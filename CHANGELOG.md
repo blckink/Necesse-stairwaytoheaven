@@ -3,6 +3,17 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [0.2.1] — 2026-08-22
+
+### Added
+- `skyreachstatus` now prints a **locator** when run by a player standing in the
+  Skyreach: your tile position plus distance and compass direction to the
+  Warden's Spire and to each cat that hasn't been brought home yet.
+
+### Changed
+- `skyreachstatus` NPC count is labeled "(loaded regions only)" — a cat resting
+  in an unloaded region is not missing, it just isn't loaded right now.
+
 ## [0.2.0] — "The Warden's Call" — 2026-08-22
 
 The Skyreach gets a resident, a memory, and things worth building. Built and

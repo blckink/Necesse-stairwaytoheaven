@@ -75,7 +75,56 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         diagnosePlacement(level, logs);
         diagnoseGeneration((SkyLevel) level, logs);
         diagnoseQuest((SkyLevel) level, logs);
+        locateFromPlayer((SkyLevel) level, serverClient, logs);
         logs.add("SKYREACH_STATUS_DONE");
+    }
+
+    /**
+     * When a player runs the command while standing in the Skyreach, print their
+     * position plus distance and compass direction to the quest landmarks.
+     */
+    private void locateFromPlayer(SkyLevel level, ServerClient serverClient, CommandLog logs) {
+        if (serverClient == null || serverClient.playerMob == null
+                || !SkyRegistry.SKYREACH_IDENTIFIER.equals(serverClient.getLevelIdentifier())) {
+            logs.add("locator: run this while standing in the Skyreach to get directions to the spire and cats");
+            return;
+        }
+        stairwaytoheaven.quest.SkywatchQuestData quest = stairwaytoheaven.quest.SkywatchQuestData.get(level);
+        int px = serverClient.playerMob.getTileX();
+        int py = serverClient.playerMob.getTileY();
+        logs.add("you are at " + px + "," + py);
+        if (quest.spirePlaced) {
+            logs.add("  Warden's Spire: " + bearing(px, py, quest.spireX, quest.spireY));
+        }
+        if (quest.catsSpawned) {
+            if (!quest.blackHome) {
+                logs.add("  Siggi (black cat): " + bearing(px, py, quest.blackLairX, quest.blackLairY));
+            }
+            if (!quest.tabbyHome) {
+                logs.add("  Peanut (tabby cat): " + bearing(px, py, quest.tabbyLairX, quest.tabbyLairY));
+            }
+        }
+    }
+
+    /** "312 tiles NW, at -42,-74" (screen directions: N = up, W = left). */
+    private static String bearing(int px, int py, int tx, int ty) {
+        int dx = tx - px;
+        int dy = ty - py;
+        int dist = (int) Math.round(Math.sqrt((double) dx * dx + (double) dy * dy));
+        if (dist == 0) {
+            return "right here (" + tx + "," + ty + ")";
+        }
+        String ns = dy < 0 ? "N" : "S";
+        String ew = dx < 0 ? "W" : "E";
+        String dir;
+        if (Math.abs(dx) > 2 * Math.abs(dy)) {
+            dir = ew;
+        } else if (Math.abs(dy) > 2 * Math.abs(dx)) {
+            dir = ns;
+        } else {
+            dir = ns + ew;
+        }
+        return dist + " tiles " + dir + ", at " + tx + "," + ty;
     }
 
     /** Verifies the Warden's Spire, the NPCs and the quest data integrity. */
@@ -102,7 +151,7 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                 cats++;
             }
         }
-        logs.add("npc check: wardens=" + wardens + " cats=" + cats);
+        logs.add("npc check: wardens=" + wardens + " cats=" + cats + " (loaded regions only)");
     }
 
     /** Recomputes what the painter SHOULD have placed and probes a live set/get. */
