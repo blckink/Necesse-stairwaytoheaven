@@ -3,6 +3,7 @@ package stairwaytoheaven;
 import necesse.engine.commands.CommandsManager;
 import necesse.engine.modLoader.annotations.ModEntry;
 import necesse.engine.registries.BiomeRegistry;
+import necesse.engine.registries.LevelDataRegistry;
 import necesse.engine.registries.LevelRegistry;
 import necesse.engine.registries.ObjectRegistry;
 import necesse.engine.registries.TileRegistry;
@@ -18,6 +19,7 @@ import stairwaytoheaven.commands.SkyreachStatusCommand;
 import stairwaytoheaven.level.SkyLevel;
 import stairwaytoheaven.objects.SkySideStairwayObject;
 import stairwaytoheaven.objects.SkywardStairwayObject;
+import stairwaytoheaven.quest.SkywatchQuestData;
 import stairwaytoheaven.tiles.CloudturfTile;
 import stairwaytoheaven.tiles.MistseaTile;
 import stairwaytoheaven.tiles.SkystoneTile;
@@ -43,8 +45,11 @@ public class StairwayToHeavenMod {
         registerBiomes();
         registerTiles();
         registerObjects();
+        SkyBuildingSet.register();
         SkyMobs.register();
         SkyItems.register();
+        SkyBuildingSet.registerItems();
+        LevelDataRegistry.registerLevelData(SkywatchQuestData.KEY, SkywatchQuestData.class);
     }
 
     private void registerDimension() {
@@ -91,6 +96,7 @@ public class StairwayToHeavenMod {
 
     public void postInit() {
         SkyItems.registerRecipes();
+        SkyBuildingSet.registerRecipes();
         registerWorldGenerator();
         CommandsManager.registerServerCommand(new SkyreachStatusCommand());
     }

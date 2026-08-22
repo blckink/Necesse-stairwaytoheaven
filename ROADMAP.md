@@ -19,27 +19,27 @@ The complete core loop.
 - [x] Reproducible pixel-art asset pipeline (`tools/asset_generator/`)
 - [x] Headless dedicated-server integration test (`scripts/`)
 
-## v0.2.0 — "The Warden's Call" (current)
+## v0.2.0 — "The Warden's Call" (released)
 
 Story, quests, and a reason to build. The Skyreach gets a resident.
 
-- [ ] **Render-correctness pass**: terrain tiles on the real `_splat` autotile format,
+- [x] **Render-correctness pass**: terrain tiles on the real `_splat` autotile format,
       ore overlay in the correct variant-strip format, Mistsea liquid splats
-- [ ] **The Warden's Spire**: unique ruined tower stamped once per world in the
+- [x] **The Warden's Spire**: unique ruined tower stamped once per world in the
       Driftlands (deterministic, save-persistent placement)
-- [ ] **The Sky Warden** NPC: interact-driven dialogue, 4-stage quest chain
+- [x] **The Sky Warden** NPC: interact-driven dialogue, 4-stage quest chain
       (find him → rekindle the beacon → bring the cats home → forge the anchor),
       server-authoritative item turn-ins, journal hint on first ascent
-- [ ] **Spire cats Siggi & Peanut**: unique friendly critters hidden in the Stormveil /
+- [x] **Spire cats Siggi & Peanut**: unique friendly critters hidden in the Stormveil /
       Aurora Shoals, brought home with Cloudpuff Treats, live at the spire afterwards
-- [ ] **"Nightfell & Skylight" building set**: Skystone Brick wall + door, Nightfell
+- [x] **"Nightfell & Skylight" building set**: Skystone Brick wall + door, Nightfell
       wall, Checkered Marble + Gloomwood floors, Wrought Iron fence + gate, Warden's
       Candelabra, Mistglass Lantern, Gloomwillow, Raven Statue, Flickerlight Garland,
       Cat Basket, Skywatch Banner (quest-exclusive pieces stay earned)
-- [ ] Warden's shop (opens after stage 2) selling the building set
-- [ ] Spire visibly evolves with quest progress (beacon, basket, anchor)
+- [x] Warden's shop (opens after stage 2) selling the building set
+- [x] Spire visibly evolves with quest progress (beacon, basket, anchor)
 
-## v0.3.0 — "Storm Season"
+## v0.3.0 — "Storm Season" (next)
 
 Weather, gear depth, quality of life.
 

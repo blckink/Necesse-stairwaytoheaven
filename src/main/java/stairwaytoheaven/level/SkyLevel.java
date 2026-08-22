@@ -1,11 +1,17 @@
 package stairwaytoheaven.level;
 
+import java.awt.Point;
+
+import necesse.engine.registries.MobRegistry;
 import necesse.engine.util.LevelIdentifier;
 import necesse.engine.world.WorldEntity;
 import necesse.level.maps.BiomeGeneratorStackLevel;
 import necesse.level.maps.regionSystem.Region;
 import stairwaytoheaven.SkyRegistry;
+import stairwaytoheaven.quest.SkywatchQuestData;
+import stairwaytoheaven.worldgen.SkyNoise;
 import stairwaytoheaven.worldgen.SkyTerrainPainter;
+import stairwaytoheaven.worldgen.WardenSpirePreset;
 
 /**
  * The Skyreach: the persistent one-world dimension one layer above the surface
@@ -59,8 +65,111 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
 
     @Override
     public boolean canRain() {
-        // Above the cloud ceiling. Storm weather is a roadmap feature (v0.2).
+        // Above the cloud ceiling. Storm weather is a roadmap feature (v0.3).
         return false;
+    }
+
+    @Override
+    public void serverTick() {
+        super.serverTick();
+        this.ensureWardenSpire();
+    }
+
+    /**
+     * Lazily stamps the Warden's Spire and spawns the spire cats, exactly
+     * once per world (persisted in SkywatchQuestData). Running from
+     * serverTick instead of world generation means existing v0.1 worlds get
+     * the structure too, the first time their Skyreach ticks under v0.2.
+     */
+    private void ensureWardenSpire() {
+        SkywatchQuestData quest = SkywatchQuestData.get(this);
+        if (!quest.spirePlaced) {
+            Point site = this.findSpireSite();
+            int half = WardenSpirePreset.SIZE / 2;
+            this.regionManager.ensureTilesAreLoaded(site.x - half - 2, site.y - half - 2,
+                    site.x + half + 2, site.y + half + 2);
+            new WardenSpirePreset().applyToLevelCentered(this, site.x, site.y);
+            // applyToLevel runs the custom-apply hook, which sets spirePlaced
+            // and the quest anchor points; guard against a silent failure so
+            // we never re-stamp every tick.
+            quest.spirePlaced = true;
+        }
+        if (!quest.catsSpawned && quest.spirePlaced) {
+            this.spawnSpireCats(quest);
+        }
+    }
+
+    /**
+     * Deterministic spire site: sweep outward from the ascent origin and take
+     * the first spot whose 15x15 footprint is solidly on Driftlands land.
+     * Pure function of the world-gen seed — every player/session agrees.
+     */
+    private Point findSpireSite() {
+        int seed = this.getWorldGenSeed();
+        for (int radius = 36; radius <= 400; radius += 6) {
+            for (int angleStep = 0; angleStep < 24; angleStep++) {
+                double angle = (angleStep / 24.0 + (radius % 12) / 24.0) * Math.PI * 2;
+                int x = (int) Math.round(Math.cos(angle) * radius);
+                int y = (int) Math.round(Math.sin(angle) * radius);
+                if (this.isSolidDriftland(seed, x, y, 7)) {
+                    return new Point(x, y);
+                }
+            }
+        }
+        return new Point(0, 0); // pathological seed: land at origin regardless
+    }
+
+    private boolean isSolidDriftland(int seed, int cx, int cy, int half) {
+        for (int dx = -half; dx <= half; dx += half) {
+            for (int dy = -half; dy <= half; dy += half) {
+                float island = SkyNoise.fbm(seed, cx + dx, cy + dy, SkyTerrainPainter.ISLAND_SCALE, 3);
+                if (island <= SkyTerrainPainter.ISLAND_THRESHOLD + 0.03F) {
+                    return false;
+                }
+            }
+        }
+        float biome = SkyNoise.fbm(seed + SkyTerrainPainter.SALT_BIOME, cx, cy, SkyTerrainPainter.BIOME_SCALE, 2);
+        return biome >= SkyTerrainPainter.STORMVEIL_BELOW && biome <= SkyTerrainPainter.AURORA_ABOVE;
+    }
+
+    private void spawnSpireCats(SkywatchQuestData quest) {
+        int seed = this.getWorldGenSeed();
+        Point blackLair = this.findLairSite(seed, quest, true);
+        Point tabbyLair = this.findLairSite(seed, quest, false);
+        quest.blackLairX = blackLair.x;
+        quest.blackLairY = blackLair.y;
+        quest.tabbyLairX = tabbyLair.x;
+        quest.tabbyLairY = tabbyLair.y;
+
+        this.regionManager.ensureTileIsLoaded(blackLair.x, blackLair.y);
+        this.entityManager.addMob(MobRegistry.getMob("spirecatblack", this), blackLair.x * 32 + 16, blackLair.y * 32 + 16);
+        this.regionManager.ensureTileIsLoaded(tabbyLair.x, tabbyLair.y);
+        this.entityManager.addMob(MobRegistry.getMob("spirecattabby", this), tabbyLair.x * 32 + 16, tabbyLair.y * 32 + 16);
+        quest.catsSpawned = true;
+    }
+
+    /** First land spot in the right sub-biome, sweeping outward from the spire. */
+    private Point findLairSite(int seed, SkywatchQuestData quest, boolean stormveil) {
+        for (int radius = 48; radius <= 600; radius += 8) {
+            for (int angleStep = 0; angleStep < 20; angleStep++) {
+                double angle = (angleStep / 20.0 + (stormveil ? 0.0 : 0.5) / 20.0 + (radius % 16) / 40.0) * Math.PI * 2;
+                int x = quest.spireX + (int) Math.round(Math.cos(angle) * radius);
+                int y = quest.spireY + (int) Math.round(Math.sin(angle) * radius);
+                float island = SkyNoise.fbm(seed, x, y, SkyTerrainPainter.ISLAND_SCALE, 3);
+                if (island <= SkyTerrainPainter.ISLAND_THRESHOLD + SkyTerrainPainter.ISLAND_RIM) {
+                    continue;
+                }
+                float biome = SkyNoise.fbm(seed + SkyTerrainPainter.SALT_BIOME, x, y, SkyTerrainPainter.BIOME_SCALE, 2);
+                boolean matches = stormveil
+                        ? biome < SkyTerrainPainter.STORMVEIL_BELOW
+                        : biome > SkyTerrainPainter.AURORA_ABOVE;
+                if (matches) {
+                    return new Point(x, y);
+                }
+            }
+        }
+        // Fallback: beside the spire, so the quest is never soft-locked
+        return new Point(quest.spireX + (stormveil ? -3 : 3), quest.spireY + 3);
     }
 
     /**

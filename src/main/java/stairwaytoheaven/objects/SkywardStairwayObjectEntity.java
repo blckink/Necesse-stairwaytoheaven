@@ -59,6 +59,10 @@ public class SkywardStairwayObjectEntity extends PortalObjectEntity {
 
             client.newStats.ladders_used.increment(1);
             this.runClearMobs(level, this.destinationTileX, this.destinationTileY);
+            if (stairwaytoheaven.quest.SkywatchQuestData.get(level).stage == 0) {
+                // First quest hook: a flicker over the mist points toward the Warden
+                client.sendChatMessage(new necesse.engine.localization.message.LocalMessage("misc", "skyreachhint"));
+            }
             return true;
         }, true);
     }

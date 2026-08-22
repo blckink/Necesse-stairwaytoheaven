@@ -70,6 +70,16 @@ echo "skyreachstatus" >&3
 
 wait_for "SKYREACH_STATUS_DONE" 180
 
+# Second pass: the first call loads the Skyreach; its serverTick then stamps
+# the Warden's Spire and spawns the cats. Give it a few ticks and re-check.
+sleep 6
+echo "Running skyreachstatus (quest verification pass)..."
+echo "skyreachstatus" >&3
+for _ in $(seq 1 60); do
+    [ "$(grep -c SKYREACH_STATUS_DONE "$LOG")" -ge 2 ] && break
+    sleep 2
+done
+
 echo "Stopping server..."
 echo "stop" >&3
 for _ in $(seq 1 30); do
@@ -84,6 +94,10 @@ STATUS=0
 grep -qE "Skyreach OK: class=SkyLevel" "$LOG" || { echo "FAIL: SkyLevel was not instantiated"; STATUS=1; }
 grep -qE "tile (cloudturftile|mistseatile)" "$LOG" || { echo "FAIL: sky terrain did not generate"; STATUS=1; }
 grep -qE "biome (driftlands|stormveil|aurorashoals)" "$LOG" || { echo "FAIL: sky biomes did not paint"; STATUS=1; }
+grep -qE "spirePlaced=true" "$LOG" || { echo "FAIL: Warden's Spire was not stamped"; STATUS=1; }
+grep -qE "beaconObject=wardenbeaconoff" "$LOG" || { echo "FAIL: spire beacon object missing"; STATUS=1; }
+grep -qE "wardenFloor=marblecheckertile" "$LOG" || { echo "FAIL: spire interior floor missing"; STATUS=1; }
+grep -qE "npc check: wardens=1 cats=2" "$LOG" || { echo "FAIL: Warden/cat NPCs not spawned exactly once"; STATUS=1; }
 if grep -nE "Exception|ERROR|ModLoadException" "$LOG" | grep -vE "libraryPatches|SLF4J" > "$WORK_DIR/errors.txt"; then
     echo "FAIL: errors found in server log:"
     cat "$WORK_DIR/errors.txt"

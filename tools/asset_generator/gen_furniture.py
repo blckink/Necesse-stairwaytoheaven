@@ -312,25 +312,359 @@ def gen_v2_item_icons(dir_path):
 
 
 def gen_set_icons(dir_path):
-    """32x32 item icons for the placeable set pieces (miniatures)."""
+    """32x32 item icons for the placeable set pieces (miniatures cropped and
+    scaled from the freshly generated object sprites)."""
     from PIL import Image
     import os
-    # Candelabra: crop+scale the lit state
+
     def mini_from(src_path, box, out_name):
         im = Image.open(src_path).convert("RGBA").crop(box)
         w, h = im.size
-        scale = min(28 / w, 28 / h)
-        nw, nh = max(1, int(w * scale)), max(1, int(h * scale))
+        scale = min(28 / w, 28 / h, 1.0)
+        nw, nh = max(1, round(w * scale)), max(1, round(h * scale))
         im = im.resize((nw, nh), Image.NEAREST)
         icon = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
         icon.alpha_composite(im, ((32 - nw) // 2, (32 - nh) // 2))
         icon.save(f"{dir_path}/{out_name}")
-    # these read the freshly generated object sprites
+
     base = os.path.dirname(dir_path)
-    mini_from(f"{base}/objects/wardencandelabra.png", (0, 8, 32, 96), "wardencandelabra.png")
-    mini_from(f"{base}/objects/gloomwillow.png", (0, 16, 48, 80), "gloomwillow.png")
-    mini_from(f"{base}/objects/skywatchbanner.png", (0, 0, 32, 64), "skywatchbanner.png")
-    mini_from(f"{base}/objects/ravenstatue.png", (4, 18, 28, 48), "ravenstatue.png")
-    mini_from(f"{base}/objects/flickerlightgarland.png", (0, 0, 64, 32), "flickerlightgarland.png")
-    mini_from(f"{base}/objects/catbasket.png", (0, 6, 32, 30), "catbasket.png")
-    mini_from(f"{base}/objects/mistglasslantern.png", (0, 0, 32, 32), "mistglasslantern.png")
+    obj = f"{base}/objects"
+    mini_from(f"{obj}/wardencandelabra.png", (0, 8, 32, 96), "wardencandelabra.png")
+    mini_from(f"{obj}/gloomwillow.png", (0, 16, 48, 80), "gloomwillow.png")
+    mini_from(f"{obj}/catbasket.png", (0, 6, 32, 30), "catbasket.png")
+    mini_from(f"{obj}/mistglasslantern.png", (0, 0, 32, 32), "mistglasslantern.png")
+    mini_from(f"{obj}/flickerlightgarland.png", (0, 0, 32, 32), "flickerlightgarland.png")
+    mini_from(f"{obj}/skywatchbanner.png", (0, 0, 32, 32), "skywatchbanner.png")
+    mini_from(f"{base}/objects/statues/gloomraven.png", (8, 34, 56, 92), "gloomravenstatue.png")
+    # walls: crop a front-face piece; doors: rotation-0 closed leaf
+    for wall in ("skystonebrickwall", "nightfellwall"):
+        mini_from(f"{obj}/{wall}.png", (0, 64, 32, 96), f"{wall}.png")
+    mini_from(f"{obj}/skystonebrickwall.png", (96, 24, 128, 120), "skystonebrickdoor.png")
+    mini_from(f"{obj}/nightfellwall.png", (96, 24, 128, 120), "nightfelldoor.png")
+    mini_from(f"{obj}/skyironfence.png", (0, 20, 32, 64), "skyironfence.png")
+    mini_from(f"{obj}/skyironfencegate.png", (32, 20, 64, 64), "skyironfencegate.png")
+
+
+# =====================================================================
+# v0.2 format-correct pieces (fence, gate, wall lights 64x128, statue
+# 64x96, painting-banner 32x128, beacon, anchor, checker floor)
+# =====================================================================
+
+def _iron_post(c, x, base_y, height, spike=True):
+    iron = palette.IRONWORK
+    for y in range(base_y - height, base_y):
+        c.put(x, y, iron["light"])
+        c.put(x + 1, y, iron["base"])
+        c.put(x + 2, y, iron["deep"])
+    if spike:
+        c.put(x + 1, base_y - height - 1, iron["base"])
+        c.put(x + 1, base_y - height - 2, iron["hi"])
+
+
+def _iron_rails(c, x0, x1, base_y):
+    iron = palette.IRONWORK
+    for rail_y in (base_y - 18, base_y - 8):
+        for x in range(x0, x1):
+            c.put(x, rail_y, iron["base"])
+            c.put(x, rail_y + 1, iron["deep"])
+    # pickets between the rails, spiked
+    for x in range(x0 + 2, x1, 6):
+        for y in range(base_y - 20, base_y - 2):
+            c.put(x, y, iron["deep"])
+        c.put(x, base_y - 21, iron["light"])
+        c.put(x, base_y - 22, iron["hi"])
+
+
+def gen_skyironfence(path):
+    """160x64: post / horizontal run / top cap / left connector / right connector."""
+    sheet = Canvas(160, 64)
+    base_y = 58
+    # col 0: freestanding post
+    c = Canvas(32, 64)
+    _iron_post(c, 14, base_y, 30)
+    c.ellipse(15, base_y, 5, 2, palette.IRONWORK["deep"])
+    c.outline(palette.OUTLINE)
+    sheet.paste(c, 0, 0)
+    # col 1: horizontal run (rails across the full cell)
+    c = Canvas(32, 64)
+    _iron_rails(c, 0, 32, base_y)
+    c.outline(palette.OUTLINE)
+    sheet.paste(c, 32, 0)
+    # col 2: top cap (post with a downward connection stub)
+    c = Canvas(32, 64)
+    _iron_post(c, 14, base_y, 30)
+    for y in range(base_y - 14, base_y - 4):
+        c.put(15, y + 4, palette.IRONWORK["deep"])
+    c.outline(palette.OUTLINE)
+    sheet.paste(c, 64, 0)
+    # col 3: left connector (rails entering from the right, ending in a post)
+    c = Canvas(32, 64)
+    _iron_rails(c, 12, 32, base_y)
+    _iron_post(c, 10, base_y, 30)
+    c.outline(palette.OUTLINE)
+    sheet.paste(c, 96, 0)
+    # col 4: right connector (mirror)
+    sheet.paste(c.mirrored(), 128, 0)
+    sheet.save(path)
+
+
+def gen_skyironfencegate(path):
+    """192x64: 6 columns — frame post, closed leaf, open leaf, then the
+    vertical-orientation trio."""
+    sheet = Canvas(192, 64)
+    base_y = 58
+    iron = palette.IRONWORK
+    # col 0: gate post pair
+    c = Canvas(32, 64)
+    _iron_post(c, 4, base_y, 32)
+    _iron_post(c, 25, base_y, 32)
+    c.outline(palette.OUTLINE)
+    sheet.paste(c, 0, 0)
+    # col 1: closed leaf between posts
+    c = Canvas(32, 64)
+    _iron_post(c, 2, base_y, 32)
+    _iron_post(c, 27, base_y, 32)
+    _iron_rails(c, 5, 27, base_y)
+    c.put(16, base_y - 13, iron["hi"])
+    c.outline(palette.OUTLINE)
+    sheet.paste(c, 32, 0)
+    # col 2: open (leaves swung back, posts only + hinge stubs)
+    c = Canvas(32, 64)
+    _iron_post(c, 2, base_y, 32)
+    _iron_post(c, 27, base_y, 32)
+    for x in (5, 26):
+        c.put(x, base_y - 16, iron["base"])
+    c.outline(palette.OUTLINE)
+    sheet.paste(c, 64, 0)
+    # cols 3-5: vertical orientation (posts top/bottom, leaf runs vertically)
+    for i, mode in enumerate(("post", "closed", "open")):
+        c = Canvas(32, 64)
+        _iron_post(c, 14, 24, 16)
+        _iron_post(c, 14, base_y + 2, 16)
+        if mode == "closed":
+            for y in range(14, base_y - 8):
+                c.put(14, y, iron["deep"])
+                c.put(16, y, iron["deep"])
+            for y in range(16, base_y - 10, 8):
+                c.put(15, y, iron["base"])
+        elif mode == "open":
+            c.put(12, 20, iron["base"])
+            c.put(18, base_y - 6, iron["base"])
+        c.outline(palette.OUTLINE)
+        sheet.paste(c, 96 + i * 32, 0)
+    sheet.save(path)
+
+
+def _wall_light_cell(kind, orientation, lit):
+    """32x32 cell for WallTorchObject sheets. orientation: 0 hang-from-top,
+    1 mounted-on-right-wall, 2 standing-on-support, 3 mounted-on-left-wall."""
+    c = Canvas(32, 32)
+    iron = palette.IRONWORK
+    glow = palette.STAIRLIGHT
+    if kind == "lantern":
+        cx, cy = 16, 16
+        if orientation == 0:
+            for y in range(2, 9):
+                c.put(cx, y, iron["base"])
+            cy = 15
+        elif orientation == 2:
+            for y in range(24, 30):
+                c.put(cx, y, iron["base"])
+            cy = 17
+        else:
+            bx = 29 if orientation == 1 else 2
+            step = -1 if orientation == 1 else 1
+            for i in range(6):
+                c.put(bx + step * i, 12, iron["base"])
+            cy = 16
+        c.rect(cx - 5, cy - 6, 10, 12, iron["deep"])
+        c.rect(cx - 4, cy - 5, 8, 10, glow["glow"] if lit else (60, 66, 78))
+        if lit:
+            c.rect(cx - 2, cy - 3, 4, 5, glow["hi"])
+        c.put(cx, cy - 7, iron["light"])
+        c.outline(palette.OUTLINE)
+    else:  # garland
+        wire = palette.GLOOMWOOD
+        pts = []
+        if orientation in (0, 2):
+            yb = 6 if orientation == 0 else 20
+            for x in range(2, 30):
+                t = (x - 2) / 28.0
+                y = int(yb + 9 * (4 * t * (1 - t)))
+                c.put(x, y, wire["deep"])
+                pts.append((x, y))
+            c.put(2, yb - 1, iron["light"])
+            c.put(29, yb - 1, iron["light"])
+        else:
+            xb = 25 if orientation == 1 else 6
+            side = -1 if orientation == 1 else 1
+            for y in range(2, 30):
+                t = (y - 2) / 28.0
+                x = int(xb + side * 8 * (4 * t * (1 - t)))
+                c.put(x, y, wire["deep"])
+                pts.append((x, y))
+        for i, (px_, py_) in enumerate(pts[3::5]):
+            color = palette.GARLAND_LIGHTS[i % len(palette.GARLAND_LIGHTS)]
+            if not lit:
+                color = tuple(int(v * 0.35) for v in color)
+            off = (0, 2) if orientation in (0, 2) else ((2, 0) if orientation == 3 else (-2, 0))
+            c.put(px_ + off[0], py_ + off[1], color)
+            if lit:
+                c.put(px_ + off[0], py_ + off[1] + (1 if orientation in (0, 2) else 0),
+                      tuple(int(v * 0.7) for v in color))
+    return c
+
+
+def gen_wall_light(path, kind):
+    """64x128 WallTorchObject sheet: 2 cols (lit/unlit) x 4 orientation rows."""
+    sheet = Canvas(64, 128)
+    for row in range(4):
+        sheet.paste(_wall_light_cell(kind, row, True), 0, row * 32)
+        sheet.paste(_wall_light_cell(kind, row, False), 32, row * 32)
+    sheet.save(path)
+
+
+def gen_gloomraven_statue(path):
+    """64x96 single-pose StatueObject sheet (vanilla ravenstatue dimensions)."""
+    c = Canvas(64, 96)
+    stone = palette.SKYSTONE
+    cx = 32
+    # two-step plinth
+    c.rect(cx - 14, 82, 28, 8, stone["base"])
+    c.rect(cx - 14, 82, 28, 2, stone["light"])
+    c.rect(cx - 10, 76, 20, 6, stone["base"])
+    c.rect(cx - 10, 76, 20, 2, stone["light"])
+    # raven, hunched, facing left, tail sweeping right
+    c.ellipse(cx + 1, 62, 12, 10, stone["base"])
+    c.ellipse(cx - 6, 48, 7, 6, stone["base"])
+    c.ellipse(cx - 3, 58, 8, 7, stone["light"])   # wing mass
+    for i in range(7):                            # beak
+        c.put(cx - 14 - i // 2, 48 + i // 3, stone["deep"])
+    for i in range(10):                           # tail
+        c.put(cx + 12 + i // 2, 66 + i // 2, stone["deep"])
+    for lx in (cx - 4, cx + 5):                   # legs
+        c.rect(lx, 72, 2, 5, stone["deep"])
+    c.shade_topleft(stone["hi"], stone["deep"])
+    c.outline(palette.OUTLINE)
+    c.put(cx - 8, 46, palette.STORMCRYSTAL["light"])  # gem eye
+    c.save(path)
+
+
+def gen_banner_painting(path):
+    """32x128 PaintingObject sheet: 4 rotation rows of one 32x32 banner."""
+    def banner_cell():
+        c = Canvas(32, 32)
+        cloth = palette.NIGHTFELL["base"]
+        cloth_deep = palette.NIGHTFELL["deep"]
+        trim = palette.STAIRLIGHT["glow"]
+        for x in range(6, 26):
+            c.put(x, 3, palette.IRONWORK["base"])
+        for y in range(4, 24):
+            for x in range(8, 24):
+                tone = cloth
+                if x in (8, 23):
+                    tone = cloth_deep
+                c.put(x, y, tone)
+        for i in range(4):
+            for x in range(8, 15 - i):
+                c.put(x, 24 + i, cloth)
+            for x in range(17 + i, 24):
+                c.put(x, 24 + i, cloth)
+        for (sx, sy) in ((11, 18), (13, 14), (15, 10)):
+            for dx in range(4):
+                c.put(sx + dx, sy, trim)
+        c.put(19, 7, palette.STAIRLIGHT["hi"])
+        c.outline(palette.OUTLINE)
+        return c
+    sheet = Canvas(32, 128)
+    cell = banner_cell()
+    for row in range(4):
+        sheet.paste(cell, 0, row * 32)
+    sheet.save(path)
+
+
+def gen_beacon(path, lit):
+    """32x96 bottom-anchored beacon pylon (SkyDecoObject)."""
+    c = Canvas(32, 96)
+    stone = palette.SKYSTONE
+    glow = palette.STAIRLIGHT
+    # base + tapering pylon
+    c.rect(8, 86, 16, 6, stone["base"])
+    c.rect(8, 86, 16, 2, stone["light"])
+    for y in range(40, 86):
+        t = (y - 40) / 46.0
+        half = round(3 + 3 * t)
+        for dx in range(-half, half + 1):
+            tone = stone["base"]
+            if dx == -half:
+                tone = stone["light"]
+            elif dx == half:
+                tone = stone["deep"]
+            c.put(16 + dx, y, tone)
+    # crown cradle
+    c.rect(9, 34, 14, 6, palette.IRONWORK["base"])
+    c.rect(9, 34, 14, 2, palette.IRONWORK["light"])
+    c.outline(palette.OUTLINE)
+    if lit:
+        # cold steady wardenlight
+        c.ellipse(16, 26, 6, 7, glow["glow"])
+        c.ellipse(16, 25, 3.5, 4.5, glow["hi"])
+        c.put(16, 18, glow["glow"])
+        c.put(13, 20, with_alpha(glow["glow"], 160))
+        c.put(19, 21, with_alpha(glow["glow"], 160))
+    else:
+        # dead shattered crystal stub
+        for (sx, sy, h) in ((13, 33, 4), (17, 33, 6), (20, 33, 3)):
+            for i in range(h):
+                c.put(sx, sy - i, palette.STORMCRYSTAL["deep"])
+            c.put(sx, sy - h, palette.STORMCRYSTAL["base"])
+    c.save(path)
+
+
+def gen_skyanchor(path):
+    """32x64 reforged island anchor (SkyDecoObject)."""
+    c = Canvas(32, 64)
+    a = palette.AETHERIUM
+    iron = palette.IRONWORK
+    # ring
+    for ang in range(0, 360, 12):
+        import math
+        x = 16 + int(6.5 * math.cos(math.radians(ang)))
+        y = 16 + int(6.5 * math.sin(math.radians(ang)))
+        c.put(x, y, iron["light"])
+    # shank
+    for y in range(22, 50):
+        c.put(15, y, a["light"])
+        c.put(16, y, a["base"])
+        c.put(17, y, a["deep"])
+    # flukes
+    for i in range(9):
+        c.put(15 - i, 50 - i // 2, a["base"])
+        c.put(16 + i, 50 - i // 2, a["deep"])
+    c.put(5, 44, a["hi"])
+    c.put(26, 44, a["hi"])
+    # crossbar
+    for x in range(9, 24):
+        c.put(x, 28, iron["base"])
+    c.outline(palette.OUTLINE)
+    c.put(16, 24, a["hi"])
+    c.save(path)
+
+
+def gen_marblechecker(path):
+    """64x64 legacy tile for SimpleTiledFloorTile: 2x2 world-locked checker."""
+    c = Canvas(64, 64)
+    from px import Rng
+    for x in range(64):
+        for y in range(64):
+            dark = (x // 32 + y // 32) % 2 == 0
+            c.put(x, y, palette.MARBLE_DARK if dark else palette.MARBLE_LIGHT)
+    rng = Rng(0xC4EC)
+    for _ in range(14):
+        x = rng.range(2, 60)
+        y = rng.range(2, 60)
+        dark = (x // 32 + y // 32) % 2 == 0
+        vein = (74, 72, 84) if dark else (198, 196, 204)
+        for i in range(rng.range(2, 5)):
+            c.put(x + i, y + i // 2, vein)
+    c.save(path)

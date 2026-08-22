@@ -24,6 +24,9 @@ import gen_mobs  # noqa: E402
 import gen_items  # noqa: E402
 import gen_misc  # noqa: E402
 import gen_npcs  # noqa: E402
+import gen_splats  # noqa: E402
+import gen_walls  # noqa: E402
+import gen_furniture  # noqa: E402
 
 
 def main():
@@ -33,14 +36,23 @@ def main():
     args = parser.parse_args()
     out = args.out
 
-    for sub in ("tiles", "objects", "items", "mobs", "mobs/icons", "player/weapons", "locale"):
+    for sub in ("tiles", "objects", "objects/statues", "items", "mobs", "mobs/icons", "player/weapons", "locale"):
         os.makedirs(os.path.join(out, sub), exist_ok=True)
 
-    # Terrain + liquid
-    gen_tiles.gen_cloudturf(f"{out}/tiles/cloudturf.png")
-    gen_tiles.gen_skystone(f"{out}/tiles/skystone.png")
-    gen_tiles.gen_stormslate(f"{out}/tiles/stormslate.png")
-    gen_tiles.gen_mistsea(f"{out}/tiles/mistsea_shallow.png", f"{out}/tiles/mistsea_deep.png")
+    # Terrain + liquid: modern _splat atlases (the 1.3.2 renderer's primary
+    # path; the marble checker deliberately stays legacy — see gen_furniture)
+    gen_splats.build_splat(f"{out}/tiles/cloudturf_splat.png", gen_splats.material_cloudturf, 3, 0xC1)
+    gen_splats.build_splat(f"{out}/tiles/skystone_splat.png", gen_splats.material_skystone, 3, 0x51)
+    gen_splats.build_splat(f"{out}/tiles/stormslate_splat.png", gen_splats.material_stormslate, 3, 0x57)
+    gen_splats.build_splat(f"{out}/tiles/gloomwoodfloor_splat.png", gen_splats.material_gloomwood, 2, 0x6D)
+    gen_splats.build_splat(f"{out}/tiles/mistsea_shallow_splat.png", gen_splats.material_mist(False), 1, 0x315E, frames=8)
+    gen_splats.build_splat(f"{out}/tiles/mistsea_deep_splat.png", gen_splats.material_mist(True), 1, 0xD1EE, frames=8)
+    gen_furniture.gen_marblechecker(f"{out}/tiles/marblechecker.png")
+    # remove the superseded legacy strips so only one source of truth ships
+    for legacy in ("cloudturf.png", "skystone.png", "stormslate.png", "mistsea_shallow.png", "mistsea_deep.png"):
+        legacy_path = os.path.join(out, "tiles", legacy)
+        if os.path.exists(legacy_path):
+            os.remove(legacy_path)
 
     # Rocks + ore overlay
     gen_rocks.gen_rock_sheet(f"{out}/objects/skystonerock.png", palette.SKYSTONE)
@@ -82,6 +94,23 @@ def main():
     # Held weapon sprites
     gen_items.gen_tempestedge_held(f"{out}/player/weapons/tempestedge.png")
     gen_items.gen_galehowl_held(f"{out}/player/weapons/galehowl.png")
+
+    # v0.2: building set, quest structure pieces, NPC-adjacent deco
+    gen_walls.gen_walls(f"{out}/objects")
+    gen_furniture.gen_skyironfence(f"{out}/objects/skyironfence.png")
+    gen_furniture.gen_skyironfencegate(f"{out}/objects/skyironfencegate.png")
+    gen_furniture.gen_candelabra(f"{out}/objects/wardencandelabra.png")
+    gen_furniture.gen_wall_light(f"{out}/objects/mistglasslantern.png", "lantern")
+    gen_furniture.gen_wall_light(f"{out}/objects/flickerlightgarland.png", "garland")
+    gen_furniture.gen_gloomraven_statue(f"{out}/objects/statues/gloomraven.png")
+    gen_furniture.gen_gloomwillow(f"{out}/objects/gloomwillow.png")
+    gen_furniture.gen_catbasket(f"{out}/objects/catbasket.png")
+    gen_furniture.gen_banner_painting(f"{out}/objects/skywatchbanner.png")
+    gen_furniture.gen_beacon(f"{out}/objects/wardenbeaconoff.png", False)
+    gen_furniture.gen_beacon(f"{out}/objects/wardenbeaconon.png", True)
+    gen_furniture.gen_skyanchor(f"{out}/objects/skyanchor.png")
+    gen_furniture.gen_v2_item_icons(f"{out}/items")
+    gen_furniture.gen_set_icons(f"{out}/items")
 
     # Mod preview
     gen_misc.gen_preview(f"{out}/preview.png")

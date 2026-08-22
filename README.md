@@ -35,6 +35,23 @@ Mistsea.
   `tools/asset_generator/` in vanilla sheet formats — regenerate or hand-replace any
   sprite at will.
 
+## New in v0.2.0 "The Warden's Call"
+
+- **A story and a resident.** The ruined **Warden's Spire** now stands somewhere in the
+  Driftlands (seed-deterministic, once per world — existing v0.1 worlds get it too). The
+  **Sky Warden** inside gives a four-stage quest chain: find him, rekindle the spire's
+  beacon, bring his two runaway cats **Siggi** and **Peanut** home with Cloudpuff
+  Treats, and reforge an island anchor. Every stage visibly changes the spire, all
+  turn-ins are server-authoritative and multiplayer-safe, dialogue is fully localized
+  (EN/DE) with speech bubbles.
+- **"Nightfell & Skylight" building set.** Two wall sets with doors and windows,
+  a world-locked checkered marble floor, gloomwood planks, wrought-iron fence + gate,
+  the Warden's Candelabra, Mistglass Lantern, gothic Gloomraven Statue, crooked
+  Gloomwillow — plus quest-exclusive rewards: the colorful Flickerlight Garland,
+  the Cat Basket and the Skywatch Banner.
+- **Render upgrade.** All sky terrain moved to the vanilla `_splat` autotile format
+  (verified cell-by-cell against 1.3.2) and the Mistsea got animated liquid splats.
+
 See [ROADMAP.md](ROADMAP.md) for what comes next (storm events, Aetherium armor,
 structures, settlements, the Storm Sovereign boss).
 

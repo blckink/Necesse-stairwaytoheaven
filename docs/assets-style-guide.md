@@ -66,3 +66,17 @@ python3 tools/asset_generator/generate_assets.py   # regenerates src/main/resour
   regenerating that file, or better: port your changes into the generator.
 - QA habit: upscale sheets 4× with nearest-neighbor and review on a dark backdrop
   before shipping (that pass caught every art bug so far).
+
+## v0.2 additions (format cheat sheet)
+
+| Asset | File | Layout |
+|---|---|---|
+| Terrain/floor splat | `tiles/<name>_splat.png` | 224×(96·variants); cells (3..6,0) = full variants, 17 marching-square blend cells (see research/splat-format.md §5.3) |
+| Liquid splat | `tiles/<name>_splat.png` | 224·8 frames × 96; hard 8-frame loop |
+| Wall set | `objects/<name>.png` | 352×128: 4×8@16px autotile blob + 2×8 window insert + 8×(32×128) door frames |
+| Fence / gate | `objects/<name>.png` | 160×64 (5 cols) / 192×64 (6 cols) |
+| Streetlamp | `objects/<id>.png` | 32×192: two 32×96 rows (on above, off below) |
+| Wall light | `objects/<id>.png` | 64×128: 2 cols on/off × 4 attach-orientation rows |
+| Statue | `objects/statues/<name>.png` | frameWidth × spriteCount columns (gloomraven: 64×96, 1 pose) |
+| Painting/banner | `objects/<texturePath>.png` | 32×128: 4 rotation rows of 32×32 |
+| Legacy checker floor | `tiles/<name>.png` | 64×64 world-locked 2×2 grid — deliberately NO `_splat` |

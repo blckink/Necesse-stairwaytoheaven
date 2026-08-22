@@ -74,7 +74,35 @@ public class SkyreachStatusCommand extends ModularChatCommand {
 
         diagnosePlacement(level, logs);
         diagnoseGeneration((SkyLevel) level, logs);
+        diagnoseQuest((SkyLevel) level, logs);
         logs.add("SKYREACH_STATUS_DONE");
+    }
+
+    /** Verifies the Warden's Spire, the NPCs and the quest data integrity. */
+    private void diagnoseQuest(SkyLevel level, CommandLog logs) {
+        stairwaytoheaven.quest.SkywatchQuestData quest = stairwaytoheaven.quest.SkywatchQuestData.get(level);
+        logs.add("quest: stage=" + quest.stage + " spirePlaced=" + quest.spirePlaced
+                + " spire=" + quest.spireX + "," + quest.spireY
+                + " beacon=" + quest.beaconX + "," + quest.beaconY
+                + " catsSpawned=" + quest.catsSpawned
+                + " blackLair=" + quest.blackLairX + "," + quest.blackLairY
+                + " tabbyLair=" + quest.tabbyLairX + "," + quest.tabbyLairY);
+        if (quest.spirePlaced) {
+            level.regionManager.ensureTileIsLoaded(quest.beaconX, quest.beaconY);
+            String beaconObj = level.getObject(quest.beaconX, quest.beaconY).getStringID();
+            String spireFloor = TileRegistry.getTileStringID(level.getTileID(quest.spireX, quest.spireY));
+            logs.add("spire check: beaconObject=" + beaconObj + " wardenFloor=" + spireFloor);
+        }
+        long wardens = 0, cats = 0;
+        for (necesse.entity.mobs.Mob mob : level.entityManager.mobs) {
+            String id = mob.getStringID();
+            if (id.equals("skywarden")) {
+                wardens++;
+            } else if (id.startsWith("spirecat")) {
+                cats++;
+            }
+        }
+        logs.add("npc check: wardens=" + wardens + " cats=" + cats);
     }
 
     /** Recomputes what the painter SHOULD have placed and probes a live set/get. */

@@ -65,4 +65,19 @@ public final class SkyRegistry {
     public static int auroraBloomID;
     public static int auroraBloomRID;
     public static int skyreedsID;
+
+    // ===== v0.2: building set & quest structure =====
+
+    public static int skystoneBrickWallID;
+    public static int nightfellWallID;
+    public static int marbleCheckerID;
+    public static int gloomwoodFloorID;
+    public static int skyironFenceID;
+    public static int wardenCandelabraID;
+    public static int flickerGarlandID;
+    public static int catBasketID;
+    public static int skywatchBannerID;
+    public static int wardenBeaconOffID;
+    public static int wardenBeaconOnID;
+    public static int skyAnchorID;
 }

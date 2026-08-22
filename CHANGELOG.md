@@ -3,6 +3,53 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [0.2.0] — "The Warden's Call" — 2026-08-22
+
+The Skyreach gets a resident, a memory, and things worth building. Built and
+integration-tested headless against Necesse **1.3.2** (structure stamping,
+NPC spawning and quest data verified on the dedicated server).
+
+### Added
+- **The Sky Warden**: a stationary, invulnerable keeper NPC living in the
+  **Warden's Spire** — a ruined 15x15 Skywatch tower stamped exactly once per
+  world at a seed-deterministic spot in the Driftlands. Placement runs lazily
+  on the level's first server tick, so worlds started on v0.1 get the spire
+  too. Persisted via a new `skywatchquest` level-data component.
+- **Quest chain "The Warden's Call"** (interact-driven, multiplayer-safe,
+  server-authoritative turn-ins using the vanilla check-then-remove idiom):
+  1. *A Light over the Mist* — find the Warden (chat hint on first ascent)
+  2. *The Dark Lighthouse* — deliver 12 Storm Shards + 8 Windsilk; the
+     spire's beacon visibly ignites
+  3. *Where the Cats Wander* — craft Cloudpuff Treats and bring **Siggi**
+     (black, Stormveil) and **Peanut** (white-tabby, Aurora Shoals) home;
+     they stay as permanent spire residents
+  4. *Anchor of the Sky* — deliver 5 Aetherium Bars + 20 Skystone; the
+     island anchor appears; finale dialogue teases the Storm Sovereign
+  Dialogue plays as speech bubbles (PacketMobChat) plus chat lines, fully
+  localized in English and German.
+- **Spire cats**: two unique invulnerable critters with HomesickCritterAI
+  home tethering, hidden at seed-deterministic lairs, moved home with a
+  cloud-puff when fed a treat.
+- **"Nightfell & Skylight" building set**: Skystone Brick and Nightfell
+  walls (each with auto-generated door + window via the vanilla wall
+  system), Checkered Marble floor (world-locked pattern), Gloomwood floor,
+  Wrought-iron sky fence + gate, Warden's Candelabra (streetlamp, wire-
+  toggleable), Mistglass Lantern and Flickerlight Garland (wall lights with
+  4 attach orientations), Gloomraven Statue, Gloomwillow dead tree, Cat
+  Basket, Skywatch Banner (painting). Garland/basket/banner are
+  quest-exclusive; everything else has Workstation recipes in sky materials.
+- Items: Cloudpuff Treat (+ recipe), Silver Bell trophy.
+- `skyreachstatus` now also reports quest state, spire integrity and NPC
+  counts; the integration test asserts them.
+
+### Changed
+- **Terrain render upgrade**: Cloudturf, Skystone, Stormslate and the new
+  Gloomwood floor moved to the modern `_splat` autotile atlas format
+  (verified cell map; 4 full-tile variants + 17 marching-square blend
+  cells); the Mistsea gained real animated 8-frame liquid splats instead of
+  the flat-color fallback.
+- Ore overlay sheets corrected to the vanilla Nx32x32 pattern-strip format.
+
 ## [0.1.0] — "First Ascent" — 2026-08-22
 
 First playable release. Built and integration-tested against Necesse **1.3.2**.
