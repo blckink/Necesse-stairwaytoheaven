@@ -22,3 +22,7 @@ build/
 ### Specific ###
 steam_appid.txt
 latest-crash.log
+
+### Python ###
+__pycache__/
+*.pyc
