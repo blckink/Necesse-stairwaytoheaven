@@ -35,6 +35,29 @@ public class SkywatchQuestData extends LevelData {
     public boolean catsRewardGiven = false;
 
     // Anchor finale
+    /**
+     * Locale key ("dirnorth".."dirsouthwest") of the 8-way compass direction
+     * from (fromX,fromY) to (toX,toY). Screen convention: north = -y (up),
+     * west = -x (left). An axis only counts once it contributes at least a
+     * third of the travel, so near-cardinal paths read as plain cardinals.
+     */
+    public static String directionKey(int fromX, int fromY, int toX, int toY) {
+        int dx = toX - fromX;
+        int dy = toY - fromY;
+        String ns = dy < 0 ? "north" : "south";
+        String ew = dx < 0 ? "west" : "east";
+        if (dx == 0 && dy == 0) {
+            return "dirnorth";
+        }
+        if (Math.abs(dx) > 2 * Math.abs(dy)) {
+            return "dir" + ew;
+        }
+        if (Math.abs(dy) > 2 * Math.abs(dx)) {
+            return "dir" + ns;
+        }
+        return "dir" + ns + ew;
+    }
+
     public boolean anchorIntroShown = false;
     public boolean anchorDone = false;
     public boolean finaleShown = false;

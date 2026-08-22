@@ -106,6 +106,7 @@ public class SkyWardenMob extends FriendlyMob {
             say(client, "wardencats1");
             say(client, "wardencats2");
             say(client, "wardencats3");
+            say(client, catDirectionsMessage("wardencats4", quest));
             give(client, "cloudpufftreat", 3);
             return;
         }
@@ -146,7 +147,7 @@ public class SkyWardenMob extends FriendlyMob {
             if (quest.blackHome != quest.tabbyHome) {
                 say(client, "wardenonecat");
             } else {
-                say(client, "wardencatswait");
+                say(client, catDirectionsMessage("wardencatswait", quest));
             }
         } else if (!quest.anchorDone) {
             say(client, "wardenanchorwait");
@@ -193,6 +194,17 @@ public class SkyWardenMob extends FriendlyMob {
                     new necesse.engine.network.packet.PacketChangeObject(level, 0, tileX, tileY, newID),
                     level, tileX, tileY);
         }
+    }
+
+    /** A misc line with <blackdir>/<tabbydir> filled with directions from the spire to each lair. */
+    private GameMessage catDirectionsMessage(String miscKey, SkywatchQuestData quest) {
+        return new LocalMessage("misc", miscKey,
+                "blackdir", translatedDirection(quest.spireX, quest.spireY, quest.blackLairX, quest.blackLairY),
+                "tabbydir", translatedDirection(quest.spireX, quest.spireY, quest.tabbyLairX, quest.tabbyLairY));
+    }
+
+    private static String translatedDirection(int fromX, int fromY, int toX, int toY) {
+        return new LocalMessage("misc", SkywatchQuestData.directionKey(fromX, fromY, toX, toY)).translate();
     }
 
     private void say(ServerClient client, String miscKey) {

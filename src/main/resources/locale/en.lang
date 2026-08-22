@@ -53,7 +53,15 @@ skyreach=The Skyreach
 
 [misc]
 wardenchatformat=<name>: <line>
-skyreachhint=Something flickers over the mist, far above the clouds. Someone still keeps a light up there.
+skyreachhint=Something flickers over the mist to the <dir>, far above the clouds. Someone still keeps a light up there.
+dirnorth=north
+dirnortheast=north-east
+direast=east
+dirsoutheast=south-east
+dirsouth=south
+dirsouthwest=south-west
+dirwest=west
+dirnorthwest=north-west
 wardenname=The Sky Warden
 wardenintro1=Hm. Stairs. Nobody has taken the stairs in a long, long while.
 wardenintro2=I am the Warden. The last one, if you keep count. I keep the light. Kept, rather. It went out with the storm.
@@ -65,7 +73,8 @@ wardenbeacondone=There. See how it burns - cold and steady, the way the Skywatch
 wardencats1=Two shadows are missing from this tower. My cats. The storm frightened them off and they have not found their way home.
 wardencats2=Siggi is the black one - he will be sulking somewhere in the Stormveil, between the crystals. Peanut chases glowmoths in the Aurora Shoals.
 wardencats3=They will not come for calling. Cloudpuff treats, that is the trick - windsilk and aurora petals, whisked. Here, I will show you the recipe.
-wardencatswait=Any sign of them? Siggi in the Stormveil, Peanut in the Shoals. The treats, do not forget the treats.
+wardencats4=Last I saw them from the roof: Siggi drifted off to the <blackdir> of here, Peanut to the <tabbydir>. Old eyes, but the mist does not move THAT much.
+wardencatswait=Any sign of them? Siggi should be to the <blackdir>, Peanut to the <tabbydir>. The treats, do not forget the treats.
 wardenonecat=One little shadow home. The tower feels warmer already. The other is still out there somewhere.
 wardencatsdone=Both of them, home. Look at them pretend they were never gone. Take this basket - they have claimed it anyway - and this bell. It was Siggi's. He hates it.
 wardenanchor1=One more task, if your legs still carry you. The isles drift because the anchors cracked. I can reforge one - with aetherium, and good skystone.

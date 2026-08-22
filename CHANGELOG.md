@@ -3,6 +3,19 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [0.2.2] — 2026-08-22
+
+Cheat-free wayfinding — the quest is now fully navigable without any commands.
+
+### Added
+- The first-ascent hint names the compass direction toward the Warden's Spire
+  ("Something flickers over the mist to the north-west…"), so finding the
+  Warden needs no coordinates. The spire is now stamped during the very first
+  ascent instead of on the level's next tick, making the pointer exact.
+- The Warden points toward each runaway cat: the cat-quest briefing gains a
+  direction line, and his reminder line now names the bearing to Siggi and
+  Peanut instead of just their biomes.
+
 ## [0.2.1] — 2026-08-22
 
 ### Added

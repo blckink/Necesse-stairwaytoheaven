@@ -53,7 +53,15 @@ skyreach=Die Himmelsweite
 
 [misc]
 wardenchatformat=<name>: <line>
-skyreachhint=Etwas flackert über dem Nebel, weit über den Wolken. Jemand hält dort oben noch ein Licht.
+skyreachhint=Etwas flackert über dem Nebel im <dir>, weit über den Wolken. Jemand hält dort oben noch ein Licht.
+dirnorth=Norden
+dirnortheast=Nordosten
+direast=Osten
+dirsoutheast=Südosten
+dirsouth=Süden
+dirsouthwest=Südwesten
+dirwest=Westen
+dirnorthwest=Nordwesten
 wardenname=Der Himmelswächter
 wardenintro1=Hm. Die Treppe. Lange hat niemand mehr die Treppe genommen.
 wardenintro2=Ich bin der Wächter. Der letzte, wenn du mitzählst. Ich hüte das Licht. Hütete, besser gesagt. Es erlosch mit dem Sturm.
@@ -65,7 +73,8 @@ wardenbeacondone=Da. Sieh, wie es brennt - kalt und ruhig, wie die Himmelswacht 
 wardencats1=Diesem Turm fehlen zwei Schatten. Meine Katzen. Der Sturm hat sie verschreckt, und heimgefunden haben sie nicht.
 wardencats2=Siggi ist der Schwarze - der schmollt irgendwo im Sturmschleier, zwischen den Kristallen. Peanut jagt Glühfalter in den Aurorabänken.
 wardencats3=Auf Rufen hören sie nicht. Wolkenzupf-Leckerli, das ist der Trick - Windseide und Aurorablätter, aufgeschlagen. Hier, ich zeige dir das Rezept.
-wardencatswait=Eine Spur von ihnen? Siggi im Sturmschleier, Peanut in den Bänken. Die Leckerli - vergiss die Leckerli nicht.
+wardencats4=Vom Dach aus habe ich sie zuletzt gesehen: Siggi zog Richtung <blackdir>, Peanut Richtung <tabbydir>. Alte Augen, ja - aber SO sehr wandert der Nebel nicht.
+wardencatswait=Eine Spur von ihnen? Siggi müsste Richtung <blackdir> sein, Peanut Richtung <tabbydir>. Die Leckerli - vergiss die Leckerli nicht.
 wardenonecat=Ein kleiner Schatten ist heim. Der Turm fühlt sich schon wärmer an. Der andere streunt noch irgendwo.
 wardencatsdone=Beide daheim. Sieh sie an - tun, als wären sie nie fort gewesen. Nimm den Korb - sie haben ihn ohnehin beschlagnahmt - und diese Glocke. Sie war Siggis. Er hasst sie.
 wardenanchor1=Eine letzte Aufgabe, wenn deine Beine noch tragen. Die Inseln treiben, weil die Anker zerbrachen. Einen kann ich neu schmieden - mit Aetherium und gutem Himmelsstein.

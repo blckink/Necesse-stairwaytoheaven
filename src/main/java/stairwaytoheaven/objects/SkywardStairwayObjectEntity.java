@@ -59,9 +59,19 @@ public class SkywardStairwayObjectEntity extends PortalObjectEntity {
 
             client.newStats.ladders_used.increment(1);
             this.runClearMobs(level, this.destinationTileX, this.destinationTileY);
-            if (stairwaytoheaven.quest.SkywatchQuestData.get(level).stage == 0) {
-                // First quest hook: a flicker over the mist points toward the Warden
-                client.sendChatMessage(new necesse.engine.localization.message.LocalMessage("misc", "skyreachhint"));
+            stairwaytoheaven.quest.SkywatchQuestData quest = stairwaytoheaven.quest.SkywatchQuestData.get(level);
+            if (quest.stage == 0) {
+                // First quest hook: a flicker over the mist points toward the
+                // Warden. Stamp the spire now so the compass direction is exact
+                // even on the very first ascent (normally serverTick does it).
+                if (level instanceof stairwaytoheaven.level.SkyLevel) {
+                    ((stairwaytoheaven.level.SkyLevel) level).ensureWardenSpire();
+                }
+                String directionWord = new necesse.engine.localization.message.LocalMessage("misc",
+                        stairwaytoheaven.quest.SkywatchQuestData.directionKey(
+                                this.destinationTileX, this.destinationTileY, quest.spireX, quest.spireY)).translate();
+                client.sendChatMessage(new necesse.engine.localization.message.LocalMessage(
+                        "misc", "skyreachhint", "dir", directionWord));
             }
             return true;
         }, true);

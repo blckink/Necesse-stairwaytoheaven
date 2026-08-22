@@ -80,8 +80,10 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
      * once per world (persisted in SkywatchQuestData). Running from
      * serverTick instead of world generation means existing v0.1 worlds get
      * the structure too, the first time their Skyreach ticks under v0.2.
+     * Public so the ascent stairway can force it before pointing the player
+     * toward the spire.
      */
-    private void ensureWardenSpire() {
+    public void ensureWardenSpire() {
         SkywatchQuestData quest = SkywatchQuestData.get(this);
         if (!quest.spirePlaced) {
             Point site = this.findSpireSite();
