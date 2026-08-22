@@ -66,8 +66,11 @@ structures, settlements, the Storm Sovereign boss).
 
 ## Building (modders)
 
-Requirements: JDK 17+ (any modern JDK — the build emits Java 8 bytecode via
-`options.release`), plus a Necesse install (client **or** dedicated server).
+Requirements: a **JDK 17–23** (recommended: [Temurin 21 LTS](https://adoptium.net) —
+on Windows simply `winget install EclipseAdoptium.Temurin.21.JDK`; note that the very
+newest JDKs 24/25 are too new for this project's Gradle 8.10 wrapper), plus a Necesse
+install (client **or** dedicated server). The build emits Java 8 bytecode via
+`options.release` regardless of the JDK used.
 
 **Windows** (cmd.exe — a Steam install of Necesse is auto-detected, no env var needed):
 
@@ -156,8 +159,10 @@ Inseln über einem begehbaren Nebelmeer.
   Aurorablätter → **Sturmklinge** (Schwert) und **Windheuler** (Bogen).
 - Vollständig auf Deutsch lokalisiert.
 
-Bauen: Im Repo-Ordner `gradlew.bat buildModJar` ausführen (Windows-Eingabeaufforderung;
-in PowerShell `.\gradlew.bat buildModJar`) — eine Steam-Installation von Necesse wird
+Bauen: Ein JDK 17–23 installieren (empfohlen: Temurin 21, z. B. per
+`winget install EclipseAdoptium.Temurin.21.JDK`), neues Terminal öffnen, dann im
+Repo-Ordner `gradlew.bat buildModJar` ausführen (Windows-Eingabeaufforderung; in
+PowerShell `.\gradlew.bat buildModJar`) — eine Steam-Installation von Necesse wird
 automatisch gefunden. Unter Linux/macOS stattdessen `./gradlew buildModJar`; Details
 oben. Die Roadmap (Sturm-Events, Aetherium-Rüstung, Strukturen, Himmels-Boss) steht in
 [ROADMAP.md](ROADMAP.md).
