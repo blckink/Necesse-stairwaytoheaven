@@ -69,6 +69,19 @@ structures, settlements, the Storm Sovereign boss).
 Requirements: JDK 17+ (any modern JDK — the build emits Java 8 bytecode via
 `options.release`), plus a Necesse install (client **or** dedicated server).
 
+**Windows** (cmd.exe — a Steam install of Necesse is auto-detected, no env var needed):
+
+```bat
+gradlew.bat buildModJar                     &:: -> build\jar\Stairway_to_Heaven-<gv>-<mv>.jar
+gradlew.bat runClient                       &:: launch the game with the mod
+gradlew.bat runDevClient                    &:: same, with -dev 1
+```
+
+In PowerShell prefix with `.\` (e.g. `.\gradlew.bat buildModJar`). The plain `./gradlew`
+script is the Linux/macOS wrapper and won't run in cmd.exe.
+
+**Linux/macOS**:
+
 ```bash
 # auto-detects a Steam install; otherwise point at any game/server directory:
 export NECESSE_GAME_DIR=/path/to/Necesse   # contains Necesse.jar or Server.jar
@@ -143,6 +156,8 @@ Inseln über einem begehbaren Nebelmeer.
   Aurorablätter → **Sturmklinge** (Schwert) und **Windheuler** (Bogen).
 - Vollständig auf Deutsch lokalisiert.
 
-Bauen: `NECESSE_GAME_DIR` auf eine Necesse-Installation zeigen lassen und
-`./gradlew buildModJar` ausführen; Details oben. Die Roadmap (Sturm-Events, Aetherium-
-Rüstung, Strukturen, Himmels-Boss) steht in [ROADMAP.md](ROADMAP.md).
+Bauen: Im Repo-Ordner `gradlew.bat buildModJar` ausführen (Windows-Eingabeaufforderung;
+in PowerShell `.\gradlew.bat buildModJar`) — eine Steam-Installation von Necesse wird
+automatisch gefunden. Unter Linux/macOS stattdessen `./gradlew buildModJar`; Details
+oben. Die Roadmap (Sturm-Events, Aetherium-Rüstung, Strukturen, Himmels-Boss) steht in
+[ROADMAP.md](ROADMAP.md).
