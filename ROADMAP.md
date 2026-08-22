@@ -19,7 +19,27 @@ The complete core loop.
 - [x] Reproducible pixel-art asset pipeline (`tools/asset_generator/`)
 - [x] Headless dedicated-server integration test (`scripts/`)
 
-## v0.2.0 — "Storm Season"
+## v0.2.0 — "The Warden's Call" (current)
+
+Story, quests, and a reason to build. The Skyreach gets a resident.
+
+- [ ] **Render-correctness pass**: terrain tiles on the real `_splat` autotile format,
+      ore overlay in the correct variant-strip format, Mistsea liquid splats
+- [ ] **The Warden's Spire**: unique ruined tower stamped once per world in the
+      Driftlands (deterministic, save-persistent placement)
+- [ ] **The Sky Warden** NPC: interact-driven dialogue, 4-stage quest chain
+      (find him → rekindle the beacon → bring the cats home → forge the anchor),
+      server-authoritative item turn-ins, journal hint on first ascent
+- [ ] **Spire cats Siggi & Peanut**: unique friendly critters hidden in the Stormveil /
+      Aurora Shoals, brought home with Cloudpuff Treats, live at the spire afterwards
+- [ ] **"Nightfell & Skylight" building set**: Skystone Brick wall + door, Nightfell
+      wall, Checkered Marble + Gloomwood floors, Wrought Iron fence + gate, Warden's
+      Candelabra, Mistglass Lantern, Gloomwillow, Raven Statue, Flickerlight Garland,
+      Cat Basket, Skywatch Banner (quest-exclusive pieces stay earned)
+- [ ] Warden's shop (opens after stage 2) selling the building set
+- [ ] Spire visibly evolves with quest progress (beacon, basket, anchor)
+
+## v0.3.0 — "Storm Season"
 
 Weather, gear depth, quality of life.
 
@@ -33,23 +53,24 @@ Weather, gear depth, quality of life.
 - [ ] Sound pass: wind ambience, mob sounds (reuse-plus-pitch first, custom later)
 - [ ] Balance pass from playtest feedback
 
-## v0.3.0 — "The Aviary"
+## v0.4.0 — "The Aviary"
 
 Making the sky a place to live.
 
-- [ ] Sky **structures/presets**: ruined skystone spires with loot crates, small
+- [ ] Sky **structures/presets**: more ruined skystone spires with loot, small
       abandoned observatories (uses the vanilla preset generation system)
 - [ ] **Settlement support**: allow claiming a Skyreach settlement flag; settler pathing
       audit around Mistsea; sky-specific settler dialogue lines
 - [ ] Wandering **Skyward Trader** with sky-exclusive stock
-- [ ] Journal/quest hooks introducing the Skyreach to new players
+- [ ] Journal/quest hooks expanded into a full sky questline
 
-## v0.4.0 — "Crown of the Sky"
+## v0.5.0 — "Crown of the Sky"
 
 The endgame of the sky arc.
 
 - [ ] **Boss: the Storm Sovereign** — summoned at a Stormveil altar with a crafted item;
-      arena-style fight over the Mistsea; trophy + relic drops
+      arena-style fight over the Mistsea; trophy + relic drops (teased by the Warden's
+      finale dialogue)
 - [ ] Post-boss weapon/relic tier (bridges into vanilla incursion-era power)
 - [ ] Unique boss music slot (custom track if available, curated vanilla list otherwise)
 

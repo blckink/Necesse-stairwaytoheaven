@@ -128,29 +128,24 @@ def gen_rock_sheet(path, ramp, variants=2, salt=0xACE):
 
 
 def gen_ore_sheet(path, ramp, variants=2, salt=0xE77):
-    """Transparent overlay with vein clusters, same grid as the rock sheet."""
-    sheet = Canvas(variants * 32, ROWS * CELL)
-    surface_rows = (0, 1, 2, 5, 6, 7, 10, 11, 12)
-    face_rows = (3, 8)
+    """Ore pattern strip in the vanilla format (verified against ironore.png,
+    64x32): N variants of 32x32 side by side, each a scatter of ore nuggets on
+    transparency. RockOreObject tiles this pattern through the engine's ore
+    mask onto the parent rock at runtime; the same 32x32 also feeds the
+    auto-generated ore item icon."""
+    sheet = Canvas(variants * 32, 32)
     for v in range(variants):
-        for half in range(2):
-            x0 = v * 32 + half * CELL
-            for row in range(ROWS):
-                rng = Rng(salt + v * 131 + half * 17 + row * 719)
-                on_surface = row in surface_rows
-                on_face = row in face_rows
-                if not (on_surface or on_face):
-                    continue
-                # guarantee veins in the icon source region (variant 0, rows 0-1)
-                guaranteed = v == 0 and row in (0, 1)
-                if not guaranteed and not rng.chance(0.6 if on_surface else 0.3):
-                    continue
-                for _ in range(rng.range(1, 2)):
-                    cx = x0 + rng.range(4, 11)
-                    cy = row * CELL + rng.range(4 if row in (0, 5) else 2, 11)
-                    sheet.ellipse(cx, cy, 2.2, 1.8, ramp["deep"])
-                    sheet.ellipse(cx, cy - 1, 1.4, 1.2, ramp["base"])
-                    sheet.put(cx, cy - 2, ramp["light"])
-                    sheet.put(cx - 1, cy - 1, ramp["light"])
-                    sheet.put(cx, cy - 3, ramp["hi"])
+        x0 = v * 32
+        rng = Rng(salt + v * 131)
+        for _ in range(rng.range(6, 8)):
+            cx = x0 + rng.range(3, 28)
+            cy = rng.range(3, 28)
+            r = rng.range(2, 3)
+            sheet.ellipse(cx, cy, r, r * 0.85, ramp["deep"])
+            sheet.ellipse(cx, cy - 1, r * 0.65, r * 0.6, ramp["base"])
+            sheet.put(cx - 1, cy - 1, ramp["light"])
+            sheet.put(cx, cy - 2, ramp["hi"] if rng.chance(0.6) else ramp["light"])
+        # a few loose sparkle pixels between nuggets
+        for _ in range(rng.range(3, 5)):
+            sheet.put(x0 + rng.range(2, 29), rng.range(2, 29), ramp["base"])
     sheet.save(path)

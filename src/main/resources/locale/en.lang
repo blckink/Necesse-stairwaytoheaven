@@ -25,16 +25,23 @@ windsilk=Windsilk
 aurorapetal=Aurora Petal
 tempestedge=Tempest Edge
 galehowl=Galehowl
+cloudpufftreat=Cloudpuff Treat
+silverbell=Silver Bell
 
 [itemtooltip]
 skystairwaydowntip=Used to ascend into the Skyreach
 tempestedgetip=Forged from sky-metal, light as the wind
 galehowltip=Strung with windsilk, its arrows outrun the storm
+cloudpufftreattip=Irresistible to sky cats. Smells faintly of thunderstorms
+silverbelltip=It was Siggi's. He hates it
 
 [mob]
 zephyrray=Zephyr Ray
 stormwisp=Storm Wisp
 skystonegolem=Skystone Golem
+skywarden=The Sky Warden
+spirecatblack=Siggi
+spirecattabby=Peanut
 
 [biome]
 driftlands=Driftlands
@@ -43,3 +50,29 @@ aurorashoals=Aurora Shoals
 
 [level]
 skyreach=The Skyreach
+
+[misc]
+skyreachhint=Something flickers over the mist, far above the clouds. Someone still keeps a light up there.
+wardenname=The Sky Warden
+wardenintro1=Hm. Stairs. Nobody has taken the stairs in a long, long while.
+wardenintro2=I am the Warden. The last one, if you keep count. I keep the light. Kept, rather. It went out with the storm.
+wardenintro3=Take this windsilk. You climbed all this way; it would be rude to send you off with empty pockets.
+wardenbeacon1=The beacon crystal shattered in the Great Storm. Without it, the isles drift dark and the wisps grow bold.
+wardenbeacon2=Bring me storm shards and windsilk - <shards> shards, <silk> silk - and I will teach the old light to burn again.
+wardenbeaconwait=Shards and silk, friend. The mist keeps what falls, so mind your step out there.
+wardenbeacondone=There. See how it burns - cold and steady, the way the Skywatch liked it. You have my thanks, and my shelves: whatever I can spare is yours to buy.
+wardencats1=Two shadows are missing from this tower. My cats. The storm frightened them off and they have not found their way home.
+wardencats2=Siggi is the black one - he will be sulking somewhere in the Stormveil, between the crystals. Peanut chases glowmoths in the Aurora Shoals.
+wardencats3=They will not come for calling. Cloudpuff treats, that is the trick - windsilk and aurora petals, whisked. Here, I will show you the recipe.
+wardencatswait=Any sign of them? Siggi in the Stormveil, Peanut in the Shoals. The treats, do not forget the treats.
+wardenonecat=One little shadow home. The tower feels warmer already. The other is still out there somewhere.
+wardencatsdone=Both of them, home. Look at them pretend they were never gone. Take this basket - they have claimed it anyway - and this bell. It was Siggi's. He hates it.
+wardenanchor1=One more task, if your legs still carry you. The isles drift because the anchors cracked. I can reforge one - with aetherium, and good skystone.
+wardenanchor2=Five bars of aetherium and twenty skystone, and this island will hold its place in the wind for another hundred years.
+wardenanchorwait=Aetherium and skystone. The forge remembers, even if my hands are slow.
+wardenanchordone=It holds. Feel that? The island stopped wandering. The Skywatch would have made a ceremony of this. I will make tea instead.
+wardenfinale=You have done old work, the kind nobody sees until it is missing. Keep the banner - and keep your blade close. The storm that broke the anchors was no weather. She is still out there, beyond the veil.
+wardenshopclosed=My shelves are dark, like everything else here. Light the beacon first.
+wardencatfound1=Mrrp?
+wardencattreat=The cat snatches the treat and vanishes in a puff of cloud - homeward.
+wardencatnotreat=The cat eyes you warily. It clearly expects a snack.

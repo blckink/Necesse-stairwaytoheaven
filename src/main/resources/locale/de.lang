@@ -25,16 +25,23 @@ windsilk=Windseide
 aurorapetal=Aurorablatt
 tempestedge=Sturmklinge
 galehowl=Windheuler
+cloudpufftreat=Wolkenzupf-Leckerli
+silverbell=Silberglöckchen
 
 [itemtooltip]
 skystairwaydowntip=Ermöglicht den Aufstieg in die Himmelsweite
 tempestedgetip=Aus Himmelsmetall geschmiedet, leicht wie der Wind
 galehowltip=Mit Windseide bespannt – ihre Pfeile überholen den Sturm
+cloudpufftreattip=Unwiderstehlich für Himmelskatzen. Riecht schwach nach Gewitter
+silverbelltip=Sie war Siggis. Er hasst sie
 
 [mob]
 zephyrray=Zephyrrochen
 stormwisp=Sturmirrlicht
 skystonegolem=Himmelsstein-Golem
+skywarden=Der Himmelswächter
+spirecatblack=Siggi
+spirecattabby=Peanut
 
 [biome]
 driftlands=Driftlande
@@ -43,3 +50,29 @@ aurorashoals=Aurorabänke
 
 [level]
 skyreach=Die Himmelsweite
+
+[misc]
+skyreachhint=Etwas flackert über dem Nebel, weit über den Wolken. Jemand hält dort oben noch ein Licht.
+wardenname=Der Himmelswächter
+wardenintro1=Hm. Die Treppe. Lange hat niemand mehr die Treppe genommen.
+wardenintro2=Ich bin der Wächter. Der letzte, wenn du mitzählst. Ich hüte das Licht. Hütete, besser gesagt. Es erlosch mit dem Sturm.
+wardenintro3=Nimm diese Windseide. Du bist den ganzen Weg geklettert; mit leeren Taschen schicke ich dich nicht fort.
+wardenbeacon1=Der Leuchtkristall zersprang im Großen Sturm. Ohne ihn treiben die Inseln im Dunkeln, und die Irrlichter werden dreist.
+wardenbeacon2=Bring mir Sturmsplitter und Windseide - <shards> Splitter, <silk> Seide - und ich lehre das alte Licht wieder zu brennen.
+wardenbeaconwait=Splitter und Seide, mein Freund. Der Nebel behält, was fällt - pass auf deine Schritte auf.
+wardenbeacondone=Da. Sieh, wie es brennt - kalt und ruhig, wie die Himmelswacht es mochte. Du hast meinen Dank - und meine Regale: Was ich entbehren kann, kannst du kaufen.
+wardencats1=Diesem Turm fehlen zwei Schatten. Meine Katzen. Der Sturm hat sie verschreckt, und heimgefunden haben sie nicht.
+wardencats2=Siggi ist der Schwarze - der schmollt irgendwo im Sturmschleier, zwischen den Kristallen. Peanut jagt Glühfalter in den Aurorabänken.
+wardencats3=Auf Rufen hören sie nicht. Wolkenzupf-Leckerli, das ist der Trick - Windseide und Aurorablätter, aufgeschlagen. Hier, ich zeige dir das Rezept.
+wardencatswait=Eine Spur von ihnen? Siggi im Sturmschleier, Peanut in den Bänken. Die Leckerli - vergiss die Leckerli nicht.
+wardenonecat=Ein kleiner Schatten ist heim. Der Turm fühlt sich schon wärmer an. Der andere streunt noch irgendwo.
+wardencatsdone=Beide daheim. Sieh sie an - tun, als wären sie nie fort gewesen. Nimm den Korb - sie haben ihn ohnehin beschlagnahmt - und diese Glocke. Sie war Siggis. Er hasst sie.
+wardenanchor1=Eine letzte Aufgabe, wenn deine Beine noch tragen. Die Inseln treiben, weil die Anker zerbrachen. Einen kann ich neu schmieden - mit Aetherium und gutem Himmelsstein.
+wardenanchor2=Fünf Barren Aetherium und zwanzig Himmelsstein, und diese Insel hält ihren Platz im Wind für weitere hundert Jahre.
+wardenanchorwait=Aetherium und Himmelsstein. Die Esse erinnert sich, auch wenn meine Hände langsam sind.
+wardenanchordone=Er hält. Spürst du das? Die Insel ist stehen geblieben. Die Himmelswacht hätte eine Zeremonie daraus gemacht. Ich mache stattdessen Tee.
+wardenfinale=Du hast alte Arbeit getan - die Art, die niemand sieht, bis sie fehlt. Behalte das Banner - und die Klinge griffbereit. Der Sturm, der die Anker brach, war kein Wetter. Sie ist noch da draußen, jenseits des Schleiers.
+wardenshopclosed=Meine Regale sind dunkel, wie alles hier. Entzünde erst das Leuchtfeuer.
+wardencatfound1=Mrrp?
+wardencattreat=Die Katze schnappt sich das Leckerli und verschwindet in einem Wölkchen - heimwärts.
+wardencatnotreat=Die Katze beäugt dich misstrauisch. Sie erwartet eindeutig einen Snack.

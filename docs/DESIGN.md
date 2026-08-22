@@ -184,3 +184,104 @@ mineral — so the sky unlocks *alongside* — never before — the deep caves.
 
 Boss fight, armor set, sky fishing loot, storm weather events, structures/presets,
 settlement support in the sky, custom music/sounds, additional sub-biomes.
+
+---
+
+# Part II — v0.2 "The Warden's Call"
+
+v0.1 built the place; v0.2 gives it a memory. Goal: the Skyreach stops being "caves,
+but up" and becomes its own world with a resident, a past, and things worth building.
+
+## 11. Story skeleton
+
+Long before the first ladder was nailed together, the **Skywatch** kept the balance
+between the layers. Their spires anchored the islands against the wind. Then the Great
+Storm came, the anchors cracked, and the Skywatch scattered — all but one.
+
+**The Sky Warden** still keeps his half-collapsed spire in the Driftlands: a tall, thin,
+slightly crooked old keeper in a feather-trimmed coat — more raven than man by now,
+politely grumpy, quietly kind. His lighthouse crystal is shattered, his two cats ran off
+during the last storm, and he has opinions about visitors who stomp on his cloudturf.
+
+Tone: dry, melancholic, a little gothic, never silly. The story is told through short
+dialogue lines, item descriptions and the spire itself changing as you help him.
+
+## 12. Quest chain (4 stages, save-persistent, multiplayer-safe)
+
+Progress is stored server-side on the spire (one shared world state, like vanilla world
+events); rewards are granted to the delivering player. Turn-ins validate and consume
+items server-side on interact — no trust in the client.
+
+| # | Quest | Type | Player does | Reward / world change |
+|---|---|---|---|---|
+| 1 | **A Light over the Mist** | find someone | On first ascent, a journal/chat hint points to a flicker over the mist. Find the spire, talk to the Warden. | Windsilk bundle; spire location pinned on map; stage 2 opens |
+| 2 | **The Dark Lighthouse** | collect & deliver | Bring **12 Storm Shards + 8 Windsilk** so he can rekindle the beacon. | The spire's **Wardenlight ignites** (visible object swap); his **shop opens** (building set); Flickerlight Garlands as a gift |
+| 3 | **Where the Cats Wander** | find + item use | His cats fled: **Siggi** (black, hides in the Stormveil) and **Peanut** (white-tabby, chases glowmoths in the Aurora Shoals). Craft **Cloudpuff Treats**, find each cat, offer a treat. | Each cat travels home and stays as a resident of the spire; both home → **Cat Basket** deco + **Silver Bell** trophy |
+| 4 | **Anchor of the Sky** | collect & deliver | Bring **5 Aetherium Bars + 20 Skystone** — he reforges a spire anchor. | **Skywatch Banner** deco + reward bundle; the anchor appears at the spire; closing dialogue teases the Storm Sovereign (v0.5 boss) |
+
+Design notes:
+- Stage gating is linear; stages 3 and 4 unlock together after 2 (players can do them in
+  either order; the finale line plays once both are done).
+- Every "delivery" is also a **visible change at the spire** — the world reacts.
+- All interaction is interact-driven (chat bubbles + server-side inventory checks); a
+  container/dialog UI is used only where research shows it is robust in MP.
+
+## 13. The Warden's Spire (structure)
+
+A ~17×17 ruined round tower stamped **once per world** in the Driftlands, 40–120 tiles
+from the ascent origin (deterministic: first suitable land patch on a seed-derived
+spiral; position recorded in level data so it never re-stamps).
+
+Composition: cracked **Skystone Brick** walls, a **checkered marble** core floor,
+**Gloomwood** planks, wrought-iron fence stubs, two Warden's Candelabras (one dead),
+the unlit **Wardenlight** at the top, a small loot chest with flavor items, the Warden
+inside, and an empty spot where a cat basket will stand.
+
+## 14. Building & deco set — "Nightfell & Skylight"
+
+Gothic-meets-sky: crooked silhouettes, wrought iron, cold stone, warm little lights.
+Craftable at a Workstation from sky materials once unlocked; garland/basket/banner stay
+quest-exclusive so they feel earned. All pieces carry proper room properties so they
+work in settlements.
+
+| Piece | Kind | Notes |
+|---|---|---|
+| Skystone Brick Wall (+ Door) | wall | pale weathered stone |
+| Nightfell Wall | wall | near-black violet stone, gothic set base |
+| Checkered Marble Floor | floor tile | black/white checker |
+| Gloomwood Floor | floor tile | dark creaking planks |
+| Wrought Iron Fence (+ Gate) | fence | spiked, crypt-style silhouette |
+| Warden's Candelabra | lamp (on/off) | cold blue-white flame, streetlamp format |
+| Mistglass Lantern | wall lamp | soft cool light |
+| Gloomwillow | deco tree | crooked bare tree; also rare natural spawn in the Stormveil |
+| Raven Statue | deco statue | small skystone raven |
+| Flickerlight Garland | wall deco, light | string of tiny colored lights, gently flickering (quest gift) |
+| Cat Basket | deco | quest reward; the spire cats nap in it |
+| Skywatch Banner | wall deco | quest finale reward |
+
+## 15. The cats
+
+Two unique, invulnerable friendly critters with their own sprites and personalities:
+
+- **Siggi** — pitch-black, amber eyes; skittish; found sheltering between storm
+  crystals in the Stormveil.
+- **Peanut** — white with tabby patches; curious; found pouncing at glowmoths in the
+  Aurora Shoals.
+
+Found cats idle near a fixed lair point per world (seed-derived, discovered by
+exploring). Interacting with a **Cloudpuff Treat** (recipe from the Warden: 1 Windsilk
++ 2 Aurora Petals → 3) sends the cat home in a puff of cloud. Homed cats live at the
+spire permanently: wander a small radius, sit, nap in the basket. They are deliberately
+pettable-adjacent ambient life — no combat role, no despawn.
+
+## 16. New items (v0.2)
+
+`cloudpufftreat` (quest consumable), `silverbell` (trophy, high vendor value, tooltip
+lore), deco/object items for every set piece above. No new combat gear in v0.2 — this
+release adds depth, not numbers.
+
+## 17. Render-correctness fixes shipped with v0.2
+
+Verified against the vanilla sprite reference: terrain tiles move to the real `_splat`
+autotile atlas format (the 1.3.2 renderer's primary path), the ore overlay becomes the
+correct N×32×32 pattern-variant strip, and the Mistsea gets proper liquid splats.

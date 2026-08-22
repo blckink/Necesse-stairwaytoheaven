@@ -23,6 +23,7 @@ import gen_objects  # noqa: E402
 import gen_mobs  # noqa: E402
 import gen_items  # noqa: E402
 import gen_misc  # noqa: E402
+import gen_npcs  # noqa: E402
 
 
 def main():
@@ -57,6 +58,11 @@ def main():
     gen_mobs.gen_stormwisp(f"{out}/mobs/stormwisp.png")
     gen_mobs.gen_skystonegolem(f"{out}/mobs/skystonegolem.png")
     gen_mobs.gen_icons(f"{out}/mobs/icons")
+
+    # NPCs: the Sky Warden and the spire cats
+    gen_npcs.gen_warden(f"{out}/mobs/skywarden.png")
+    gen_npcs.gen_cats(f"{out}/mobs/spirecatblack.png", f"{out}/mobs/spirecattabby.png")
+    gen_npcs.gen_npc_icons(f"{out}/mobs/icons")
 
     # Item icons
     gen_items.gen_skystone(f"{out}/items/skystone.png")
