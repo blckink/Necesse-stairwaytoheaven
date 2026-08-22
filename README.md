@@ -1,24 +1,131 @@
-Ready-to-start template mod with decompile task and dependency bundling.
+# Stairway to Heaven
+
+A content mod for [Necesse](https://necessegame.com) (game version **1.3.2**) that completes
+the game's vertical axis: after the Cave Ladder (down) and the Deep Cave Ladder (further
+down), the **Stairway to Heaven** ascends **up** — through the cloud ceiling into the
+**Skyreach**, a persistent sky dimension of floating islands drifting over an endless
+Mistsea.
+
+> _Deutsch? Siehe [unten](#-deutsch)._
+
+![Preview](src/main/resources/preview.png)
+
+## Features (v0.1.0 "First Ascent")
+
+- **A real third world layer.** The Skyreach is a persistent, infinite, seeded dimension
+  (`+1`, above `surface`/`cave`/`deepcave`), generated region-by-region exactly like the
+  underground layers — not an instanced pocket level. Each world gets its own sky.
+- **Stairway pair.** Craft the Stairway to Heaven at a Tungsten Workstation
+  (8 Tungsten Bars + 15 Quartz), place it on the surface, climb up. A return stairway is
+  placed in the sky automatically; both sides use the vanilla ladder netcode, so
+  multiplayer works out of the box.
+- **Three sky sub-biomes**, painted per-tile into the biome layer like cave biomes:
+  - **Driftlands** (common) — silver-green isles, Sky Reeds, Zephyr Rays
+  - **Stormveil** (uncommon) — charcoal slate, glowing Storm Crystals, Storm Wisps
+  - **Aurora Shoals** (rare) — cold dawn light, Aurora Blooms, rich Aetherium, Skystone Golems
+- **The Mistsea** — the swimmable cloud-ocean between islands; bridge it by placing
+  tiles (reclaims Cloudturf, not dirt) or swim across.
+- **Three enemies** tuned to the Tungsten era: Zephyr Ray (fast melee flier),
+  Storm Wisp (ranged spark-caster), Skystone Golem (armored bruiser).
+- **New materials & gear:** Skystone, Aetherium Ore/Bars, Storm Shards, Windsilk,
+  Aurora Petals — crafted into the **Tempest Edge** (sword) and **Galehowl** (bow),
+  deliberate sidegrades to Tungsten weapons, not power creep.
+- **English + German localization.**
+- **Reproducible pixel-art pipeline:** every texture is generated deterministically by
+  `tools/asset_generator/` in vanilla sheet formats — regenerate or hand-replace any
+  sprite at will.
+
+See [ROADMAP.md](ROADMAP.md) for what comes next (storm events, Aetherium armor,
+structures, settlements, the Storm Sovereign boss).
+
+## Installation (players)
+
+1. Build the jar (below) or grab a release jar.
+2. Drop it into your Necesse mods folder (`%appdata%/Necesse/mods` on Windows,
+   `~/.config/Necesse/mods` on Linux) — or subscribe on the Steam Workshop once
+   published.
+3. Start the game. Progress to Tungsten tech, craft the Stairway to Heaven, place it on
+   the surface, and climb.
+
+## Building (modders)
+
+Requirements: JDK 17+ (any modern JDK — the build emits Java 8 bytecode via
+`options.release`), plus a Necesse install (client **or** dedicated server).
+
+```bash
+# auto-detects a Steam install; otherwise point at any game/server directory:
+export NECESSE_GAME_DIR=/path/to/Necesse   # contains Necesse.jar or Server.jar
+./gradlew buildModJar                       # -> build/jar/Stairway_to_Heaven-<gv>-<mv>.jar
+./gradlew runClient                         # launch the game with the mod (client install)
+./gradlew runDevClient                      # same, with -dev 1
+```
+
+The Gradle setup was modernized to Gradle 8.10 (runs on current JDKs) while staying
+compatible with the upstream template layout (`settings.gradle` holds mod info,
+`gradle/main.gradle` the shared logic, `decompileToSources` still works).
+
+### Headless integration test
+
+`scripts/integration_test.sh` boots the official **dedicated server** with the freshly
+built jar, creates a throwaway world, drives the mod's `skyreachstatus` admin command
+through the server console, and asserts that the Skyreach generates (tiles, biomes,
+objects) with a clean log. This catches registry mistakes, world-gen regressions and
+load-order bugs without a client:
+
+```bash
+export NECESSE_GAME_DIR=/path/to/necesse-dedicated-server
+./gradlew buildModJar && scripts/integration_test.sh
+```
+
+`skyreachstatus` also works on any modded server as a diagnostics command (admin,
+non-cheat): it reports generated tile/biome/object counts around the origin plus
+placement diagnostics — paste its output into bug reports.
+
+## Repository layout
+
+| Path | Contents |
+|---|---|
+| `src/main/java/stairwaytoheaven/` | mod code: entry, registries facade, `level/`, `worldgen/`, `biomes/`, `tiles/`, `objects/`, `mobs/`, `items/`, `commands/` |
+| `src/main/resources/` | generated textures (vanilla sheet formats), `locale/` (en, de), mod preview |
+| `tools/asset_generator/` | deterministic Python/Pillow pixel-art pipeline |
+| `scripts/` | headless dedicated-server integration test |
+| `docs/DESIGN.md` | full design document (vision, content spec, tuning) |
+| `docs/ARCHITECTURE.md` | how the mod hooks the engine, module by module |
+| `docs/assets-style-guide.md` | palette + pixel style rules + sheet format cheat sheet |
+| `docs/research/` | knowledge base: verified engine/API notes this mod is built on |
+| `ROADMAP.md`, `CHANGELOG.md`, `CONTRIBUTING.md` | project management |
+
+## Compatibility
+
+- Built and tested against **Necesse 1.3.2** (dedicated server, headless world-gen test).
+- Purely additive: no vanilla registry entries are modified and no bytecode is patched,
+  so it should coexist with most mods.
+- Removing the mod leaves worlds loadable (unknown level identifiers are simply not
+  entered; unknown objects/items are dropped by the game's standard handling).
+
+## License
+
+Like the upstream mod template, this repository is released into the public domain.
 
 ---
 
-### Using decompiled sources
-- Load the project, and run the `decompileToSources` Gradle task.
-- Wait for decompilation to complete.
-  - Decompiled sources will be written in `<gameDirectory>/decompiled/Necesse-sources.jar`,
-    make sure permissions allow writing to the `decompiled` directory.
-  - Once this is done, future runs will not need to decompile again. Other projects created
-    later using this build script will also use the decompiled sources in the game directory
-  - Decompiled sources will be reused until `Necesse.jar` updates, or `Necesse-sources.jar`
-    gets deleted, in which case the `decompileToSources` should be ran again.
-- Once decompilation is complete, open up a game class, a blue bar on top of the editor will
-  appear. Click "Choose sources..." and navigate to `Necesse-sources.jar` in the `decompiled`
-  folder.
-- Looking at game classes should now have .java extensions, and Find Usages will now work
-  (Projects and Libraries search, with `Ctrl+Alt+F7` (by default))
+## 🇩🇪 Deutsch
 
-__Distributing decompiled sources is not allowed.__
+**Stairway to Heaven** ergänzt Necesse um die dritte Vertikale: Nach Leiter (Untergrund)
+und Tiefen-Leiter (Deep Caves) führt die **Himmelstreppe** nach **oben** in die
+**Himmelsweite** (Skyreach) — eine persistente, unendliche Himmelsebene mit schwebenden
+Inseln über einem begehbaren Nebelmeer.
 
----
+- **Bauen:** Tungsten-Werkbank → 8 Wolframbarren + 15 Quarz → Treppe auf der Oberfläche
+  platzieren und benutzen. Der Rückweg wird oben automatisch platziert; Multiplayer
+  funktioniert wie bei Vanilla-Leitern.
+- **Drei Himmels-Biome:** Driftlande (häufig), Sturmschleier (Sturmkristalle, Irrlichter)
+  und die seltenen Aurorabänke (Aurorablüten, viel Aetherium, Golems).
+- **Neue Gegner** (Wolfram-Ära): Zephyrrochen, Sturmirrlicht, Himmelsstein-Golem.
+- **Neue Materialien & Waffen:** Aetherium-Erz/-Barren, Sturmsplitter, Windseide,
+  Aurorablätter → **Sturmklinge** (Schwert) und **Windheuler** (Bogen).
+- Vollständig auf Deutsch lokalisiert.
 
-This repository is released into the public domain.
+Bauen: `NECESSE_GAME_DIR` auf eine Necesse-Installation zeigen lassen und
+`./gradlew buildModJar` ausführen; Details oben. Die Roadmap (Sturm-Events, Aetherium-
+Rüstung, Strukturen, Himmels-Boss) steht in [ROADMAP.md](ROADMAP.md).

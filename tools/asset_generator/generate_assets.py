@@ -1,0 +1,87 @@
+#!/usr/bin/env python3
+"""Stairway to Heaven — deterministic asset pipeline.
+
+Regenerates every mod texture into src/main/resources/. All output is seeded:
+running this twice produces byte-identical PNGs, so art diffs stay reviewable.
+
+Usage:  python3 tools/asset_generator/generate_assets.py [--out <resources-dir>]
+
+Sheet formats are documented in docs/research/asset-formats.md; palette and
+style rules in docs/assets-style-guide.md.
+"""
+
+import argparse
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import palette  # noqa: E402
+import gen_tiles  # noqa: E402
+import gen_rocks  # noqa: E402
+import gen_objects  # noqa: E402
+import gen_mobs  # noqa: E402
+import gen_items  # noqa: E402
+import gen_misc  # noqa: E402
+
+
+def main():
+    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--out", default=os.path.join(repo_root, "src", "main", "resources"))
+    args = parser.parse_args()
+    out = args.out
+
+    for sub in ("tiles", "objects", "items", "mobs", "mobs/icons", "player/weapons", "locale"):
+        os.makedirs(os.path.join(out, sub), exist_ok=True)
+
+    # Terrain + liquid
+    gen_tiles.gen_cloudturf(f"{out}/tiles/cloudturf.png")
+    gen_tiles.gen_skystone(f"{out}/tiles/skystone.png")
+    gen_tiles.gen_stormslate(f"{out}/tiles/stormslate.png")
+    gen_tiles.gen_mistsea(f"{out}/tiles/mistsea_shallow.png", f"{out}/tiles/mistsea_deep.png")
+
+    # Rocks + ore overlay
+    gen_rocks.gen_rock_sheet(f"{out}/objects/skystonerock.png", palette.SKYSTONE)
+    gen_rocks.gen_ore_sheet(f"{out}/objects/aetheriumore.png", palette.AETHERIUM)
+
+    # Objects
+    gen_objects.gen_stairway_down(f"{out}/objects/skystairwaydown.png")
+    gen_objects.gen_stairway_up(f"{out}/objects/skystairwayup.png")
+    gen_objects.gen_crystal_cluster(f"{out}/objects/stormcrystal.png", palette.STORMCRYSTAL, 0x57C7)
+    gen_objects.gen_aurorabloom(f"{out}/objects/aurorabloom.png")
+    gen_objects.gen_skyreeds(f"{out}/objects/skyreeds.png")
+
+    # Mobs + bestiary icons
+    gen_mobs.gen_zephyrray(f"{out}/mobs/zephyrray.png")
+    gen_mobs.gen_stormwisp(f"{out}/mobs/stormwisp.png")
+    gen_mobs.gen_skystonegolem(f"{out}/mobs/skystonegolem.png")
+    gen_mobs.gen_icons(f"{out}/mobs/icons")
+
+    # Item icons
+    gen_items.gen_skystone(f"{out}/items/skystone.png")
+    gen_items.gen_aetheriumore(f"{out}/items/aetheriumore.png")
+    gen_items.gen_aetheriumbar(f"{out}/items/aetheriumbar.png")
+    gen_items.gen_stormshard(f"{out}/items/stormshard.png")
+    gen_items.gen_windsilk(f"{out}/items/windsilk.png")
+    gen_items.gen_aurorapetal(f"{out}/items/aurorapetal.png")
+    gen_items.gen_tempestedge_icon(f"{out}/items/tempestedge.png")
+    gen_items.gen_galehowl_icon(f"{out}/items/galehowl.png")
+    gen_items.gen_skystonerock_item(f"{out}/items/skystonerock.png")
+    gen_items.gen_skyreeds_item(f"{out}/items/skyreeds.png")
+    gen_items.gen_stairway_item(f"{out}/items/skystairwaydown.png")
+    gen_items.gen_crystal_item(f"{out}/items/stormcrystal.png", palette.STORMCRYSTAL, 0x1CE1)
+    gen_items.gen_crystal_item(f"{out}/items/aurorabloom.png", palette.AURORA, 0x1CE2)
+
+    # Held weapon sprites
+    gen_items.gen_tempestedge_held(f"{out}/player/weapons/tempestedge.png")
+    gen_items.gen_galehowl_held(f"{out}/player/weapons/galehowl.png")
+
+    # Mod preview
+    gen_misc.gen_preview(f"{out}/preview.png")
+
+    print(f"Assets written to {out}")
+
+
+if __name__ == "__main__":
+    main()

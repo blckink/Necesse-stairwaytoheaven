@@ -7,12 +7,12 @@
 
 // ===== Mod info ===== //
 def modInfo = [
-        modID          : "my.template.mod",
-        modName        : "Template Mod",
-        modVersion     : "1.0",
+        modID          : "stairwaytoheaven",
+        modName        : "Stairway to Heaven",
+        modVersion     : "0.1.0",
         gameVersion    : "auto",
-        modDescription : "Some template mod",
-        author         : "YourNameHere",
+        modDescription : "Adds a third stairway that ascends above the clouds into the Skyreach: floating islands over an endless mistsea, three new sky biomes, new enemies, Aetherium gear and more.",
+        author         : "blckink",
         clientside     : false,
         modDependencies         : [],
         modOptionalDependencies : [],
@@ -20,7 +20,9 @@ def modInfo = [
 
 
 // ===== Necesse game directory ===== //
-//   "auto" to attempt searching in default locations
+//   "auto" to attempt searching in default locations.
+//   The NECESSE_GAME_DIR environment variable overrides auto-detection
+//   (useful for CI/headless builds against the dedicated server).
 def gamePath = "auto"
 
 

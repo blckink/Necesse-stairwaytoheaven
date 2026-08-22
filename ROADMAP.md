@@ -1,0 +1,68 @@
+# Roadmap — Stairway to Heaven
+
+Milestones are scoped so that every release is a complete, playable, save-compatible
+increment. Versioning: `MAJOR.MINOR.PATCH`; content milestones bump MINOR.
+
+## v0.1.0 — "First Ascent" (current)
+
+The complete core loop.
+
+- [x] Skyreach dimension (`+1`, infinite, seeded, persistent) with region generation
+- [x] Stairway to Heaven / return stairway object pair (vanilla ladder netcode)
+- [x] 3 sub-biomes painted into the biome layer: Driftlands, Stormveil, Aurora Shoals
+- [x] Tiles: Cloudturf, Skystone, Stormslate, Mistsea (liquid)
+- [x] Objects: Skystone Rock, Aetherium Rock, Storm Crystal, Aurora Bloom, Skyreeds
+- [x] Enemies: Zephyr Ray, Storm Wisp, Skystone Golem (biome spawn tables)
+- [x] Items: Skystone, Aetherium Ore/Bar, Storm Shard, Windsilk, Aurora Petal,
+      Tempest Edge (sword), Galehowl (bow)
+- [x] Recipes & loot tables, English + German localization
+- [x] Reproducible pixel-art asset pipeline (`tools/asset_generator/`)
+- [x] Headless dedicated-server integration test (`scripts/`)
+
+## v0.2.0 — "Storm Season"
+
+Weather, gear depth, quality of life.
+
+- [ ] **Aetherium armor set** (head/chest/boots; Tungsten-tier set bonus: fall-themed
+      mobility perk, e.g. brief glide/slow-fall visual + speed after damage)
+- [ ] **Storm events** in the Stormveil: periodic level event (lightning strikes,
+      increased Storm Wisp spawns, bonus Storm Shard yield) — mirrors the deep-cave
+      Spirit Corrupted event pattern
+- [ ] Mistsea **fishing loot table** (new fish + rare catches)
+- [ ] More decor objects (drift stones, cloud tufts), Mistsea ambience particles
+- [ ] Sound pass: wind ambience, mob sounds (reuse-plus-pitch first, custom later)
+- [ ] Balance pass from playtest feedback
+
+## v0.3.0 — "The Aviary"
+
+Making the sky a place to live.
+
+- [ ] Sky **structures/presets**: ruined skystone spires with loot crates, small
+      abandoned observatories (uses the vanilla preset generation system)
+- [ ] **Settlement support**: allow claiming a Skyreach settlement flag; settler pathing
+      audit around Mistsea; sky-specific settler dialogue lines
+- [ ] Wandering **Skyward Trader** with sky-exclusive stock
+- [ ] Journal/quest hooks introducing the Skyreach to new players
+
+## v0.4.0 — "Crown of the Sky"
+
+The endgame of the sky arc.
+
+- [ ] **Boss: the Storm Sovereign** — summoned at a Stormveil altar with a crafted item;
+      arena-style fight over the Mistsea; trophy + relic drops
+- [ ] Post-boss weapon/relic tier (bridges into vanilla incursion-era power)
+- [ ] Unique boss music slot (custom track if available, curated vanilla list otherwise)
+
+## v1.0.0 — Release
+
+- [ ] Full localization sweep (all vanilla-supported languages where feasible)
+- [ ] Steam Workshop packaging, workshop art, trailer GIFs
+- [ ] Performance audit (region generation profiling, spawn-table load)
+- [ ] Public modding notes: how to extend the Skyreach from other mods
+
+## Compatibility policy
+
+- Never modify vanilla registries' existing entries; additive registration only.
+- Keep save compatibility within a MAJOR version; migrations documented in CHANGELOG.
+- Track Necesse updates: re-verify against each game patch (decompiled-API notes in
+  `docs/research/` record which game version each finding was verified on).

@@ -1,0 +1,45 @@
+// Stairway to Heaven — English localization
+
+[tile]
+cloudturftile=Cloudturf
+skystonetile=Skystone
+stormslatetile=Stormslate
+mistseatile=Mistsea
+
+[object]
+stairwaytoheaven=Stairway to Heaven
+skystonerock=Skystone Rock
+aetheriumore=Aetherium
+stormcrystal=Storm Crystal
+stormcrystalr=Storm Crystal
+aurorabloom=Aurora Bloom
+aurorabloomr=Aurora Bloom
+skyreeds=Sky Reeds
+
+[item]
+skystone=Skystone
+aetheriumore=Aetherium Ore
+aetheriumbar=Aetherium Bar
+stormshard=Storm Shard
+windsilk=Windsilk
+aurorapetal=Aurora Petal
+tempestedge=Tempest Edge
+galehowl=Galehowl
+
+[itemtooltip]
+skystairwaydowntip=Used to ascend into the Skyreach
+tempestedgetip=Forged from sky-metal, light as the wind
+galehowltip=Strung with windsilk, its arrows outrun the storm
+
+[mob]
+zephyrray=Zephyr Ray
+stormwisp=Storm Wisp
+skystonegolem=Skystone Golem
+
+[biome]
+driftlands=Driftlands
+stormveil=Stormveil
+aurorashoals=Aurora Shoals
+
+[level]
+skyreach=The Skyreach

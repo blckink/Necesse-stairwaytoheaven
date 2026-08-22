@@ -1,0 +1,45 @@
+// Stairway to Heaven — Deutsche Lokalisierung
+
+[tile]
+cloudturftile=Wolkengras
+skystonetile=Himmelsstein
+stormslatetile=Sturmschiefer
+mistseatile=Nebelmeer
+
+[object]
+stairwaytoheaven=Stairway to Heaven
+skystonerock=Himmelsstein-Felsen
+aetheriumore=Aetherium
+stormcrystal=Sturmkristall
+stormcrystalr=Sturmkristall
+aurorabloom=Aurorablüte
+aurorabloomr=Aurorablüte
+skyreeds=Himmelsried
+
+[item]
+skystone=Himmelsstein
+aetheriumore=Aetheriumerz
+aetheriumbar=Aetheriumbarren
+stormshard=Sturmsplitter
+windsilk=Windseide
+aurorapetal=Aurorablatt
+tempestedge=Sturmklinge
+galehowl=Windheuler
+
+[itemtooltip]
+skystairwaydowntip=Ermöglicht den Aufstieg in die Himmelsweite
+tempestedgetip=Aus Himmelsmetall geschmiedet, leicht wie der Wind
+galehowltip=Mit Windseide bespannt – ihre Pfeile überholen den Sturm
+
+[mob]
+zephyrray=Zephyrrochen
+stormwisp=Sturmirrlicht
+skystonegolem=Himmelsstein-Golem
+
+[biome]
+driftlands=Driftlande
+stormveil=Sturmschleier
+aurorashoals=Aurorabänke
+
+[level]
+skyreach=Die Himmelsweite
