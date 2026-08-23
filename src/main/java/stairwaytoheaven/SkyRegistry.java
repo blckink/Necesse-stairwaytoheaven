@@ -1,13 +1,18 @@
 package stairwaytoheaven;
 
 import necesse.engine.util.LevelIdentifier;
+import stairwaytoheaven.biomes.AshenReachBiome;
 import stairwaytoheaven.biomes.AuroraShoalsBiome;
 import stairwaytoheaven.biomes.DriftlandsBiome;
+import stairwaytoheaven.biomes.GloomfenBiome;
 import stairwaytoheaven.biomes.StormveilBiome;
 import stairwaytoheaven.objects.SkySideStairwayObject;
 import stairwaytoheaven.objects.SkywardStairwayObject;
+import stairwaytoheaven.objects.VeilRiftObject;
+import stairwaytoheaven.objects.VeilSideRiftObject;
 import stairwaytoheaven.tiles.CloudturfTile;
 import stairwaytoheaven.tiles.MistseaTile;
+import stairwaytoheaven.tiles.MurkmossTile;
 import stairwaytoheaven.tiles.SkystoneTile;
 import stairwaytoheaven.tiles.StormslateTile;
 
@@ -82,4 +87,32 @@ public final class SkyRegistry {
     public static int wardenBeaconOffID;
     public static int wardenBeaconOnID;
     public static int skyAnchorID;
+
+    // ===== v0.3: The Veil =====
+
+    /** One-world dimension index of the Veil: below the deep caves. */
+    public static final int VEIL_DIMENSION = -3;
+    public static final LevelIdentifier VEIL_IDENTIFIER = new LevelIdentifier("veil");
+
+    public static GloomfenBiome gloomfen;
+    public static AshenReachBiome ashenReach;
+
+    public static MurkmossTile murkmossTile;
+    public static int murkmossID;
+    public static int blackpeatID;
+    public static int ashsandID;
+    public static int murkwaterID;
+
+    public static VeilRiftObject veilRiftDown;
+    public static VeilSideRiftObject veilRiftUp;
+    public static int veilRiftDownID;
+    public static int veilRiftUpID;
+    public static int seanceCircleID;
+
+    public static int whisperreedsID;
+    public static int gloomshroomID;
+    public static int veilrockID;
+    public static int ashbonesID;
+    public static int deadtreeID;
+    public static int ghostLanternID;
 }

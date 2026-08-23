@@ -39,6 +39,12 @@ final class SkyItems {
                 new necesse.inventory.item.placeableItem.consumableItem.food.FoodMatItem(250, Item.Rarity.NORMAL)
                         .spoilDuration(480), 3.0F, true);
 
+        // v0.3: Veil materials
+        ItemRegistry.registerItem("veilessence",
+                new MatItem(500, Item.Rarity.RARE).setItemCategory("materials", "mobdrops"), 18.0F, true);
+        ItemRegistry.registerItem("cinderpearl",
+                new MatItem(250, Item.Rarity.UNCOMMON).setItemCategory("materials", "minerals"), 14.0F, true);
+
         // Weapons
         ItemRegistry.registerItem("tempestedge", new TempestEdgeSwordToolItem(), 220.0F, true);
         ItemRegistry.registerItem("galehowl", new GalehowlProjectileToolItem(), 220.0F, true);
@@ -68,5 +74,11 @@ final class SkyItems {
         Recipes.registerModRecipe(new Recipe(
                 "windsilk", 1, RecipeTechRegistry.NONE,
                 Recipes.ingredientsFromScript("{{windwheat, 3}}")));
+
+        // The way down: chalk, candlewax-silk and petals — the Silver Bell is
+        // the key and stays with the player (checked on use, never consumed)
+        Recipes.registerModRecipe(new Recipe(
+                "seancecircle", 1, RecipeTechRegistry.TUNGSTEN_WORKSTATION,
+                Recipes.ingredientsFromScript("{{stormshard, 6}, {windsilk, 4}, {aurorapetal, 2}}")));
     }
 }

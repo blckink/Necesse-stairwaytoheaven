@@ -3,6 +3,36 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [0.3.0] — "The Veil Below, Part 1" — 2026-08-23
+
+The mod's second world opens: a gothic-comedy afterlife layer below the deep
+caves, entered by ritual. Part 1 ships the dimension, its first biomes, its
+first resident enemy and the signature light; Mortimer, Vesper, the quest
+chain, the Model Town, the Office of Eternity and the Ashwyrm follow in 0.3.x.
+
+### Added
+- **The Séance Circle**: craft it (6 Storm Shards + 4 Windsilk + 2 Aurora
+  Petals, Tungsten Workstation), place it, and use it while carrying the
+  **Silver Bell** from the Warden's cat quest — the bell is the key and is
+  never consumed. The circle tears open a persistent **Rift** (vanilla
+  ladder netcode, multiplayer-safe, auto-placed return rift on the far side).
+- **The Veil** (dimension −3, below the deep caves): infinite, seeded,
+  region-streamed, and in **permanent night** — the vanilla "light = safety"
+  rule shapes the whole layer. Two sub-biomes: the **Gloomfen** (dark moss,
+  black peat, whisper reeds, glowing gloomshrooms, dead trees) and the
+  **Ashen Reach** (ash dunes, bone-strewn, veilrock ridges). Between the
+  landmasses lies still black **Murkwater** (animated, bridgeable — placing
+  tiles reclaims murkmoss).
+- **The Gloom Shade**: the Veil's first enemy, built on the new organic-mass
+  construction standard — a hooded fen ghost with a hollow glowing face,
+  claw arms and a wispy tail. Drops **Veil Essence**.
+- **Forage & light**: gloomshrooms are replantable natural light; **Ash
+  Bones** ribcages break into **Cinder Pearls**, which craft the
+  **Ghost Lantern** (green-flame streetlamp, wire-toggleable, usable in any
+  base). Veilrock drops plain stone.
+- `veilstatus` admin diagnostics command; the integration test now generates
+  and verifies the Veil too. Locale: English + German for everything.
+
 ## [0.2.7] — 2026-08-23
 
 ### Changed

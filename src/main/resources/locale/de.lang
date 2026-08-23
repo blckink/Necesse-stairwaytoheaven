@@ -1,12 +1,24 @@
 // Stairway to Heaven — Deutsche Lokalisierung
 
 [tile]
+murkmosstile=Düstermoos
+blackpeattile=Schwarztorf
+ashsandtile=Aschesand
+murkwatertile=Schattenwasser
 cloudturftile=Wolkengras
 skystonetile=Himmelsstein
 stormslatetile=Sturmschiefer
 mistseatile=Nebelmeer
 
 [object]
+veilrift=Schleier-Riss
+seancecircle=Séance-Zirkel
+whisperreeds=Flüsterried
+gloomshroom=Düsterpilz
+veilrock=Schleierfels
+ashbones=Aschengebein
+deadtree=Toter Baum
+ghostlantern=Geisterlaterne
 windwheat=Windweizen
 cloudberrybush=Wolkenbeeren-Busch
 stairwaytoheaven=Stairway to Heaven
@@ -19,6 +31,12 @@ aurorabloomr=Aurorablüte
 skyreeds=Himmelsried
 
 [item]
+veilessence=Schleier-Essenz
+veilessencetip=Das, woraus ein Schemen besteht. Kalt in der Hand, kälter im Verlust.
+cinderpearl=Glutperle
+cinderpearltip=Eine Glut, die vergessen hat zu erlöschen. Brennt grün.
+seancecircletip=Zeichne den Kreis, läute das Silberglöckchen - und klopfe an.
+ghostlanterntip=Ihre Flamme erinnert sich, wer sie zuerst entzündet hat.
 windwheat=Windweizen
 cloudberrybush=Wolkenbeeren-Busch
 cloudberry=Wolkenbeere
@@ -42,6 +60,7 @@ cloudpufftreattip=Unwiderstehlich für Himmelskatzen. Riecht schwach nach Gewitt
 silverbelltip=Sie war Siggis. Er hasst sie
 
 [mob]
+gloomshade=Düsterschemen
 cloudlamb=Wolkenschaf
 glowmoth=Glühfalter
 sparkbeetle=Funkenkäfer
@@ -53,14 +72,20 @@ spirecatblack=Siggi
 spirecattabby=Peanut
 
 [biome]
+gloomfen=Düsterfenn
+ashenreach=Aschenöde
 driftlands=Driftlande
 stormveil=Sturmschleier
 aurorashoals=Aurorabänke
 
 [level]
+veil=Der Schleier
 skyreach=Die Himmelsweite
 
 [misc]
+seanceneedbell=Der Kreis wartet. Er will das Silberglöckchen hören.
+seancealreadyveil=Der Schleier ist bereits überall um dich herum.
+riftopened=Die Glocke schlägt einmal an - und etwas auf der anderen Seite antwortet. Der Kreis reißt auf.
 wardenchatformat=<name>: <line>
 skyreachhint=Etwas flackert über dem Nebel im <dir>, weit über den Wolken. Jemand hält dort oben noch ein Licht.
 dirnorth=Norden

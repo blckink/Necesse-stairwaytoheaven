@@ -15,15 +15,26 @@ import necesse.level.maps.Level;
 import stairwaytoheaven.biomes.AuroraShoalsBiome;
 import stairwaytoheaven.biomes.DriftlandsBiome;
 import stairwaytoheaven.biomes.StormveilBiome;
+import stairwaytoheaven.biomes.GloomfenBiome;
+import stairwaytoheaven.biomes.AshenReachBiome;
 import stairwaytoheaven.commands.SkyreachStatusCommand;
+import stairwaytoheaven.commands.VeilStatusCommand;
 import stairwaytoheaven.level.SkyLevel;
+import stairwaytoheaven.level.VeilLevel;
 import stairwaytoheaven.objects.SkySideStairwayObject;
 import stairwaytoheaven.objects.SkywardStairwayObject;
+import stairwaytoheaven.objects.SeanceCircleObject;
+import stairwaytoheaven.objects.VeilRiftObject;
+import stairwaytoheaven.objects.VeilSideRiftObject;
 import stairwaytoheaven.quest.SkywatchQuestData;
 import stairwaytoheaven.tiles.CloudturfTile;
 import stairwaytoheaven.tiles.MistseaTile;
 import stairwaytoheaven.tiles.SkystoneTile;
 import stairwaytoheaven.tiles.StormslateTile;
+import stairwaytoheaven.tiles.MurkmossTile;
+import stairwaytoheaven.tiles.BlackpeatTile;
+import stairwaytoheaven.tiles.AshsandTile;
+import stairwaytoheaven.tiles.MurkwaterTile;
 
 /**
  * Stairway to Heaven — adds the Skyreach, a persistent sky dimension one layer
@@ -53,9 +64,11 @@ public class StairwayToHeavenMod {
     }
 
     private void registerDimension() {
-        // Vertical layout: deepcave(-2) < cave(-1) < surface(0) < skyreach(+1)
+        // Vertical layout: veil(-3) < deepcave(-2) < cave(-1) < surface(0) < skyreach(+1)
         LevelIdentifier.IDENTIFIER_TO_DIMENSION.put(SkyRegistry.SKYREACH_IDENTIFIER.stringID, SkyRegistry.SKY_DIMENSION);
         LevelRegistry.registerLevel("skylevel", SkyLevel.class);
+        LevelIdentifier.IDENTIFIER_TO_DIMENSION.put(SkyRegistry.VEIL_IDENTIFIER.stringID, SkyRegistry.VEIL_DIMENSION);
+        LevelRegistry.registerLevel("veillevel", VeilLevel.class);
     }
 
     private void registerBiomes() {
@@ -64,6 +77,8 @@ public class StairwayToHeavenMod {
         SkyRegistry.driftlands = BiomeRegistry.registerBiome("driftlands", new DriftlandsBiome(), false);
         SkyRegistry.stormveil = BiomeRegistry.registerBiome("stormveil", new StormveilBiome(), false);
         SkyRegistry.auroraShoals = BiomeRegistry.registerBiome("aurorashoals", new AuroraShoalsBiome(), false);
+        SkyRegistry.gloomfen = BiomeRegistry.registerBiome("gloomfen", new GloomfenBiome(), false);
+        SkyRegistry.ashenReach = BiomeRegistry.registerBiome("ashenreach", new AshenReachBiome(), false);
     }
 
     private void registerTiles() {
@@ -78,6 +93,12 @@ public class StairwayToHeavenMod {
         SkyRegistry.skystoneTileID = TileRegistry.registerTile("skystonetile", SkyRegistry.skystoneTile, 1.0F, true);
         SkyRegistry.stormslateID = TileRegistry.registerTile("stormslatetile", SkyRegistry.stormslateTile, 1.0F, true);
         SkyRegistry.mistseaID = TileRegistry.registerTile("mistseatile", SkyRegistry.mistseaTile, 0.0F, false);
+
+        SkyRegistry.murkmossTile = new MurkmossTile();
+        SkyRegistry.murkmossID = TileRegistry.registerTile("murkmosstile", SkyRegistry.murkmossTile, 1.0F, true);
+        SkyRegistry.blackpeatID = TileRegistry.registerTile("blackpeattile", new BlackpeatTile(), 1.0F, true);
+        SkyRegistry.ashsandID = TileRegistry.registerTile("ashsandtile", new AshsandTile(), 1.0F, true);
+        SkyRegistry.murkwaterID = TileRegistry.registerTile("murkwatertile", new MurkwaterTile(), 0.0F, false);
     }
 
     private void registerObjects() {
@@ -86,6 +107,14 @@ public class StairwayToHeavenMod {
         SkyRegistry.stairwayDownID = ObjectRegistry.registerObject("skystairwaydown", SkyRegistry.stairwayDown, 20.0F, true);
         SkyRegistry.stairwayUpID = ObjectRegistry.registerObject("skystairwayup", SkyRegistry.stairwayUp, 0.0F, false);
         SkyRegistry.stairwayDown.ladderUpObjectID = SkyRegistry.stairwayUpID;
+
+        // The Veil's rift pair + the seance circle that opens it
+        SkyRegistry.veilRiftDown = new VeilRiftObject();
+        SkyRegistry.veilRiftUp = new VeilSideRiftObject();
+        SkyRegistry.veilRiftDownID = ObjectRegistry.registerObject("veilriftdown", SkyRegistry.veilRiftDown, 0.0F, false);
+        SkyRegistry.veilRiftUpID = ObjectRegistry.registerObject("veilriftup", SkyRegistry.veilRiftUp, 0.0F, false);
+        SkyRegistry.veilRiftDown.ladderUpObjectID = SkyRegistry.veilRiftUpID;
+        SkyRegistry.seanceCircleID = ObjectRegistry.registerObject("seancecircle", new SeanceCircleObject(), 15.0F, true);
 
         SkyObjects.register();
     }
@@ -99,6 +128,7 @@ public class StairwayToHeavenMod {
         SkyBuildingSet.registerRecipes();
         registerWorldGenerator();
         CommandsManager.registerServerCommand(new SkyreachStatusCommand());
+        CommandsManager.registerServerCommand(new VeilStatusCommand());
     }
 
     private void registerWorldGenerator() {
@@ -107,6 +137,9 @@ public class StairwayToHeavenMod {
             public Level getNewLevel(LevelIdentifier levelIdentifier, Server server, GameBlackboard blackboard) {
                 if (levelIdentifier.equals(SkyRegistry.SKYREACH_IDENTIFIER)) {
                     return new SkyLevel(levelIdentifier, 0, 0, server.world.worldEntity, blackboard.getInt("seed"));
+                }
+                if (levelIdentifier.equals(SkyRegistry.VEIL_IDENTIFIER)) {
+                    return new VeilLevel(levelIdentifier, 0, 0, server.world.worldEntity, blackboard.getInt("seed"));
                 }
                 return null;
             }

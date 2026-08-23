@@ -1,12 +1,24 @@
 // Stairway to Heaven — English localization
 
 [tile]
+murkmosstile=Murkmoss
+blackpeattile=Black Peat
+ashsandtile=Ash Sand
+murkwatertile=Murkwater
 cloudturftile=Cloudturf
 skystonetile=Skystone
 stormslatetile=Stormslate
 mistseatile=Mistsea
 
 [object]
+veilrift=Veil Rift
+seancecircle=Seance Circle
+whisperreeds=Whisper Reeds
+gloomshroom=Gloomshroom
+veilrock=Veilrock
+ashbones=Ash Bones
+deadtree=Dead Tree
+ghostlantern=Ghost Lantern
 windwheat=Windwheat
 cloudberrybush=Cloudberry Bush
 stairwaytoheaven=Stairway to Heaven
@@ -19,6 +31,12 @@ aurorabloomr=Aurora Bloom
 skyreeds=Sky Reeds
 
 [item]
+veilessence=Veil Essence
+veilessencetip=What a shade is made of. Cold to hold, colder to lose.
+cinderpearl=Cinder Pearl
+cinderpearltip=An ember that forgot to go out. Burns green.
+seancecircletip=Draw the circle, ring the Silver Bell, and knock.
+ghostlanterntip=Its flame remembers whoever lit it first.
 windwheat=Windwheat
 cloudberrybush=Cloudberry Bush
 cloudberry=Cloudberry
@@ -42,6 +60,7 @@ cloudpufftreattip=Irresistible to sky cats. Smells faintly of thunderstorms
 silverbelltip=It was Siggi's. He hates it
 
 [mob]
+gloomshade=Gloom Shade
 cloudlamb=Cloudlamb
 glowmoth=Glowmoth
 sparkbeetle=Sparkbeetle
@@ -53,14 +72,20 @@ spirecatblack=Siggi
 spirecattabby=Peanut
 
 [biome]
+gloomfen=Gloomfen
+ashenreach=Ashen Reach
 driftlands=Driftlands
 stormveil=Stormveil
 aurorashoals=Aurora Shoals
 
 [level]
+veil=The Veil
 skyreach=The Skyreach
 
 [misc]
+seanceneedbell=The circle waits. It wants to hear the Silver Bell.
+seancealreadyveil=The Veil is already all around you.
+riftopened=The bell rings once - and something on the other side answers. The circle tears open.
 wardenchatformat=<name>: <line>
 skyreachhint=Something flickers over the mist to the <dir>, far above the clouds. Someone still keeps a light up there.
 dirnorth=north

@@ -45,11 +45,12 @@ The afterlife layer: gothic-comedy underworld, entered by ritual, leaking into
 the overworld. Full concept: DESIGN.md Part IV. Rolling art batches (terrain,
 mobs, building sets — see the style guide's art direction) continue throughout.
 
-- [ ] **Séance Circle ritual** (chalk + candles + the Silver Bell) opening a
-      persistent **Rift** portal to the Veil (one-world dimension below the
-      deep caves, same proven pattern as the Skyreach)
-- [ ] **The Veil** level: permanent-night region streaming; sub-biomes
-      **Gloomfen** (green-moon marsh) and **Ashen Reach** (ash waste)
+- [x] **Séance Circle ritual** (crafted circle + the Silver Bell as the
+      un-consumed key) opening a persistent **Rift** portal to the Veil
+      (one-world dimension below the deep caves) — shipped in 0.3.0
+- [x] **The Veil** level: permanent-night region streaming; sub-biomes
+      **Gloomfen** (green-moon marsh) and **Ashen Reach** (ash waste) —
+      shipped in 0.3.0 with fen flora, ash bones and the Gloom Shade
 - [ ] Structures: **The Model Town** (doll-scale streets) and the
       **Office of Eternity** (waiting-room dungeon, ticket-number humor)
 - [ ] **Ashwyrm**: summoned mid-boss in the Ashen Reach + juvenile

@@ -61,6 +61,9 @@ final class SkyBuildingSet {
         // ===== Lights =====
         SkyRegistry.wardenCandelabraID = ObjectRegistry.registerObject("wardencandelabra",
                 new StreetlampObject(), 30.0F, true);
+        // v0.3: green-flame ghost lantern (the Veil signature light)
+        SkyRegistry.ghostLanternID = ObjectRegistry.registerObject("ghostlantern",
+                new StreetlampObject(), 30.0F, true);
         ObjectRegistry.registerObject("mistglasslantern",
                 new SkyWallLightObject("mistglasslantern", 150, 0.52F, 0.25F), 10.0F, true);
         // Quest gift: warm flickering colored lights (obtainable so the item
@@ -119,6 +122,8 @@ final class SkyBuildingSet {
                 Recipes.ingredientsFromScript("{{ironbar, 1}, {skystone, 1}}")));
         Recipes.registerModRecipe(new Recipe("skyironfencegate", 1, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{ironbar, 2}, {skystone, 1}}")));
+        Recipes.registerModRecipe(new Recipe("ghostlantern", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{cinderpearl, 2}, {skystone, 8}}")));
         Recipes.registerModRecipe(new Recipe("wardencandelabra", 1, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{ironbar, 2}, {stormshard, 2}, {skystone, 2}}")));
         Recipes.registerModRecipe(new Recipe("mistglasslantern", 1, RecipeTechRegistry.WORKSTATION,

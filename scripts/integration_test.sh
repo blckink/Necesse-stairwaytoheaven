@@ -80,6 +80,10 @@ for _ in $(seq 1 60); do
     sleep 2
 done
 
+echo "Running veilstatus..."
+echo "veilstatus" >&3
+wait_for "VEIL_STATUS_DONE" 180
+
 echo "Stopping server..."
 echo "stop" >&3
 for _ in $(seq 1 30); do
@@ -98,6 +102,9 @@ grep -qE "spirePlaced=true" "$LOG" || { echo "FAIL: Warden's Spire was not stamp
 grep -qE "beaconObject=wardenbeaconoff" "$LOG" || { echo "FAIL: spire beacon object missing"; STATUS=1; }
 grep -qE "wardenFloor=marblecheckertile" "$LOG" || { echo "FAIL: spire interior floor missing"; STATUS=1; }
 grep -qE "npc check: wardens=1 cats=2" "$LOG" || { echo "FAIL: Warden/cat NPCs not spawned exactly once"; STATUS=1; }
+grep -qE "Veil OK: class=VeilLevel" "$LOG" || { echo "FAIL: VeilLevel was not instantiated"; STATUS=1; }
+grep -qE "tile (murkmosstile|murkwatertile)" "$LOG" || { echo "FAIL: Veil terrain did not generate"; STATUS=1; }
+grep -qE "biome (gloomfen|ashenreach)" "$LOG" || { echo "FAIL: Veil biomes did not paint"; STATUS=1; }
 if grep -nE "Exception|ERROR|ModLoadException" "$LOG" | grep -vE "libraryPatches|SLF4J" > "$WORK_DIR/errors.txt"; then
     echo "FAIL: errors found in server log:"
     cat "$WORK_DIR/errors.txt"

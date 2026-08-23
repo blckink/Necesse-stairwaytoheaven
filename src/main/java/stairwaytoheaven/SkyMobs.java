@@ -29,6 +29,8 @@ final class SkyMobs {
         MobRegistry.registerMob("cloudlamb", SkyCritterMob.CloudLamb.class, false);
         MobRegistry.registerMob("glowmoth", SkyCritterMob.GlowMoth.class, false);
         MobRegistry.registerMob("sparkbeetle", SkyCritterMob.SparkBeetle.class, false);
+        // v0.3: the Veil
+        MobRegistry.registerMob("gloomshade", stairwaytoheaven.mobs.GloomShadeMob.class, true);
     }
 
     /** Called from initResources — runs on the client only, never on servers. */
@@ -42,5 +44,6 @@ final class SkyMobs {
         SkyCritterMob.lambTexture = GameTexture.fromFile("mobs/cloudlamb");
         SkyCritterMob.mothTexture = GameTexture.fromFile("mobs/glowmoth");
         SkyCritterMob.beetleTexture = GameTexture.fromFile("mobs/sparkbeetle");
+        stairwaytoheaven.mobs.GloomShadeMob.texture = GameTexture.fromFile("mobs/gloomshade");
     }
 }

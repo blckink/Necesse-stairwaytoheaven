@@ -79,6 +79,9 @@ ITEM_NAMES = {
     "flickerlightgarland": "Girlande", "gloomravenstatue": "Raben-Statue", "gloomwillow": "Gloomweide",
     "catbasket": "Katzenkorb", "skywatchbanner": "Banner",
     "windwheat": "Windweizen", "cloudberrybush": "Beeren-Busch", "cloudberry": "Wolkenbeere",
+    "veilessence": "Schleier-Essenz", "cinderpearl": "Glutperle", "seancecircle": "Séance-Zirkel",
+    "ghostlantern": "Geisterlaterne", "gloomshroom": "Düsterpilz", "whisperreeds": "Flüsterried",
+    "deadtree": "Toter Baum", "veilrock": "Schleierfels",
 }
 
 SECTIONS = [
@@ -99,6 +102,12 @@ SECTIONS = [
      ["mobs/skywarden.png", "mobs/spirecatblack.png", "mobs/spirecattabby.png",
       "mobs/zephyrray.png", "mobs/stormwisp.png", "mobs/skystonegolem.png",
       "mobs/cloudlamb.png", "mobs/glowmoth.png", "mobs/sparkbeetle.png"]),
+    ("veil", "Der Schleier (v0.3)", "Die Zwischenwelt: Séance, Riss, Fenn-Flora und der erste Schemen.",
+     ["tiles/murkmoss_splat.png", "tiles/blackpeat_splat.png", "tiles/ashsand_splat.png",
+      "objects/seancecircle.png", "objects/veilriftdown.png", "objects/veilriftup.png",
+      "objects/whisperreeds.png", "objects/gloomshroom.png", "objects/ashbones.png",
+      "objects/deadtree.png", "objects/veilrock.png", "objects/ghostlantern.png",
+      "mobs/gloomshade.png"]),
     ("treppen", "Die Treppen", "Das namensgebende Objekt-Paar.",
      ["objects/skystairwaydown.png", "objects/skystairwayup.png",
       "player/weapons/tempestedge.png", "player/weapons/galehowl.png", "preview.png"]),

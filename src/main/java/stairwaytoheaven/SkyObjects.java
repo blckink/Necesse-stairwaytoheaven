@@ -67,7 +67,46 @@ final class SkyObjects {
         // (verified via the skyreachstatus diagnostics).
         allowShore("stormcrystal", "stormcrystalr", "aurorabloom", "aurorabloomr", "skyreeds",
                 "windwheat", "cloudberrybush");
+
+        registerVeilObjects();
     }
+
+    /** Natural objects of the Veil (v0.3): fen flora, ash bones, dark rock. */
+    private static void registerVeilObjects() {
+        RockObject veilrock = new RockObject("veilrock", new Color(70, 66, 84), "stone", SKY_CATEGORY);
+        SkyRegistry.veilrockID = ObjectRegistry.registerObject("veilrock", veilrock, -1.0F, true);
+
+        GrassObject whisperreeds = new GrassObject("whisperreeds", 4);
+        whisperreeds.mapColor = new Color(96, 110, 96);
+        SkyRegistry.whisperreedsID = ObjectRegistry.registerObject("whisperreeds", whisperreeds, 1.0F, true);
+
+        // glowing fen shroom: the Veil's natural light source, replantable
+        stairwaytoheaven.objects.SkyDecoObject gloomshroom = new stairwaytoheaven.objects.SkyDecoObject(
+                "gloomshroom", 32, new Color(122, 196, 160), null, "objects", "decorations")
+                .setLight(70, 0.40F, 0.40F);
+        SkyRegistry.gloomshroomID = ObjectRegistry.registerObject("gloomshroom", gloomshroom, 5.0F, true);
+
+        // half-buried ribcage: harvest node for Cinder Pearls (drops no item of itself)
+        stairwaytoheaven.objects.SkyDecoObject ashbones = new stairwaytoheaven.objects.SkyDecoObject(
+                "ashbones", 32, new Color(180, 174, 166), null, "objects", "decorations") {
+            @Override
+            public necesse.inventory.lootTable.LootTable getLootTable(
+                    necesse.level.maps.Level level, int layerID, int tileX, int tileY) {
+                return ashbonesLoot;
+            }
+        };
+        SkyRegistry.ashbonesID = ObjectRegistry.registerObject("ashbones", ashbones, 0.0F, false);
+
+        stairwaytoheaven.objects.SkyDecoObject deadtree = new stairwaytoheaven.objects.SkyDecoObject(
+                "deadtree", 48, new Color(60, 52, 58), null, "objects", "decorations");
+        SkyRegistry.deadtreeID = ObjectRegistry.registerObject("deadtree", deadtree, 4.0F, true);
+
+        allowShore("veilrock", "whisperreeds", "gloomshroom", "ashbones", "deadtree");
+    }
+
+    static final necesse.inventory.lootTable.LootTable ashbonesLoot =
+            new necesse.inventory.lootTable.LootTable(
+                    necesse.inventory.lootTable.lootItem.LootItem.between("cinderpearl", 1, 1));
 
     static final necesse.inventory.lootTable.LootTable cloudberryLoot =
             new necesse.inventory.lootTable.LootTable(

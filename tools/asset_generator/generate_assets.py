@@ -25,6 +25,7 @@ import gen_items  # noqa: E402
 import gen_misc  # noqa: E402
 import gen_npcs
 import gen_critters  # noqa: E402
+import gen_veil  # noqa: E402
 import gen_splats  # noqa: E402
 import gen_walls  # noqa: E402
 import gen_furniture  # noqa: E402
@@ -53,6 +54,16 @@ def main():
     gen_splats.build_splat(f"{out}/tiles/mistsea_shallow_splat.png", gen_splats.material_mist(False), 1, 0x315E, frames=8)
     gen_splats.build_splat(f"{out}/tiles/mistsea_deep_splat.png", gen_splats.material_mist(True), 1, 0xD1EE, frames=8)
     gen_furniture.gen_marblechecker(f"{out}/tiles/marblechecker.png")
+
+    # v0.3: the Veil — terrain, water, flora, rift, lantern, shade
+    gen_splats.build_splat(f"{out}/tiles/murkmoss_splat.png", gen_veil.material_murkmoss, 3, 0x3E,
+                           features=gen_veil.features_murkmoss)
+    gen_splats.build_splat(f"{out}/tiles/blackpeat_splat.png", gen_veil.material_blackpeat, 2, 0xB1,
+                           features=gen_veil.features_blackpeat)
+    gen_splats.build_splat(f"{out}/tiles/ashsand_splat.png", gen_veil.material_ashsand, 3, 0xA5,
+                           features=gen_veil.features_ashsand)
+    gen_splats.build_splat(f"{out}/tiles/murkwater_shallow_splat.png", gen_veil.material_murkwater(False), 1, 0x3E77, frames=8)
+    gen_splats.build_splat(f"{out}/tiles/murkwater_deep_splat.png", gen_veil.material_murkwater(True), 1, 0xDEE7, frames=8)
     # remove the superseded legacy strips so only one source of truth ships
     for legacy in ("cloudturf.png", "skystone.png", "stormslate.png", "mistsea_shallow.png", "mistsea_deep.png"):
         legacy_path = os.path.join(out, "tiles", legacy)
@@ -68,6 +79,15 @@ def main():
     gen_objects.gen_stairway_up(f"{out}/objects/skystairwayup.png")
     gen_objects.gen_windwheat(f"{out}/objects/windwheat.png")
     gen_objects.gen_cloudberrybush(f"{out}/objects/cloudberrybush.png")
+    gen_rocks.gen_rock_sheet(f"{out}/objects/veilrock.png", palette.VEILROCK, salt=0x3E1F)
+    gen_veil.gen_whisperreeds(f"{out}/objects/whisperreeds.png")
+    gen_veil.gen_gloomshroom(f"{out}/objects/gloomshroom.png")
+    gen_veil.gen_ashbones(f"{out}/objects/ashbones.png")
+    gen_veil.gen_seancecircle(f"{out}/objects/seancecircle.png")
+    gen_veil.gen_riftdown(f"{out}/objects/veilriftdown.png")
+    gen_veil.gen_riftup(f"{out}/objects/veilriftup.png")
+    gen_veil.gen_ghostlantern(f"{out}/objects/ghostlantern.png")
+    gen_veil.gen_deadtree(f"{out}/objects/deadtree.png")
     gen_objects.gen_crystal_cluster(f"{out}/objects/stormcrystal.png", palette.STORMCRYSTAL, 0x57C7)
     gen_objects.gen_aurorabloom(f"{out}/objects/aurorabloom.png")
     gen_objects.gen_skyreeds(f"{out}/objects/skyreeds.png")
@@ -84,6 +104,8 @@ def main():
     gen_npcs.gen_npc_icons(f"{out}/mobs/icons")
     gen_critters.gen_critters(f"{out}/mobs")
     gen_critters.gen_critter_icons(f"{out}/mobs/icons")
+    gen_veil.gen_gloomshade(f"{out}/mobs/gloomshade.png")
+    gen_veil.gen_shade_icon(f"{out}/mobs/icons/gloomshade.png")
 
     # Item icons
     gen_items.gen_skystone(f"{out}/items/skystone.png")
@@ -100,6 +122,7 @@ def main():
     gen_items.gen_windwheat_item(f"{out}/items/windwheat.png")
     gen_items.gen_cloudberrybush_item(f"{out}/items/cloudberrybush.png")
     gen_items.gen_cloudberry_item(f"{out}/items/cloudberry.png")
+    gen_veil.gen_veil_item_icons(f"{out}/items")
     gen_items.gen_crystal_item(f"{out}/items/stormcrystal.png", palette.STORMCRYSTAL, 0x1CE1)
     gen_items.gen_crystal_item(f"{out}/items/aurorabloom.png", palette.AURORA, 0x1CE2)
 
