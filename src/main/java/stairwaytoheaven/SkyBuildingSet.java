@@ -87,17 +87,20 @@ final class SkyBuildingSet {
         SkyRegistry.skywatchBannerID = ObjectRegistry.registerObject("skywatchbanner", banner, 80.0F, true);
 
         // ===== Quest structure pieces (not player-obtainable) =====
-        SkyRegistry.wardenBeaconOffID = ObjectRegistry.registerObject("wardenbeaconoff",
-                new SkyDecoObject("wardenbeaconoff", 32, new Color(90, 96, 110), new Rectangle(4, 8, 24, 20)),
-                0.0F, false);
-        SkyRegistry.wardenBeaconOnID = ObjectRegistry.registerObject("wardenbeaconon",
-                new SkyDecoObject("wardenbeaconon", 32, new Color(186, 226, 230), new Rectangle(4, 8, 24, 20))
-                        .setLight(180, 0.52F, 0.30F),
-                0.0F, false);
-        SkyRegistry.skyAnchorID = ObjectRegistry.registerObject("skyanchor",
-                new SkyDecoObject("skyanchor", 32, new Color(86, 178, 186), new Rectangle(4, 10, 24, 18))
-                        .setLight(100, 0.50F, 0.25F),
-                0.0F, false);
+        // UNBREAKABLE: mining the beacon/anchor would drop nothing and soft-lock
+        // the quest chain, so a pickaxe must not touch them.
+        SkyDecoObject beaconOff = new SkyDecoObject("wardenbeaconoff", 32,
+                new Color(90, 96, 110), new Rectangle(4, 8, 24, 20));
+        beaconOff.toolType = necesse.inventory.item.toolItem.ToolType.UNBREAKABLE;
+        SkyRegistry.wardenBeaconOffID = ObjectRegistry.registerObject("wardenbeaconoff", beaconOff, 0.0F, false);
+        SkyDecoObject beaconOn = new SkyDecoObject("wardenbeaconon", 32,
+                new Color(186, 226, 230), new Rectangle(4, 8, 24, 20)).setLight(180, 0.52F, 0.30F);
+        beaconOn.toolType = necesse.inventory.item.toolItem.ToolType.UNBREAKABLE;
+        SkyRegistry.wardenBeaconOnID = ObjectRegistry.registerObject("wardenbeaconon", beaconOn, 0.0F, false);
+        SkyDecoObject anchor = new SkyDecoObject("skyanchor", 32,
+                new Color(86, 178, 186), new Rectangle(4, 10, 24, 18)).setLight(100, 0.50F, 0.25F);
+        anchor.toolType = necesse.inventory.item.toolItem.ToolType.UNBREAKABLE;
+        SkyRegistry.skyAnchorID = ObjectRegistry.registerObject("skyanchor", anchor, 0.0F, false);
     }
 
     static void registerItems() {

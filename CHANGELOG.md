@@ -3,6 +3,41 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [0.3.4] — 2026-08-23
+
+Playtest fixes: real journal quests, correct walls, a warden with presence.
+
+### Added
+- **Real HUD quests**: the whole Warden chain now runs through the vanilla
+  quest journal — "The Warden's Call" (find the spire), "Light the Beacon"
+  and "Anchor the Island" (delivery quests with live per-item progress bars),
+  and "The Spire Cats" (two-cat checklist) appear in the tracked sidebar and
+  the quest log, sync in multiplayer, support team-sharing and abandoning,
+  and are given/completed at the exact same dialogue points as before. Chat
+  lines remain as flavor; the objectives no longer live only in chat.
+
+### Fixed
+- **Wall inner corners no longer break**: the wall sheet's autotile blob was
+  decoded cell-by-cell against the game's actual draw code — the face halves
+  sat one row off and the inner-corner/junction pieces (rows 5-7) contained
+  the wrong art, which rendered as misplaced squares wherever walls met in an
+  L or T. Both wall sets regenerate with the correct piece semantics.
+- **The Sky Warden has real presence**: rebuilt on vanilla chibi proportions
+  (the player's head alone is ~26px wide; the old warden's whole coat was
+  ~11px, reading a third as wide as the player).
+- **Quest structures are unbreakable**: the beacon (lit and unlit) and the
+  sky anchor can no longer be mined — an older jar let a pickaxe remove the
+  beacon with no drop, soft-locking the chain. Worlds where it already
+  happened self-heal: the level re-places the beacon in its correct
+  quest-stage state.
+- **The spire now spawns near your arrival**: it anchors to the first ascent
+  stairway (radius sweep from ~20 tiles) instead of the world origin, which
+  could put it hundreds of tiles from a base far from spawn. Existing worlds
+  keep their placed spire (the map marker covers finding it).
+- **Golems actually appear**: they patrol the Stormveil crystal fields too
+  now (they were exclusive to the rarest biome, the Aurora Shoals, where
+  their cap is also raised slightly).
+
 ## [0.3.3] — 2026-08-23
 
 Never lose the tower again.

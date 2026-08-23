@@ -61,6 +61,13 @@ public class StairwayToHeavenMod {
         SkyItems.register();
         SkyBuildingSet.registerItems();
         LevelDataRegistry.registerLevelData(SkywatchQuestData.KEY, SkywatchQuestData.class);
+        // HUD quest layer: real journal/sidebar quests mirroring the Warden
+        // chain (see docs/research/quest-api.md). Items must already be
+        // registered — the delivery quests reference them by stringID.
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_findspire", stairwaytoheaven.quest.FindSpireQuest.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_beacon", stairwaytoheaven.quest.BeaconDeliveryQuest.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_cats", stairwaytoheaven.quest.SpireCatsQuest.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_anchor", stairwaytoheaven.quest.AnchorDeliveryQuest.class);
         // World-map icons for the auto-placed markers (spire + return
         // stairway). Textures load client-side via GameResources; the
         // registration itself is texture-free and server-safe.

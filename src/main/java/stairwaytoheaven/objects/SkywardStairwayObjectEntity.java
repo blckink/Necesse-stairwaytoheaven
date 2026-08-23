@@ -61,10 +61,12 @@ public class SkywardStairwayObjectEntity extends PortalObjectEntity {
             client.newStats.ladders_used.increment(1);
             this.runClearMobs(level, this.destinationTileX, this.destinationTileY);
             stairwaytoheaven.quest.SkywatchQuestData quest = stairwaytoheaven.quest.SkywatchQuestData.get(level);
-            // Stamp the spire on any ascent (idempotent) so the hint below and
-            // the map markers always carry exact coordinates.
+            // Stamp the spire on any ascent (idempotent), anchored to THIS
+            // arrival stairway — the spire spawns within walking distance of
+            // where the player comes up, and hint + map markers get exact
+            // coordinates.
             if (level instanceof stairwaytoheaven.level.SkyLevel) {
-                ((stairwaytoheaven.level.SkyLevel) level).ensureWardenSpire();
+                ((stairwaytoheaven.level.SkyLevel) level).ensureWardenSpire(this.destinationTileX, this.destinationTileY);
             }
             if (quest.stage == 0) {
                 // First quest hook: a flicker over the mist points toward the
@@ -76,6 +78,11 @@ public class SkywardStairwayObjectEntity extends PortalObjectEntity {
                         "misc", "skyreachhint", "dir", directionWord));
             }
             SkyMapMarkers.onAscent(client, quest, this.destinationTileX, this.destinationTileY);
+            if (quest.stage == 0) {
+                // Journal entry "find the spire" — completed by the Warden's
+                // first dialogue.
+                stairwaytoheaven.quest.SkyQuests.giveOnce(server, client, new stairwaytoheaven.quest.FindSpireQuest());
+            }
             return true;
         }, true);
     }

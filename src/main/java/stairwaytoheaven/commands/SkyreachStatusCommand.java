@@ -53,6 +53,16 @@ public class SkyreachStatusCommand extends ModularChatCommand {
     private void runLocked(Level level, Server server, ServerClient serverClient, CommandLog logs) {
         int r = SCAN_RADIUS_TILES;
         level.regionManager.ensureTilesAreLoaded(-r, -r, r, r);
+        // Normally the spire is stamped on the first ascent near the arrival
+        // stairway; headless diagnostics anchor it to the caller's position
+        // (or the origin) so the quest checks below have something to verify.
+        int anchorX = 0, anchorY = 0;
+        if (serverClient != null && serverClient.playerMob != null
+                && SkyRegistry.SKYREACH_IDENTIFIER.equals(serverClient.getLevelIdentifier())) {
+            anchorX = serverClient.playerMob.getTileX();
+            anchorY = serverClient.playerMob.getTileY();
+        }
+        ((SkyLevel) level).ensureWardenSpire(anchorX, anchorY);
 
         Map<String, Integer> tileCounts = new HashMap<>();
         Map<String, Integer> biomeCounts = new HashMap<>();

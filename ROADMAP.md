@@ -68,8 +68,17 @@ mobs, building sets — see the style guide's art direction) continue throughout
 ## v0.4.0 — "The Living Sky"
 
 Full vanilla-fidelity art across the sky, a dense living world, weather, and
-ties to the surface. Full concept: DESIGN.md Part III.
+ties to the surface. Full concept: DESIGN.md Part III; the per-biome content
+lock (trees, plants, animals, enemies, ores, structures, second NPC) is
+DESIGN.md **Part V**.
 
+- [ ] **Per-biome fill (Part V lock)**: one tree family per biome with its own
+      wood + plank floor (Nimbus Willow / Fulgur Pine / Prisma Birch), 2 new
+      plants per biome, a new critter and a new enemy where a biome lacks one
+      (Zephyr Finch + Galehound, Dew Snail + Dawnpiercer), 2 new ores
+      (Fulgurite, Prismshard), and generated structures: Sky Cottage with the
+      **Cloud Shepherd NPC** (shop + small journal quest), Storm Ruin with
+      loot + golem guards, Aurora Shrine
 - [ ] **Art overhaul** of every existing sprite to vanilla detail density
       (terrain splats → Mistsea → nodes/plants → mobs/NPCs → building set → items),
       each batch gated by the contact-sheet QA process

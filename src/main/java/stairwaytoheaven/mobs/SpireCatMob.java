@@ -119,6 +119,10 @@ public abstract class SpireCatMob extends CritterMob {
         } else {
             quest.tabbyHome = true;
         }
+        // Push the new state into every player's journal copy (auto-syncs)
+        if (level.getServer() != null) {
+            stairwaytoheaven.quest.SkyQuests.syncCatQuests(level.getServer(), quest);
+        }
         client.sendChatMessage(new LocalMessage("misc", "wardencattreat"));
         this.bubble("wardencatfound1");
         this.travelHome(level, quest);

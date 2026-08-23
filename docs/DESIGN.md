@@ -473,3 +473,51 @@ sign, lamp, rail buffer) for a station diorama.
    (honorary)" — unlocks Mortimer's full stock and Vesper's recruitment.
 
 Tone rule for all dialogue: dry, warm, a little morbid, never gory.
+
+
+# Part V — v0.4 "The Living Sky": per-biome fill
+
+Playtest verdict driving this part: the sky reads empty next to vanilla —
+every biome needs its own trees, plants, animals, enemies, blocks and ores,
+plus inhabited structures. Rules: every addition is unique to its biome,
+comes in variants, and feeds at least one loop (build, craft, cook or fight).
+
+## Driftlands — pastoral sky meadows
+- **Nimbus Willow** (tree, 2 variants): fluffy cloud-canopy tree; axe →
+  3-6 Nimbuswood (+ sapling later). **Nimbuswood floor** buildable tile.
+- **Cloudbell** (plant, 2 variants): blue bell flower, pickable material.
+- **Sky Tulip** (plant, 3 color variants): pickable deco flower.
+- **Zephyr Finch** (critter): tiny darting bird, ambient life.
+- **Galehound** (enemy, night): wind-wolf pack hunter, mid HP/speed —
+  Driftlands finally has a night threat of its own.
+
+## Stormveil — charged slate
+- **Fulgur Pine** (tree, 2 variants): lightning-charred pine; axe → Charwood.
+  **Charwood floor** buildable tile.
+- **Static Moss** (plant): faint glowing ground moss, pickable.
+- **Thunderbloom** (plant, 2 variants): sparking flower, harvestable material.
+- **Fulgurite** (ore): fused lightning glass in slate outcrops — material for
+  future storm-tier recipes.
+- Enemies: Storm Wisp + Zephyr Ray + (since 0.3.4) Skystone Golem — covered.
+
+## Aurora Shoals — pastel glow
+- **Prisma Birch** (tree, 2 variants): pale trunk, iridescent canopy; axe →
+  Prismwood. **Prismwood floor** buildable tile.
+- **Glowfern** (plant, 2 variants): light-emitting fern.
+- **Aurora Lily** (plant): glow flower, pickable.
+- **Dew Snail** (critter): slow glowing snail.
+- **Dawnpiercer** (enemy): crystal-feathered dive bird — fast, fragile,
+  burst damage; the Shoals' counterpart to the golem's tankiness.
+- **Prismshard** (ore): crystal vein in shoal rock.
+
+## Structures & the second NPC
+- **Sky Cottage** (Driftlands, rare preset): small nimbuswood homestead.
+  Resident: the **Cloud Shepherd** — second friendly NPC; shop (seeds,
+  cloud puff treats, wool trade) and one small journal quest (lost lamb).
+- **Storm Ruin** (Stormveil preset): broken watchtower, loot chest, golem
+  guards.
+- **Aurora Shrine** (Aurora Shoals preset): prism arch, deco landmark.
+
+Ship order: (a) flora + wood/plank blocks + ores, (b) fauna, (c) structures
++ NPC. Each sub-batch passes the pixel-art QA gate and the headless
+integration test before release.

@@ -123,3 +123,20 @@ wardenshopclosed=My shelves are dark, like everything else here. Light the beaco
 wardencatfound1=Mrrp?
 wardencattreat=The cat snatches the treat and vanishes in a puff of cloud - homeward.
 wardencatnotreat=The cat eyes you warily. It clearly expects a snack.
+
+[quests]
+swhfindspiretitle=The Warden's Call
+swhfindspiredesc=Something still keeps a light burning above the clouds.
+swhfindspireobj=Find the Warden's Spire - follow the flicker over the mist.
+swhreturnwarden=Speak with the Sky Warden.
+swhbeacontitle=Light the Beacon
+swhbeacondesc=The Skywatch beacon has been dark for too long. Bring the Warden what it needs to burn again.
+swhbeaconreward=2x Flickerlight Garland
+swhcatstitle=The Spire Cats
+swhcatsdesc=Two cats still roam the storm and the shoals. A cloud puff treat will convince them to come home.
+swhcatblack=Coax the black cat home (roams the Stormveil)
+swhcattabby=Coax the tabby cat home (roams the Aurora Shoals)
+swhcatsreward=Cat Basket + Silver Bell
+swhanchortitle=Anchor the Island
+swhanchordesc=The spire island drifts. The Warden can anchor it - with your metal and stone.
+swhanchorreward=Skywatch Banner + 5x Aurora Petal

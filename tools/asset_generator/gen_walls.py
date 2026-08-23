@@ -1,12 +1,17 @@
-"""Wall sheets in the vanilla 352x128 WallObject layout (decoded from
-stonewall.png + WallObject/WallDoorObject/WallWindowObject draw code):
+"""Wall sheets in the vanilla 352x128 WallObject layout, decoded cell by cell
+from WallObject.addWallDrawOptions (the draw code is the ground truth — each
+16px cell of the left 4x8 blob is a specific autotile piece):
 
-  x 0-64    4x8 grid of 16px cells: the wall auto-tile blob
-            rows 0-3: dark top/ceiling area (row 0 N-edge, rows 1-2 interior
-            fast-path block, row 3 S rim before the front face)
-            rows 4-5: the bright brick FRONT face (4 variant columns;
-            row 4 = crenellated top half, row 5 = footed bottom half)
-            rows 6-7: freestanding/end pieces (vertical edges, pillar foot)
+  row 0   free top caps (N rim): (0,0) W-end, (1,0)/(2,0) continuing, (3,0) E-end
+  row 1-2 ceiling bands: col 0 W edge, cols 1-2 interior, col 3 E edge
+  row 3   front face TOP halves (crenellated rim), 4 variant columns
+  row 4   front face BOTTOM halves (foot shadow), same columns
+  row 5   (0,5)/(1,5) inner-corner mid pieces (side rim hooking at top);
+          (2,5)/(3,5) other-wall-below top strips
+  row 6   (0,6)/(1,6) inner-corner bottom pieces (side rim hooking at bottom);
+          (2,6)/(3,6) other-wall-below rim + mini face strip
+  row 7   (0,7)/(1,7) inner-corner top hooks; (2,7)/(3,7) diagonal-other-wall
+          mid pieces (small face nub at the bottom edge)
   x 64-96   window insert (2x8 cells: short high window rows 0-1,
             tall strip rows 2-7)
   x 96-352  eight 32x128 door-frame columns (rot0..3, closed/open each)
@@ -71,37 +76,96 @@ def _edge_line(c, x0, y0, w, h, vertical, at_start, color):
             c.put(x0 + x, y, color)
 
 
+def _mini_face(c, x0, y0, w, h, mat, salt):
+    """Small crenellated face strip for the junction pieces of rows 6-7."""
+    for x in range(w):
+        for y in range(1, h):
+            gy = y + 20  # bottom-half brick phase
+            course = gy // 8
+            brick_shift = 4 if course % 2 else 0
+            tone = mat["face"]
+            if gy % 8 == 7 or (x0 + x + brick_shift) % 8 == 7:
+                tone = mat["face_deep"]
+            elif gy % 8 == 0:
+                tone = mat["face_hi"]
+            r = Rng(((x0 + x) * 733 + (y0 + y) * 977) ^ salt)
+            if r.float() < 0.04:
+                tone = mat["face_deep"]
+            c.put(x0 + x, y0 + y, tone)
+    for x in range(w):  # merlon rim on the strip's top row
+        step = (x0 + x) % 8
+        c.put(x0 + x, y0, mat["ceil"] if 2 <= step <= 5 else mat["face_hi"])
+
+
 def _build_wall(mat, salt):
     c = Canvas(352, 128)
     C = 16
 
-    # ---- auto-tile blob (0-64) ----
-    # rows 0-3: ceiling with directional bright rims
+    # ---- auto-tile blob (0-64): cell semantics from WallObject draw code ----
+    # row 0: free top caps
     for col in range(4):
-        for row in range(4):
-            x0, y0 = col * C, row * C
-            _ceiling(c, x0, y0, C, C, mat, salt)
-    for col in range(4):  # N rim on row 0
+        _ceiling(c, col * C, 0, C, C, mat, salt)
         _edge_line(c, col * C, 0, C, C, False, True, mat["rim"])
-    for row in range(4):  # W rim on col 0, E rim on col 3
+    _edge_line(c, 0, 0, C, C, True, True, mat["rim"])
+    _edge_line(c, 3 * C, 0, C, C, True, False, mat["rim"])
+
+    # rows 1-2: ceiling bands (W edge, interior x2, E edge)
+    for row in (1, 2):
+        for col in range(4):
+            _ceiling(c, col * C, row * C, C, C, mat, salt + row)
         _edge_line(c, 0, row * C, C, C, True, True, mat["rim"])
         _edge_line(c, 3 * C, row * C, C, C, True, False, mat["rim"])
-    for col in range(4):  # S rim on row 3 (transition to the face)
-        _edge_line(c, col * C, 3 * C, C, C, False, False, mat["rim"])
 
-    # rows 4-5: front face variants (4 columns)
+    # rows 3-4: front face top/bottom halves (4 variant columns)
     for col in range(4):
-        _face(c, col * C, 4 * C, C, True, mat, salt + col * 31)
-        _face(c, col * C, 5 * C, C, False, mat, salt + col * 31)
+        _face(c, col * C, 3 * C, C, True, mat, salt + col * 31)
+        _face(c, col * C, 4 * C, C, False, mat, salt + col * 31)
 
-    # rows 6-7: freestanding pieces — face with bright side edges + pillar foot
-    for col in range(4):
-        _face(c, col * C, 6 * C, C, True, mat, salt + 900 + col * 31)
-        _face(c, col * C, 7 * C, C, False, mat, salt + 900 + col * 31)
-        _edge_line(c, col * C, 6 * C, C, C, True, True, mat["rim"])
-        _edge_line(c, col * C, 6 * C, C, C, True, False, mat["rim"])
-        _edge_line(c, col * C, 7 * C, C, C, True, True, mat["rim"])
-        _edge_line(c, col * C, 7 * C, C, C, True, False, mat["rim"])
+    # rows 5-7: junction and inner-corner pieces on a ceiling base
+    for row in (5, 6, 7):
+        for col in range(4):
+            _ceiling(c, col * C, row * C, C, C, mat, salt + 7 * row + col)
+
+    def vrim(cell_x, cell_y, x, y0, y1):
+        for y in range(y0, y1):
+            c.put(cell_x * C + x, cell_y * C + y, mat["rim"])
+
+    def hrim(cell_x, cell_y, y, x0, x1):
+        for x in range(x0, x1):
+            c.put(cell_x * C + x, cell_y * C + y, mat["rim"])
+
+    # (0,5)/(1,5): inner-corner mid — side rim hooking toward the center at top
+    vrim(0, 5, 0, 0, 16)
+    hrim(0, 5, 0, 0, 6)
+    vrim(1, 5, 15, 0, 16)
+    hrim(1, 5, 0, 10, 16)
+    # (2,5): other-wall-below W-end — hook fragment in the top-right corner
+    hrim(2, 5, 0, 11, 16)
+    vrim(2, 5, 15, 0, 5)
+    # (3,5): other-wall-below continuing — full top rim, hook down at right
+    hrim(3, 5, 0, 0, 16)
+    vrim(3, 5, 15, 0, 6)
+
+    # (0,6)/(1,6): inner-corner bottom — side rim hooking toward center at bottom
+    vrim(0, 6, 0, 0, 16)
+    hrim(0, 6, 15, 0, 6)
+    vrim(1, 6, 15, 0, 16)
+    hrim(1, 6, 15, 10, 16)
+    # (2,6)/(3,6): other-wall-below band — top rim over a mini face strip
+    hrim(2, 6, 0, 0, 16)
+    _mini_face(c, 2 * C, 6 * C + 3, C, 13, mat, salt + 61)
+    hrim(3, 6, 0, 0, 16)
+    vrim(3, 6, 15, 1, 9)
+    _mini_face(c, 3 * C, 6 * C + 3, 12, 13, mat, salt + 62)
+
+    # (0,7)/(1,7): inner-corner top hooks
+    vrim(0, 7, 0, 0, 6)
+    hrim(0, 7, 0, 0, 6)
+    vrim(1, 7, 15, 0, 6)
+    hrim(1, 7, 0, 10, 16)
+    # (2,7)/(3,7): diagonal-other-wall mid — small face nub at the bottom edge
+    _mini_face(c, 2 * C + 10, 7 * C + 10, 6, 6, mat, salt + 71)
+    _mini_face(c, 3 * C, 7 * C + 10, 6, 6, mat, salt + 72)
 
     # ---- window insert (64-96) ----
     def window_pane(x0, y0, w, h):

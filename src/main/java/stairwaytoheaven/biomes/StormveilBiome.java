@@ -10,8 +10,12 @@ import necesse.level.maps.biomes.MobSpawnTable;
 public class StormveilBiome extends SkyBiome {
 
     public static final MobSpawnTable mobs = new MobSpawnTable()
-            .addLimited(70, "stormwisp", 4, 80)
-            .addLimited(30, "zephyrray", 2, 80);
+            .addLimited(60, "stormwisp", 4, 80)
+            .addLimited(25, "zephyrray", 2, 80)
+            // playtests: golems were Aurora-only and the Aurora Shoals are the
+            // rarest biome, so many players never met one — they patrol the
+            // Stormveil crystal fields too now
+            .addLimited(25, "skystonegolem", 2, 96);
 
     public static final MobSpawnTable critters = new MobSpawnTable()
             .addLimited(100, "sparkbeetle", 4, 60);

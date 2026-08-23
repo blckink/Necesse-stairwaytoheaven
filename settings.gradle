@@ -9,7 +9,7 @@
 def modInfo = [
         modID          : "stairwaytoheaven",
         modName        : "Stairway to Heaven",
-        modVersion     : "0.3.3",
+        modVersion     : "0.3.4",
         gameVersion    : "auto",
         modDescription : "Adds a third stairway that ascends above the clouds into the Skyreach: floating islands over an endless mistsea, three new sky biomes, new enemies, Aetherium gear and more.",
         author         : "blckink",

@@ -123,3 +123,20 @@ wardenshopclosed=Meine Regale sind dunkel, wie alles hier. Entzünde erst das Le
 wardencatfound1=Mrrp?
 wardencattreat=Die Katze schnappt sich das Leckerli und verschwindet in einem Wölkchen - heimwärts.
 wardencatnotreat=Die Katze beäugt dich misstrauisch. Sie erwartet eindeutig einen Snack.
+
+[quests]
+swhfindspiretitle=Der Ruf des Wardens
+swhfindspiredesc=Etwas hält über den Wolken noch ein Licht am Brennen.
+swhfindspireobj=Finde Wardens Turm - folge dem Flackern über dem Nebel.
+swhreturnwarden=Sprich mit dem Sky Warden.
+swhbeacontitle=Entzünde das Leuchtfeuer
+swhbeacondesc=Das Leuchtfeuer der Himmelswacht ist zu lange dunkel gewesen. Bring dem Warden, was es zum Brennen braucht.
+swhbeaconreward=2x Flickerlicht-Girlande
+swhcatstitle=Die Turmkatzen
+swhcatsdesc=Zwei Katzen streunen noch durch Sturm und Bänke. Ein Wolkenzupf-Leckerli überzeugt sie vom Heimweg.
+swhcatblack=Lock die schwarze Katze heim (streunt im Sturmschleier)
+swhcattabby=Lock die getigerte Katze heim (streunt in den Aurorabänken)
+swhcatsreward=Katzenkorb + Silberglöckchen
+swhanchortitle=Verankere die Insel
+swhanchordesc=Die Turminsel driftet. Der Warden kann sie verankern - mit deinem Metall und Stein.
+swhanchorreward=Skywatch-Banner + 5x Aurorablatt

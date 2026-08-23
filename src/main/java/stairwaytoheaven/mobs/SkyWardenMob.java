@@ -77,6 +77,7 @@ public class SkyWardenMob extends FriendlyMob {
         Level level = this.getLevel();
         SkywatchQuestData quest = SkywatchQuestData.get(level);
 
+        necesse.engine.network.server.Server server = level.getServer();
         switch (quest.stage) {
             case 0:
                 say(client, "wardenintro1");
@@ -84,15 +85,34 @@ public class SkyWardenMob extends FriendlyMob {
                 say(client, "wardenintro3");
                 give(client, "windsilk", 6);
                 quest.stage = 1;
+                // Journal: "find the spire" is done for everyone; the beacon
+                // delivery quest takes its place for this player.
+                stairwaytoheaven.quest.SkyQuests.removeAllOfType(server, stairwaytoheaven.quest.FindSpireQuest.class);
+                stairwaytoheaven.quest.SkyQuests.giveOnce(server, client, new stairwaytoheaven.quest.BeaconDeliveryQuest());
                 sayBeaconTask(client);
                 break;
             case 1:
-                if (tryTurnIn(client, "stormshard", BEACON_SHARDS, "windsilk", BEACON_SILK)) {
+                stairwaytoheaven.quest.BeaconDeliveryQuest held =
+                        stairwaytoheaven.quest.SkyQuests.findHeld(client, stairwaytoheaven.quest.BeaconDeliveryQuest.class);
+                boolean delivered;
+                if (held != null && held.canComplete(client)) {
+                    held.complete(client); // consumes the items (vanilla idiom)
+                    delivered = true;
+                } else if (held == null) {
+                    // No journal copy (e.g. save from an older version): fall
+                    // back to the direct inventory turn-in.
+                    delivered = tryTurnIn(client, "stormshard", BEACON_SHARDS, "windsilk", BEACON_SILK);
+                } else {
+                    delivered = false;
+                }
+                if (delivered) {
                     quest.stage = 2;
                     igniteBeacon(level, quest);
                     say(client, "wardenbeacondone");
                     give(client, "flickerlightgarland", 2);
+                    stairwaytoheaven.quest.SkyQuests.removeAllOfType(server, stairwaytoheaven.quest.BeaconDeliveryQuest.class);
                 } else {
+                    stairwaytoheaven.quest.SkyQuests.giveOnce(server, client, new stairwaytoheaven.quest.BeaconDeliveryQuest());
                     sayBeaconTask(client);
                     say(client, "wardenbeaconwait");
                 }
@@ -110,6 +130,7 @@ public class SkyWardenMob extends FriendlyMob {
     }
 
     private void interactAfterBeacon(ServerClient client, Level level, SkywatchQuestData quest) {
+        necesse.engine.network.server.Server server = level.getServer();
         // One-time intros for the two parallel quests
         if (!quest.catsIntroShown) {
             quest.catsIntroShown = true;
@@ -118,13 +139,22 @@ public class SkyWardenMob extends FriendlyMob {
             say(client, "wardencats3");
             say(client, catDirectionsMessage("wardencats4", quest));
             give(client, "cloudpufftreat", 3);
+            giveCatsQuest(server, client, quest);
             return;
         }
         if (!quest.anchorIntroShown) {
             quest.anchorIntroShown = true;
             say(client, "wardenanchor1");
             say(client, "wardenanchor2");
+            stairwaytoheaven.quest.SkyQuests.giveOnce(server, client, new stairwaytoheaven.quest.AnchorDeliveryQuest());
             return;
+        }
+        // Journal copies for players who join the chain later
+        if (!quest.catsRewardGiven) {
+            giveCatsQuest(server, client, quest);
+        }
+        if (!quest.anchorDone) {
+            stairwaytoheaven.quest.SkyQuests.giveOnce(server, client, new stairwaytoheaven.quest.AnchorDeliveryQuest());
         }
         // Cats reward
         if (quest.blackHome && quest.tabbyHome && !quest.catsRewardGiven) {
@@ -133,16 +163,29 @@ public class SkyWardenMob extends FriendlyMob {
             give(client, "catbasket", 1);
             give(client, "silverbell", 1);
             placeBasket(level, quest);
+            stairwaytoheaven.quest.SkyQuests.removeAllOfType(server, stairwaytoheaven.quest.SpireCatsQuest.class);
             return;
         }
         // Anchor turn-in
         if (!quest.anchorDone) {
-            if (tryTurnIn(client, "aetheriumbar", ANCHOR_BARS, "skystone", ANCHOR_STONE)) {
+            stairwaytoheaven.quest.AnchorDeliveryQuest heldAnchor =
+                    stairwaytoheaven.quest.SkyQuests.findHeld(client, stairwaytoheaven.quest.AnchorDeliveryQuest.class);
+            boolean delivered;
+            if (heldAnchor != null && heldAnchor.canComplete(client)) {
+                heldAnchor.complete(client);
+                delivered = true;
+            } else if (heldAnchor == null) {
+                delivered = tryTurnIn(client, "aetheriumbar", ANCHOR_BARS, "skystone", ANCHOR_STONE);
+            } else {
+                delivered = false;
+            }
+            if (delivered) {
                 quest.anchorDone = true;
                 say(client, "wardenanchordone");
                 give(client, "skywatchbanner", 1);
                 give(client, "aurorapetal", 5);
                 placeAnchor(level, quest);
+                stairwaytoheaven.quest.SkyQuests.removeAllOfType(server, stairwaytoheaven.quest.AnchorDeliveryQuest.class);
                 return;
             }
         }
@@ -164,6 +207,14 @@ public class SkyWardenMob extends FriendlyMob {
         } else {
             say(client, "wardenanchordone");
         }
+    }
+
+    /** Journal copy of the cats quest, pre-filled with the current world state. */
+    private void giveCatsQuest(necesse.engine.network.server.Server server, ServerClient client, SkywatchQuestData quest) {
+        stairwaytoheaven.quest.SpireCatsQuest catsQuest = new stairwaytoheaven.quest.SpireCatsQuest();
+        catsQuest.blackHome = quest.blackHome;
+        catsQuest.tabbyHome = quest.tabbyHome;
+        stairwaytoheaven.quest.SkyQuests.giveOnce(server, client, catsQuest);
     }
 
     /** Server-authoritative delivery: both stacks must be present, then both are consumed. */

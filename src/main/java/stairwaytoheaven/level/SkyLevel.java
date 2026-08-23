@@ -69,24 +69,62 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
         return false;
     }
 
+    private int structureHealCounter;
+
     @Override
     public void serverTick() {
         super.serverTick();
-        this.ensureWardenSpire();
+        // The spire is stamped on the FIRST ASCENT near the player's arrival
+        // stairway (see ensureWardenSpire(anchor)); the tick only maintains an
+        // already-placed spire: cat spawns + healing the quest beacon.
+        SkywatchQuestData quest = SkywatchQuestData.get(this);
+        if (!quest.spirePlaced) {
+            return;
+        }
+        if (!quest.catsSpawned) {
+            this.spawnSpireCats(quest);
+        }
+        if (++this.structureHealCounter >= 200) {
+            this.structureHealCounter = 0;
+            this.healQuestStructure(quest);
+        }
+    }
+
+    /**
+     * Restores the quest beacon if it went missing (older jars allowed mining
+     * it, which dropped nothing and would soft-lock the chain). Only touches
+     * loaded regions — never forces region loads from the tick.
+     */
+    private void healQuestStructure(SkywatchQuestData quest) {
+        if (!this.regionManager.isTileLoaded(quest.beaconX, quest.beaconY)) {
+            return;
+        }
+        int current = this.getObjectID(quest.beaconX, quest.beaconY);
+        if (current == SkyRegistry.wardenBeaconOffID || current == SkyRegistry.wardenBeaconOnID) {
+            return;
+        }
+        int wanted = quest.stage >= 2 ? SkyRegistry.wardenBeaconOnID : SkyRegistry.wardenBeaconOffID;
+        this.setObject(quest.beaconX, quest.beaconY, wanted);
+        if (this.getServer() != null) {
+            this.getServer().network.sendToClientsWithTile(
+                    new necesse.engine.network.packet.PacketChangeObject(this, 0, quest.beaconX, quest.beaconY, wanted),
+                    this, quest.beaconX, quest.beaconY);
+        }
     }
 
     /**
      * Lazily stamps the Warden's Spire and spawns the spire cats, exactly
-     * once per world (persisted in SkywatchQuestData). Running from
-     * serverTick instead of world generation means existing v0.1 worlds get
-     * the structure too, the first time their Skyreach ticks under v0.2.
-     * Public so the ascent stairway can force it before pointing the player
-     * toward the spire.
+     * once per world (persisted in SkywatchQuestData). Anchored to the given
+     * point — the player's arrival stairway on the first ascent — so the
+     * spire always sits within walking distance of where they come up
+     * (playtests: a spire anchored to the world origin could be hundreds of
+     * tiles from a base far from spawn). The status command passes the origin
+     * as a headless fallback.
      */
-    public void ensureWardenSpire() {
+    public void ensureWardenSpire(int anchorX, int anchorY) {
         SkywatchQuestData quest = SkywatchQuestData.get(this);
         if (!quest.spirePlaced) {
-            Point site = this.findSpireSite();
+            Point site = this.findSpireSite(anchorX, anchorY);
             int half = WardenSpirePreset.SIZE / 2;
             this.regionManager.ensureTilesAreLoaded(site.x - half - 2, site.y - half - 2,
                     site.x + half + 2, site.y + half + 2);
@@ -102,23 +140,23 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
     }
 
     /**
-     * Deterministic spire site: sweep outward from the ascent origin and take
-     * the first spot whose 15x15 footprint is solidly on Driftlands land.
-     * Pure function of the world-gen seed — every player/session agrees.
+     * Deterministic spire site: sweep outward from the anchor and take the
+     * first spot whose 15x15 footprint is solidly on Driftlands land. Starts
+     * close (radius 20) so the spire lands near the arrival stairway.
      */
-    private Point findSpireSite() {
+    private Point findSpireSite(int anchorX, int anchorY) {
         int seed = this.getWorldGenSeed();
-        for (int radius = 36; radius <= 400; radius += 6) {
+        for (int radius = 20; radius <= 400; radius += 6) {
             for (int angleStep = 0; angleStep < 24; angleStep++) {
                 double angle = (angleStep / 24.0 + (radius % 12) / 24.0) * Math.PI * 2;
-                int x = (int) Math.round(Math.cos(angle) * radius);
-                int y = (int) Math.round(Math.sin(angle) * radius);
+                int x = anchorX + (int) Math.round(Math.cos(angle) * radius);
+                int y = anchorY + (int) Math.round(Math.sin(angle) * radius);
                 if (this.isSolidDriftland(seed, x, y, 7)) {
                     return new Point(x, y);
                 }
             }
         }
-        return new Point(0, 0); // pathological seed: land at origin regardless
+        return new Point(anchorX, anchorY); // pathological seed: land here regardless
     }
 
     private boolean isSolidDriftland(int seed, int cx, int cy, int half) {

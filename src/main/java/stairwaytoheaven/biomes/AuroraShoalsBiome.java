@@ -11,7 +11,7 @@ public class AuroraShoalsBiome extends SkyBiome {
 
     // rare but hard: few golems, capped tight
     public static final MobSpawnTable mobs = new MobSpawnTable()
-            .addLimited(50, "skystonegolem", 2, 96)
+            .addLimited(55, "skystonegolem", 3, 96)
             .addLimited(50, "zephyrray", 2, 80);
 
     public static final MobSpawnTable critters = new MobSpawnTable()
