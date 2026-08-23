@@ -3,6 +3,24 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [0.3.1] — 2026-08-23
+
+Playtest feedback release: real livestock, real landmasses.
+
+### Changed
+- **The Cloudlamb is now actual livestock**, not a critter: it extends the
+  vanilla sheep, so **rope-catching, feeding troughs, breeding, growing up
+  and shearing** (yields wool) all work exactly like surface animals — build
+  them a pen in the sky or lead them home. Redrawn at **vanilla sheep scale**
+  (it was bug-sized) on the vanilla sheet layout, with a sheared look and
+  fleece death particles; sky twist: grown lambs drop windsilk.
+- **Much more land**: island noise retuned in both dimensions (Skyreach
+  threshold 0.55 → 0.48, scale 42 → 54; Veil 0.50 → 0.44, 46 → 56) — bigger,
+  more frequent landmasses, so travel is walking with occasional swims
+  instead of aimless paddling through clouds. Applies to newly generated
+  regions; for a fully coherent layout, reset the level per the README's
+  troubleshooting section (existing explored regions keep their old shape).
+
 ## [0.3.0] — "The Veil Below, Part 1" — 2026-08-23
 
 The mod's second world opens: a gothic-comedy afterlife layer below the deep

@@ -10,8 +10,8 @@ import stairwaytoheaven.SkyRegistry;
  */
 public final class VeilTerrainPainter {
 
-    public static final int ISLAND_SCALE = 46;
-    public static final float ISLAND_THRESHOLD = 0.50F;
+    public static final int ISLAND_SCALE = 56;
+    public static final float ISLAND_THRESHOLD = 0.44F;
     public static final int BIOME_SCALE = 150;
     public static final float ASHEN_BELOW = 0.30F;
     public static final int PATCH_SCALE = 20;

@@ -22,8 +22,10 @@ public final class SkyTerrainPainter {
     public static final int SALT_OBJECT_ROLL = 7;
 
     // Island shape
-    public static final float ISLAND_SCALE = 42.0F;
-    public static final float ISLAND_THRESHOLD = 0.55F;
+    // v0.3.1: bigger, more frequent landmasses after playtests (the sky read
+    // as mostly Mistsea and travel was all swimming)
+    public static final float ISLAND_SCALE = 54.0F;
+    public static final float ISLAND_THRESHOLD = 0.48F;
     /** Rim band above the threshold that is kept clear of objects, so island edges stay walkable. */
     public static final float ISLAND_RIM = 0.020F;
 

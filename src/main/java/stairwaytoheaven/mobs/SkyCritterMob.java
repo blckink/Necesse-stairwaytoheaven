@@ -28,12 +28,9 @@ import necesse.level.maps.light.GameLight;
  */
 public abstract class SkyCritterMob extends CritterMob {
 
-    public static GameTexture lambTexture;
     public static GameTexture mothTexture;
     public static GameTexture beetleTexture;
 
-    public static final LootTable lambLoot = new LootTable(
-            new ChanceLootItemList(0.6F, LootItem.between("windsilk", 1, 1)));
     public static final LootTable mothLoot = new LootTable(
             new ChanceLootItemList(0.4F, LootItem.between("aurorapetal", 1, 1)));
     public static final LootTable beetleLoot = new LootTable(
@@ -52,26 +49,12 @@ public abstract class SkyCritterMob extends CritterMob {
     }
 
     private GameTexture texture() {
-        switch (this.kind) {
-            case 0:
-                return lambTexture;
-            case 1:
-                return mothTexture;
-            default:
-                return beetleTexture;
-        }
+        return this.kind == 1 ? mothTexture : beetleTexture;
     }
 
     @Override
     public LootTable getLootTable() {
-        switch (this.kind) {
-            case 0:
-                return lambLoot;
-            case 1:
-                return mothLoot;
-            default:
-                return beetleLoot;
-        }
+        return this.kind == 1 ? mothLoot : beetleLoot;
     }
 
     @Override
@@ -100,13 +83,6 @@ public abstract class SkyCritterMob extends CritterMob {
             }
         });
         this.addShadowDrawables(tileList, level, x, y, light, camera);
-    }
-
-    /** Cloudlamb — a fluffy little sky sheep drifting across the Driftlands. */
-    public static class CloudLamb extends SkyCritterMob {
-        public CloudLamb() {
-            super(0, 30, 18.0F);
-        }
     }
 
     /** Glowmoth — the pale moths Peanut chases over the Aurora Shoals. */

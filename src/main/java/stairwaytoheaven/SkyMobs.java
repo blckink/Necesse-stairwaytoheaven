@@ -26,7 +26,7 @@ final class SkyMobs {
         MobRegistry.registerMob("spirecatblack", SpireCatMob.Black.class, false);
         MobRegistry.registerMob("spirecattabby", SpireCatMob.Tabby.class, false);
         // ambient critters, one per sub-biome
-        MobRegistry.registerMob("cloudlamb", SkyCritterMob.CloudLamb.class, false);
+        MobRegistry.registerMob("cloudlamb", stairwaytoheaven.mobs.CloudLambMob.class, false);
         MobRegistry.registerMob("glowmoth", SkyCritterMob.GlowMoth.class, false);
         MobRegistry.registerMob("sparkbeetle", SkyCritterMob.SparkBeetle.class, false);
         // v0.3: the Veil
@@ -41,7 +41,8 @@ final class SkyMobs {
         SkyWardenMob.texture = GameTexture.fromFile("mobs/skywarden");
         SpireCatMob.blackTexture = GameTexture.fromFile("mobs/spirecatblack");
         SpireCatMob.tabbyTexture = GameTexture.fromFile("mobs/spirecattabby");
-        SkyCritterMob.lambTexture = GameTexture.fromFile("mobs/cloudlamb");
+        stairwaytoheaven.mobs.CloudLambMob.texture = GameTexture.fromFile("mobs/cloudlamb");
+        stairwaytoheaven.mobs.CloudLambMob.shearedTexture = GameTexture.fromFile("mobs/cloudlamb_sheared");
         SkyCritterMob.mothTexture = GameTexture.fromFile("mobs/glowmoth");
         SkyCritterMob.beetleTexture = GameTexture.fromFile("mobs/sparkbeetle");
         stairwaytoheaven.mobs.GloomShadeMob.texture = GameTexture.fromFile("mobs/gloomshade");

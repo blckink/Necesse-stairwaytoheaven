@@ -37,7 +37,7 @@ META = {
     "objects/skyreeds.png": ("Himmelsschilf", "4 Gras-Varianten, wachsen nur auf organischem Cloudturf."),
     "objects/windwheat.png": ("Windweizen", "Erntbares Wolkengras mit Samenstaenden - 3 Buendel ergeben 1 Windseide."),
     "objects/cloudberrybush.png": ("Wolkenbeeren-Busch", "Niedriger Busch, droppt essbare Wolkenbeeren."),
-    "mobs/cloudlamb.png": ("Wolkenschaf", "Friedliches Critter der Driftlande."),
+    "mobs/cloudlamb.png": ("Wolkenschaf", "Echtes Nutztier (Vanilla-Schaf-Verhalten): mit Seil fangen, zuechten, scheren. Layout wie Vanilla-sheep.png inkl. Woll-Fetzen-Reihe."),
     "mobs/glowmoth.png": ("Gluehfalter", "Die Falter, die Peanut ueber den Aurorabaenken jagt."),
     "mobs/sparkbeetle.png": ("Funkenkaefer", "Schieferkaefer mit Ladungs-Schimmer (Sturmschleier)."),
     "objects/skystairwaydown.png": ("Himmelstreppe (Oberflaeche)", "Der Aufgang. Oberste 32x32 = Bodenteil, darunter der Aufbau."),

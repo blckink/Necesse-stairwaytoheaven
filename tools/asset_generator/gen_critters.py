@@ -20,44 +20,6 @@ def _mist_clip(c, water_y):
     c.ellipse(16, water_y + 2, 7, 1.8, with_alpha(mist["light"], 200))
 
 
-def _lamb_frame(facing, col):
-    c = Canvas(32, 32)
-    L = palette.LAMB
-    step = {0: 0, 1: 1, 2: 0, 3: -1, 4: 0, 5: 0}[col]
-    cx, ground = 16, 26
-    # legs first (behind body)
-    for i, lx in enumerate((-5, -2, 2, 5)):
-        off = step if i % 2 == 0 else -step
-        c.rect(cx + lx, ground - 4 + (1 if off > 0 else 0), 2, 4, L["face_dark"])
-    # fluffy body: base blob + puff bumps along the top
-    c.ellipse(cx, ground - 8, 7.5, 5, L["wool"])
-    rng = Rng(0x1A3B + col)
-    for bx in (-5, -2, 1, 4):
-        c.ellipse(cx + bx, ground - 12 + rng.range(0, 1), 2.4, 2, L["wool"])
-    c.ellipse(cx - 2, ground - 6, 4.5, 2.5, L["wool_shade"])   # belly shade
-    # cotton tail
-    c.ellipse(cx - 8, ground - 9, 1.8, 1.6, L["wool"])
-    # head at the front (right when walking right, centered for up/down)
-    hx = cx + (8 if facing == "right" else 0)
-    hy = ground - 12 if facing != "right" else ground - 11
-    if facing == "up":
-        c.ellipse(hx, hy, 3, 3, L["wool"])                     # wool from behind
-    else:
-        c.ellipse(hx, hy, 2.8, 3, L["face"])
-        c.put(hx - 3, hy - 2, L["face_dark"])                  # ears
-        c.put(hx + 3, hy - 2, L["face_dark"])
-        c.ellipse(hx, hy - 3, 2.4, 1.4, L["wool"])             # wool tuft on top
-    c.outline(palette.OUTLINE)
-    if facing == "down":
-        c.put(hx - 1, hy, L["face_dark"])
-        c.put(hx + 1, hy, L["face_dark"])
-    elif facing == "right":
-        c.put(hx + 1, hy, L["face_dark"])
-    if col == 5:
-        _mist_clip(c, 22)
-    return c
-
-
 def _moth_frame(facing, col):
     c = Canvas(32, 32)
     M = palette.MOTH
@@ -134,9 +96,10 @@ def _gen_sheet(path, frame_fn):
 
 
 def gen_critters(mob_dir):
-    _gen_sheet(f"{mob_dir}/cloudlamb.png", _lamb_frame)
     _gen_sheet(f"{mob_dir}/glowmoth.png", _moth_frame)
     _gen_sheet(f"{mob_dir}/sparkbeetle.png", _beetle_frame)
+    gen_cloudlamb(f"{mob_dir}/cloudlamb.png", sheared=False)
+    gen_cloudlamb(f"{mob_dir}/cloudlamb_sheared.png", sheared=True)
 
 
 def gen_critter_icons(icon_dir):
@@ -183,3 +146,110 @@ def gen_critter_icons(icon_dir):
         c.put(zx, zy, B["charge"])
     c.outline(palette.OUTLINE)
     c.save(f"{icon_dir}/sparkbeetle.png")
+
+
+# --- the Cloudlamb: REAL livestock at vanilla sheep scale ---------------------
+# Sheet mirrors vanilla sheep.png exactly: 6 cols (idle, walk x4, swim) x
+# 4 facing rows (Up, Right, Down, Left) of 64px cells, plus a 5th row of five
+# 32px fleece chunks for the death particles.
+
+def _puff_body(c, cx, cy, w, h, wool, wool_shade, rng, lumpy=True):
+    c.ellipse(cx + 1, cy + 1, w, h, wool_shade)
+    c.ellipse(cx, cy, w, h, wool)
+    if lumpy:
+        for i in range(7):
+            a = i / 7.0 * 6.283
+            import math
+            bx = cx + math.cos(a) * (w - 1)
+            by = cy + math.sin(a) * (h - 1)
+            r = rng.range(2, 3)
+            c.ellipse(bx, by, r + 1, r, wool_shade)
+            c.ellipse(bx, by - 1, r, r - 0.5 if r > 1 else 1, wool)
+    c.ellipse(cx - w * 0.3, cy - h * 0.4, w * 0.5, h * 0.45, (246, 249, 252))
+
+
+def _lamb64_frame(facing, col, sheared):
+    from px import Canvas, Rng
+    import palette
+    L = palette.LAMB
+    wool = L["wool"]
+    shade = L["wool_shade"]
+    c = Canvas(64, 64)
+    rng = Rng(0x1A3B + col * 7 + (13 if facing == "right" else 0))
+    step = {0: 0, 1: 1, 2: 0, 3: -1, 4: 0, 5: 0}[col]
+    cx, ground = 32, 50
+    bob = 1 if step != 0 else 0
+
+    # legs (behind the body)
+    if facing in ("down", "up"):
+        legs = ((-10, step), (-4, -step), (4, step), (10, -step))
+    else:
+        legs = ((-11, step), (-5, -step), (5, step), (11, -step))
+    for lx, off in legs:
+        lift = 1 if off > 0 else 0
+        c.rect(cx + lx - 1, ground - 7 - lift, 3, 8, L["face_dark"])
+        c.rect(cx + lx - 1, ground - 1 - lift, 3, 2, L["face"])
+
+    body_w, body_h = (15, 11) if not sheared else (12, 9)
+    if facing == "right":
+        _puff_body(c, cx - 1, ground - 13 - bob, body_w + 1, body_h, wool, shade, rng, lumpy=not sheared)
+        # head on the right, slightly low
+        hx, hy = cx + 14, ground - 18 - bob
+        c.ellipse(hx, hy, 5, 5.5, L["face"])
+        c.put(hx - 2, hy - 6, L["face_dark"])   # ear back
+        c.put(hx - 3, hy - 5, L["face_dark"])
+        c.ellipse(hx - 2, hy - 4, 4, 2.5, wool)  # wool cap
+        tail_x = cx - body_w - 1
+        c.ellipse(tail_x, ground - 16 - bob, 2.5, 2, wool)
+    elif facing == "down":
+        _puff_body(c, cx, ground - 13 - bob, body_w, body_h, wool, shade, rng, lumpy=not sheared)
+        hx, hy = cx, ground - 22 - bob
+        c.ellipse(hx, hy, 5, 5.5, L["face"])
+        for side in (-1, 1):                     # droopy ears
+            c.put(hx + side * 5, hy - 2, L["face_dark"])
+            c.put(hx + side * 6, hy - 1, L["face_dark"])
+        c.ellipse(hx, hy - 4, 4.5, 2.5, wool)    # wool crown
+    else:  # up
+        _puff_body(c, cx, ground - 13 - bob, body_w, body_h, wool, shade, rng, lumpy=not sheared)
+        hx, hy = cx, ground - 22 - bob
+        c.ellipse(hx, hy, 5, 5, wool)            # wool from behind
+        for side in (-1, 1):
+            c.put(hx + side * 5, hy - 1, L["face_dark"])
+        c.ellipse(cx, ground - 6 - bob, 2.5, 2, wool)  # tail
+    c.outline(palette.OUTLINE)
+    # face after outline
+    if facing == "down":
+        c.put(hx - 2, hy, L["face_dark"])
+        c.put(hx + 2, hy, L["face_dark"])
+        c.put(hx, hy + 2, (222, 150, 150))       # pink nose
+    elif facing == "right":
+        c.put(hx + 2, hy - 1, L["face_dark"])
+        c.put(hx + 4, hy + 1, (222, 150, 150))
+    if col == 5:
+        import gen_mobs
+        gen_mobs._mist_overlay(c)
+    return c
+
+
+def gen_cloudlamb(path, sheared):
+    from px import Canvas, Rng
+    import palette
+    sheet = Canvas(6 * 64, 5 * 64)
+    for col in range(6):
+        up = _lamb64_frame("up", col, sheared)
+        right = _lamb64_frame("right", col, sheared)
+        down = _lamb64_frame("down", col, sheared)
+        left = right.mirrored()
+        for row, sprite in enumerate((up, right, down, left)):
+            sheet.paste(sprite, col * 64, row * 64)
+    # 5th row: five 32px fleece chunks for death particles
+    L = palette.LAMB
+    rng = Rng(0xF1EE)
+    for i in range(5):
+        chunk = Canvas(32, 32)
+        chunk.ellipse(16, 16, 5 + rng.range(0, 3), 4 + rng.range(0, 2), L["wool"])
+        chunk.ellipse(14, 14, 3, 2.5, (246, 249, 252))
+        chunk.ellipse(18, 18, 2.5, 2, L["wool_shade"])
+        chunk.outline(palette.OUTLINE)
+        sheet.paste(chunk, i * 64 + 16, 4 * 64 + 16)
+    sheet.save(path)
