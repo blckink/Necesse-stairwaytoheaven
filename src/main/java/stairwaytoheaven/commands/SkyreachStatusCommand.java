@@ -109,6 +109,9 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         if (quest.spirePlaced) {
             logs.add("  Warden's Spire: " + bearing(px, py, quest.spireX, quest.spireY));
         }
+        // Rescue path: a lost player running the locator also gets the spire
+        // pinned on their world map (once — the sent-set persists).
+        stairwaytoheaven.quest.SkyMapMarkers.onLocator(serverClient, quest);
         if (quest.catsSpawned) {
             if (!quest.blackHome) {
                 logs.add("  Siggi (black cat): " + bearing(px, py, quest.blackLairX, quest.blackLairY));

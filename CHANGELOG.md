@@ -3,6 +3,22 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [0.3.3] — 2026-08-23
+
+Never lose the tower again.
+
+### Added
+- **World-map markers**: on a player's first ascent, the **Warden's Spire**
+  and **their arrival stairway** are pinned on the world map (M) with their
+  own icons — the vanilla cartographer-map mechanism, no cheats. Delivered
+  once per player (persisted server-side), and markers live in the client's
+  per-world map data like any hand-placed marker, so deleting one is
+  respected. Players already in the sky can run `skyreachstatus` once to get
+  the spire pinned retroactively; the stairway marker follows on their next
+  ascent. Both icons are also available in the map's own marker editor.
+- Two new 32×32 map icons in the vanilla `ui/mapicons` style (spire with
+  teal beacon, marble stairway on a cloud).
+
 ## [0.3.2] — 2026-08-23
 
 Art release: living sprites, organic construction.

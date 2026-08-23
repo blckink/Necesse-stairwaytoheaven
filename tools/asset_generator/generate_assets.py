@@ -38,7 +38,7 @@ def main():
     args = parser.parse_args()
     out = args.out
 
-    for sub in ("tiles", "objects", "objects/statues", "items", "mobs", "mobs/icons", "player/weapons", "locale"):
+    for sub in ("tiles", "objects", "objects/statues", "items", "mobs", "mobs/icons", "player/weapons", "locale", "ui/mapicons"):
         os.makedirs(os.path.join(out, sub), exist_ok=True)
 
     # Terrain + liquid: modern _splat atlases (the 1.3.2 renderer's primary
@@ -91,6 +91,7 @@ def main():
     gen_objects.gen_crystal_cluster(f"{out}/objects/stormcrystal.png", palette.STORMCRYSTAL, 0x57C7)
     gen_objects.gen_aurorabloom(f"{out}/objects/aurorabloom.png")
     gen_objects.gen_skyreeds(f"{out}/objects/skyreeds.png")
+    gen_objects.gen_mapicons(f"{out}/ui/mapicons")
 
     # Mobs + bestiary icons
     gen_mobs.gen_zephyrray(f"{out}/mobs/zephyrray.png")

@@ -77,6 +77,8 @@ META = {
     "mobs/skywarden.png": ("Der Sky Warden", "Quest-NPC: hagerer Waechter mit Laternenstab."),
     "mobs/spirecatblack.png": ("Siggi", "Die schwarze Turmkatze (versteckt im Sturmschleier)."),
     "mobs/spirecattabby.png": ("Peanut", "Die weiss-getigerte Turmkatze (Aurorabaenke)."),
+    "ui/mapicons/skyspire.png": ("Karten-Icon: Wardens Turm", "Wird beim ersten Aufstieg automatisch auf der Weltkarte (M) markiert."),
+    "ui/mapicons/skystairs.png": ("Karten-Icon: Deine Treppe", "Markiert die Ankunfts-Treppe - der Rückweg geht nicht mehr verloren."),
     "player/weapons/tempestedge.png": ("Sturmklinge (gehalten)", "Haltegrafik der Schwert-Hand."),
     "player/weapons/galehowl.png": ("Windheuler (gehalten)", "Haltegrafik des Bogens."),
     "preview.png": ("Mod-Preview", "268x268-Vorschaubild fuer Mod-Liste/Workshop."),
@@ -123,8 +125,9 @@ SECTIONS = [
       "objects/whisperreeds.png", "objects/gloomshroom.png", "objects/ashbones.png",
       "objects/deadtree.png", "objects/veilrock.png", "objects/ghostlantern.png",
       "mobs/gloomshade.png"]),
-    ("treppen", "Die Treppen", "Das namensgebende Objekt-Paar.",
+    ("treppen", "Die Treppen", "Das namensgebende Objekt-Paar - plus die neuen Weltkarten-Icons.",
      ["objects/skystairwaydown.png", "objects/skystairwayup.png",
+      "ui/mapicons/skyspire.png", "ui/mapicons/skystairs.png",
       "player/weapons/tempestedge.png", "player/weapons/galehowl.png", "preview.png"]),
 ]
 

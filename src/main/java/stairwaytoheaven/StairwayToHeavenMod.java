@@ -61,6 +61,13 @@ public class StairwayToHeavenMod {
         SkyItems.register();
         SkyBuildingSet.registerItems();
         LevelDataRegistry.registerLevelData(SkywatchQuestData.KEY, SkywatchQuestData.class);
+        // World-map icons for the auto-placed markers (spire + return
+        // stairway). Textures load client-side via GameResources; the
+        // registration itself is texture-free and server-safe.
+        necesse.engine.registries.MapIconRegistry.registerIcon("skyspire",
+                new necesse.level.maps.mapData.TextureGameMapIcon("ui/mapicons/skyspire"));
+        necesse.engine.registries.MapIconRegistry.registerIcon("skystairs",
+                new necesse.level.maps.mapData.TextureGameMapIcon("ui/mapicons/skystairs"));
     }
 
     private void registerDimension() {

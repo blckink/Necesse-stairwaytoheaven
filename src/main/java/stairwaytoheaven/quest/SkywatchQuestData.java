@@ -62,6 +62,16 @@ public class SkywatchQuestData extends LevelData {
     public boolean anchorDone = false;
     public boolean finaleShown = false;
 
+    /**
+     * Auths of players who already received each world-map marker. Markers
+     * persist client-side per world, so each player gets each one exactly
+     * once (and re-deleting one on purpose is respected). Two sets because
+     * the spire marker can also be delivered by the status command, which
+     * does not know the player's stairway position.
+     */
+    public final java.util.HashSet<Long> spireMarkerAuths = new java.util.HashSet<>();
+    public final java.util.HashSet<Long> stairsMarkerAuths = new java.util.HashSet<>();
+
     @Override
     public void addSaveData(SaveData save) {
         super.addSaveData(save);
@@ -85,6 +95,26 @@ public class SkywatchQuestData extends LevelData {
         save.addBoolean("anchorIntroShown", this.anchorIntroShown);
         save.addBoolean("anchorDone", this.anchorDone);
         save.addBoolean("finaleShown", this.finaleShown);
+        save.addLongArray("spireMarkerAuths", toLongArray(this.spireMarkerAuths));
+        save.addLongArray("stairsMarkerAuths", toLongArray(this.stairsMarkerAuths));
+    }
+
+    private static long[] toLongArray(java.util.Set<Long> set) {
+        long[] out = new long[set.size()];
+        int i = 0;
+        for (long value : set) {
+            out[i++] = value;
+        }
+        return out;
+    }
+
+    private static void loadLongSet(LoadData save, String name, java.util.Set<Long> into) {
+        into.clear();
+        if (save.hasLoadDataByName(name)) {
+            for (long value : save.getLongArray(name)) {
+                into.add(value);
+            }
+        }
     }
 
     @Override
@@ -110,6 +140,8 @@ public class SkywatchQuestData extends LevelData {
         this.anchorIntroShown = save.getBoolean("anchorIntroShown", false, false);
         this.anchorDone = save.getBoolean("anchorDone", false, false);
         this.finaleShown = save.getBoolean("finaleShown", false, false);
+        loadLongSet(save, "spireMarkerAuths", this.spireMarkerAuths);
+        loadLongSet(save, "stairsMarkerAuths", this.stairsMarkerAuths);
     }
 
     /** Fetches the quest data of a level, creating and attaching it if absent. */

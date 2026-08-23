@@ -352,3 +352,47 @@ def gen_skyreeds(path, variants=4):
             c.put(x, y, ramp["hi"])                  # glint ON the tip pixel
         sheet.paste(c, v * 32, 0)
     sheet.save(path)
+
+
+# --- World-map icons ---------------------------------------------------------
+
+def gen_mapicons(dir_path):
+    """32x32 world-map icons in the vanilla ui/mapicons style: chunky flat
+    silhouette, 2-3 tones, dark outline — readable at map zoom."""
+    # Warden's Spire: slim tower with a pointed roof and teal beacon light
+    c = Canvas(32, 32)
+    st = palette.SKYSTONE
+    au = palette.AURORA
+    c.rect(11, 12, 10, 15, st["base"])          # tower body
+    c.rect(11, 12, 3, 15, st["light"])          # lit left face
+    c.rect(19, 12, 2, 15, st["deep"])           # shaded right edge
+    c.rect(9, 26, 14, 3, st["deep"])            # footing
+    for i in range(5):                          # pointed roof
+        c.rect(11 + i, 10 - i, 10 - 2 * i, 2, st["deep"])
+    c.rect(13, 3, 6, 3, au["teal"])           # beacon light at the tip
+    c.rect(14, 2, 4, 1, au["hi"])
+    c.rect(14, 17, 4, 6, st["deep"])            # tall door
+    c.put(15, 19, au["teal"])                   # lit doorway glint
+    c.outline(palette.OUTLINE)
+    c.save(f"{dir_path}/skyspire.png")
+
+    # Return stairway: a zigzag of four distinct marble steps on a cloud puff,
+    # rising left -> right. Each step is a light top slab over a mid riser
+    # with a deep shadow under the slab so the steps separate at map zoom.
+    c = Canvas(32, 32)
+    sl = palette.STAIRLIGHT
+    mi = palette.MISTSEA
+    steps = ((3, 21), (10, 16), (17, 11), (24, 6))
+    for (sx, sy) in steps:
+        c.rect(sx, sy + 2, 7, 4, sl["base"])    # riser front
+        c.rect(sx, sy + 5, 7, 1, sl["deep"])    # foot shadow line
+        c.rect(sx, sy, 8, 2, sl["light"])       # top slab
+        c.rect(sx, sy + 2, 8, 1, sl["deep"])    # shadow under the slab lip
+    c.rect(10, 22, 21, 2, sl["deep"])           # side face under the flight
+    c.rect(17, 17, 14, 5, sl["base"])
+    c.rect(24, 12, 7, 5, sl["base"])
+    c.ellipse(9, 27, 8, 3, mi["hi"])            # cloud puff at the base
+    c.ellipse(20, 28, 8, 2.8, mi["hi"])
+    c.ellipse(15, 28, 5, 2.2, mi["light"])
+    c.outline(palette.OUTLINE)
+    c.save(f"{dir_path}/skystairs.png")
