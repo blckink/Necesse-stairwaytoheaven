@@ -126,15 +126,21 @@ NIGHTFELL = {
 }
 
 WARDEN = {
-    "coat_deep":  (36, 32, 50),
-    "coat":       (54, 49, 72),
-    "coat_light": (76, 70, 96),
-    "feather":    (98, 92, 118),
-    "skin":       (196, 186, 172),
-    "skin_shade": (162, 150, 138),
-    "hair":       (222, 224, 228),
+    # coat ramp lifted well above the outline color (34,34,46) — the old ramp
+    # started at 36 luminance and the whole figure melted into a black cone
+    "coat_deep":  (52, 47, 76),
+    "coat":       (74, 68, 102),
+    "coat_light": (100, 93, 132),
+    "coat_hi":    (126, 119, 160),
+    "feather":    (152, 148, 174),
+    "feather_hi": (196, 194, 212),
+    "skin":       (203, 192, 176),
+    "skin_shade": (168, 155, 141),
+    "hair":       (226, 228, 233),
+    "hair_shade": (178, 182, 196),
     "eye":        (108, 196, 186),
-    "staff":      (86, 66, 50),
+    "staff":      (110, 86, 62),
+    "staff_hi":   (148, 118, 86),
     "lanternglow": (186, 226, 230),
 }
 

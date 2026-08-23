@@ -608,29 +608,54 @@ def gen_gloomraven_statue(path):
 
 
 def gen_banner_painting(path):
-    """32x128 PaintingObject sheet: 4 rotation rows of one 32x32 banner."""
+    """32x128 PaintingObject sheet: 4 rotation rows of one 32x32 banner —
+    iron rod, bordered night cloth with fold shading, crescent-and-star
+    emblem, swallowtail bottom with fringe (vanilla banner detail bar)."""
     def banner_cell():
         c = Canvas(32, 32)
-        cloth = palette.NIGHTFELL["base"]
-        cloth_deep = palette.NIGHTFELL["deep"]
-        trim = palette.STAIRLIGHT["glow"]
-        for x in range(6, 26):
-            c.put(x, 3, palette.IRONWORK["base"])
+        cloth = palette.NIGHTFELL
+        trim = palette.STAIRLIGHT
+        iron = palette.IRONWORK
+        # mounting rod with end caps and rings
+        c.rect(4, 2, 24, 2, iron["base"])
+        c.rect(4, 2, 24, 1, iron["light"])
+        c.put(3, 2, iron["light"])
+        c.put(28, 2, iron["light"])
+        c.put(8, 4, iron["deep"])
+        c.put(23, 4, iron["deep"])
+        # cloth field with border trim
         for y in range(4, 24):
-            for x in range(8, 24):
-                tone = cloth
-                if x in (8, 23):
-                    tone = cloth_deep
+            for x in range(7, 26):
+                tone = cloth["base"]
+                if x in (7, 25) or y == 4:
+                    tone = trim["base"]            # silver border
+                elif x in (11,) or x in (19,):
+                    tone = cloth["deep"]           # fold shadows
+                elif x in (9, 15):
+                    tone = cloth["light"]          # fold ridges
                 c.put(x, y, tone)
-        for i in range(4):
-            for x in range(8, 15 - i):
-                c.put(x, 24 + i, cloth)
-            for x in range(17 + i, 24):
-                c.put(x, 24 + i, cloth)
-        for (sx, sy) in ((11, 18), (13, 14), (15, 10)):
-            for dx in range(4):
-                c.put(sx + dx, sy, trim)
-        c.put(19, 7, palette.STAIRLIGHT["hi"])
+        # swallowtail: two tails + notch
+        for i in range(5):
+            for x in range(7, 14 - i):
+                c.put(x, 24 + i, cloth["base"] if x > 7 else trim["base"])
+            for x in range(19 + i, 26):
+                c.put(x, 24 + i, cloth["base"] if x < 25 else trim["base"])
+        for x in range(14, 19):                    # notch upper edge
+            c.put(x, 24, cloth["deep"])
+        # fringe tips
+        for (fx, fy) in ((8, 29), (10, 28), (12, 27), (20, 27), (22, 28), (24, 29)):
+            c.put(fx, fy, trim["base"])
+        # crescent moon (2px stroke, opens right) + four-point star
+        for (mx, my) in ((15, 8), (16, 8), (14, 9), (15, 9), (13, 10), (14, 10),
+                         (13, 11), (14, 11), (13, 12), (14, 12), (13, 13), (14, 13),
+                         (14, 14), (15, 14), (15, 15), (16, 15), (17, 15), (17, 8)):
+            c.put(mx, my, trim["hi"])
+        c.put(20, 10, trim["hi"])                  # star core
+        c.put(20, 9, trim["base"])
+        c.put(20, 11, trim["base"])
+        c.put(19, 10, trim["base"])
+        c.put(21, 10, trim["base"])
+        c.put(18, 19, trim["base"])                # small companion star
         c.outline(palette.OUTLINE)
         return c
     sheet = Canvas(32, 128)
@@ -641,40 +666,106 @@ def gen_banner_painting(path):
 
 
 def gen_beacon(path, lit):
-    """32x96 bottom-anchored beacon pylon (SkyDecoObject)."""
+    """32x96 bottom-anchored beacon: masonry base, riveted iron column and a
+    caged brazier head. OFF = dead coals behind dark glass with soot streaks;
+    ON = blazing cold-teal flame with white core, halo and sparks."""
     c = Canvas(32, 96)
     stone = palette.SKYSTONE
+    iron = palette.IRONWORK
     glow = palette.STAIRLIGHT
-    # base + tapering pylon
-    c.rect(8, 86, 16, 6, stone["base"])
-    c.rect(8, 86, 16, 2, stone["light"])
-    for y in range(40, 86):
-        t = (y - 40) / 46.0
-        half = round(3 + 3 * t)
+
+    # --- masonry base: two brick steps ---
+    c.rect(4, 88, 24, 5, stone["base"])
+    c.rect(4, 88, 24, 1, stone["light"])
+    c.rect(4, 92, 24, 1, stone["deep"])
+    for x in (10, 17, 24):
+        c.put(x, 90, stone["deep"])
+        c.put(x, 91, stone["deep"])
+    c.rect(7, 80, 18, 8, stone["base"])
+    c.rect(7, 80, 18, 1, stone["light"])
+    for x in (12, 19):
+        c.put(x, 81, stone["deep"])
+        c.put(x, 82, stone["deep"])
+    c.rect(7, 84, 18, 1, stone["deep"])
+    for x in (15, 22):
+        c.put(x, 85, stone["deep"])
+        c.put(x, 86, stone["deep"])
+    c.put(24, 82, stone["deep"])   # crack
+    c.put(25, 83, stone["deep"])
+
+    # --- iron column with rivet bands ---
+    for y in range(46, 80):
+        t = (y - 46) / 34.0
+        half = 4 + round(2 * t)
         for dx in range(-half, half + 1):
-            tone = stone["base"]
-            if dx == -half:
-                tone = stone["light"]
-            elif dx == half:
-                tone = stone["deep"]
+            tone = iron["base"]
+            if dx <= -half + 1:
+                tone = iron["light"]
+            elif dx >= half - 1:
+                tone = iron["deep"]
             c.put(16 + dx, y, tone)
-    # crown cradle
-    c.rect(9, 34, 14, 6, palette.IRONWORK["base"])
-    c.rect(9, 34, 14, 2, palette.IRONWORK["light"])
+    for band_y in (52, 68):
+        half = 4 + round(2 * (band_y - 46) / 34.0) + 1
+        for dx in range(-half, half + 1):
+            c.put(16 + dx, band_y, iron["deep"])
+            c.put(16 + dx, band_y - 1, iron["light"])
+        c.put(16 - half, band_y - 1, glow["hi"] if lit else iron["light"])
+        c.put(16 + half, band_y - 1, iron["deep"])
+    c.put(14, 60, iron["deep"])    # hairline crack
+    c.put(15, 61, iron["deep"])
+    c.put(15, 62, iron["deep"])
+
+    # --- brazier bowl ---
+    for i, y in enumerate(range(36, 46)):
+        half = 9 - i // 2
+        for dx in range(-half, half + 1):
+            tone = iron["base"]
+            if dx <= -half + 1:
+                tone = iron["light"]
+            elif dx >= half - 1 or y >= 44:
+                tone = iron["deep"]
+            c.put(16 + dx, y, tone)
+    c.rect(7, 35, 18, 1, iron["light"])          # rim
+    c.put(7, 36, iron["light"])
+    c.put(24, 36, iron["deep"])
+    c.put(9, 36, glow["hi"] if lit else iron["light"])   # rim rivets
+    c.put(22, 36, iron["deep"])
+
+    # --- cage: four ribs + top ring + finial ---
+    for rx in (8, 13, 18, 23):
+        for y in range(23, 35):
+            c.put(rx, y, iron["deep"])
+        c.put(rx, 23, iron["base"])
+    c.rect(8, 21, 16, 2, iron["base"])
+    c.rect(8, 21, 16, 1, iron["light"])
+    c.rect(14, 17, 4, 4, iron["base"])
+    c.put(15, 16, iron["light"])
+    c.put(16, 16, iron["light"])
+
+    # --- core ---
+    if lit:
+        c.ellipse(16, 29, 6, 5, glow["glow"])
+        c.ellipse(16, 28, 3.5, 3.5, glow["hi"])
+        c.put(15, 24, glow["glow"])              # flame tongue
+        c.put(16, 23, glow["hi"])
+        c.put(17, 25, glow["glow"])
+    else:
+        c.ellipse(16, 30, 5.5, 4, palette.NIGHTFELL["deep"])
+        c.ellipse(15, 31, 3, 2, palette.NIGHTFELL["base"])
+        c.put(14, 32, palette.STORMCRYSTAL["deep"])   # dead coals
+        c.put(18, 31, palette.STORMCRYSTAL["deep"])
+        c.put(16, 30, palette.STORMSLATE["charge"])   # one faint live ember
+        c.put(11, 38, iron["deep"])                   # soot streaks on the bowl
+        c.put(12, 39, iron["deep"])
+        c.put(20, 38, iron["deep"])
+
     c.outline(palette.OUTLINE)
     if lit:
-        # cold steady wardenlight
-        c.ellipse(16, 26, 6, 7, glow["glow"])
-        c.ellipse(16, 25, 3.5, 4.5, glow["hi"])
-        c.put(16, 18, glow["glow"])
-        c.put(13, 20, with_alpha(glow["glow"], 160))
-        c.put(19, 21, with_alpha(glow["glow"], 160))
-    else:
-        # dead shattered crystal stub
-        for (sx, sy, h) in ((13, 33, 4), (17, 33, 6), (20, 33, 3)):
-            for i in range(h):
-                c.put(sx, sy - i, palette.STORMCRYSTAL["deep"])
-            c.put(sx, sy - h, palette.STORMCRYSTAL["base"])
+        # glow halo + sparks float outside the silhouette (after outline)
+        for (hx, hy, a) in ((5, 27, 150), (27, 25, 150), (16, 13, 170),
+                            (9, 18, 130), (23, 17, 130), (12, 11, 110), (21, 9, 110)):
+            c.put(hx, hy, with_alpha(glow["glow"], a))
+        c.put(16, 11, with_alpha(glow["hi"], 200))
     c.save(path)
 
 

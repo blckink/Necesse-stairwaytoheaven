@@ -3,6 +3,28 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [0.2.5] — 2026-08-23
+
+Art batch 2 — the quest landmarks reach vanilla detail density (measured
+against vanilla banners and character sprites from playtest screenshots).
+
+### Changed
+- **Sky Warden redrawn**: the coat palette sat so close to the outline color
+  that the figure rendered as a black cone. New material-separated look:
+  lifted violet-grey coat ramp with shoulder rim light, center and skirt
+  creases, iron belt with buckle, hip satchel, ragged hem with pale lining,
+  two-row feather collar with bright tips, full hair crown + curtains, long
+  beard, and a taller staff crowned by a riveted iron cage lantern with a
+  glowing core and floating halo (all four facings + walk/swim frames).
+- **Warden's beacon rebuilt** (off + on): two-step masonry base with mortar
+  joints and cracks, tapered riveted iron column, flared brazier bowl, a
+  four-rib cage with finial. Off shows dead coals, soot streaks and one
+  faint ember; on burns with a white-teal core, flame tongues, sparks and a
+  glow halo, with light catching the rivets and bands.
+- **Skywatch banner redrawn**: iron mounting rod with rings and end caps,
+  silver-bordered night cloth with fold shading, a bold two-pixel crescent
+  moon + star emblem, swallowtail bottom with fringe tips.
+
 ## [0.2.4] — 2026-08-23
 
 Art batch 1, driven by playtest + reference feedback: terrain with real material
