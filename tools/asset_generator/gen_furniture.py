@@ -6,6 +6,8 @@ Formats verified against vanilla references:
 - simple deco objects: 32xH bottom-anchored columns
 """
 
+import math
+
 from px import Canvas, Rng, with_alpha
 import palette
 
@@ -105,51 +107,67 @@ def gen_gloomwillow(path, variants=2):
         rng = Rng(0x610C + v * 313)
         base_x = 22 + rng.pick((-2, 2))
         base_y = 76
-        # thick crooked trunk: tapering 6->3px, with two hard kinks
-        x = base_x
-        kink1 = rng.range(50, 58)
-        kink2 = rng.range(32, 40)
-        for y in range(base_y, 24, -1):
-            if y == kink1:
-                x += rng.pick((-3, 3))
-            if y == kink2:
-                x += rng.pick((-4, 4))
-            if y % 9 == 0:
-                x += rng.pick((-1, 0, 1))
-            x = max(8, min(38, x))
-            t = (base_y - y) / (base_y - 24)
-            width = max(3, round(6 - 3 * t))
+        top_y = 24
+        H = base_y - top_y
+        # soft ground shadow so the tree sits in the world
+        c.ellipse(base_x + 3, base_y + 2, 9, 2, with_alpha((20, 19, 26), 70))
+        # crooked trunk as one CONTINUOUS S-curve (no hard kinks), taper 6->2
+        amp = rng.pick((2.5, 3.0, 3.5))
+        ph = rng.float() * 3.0
+        drift = rng.pick((-4, -3, 3, 4))
+        path_x = {}
+        for y in range(base_y, top_y - 1, -1):
+            t = (base_y - y) / H
+            x = base_x + round(amp * math.sin(t * 3.2 + ph) + drift * t)
+            path_x[y] = x
+            width = max(3, round(6 - 3.5 * t))
             for dx in range(width):
                 tone = wood["light"] if dx == 0 else (wood["deep"] if dx >= width - 1 else wood["base"])
                 c.put(x + dx, y, tone)
-            # bark notches
+            # bark notches + a rare sheen fleck
             if y % 6 == 0 and width > 3:
                 c.put(x + rng.range(1, width - 2), y, wood["deep"])
-        top_x, top_y = x + 1, 24
-        # gnarled branches: 2px crooked limbs ending in claw twigs
-        for (ox, oy, ln, lean) in ((-1, 4, 11, -2), (2, 0, 10, 3), (0, 9, 8, -3)):
-            bx, by = top_x + ox, top_y + oy
+            if y % 9 == 4 and width > 4:
+                c.put(x + 1, y, wood["hi"])
+        top_x = path_x[top_y] + 1
+        # branches: WEEPING curved limbs (per-step turn keeps them
+        # 8-connected) that open outward and droop, each with a claw twig
+        perch = (top_x + 4, top_y + 2)
+        for bi, (start_dy, ang0, turn, ln) in enumerate(
+                ((1, 115, 7, 12), (5, 62, -7, 11), (10, 92, 4, 7),
+                 (26, 148, -9, 6))):              # low upturned snag
+            fx = float(path_x[top_y + start_dy] + 1)
+            fy = float(top_y + start_dy)
+            ang = ang0 + rng.range(-8, 8)
             for i in range(ln):
-                bx += lean if i % 3 == 0 else (1 if lean > 0 else -1) * (i % 2)
-                by -= 1
-                bx = max(2, min(45, bx))
-                c.put(bx, by, wood["base"])
-                c.put(bx + 1, by, wood["deep"])
-            # claw fork at the tip
-            c.put(bx - 1, by - 1, wood["deep"])
-            c.put(bx - 2, by - 2, wood["deep"])
-            c.put(bx + 2, by - 1, wood["deep"])
-            c.put(bx + 3, by - 2, wood["deep"])
+                ang += turn * (2.5 if i >= ln - 2 else 1)   # hooked tip
+                fx += math.cos(math.radians(ang))
+                fy -= math.sin(math.radians(ang))
+                x, yy = round(fx), round(fy)
+                c.put(x, yy, wood["base"])
+                if i < ln * 0.6:
+                    c.put(x + 1, yy, wood["deep"])
+                if bi == 1 and i == 3:
+                    perch = (x + 1, yy - 1)       # the raven sits here
+                if ln > 6 and i in (round(ln * 0.45), round(ln * 0.8)):
+                    sx, sy = fx, fy
+                    sang = ang + (55 if i == round(ln * 0.45) else -50)
+                    for _k in range(3 + rng.range(0, 2)):
+                        sx += math.cos(math.radians(sang))
+                        sy -= math.sin(math.radians(sang))
+                        c.put(round(sx), round(sy), wood["deep"])
         # flared roots
         for side in (-1, 1):
             for i in range(5):
                 c.put(base_x + (2 if side > 0 else 0) + side * (2 + i), base_y - i // 3, wood["deep"])
                 c.put(base_x + (2 if side > 0 else 0) + side * (2 + i), base_y + 1 - i // 3, wood["base"])
-        # one perched tiny raven on variant 0
+        # one perched tiny raven on variant 0, sitting on the branch elbow
         if v == 0:
-            c.ellipse(top_x + 4, top_y + 2, 2.4, 2, (20, 19, 26))
-            c.put(top_x + 2, top_y + 1, (20, 19, 26))
-            c.put(top_x + 1, top_y + 1, (44, 43, 52))
+            px_, py_ = perch
+            c.ellipse(px_, py_ - 1, 2.4, 2, (20, 19, 26))
+            c.put(px_ - 2, py_ - 2, (20, 19, 26))      # head tuck
+            c.put(px_ - 3, py_ - 2, (44, 43, 52))      # beak glint
+            c.put(px_ + 2, py_ - 3, (20, 19, 26))      # tail tip up
         c.outline(palette.OUTLINE)
         sheet.paste(c, v * 48, 0)
     sheet.save(path)

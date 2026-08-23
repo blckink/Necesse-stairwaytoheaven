@@ -9,6 +9,8 @@ Formats (docs/research/asset-formats.md):
 - GrassObject: N * 32 wide, 32 tall (undergroundPixels = 0).
 """
 
+import math
+
 from px import Canvas, Rng, with_alpha
 import palette
 
@@ -122,63 +124,98 @@ def gen_stairway_up(path):
 
 
 def gen_windwheat(path):
-    """128x32 grass strip: 4 variants of tall wheat-grass with seed heads."""
+    """128x32 grass strip: 4 variants of a wheat-grass CLUMP. Stalks fan out
+    of one root and arc toward their lean (t^2 bend), heights vary widely,
+    heavy seed heads nod sideways, and 1px awn whiskers poke off the grain.
+    Like vanilla grass there is no generic outline pass — the deep ramp edge
+    carries the silhouette (an outline pass would eat the awns and tips)."""
     sheet = Canvas(128, 32)
     W = palette.WINDWHEAT
     for v in range(4):
         c = Canvas(32, 32)
         rng = Rng(0x3EA7 + v * 131)
-        # 2px stalks (the outline pass eats 1px lines) with fat seed heads
-        for s in range(rng.range(4, 5)):
-            x = 6 + s * 6 + rng.range(-1, 1)
-            h = rng.range(12, 18)
-            lean = rng.pick((-2, -1, 1, 2))
-            top_x = x
+        root = 15 + rng.pick((-2, 0, 1))
+        n = rng.range(5, 6)
+        stalks = []
+        for s in range(n):
+            bx = root + round((s - (n - 1) / 2.0) * 3.2) + rng.range(-1, 1)
+            h = rng.range(9, 18)
+            lean = round((s - (n - 1) / 2.0) * 2.2) + rng.range(-2, 2)
+            lean = max(-6, min(6, lean))
+            if lean == 0:
+                lean = rng.pick((-1, 1))
+            stalks.append((h, bx, lean, rng.chance(0.8)))
+        for (h, bx, lean, headed) in sorted(stalks):     # tall stalks in front
+            base_y = 29 + rng.pick((0, 0, -1))
+            top_x = bx
             for i in range(h):
-                top_x = x + round(lean * (i / h))
-                # 3px stalk: inside-outline eats both edge columns, the bright
-                # core must survive on its own
+                t = i / h
+                top_x = bx + round(lean * t * t)         # arc, not a tilt
                 mid = W["base"] if i < h - 4 else W["light"]
-                c.put(top_x - 1, 29 - i, W["deep"])
-                c.put(top_x, 29 - i, mid)
-                c.put(top_x + 1, 29 - i, W["deep"] if i < 3 else W["base"])
-            # seed head: plump 3x4 grain cluster
-            hy = 29 - h
-            for (dx, dy) in ((0, 0), (1, 0), (-1, 1), (0, 1), (1, 1), (2, 1),
-                             (-1, 2), (0, 2), (1, 2), (0, 3), (1, 3)):
-                c.put(top_x + dx, hy - 3 + dy, W["head"])
-            c.put(top_x, hy - 4, W["light"])
-            c.put(top_x + 2, hy - 1, W["base"])
-        # base tuft shadow
-        for dx in range(6, 27, 2):
-            c.put(dx, 30, W["deep"])
-        c.outline(palette.OUTLINE)
+                c.put(top_x - 1, base_y - i, W["deep"])
+                c.put(top_x, base_y - i, mid)
+                if i < h - 2:
+                    c.put(top_x + 1, base_y - i, W["deep"] if i < 3 else W["base"])
+            hy = base_y - h
+            if headed:
+                nod = (1 if lean > 0 else -1) * (2 if abs(lean) > 3 else 1)
+                hx = top_x + nod
+                for (dx, dy) in ((0, 0), (1, 0), (-1, 1), (0, 1), (1, 1), (2, 1),
+                                 (-1, 2), (0, 2), (1, 2), (0, 3), (1, 3)):
+                    c.put(hx + dx, hy - 3 + dy, W["head"])
+                c.put(hx, hy - 4, W["light"])
+                c.put(hx + (2 if nod > 0 else -1), hy - 1, W["base"])
+                c.put(hx + nod, hy - 5, W["deep"])        # awn whiskers
+                c.put(hx + nod * 2, hy - 4, W["deep"])
+            else:
+                c.put(top_x, hy - 1, W["light"])          # bare blade tip
+        # irregular root tufts (no dotted line)
+        for _ in range(rng.range(3, 4)):
+            tx = root + rng.range(-9, 9)
+            c.put(tx, 30, W["deep"])
+            c.put(tx + 1, 30, W["deep"])
+            c.put(tx + rng.pick((0, 1)), 29, W["deep"])
         sheet.paste(c, v * 32, 0)
     sheet.save(path)
 
 
 def gen_cloudberrybush(path):
-    """64x32 strip: 2 variants of a low berry bush with amber cloudberries."""
+    """64x32 strip: 2 variants of a low cloudberry bush. Canopy built from a
+    ring of jittered lobes (lumpy silhouette, mirror-free), dappled with a
+    broken leaf-scale texture; berries sit in clusters of 2-3 like vanilla
+    berry bushes, each a 2x2 ball with glint and rim shadow."""
     sheet = Canvas(64, 32)
     B = palette.CLOUDBERRY
     for v in range(2):
         c = Canvas(32, 32)
         rng = Rng(0xBE44 + v * 977)
-        # foliage mound with lumpy top
-        c.ellipse(16, 22, 10, 6, B["leaf"])
-        for bx in (-6, -1, 4, 8):
-            c.ellipse(16 + bx, 17 + rng.range(0, 2), 3, 2.4, B["leaf"])
-        c.ellipse(13, 24, 7, 3.5, B["leaf_deep"])
-        # stem base
-        c.put(15, 28, B["leaf_deep"])
+        lobes = [(16, 21, 7, 4.5)]
+        for (lx, ly) in ((9, 20), (13, 17), (18, 16), (23, 19), (25, 22), (7, 23)):
+            lobes.append((lx + rng.range(-1, 1), ly + rng.range(0, 1),
+                          rng.range(3, 4), 2.6))
+        for (lx, ly, r, ry) in lobes:            # deep under-lobes = volume
+            c.ellipse(lx + 1, ly + 1, r, ry, B["leaf_deep"])
+        for (lx, ly, r, ry) in lobes:
+            c.ellipse(lx, ly, r, ry, B["leaf"])
+        # dappled leaf-scale texture, broken so it never reads as a grid
+        for x in range(3, 29):
+            for y in range(12, 28):
+                if c.get(x, y)[:3] == B["leaf"][:3] and (x + 2 * y) % 5 == 0 \
+                        and rng.chance(0.8):
+                    c.put(x, y, B["leaf_deep"])
+        c.ellipse(13, 26, 7, 2, B["leaf_deep"])  # shaded underside
+        c.put(15, 28, B["leaf_deep"])            # stem base peeking out
         c.put(16, 28, B["leaf_deep"])
-        # berries: amber clusters with a single highlight each
-        for _ in range(rng.range(5, 7)):
-            bx = 16 + rng.range(-8, 8)
-            by = 18 + rng.range(-3, 4)
-            c.put(bx, by, B["berry"])
-            c.put(bx + 1, by, B["berry_deep"])
-            c.put(bx, by - 1, B["berry_hi"])
+        # berries: two clusters + one loner
+        pts = []
+        for (bx0, by0) in ((11 + rng.range(-1, 1), 20), (21 + rng.range(-1, 1), 17)):
+            for k in range(rng.range(2, 3)):
+                pts.append((bx0 + (k * 3) % 5 - 1, by0 + (k * 2) % 3))
+        pts.append((16 + rng.pick((-5, 4)), 23))
+        for (bx, by) in pts:
+            c.rect(bx, by, 2, 2, B["berry"])
+            c.put(bx + 1, by + 1, B["berry_deep"])
+            c.put(bx, by, B["berry_hi"])
         c.outline(palette.OUTLINE)
         sheet.paste(c, v * 32, 0)
     sheet.save(path)
@@ -274,27 +311,44 @@ def gen_aurorabloom(path, variants=2):
 # --- Sky reeds ---------------------------------------------------------------
 
 def gen_skyreeds(path, variants=4):
+    """N*32 strip: silky reeds in TWO uneven clumps. Blades fan outward from
+    their clump root, arc with per-blade curvature, and half of them hook
+    over at the tip like vanilla tall grass. No outline pass (grass rule)."""
     ramp = palette.WINDSILK
     tuft = palette.CLOUDTURF
     sheet = Canvas(variants * 32, 32)
     for v in range(variants):
         c = Canvas(32, 32)
         rng = Rng(0x4EED + v * 313)
-        # grounding tuft so the reeds sit in the turf
-        c.ellipse(16, 29, 8, 2, tuft["tuft"])
-        for _ in range(rng.range(5, 7)):
-            x = rng.range(7, 23)
-            base_y = rng.range(26, 29)
-            h = rng.range(12, 19)
-            lean = rng.pick((-3, -2, 2, 3))
+        # two uneven grounding tufts over a deep shadow that anchors the
+        # pale blades on pale cloudturf at 1x
+        c.ellipse(12 + rng.range(-2, 1), 30, 6.5, 1.6, tuft["deep"])
+        c.ellipse(21 + rng.range(-1, 2), 30.5, 5.5, 1.4, tuft["deep"])
+        c.ellipse(11 + rng.range(-2, 1), 29, 6, 1.6, tuft["tuft"])
+        c.ellipse(22 + rng.range(-1, 2), 30, 5, 1.4, tuft["tuft"])
+        blades = []
+        for (cx0, cnt) in ((rng.range(9, 12), rng.range(3, 4)),
+                           (rng.range(19, 22), rng.range(2, 3))):
+            for _ in range(cnt):
+                blades.append((rng.range(8, 19), cx0 + rng.range(-2, 2), cx0))
+        for (h, bx, cx0) in sorted(blades):          # tall blades in front
+            base_y = rng.range(27, 29)
+            out = 1 if bx >= cx0 else -1
+            lean = out * rng.range(2, 5)
+            bend = rng.pick((1.6, 2.0, 2.4))
+            hook = rng.chance(0.5)
+            x = bx
+            y = base_y
             for i in range(h):
                 t = i / h
-                sx = x + round(lean * t * t * 1.6)
-                # 2px thick blades that thin to 1px at the tip
-                tone = ramp["deep"] if t < 0.3 else (ramp["base"] if t < 0.7 else ramp["light"])
-                c.put(sx, base_y - i, tone)
-                if t < 0.65:
-                    c.put(sx + 1, base_y - i, tone)
-            c.put(x + round(lean * 1.6), base_y - h, ramp["hi"])
+                x = bx + round(lean * (t ** bend))
+                if hook and i > h - 3:
+                    x += out * (i - (h - 3))         # tip curls over
+                y = base_y - i
+                tone = ramp["deep"] if t < 0.35 else (ramp["base"] if t < 0.7 else ramp["light"])
+                c.put(x, y, tone)
+                if t < 0.6:
+                    c.put(x + 1, y, ramp["deep"] if t < 0.45 else ramp["base"])
+            c.put(x, y, ramp["hi"])                  # glint ON the tip pixel
         sheet.paste(c, v * 32, 0)
     sheet.save(path)

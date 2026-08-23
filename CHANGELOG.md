@@ -14,6 +14,24 @@ Art release: living sprites, organic construction.
   around the body, with a breathing glow halo synced to the crackle. It was a
   static orb ("an unanimated dot") before.
 - Storm Wisp bestiary icon redrawn to match the new flame-teardrop body.
+- **Zephyr Ray rebuilt as an organic manta**: wings are curved membranes now —
+  convex leading edge, scalloped trailing edge, shading bands that follow the
+  sweep — with buried wing roots, cephalic lobes, mantle spots and an
+  S-curved tail whip; folded frames sweep the tips down and back, so the flap
+  visibly curls through the stroke instead of just scaling. Icon matches.
+- **Gloom Shade hem now genuinely undulates**: stable hood with a floppy
+  point, asymmetric drifting cloak masses, and a ragged tendril hem that
+  re-poses on every walk frame (the vanilla spirit construction), with claw
+  arms and glowing eyes applied after the outline.
+- **Flora made organic across both dimensions**: windwheat arcs in a fanning
+  clump with nodding seed heads (was a picket fence of straight stalks);
+  skyreeds and whisperreeds got uneven clumps, curved blades and hooked or
+  fluffed tips; the cloudberry bush a lumpy lobed canopy with berry clusters;
+  gloomshrooms bell-dome caps with wavy skirts and broken glow-gills (were
+  flying saucers); ash bones individually bowed ribs, ash mounds and a real
+  skull; the dead tree / gloomwillow a continuous S-curve trunk with weeping,
+  fully connected branches and the raven re-perched on a branch elbow.
+  Grass-class sprites now skip the outline pass like vanilla grasses.
 
 ### Fixed
 - README troubleshooting now covers BOTH artifacts a broken sky/Veil level

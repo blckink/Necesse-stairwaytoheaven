@@ -1,6 +1,8 @@
 """All Veil (v0.3) sprites: terrain splat materials, murkwater, fen flora,
 seance circle, the rift pair, the ghost lantern and the Gloom Shade."""
 
+import math
+
 from px import Canvas, Rng, with_alpha
 import palette
 import gen_splats
@@ -133,93 +135,197 @@ def material_murkwater(deep):
 # --- flora + deco -------------------------------------------------------------
 
 def gen_whisperreeds(path, variants=4):
+    """N*32 strip: murk reeds arcing out of two uneven root clumps, tips
+    dressed in pale whisper-fluff; one reed per variant is snapped over.
+    No generic outline pass (vanilla grass construction) — the deep ramp
+    edge carries the silhouette and keeps the 1px fluff whiskers alive."""
     W = palette.MURKMOSS
     pale = palette.BONEASH
     sheet = Canvas(variants * 32, 32)
     for v in range(variants):
         c = Canvas(32, 32)
         rng = Rng(0x3EED + v * 313)
-        c.ellipse(16, 29, 8, 2, W["deep"])
-        for s in range(rng.range(4, 6)):
-            x = 7 + s * 5 + rng.range(-1, 1)
-            h = rng.range(11, 17)
-            lean = rng.pick((-2, -1, 1, 2))
+        # uneven mud tufts at the roots
+        c.ellipse(12 + rng.range(-2, 1), 29, 6, 1.8, W["deep"])
+        c.ellipse(21 + rng.range(-1, 2), 30, 5, 1.5, W["deep"])
+        c.put(9 + rng.range(0, 2), 28, W["tuft"])
+        c.put(23 + rng.range(-1, 1), 29, W["tuft"])
+        blades = []
+        for (cx0, cnt) in ((rng.range(9, 12), rng.range(2, 3)),
+                           (rng.range(19, 22), rng.range(2, 3))):
+            for _ in range(cnt):
+                blades.append((rng.range(9, 17), cx0 + rng.range(-2, 2), cx0))
+        broken = rng.range(0, len(blades) - 1)       # one reed snapped over
+        for bi, (h, bx, cx0) in enumerate(sorted(blades)):
+            base_y = rng.range(27, 29)
+            out = 1 if bx >= cx0 else -1
+            lean = out * rng.range(2, 5)
+            bend = rng.pick((1.7, 2.0, 2.3))
+            x = bx
             for i in range(h):
                 t = i / h
-                sx = x + round(lean * t * t * 1.5)
-                mid = W["base"] if t < 0.6 else W["tuft"]
-                c.put(sx - 1, 29 - i, W["deep"])
-                c.put(sx, 29 - i, mid)
-                c.put(sx + 1, 29 - i, W["deep"] if t < 0.5 else W["base"])
-            c.put(sx, 29 - h, pale["light"])      # pale whisper-tip
-            c.put(sx, 29 - h - 1, pale["hi"])
-        c.outline(palette.OUTLINE)
+                x = bx + round(lean * (t ** bend))
+                if bi == broken and i > h - 4:
+                    x += out * (i - (h - 4))         # snapped tip flops over
+                y = base_y - i
+                mid = W["base"] if t < 0.55 else W["tuft"]
+                c.put(x - 1, y, W["deep"])
+                c.put(x, y, mid)
+                if t < 0.5:
+                    c.put(x + 1, y, W["deep"])
+            ty = base_y - h
+            if bi == broken:
+                c.put(x + out, ty + 1, pale["base"])  # husk at the snap
+            else:
+                c.put(x, ty, pale["light"])           # whisper-fluff tip
+                c.put(x, ty - 1, pale["hi"])
+                c.put(x + out, ty - 1, pale["base"])
         sheet.paste(c, v * 32, 0)
     sheet.save(path)
 
 
 def gen_gloomshroom(path):
-    """64x32: 2 variants — a fat glowing cap shroom plus a small companion."""
+    """64x32: 2 variants of glowing shrooms with vanilla mushroom
+    proportions: a BELL-DOME cap (not a disc) with a wavy skirt over a pale
+    curved stem, glowing gill dashes under the rim, a tilted companion and a
+    tiny button, all rooted in a dark peat mound."""
     sheet = Canvas(64, 32)
     G = palette.GHOSTFLAME
     S = palette.NIGHTFELL
+    P = palette.BLACKPEAT
     for v in range(2):
         c = Canvas(32, 32)
         rng = Rng(0x5A00 + v * 977)
 
-        def shroom(cx, ground, r):
-            # stem
-            c.rect(cx - 1, ground - r - 1, 3, r + 1, S["light"])
-            c.put(cx + 1, ground - 2, S["base"])
-            # cap: wide dome sitting ON the stem
-            c.ellipse(cx, ground - r - 2, r + 3, r * 0.8 + 1.5, S["base"])
-            c.ellipse(cx - 1, ground - r - 3, r + 1.5, r * 0.6 + 1, S["light"])
-            c.ellipse(cx - 2, ground - r - 4, r * 0.6, r * 0.35, S["hi"])
-            # glowing gill line under the rim + spots on the cap
-            for dx in range(-r - 2, r + 3, 2):
-                c.put(cx + dx, ground - r - 1, G["glow"])
-            c.put(cx - r + 1, ground - r - 4, G["glow"])
-            c.put(cx + 2, ground - r - 5, G["core"])
+        def shroom(cx, ground, r, tilt=0):
+            """r = cap half-width. Dome height ~ r, cap overhangs the stem."""
+            stem_h = r + 3
+            cap_y = ground - stem_h            # cap skirt line
+            # peat mound the stem grows out of
+            c.ellipse(cx, ground, r - 1, 1.4, P["base"])
+            c.put(cx - 1, ground - 1, P["light"])
+            # stem: 3px pale column with a subtle lean
+            for i in range(stem_h + 1):
+                sx = cx + (tilt if i > stem_h // 2 else 0)
+                c.put(sx - 1, ground - i, S["hi"])
+                c.put(sx, ground - i, S["light"])
+                c.put(sx + 1, ground - i, S["base"])
+            # cap: stacked dome rows (quarter-ellipse profile), wavy skirt
+            H = max(3, round(r * 0.9))
+            for j in range(H + 1):
+                u = j / H
+                half = max(1, round((r + 1) * math.sqrt(max(0.0, 1 - (1 - u) ** 2))))
+                y = cap_y - H + j
+                row_off = tilt * round(u * 1.2)
+                for dx in range(-half, half + 1):
+                    c.put(cx + row_off + dx, y, S["base"])
+            # cap shading: lit upper-left, pale speckles
+            c.ellipse(cx - r * 0.3 + tilt, cap_y - H + H * 0.34, r * 0.52, H * 0.4, S["light"])
+            c.ellipse(cx - r * 0.42 + tilt, cap_y - H + H * 0.22, r * 0.26, H * 0.2, S["hi"])
+            if r >= 5:
+                # wavy skirt dips + dome details only fit the big cap
+                for k, dx in enumerate(range(-r, r + 1, 3)):
+                    c.put(cx + tilt + dx + (k % 2), cap_y + 1, S["base"])
+                c.put(cx + tilt + r - 3, cap_y - H + 2, S["hi"])
+                c.put(cx + tilt - 1, cap_y - 2, S["hi"])
+                # glowing gill dashes under the rim (broken, not a dotted line)
+                for dx in range(-r, r + 1):
+                    if (dx + r) % 4 < 2 and abs(dx - tilt) > 1:
+                        c.put(cx + tilt + dx, cap_y, G["glow"])
+                c.put(cx + tilt - r + 2, cap_y - H + 1, G["glow"])
+                c.put(cx + tilt + 2, cap_y - H, G["core"])
+            else:
+                c.put(cx + tilt - 1, cap_y, G["glow"])       # small gill glint
+                c.put(cx + tilt + 2, cap_y, G["glow"])
+                c.put(cx + tilt, cap_y - H + 1, G["core"])
 
-        big = rng.range(5, 6)
+        big = rng.range(6, 7)
         if v == 0:
-            shroom(11, 29, big)
-            shroom(23, 29, 3)
+            shroom(9, 28, big)
+            shroom(23, 29, 4, tilt=-1)         # companion leans toward the big one
         else:
-            shroom(20, 29, big)
-            shroom(8, 30, 3)
+            shroom(21, 28, big)
+            shroom(7, 29, 4, tilt=1)
         c.outline(palette.OUTLINE)
-        c.put(6 + v * 18, 14, with_alpha(G["glow"], 150))
-        c.put(26 - v * 12, 18, with_alpha(G["glow"], 130))
+        # drifting spore motes (after outline so they float)
+        c.put(6 + v * 18, 13, with_alpha(G["glow"], 150))
+        c.put(26 - v * 12, 17, with_alpha(G["glow"], 130))
+        c.put(15 + v * 2, 8, with_alpha(G["glow"], 110))
         sheet.paste(c, v * 32, 0)
     sheet.save(path)
 
 
 def gen_ashbones(path):
+    """64x32: 2 variants of half-buried remains rising from an ash drift:
+    individually BOWED ribs (each its own arc, heights varied), a vertebrae
+    ridge of knobs, a proper little skull on variant 0 and a fallen long
+    bone on variant 1. No parallel hatching — every bone is a curved mass."""
     sheet = Canvas(64, 32)
     B = palette.BONEASH
+    A = palette.ASHSAND
     for v in range(2):
         c = Canvas(32, 32)
         rng = Rng(0xB0E5 + v * 131)
-        cx = 16 + rng.pick((-2, 2))
-        # half-buried ribcage: 4 arcs rising from the ash
-        for i, rx in enumerate((10, 8, 6, 4)):
-            h = 12 - i * 2
-            x = cx - rx + i * (1 if v == 0 else 2)
-            for j in range(h):
-                t = j / max(h - 1, 1)
-                px_ = x + round(rx * 0.9 * t)
-                c.put(px_, 28 - j, B["base"] if j < h - 2 else B["light"])
-                c.put(px_ + 1, 28 - j, B["deep"])
-        # spine ridge + skull hint on variant 0
-        for i in range(6):
-            c.put(cx - 8 + i * 3, 28, B["deep"])
+        cx = 13 + rng.pick((-2, 1))
+        ground = 28
+        # ash drift: two low overlapping mounds, not one slug-shaped bar
+        c.ellipse(cx - 2, ground + 1, 7, 1.8, A["deep"])
+        c.ellipse(cx + 8, ground + 1, 6, 1.6, A["deep"])
+        c.ellipse(cx - 3, ground, 6, 1.6, A["base"])
+        c.ellipse(cx + 7, ground, 5.5, 1.5, A["base"])
+        c.put(cx - 3, ground - 1, A["light"])
+        c.put(cx + 5, ground - 1, A["light"])
+        # ribs: each bows outward on its own arc and tapers to a point
+        n_ribs = 3
+        for k in range(n_ribs):
+            rx0 = cx - 6 + k * 5 + rng.range(-1, 0)
+            rh = 10 - k * 2 + rng.range(-1, 1)
+            bow = 3 + (k % 2) + rng.range(0, 1)
+            x = rx0
+            for j in range(rh + 1):
+                u = j / rh
+                x = rx0 + round(bow * math.sin(u * math.pi * 0.55))
+                y = ground - 1 - j
+                c.put(x, y, B["base"] if u > 0.15 else B["deep"])
+                if u < 0.8:                              # taper: 2px -> 1px
+                    c.put(x + 1, y, B["deep"] if u < 0.7 else B["base"])
+                if u < 0.5:
+                    c.put(x - 1, y, B["light"])
+        # vertebrae ridge: knobs with gaps, not a dotted line
+        for (vx, vy) in ((cx - 5, ground), (cx - 1, ground + 1), (cx + 4, ground)):
+            c.rect(vx, vy - 1, 2, 2, B["base"])
+            c.put(vx, vy - 1, B["light"])
+            c.put(vx + 1, vy, B["deep"])
         if v == 0:
-            c.ellipse(cx + 8, 26, 3.4, 3, B["base"])
-            c.ellipse(cx + 8, 24, 2.6, 1.6, B["light"])
-            c.put(cx + 7, 26, palette.OUTLINE)
-            c.put(cx + 10, 26, palette.OUTLINE)
+            # skull: dome + cheek, sockets and nose slit go on after outline
+            sx = cx + 11
+            c.ellipse(sx, 25, 3.6, 3.2, B["base"])
+            c.ellipse(sx - 1, 23.5, 2.6, 1.8, B["light"])
+            c.ellipse(sx - 1, 28, 2.2, 1.4, B["base"])   # jaw half-buried
+            c.put(sx - 3, 27, B["deep"])
+        else:
+            # fallen long bone with knobbed ends
+            bx = cx + 9
+            for i in range(6):
+                y = 25 + i // 3
+                c.put(bx + i, y - 1, B["light"])
+                c.put(bx + i, y, B["base"])
+                c.put(bx + i, y + 1, B["deep"])
+            for ex, ey in ((bx - 1, 25), (bx + 6, 26)):
+                c.ellipse(ex, ey + 0.5, 1.4, 1.4, B["base"])
+                c.put(ex, ey, B["light"])
         c.outline(palette.OUTLINE)
+        if v == 0:
+            sx = cx + 11
+            c.rect(sx - 2, 24, 2, 2, (16, 16, 26))       # eye sockets
+            c.rect(sx + 1, 24, 2, 2, (16, 16, 26))
+            c.put(sx, 26, B["deep"])                     # nose slit
+            c.put(sx - 1, 28, B["deep"])                 # tooth gaps
+            c.put(sx + 1, 28, B["deep"])
+        # ash spilling over the bone roots (buried feel, after outline)
+        c.put(cx - 4, ground - 1, A["base"])
+        c.put(cx + 2, ground, A["light"])
+        c.put(cx + 8, ground - 1, A["base"])
         sheet.paste(c, v * 32, 0)
     sheet.save(path)
 
@@ -356,67 +462,114 @@ def gen_ghostlantern(path):
 
 # --- the Gloom Shade ----------------------------------------------------------
 
+# Ragged hem per float phase (0=idle, 1-4=walk cycle): (x offset from the
+# lower-cloak center, length below the root line, sway dir). Lengths and
+# positions shift phase to phase so the hem visibly undulates, matching the
+# vanilla deepcavespirit's re-posed trailing tendrils.
+_SHADE_HEM = (
+    ((-7, 5, 0), (-4, 2, 0), (-1, 9, -1), (2, 4, 0), (5, 7, 1), (7, 3, 0)),
+    ((-7, 4, -1), (-4, 8, 0), (-1, 5, 0), (2, 10, 1), (5, 3, 0), (7, 6, 1)),
+    ((-7, 3, 0), (-3, 10, -1), (0, 5, 0), (3, 3, 0), (6, 8, 1)),
+    ((-7, 7, -1), (-4, 3, 0), (-1, 11, 0), (2, 5, 1), (5, 2, 0), (7, 4, 0)),
+    ((-7, 6, 0), (-3, 4, 1), (0, 8, -1), (3, 10, 0), (6, 5, 1)),
+)
+
+_SHADE_SWAY = (0, 1, 0, -1, 0)
+_SHADE_BOB = (0, 1, 0, 1, 0)
+
+
 def _shade_frame(facing, step, swim=False):
-    """Hooded fen shade built from round masses: hood, shroud, wispy tail,
-    claw arms, hollow face with glowing eyes."""
+    """Hooded fen shade after the vanilla ragged-hem spirit: a stable hood
+    dome, lumpy asymmetric shoulders, a drifting cloak, and a hem of pointed
+    tendrils that re-pose every phase. `step` is the float phase 0..4."""
     c = Canvas(CELL, CELL)
     S = palette.SHADE
     G = palette.GHOSTFLAME
     cx = 32
-    drift = step  # sway with the float cycle
-    top = 16 + (1 if step != 0 else 0)
+    phase = step % 5
+    sway = _SHADE_SWAY[phase]
+    top = 16 + _SHADE_BOB[phase]
 
     def mass(mx, my, rx, ry):
         c.ellipse(mx + 1, my + 1, rx, ry, S["deep"])
         c.ellipse(mx, my, rx, ry, S["base"])
         c.ellipse(mx - rx * 0.3, my - ry * 0.3, rx * 0.55, ry * 0.5, S["light"])
 
-    # shroud body: tapering stacked masses, tail curls at the bottom
-    mass(cx + drift, top + 26, 8, 9)
-    mass(cx, top + 16, 10, 9)
-    # wispy tail: three curls fading down
-    for i, (ox, oy) in enumerate(((-4, 34), (2, 38), (-1, 42))):
-        r = 3 - i
-        if r > 0:
-            c.ellipse(cx + ox + drift * 2, top + oy, r + 1, r, S["deep"])
-            c.ellipse(cx + ox + drift * 2 - 1, top + oy - 1, r, r - 0.5 if r > 1 else 1, S["base"])
-    # hood: big rounded mass with a folded point
-    mass(cx, top + 4, 9, 8)
-    for i in range(4):                        # hood point flops to one side
-        c.put(cx - 2 + i, top - 4 + (i // 2), S["base"])
-        c.put(cx - 2 + i, top - 3 + (i // 2), S["deep"])
-    # claw arms
-    if facing in ("down", "up"):
-        for side in (-1, 1):
-            ax = cx + side * 11
-            ay = top + 18 + (step * side)
-            mass(ax, ay, 3, 4)
-            for j in range(3):                # three claw fingers
-                c.put(ax + side * 2, ay + 3 + j, S["light"])
-                c.put(ax + side * 1, ay + 4 + j, S["deep"])
+    profile = facing == "right"
+    lean = -2 if profile else 0               # profile drifts, hem trails back
+    # --- cloak: shoulders + two drifting body masses (asymmetric on purpose)
+    if profile:
+        mass(cx - 2, top + 13, 7, 6)                      # shoulder hump
+        mass(cx + 3, top + 12, 5.5, 5)                    # chest under the face
     else:
-        ax = cx + 11
-        ay = top + 17 + step
-        mass(ax, ay, 3.5, 4)
-        for j in range(3):
-            c.put(ax + 2, ay + 3 + j, S["light"])
+        mass(cx - 6, top + 13, 6.5, 5.5)                  # heavy left shoulder
+        mass(cx + 5, top + 12, 6, 5)                      # lighter right
+    body_cx = cx + sway + lean
+    hem_cx = cx + sway * 2 - 1 + lean * 2
+    mass(body_cx, top + 20, 9, 7)
+    mass(hem_cx, top + 27, 7.5, 6)
+    # --- ragged hem: tapering tendrils rooted inside the lower cloak mass
+    root = top + 28
+    for (tx, ln, tsway) in _SHADE_HEM[phase]:
+        x = hem_cx + tx
+        for i in range(ln + 4):
+            y = root + i - 4                  # first rows weld into the cloak
+            f = max(0, i - 4) / max(1, ln - 1)
+            w = 4 if i < 4 else (3 if f < 0.45 else (2 if f < 0.8 else 1))
+            if tsway != 0 and i > 6 and i % 3 == 0:
+                x += tsway
+            tone = S["base"] if f < 0.4 else S["deep"]
+            for k in range(w):
+                c.put(x - w // 2 + k, y, tone)
+    # --- hood: stable dome with a floppy point (flops left = asymmetry)
+    hood_cx = cx + (2 if profile else 0)
+    mass(hood_cx, top + 11, 6.5, 4)          # cowl drape bridging into the body
+    c.ellipse(hood_cx + 1, top + 6, 8.5, 7.5, S["deep"])
+    c.ellipse(hood_cx, top + 5, 8.5, 7.5, S["base"])
+    c.ellipse(hood_cx - 2, top + 2, 4.5, 3.4, S["light"])  # thin top-left sheen
+    c.put(hood_cx - 4, top, S["hi"])
+    c.put(hood_cx - 3, top - 1, S["hi"])
+    for i, (px_, w) in enumerate(((0, 3), (-2, 3), (-4, 2))):
+        for k in range(w):
+            c.put(hood_cx + px_ - k, top - 3 - i, S["base"] if k < w - 1 else S["deep"])
+    # --- cloth detail: V-collar fold + two wavy drape creases
+    collar_y = top + 11
+    for dx in range(-4, 5):
+        c.put(cx + dx + (1 if profile else 0), collar_y + abs(dx) // 2, S["deep"])
+    for fx in (-4, 3):
+        for y in range(top + 15, top + 29):
+            wx = body_cx + fx + round(1.3 * math.sin((y - top) * 0.5 + fx + phase * 0.7))
+            c.put(wx, y, S["deep"])
+    # --- claw arms, re-posed with the float phase
+    raise_l = (0, -1, 0, 1, 0)[phase]
+    if profile:
+        arms = ((cx + 9, top + 16 + raise_l),)
+    else:
+        arms = ((cx - 10, top + 17 + raise_l), (cx + 10, top + 17 - raise_l))
+    for (ax, ay) in arms:
+        mass(ax, ay, 3, 4.5)
+        for j in (-2, 0, 2):
+            c.put(ax + j, ay + 5, S["base"])
+            c.put(ax + j, ay + 6, S["deep"])
     c.outline(palette.OUTLINE)
-    # face: hollow void + glowing eyes (after outline)
+    # --- claw glints + hollow face with glowing eyes (after the outline)
+    for (ax, ay) in arms:
+        for j in (-2, 0, 2):
+            c.put(ax + j, ay + 5, S["light"])
     if facing == "down":
-        c.ellipse(cx, top + 5, 6, 5, (16, 16, 26))
-        c.put(cx - 3, top + 4, S["eye"])
-        c.put(cx - 2, top + 4, S["eye"])
-        c.put(cx + 2, top + 4, S["eye"])
-        c.put(cx + 3, top + 4, S["eye"])
-        c.put(cx - 2, top + 3, G["core"])
-        c.put(cx + 3, top + 3, G["core"])
-        c.put(cx, top + 8, S["eye"])          # faint mouth glow
+        c.ellipse(cx, top + 5, 5.5, 4.5, (16, 16, 26))
+        for ex in (cx - 3, cx + 3):
+            c.put(ex, top + 4, S["eye"])
+            c.put(ex, top + 5, S["eye"])
+        c.put(cx - 3, top + 3, G["core"])
     elif facing == "right":
-        c.ellipse(cx + 4, top + 5, 4, 4.5, (16, 16, 26))
+        c.ellipse(cx + 4, top + 5, 3, 3.4, (16, 16, 26))
         c.put(cx + 5, top + 4, S["eye"])
-        c.put(cx + 6, top + 4, S["eye"])
-        c.put(cx + 6, top + 3, G["core"])
-    # up: hood back only — no face
+        c.put(cx + 5, top + 5, S["eye"])
+        c.put(cx + 5, top + 3, G["core"])
+    else:  # up: hood back stays a clean dome; a wavy seam runs down the cloak
+        for y in range(top + 14, top + 27):
+            c.put(cx + round(1.2 * math.sin(y * 0.5 + phase * 0.7)), y, S["deep"])
     if swim:
         import gen_mobs
         gen_mobs._mist_overlay(c)
@@ -425,7 +578,9 @@ def _shade_frame(facing, step, swim=False):
 
 def gen_gloomshade(path):
     from PIL import Image
-    steps = {0: 0, 1: 1, 2: 0, 3: -1, 4: 0, 5: 0}
+    # float phases: idle, then the 4-frame walk cycle (each phase re-poses
+    # the hem tendrils), swim reuses the idle pose under the mist overlay
+    steps = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 0}
     sheet = Canvas(6 * CELL, 4 * CELL)
     for col in range(6):
         swim = col == 5
@@ -442,11 +597,17 @@ def gen_shade_icon(path):
     c = Canvas(32, 32)
     S = palette.SHADE
     G = palette.GHOSTFLAME
-    c.ellipse(16, 20, 8, 9, S["base"])
+    c.ellipse(16, 18, 8, 8, S["base"])
     c.ellipse(16, 11, 7, 6.5, S["base"])
     c.ellipse(13, 9, 4, 3.5, S["light"])
     c.put(15, 4, S["base"])
     c.put(16, 3, S["deep"])
+    # ragged hem drips matching the sheet's tendril skirt
+    for tx, ln in ((11, 3), (15, 5), (19, 2), (22, 4)):
+        for i in range(ln):
+            c.put(tx, 25 + i, S["base"] if i < 2 else S["deep"])
+            if i < 2:
+                c.put(tx + 1, 25 + i, S["deep"])
     c.outline(palette.OUTLINE)
     c.ellipse(16, 12, 4.5, 4, (16, 16, 26))
     c.put(14, 11, S["eye"])

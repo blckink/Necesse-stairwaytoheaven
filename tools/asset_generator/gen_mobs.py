@@ -7,6 +7,8 @@ flying-spirit layout: column 0 = 4 stacked body frames, column 1 = matching
 glow overlays (128x256).
 """
 
+import math
+
 from PIL import Image
 from px import Canvas, Rng, with_alpha, mix
 import palette
@@ -36,63 +38,130 @@ def _mist_overlay(c):
 
 # --- Zephyr Ray --------------------------------------------------------------
 
+def _ray_wing(c, cx, cy, side, root, span, droop, camber, bite, phase, ramp,
+              rng=None):
+    """One organic manta wing, top view: convex CURVED leading edge (quadratic
+    arc bulging forward), gently scalloped trailing edge (three shallow bites
+    between finger points), membrane shaded in bands that follow the sweep.
+    Returns the per-column geometry so accents can ride the same curves."""
+    tip_y = cy + droop
+    lead = (cy - 7.0, cy - 7.0 - camber, tip_y - 0.5)   # bezier root/ctrl/tip
+    trail = (cy + 8.0, cy + 9.0 + droop * 0.55, tip_y + 1.0)
+
+    def bez(p, f):
+        return (1 - f) * (1 - f) * p[0] + 2 * f * (1 - f) * p[1] + f * f * p[2]
+
+    cols = []
+    for xi in range(root, span + 1):
+        f = (xi - root) / max(span - root, 1)
+        yl = bez(lead, f)
+        yt = bez(trail, f)
+        if f > 0.12:                       # ragged trailing edge, zero at tips
+            g = (f * 3.0 + phase) % 1.0
+            yt -= bite * math.sin(g * math.pi)
+        yl_i = round(yl)
+        yt_i = round(max(yt, yl + (2 if f < 0.97 else 0)))
+        cols.append((cx + side * xi, yl_i, yt_i, f))
+    for x, yl, yt, _f in cols:
+        for y in range(yl, yt + 1):
+            c.put(x, y, ramp["base"])
+    # membrane shading: lit band inside the leading edge, shadow along the
+    # trailing edge, two finger creases at fixed chord fractions — all of it
+    # inherits the curvature of the edges, so the bands sweep with the wing
+    for x, yl, yt, f in cols:
+        h = yt - yl
+        if h >= 4:
+            c.put(x, yl + 1, ramp["light"])
+            if h >= 8:
+                c.put(x, yl + 2, ramp["light"])
+            c.put(x, yt - 1, ramp["deep"])
+            if h >= 7:
+                c.put(x, yt - 2, ramp["deep"])
+        # finger creases: dashed so they read as membrane folds, not wires,
+        # and clamped away from the lit and shadowed bands
+        c1 = yl + max(3, round(h * 0.40))
+        c2 = yl + round(h * 0.62)
+        if 0.14 < f < 0.86 and c1 <= yt - 3 and not (rng and rng.chance(0.3)):
+            c.put(x, c1, ramp["deep"])
+        if 0.24 < f < 0.93 and c1 + 2 <= c2 <= yt - 3 and not (rng and rng.chance(0.3)):
+            c.put(x, c2, ramp["deep"])
+        # sparse sheen glints on the lit leading band (light stays top-left)
+        if h >= 6 and 0.26 < f < 0.66 and (x + yl) % 5 == 0:
+            c.put(x, yl + 1, ramp["hi"])
+    return cols
+
+
 def _ray_base(wing_spread, frame_seed):
-    """Top view, head up. wing_spread in [0..1]: 0 folded, 1 full."""
+    """Top view, head up. wing_spread in [0..1]: 0 folded, 1 full.
+
+    Organic manta build: wings are curved membranes whose tips sweep down and
+    back as the spread closes (the flap visibly curls through the stroke),
+    wing roots are buried under the body mass so they blend seamlessly, and
+    the tail whips in an S-curve that re-poses per frame."""
     c = Canvas(CELL, CELL)
     ramp = palette.ZEPHYR
-    rng = Rng(0x2A7 + frame_seed)
-    cx, cy = 32, 32
-    half_span = round(12 + 14 * wing_spread)
-    sweep = round(6 + 3 * (1 - wing_spread))
-    # wings: broad triangles from the body out and slightly back
+    rng = Rng(0x2A7 + frame_seed * 7919)
+    cx, cy = 32, 30
+    span = round(12 + 14 * wing_spread)
+    droop = round(3 + 12 * (1 - wing_spread))      # folded wings trail back
+    camber = 4 + round(3 * wing_spread)            # spread wings bow forward
+    bite = 1.5 + 0.9 * (1 - wing_spread)
+    phase = 0.15 + rng.float() * 0.35              # scallops ripple per frame
+    wings = {}
     for side in (-1, 1):
-        tip_x = cx + side * half_span
-        tip_y = cy + sweep
-        for t in range(0, 101, 4):
-            f = t / 100.0
-            x_edge = round(cx + side * 4 + (tip_x - cx - side * 4) * f)
-            y_front = round(cy - 9 + (tip_y - (cy - 9)) * f)
-            y_back = round(cy + 8 + (tip_y - (cy + 8)) * f * 1.05)
-            for y in range(min(y_front, y_back), max(y_front, y_back) + 1):
-                c.put(x_edge, y, ramp["base"])
-    # body: sleek lens with head up
-    c.ellipse(cx, cy, 5.5, 11, ramp["base"])
-    c.ellipse(cx, cy - 2, 4, 7, ramp["light"])
-    # head tip + eye ridges
-    c.ellipse(cx, cy - 10, 2.5, 2.5, ramp["light"])
-    c.put(cx - 2, cy - 10, palette.OUTLINE)
-    c.put(cx + 2, cy - 10, palette.OUTLINE)
-    # tail whip
-    for i in range(9):
-        c.put(cx + (1 if i % 3 == 2 else 0), cy + 11 + i, ramp["deep"] if i > 4 else ramp["base"])
-    # wing finger ridges radiating toward the tips (drawn before shading)
-    for side in (-1, 1):
-        for k, back in ((0.45, 2), (0.75, 5)):
-            ex = cx + side * round(half_span * k)
-            ey = cy + round(sweep * k) + back
-            c.line(cx + side * 4, cy + back - 2, ex, ey, ramp["deep"])
-    # spine pattern: diamond chain down the back
-    for i, sy in enumerate(range(cy - 7, cy + 8, 4)):
-        c.put(cx, sy, ramp["deep"])
-        c.put(cx - 1, sy + 1, ramp["deep"])
-        c.put(cx + 1, sy + 1, ramp["deep"])
-        c.put(cx, sy + 1, ramp["hi"])
-        c.put(cx, sy + 2, ramp["deep"])
-    # wing shading: leading edge light, trailing dark
-    c.shade_topleft(ramp["hi"], ramp["deep"])
+        wings[side] = _ray_wing(c, cx, cy, side, 2, span, droop, camber,
+                                bite, phase, ramp, rng)
+    # body: overlapping round masses over the wing roots (deep under-crescent,
+    # base mass, light upper-left sheen — the house volumetric construction)
+    c.ellipse(cx + 1, cy + 3, 5.5, 9.5, ramp["deep"])
+    c.ellipse(cx, cy + 1, 5.5, 10, ramp["base"])
+    c.ellipse(cx, cy - 8, 4, 4.5, ramp["base"])            # head mass
+    c.ellipse(cx - 3, cy - 12, 1.7, 2.3, ramp["base"])     # cephalic lobes
+    c.ellipse(cx + 3, cy - 12, 1.7, 2.3, ramp["base"])
+    c.ellipse(cx - 1, cy - 3, 3.6, 7, ramp["light"])
+    c.ellipse(cx - 1, cy - 8, 2.6, 2.8, ramp["light"])
+    c.ellipse(cx - 3, cy - 12, 1.1, 1.5, ramp["light"])
+    c.ellipse(cx - 2, cy - 5, 1.5, 2.4, ramp["hi"])
+    # back pattern: paired dark spots down the mantle (no diamond chain)
+    for sx, sy in ((-2, -1), (2, -1), (-3, 4), (3, 4), (0, 7)):
+        c.put(cx + sx, cy + sy, ramp["deep"])
+    # pelvic fin bumps at the tail root
+    c.ellipse(cx - 3, cy + 9, 2, 1.6, ramp["base"])
+    c.ellipse(cx + 3, cy + 9, 2, 1.6, ramp["base"])
+    c.put(cx - 3, cy + 10, ramp["deep"])
+    c.put(cx + 3, cy + 10, ramp["deep"])
+    # tail: S-curved whip, 3px silhouette at the root tapering to a dark tip
+    tail_phase = 0.9 * frame_seed
+    for i in range(13):
+        y = cy + 9 + i
+        x = cx + round(1.9 * math.sin(i * 0.42 + tail_phase))
+        if i < 4:
+            c.put(x - 1, y, ramp["deep"])
+            c.put(x, y, ramp["base"])
+            c.put(x + 1, y, ramp["deep"])
+        elif i < 9:
+            c.put(x, y, ramp["base"])
+            c.put(x + 1, y, ramp["deep"])
+        else:
+            c.put(x, y, ramp["deep"])
     c.outline(palette.OUTLINE)
-    # accents after the outline: teal spot rows + bright wing-tip rims
+    # accents AFTER the outline: teal spot rows riding the wing sweep, a
+    # glint just inside each tip, eyes at the lobe bases
     for side in (-1, 1):
-        for k in (0.5, 0.72, 0.9):
-            sx = cx + side * round((4 + (half_span - 4) * k))
-            sy = cy + round(sweep * k) + 1
-            c.put(sx, sy, ramp["accent"])
-        tipx = cx + side * half_span
-        c.put(tipx, cy + sweep - 1, ramp["hi"])
-    c.put(cx - 2, cy - 10, palette.OUTLINE)
-    c.put(cx + 2, cy - 10, palette.OUTLINE)
-    c.put(cx - 2, cy - 9, ramp["accent"])
-    c.put(cx + 2, cy - 9, ramp["accent"])
+        cols = wings[side]
+        n = len(cols) - 1
+        for k, fr in enumerate((0.45, 0.66, 0.86)):
+            x, yl, yt, _f = cols[round(n * fr)]
+            mid = yl + (yt - yl) // 2
+            c.put(x, mid, ramp["accent"])
+            if k == 0:
+                c.put(x, mid + 1, ramp["accent"])
+        tx, tyl, tyt, _f = cols[max(0, n - 2)]
+        c.put(tx, tyl + (tyt - tyl) // 2, ramp["hi"])
+    c.put(cx - 3, cy - 9, palette.OUTLINE)
+    c.put(cx + 3, cy - 9, palette.OUTLINE)
+    c.put(cx - 3, cy - 8, ramp["accent"])
+    c.put(cx + 3, cy - 8, ramp["accent"])
     return c
 
 
@@ -397,23 +466,35 @@ def _icon_canvas():
 
 
 def gen_icons(dir_path):
-    # Zephyr Ray: top view, head up — matches the in-world silhouette
+    # Zephyr Ray: top view, head up — mini version of the curved-wing build
     c = _icon_canvas()
     z = palette.ZEPHYR
+    cx, cy = 16, 14
     for side in (-1, 1):
-        c.line(16 + side * 3, 14, 16 + side * 13, 19, z["base"])
-        c.line(16 + side * 3, 17, 16 + side * 13, 20, z["base"])
-        c.line(16 + side * 3, 15, 16 + side * 12, 19, z["light"])
-        c.line(16 + side * 3, 16, 16 + side * 13, 20, z["deep"])
-    c.ellipse(16, 16, 4, 8, z["base"])
-    c.ellipse(16, 14, 3, 5, z["light"])
-    for i in range(6):
-        c.put(16, 24 + i, z["deep"])
+        # same organic wing as the sheet, scaled down (no rng: solid creases)
+        _ray_wing(c, cx, cy, side, 1, 13, 1, 5, 1.2, 0.3, z)
+    c.ellipse(cx, cy + 1, 3, 5.5, z["base"])
+    c.ellipse(cx, cy - 4, 2.4, 2.6, z["base"])
+    c.ellipse(cx - 2, cy - 6, 1.1, 1.4, z["base"])
+    c.ellipse(cx + 2, cy - 6, 1.1, 1.4, z["base"])
+    c.ellipse(cx - 1, cy - 2, 2, 3.6, z["light"])
+    for i in range(8):
+        y = cy + 7 + i
+        x = cx + round(1.6 * math.sin(i * 0.5 + 0.4))
+        if i < 3:
+            c.put(x - 1, y, z["deep"])
+            c.put(x, y, z["base"])
+            c.put(x + 1, y, z["deep"])
+        elif i < 6:
+            c.put(x, y, z["base"])
+            c.put(x + 1, y, z["deep"])
+        else:
+            c.put(x, y, z["deep"])
     c.outline(palette.OUTLINE)
-    c.put(14, 10, palette.OUTLINE)
-    c.put(18, 10, palette.OUTLINE)
-    c.put(10, 17, z["accent"])
-    c.put(22, 17, z["accent"])
+    c.put(cx - 2, cy - 5, palette.OUTLINE)
+    c.put(cx + 2, cy - 5, palette.OUTLINE)
+    c.put(10, cy + 3, z["accent"])
+    c.put(22, cy + 3, z["accent"])
     c.save(f"{dir_path}/zephyrray.png")
 
     # Storm Wisp: mini flame-teardrop matching the animated body
