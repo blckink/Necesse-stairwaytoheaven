@@ -114,6 +114,27 @@ export NECESSE_GAME_DIR=/path/to/necesse-dedicated-server
 non-cheat): it reports generated tile/biome/object counts around the origin plus
 placement diagnostics — paste its output into bug reports.
 
+## Troubleshooting
+
+**The sky (or the Veil) suddenly looks like a vanilla ocean — sharks, zombies,
+fireflies — with unwalkable black patches:** that world was opened in a session
+where the mod was NOT active (duplicate/old jars in the mods folder, the mod
+disabled in the Mods menu, or a Necesse game update that version-locked the
+mod). Without the mod, the game regenerates untouched sky regions with the
+vanilla island generator and can no longer read the mod's tiles in explored
+regions (they render black and block movement).
+
+Fix, in order:
+1. Ensure exactly ONE `Stairway_to_Heaven-*.jar` sits in the mods folder and
+   the Mods menu shows it enabled without warnings. If the game updated past
+   the jar's version, rebuild the jar against the new game version.
+2. With the game CLOSED, open the world save
+   (`%appdata%/Necesse/saves/<world>.zip`) and delete `levels/skyreach.dat`
+   (and/or `levels/veil.dat`) inside it. Only the sky/Veil resets — the level
+   regenerates cleanly (same layout — the seed derives from the world seed)
+   on the next ascent; quest progress up there restarts. The rest of the
+   world is untouched, no cheats involved.
+
 ## Repository layout
 
 | Path | Contents |
