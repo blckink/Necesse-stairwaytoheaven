@@ -1,0 +1,624 @@
+"""Biome trees (vanilla TreeObject format) + falling-leaf particle strips.
+
+Formats (verified against the decompiled TreeObject draw code + vanilla
+sheets, see docs/research/asset-formats.md):
+- Tree sheet: 128 px cells drawn at (tileDrawX - 48, tileDrawY - 96), so the
+  trunk BASE must stand inside the bottom-center 32x32 of its cell
+  (x 48..80, y 96..127). Vanilla ships 2 columns (normal + snow) x 4 variant
+  rows; the sky islands have no snow layer, so we ship 1 column x 2 variant
+  rows -> each sheet is 128x256. Sway comes from the game's wave shader —
+  nothing is baked into the frames.
+- Leaf particles: five 20 px sprites in one row -> 100x20 (vanilla ships
+  4-6 frames of tumbling leaf clumps; the engine picks frames at random).
+
+Construction follows vanilla pinetree/willowtree/birchtree: a soft ground
+shadow (18,32,32 @ ~44% alpha) with NO outline, a trunk grounded by root
+flares, canopy = few BIG overlapping masses (deep crescent lower-right, base
+mass, light upper-left sheen, hard 1 px sunlit rim under the top outline,
+deep fold arcs where lobes overlap), micro-detail from leaf-clump ticks —
+never uniform noise, never stacked rectangles.
+"""
+
+import math
+
+from px import Canvas, Rng, with_alpha
+import palette
+
+SHADOW = (18, 32, 32)          # vanilla tree ground-shadow tone (alpha 110)
+
+
+# --- shared passes -----------------------------------------------------------
+
+def _sunlit_rim(c, hi, light, y_max, outline=palette.OUTLINE):
+    """Hard 1 px sunlit rim just inside the outline on upper/left canopy
+    edges (the vanilla cartoon-cloud top edge). Runs AFTER the outline pass;
+    restricted to y < y_max so trunks keep their own shading."""
+    rims = []
+    for x in range(c.width):
+        for y in range(min(y_max, c.height)):
+            p = c.get(x, y)
+            if p[3] == 0 or p[:3] == outline:
+                continue
+            if c.get(x, y - 1)[:3] == outline and not c.filled(x, y - 2):
+                rims.append((x, y, hi))
+            elif c.get(x - 1, y)[:3] == outline and not c.filled(x - 2, y):
+                rims.append((x, y, light))
+    for x, y, tone in rims:
+        c.put(x, y, tone)
+
+
+def _lobed_mass(c, lobes, ramp, fold=True, sheen=True):
+    """One cohesive canopy from overlapping lobes: deep silhouette body,
+    base fill, per-lobe light upper-left sheen, then deep 'fold' arcs along
+    each lobe's lower boundary — but only where the arc stays INTERIOR, so
+    the mass reads as one volume with cloud folds, not separate balloons."""
+    for (cx, cy, rx, ry) in lobes:
+        c.ellipse(cx + 1, cy + 2, rx, ry, ramp["deep"])
+    for (cx, cy, rx, ry) in lobes:
+        c.ellipse(cx, cy, rx, ry, ramp["base"])
+    if sheen:
+        for (cx, cy, rx, ry) in lobes:
+            c.ellipse(cx - rx * 0.28, cy - ry * 0.36, rx * 0.5, ry * 0.45,
+                      ramp["light"])
+    if not fold:
+        return
+    for (cx, cy, rx, ry) in lobes:
+        for deg in range(25, 156, 4):           # lower arc (screen y down)
+            x = round(cx + (rx - 1) * math.cos(math.radians(deg)))
+            y = round(cy + (ry - 1) * math.sin(math.radians(deg)))
+            # interior only: skip near the silhouette (outline handles that)
+            if c.filled(x, y + 2) and c.filled(x + 2, y) and c.filled(x - 2, y):
+                c.put(x, y, ramp["deep"])
+                if deg % 12 == 1:
+                    c.put(x, y - 1, ramp["deep"])
+
+
+def _bottom_edge(c, x, y_from=127):
+    """Lowest filled y in column x (or None)."""
+    for y in range(y_from, -1, -1):
+        if c.filled(x, y):
+            return y
+    return None
+
+
+def _trunk(c, rng, ramp, base_x, base_y, top_y, w_base, w_top,
+           amp=2.5, drift=0, notch_tone=None):
+    """S-curved tapering trunk (gloomwillow build): light left column, base
+    fill, deep right column, periodic bark notches. Returns {y: left_x}."""
+    H = max(base_y - top_y, 1)
+    ph = rng.float() * 3.0
+    path_x = {}
+    notch = notch_tone if notch_tone is not None else ramp["deep"]
+    for y in range(base_y, top_y - 1, -1):
+        t = (base_y - y) / H
+        x = base_x + round(amp * math.sin(t * 2.6 + ph) + drift * t)
+        width = max(w_top, round(w_base - (w_base - w_top) * t))
+        x -= width // 2
+        path_x[y] = (x, width)
+        for dx in range(width):
+            tone = ramp["base"]
+            if dx <= 0:
+                tone = ramp["light"]
+            elif dx >= width - 1:
+                tone = ramp["deep"]
+            elif dx == width - 2 and width > 4:
+                tone = ramp["deep"]
+            c.put(x + dx, y, tone)
+        if y % 7 == 3 and width > 3:
+            c.put(x + rng.range(1, width - 2), y, notch)
+        if y % 11 == 5 and width > 4:
+            c.put(x + 1, y, ramp["hi"])
+    return path_x
+
+
+def _roots(c, rng, ramp, base_x, base_y, half_w):
+    """Flared root nubs on both sides of the trunk foot."""
+    for side in (-1, 1):
+        reach = half_w + rng.range(2, 4)
+        for i in range(reach):
+            x = base_x + side * (half_w - 1 + i)
+            y = base_y - max(0, (reach - i) // 3) + 1
+            c.put(x, y, ramp["deep"] if i > reach - 3 else ramp["base"])
+            c.put(x, y + 1, ramp["deep"])
+        c.put(base_x + side * (half_w + reach - 2), base_y + 1, ramp["deep"])
+
+
+# --- Nimbus Willow (Driftlands) ---------------------------------------------
+
+def _nimbuswillow_cell(variant):
+    cell = Canvas(128, 128)
+    rng = Rng(0x1717B05 + variant * 4099)
+    wood = palette.NIMBUSWOOD
+    leaf = palette.NIMBUSLEAF
+    base_x, base_y = 64 + rng.pick((-2, 2)), 123
+
+    cell.ellipse(base_x + 2, base_y + 2, 24, 4.2, with_alpha(SHADOW, 110))
+
+    body = Canvas(128, 128)
+    _trunk(body, rng, wood, base_x, base_y, 56, 12, 5,
+           amp=rng.pick((2.0, 2.5)), drift=rng.pick((-4, 4)))
+    _roots(body, rng, wood, base_x, base_y, 6)
+
+    # canopy: BIG heavily-overlapping cloud lobes drooping around the trunk
+    if variant == 0:
+        lobes = [(64, 20, 20, 12), (42, 27, 17, 11), (87, 26, 16, 11),
+                 (64, 42, 25, 15), (30, 47, 15, 12), (98, 46, 14, 12),
+                 (46, 61, 15, 10), (82, 62, 14, 10)]
+    else:
+        lobes = [(58, 18, 18, 11), (36, 30, 16, 11), (84, 24, 17, 12),
+                 (62, 42, 24, 15), (28, 50, 13, 11), (98, 44, 14, 13),
+                 (44, 63, 14, 9), (86, 61, 15, 11)]
+    _lobed_mass(body, lobes, leaf)
+
+    body.outline(palette.OUTLINE)
+    _sunlit_rim(body, leaf["hi"], leaf["light"], y_max=76)
+
+    # weeping strands AFTER the outline pass (a generic outline would eat
+    # them). Chunky 2px cores with a deep trail edge, strongly staggered
+    # lengths (long-short alternation like vanilla willow), each rooted
+    # INSIDE the canopy underside and tipped with outline so it grounds.
+    long_next = rng.chance(0.5)
+    for sx in range(20, 111, 7):
+        sx += rng.range(-1, 1)
+        edge = _bottom_edge(body, sx, 95)
+        if edge is None or edge < 30 or not rng.chance(0.9):
+            continue
+        if long_next:
+            ln = rng.range(20, 30) - abs(sx - 64) // 5
+        else:
+            ln = rng.range(9, 14)
+        long_next = not long_next
+        x, top = sx, edge - 2
+        # light attachment clump where the strand leaves the canopy
+        body.put(x, top, leaf["light"])
+        body.put(x + 1, top, leaf["light"])
+        body.put(x, top - 1, leaf["light"])
+        for i in range(ln):
+            if i > 2 and i % rng.pick((5, 6, 7)) == 0:
+                x += rng.pick((-1, 0, 1))
+            tone = leaf["light"] if i < 3 else (
+                leaf["base"] if i < ln - 4 else leaf["deep"])
+            body.put(x, top + i, tone)
+            body.put(x + 1, top + i, leaf["base"] if 2 < i < ln - 6 else leaf["deep"])
+            body.put(x + 2, top + i, leaf["deep"])
+        body.put(x, top + ln, palette.OUTLINE)
+        body.put(x + 1, top + ln, palette.OUTLINE)
+        body.put(x + 2, top + ln - 1, palette.OUTLINE)
+        body.put(x, top + ln - 1, leaf["deep"])
+    # one tiny detached drift-puff beside the crown (sky-island charm)
+    px_, py_ = (110, 12) if variant == 0 else (16, 16)
+    body.ellipse(px_, py_, 4, 2.4, leaf["base"])
+    body.ellipse(px_ - 1, py_ - 1, 2.4, 1.4, leaf["hi"])
+    body.put(px_ + 3, py_ + 2, leaf["deep"])
+
+    cell.paste(body, 0, 0)
+    return cell
+
+
+def gen_nimbuswillow(path):
+    """128x256 tree sheet: Driftlands cloud-canopy willow, 2 variants."""
+    sheet = Canvas(128, 256)
+    for v in range(2):
+        sheet.paste(_nimbuswillow_cell(v), 0, v * 128)
+    sheet.save(path)
+
+
+# --- Fulgur Pine (Stormveil) -------------------------------------------------
+
+def _bough_tier(body, rng, ndl, cx, cy, span_l, span_r, tilt=0):
+    """One needle tier as 3-4 overlapping droopy boughs (ellipse blobs with
+    sagging outer tips) — volumetric, never a flat saucer. cy = tier center."""
+    boughs = [(-0.62, 0.45, 4.6, 1), (0.58, 0.42, 4.2, 1),
+              (-0.2, 0.55, 5.0, -1), (0.25, 0.5, 4.6, -1)]
+    lobes = []
+    for (px_, w, h, dy) in boughs:
+        span = span_l if px_ < 0 else span_r
+        lx = cx + px_ * span + rng.range(-1, 1)
+        lobes.append((lx, cy + dy + tilt * px_, max(4, w * span), h))
+    # sagging tips at the tier's outer ends
+    lobes.append((cx - span_l + 2, cy + 2 + rng.range(0, 1), 4, 3.0))
+    lobes.append((cx + span_r - 2, cy + 2 + rng.range(0, 1), 4, 2.8))
+    _lobed_mass(body, lobes, ndl, fold=False, sheen=False)
+    return lobes
+
+
+def _needle_texture(body, rng, ndl, cx, cy, span_l, span_r, h=9):
+    """Post-outline needle-clump ticks: lit 2px ticks upper-left, deep ticks
+    lower-right, sparse hi glints along the top."""
+    for _ in range((span_l + span_r)):
+        x = cx + rng.range(-span_l + 2, span_r - 2)
+        y = cy + rng.range(-h // 2, h // 2 + 2)
+        p = body.get(x, y)
+        if p[3] == 0 or p[:3] == palette.OUTLINE:
+            continue
+        rel = 0.55 * (x - cx) / max(span_r, 1) + (y - cy) / max(h * 0.6, 1)
+        if rel < -0.15:
+            body.put(x, y, ndl["light"])
+            body.put(x + 1, y, ndl["light"])
+            if rng.chance(0.3):
+                body.put(x - 1, y - 1, ndl["hi"])
+        elif rel > 0.2:
+            body.put(x, y, ndl["deep"])
+            body.put(x + rng.pick((1, 1, -1)), y + rng.pick((0, 1)), ndl["deep"])
+
+
+def _needle_fringe(body, rng, ndl, y_limit=118):
+    """Ragged hanging needle clumps along the canopy's lower edges, drawn
+    after the outline so the silhouette gets vanilla's spiky droop."""
+    for x in range(16, 113, 3):
+        edge = _bottom_edge(body, x, y_limit)
+        if edge is None or edge > y_limit - 2 or not rng.chance(0.7):
+            continue
+        p = body.get(x, edge)[:3]
+        if p != palette.OUTLINE:
+            continue
+        ln = rng.range(1, 3)
+        for k in range(ln):
+            body.put(x, edge + 1 + k, ndl["deep"])
+            if k == 0 and rng.chance(0.5):
+                body.put(x + 1, edge + 1, ndl["deep"])
+        body.put(x, edge + 1 + ln, palette.OUTLINE)
+
+
+def _fulgurpine_cell(variant):
+    cell = Canvas(128, 128)
+    rng = Rng(0xF7169 + variant * 5077)
+    wood = palette.CHARWOOD
+    ndl = palette.FULGURPINE_NEEDLE
+    base_x, base_y = 64 + rng.pick((-1, 1)), 123
+
+    cell.ellipse(base_x + 1, base_y + 2, 18, 3.6, with_alpha(SHADOW, 110))
+
+    body = Canvas(128, 128)
+    top_y = 26 if variant == 0 else 62
+    _trunk(body, rng, wood, base_x, base_y, top_y, 10, 3,
+           amp=1.5, drift=rng.pick((-2, 2)))
+    _roots(body, rng, wood, base_x, base_y, 5)
+
+    if variant == 0:
+        # asymmetric cone of overlapping bough tiers, trunk in the gaps
+        tiers = [(base_x, 103, 30, 25, 1), (base_x + 1, 87, 22, 28, -1),
+                 (base_x - 1, 71, 25, 19, 1), (base_x + 1, 56, 16, 21, -1),
+                 (base_x, 42, 17, 13, 0), (base_x, 30, 11, 10, 0)]
+        for (cx, cy, sl, sr, tl) in tiers:
+            _bough_tier(body, rng, ndl, cx, cy, sl, sr, tl)
+        # pointed crown clump
+        crown = [(base_x, 21, 6, 4), (base_x - 1, 15, 4, 3.2),
+                 (base_x + 1, 10, 2.6, 2.6)]
+        _lobed_mass(body, crown, ndl, fold=False, sheen=False)
+        # re-assert the trunk through the tier gaps (pale bark flecks so the
+        # trunk clearly reads between boughs like vanilla pine)
+        for gy in (94, 78, 63, 48):
+            for dy in range(3):
+                body.put(base_x - 1, gy + dy, wood["light"])
+                body.put(base_x, gy + dy, wood["base"])
+                body.put(base_x + 1, gy + dy, wood["deep"])
+            body.put(base_x, gy + 1, wood["hi"])
+    else:
+        # lightning-split fork: needle side survives, charred snag side dies
+        tiers = [(base_x, 105, 28, 24, 1), (base_x - 2, 90, 24, 20, -1),
+                 (base_x - 3, 75, 19, 15, 1)]
+        for (cx, cy, sl, sr, tl) in tiers:
+            _bough_tier(body, rng, ndl, cx, cy, sl, sr, tl)
+        # living prong: leans up-left with two smaller tiers
+        for i in range(22):
+            x = base_x - 2 - round(i * 0.45)
+            y = 64 - i
+            body.put(x, y, wood["light"] if i % 5 == 0 else wood["base"])
+            body.put(x + 1, y, wood["base"])
+            body.put(x + 2, y, wood["deep"])
+        small = [(base_x - 8, 52, 12, 9, -1), (base_x - 12, 38, 9, 7, 0)]
+        for (cx, cy, sl, sr, tl) in small:
+            _bough_tier(body, rng, ndl, cx, cy, sl, sr, tl)
+        tiers += small
+        # dead prong: thick charred snag leaning hard right, jagged, with
+        # stub branches and a splintered broken tip — the lightning scar
+        fx, fy = float(base_x + 2), 66.0
+        ang = 64.0
+        stubs = []
+        for i in range(24):
+            ang += rng.pick((-4, -1, 2)) - (6 if i > 18 else 0)
+            fx += math.cos(math.radians(ang))
+            fy -= math.sin(math.radians(ang))
+            x, y = round(fx), round(fy)
+            w = 4 if i < 7 else (3 if i < 16 else 2)
+            for dx in range(w):
+                body.put(x + dx, y,
+                         wood["deep"] if dx >= w - 1 else
+                         (wood["light"] if dx == 0 and i % 4 == 0 else wood["base"]))
+            if i in (6, 13):
+                stubs.append((x, y, 1 if i == 6 else -1))
+        for (sx_, sy_, sd) in stubs:         # short charred stub branches
+            for k in range(4):
+                body.put(sx_ + 2 + k, sy_ - (k if sd > 0 else -k // 2), wood["base"])
+                body.put(sx_ + 2 + k, sy_ + 1 - (k if sd > 0 else -k // 2), wood["deep"])
+            body.put(sx_ + 6, sy_ - (4 if sd > 0 else -2), wood["deep"])
+        # splintered break: pale exposed wood + charred spike beside it
+        tipx, tipy = round(fx), round(fy)
+        body.put(tipx, tipy - 1, wood["hi"])
+        body.put(tipx + 1, tipy - 2, wood["hi"])
+        body.put(tipx, tipy - 2, wood["light"])
+        body.put(tipx + 1, tipy - 1, wood["light"])
+        body.put(tipx + 2, tipy, wood["deep"])
+        body.put(tipx - 1, tipy - 1, wood["deep"])
+        # pale lightning scar zigzagging down the trunk from the split
+        sx = base_x + 1
+        for k in range(8):
+            body.put(sx + (k % 2), 68 + k * 2, wood["hi"])
+
+    body.outline(palette.OUTLINE)
+    _sunlit_rim(body, ndl["hi"], ndl["light"], y_max=base_y - 10)
+    for (cx, cy, sl, sr, tl) in tiers if variant else tiers:
+        _needle_texture(body, rng, ndl, cx, cy, sl, sr)
+    if variant == 0:
+        _needle_texture(body, rng, ndl, base_x, 18, 5, 5, h=12)
+    _needle_fringe(body, rng, ndl)
+    # sparse ember clusters still glowing in the charred bark (SPARSE:
+    # 2-3 per tree; a bright core pixel + one dimmer neighbor reads at 1x)
+    embers = ((base_x - 2, 116), (base_x + 2, 95), (base_x - 2, 64)) \
+        if variant == 0 else \
+        ((base_x + 6, 58), (round(fx) - 2, round(fy) + 3), (base_x - 2, 117))
+    for (ex, ey) in embers:
+        if body.filled(ex, ey):
+            body.put(ex, ey, wood["ember"])
+            body.put(ex + 1, ey + 1, with_alpha(wood["ember"], 150))
+
+    cell.paste(body, 0, 0)
+    return cell
+
+
+def gen_fulgurpine(path):
+    """128x256 tree sheet: Stormveil lightning-charred pine, 2 variants
+    (variant 1 carries the lightning-split fork)."""
+    sheet = Canvas(128, 256)
+    for v in range(2):
+        sheet.paste(_fulgurpine_cell(v), 0, v * 128)
+    sheet.save(path)
+
+
+# --- Prisma Birch (Aurora Shoals) --------------------------------------------
+
+_BARK_DASH = palette.NIGHTFELL["hi"]     # violet-gray birch bark dashes
+
+
+def _prismabirch_cell(variant):
+    cell = Canvas(128, 128)
+    rng = Rng(0xB123C4 + variant * 6151)
+    wood = palette.PRISMWOOD
+    leaf = palette.PRISMLEAF
+    base_x, base_y = 64 + rng.pick((-2, 2)), 123
+
+    cell.ellipse(base_x + 2, base_y + 2, 21, 4, with_alpha(SHADOW, 110))
+
+    body = Canvas(128, 128)
+    path_x = _trunk(body, rng, wood, base_x, base_y, 48, 10, 6,
+                    amp=1.2, drift=3 if variant else -3,
+                    notch_tone=_BARK_DASH)
+    _roots(body, rng, wood, base_x, base_y, 5)
+    # birch-bark dashes: bold staggered dark strokes down the trunk
+    side = 1
+    for y in range(56, base_y - 4, 4):
+        info = path_x.get(y)
+        if info is None:
+            continue
+        x, width = info
+        dx = 1 + (width - 3) * (side + 1) // 2 + rng.range(0, 1)
+        ln = rng.range(2, 3)
+        for k in range(ln):
+            body.put(x + dx + k, y, palette.OUTLINE)
+        body.put(x + dx + rng.pick((0, 1)), y + 1, _BARK_DASH)
+        side = -side
+
+    # canopy: lumpy mushroom dome of overlapping lobes
+    if variant == 0:
+        dome = [(64, 30, 30, 20), (40, 40, 17, 12), (89, 38, 16, 12),
+                (48, 16, 15, 10), (81, 17, 14, 10), (64, 46, 20, 12),
+                (26, 32, 10, 8), (102, 30, 9, 8)]
+    else:
+        dome = [(60, 26, 27, 19), (36, 38, 15, 11), (85, 40, 16, 12),
+                (72, 12, 14, 9), (46, 18, 13, 9), (62, 44, 19, 11),
+                (98, 26, 10, 9), (24, 44, 9, 7)]
+    _lobed_mass(body, dome, leaf)
+
+    # clustered iridescent leaf texture (clumps, not salt-and-pepper):
+    cx0, cy0, rx0, ry0 = dome[0]
+
+    def clump(x, y, tone, size):
+        for _ in range(size):
+            body.put(x, y, tone)
+            body.put(x + 1, y, tone)
+            x += rng.pick((-1, 1, 1, 0))
+            y += rng.pick((0, 1, -1))
+
+    for _ in range(30):
+        x = cx0 + rng.range(-rx0 - 8, rx0 + 8)
+        y = cy0 + rng.range(-ry0 - 6, ry0 + 12)
+        if not body.filled(x, y) or y > 56:
+            continue
+        rel = 0.6 * (x - cx0) / rx0 + (y - cy0) / ry0
+        if rel < -0.3:
+            tone = leaf["hi"] if rng.chance(0.35) else leaf["light"]
+        elif rel > 0.35:
+            tone = leaf["deep"]
+        else:
+            tone = leaf["light"] if rng.chance(0.4) else leaf["deep"]
+        clump(x, y, tone, rng.range(2, 4))
+    # the Shoals' exclusive accents: few distinct teal/rose clusters
+    accents = ((-16, 2, "teal"), (10, -8, "rose"), (1, 10, "teal"),
+               (-6, -13, "rose"), (19, 4, "teal"), (-24, -3, "rose"))
+    for (ax, ay, key) in accents:
+        x, y = cx0 + ax + rng.range(-2, 2), cy0 + ay + rng.range(-1, 1)
+        if body.filled(x, y) and body.filled(x + 2, y + 1):
+            body.put(x, y, leaf[key])
+            body.put(x + 1, y, leaf[key])
+            body.put(x + rng.pick((0, 1)), y + 1, leaf[key])
+            body.put(x + rng.pick((1, 2)), y - 1, leaf[key])
+            body.put(x - 1, y - 1, leaf["hi"])       # sparkle catch-light
+
+    body.outline(palette.OUTLINE)
+    _sunlit_rim(body, leaf["hi"], leaf["light"], y_max=58)
+    # scalloped deep underside so the dome reads shaded over the trunk
+    for x in range(cx0 - rx0 - 6, cx0 + rx0 + 7, 2):
+        edge = _bottom_edge(body, x, 60)
+        if edge is None or edge < 30:
+            continue
+        if body.get(x, edge)[:3] == palette.OUTLINE and body.filled(x, edge - 1):
+            body.put(x, edge - 1, leaf["deep"])
+            if x % 6 == 0:
+                body.put(x, edge - 2, leaf["deep"])
+
+    cell.paste(body, 0, 0)
+    return cell
+
+
+def gen_prismabirch(path):
+    """128x256 tree sheet: Aurora Shoals iridescent birch, 2 variants."""
+    sheet = Canvas(128, 256)
+    for v in range(2):
+        sheet.paste(_prismabirch_cell(v), 0, v * 128)
+    sheet.save(path)
+
+
+# --- Falling-leaf particle strips (100x20: five 20px frames) -----------------
+
+def gen_nimbuswillow_leaves(path):
+    """Tiny drifting cloud-puffs shed by the nimbus willow."""
+    sheet = Canvas(100, 20)
+    leaf = palette.NIMBUSLEAF
+    for f in range(5):
+        c = Canvas(20, 20)
+        rng = Rng(0x11EAF + f * 271)
+        cx, cy = 9 + rng.range(-1, 1), 10 + rng.range(-1, 1)
+        rx = 3.4 + (f % 3) * 0.5
+        c.ellipse(cx, cy, rx, 2.2, leaf["base"])
+        c.ellipse(cx + rng.pick((-2, 2)), cy + 1, rx * 0.55, 1.4, leaf["base"])
+        c.ellipse(cx - 1, cy - 1, rx * 0.55, 1.2, leaf["hi"])
+        c.put(cx + int(rx) - 1, cy + 1, leaf["deep"])
+        c.put(cx - int(rx) + 1, cy + 2, leaf["deep"])
+        c.put(cx + rng.range(-1, 1), cy + 2, leaf["deep"])
+        sheet.paste(c, f * 20, 0)
+    sheet.save(path)
+
+
+def gen_fulgurpine_leaves(path):
+    """Charred needle sprigs: a SOLID tuft mass (silhouette-first — dots
+    would shred) with pale needle ticks laid on top, tumbled per frame."""
+    sheet = Canvas(100, 20)
+    ndl = palette.FULGURPINE_NEEDLE
+    wood = palette.CHARWOOD
+    shapes = (  # (dx, dy) offsets of the solid clump mass, per frame
+        ((0, 0), (1, 0), (2, 0), (3, 1), (1, 1), (2, 1), (4, 1), (3, 2), (4, 2), (5, 2)),
+        ((0, 2), (1, 2), (1, 1), (2, 1), (3, 1), (2, 0), (3, 0), (4, 0), (2, 2), (3, 2)),
+        ((0, 0), (0, 1), (1, 1), (1, 2), (2, 2), (1, 0), (2, 3), (2, 1), (3, 3), (3, 2)),
+        ((0, 1), (1, 0), (1, 1), (2, 0), (3, 0), (2, 1), (4, 0), (3, 1), (4, 1), (5, 0)),
+        ((0, 3), (1, 2), (1, 3), (2, 1), (2, 2), (3, 1), (3, 0), (4, 0), (2, 3), (3, 2)),
+    )
+    for f in range(5):
+        c = Canvas(20, 20)
+        rng = Rng(0xF17EA + f * 353)
+        ox, oy = 7, 8 + rng.range(-1, 1)
+        for (dx, dy) in shapes[f]:               # deep silhouette mass
+            c.put(ox + dx, oy + dy, ndl["deep"])
+            c.put(ox + dx, oy + dy + 1, ndl["deep"])
+        for i, (dx, dy) in enumerate(shapes[f]):  # lit needle ticks on top
+            if i % 3 == 0:
+                c.put(ox + dx, oy + dy, ndl["light"])
+            elif i % 3 == 1:
+                c.put(ox + dx, oy + dy, ndl["base"])
+        # twig nub + one hi glint
+        (tx, ty) = shapes[f][0]
+        c.put(ox + tx - 1, oy + ty + 1, wood["deep"])
+        c.put(ox + tx - 2, oy + ty + 2, wood["base"])
+        (hx, hy) = shapes[f][rng.range(3, 6)]
+        c.put(ox + hx, oy + hy - 1, ndl["hi"])
+        sheet.paste(c, f * 20, 0)
+    sheet.save(path)
+
+
+def gen_prismabirch_leaves(path):
+    """Tumbling iridescent birch leaves; frames 2 and 4 catch a teal/rose
+    glint mid-tumble."""
+    sheet = Canvas(100, 20)
+    leaf = palette.PRISMLEAF
+    for f in range(5):
+        c = Canvas(20, 20)
+        rng = Rng(0xB1EAF + f * 431)
+        cx, cy = 9, 10
+        w = (4, 3, 2, 3, 4)[f]                   # tumble squash
+        h = (2, 3, 4, 3, 2)[f]
+        for dy in range(-h, h + 1):
+            span = max(0, round(w * (1 - abs(dy) / (h + 0.5))))
+            for dx in range(-span, span + 1):
+                edge = abs(dx) == span or abs(dy) == h
+                c.put(cx + dx, cy + dy, leaf["deep"] if edge else leaf["base"])
+        c.put(cx - 1, cy - 1, leaf["light"])
+        c.put(cx, cy - 1, leaf["light"])
+        if f == 2:
+            c.put(cx, cy, leaf["teal"])
+        elif f == 4:
+            c.put(cx - 1, cy, leaf["rose"])
+        else:
+            c.put(cx - w + 1, cy, leaf["light"])
+        c.put(cx + rng.pick((-1, 1)), cy + h, leaf["deep"])   # stem nub
+        sheet.paste(c, f * 20, 0)
+    sheet.save(path)
+
+
+# --- Log-bundle item icons (32x32) ------------------------------------------
+
+def _log(c, x, y, ln, ramp, rng, dash_tone=None):
+    """One horizontal log: bark cylinder + ringed end cap on the right."""
+    for dx in range(ln):
+        for dy in range(6):
+            tone = ramp["base"]
+            if dy == 0:
+                tone = ramp["light"]
+            elif dy >= 4:
+                tone = ramp["deep"]
+            c.put(x + dx, y + dy, tone)
+    for k in range(rng.range(2, 3)):        # bark grain dashes
+        gx = x + rng.range(2, max(ln - 5, 3))
+        gy = y + rng.range(1, 4)
+        c.put(gx, gy, dash_tone if dash_tone else ramp["deep"])
+        c.put(gx + 1, gy, dash_tone if dash_tone else ramp["deep"])
+    # end cap: rings
+    ex = x + ln - 1
+    c.ellipse(ex, y + 2.5, 2.4, 3, ramp["deep"])
+    c.ellipse(ex, y + 2.5, 1.6, 2.2, ramp["light"])
+    c.ellipse(ex, y + 2.5, 0.8, 1.2, ramp["hi"])
+    c.put(ex, y + 2, ramp["deep"])
+
+
+def gen_nimbuswood_item(path):
+    c = Canvas(32, 32)
+    rng = Rng(0x817B)
+    _log(c, 5, 8, 21, palette.NIMBUSWOOD, rng)
+    _log(c, 7, 15, 20, palette.NIMBUSWOOD, rng)
+    _log(c, 4, 22, 22, palette.NIMBUSWOOD, rng)
+    c.outline(palette.OUTLINE)
+    c.save(path)
+
+
+def gen_charwood_item(path):
+    c = Canvas(32, 32)
+    rng = Rng(0xC4A2)
+    wood = palette.CHARWOOD
+    _log(c, 5, 8, 21, wood, rng, dash_tone=wood["hi"])
+    _log(c, 7, 15, 20, wood, rng, dash_tone=wood["hi"])
+    _log(c, 4, 22, 22, wood, rng, dash_tone=wood["hi"])
+    c.outline(palette.OUTLINE)
+    c.put(12, 16, wood["ember"])            # one live ember in the stack
+    c.put(21, 10, with_alpha(wood["ember"], 190))
+    c.save(path)
+
+
+def gen_prismwood_item(path):
+    c = Canvas(32, 32)
+    rng = Rng(0x9817)
+    _log(c, 5, 8, 21, palette.PRISMWOOD, rng, dash_tone=_BARK_DASH)
+    _log(c, 7, 15, 20, palette.PRISMWOOD, rng, dash_tone=_BARK_DASH)
+    _log(c, 4, 22, 22, palette.PRISMWOOD, rng, dash_tone=_BARK_DASH)
+    c.outline(palette.OUTLINE)
+    c.put(24, 9, palette.PRISMLEAF["teal"])   # iridescent glints on the grain
+    c.put(10, 23, palette.PRISMLEAF["rose"])
+    c.save(path)
