@@ -25,7 +25,13 @@ eyes, sparse electric accents. Stripe and crescent-moon motifs are welcome as
 deco accents. Reference/mood material stays outside the repo — docs describe the
 direction generically, never brands or franchises.
 
-Two construction rules learned from vanilla:
+Three construction rules learned from vanilla:
+
+- **Creatures = round overlapping masses, never stacked rectangles.** Bodies
+  are built from volumetric blobs (deep crescent lower-right, base mass, light
+  upper-left sheen per mass), limbs are distinct articulated shapes, faces get
+  sockets + brow + pupil, and walk frames re-pose limbs instead of shifting
+  boxes. Heavy creatures gain ribbed plate bands for texture identity.
 
 - **Terrain = calm base + per-variant feature clusters.** The four full-variant
   cells of a splat each carry their own small motif (tufts, a fissure, a moss

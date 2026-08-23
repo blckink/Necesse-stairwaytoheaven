@@ -3,6 +3,21 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [0.2.7] — 2026-08-23
+
+### Changed
+- **Skystone Golem rebuilt from scratch** on vanilla mob construction
+  principles (studied from the game's own heavy creatures): the body is now
+  organic overlapping boulder masses with per-mass volumetric shading instead
+  of stacked rectangles. Ribbed armor plates across the belly, shoulder-cap
+  stones, articulated stomp walk (legs lift, arms swing), a head sunk between
+  the shoulders under a heavy brow ledge with deep eye sockets and glowing
+  pupils, chest cracks, moss clumps and a solid aetherium crystal spur with a
+  lit tip. The profile view is a proper hunched ape posture with a big
+  leading arm reaching toward the ground.
+- Style guide gains the "round overlapping masses" construction rule; the
+  same template is earmarked for the Ashen Reach creatures of v0.3.
+
 ## [0.2.6] — 2026-08-23
 
 The "living world" release: light is safe again, the sky gets wildlife and

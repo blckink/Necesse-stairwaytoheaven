@@ -112,99 +112,136 @@ def gen_zephyrray(path):
 
 # --- Skystone Golem ----------------------------------------------------------
 
+def _stone(c, cx, cy, rx, ry, r):
+    """One volumetric boulder: deep crescent lower-right, base mass, light
+    upper-left sheen — the vanilla 'round overlapping masses' construction."""
+    c.ellipse(cx + 1, cy + 1, rx, ry, r["deep"])
+    c.ellipse(cx, cy, rx, ry, r["base"])
+    c.ellipse(cx - rx * 0.28, cy - ry * 0.28, rx * 0.62, ry * 0.6, r["light"])
+    c.ellipse(cx - rx * 0.42, cy - ry * 0.45, rx * 0.3, ry * 0.26, r["hi"])
+
+
 def _golem_frame(facing, step, swim=False):
-    """facing: 'up' | 'right' | 'down'. step in -1..1 shifts legs/arms."""
+    """Skystone Golem rebuilt from organic boulder masses (goblin-construction
+    bar): articulated stomp walk, sunken head under a heavy brow, glowing
+    eyes, cracks, moss and an aetherium spur."""
     c = Canvas(CELL, CELL)
     r = palette.GOLEM
+    aeth = palette.AETHERIUM
     cx = 32
-    feet_y = 54
-    bob = 1 if step != 0 else 0
-    top = 18 - bob
+    feet_y = 55
+    stomp = 1 if step != 0 else 0
+
     if facing in ("up", "down"):
-        # legs
+        # --- legs: stout boulders with foot masses, one lifted per stride ---
         if not swim:
-            c.rect(cx - 9, feet_y - 8, 6, 8 + (1 if step > 0 else 0), r["deep"])
-            c.rect(cx + 3, feet_y - 8, 6, 8 + (1 if step < 0 else 0), r["deep"])
-        # torso: massive slab, narrower hips
-        c.rect(cx - 12, top + 10, 24, 20, r["base"])
-        c.rect(cx - 10, top + 6, 20, 6, r["base"])
-        # arms: heavy stone fists at the sides
-        arm_shift = step * 2
-        c.rect(cx - 17, top + 11 + arm_shift, 5, 15, r["base"])
-        c.rect(cx + 12, top + 11 - arm_shift, 5, 15, r["base"])
-        # head block
-        c.rect(cx - 7, top, 14, 10, r["light"])
-    else:  # right profile
-        if not swim:
-            front = 2 * step
-            c.rect(cx - 7 + front, feet_y - 8, 6, 8, r["deep"])
-            c.rect(cx + 2 - front, feet_y - 8, 6, 8, r["deep"])
-        c.rect(cx - 10, top + 10, 20, 20, r["base"])
-        c.rect(cx - 8, top + 6, 16, 6, r["base"])
-        arm_swing = 3 * step
-        c.rect(cx + 3 + arm_swing, top + 12, 5, 13, r["light"])
-        c.rect(cx - 5, top, 12, 10, r["light"])
-        c.put(cx - 2, top + 24, r["moss"])
-    # armor plate seams: the torso reads as fitted stone slabs, not one box
-    if facing in ("up", "down"):
-        for dx in range(-12, 12):
-            c.put(cx + dx, top + 17, r["deep"])
-        for sy in range(top + 11, top + 29):
-            c.put(cx - 5, sy, r["deep"])
-            c.put(cx + 5, sy, r["deep"])
-        # pauldron caps on the arms
-        for ax in (cx - 17, cx + 12):
-            for dx in range(5):
-                c.put(ax + dx, top + 10, r["hi"])
-                c.put(ax + dx, top + 11, r["light"])
-        # aetherium crystal spur on the right shoulder
-        spur_x = cx + 13
-        for i in range(4):
-            c.put(spur_x + i // 2, top + 8 - i, palette.AETHERIUM["base"])
-        c.put(spur_x, top + 5, palette.AETHERIUM["hi"])
-        # knuckle grooves on the fists
-        for ax in (cx - 16, cx + 13):
-            c.put(ax, top + 24, r["deep"])
-            c.put(ax + 2, top + 24, r["deep"])
-    else:
-        for dx in range(-10, 10):
-            c.put(cx + dx, top + 17, r["deep"])
-        c.put(cx - 3, top + 12, r["deep"])
-        for dx in range(4):
-            c.put(cx + 3 + dx, top + 11, r["hi"])
-    # weathering speckle + moss clumps
-    rng = Rng(0x601E + (1 if facing == "up" else 2 if facing == "right" else 3) * 97 + (step + 2) * 31)
-    for _ in range(8):
-        x = rng.range(cx - 12, cx + 12)
-        y = rng.range(top, feet_y - 6)
-        if c.filled(x, y):
-            c.put(x, y, r["deep"] if rng.chance(0.7) else r["moss"])
-    for _ in range(2):
-        mx = rng.range(cx - 11, cx + 9)
-        my = rng.range(top + 2, top + 8)
-        if c.filled(mx, my):
+            for side, s in ((-1, step), (1, -step)):
+                lx = cx + side * 7
+                lift = 2 if s > 0 else 0
+                _stone(c, lx, feet_y - 9 - lift, 4, 6, r)   # overlaps the belly
+                _stone(c, lx + side, feet_y - 1 - lift, 4.5, 2.5, r)  # foot
+        # --- torso: big chest boulder over a ribbed belly stone ---
+        _stone(c, cx, feet_y - 21, 11, 8, r)          # belly
+        for i, by in enumerate((feet_y - 24, feet_y - 20, feet_y - 16)):
+            half = 10 - i * 2
+            for dx in range(-half, half + 1):
+                arc = by + (abs(dx) // 4)
+                c.put(cx + dx, arc, r["light"])       # plate ridge
+                c.put(cx + dx, arc + 1, r["deep"])    # plate seam
+        _stone(c, cx, feet_y - 30 + stomp, 13, 10, r)  # chest
+        # --- arms: shoulder cap, forearm, fist boulder (swing vs legs) ---
+        for side, s in ((-1, -step), (1, step)):
+            sw = round(s * 2)
+            ax = cx + side * 15
+            _stone(c, cx + side * 12, feet_y - 36 + stomp, 5.5, 4.5, r)  # shoulder cap
+            _stone(c, ax, feet_y - 29 + sw, 4, 5, r)                      # upper arm
+            _stone(c, ax + side, feet_y - 21 + sw, 4.5, 4.5, r)           # fist
+            c.put(ax + side - 1, feet_y - 19 + sw, r["deep"])             # knuckles
+            c.put(ax + side + 1, feet_y - 19 + sw, r["deep"])
+        # --- head: sunk between the shoulders, heavy brow ledge ---
+        head_y = feet_y - 39 + stomp
+        _stone(c, cx, head_y, 6.5, 5.5, r)
+        for dx in range(-5, 6):                                           # brow ledge
+            c.put(cx + dx, head_y - 2, r["deep"])
+            if -4 <= dx <= 4:
+                c.put(cx + dx, head_y - 3, r["light"])
+        # --- cracks on the chest ---
+        crx, cry = cx - 6, feet_y - 33 + stomp
+        for i in range(7):
+            c.put(crx + i, cry + (i // 2) - (1 if i > 4 else 0), r["deep"])
+        c.put(cx + 4, feet_y - 24, r["deep"])
+        c.put(cx + 5, feet_y - 23, r["deep"])
+        c.put(cx + 5, feet_y - 22, r["deep"])
+        # --- moss clumps on upper surfaces ---
+        for (mx, my) in ((cx - 11, feet_y - 39 + stomp), (cx + 8, feet_y - 27), (cx - 4, feet_y - 15)):
             c.put(mx, my, r["moss"])
             c.put(mx + 1, my, r["moss"])
-            c.put(mx, my - 1, r["moss"])
-    c.shade_topleft(r["hi"], r["deep"])
-    c.outline(palette.OUTLINE)
-    # face details go on AFTER shading/outline so they stay readable
-    if facing == "down":
-        c.rect(cx - 4, top + 4, 2, 2, r["eye"])
-        c.rect(cx + 2, top + 4, 2, 2, r["eye"])
-        c.put(cx - 4, top + 4, (240, 252, 252))
-        c.put(cx + 2, top + 4, (240, 252, 252))
-        # cracked chest rune, glowing faintly
-        c.line(cx - 1, top + 13, cx + 1, top + 21, r["deep"])
-        c.put(cx, top + 17, r["eye"])
-        c.put(cx - 1, top + 19, r["eye"])
-        c.put(cx + 1, top + 15, r["eye"])
-    elif facing == "up":
-        c.rect(cx - 6, top + 1, 12, 3, r["moss"])
-        c.rect(cx - 11, top + 11, 22, 2, r["light"])
-    else:
-        c.rect(cx + 4, top + 4, 2, 2, r["eye"])
-        c.put(cx + 4, top + 4, (240, 252, 252))
+            c.put(mx, my + 1, r["moss"])
+        # --- aetherium spur cluster on the right shoulder ---
+        spx = cx + 12
+        spy = feet_y - 40 + stomp
+        for i in range(5):                      # solid crystal wedge (3px base)
+            w = max(0, 2 - i // 2)
+            for dx in range(-w, w + 1):
+                c.put(spx + dx, spy - i, aeth["light"] if dx <= 0 else aeth["base"])
+        c.outline(palette.OUTLINE)
+        c.put(spx, spy - 5, aeth["hi"])         # crystal tip glint
+        # --- face AFTER outline ---
+        if facing == "down":
+            for ex in (cx - 4, cx + 2):
+                c.rect(ex, head_y - 1, 3, 3, r["deep"])                   # socket
+                c.rect(ex, head_y, 2, 2, r["eye"])                        # glow
+                c.put(ex, head_y, (240, 252, 252))                        # pupil
+            for i in range(3):                                            # jaw crack
+                c.put(cx - 1 + i, head_y + 3 + (i % 2), r["deep"])
+        else:  # up: back plate seam + moss instead of a face
+            for dy in range(-1, 9):
+                c.put(cx, head_y + dy + 4, r["deep"])
+            c.put(cx - 6, head_y + 2, r["moss"])
+            c.put(cx - 5, head_y + 2, r["moss"])
+            c.put(cx + 5, head_y + 6, r["moss"])
+    else:  # right profile: hunched ape posture, big leading arm (ash-golem bar)
+        if not swim:
+            front = 3 * step
+            _stone(c, cx - 8 + front, feet_y - 7, 4.5, 6, r)     # rear leg
+            _stone(c, cx - 7 + front, feet_y - 1, 5, 2.5, r)
+            _stone(c, cx - 1 - front, feet_y - 6, 4.5, 6, r)     # front leg
+            _stone(c, cx - front, feet_y - 1, 5, 2.5, r)
+        _stone(c, cx - 4, feet_y - 17, 9, 7, r)                  # haunch
+        _stone(c, cx + 2, feet_y - 26 + stomp, 12, 9, r)         # chest, leaning fwd
+        for i, by in enumerate((feet_y - 21, feet_y - 17)):      # rib plates
+            for dx in range(-7 + i, 6 - i):
+                c.put(cx - 2 + dx, by + abs(dx) // 4, r["light"])
+                c.put(cx - 2 + dx, by + abs(dx) // 4 + 1, r["deep"])
+        _stone(c, cx - 3, feet_y - 33 + stomp, 5.5, 4.5, r)      # rear shoulder hump
+        # leading arm: reaches forward and down to the ground
+        sw = round(step * 2)
+        _stone(c, cx + 10, feet_y - 22 + sw, 4.5, 5.5, r)        # upper arm
+        _stone(c, cx + 13, feet_y - 12 + sw, 5, 5, r)            # fist near ground
+        c.put(cx + 12, feet_y - 9 + sw, r["deep"])               # knuckles
+        c.put(cx + 15, feet_y - 9 + sw, r["deep"])
+        # head juts forward from the chest
+        head_y = feet_y - 33 + stomp
+        _stone(c, cx + 9, head_y, 6, 5, r)
+        for dx in range(-3, 6):
+            c.put(cx + 9 + dx, head_y - 2, r["deep"])            # brow ledge
+            c.put(cx + 9 + dx, head_y - 3, r["light"])
+        for dx in range(-2, 3):                                  # neck shadow
+            c.put(cx + 6 + dx, head_y + 4, r["deep"])
+        # spur on the rear shoulder + moss
+        spx, spy = cx - 4, feet_y - 37 + stomp
+        for i in range(4):
+            w = max(0, 2 - i // 2)
+            for dx in range(-w, w + 1):
+                c.put(spx + dx, spy - i, aeth["light"] if dx <= 0 else aeth["base"])
+        c.put(cx - 8, feet_y - 30, r["moss"])
+        c.put(cx - 7, feet_y - 30, r["moss"])
+        c.put(cx - 2, feet_y - 12, r["moss"])
+        c.outline(palette.OUTLINE)
+        c.put(spx, spy - 4, aeth["hi"])
+        c.rect(cx + 11, head_y - 1, 3, 3, r["deep"])             # deep socket
+        c.rect(cx + 12, head_y, 2, 2, r["eye"])
+        c.put(cx + 12, head_y, (240, 252, 252))
     if swim:
         _mist_overlay(c)
     return c
