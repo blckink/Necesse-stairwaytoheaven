@@ -38,6 +38,8 @@ MISTSEA = {
     "base":  (185, 198, 211),
     "light": (206, 217, 227),
     "hi":    (228, 236, 242),
+    # sunlit cloud tops for the fluffy cloud-deck look (v0.2.3 mist rework)
+    "top":   (247, 250, 253),
 }
 
 # --- Materials ---------------------------------------------------------------

@@ -57,6 +57,16 @@ public class SkyWardenMob extends FriendlyMob {
         return false;
     }
 
+    /**
+     * Mob.canInteract defaults to FALSE — without this override the client
+     * never offers the interact prompt and PacketPlayerMobInteract drops the
+     * request server-side, so interact() would be dead code.
+     */
+    @Override
+    public boolean canInteract(necesse.entity.mobs.Mob mob) {
+        return mob != null && mob.isPlayer;
+    }
+
     @Override
     public void interact(PlayerMob player) {
         super.interact(player);

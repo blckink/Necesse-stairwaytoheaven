@@ -39,29 +39,47 @@ Story, quests, and a reason to build. The Skyreach gets a resident.
 - [x] Warden's shop (opens after stage 2) selling the building set
 - [x] Spire visibly evolves with quest progress (beacon, basket, anchor)
 
-## v0.3.0 — "Storm Season" (next)
+## v0.3.0 — "The Living Sky" (next)
 
-Weather, gear depth, quality of life.
+Playtest verdict drives this milestone: full vanilla-fidelity art, a dense living
+world, weather, and ties to the surface. Full concept: DESIGN.md Part III.
 
-- [ ] **Aetherium armor set** (head/chest/boots; Tungsten-tier set bonus: fall-themed
-      mobility perk, e.g. brief glide/slow-fall visual + speed after damage)
-- [ ] **Storm events** in the Stormveil: periodic level event (lightning strikes,
-      increased Storm Wisp spawns, bonus Storm Shard yield) — mirrors the deep-cave
-      Spirit Corrupted event pattern
+- [ ] **Art overhaul** of every existing sprite to vanilla detail density
+      (terrain splats → Mistsea → nodes/plants → mobs/NPCs → building set → items),
+      each batch gated by the contact-sheet QA process
+      (`.claude/skills/necesse-pixel-art/`) and verified on gameplay screenshots
+- [ ] **Mistsea recast as a cloudsea**: puffy animated cloud deck, shore wisps,
+      Mist Lilies, drifting cloud shadows
+- [ ] **World density & diversity**: higher decor/node density, more sheet variants,
+      and new per-biome gathering loops — Windwheat, Cloudberry, Drift Boulder,
+      Nimbus Tuft, Fulgurite Spire, Charged Slate, Static Bloom, Prismshell,
+      Aurora Kelp, Chimeflower; new materials (Cloudfluff, Fulgurite Glass,
+      Prismshell) feeding new building/furniture pieces
+- [ ] **Sky weather cycle**: Radiance, Overcast Drift, Tempest (Stormveil storm
+      event with lightning + shard yield), Mist Surge — seeded, announced via chat
+      line + palette/particles, vanilla level-event pattern
+- [ ] **Cats as settlement companions**: after the finale, Siggi and Peanut become
+      individually recruitable to the player's settlement (vanilla pet path,
+      carrier item from the Warden; declining keeps them at the spire)
+- [ ] **Fallen stars**: post-beacon skyfall event drops small Aetherium meteors on
+      surface islands
 - [ ] Mistsea **fishing loot table** (new fish + rare catches)
-- [ ] More decor objects (drift stones, cloud tufts), Mistsea ambience particles
-- [ ] Sound pass: wind ambience, mob sounds (reuse-plus-pitch first, custom later)
 - [ ] Balance pass from playtest feedback
 
 ## v0.4.0 — "The Aviary"
 
 Making the sky a place to live.
 
+- [ ] **Aetherium armor set** (head/chest/boots; Tungsten-tier set bonus: fall-themed
+      mobility perk, e.g. brief glide/slow-fall visual + speed after damage)
 - [ ] Sky **structures/presets**: more ruined skystone spires with loot, small
       abandoned observatories (uses the vanilla preset generation system)
 - [ ] **Settlement support**: allow claiming a Skyreach settlement flag; settler pathing
       audit around Mistsea; sky-specific settler dialogue lines
-- [ ] Wandering **Skyward Trader** with sky-exclusive stock
+- [ ] Wandering **Skyward Trader** visiting surface settlements with sky-exclusive stock
+- [ ] **Surface-ingredient requests**: repeatable Warden task trading surface goods
+      for sky materials
+- [ ] Sound pass: wind ambience, mob sounds (reuse-plus-pitch first, custom later)
 - [ ] Journal/quest hooks expanded into a full sky questline
 
 ## v0.5.0 — "Crown of the Sky"

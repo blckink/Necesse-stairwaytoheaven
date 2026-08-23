@@ -57,6 +57,12 @@ public abstract class SpireCatMob extends CritterMob {
         return false;
     }
 
+    /** Mob.canInteract defaults to false — required for the treat/feeding interaction to fire at all. */
+    @Override
+    public boolean canInteract(necesse.entity.mobs.Mob mob) {
+        return mob != null && mob.isPlayer;
+    }
+
     @Override
     public void init() {
         super.init();

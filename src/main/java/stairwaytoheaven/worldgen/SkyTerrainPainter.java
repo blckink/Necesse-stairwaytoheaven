@@ -115,24 +115,26 @@ public final class SkyTerrainPainter {
      */
     public static int rollObject(int seed, int tileX, int tileY, boolean isStormveil, boolean isAurora, boolean isRockPatch) {
         float roll = SkyNoise.tileRoll(seed, tileX, tileY, SALT_OBJECT_ROLL);
+        // Densities tuned up ~1.6x after playtests: the sky read as bare next to
+        // vanilla biomes. Grass-likes are generous (walk-through), blockers moderate.
         if (isStormveil) {
-            if (roll < 0.022F) return SkyRegistry.stormCrystalID;
-            if (roll < 0.055F) return SkyRegistry.skystoneRockID;
-            if (roll < 0.063F) return SkyRegistry.aetheriumRockID;
+            if (roll < 0.035F) return SkyRegistry.stormCrystalID;
+            if (roll < 0.090F) return SkyRegistry.skystoneRockID;
+            if (roll < 0.102F) return SkyRegistry.aetheriumRockID;
             return 0;
         }
         if (isAurora) {
-            if (roll < 0.026F) return SkyRegistry.auroraBloomID;
-            if (roll < 0.048F) return SkyRegistry.aetheriumRockID;
-            if (roll < 0.080F) return SkyRegistry.skystoneRockID;
+            if (roll < 0.042F) return SkyRegistry.auroraBloomID;
+            if (roll < 0.072F) return SkyRegistry.aetheriumRockID;
+            if (roll < 0.128F) return SkyRegistry.skystoneRockID;
             return 0;
         }
         // Driftlands: reeds prefer soft ground, rocks prefer outcrops
-        if (roll < 0.055F) {
+        if (roll < 0.090F) {
             return isRockPatch ? SkyRegistry.skystoneRockID : SkyRegistry.skyreedsID;
         }
-        if (roll < 0.085F) return SkyRegistry.skystoneRockID;
-        if (roll < 0.093F) return SkyRegistry.aetheriumRockID;
+        if (roll < 0.135F) return SkyRegistry.skystoneRockID;
+        if (roll < 0.145F) return SkyRegistry.aetheriumRockID;
         return 0;
     }
 }

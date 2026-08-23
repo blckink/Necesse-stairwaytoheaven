@@ -174,21 +174,90 @@ def material_gloomwood(c, x0, y0, salt, frame=0):
               ramp["hi"] if rng.chance(0.3) else ramp["deep"])
 
 
+_PUFF_CACHE = {}
+
+
+def _puff_field(hsalt, big_shift, small_shift):
+    """32x32 toroidal 'cloudiness' map: 3x3 big puffs + 5x5 small detail puffs.
+
+    Both layers wrap (distances mod 32), so the tile is seamless; shifting the
+    sample point by multiples of 4 px per frame keeps the 8-frame loop seamless
+    too (8 * 4 = 32 = one full period).
+    """
+    key = (hsalt, big_shift, small_shift)
+    cached = _PUFF_CACHE.get(key)
+    if cached is not None:
+        return cached
+    layers = []
+    # big billow masses, a medium layer breaking their edges, and fine detail
+    for grid, rmin, rmax, layer_salt in ((2, 11, 16, 0), (3, 6, 9, 0x77), (5, 3, 5, 0x33)):
+        centers = []
+        step = 32.0 / grid
+        for i in range(grid):
+            for j in range(grid):
+                r = Rng((hsalt >> 16) ^ (i * 733 + j * 2711 + layer_salt) * 40503)
+                cx = (i + 0.5) * step + (r.float() - 0.5) * step * 0.9
+                cy = (j + 0.5) * step + (r.float() - 0.5) * step * 0.9
+                centers.append((cx % 32, cy % 32, rmin + r.float() * (rmax - rmin)))
+        layers.append(centers)
+
+    def torus_d(ax, ay, bx, by):
+        dx = abs(ax - bx)
+        dy = abs(ay - by)
+        dx = min(dx, 32 - dx)
+        dy = min(dy, 32 - dy)
+        return (dx * dx + dy * dy) ** 0.5
+
+    field = [[0.0] * 32 for _ in range(32)]
+    for y in range(32):
+        for x in range(32):
+            bx, by = (x + big_shift) % 32, y
+            mx, my = (x + big_shift) % 32, (y + 5) % 32
+            sx, sy = (x + small_shift) % 32, (y + 11) % 32
+            big = 0.0
+            for (cx, cy, r) in layers[0]:
+                big = max(big, 1.0 - torus_d(bx, by, cx, cy) / r)
+            mid = 0.0
+            for (cx, cy, r) in layers[1]:
+                mid = max(mid, 1.0 - torus_d(mx, my, cx, cy) / r)
+            small = 0.0
+            for (cx, cy, r) in layers[2]:
+                small = max(small, 1.0 - torus_d(sx, sy, cx, cy) / r)
+            field[y][x] = max(0.0, big) * 0.72 + max(0.0, mid) * 0.42 + max(0.0, small) * 0.26
+    _PUFF_CACHE[key] = field
+    return field
+
+
 def material_mist(deep):
-    """Animated drifting mist: streaks shift per frame (8-frame liquid loop)."""
+    """The Mistsea as a rolling CLOUD deck, not water: bright puffy tops with
+    self-shadowed billows. Big puffs drift east, the detail layer drifts west
+    (counter-parallax); both loop seamlessly over the 8 liquid frames.
+    Deep = the open cloudsea (full contrast between sunlit tops and shadowed
+    valleys); shallow = the thinner shore band (compressed to lighter tones)."""
     def painter(c, x0, y0, salt, frame=0):
         ramp = palette.MISTSEA
-        base = ramp["deep"] if deep else ramp["base"]
+        hsalt = salt & 0xFFFF0000
+        field = _puff_field(hsalt, (frame * 4) % 32, (-frame * 4) % 32)
         for x in range(32):
             for y in range(32):
-                c.put(x0 + x, y0 + y, base)
-        rng = Rng(salt)
-        shift = frame * 4
-        for _ in range(rng.range(4, 6)):
-            x = rng.range(0, 20)
-            y = y0 + rng.range(2, 29)
-            tone = rng.pick((ramp["light"], ramp["hi"]) if not deep else (ramp["base"], ramp["light"]))
-            for i in range(rng.range(6, 14)):
-                c.put(x0 + (x + i + shift) % 32, y, tone)
-        c.put(x0 + (rng.range(2, 29) + shift) % 32, y0 + rng.range(2, 29), ramp["hi"])
+                gx, gy = (x0 + x) % 32, (y0 + y) % 32
+                v = field[gy][gx]
+                if not deep:
+                    v = 0.34 + v * 0.72  # shore mist: thinner, floor-lit
+                if v > 0.86:
+                    col = ramp["top"]
+                elif v > 0.62:
+                    col = ramp["hi"]
+                elif v > 0.42:
+                    col = ramp["light"]
+                elif v > 0.24:
+                    col = ramp["base"]
+                else:
+                    col = ramp["deep"]
+                # single-pixel checker dither at the two brightest seams
+                if 0.60 < v <= 0.62 and (gx + gy) % 2 == 0:
+                    col = ramp["hi"]
+                elif 0.84 < v <= 0.86 and (gx + gy) % 2 == 0:
+                    col = ramp["top"]
+                c.put(x0 + x, y0 + y, col)
     return painter

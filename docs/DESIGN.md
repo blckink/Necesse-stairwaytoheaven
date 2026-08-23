@@ -285,3 +285,98 @@ release adds depth, not numbers.
 Verified against the vanilla sprite reference: terrain tiles move to the real `_splat`
 autotile atlas format (the 1.3.2 renderer's primary path), the ore overlay becomes the
 correct N×32×32 pattern-variant strip, and the Mistsea gets proper liquid splats.
+
+---
+
+# Part III — v0.3 "The Living Sky"
+
+First in-game playtests delivered the verdict that shapes this milestone: the systems
+work, but the world reads **bare** — sprites are too flat next to vanilla's detail
+density, the Mistsea reads as blue water instead of cloud, and the biomes offer too
+few things to gather, mine and discover. v0.3 is the "make it feel alive" release:
+an art overhaul to full vanilla fidelity, denser and more diverse biomes, sky
+weather, and stronger ties between the sky and the world below.
+
+## 18. Quality bar
+
+A screenshot of a player-built base in the Skyreach must sit next to a screenshot of
+a decorated vanilla town without looking like modded content. Concretely: vanilla
+detail density (3–6 micro-details per 32 px cell), cute rounded silhouettes, zero
+flat two-tone fills, and every category matched against 2–3 vanilla references of
+the same kind. The process is codified in `.claude/skills/necesse-pixel-art/` and
+`docs/assets-style-guide.md`; in-game screenshots from playtests are the acceptance
+test for every art batch.
+
+## 19. Art overhaul (every existing sprite gets a detail pass)
+
+Priority = screen area × visibility:
+
+1. **Terrain splats** (Cloudturf, Skystone, Stormslate, floors) — richer variants:
+   tufts, cracks, pebbles, edge-blend character. The ground is 70% of every frame.
+2. **The Mistsea → a true cloudsea** (see §20).
+3. **Rocks, ore, crystals, plants** — silhouette + micro-detail pass, more variants
+   per sheet so fields stop tiling visibly.
+4. **Mobs and NPCs** — cleaner silhouettes, readable faces, idle charm.
+5. **Building set & furniture** — the pieces players stare at longest in bases.
+6. **Items** — icon polish last (smallest on screen).
+
+Each batch ships only after the 4× contact-sheet QA gate plus an in-context mock,
+and gets verified against real gameplay screenshots.
+
+## 20. The Mistsea, recast
+
+Not water: a **rolling cloud deck** seen from above. Bright puffy tops with soft
+self-shadowed billows, slow 8-frame drift, mist wisps curling at island shores.
+Swimming becomes wading chest-deep through cloud (same mechanics, new read).
+Additions: drifting **cloud shadows** on terrain (visual), **Mist Lily** pads at
+shorelines, and fishing into the mist (v0.3 fishing table: mist-dwelling catches).
+
+## 21. Biome life & resources (more to gather, mine and find)
+
+Density tuning first (higher object rolls, more sheet variants), then new content
+so each biome has its own forage/mining loop:
+
+| Biome | New nodes/plants | Yields |
+|---|---|---|
+| Driftlands | Windwheat grass, Cloudberry bush, Drift Boulder, Nimbus Tuft | plant fiber/Windsilk chance, food, stone + rare Aetherium, Cloudfluff (new soft material) |
+| Stormveil | Fulgurite Spire, Charged Slate node, Static Bloom | Fulgurite Glass (new), extra Storm Shards, alchemy reagent |
+| Aurora Shoals | Prismshell node, Aurora Kelp (mist edge), Chimeflower | Prismshell (new deco/craft material), food/reagent, ambience + petals |
+| Mistsea | Mist Lily, fishing table | walk-near-shore decor, fish + rare catches |
+
+New materials feed the building set (Cloudfluff → bed/carpets, Fulgurite Glass →
+windows/lamps, Prismshell → furniture trim) so gathering has visible payoff.
+
+## 22. Sky weather ("the sky has moods")
+
+A seeded, level-wide weather cycle in the Skyreach (visual layer + event hooks,
+built on the same level-event pattern vanilla uses for its surface events):
+
+- **Radiance** — brilliant clear sky: brighter light, aurora shimmer over the
+  Shoals, small gathering luck bonus. The "beautiful day" state.
+- **Overcast Drift** — the default; drifting cloud shadows.
+- **Tempest** — a storm event centered on the Stormveil: darkened palette,
+  lightning strikes (telegraphed AoE), Storm Wisp spawns up, Storm Shard yield up.
+  Danger and reward spike together; other biomes stay playable.
+- **Mist Surge** — the Mistsea "rises": fog particles, reduced sight range, mist
+  creatures surface near shores. Fishing improves.
+
+Weather states announce themselves with a short localized chat line and a palette/
+particle shift, never with a UI popup. (A sandstorm-style event stays a surface
+concept — in the sky its equivalent is the Tempest.)
+
+## 23. Ties to the world below
+
+The sky should feel connected to the rest of the game, not parallel to it:
+
+- **The cats become recruitable.** After the quest finale the Warden offers to let
+  Siggi and Peanut move down to the player's settlement — implemented on the
+  vanilla settlement-pet path (each cat individually, via a carrier item he hands
+  over; unique looks preserved, baskets placeable in the base, the spire keeps
+  spare baskets as their "visiting" spot). Declining keeps them at the spire.
+- **Fallen stars**: rare skyfall events drop a small Aetherium-bearing meteor onto
+  surface islands after the beacon is lit — surface players see the sky exists.
+- **Surface-ingredient requests**: one optional repeatable Warden task asks for
+  common surface goods (wood kinds, desert glass, ocean shells) in exchange for
+  sky materials — pulling players back down and up again.
+- **Skyward Trader** (moved here from v0.4): occasionally visits claimed surface
+  settlements once the beacon burns, selling a rotating sliver of sky stock.

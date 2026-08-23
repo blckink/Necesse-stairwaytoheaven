@@ -27,7 +27,7 @@ def _mist_clip(c, cell, water_y):
 
 def _warden_frame(facing, step, swim=False):
     """Tall, thin, slightly stooped old keeper in a feather-trimmed coat,
-    carrying a mistglass lantern staff. Burton-esque silhouette: narrow,
+    carrying a mistglass lantern staff. Storybook-gothic silhouette: narrow,
     crooked, gentle."""
     c = Canvas(64, 64)
     w = palette.WARDEN

@@ -3,6 +3,33 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [0.2.3] — 2026-08-23
+
+First real-client playtest feedback release.
+
+### Fixed
+- **The Sky Warden (and the cats) could not be talked to at all**: `Mob.canInteract`
+  defaults to `false` in the engine, so the client never offered the interact
+  prompt and the server dropped interact packets — the entire quest chain was
+  unreachable in-game. Both NPCs now override `canInteract` for players. (Found
+  only in client play; the headless test has no player and now this is documented
+  as its known blind spot.)
+
+### Changed
+- **The Mistsea now looks like a rolling cloud deck** instead of flat water:
+  layered puffy billows with sunlit tops and self-shadowed valleys, seamless
+  8-frame drift (big masses east, detail wisps west), thinner/lighter shore band.
+- **World density up ~1.6x** across all three biomes (playtests: the sky read as
+  bare) — more rocks, crystals, blooms, reeds and ore. Applies to newly generated
+  regions; already-explored areas keep their objects.
+
+### Dev
+- Added `.claude/skills/necesse-pixel-art/` (the distilled, verified style +
+  format + QA knowledge) and a `pixel-artist` agent definition that uses it.
+- DESIGN.md Part III + reworked ROADMAP v0.3: "The Living Sky" concept (full art
+  overhaul, cloudsea, per-biome gathering loops, sky weather cycle, cats as
+  recruitable settlement companions, fallen-star events).
+
 ## [0.2.2] — 2026-08-22
 
 Cheat-free wayfinding — the quest is now fully navigable without any commands.
