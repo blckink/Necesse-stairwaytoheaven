@@ -66,9 +66,8 @@ structures, settlements, the Storm Sovereign boss).
 
 ## Building (modders)
 
-Requirements: a **JDK 17–23** (recommended: [Temurin 21 LTS](https://adoptium.net) —
-on Windows simply `winget install EclipseAdoptium.Temurin.21.JDK`; note that the very
-newest JDKs 24/25 are too new for this project's Gradle 8.10 wrapper), plus a Necesse
+Requirements: a **JDK 17–25** (recommended: [Temurin 21 LTS](https://adoptium.net) —
+on Windows simply `winget install EclipseAdoptium.Temurin.21.JDK`), plus a Necesse
 install (client **or** dedicated server). The build emits Java 8 bytecode via
 `options.release` regardless of the JDK used.
 
@@ -93,9 +92,10 @@ export NECESSE_GAME_DIR=/path/to/Necesse   # contains Necesse.jar or Server.jar
 ./gradlew runDevClient                      # same, with -dev 1
 ```
 
-The Gradle setup was modernized to Gradle 8.10 (runs on current JDKs) while staying
-compatible with the upstream template layout (`settings.gradle` holds mod info,
-`gradle/main.gradle` the shared logic, `decompileToSources` still works).
+The Gradle setup was modernized to **Gradle 9.7** (runs on current JDKs, checksum-pinned
+wrapper, no internal Gradle APIs) while staying compatible with the upstream template
+layout (`settings.gradle` holds mod info, `gradle/main.gradle` the shared logic,
+`decompileToSources` still works).
 
 ### Headless integration test
 
@@ -144,6 +144,21 @@ Fix, in order:
    step 2 — joining players store no world files, so there is nothing to
    delete on their side. They just need the same single, current mod jar.
 
+**Build fails instantly with `Could not initialize class
+org.codehaus.groovy...ReflectionCache` (or `InvokerHelper`):** the checkout's
+Gradle wrapper is older than the installed JDK supports. Current versions of
+this repo ship Gradle 9.7 (JDK 17–25); if you see this error you are building
+an outdated download — re-download the development branch — or, with an even
+newer JDK, install [Temurin 21 LTS](https://adoptium.net) and set `JAVA_HOME`
+to it for the build.
+
+**The build succeeds but the jar says version `1.0` and adds nothing in
+game:** you built the bare upstream mod template, not this mod. When
+downloading as ZIP, make sure you grab the **development branch** (Code →
+Download ZIP *while the branch is selected*) and run `gradlew` in the folder
+whose `settings.gradle` shows the current `modVersion` — not in a
+`...-master` folder.
+
 ## Repository layout
 
 | Path | Contents |
@@ -189,7 +204,7 @@ Inseln über einem begehbaren Nebelmeer.
   Aurorablätter → **Sturmklinge** (Schwert) und **Windheuler** (Bogen).
 - Vollständig auf Deutsch lokalisiert.
 
-Bauen: Ein JDK 17–23 installieren (empfohlen: Temurin 21, z. B. per
+Bauen: Ein JDK 17–25 installieren (empfohlen: Temurin 21, z. B. per
 `winget install EclipseAdoptium.Temurin.21.JDK`), neues Terminal öffnen, dann im
 Repo-Ordner `gradlew.bat buildModJar` ausführen (Windows-Eingabeaufforderung; in
 PowerShell `.\gradlew.bat buildModJar`) — eine Steam-Installation von Necesse wird

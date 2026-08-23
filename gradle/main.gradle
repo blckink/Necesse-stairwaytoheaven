@@ -14,7 +14,11 @@ if (project.hasProperty('useDecompiledSources')) {
 
 //region // ===== Find Steam and game location ===== //
 
-import org.gradle.internal.os.OperatingSystem;
+// Plain os.name checks: org.gradle.internal.os.OperatingSystem is an internal
+// Gradle API and not stable across major Gradle versions.
+def osName = System.getProperty('os.name').toLowerCase(Locale.ROOT)
+boolean isWindowsHost = osName.contains('windows')
+boolean isMacHost = osName.contains('mac') || osName.contains('darwin')
 
 // A directory counts as a game install if it contains the client jar or, as a
 // fallback for CI/headless environments, the dedicated server jar (which contains
@@ -35,7 +39,7 @@ if (gameDirectory == "auto") {
         gameDirectory = envDir
     }
 
-    if (gameDirectory == null && OperatingSystem.current() == OperatingSystem.WINDOWS) {
+    if (gameDirectory == null && isWindowsHost) {
         def checkDefault = {
             def path = 'C:\\Program Files (x86)\\Steam\\steamapps\\libraryfolders.vdf'
             return file(path).exists() ? path : null
@@ -61,7 +65,7 @@ if (gameDirectory == "auto") {
                 }
             })
         }
-    } else if (gameDirectory == null && OperatingSystem.current() == OperatingSystem.MAC_OS) {
+    } else if (gameDirectory == null && isMacHost) {
         // i dont have a mac to actually check
         if (file("${System.getenv('HOME')}/Library/Application Support/Steam/steamapps/common/Necesse/Necesse.app/Contents/Resources/Necesse.jar").exists()) {
             gameDirectory = "${System.getenv('HOME')}/Library/Application Support/Steam/steamapps/common/Necesse/Necesse.app/Contents/Resources"

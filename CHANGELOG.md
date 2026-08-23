@@ -34,6 +34,13 @@ Art release: living sprites, organic construction.
   Grass-class sprites now skip the outline pass like vanilla grasses.
 
 ### Fixed
+- **Build works on the newest JDKs**: Gradle wrapper upgraded 8.10.2 → 9.7.1
+  (checksum-pinned), so building with JDK 24/25 no longer crashes in Groovy
+  (`Could not initialize class ...ReflectionCache`). The shared build script
+  no longer uses the internal `org.gradle.internal.os.OperatingSystem` API.
+  README troubleshooting documents the crash signature and the
+  wrong-folder trap (building the bare upstream template instead of the
+  mod branch yields an empty `1.0` jar).
 - README troubleshooting now covers BOTH artifacts a broken sky/Veil level
   leaves in the world save — `levels/<level>.dat` AND the
   `levels/regions/<level>/` folder — plus the `worlds/` folder layout some
