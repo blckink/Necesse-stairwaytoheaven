@@ -26,46 +26,63 @@ def _mist_clip(c, cell, water_y):
 # --- The Sky Warden ----------------------------------------------------------
 
 def _warden_frame(facing, step, swim=False):
-    """Tall, stooped old keeper: layered coat with belt + satchel, two-row
-    feather collar, long hair curtains and beard, lit iron cage lantern on a
-    staff. Storybook-gothic: narrow, crooked, gentle — but material-separated
-    and contrast-rich (vanilla character detail bar)."""
+    """Old, gentle, slightly stooped keeper on VANILLA CHIBI proportions:
+    big round head (~26px wide with the long gray hair curtains), 19px
+    shoulders flaring to a 23px ragged hem, two-row feather collar, belt +
+    satchel, long beard, and an iron cage lantern on a planted staff.
+
+    Construction is vanilla-style: the head silhouette is one big HAIR MASS,
+    the face is a skin opening painted into it, the beard a mass on top.
+    Face + glow details go in AFTER the outline pass."""
     c = Canvas(64, 64)
     w = palette.WARDEN
     iron = palette.IRONWORK
     cx = 32
     feet_y = 56
     bob = 1 if step != 0 else 0
-    head_top = 12 - bob
+    hd = -bob                    # head/collar cluster bobs up on mid-steps
     sway = step
 
-    def draw_staff(sx):
-        for y in range(head_top - 3, feet_y - 1):
-            c.put(sx, y, w["staff_hi"])
-            c.put(sx + 1, y, w["staff"])
-        # iron cage lantern on top (5 wide, 6 tall) with glowing core
-        top = head_top - 10
-        c.rect(sx - 1, top, 5, 7, iron["base"])
-        c.put(sx - 1, top, iron["light"])
-        c.put(sx + 3, top, iron["light"])
-        c.rect(sx, top + 1, 3, 5, w["lanternglow"])
-        c.put(sx + 1, top + 3, palette.STAIRLIGHT["hi"])
-        c.put(sx + 1, top - 1, iron["light"])  # finial
+    def sway_off(y):
+        # skirt sway builds from the belt down to +/-2 at the hem
+        return round(sway * 2 * max(0, y - 39) / 16.0)
 
-    def halo(sx):
-        top = head_top - 10
-        for (hx, hy) in ((sx - 3, top + 3), (sx + 5, top + 2),
-                         (sx + 1, top - 3), (sx - 2, top + 7), (sx + 4, top + 6)):
-            c.put(hx, hy, with_alpha(w["lanternglow"], 140))
+    def draw_staff(px_):
+        """Planted walking staff: pole cols px_/px_+1, 7px iron cage lantern."""
+        for y in range(13, feet_y):
+            c.put(px_, y, w["staff_hi"])
+            c.put(px_ + 1, y, w["staff"])
+        left = px_ - 2                          # cage x: left..left+6
+        c.rect(px_, 3, 2, 2, iron["light"])     # finial
+        for x in range(left, left + 7):         # top / bottom bars
+            c.put(x, 5, iron["base"])
+            c.put(x, 12, iron["deep"] if x in (left, left + 6) else iron["base"])
+        c.put(left, 5, iron["light"])
+        c.put(left + 6, 5, iron["light"])
+        for y in range(6, 12):                  # glass + three cage posts
+            for x in (left + 1, left + 2, left + 4, left + 5):
+                c.put(x, y, w["lanternglow"])
+            for x in (left, left + 3, left + 6):
+                c.put(x, y, iron["base"])
+        c.put(left, 6, iron["light"])
+        c.put(left + 6, 6, iron["light"])
+        for x in (left + 1, left + 2, left + 4, left + 5):   # bright core
+            c.put(x, 8, palette.STAIRLIGHT["hi"])
+            c.put(x, 9, palette.STAIRLIGHT["hi"])
 
-    if facing in ("down", "up"):
-        shoulder_y = head_top + 13
-        belt_y = head_top + 20
-        # --- coat: shoulder light, center crease, twin skirt creases ---
-        for y in range(shoulder_y, feet_y - 1):
-            t = (y - shoulder_y) / max(feet_y - 1 - shoulder_y, 1)
-            half = 5 + round(3.5 * t)
-            off = round(sway * t * 2)
+    def halo(px_):
+        mid = px_ + 1
+        for (hx, hy, a) in ((mid - 6, 7, 140), (mid + 6, 9, 140), (mid - 5, 12, 140),
+                            (mid + 5, 4, 140), (mid - 1, 1, 140), (mid + 2, 14, 140),
+                            (mid - 5, 5, 200), (mid + 5, 11, 200)):
+            c.put(hx, hy, with_alpha(w["lanternglow"], a))
+
+    def coat_frontback(satchel_side):
+        shoulder_y, belt_y = 30, 38
+        for y in range(shoulder_y, feet_y):
+            t = (y - shoulder_y) / float(feet_y - 1 - shoulder_y)
+            half = 9 + round(2 * t)             # 19px shoulders -> 23px hem
+            off = sway_off(y)
             for dx in range(-half, half + 1):
                 tone = w["coat"]
                 if dx <= -half + 1:
@@ -73,150 +90,188 @@ def _warden_frame(facing, step, swim=False):
                 elif dx >= half - 1:
                     tone = w["coat_deep"]
                 elif dx == 1:
-                    tone = w["coat_deep"]          # center crease
-                elif y > belt_y + 2 and dx in (-3, 4):
-                    tone = w["coat_deep"]          # skirt creases
-                elif y > belt_y + 2 and dx in (-2, 5):
-                    tone = w["coat_light"]         # crease ridges
+                    tone = w["coat_deep"]        # center crease
+                elif abs(dx) == 7 and shoulder_y < y <= belt_y + 1:
+                    tone = w["coat_deep"]        # sleeve seams
+                elif y > belt_y + 3 and dx in (-4, 5):
+                    tone = w["coat_deep"]        # skirt creases
+                elif y > belt_y + 3 and dx in (-3, 6):
+                    tone = w["coat_light"]       # crease ridges
                 c.put(cx + dx + off, y, tone)
-            if y == shoulder_y:                    # rim light on the shoulders
-                for dx in range(-half, half + 1, 1):
-                    if dx < -1 or dx > 2:
-                        c.put(cx + dx + off, y, w["coat_hi"])
-        # belt + buckle
-        for dx in range(-6, 7):
+            if y == shoulder_y:                  # rim light on the shoulders
+                for dx in range(-half, half + 1):
+                    if abs(dx) >= 3:
+                        c.put(cx + dx, y, w["coat_hi"])
+        for dx in range(-9, 10):                 # belt
             c.put(cx + dx, belt_y, iron["base"])
             c.put(cx + dx, belt_y + 1, iron["deep"])
-        c.rect(cx - 1, belt_y, 3, 2, iron["light"])
-        # hip satchel (his left = our right)
-        if facing == "down":
-            c.rect(cx + 4, belt_y + 3, 5, 4, palette.WOOD["deep"])
-            c.rect(cx + 4, belt_y + 3, 5, 1, palette.WOOD["light"])
-        # ragged hem with pale lining
+        if satchel_side > 0:                     # buckle only on the front side
+            c.rect(cx - 1, belt_y, 3, 2, iron["light"])
+        sx0 = cx + 5 if satchel_side > 0 else cx - 10
+        c.rect(sx0, 41, 6, 6, palette.WOOD["deep"])       # hip satchel
+        c.rect(sx0, 41, 6, 1, palette.WOOD["light"])
+        c.put(sx0 + 2, 44, iron["light"])
+        c.put(sx0 + 2, 40, palette.WOOD["deep"])          # strap stub
         rng = Rng(0x9AEF + step)
-        hem_off = round(sway * 2)
-        for dx in range(-9, 10):
-            c.put(cx + dx + hem_off, feet_y - 2, w["coat_light"])
-            if rng.chance(0.55):
-                c.put(cx + dx + hem_off, feet_y - 1, w["coat_deep"])
-        # --- feather collar: two scallop rows, wider than the shoulders ---
-        for dx in range(-8, 9):
-            c.put(cx + dx, head_top + 12, w["feather"])
-            c.put(cx + dx, head_top + 13, w["feather"])
+        for dx in range(-11, 12):                # ragged hem with pale lining
+            c.put(cx + dx + sway_off(54), 54, w["coat_light"])
+            if rng.chance(0.6):
+                c.put(cx + dx + sway_off(55), 55, w["coat_deep"])
+
+    def collar(ccx):
+        for dx in range(-10, 11):                # scallop tips, row 1
             if dx % 2 == 0:
-                c.put(cx + dx, head_top + 11, w["feather_hi"])
-                c.put(cx + dx, head_top + 14, w["feather"])
-            else:
-                c.put(cx + dx, head_top + 11, w["feather"])
-        # --- head ---
+                c.put(ccx + dx, 27 + hd, w["feather_hi"])
+        for dy in (28, 29):
+            for dx in range(-11, 12):
+                c.put(ccx + dx, dy + hd, w["feather"])
+        for dx in range(-9, 10):                 # scallop tips, row 2
+            if dx % 2 != 0:
+                c.put(ccx + dx, 30 + hd, w["feather_hi"])
+        for dx in range(-10, 11):
+            c.put(ccx + dx, 31 + hd, w["feather"])
+
+    def staff_arm(side, pole_x):
+        """Sleeve wedge from the shoulder out to a 3px hand on the pole."""
+        for i, y in enumerate(range(32, 36)):
+            a = side * (9 + i)
+            b = side * (11 + i)
+            for x in range(min(a, b), max(a, b) + 1):
+                c.put(cx + x, y, w["coat_light"] if i == 0 else w["coat"])
+            c.put(cx + b, y, w["coat_deep"])     # under-edge of the sleeve
+        hx0 = pole_x if side < 0 else pole_x - 1
+        c.rect(hx0, 36, 3, 2, w["skin"])         # hand gripping the pole
+
+    # ------------------------------------------------------------------ build
+    if facing in ("down", "up"):
+        pole_x = cx - 15 if facing == "down" else cx + 14
+        coat_frontback(satchel_side=1 if facing == "down" else -1)
+        staff_arm(-1 if facing == "down" else 1, pole_x)
+        if facing == "down":                     # hanging hand on the free arm
+            c.rect(cx + 8, 40, 2, 2, w["skin"])
+        collar(cx)
+        # --- head: hair mass -> face opening -> beard mass ---
+        c.ellipse(cx, 18 + hd, 12.8, 9.4, w["hair"])       # 25px hair dome
+        for dx in range(-4, 5):
+            c.put(cx + dx, 8 + hd, w["hair"])              # flatten the crown
+        for y in range(25 + hd, 28 + hd):                  # jaw band under dome
+            for dx in range(-9, 10):
+                c.put(cx + dx, y, w["hair"])
+        for y in range(13 + hd, 28 + hd):                  # curtains: L 5px, R 4px
+            for dx in range(-13, -8):
+                c.put(cx + dx, y, w["hair_shade"] if (dx <= -12 and y > 19 + hd) else w["hair"])
+            for dx in range(9, 13):
+                c.put(cx + dx, y, w["hair_shade"] if (dx >= 12 and y > 20 + hd) else w["hair"])
+        for y in range(28 + hd, 30 + hd):                  # curtain tips
+            for dx in range(-13, -10):
+                c.put(cx + dx, y, w["hair_shade"])
+        c.rect(cx + 10, 28 + hd, 3, 1, w["hair_shade"])
         if facing == "down":
-            for y in range(head_top, head_top + 11):
-                for dx in range(-3, 4):
-                    c.put(cx + dx, y, w["skin"])
-            c.put(cx - 3, head_top + 9, w["skin_shade"])
-            c.put(cx + 3, head_top + 9, w["skin_shade"])
-            # hair: full crown + curtains down to the collar
-            rng = Rng(0x9A12 + step)
-            for dx in range(-5, 6):
-                c.put(cx + dx, head_top - 1, w["hair"])
-                c.put(cx + dx, head_top - 2, w["hair"])
-                if rng.chance(0.5):
-                    c.put(cx + dx, head_top - 3, w["hair"])
-            for y in range(head_top, head_top + 12):
-                c.put(cx - 4, y, w["hair"])
-                c.put(cx - 5, y, w["hair_shade"] if y > head_top + 5 else w["hair"])
-                c.put(cx + 4, y, w["hair"])
-                c.put(cx + 5, y, w["hair_shade"] if y > head_top + 4 else w["hair"])
-            # long beard over the collar
-            for i, bw in enumerate((3, 3, 2, 2, 1, 1)):
-                for dx in range(-bw, bw + 1):
-                    c.put(cx + dx, head_top + 10 + i, w["hair"] if dx != bw else w["hair_shade"])
-        else:  # up: hair covers everything down to the collar
-            for y in range(head_top - 3, head_top + 12):
-                for dx in range(-5, 6):
-                    c.put(cx + dx, y, w["hair"])
-            for dx in (-3, 1, 4):                          # vertical strand shadows
-                for y in range(head_top + 2 + abs(dx) % 2, head_top + 12):
+            c.ellipse(cx, 19.5 + hd, 8.0, 7.2, w["skin"])  # face opening
+            for i, bw in enumerate((7, 7, 7, 7, 6, 6, 5, 5, 4, 4, 2, 2)):
+                for dx in range(-bw, bw + 1):              # long beard mass
+                    c.put(cx + dx, 24 + i + hd, w["hair"])
+        else:  # up: no face — vertical strand shadows down the hair sheet
+            rng = Rng(0x9A44 + step)
+            for dx in (-8, -4, 1, 5, 9):
+                for y in range(12 + hd + rng.range(0, 2), 27 + hd - rng.range(0, 2)):
                     c.put(cx + dx, y, w["hair_shade"])
-        draw_staff(cx + (-11 if facing == "down" else 10))
-    else:  # right profile
-        lean = 4
-        shoulder_y = head_top + 13
-        belt_y = head_top + 20
-        for y in range(shoulder_y, feet_y - 1):
-            t = (y - shoulder_y) / max(feet_y - 1 - shoulder_y, 1)
-            half = 4 + round(3 * t)
-            off = round(lean * (1 - t)) + round(sway * t)
+            for dx in range(-9, 10):                       # ragged hair bottom
+                if rng.chance(0.5):
+                    c.put(cx + dx, 27 + hd, w["hair_shade"])
+        draw_staff(pole_x)
+    else:  # right profile, stooped forward
+        pole_x = cx + 15
+        shoulder_y, belt_y = 30, 38
+        for y in range(shoulder_y, feet_y):
+            t = (y - shoulder_y) / float(feet_y - 1 - shoulder_y)
+            half = 8 + round(2 * t)              # 17px -> 21px in profile
+            off = (2 if y < 34 else 1 if y < 40 else 0) + sway_off(y)
             for dx in range(-half, half + 1):
                 tone = w["coat"]
                 if dx <= -half + 1:
                     tone = w["coat_light"]
                 elif dx >= half - 1:
                     tone = w["coat_deep"]
-                elif y > belt_y + 2 and dx == 0:
-                    tone = w["coat_deep"]
+                elif y > belt_y + 3 and dx in (0, -4):
+                    tone = w["coat_deep"]        # skirt creases
+                elif y > belt_y + 3 and dx == -3:
+                    tone = w["coat_light"]
                 c.put(cx + dx + off, y, tone)
             if y == shoulder_y:
                 for dx in range(-half + 1, half):
                     c.put(cx + dx + off, y, w["coat_hi"])
-        for dx in range(-5, 6):
-            c.put(cx + dx + 2, belt_y, iron["base"])
-        c.put(cx + 4, belt_y, iron["light"])
-        c.rect(cx - 4, belt_y + 3, 4, 4, palette.WOOD["deep"])   # satchel at the back
-        c.rect(cx - 4, belt_y + 3, 4, 1, palette.WOOD["light"])
+        for dx in range(-8, 9):                  # belt, buckle at the front
+            c.put(cx + dx + 1, belt_y, iron["base"])
+            c.put(cx + dx + 1, belt_y + 1, iron["deep"])
+        c.rect(cx + 5, belt_y, 2, 2, iron["light"])
+        c.rect(cx - 10, 41, 5, 5, palette.WOOD["deep"])    # satchel at the back
+        c.rect(cx - 10, 41, 5, 1, palette.WOOD["light"])
         rng = Rng(0x9AEE + step)
-        for dx in range(-7, 8):
-            c.put(cx + dx + 1, feet_y - 2, w["coat_light"])
-            if rng.chance(0.55):
-                c.put(cx + dx + 1, feet_y - 1, w["coat_deep"])
-        # collar
-        for dx in range(-6, 8):
-            c.put(cx + dx + lean, head_top + 12, w["feather"])
-            c.put(cx + dx + lean, head_top + 13, w["feather"])
-            if dx % 2 == 0:
-                c.put(cx + dx + lean, head_top + 11, w["feather_hi"])
-        # head leaning forward, hooked nose
-        for y in range(head_top, head_top + 11):
-            for dx in range(-3, 4):
-                c.put(cx + dx + lean, y, w["skin"])
-        c.put(cx + 4 + lean, head_top + 5, w["skin"])
-        c.put(cx + 5 + lean, head_top + 5, w["skin"])
-        c.put(cx + 5 + lean, head_top + 6, w["skin_shade"])
-        c.put(cx + 6 + lean, head_top + 6, w["skin_shade"])
-        # hair: crown + back curtain
-        rng = Rng(0x9A34 + step)
-        for dx in range(-5, 4):
-            c.put(cx + dx + lean, head_top - 1, w["hair"])
-            c.put(cx + dx + lean, head_top - 2, w["hair"])
-            if rng.chance(0.4):
-                c.put(cx + dx + lean, head_top - 3, w["hair"])
-        for y in range(head_top, head_top + 12):
-            c.put(cx - 4 + lean, y, w["hair"])
-            c.put(cx - 5 + lean, y, w["hair_shade"])
-        # short beard jutting forward
-        for i, bw in enumerate((2, 2, 1)):
-            for dx in range(bw + 1):
-                c.put(cx + 2 + lean + dx, head_top + 10 + i, w["hair"])
-        draw_staff(cx + 11)
+        for dx in range(-10, 11):
+            c.put(cx + dx + sway_off(54), 54, w["coat_light"])
+            if rng.chance(0.6):
+                c.put(cx + dx + sway_off(55), 55, w["coat_deep"])
+        collar(cx + 2)
+        # --- head: back-heavy hair mass, face opening at the front ---
+        c.ellipse(cx + 1, 18 + hd, 10.8, 9.2, w["hair"])
+        for dx in range(-2, 5):
+            c.put(cx + dx, 8 + hd, w["hair"])
+        for y in range(24 + hd, 27 + hd):                  # jaw band
+            for dx in range(-5, 3):
+                c.put(cx + dx, y, w["hair"])
+        for y in range(12 + hd, 28 + hd):                  # back curtain
+            for dx in range(-8, -4):
+                c.put(cx + dx, y, w["hair_shade"] if (dx <= -7 and y > 19 + hd) else w["hair"])
+        c.rect(cx - 8, 28 + hd, 3, 2, w["hair_shade"])     # curtain tip
+        c.ellipse(cx + 4, 19.5 + hd, 6.8, 7.0, w["skin"])  # face opening
+        c.rect(cx + 11, 17 + hd, 2, 1, w["skin"])          # big hooked nose
+        c.rect(cx + 11, 18 + hd, 3, 1, w["skin"])
+        c.rect(cx + 12, 19 + hd, 2, 1, w["skin_shade"])
+        for i, (a, b) in enumerate(((6, 11), (4, 11), (3, 10), (4, 10),
+                                    (4, 10), (5, 9), (5, 9), (6, 8), (6, 8), (6, 8))):
+            for x in range(a, b + 1):                      # beard jutting forward
+                c.put(cx + x, 21 + i + hd, w["hair"])
+        staff_arm(1, pole_x)
+        draw_staff(pole_x)
 
     c.outline(palette.OUTLINE)
-    # face + glow details after the outline pass
+
+    # ---------------------------------------------- after-outline detail pass
     if facing == "down":
-        c.put(cx - 2, head_top + 4, palette.OUTLINE)
-        c.put(cx + 2, head_top + 4, palette.OUTLINE)
-        c.put(cx - 2, head_top + 5, w["eye"])
-        c.put(cx + 2, head_top + 5, w["eye"])
-        c.put(cx - 3, head_top + 3, w["skin_shade"])
-        c.put(cx + 3, head_top + 3, w["skin_shade"])
-        c.put(cx, head_top + 7, w["skin_shade"])          # nose tip
-        c.put(cx - 1, head_top + 12, w["hair_shade"])     # beard part
-        halo(cx - 11)
+        for dx in list(range(-6, -2)) + list(range(3, 7)):
+            c.put(cx + dx, 15 + hd, w["skin_shade"])       # hooded brow shade
+        for dx in list(range(-5, -2)) + list(range(3, 6)):
+            c.put(cx + dx, 16 + hd, palette.OUTLINE)       # heavy brow bars
+        for dx in (-5, -4, 4, 5):
+            c.put(cx + dx, 17 + hd, w["eye"])              # bright 2x2 eyes
+            c.put(cx + dx, 18 + hd, w["eye"])
+            c.put(cx + dx, 19 + hd, w["skin_shade"])       # under-eye bags
+        c.rect(cx - 1, 17 + hd, 2, 3, w["skin"])           # nose bridge
+        c.rect(cx - 1, 20 + hd, 2, 2, w["skin_shade"])     # nose tip
+        c.put(cx - 7, 19 + hd, w["skin_shade"])            # age lines
+        c.put(cx + 6, 19 + hd, w["skin_shade"])
+        for (sx_, y0, y1) in ((-4, 25, 28), (-1, 24, 32), (2, 26, 30), (5, 25, 27)):
+            for y in range(y0, y1 + 1):                    # beard streaks
+                c.put(cx + sx_, y + hd, w["hair_shade"])
+        c.put(cx, 22 + hd, w["hair_shade"])                # mustache part
+        c.put(cx, 23 + hd, w["hair_shade"])
+        halo(cx - 15)
     elif facing == "up":
-        halo(cx + 10)
+        halo(cx + 14)
     else:
-        c.put(cx + 3 + 4, head_top + 4, palette.OUTLINE)
-        c.put(cx + 3 + 4, head_top + 5, w["eye"])
-        halo(cx + 11)
+        for dx in range(5, 10):
+            c.put(cx + dx, 15 + hd, w["skin_shade"])       # brow shade
+        for dx in range(6, 9):
+            c.put(cx + dx, 16 + hd, palette.OUTLINE)       # brow bar
+        for dx in (6, 7):
+            c.put(cx + dx, 17 + hd, w["eye"])
+            c.put(cx + dx, 18 + hd, w["eye"])
+            c.put(cx + dx, 19 + hd, w["skin_shade"])
+        for (sx_, y0, y1) in ((6, 23, 26), (8, 22, 25)):
+            for y in range(y0, y1 + 1):                    # beard streaks
+                c.put(cx + sx_, y + hd, w["hair_shade"])
+        halo(pole_x)
     if swim:
         _mist_clip(c, 64, 42)
     return c
