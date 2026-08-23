@@ -242,7 +242,7 @@ figcaption{display:flex;justify-content:space-between;gap:10px;align-items:basel
   conic-gradient(var(--chk-a) 25%,var(--chk-b) 0 50%,var(--chk-a) 0 75%,var(--chk-b) 0)
   0 0/16px 16px;border-radius:4px;}
 .vp{overflow-x:auto;padding:10px;}
-.vp img,.ivp img,.mistroll{image-rendering:pixelated;display:block;}
+.vp img,.ivp img,.mistroll{image-rendering:pixelated;display:block;max-width:none;}
 .note{color:var(--mut);font-size:14px;margin:8px 0 0;max-width:62ch;}
 .mistcap{font:12px "IBM Plex Mono",monospace;color:var(--mut);margin:8px 0 4px;}
 .mist{overflow:hidden;width:448px;max-width:100%;height:192px;position:relative;}

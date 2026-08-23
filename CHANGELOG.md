@@ -3,6 +3,31 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [0.2.4] — 2026-08-23
+
+Art batch 1, driven by playtest + reference feedback: terrain with real material
+character, an actual raven, chunkier clouds, and the gothic night-violet
+direction made official (see the style guide's new "Art direction" section).
+
+### Changed
+- **Terrain splats rebuilt on vanilla's construction principle**: calm base +
+  per-variant detail clusters (before: uniform speckle with all four full
+  variants identical — "recolored" instead of distinct). Cloudturf gets chunky
+  tuft clusters and cloud-moss patches, Skystone gets fissures and chipped
+  facets, Stormslate becomes layered night-violet slate with electric charge
+  veins, Gloomwood gets knots, nail heads and grain streaks.
+- **Stormslate palette shifted to night violet** — the walkable purple night sky.
+- **Mistsea clouds v2**: bigger rounded lobes, hard sunlit rim on every lobe's
+  upper edge, dither removed — crisp cartoon-cloud read.
+- **Gloomraven statue redrawn as an actual raven**: profile pose with a big pale
+  hooked beak, eye ring, folded wing with sheen, long tail, two-step plinth.
+  The inventory icon follows automatically.
+
+### Fixed
+- Sprite gallery: the viewer's CSS reset squashed oversized sheets — the Mistsea
+  animation appeared to flicker and wide sheets rendered blurry/downscaled. All
+  sheets now render unscaled and pixel-crisp.
+
 ## [0.2.3] — 2026-08-23
 
 First real-client playtest feedback release.

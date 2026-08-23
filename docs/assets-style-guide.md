@@ -17,6 +17,23 @@ replacements should follow them too.
 - **Readability first:** every object must read at 1× zoom against both Cloudturf and
   Stormslate.
 
+## Art direction (since v0.2.4): "a purple night sky made walkable"
+
+Gothic-whimsical, cute-macabre: night-violet ground tones in the Stormveil, pale
+stone against near-black trim, crooked-but-rounded silhouettes with big readable
+eyes, sparse electric accents. Stripe and crescent-moon motifs are welcome as
+deco accents. Reference/mood material stays outside the repo — docs describe the
+direction generically, never brands or franchises.
+
+Two construction rules learned from vanilla:
+
+- **Terrain = calm base + per-variant feature clusters.** The four full-variant
+  cells of a splat each carry their own small motif (tufts, a fissure, a moss
+  patch); blend cells stay plain base. Uniform speckle everywhere reads as
+  "recolored", not as material.
+- **Clouds = few big rounded lobes** with a hard 1-px sunlit rim on upper edges
+  and no dither — cartoon-cloud read, not soft noise.
+
 ## Palette (see tools/asset_generator/palette.py)
 
 Muted bases, few saturated accents. "Cool, not kitschy": weathered stone, cold air,

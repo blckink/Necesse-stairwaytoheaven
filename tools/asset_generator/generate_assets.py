@@ -41,10 +41,14 @@ def main():
 
     # Terrain + liquid: modern _splat atlases (the 1.3.2 renderer's primary
     # path; the marble checker deliberately stays legacy — see gen_furniture)
-    gen_splats.build_splat(f"{out}/tiles/cloudturf_splat.png", gen_splats.material_cloudturf, 3, 0xC1)
-    gen_splats.build_splat(f"{out}/tiles/skystone_splat.png", gen_splats.material_skystone, 3, 0x51)
-    gen_splats.build_splat(f"{out}/tiles/stormslate_splat.png", gen_splats.material_stormslate, 3, 0x57)
-    gen_splats.build_splat(f"{out}/tiles/gloomwoodfloor_splat.png", gen_splats.material_gloomwood, 2, 0x6D)
+    gen_splats.build_splat(f"{out}/tiles/cloudturf_splat.png", gen_splats.material_cloudturf, 3, 0xC1,
+                           features=gen_splats.features_cloudturf)
+    gen_splats.build_splat(f"{out}/tiles/skystone_splat.png", gen_splats.material_skystone, 3, 0x51,
+                           features=gen_splats.features_skystone)
+    gen_splats.build_splat(f"{out}/tiles/stormslate_splat.png", gen_splats.material_stormslate, 3, 0x57,
+                           features=gen_splats.features_stormslate)
+    gen_splats.build_splat(f"{out}/tiles/gloomwoodfloor_splat.png", gen_splats.material_gloomwood, 2, 0x6D,
+                           features=gen_splats.features_gloomwood)
     gen_splats.build_splat(f"{out}/tiles/mistsea_shallow_splat.png", gen_splats.material_mist(False), 1, 0x315E, frames=8)
     gen_splats.build_splat(f"{out}/tiles/mistsea_deep_splat.png", gen_splats.material_mist(True), 1, 0xD1EE, frames=8)
     gen_furniture.gen_marblechecker(f"{out}/tiles/marblechecker.png")

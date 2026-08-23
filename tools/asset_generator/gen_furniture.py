@@ -525,28 +525,85 @@ def gen_wall_light(path, kind):
 
 
 def gen_gloomraven_statue(path):
-    """64x96 single-pose StatueObject sheet (vanilla ravenstatue dimensions)."""
+    """64x96 single-pose StatueObject sheet (vanilla ravenstatue dimensions).
+
+    A REAL raven in profile, facing right: hunched shoulders, big pale
+    slightly-hooked beak, eye ring, folded wing with layered sheen, long tail
+    sweeping down-left — perched on a two-step skystone plinth. Dark
+    night-violet body (the mod's gothic direction), stone-pale beak."""
     c = Canvas(64, 96)
     stone = palette.SKYSTONE
-    cx = 32
-    # two-step plinth
-    c.rect(cx - 14, 82, 28, 8, stone["base"])
-    c.rect(cx - 14, 82, 28, 2, stone["light"])
-    c.rect(cx - 10, 76, 20, 6, stone["base"])
-    c.rect(cx - 10, 76, 20, 2, stone["light"])
-    # raven, hunched, facing left, tail sweeping right
-    c.ellipse(cx + 1, 62, 12, 10, stone["base"])
-    c.ellipse(cx - 6, 48, 7, 6, stone["base"])
-    c.ellipse(cx - 3, 58, 8, 7, stone["light"])   # wing mass
-    for i in range(7):                            # beak
-        c.put(cx - 14 - i // 2, 48 + i // 3, stone["deep"])
-    for i in range(10):                           # tail
-        c.put(cx + 12 + i // 2, 66 + i // 2, stone["deep"])
-    for lx in (cx - 4, cx + 5):                   # legs
-        c.rect(lx, 72, 2, 5, stone["deep"])
-    c.shade_topleft(stone["hi"], stone["deep"])
+    body = palette.NIGHTFELL
+    rng = Rng(0x6B1D)
+
+    # --- two-step plinth ---
+    c.rect(15, 82, 34, 8, stone["base"])
+    c.rect(15, 82, 34, 2, stone["light"])
+    c.rect(15, 88, 34, 2, stone["deep"])
+    c.rect(20, 76, 24, 6, stone["base"])
+    c.rect(20, 76, 24, 2, stone["light"])
+    c.put(17, 85, stone["deep"])   # plinth chip
+    c.put(46, 84, stone["light"])
+
+    # --- raven silhouette (dark mass first — outline pass eats thin shapes) ---
+    # tail: thick wedge from the body's rear, sweeping down-left
+    for i in range(13):
+        t = 4 - i // 4
+        for w in range(max(1, t)):
+            c.put(22 - i, 57 + i // 2 + w, body["base"])
+    # body, chest and head as one overlapping mass (no "two balls" gap)
+    c.ellipse(31, 62, 11, 9, body["base"])
+    c.ellipse(36, 54, 8, 8, body["base"])
+    c.ellipse(40, 45, 7, 6, body["base"])
+    # crown + hunched nape
+    c.ellipse(37, 42, 5, 4, body["base"])
+
+    # --- big pale beak, slightly hooked at the tip ---
+    for i in range(10):
+        top = 42 + i // 4
+        bot = 47 - i // 5
+        for y in range(top, bot + 1):
+            c.put(46 + i, y, stone["light"])
+    c.put(55, 46, stone["base"])   # hook
+    c.put(54, 47, stone["base"])
+    for i in range(9):             # beak shadow seam
+        c.put(46 + i, 46 - i // 5, stone["base"])
+
+    # --- folded wing over the body ---
+    for i in range(14):            # wing edge line
+        c.put(29 - i // 2, 52 + i, body["deep"])
+    for i in range(10):            # upper sheen arc
+        c.put(31 - i // 2, 54 + i, body["hi"])
+    for i in range(7):             # lower sheen arc
+        c.put(29 - i // 2, 60 + i, body["light"])
+    for fx, fy in ((22, 69), (26, 70), (30, 71)):   # feather tips
+        c.put(fx, fy, body["deep"])
+        c.put(fx + 1, fy, body["deep"])
+        c.put(fx, fy - 1, body["light"])
+
+    # --- legs + claws on the plinth ---
+    c.rect(30, 71, 2, 6, body["deep"])
+    c.rect(37, 70, 2, 7, body["deep"])
+    c.put(32, 76, body["deep"])
+    c.put(39, 76, body["deep"])
+
+    c.shade_topleft(body["hi"], body["deep"], strength=0.6)
     c.outline(palette.OUTLINE)
-    c.put(cx - 8, 46, palette.STORMCRYSTAL["light"])  # gem eye
+
+    # --- face details AFTER the outline pass (it would eat them) ---
+    c.put(41, 43, stone["hi"])     # eye ring
+    c.put(42, 43, stone["hi"])
+    c.put(41, 44, stone["hi"])
+    c.put(42, 44, body["deep"])    # pupil
+    c.put(41, 42, stone["light"])
+    c.put(43, 43, body["deep"])
+    for i in range(9):             # solid beak top edge, one clean light line
+        c.put(46 + i, 42 + i // 4, stone["hi"])
+    for i in range(14):            # wing fold sheen (readable on the dark mass)
+        c.put(30 - i // 2, 53 + i, body["hi"])
+    c.put(35, 40, body["hi"])      # crown sheen
+    c.put(36, 40, body["hi"])
+    c.put(34, 41, body["hi"])
     c.save(path)
 
 

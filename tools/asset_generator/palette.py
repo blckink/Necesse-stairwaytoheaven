@@ -26,11 +26,13 @@ SKYSTONE = {
 }
 
 STORMSLATE = {
-    "deep":  (48, 51, 66),
-    "base":  (68, 72, 90),
-    "light": (88, 93, 112),
-    "hi":    (112, 118, 138),
-    "charge": (150, 140, 220),
+    # night-violet slate — the mod's gothic art direction: a purple night sky
+    # made walkable. Same luminance ladder as before, hue shifted to violet.
+    "deep":  (47, 42, 70),
+    "base":  (66, 60, 95),
+    "light": (89, 82, 122),
+    "hi":    (115, 108, 150),
+    "charge": (168, 150, 240),
 }
 
 MISTSEA = {

@@ -65,7 +65,10 @@ def _mask_alpha(discs, x, y, salt):
     return 255 if speck < t else 0
 
 
-def build_splat(path, material, variants=3, salt=0x51A7, frames=1):
+def build_splat(path, material, variants=3, salt=0x51A7, frames=1, features=None):
+    """features(block, x0, y0, salt, k): optional motif painter run on the four
+    FULL-variant cells (3..6, 0) only — vanilla's trick: blend cells stay a calm
+    base texture, while each full variant carries its own detail cluster."""
     sheet = Canvas(BLOCK_W * frames, BLOCK_H * variants)
     for frame in range(frames):
         for v in range(variants):
@@ -76,6 +79,9 @@ def build_splat(path, material, variants=3, salt=0x51A7, frames=1):
             for cx in range(7):
                 for cy in range(3):
                     material(block, cx * CELL, cy * CELL, vsalt + cx * 17 + cy * 53, frame)
+            if features is not None:
+                for k, fcx in enumerate((3, 4, 5, 6)):
+                    features(block, fcx * CELL, 0, vsalt + 0xF17 + k * 977, k)
             # ...then mask each cell by its blend shape
             for cx in range(7):
                 for cy in range(3):
@@ -108,49 +114,133 @@ def _speckle_cell(c, x0, y0, ramp, salt, density=0.10):
 
 
 def material_cloudturf(c, x0, y0, salt, frame=0):
+    """Calm silver-green turf. All character lives in the full-variant motifs
+    (vanilla construction: quiet base, clustered features per variant)."""
+    _speckle_cell(c, x0, y0, palette.CLOUDTURF, 0xC10D0000, density=0.04)
+
+
+def features_cloudturf(c, x0, y0, salt, k):
     ramp = palette.CLOUDTURF
-    _speckle_cell(c, x0, y0, ramp, 0xC10D0000)
     rng = Rng(salt)
-    for _ in range(rng.range(4, 6)):
-        x = x0 + rng.range(1, 30)
-        y = y0 + rng.range(2, 29)
-        lean = rng.pick((-1, 0, 1))
+
+    def tuft(x, y):
+        # chunky 4px-tall blade cluster with rooted shadow (vanilla-scale)
+        lean = rng.pick((-1, 1))
+        c.put(x - 1, y, ramp["tuft"])
         c.put(x, y, ramp["tuft"])
+        c.put(x + 1, y, ramp["tuft"])
+        c.put(x - lean, y - 1, ramp["tuft"])
         c.put(x + lean, y - 1, ramp["tuft"])
-        if rng.chance(0.5):
-            c.put(x + lean, y - 2, ramp["hi"])
-    for _ in range(rng.range(2, 3)):
-        c.put(x0 + rng.range(2, 29), y0 + rng.range(2, 29), ramp["hi"])
+        c.put(x + lean, y - 2, ramp["tuft"])
+        c.put(x + lean * 2, y - 3, ramp["hi"])
+        c.put(x - 1, y + 1, ramp["deep"])
+        c.put(x, y + 1, ramp["deep"])
+
+    if k == 0:  # near-plain
+        c.put(x0 + rng.range(6, 26), y0 + rng.range(6, 26), ramp["hi"])
+        return
+    if k == 1:  # two tuft clusters, each of two neighboring tufts
+        for _ in range(2):
+            tx, ty = x0 + rng.range(6, 24), y0 + rng.range(7, 26)
+            tuft(tx, ty)
+            tuft(tx + rng.range(4, 7), ty + rng.pick((-2, 2)))
+    elif k == 2:  # soft cloud-moss patch
+        mx, my = x0 + rng.range(10, 21), y0 + rng.range(10, 21)
+        c.blob(mx, my, 4, ramp["light"], rng, lumps=3)
+        c.blob(mx - 1, my - 1, 2, ramp["hi"], rng, lumps=2)
+        c.put(mx + 3, my + 3, ramp["deep"])
+        for _ in range(3):
+            c.put(x0 + rng.range(3, 28), y0 + rng.range(3, 28), ramp["hi"])
+    else:  # tuft + pale pebbles
+        tuft(x0 + rng.range(5, 26), y0 + rng.range(6, 26))
+        for _ in range(3):
+            px, py = x0 + rng.range(3, 27), y0 + rng.range(3, 27)
+            c.put(px, py, ramp["light"])
+            c.put(px + 1, py, ramp["deep"])
 
 
 def material_skystone(c, x0, y0, salt, frame=0):
+    """Calm pale stone; cracks and chips are per-variant features."""
+    _speckle_cell(c, x0, y0, palette.SKYSTONE, 0x51A90000, density=0.05)
+
+
+def features_skystone(c, x0, y0, salt, k):
     ramp = palette.SKYSTONE
-    _speckle_cell(c, x0, y0, ramp, 0x51A90000)
     rng = Rng(salt)
-    for _ in range(rng.range(1, 3)):
-        x = x0 + rng.range(3, 26)
-        y = y0 + rng.range(3, 26)
+
+    def crack(x, y, length):
         step = rng.pick((-1, 1))
-        for i in range(rng.range(3, 6)):
-            c.put(x + i, y + (i // 2) * step, ramp["deep"])
-    for _ in range(rng.range(2, 4)):
-        x = x0 + rng.range(2, 28)
-        y = y0 + rng.range(2, 28)
-        c.put(x, y, ramp["light"])
-        c.put(x + 1, y + 1, ramp["hi"])
+        for i in range(length):
+            c.put(x + i, y, ramp["deep"])
+            if rng.chance(0.45):
+                y += step
+        c.put(x + length - 1, y + 1, ramp["light"])
+
+    if k == 0:  # plain slab
+        return
+    if k == 1:  # one long meandering fissure
+        crack(x0 + rng.range(3, 12), y0 + rng.range(8, 24), rng.range(9, 14))
+    elif k == 2:  # chipped facet + pebbles
+        fx, fy = x0 + rng.range(8, 20), y0 + rng.range(8, 20)
+        for i in range(4):
+            for j in range(4 - i):
+                c.put(fx + i, fy + j, ramp["light"])
+        c.put(fx, fy, ramp["hi"])
+        c.put(fx + 2, fy + 4, ramp["deep"])
+        c.put(fx + 4, fy + 2, ramp["deep"])
+        for _ in range(2):
+            px, py = x0 + rng.range(3, 27), y0 + rng.range(3, 27)
+            c.put(px, py, ramp["light"])
+            c.put(px + 1, py + 1, ramp["deep"])
+    else:  # two hairline cracks + a glint
+        crack(x0 + rng.range(3, 12), y0 + rng.range(5, 14), rng.range(6, 9))
+        crack(x0 + rng.range(8, 18), y0 + rng.range(18, 26), rng.range(6, 9))
+        c.put(x0 + rng.range(6, 26), y0 + rng.range(6, 26), ramp["hi"])
 
 
 def material_stormslate(c, x0, y0, salt, frame=0):
+    """Layered night-violet slate: position-locked dashed diagonal strata
+    (period 16 divides the 32px tile, so it stays seamless)."""
     ramp = palette.STORMSLATE
-    _speckle_cell(c, x0, y0, ramp, 0x570A0000)
+    _speckle_cell(c, x0, y0, ramp, 0x570A0000, density=0.08)
+    for x in range(32):
+        for y in range(32):
+            gx, gy = (x0 + x) % 32, (y0 + y) % 32
+            m = (gx + gy) % 16
+            h = Rng((gx * 5081 + gy * 947) ^ 0x570A5EED)
+            if m == 0 and h.chance(0.72):
+                c.put(x0 + x, y0 + y, ramp["deep"])
+            elif m == 1 and h.chance(0.35):
+                c.put(x0 + x, y0 + y, ramp["light"])
+
+
+def features_stormslate(c, x0, y0, salt, k):
+    ramp = palette.STORMSLATE
     rng = Rng(salt)
-    for _ in range(rng.range(2, 3)):
-        x = x0 + rng.range(2, 22)
-        y = y0 + rng.range(2, 22)
-        for i in range(rng.range(4, 8)):
-            c.put(x + i, y + i, ramp["deep"])
-    if rng.chance(0.6):
+    if k == 0:
+        return
+    if k == 1:  # charge vein: crack with electric violet pinpricks
+        x, y = x0 + rng.range(4, 14), y0 + rng.range(6, 22)
+        for i in range(rng.range(8, 12)):
+            c.put(x + i, y, ramp["deep"])
+            if rng.chance(0.5):
+                y += rng.pick((-1, 1))
+            if i in (2, 5, 8):
+                c.put(x + i, y, ramp["charge"])
+        c.put(x + 1, y - 1, ramp["hi"])
+    elif k == 2:  # raised shard ridge catching the light
+        rx, ry = x0 + rng.range(4, 16), y0 + rng.range(8, 22)
+        w = rng.range(7, 11)
+        for i in range(w):
+            c.put(rx + i, ry, ramp["light"])
+            c.put(rx + i, ry + 1, ramp["deep"])
+        c.put(rx, ry, ramp["hi"])
+    else:  # short crack + lone charge spark + pebble
+        x, y = x0 + rng.range(5, 18), y0 + rng.range(5, 24)
+        for i in range(rng.range(5, 8)):
+            c.put(x + i, y + i // 2, ramp["deep"])
         c.put(x0 + rng.range(4, 27), y0 + rng.range(4, 27), ramp["charge"])
+        c.put(x0 + rng.range(4, 27), y0 + rng.range(4, 27), ramp["light"])
 
 
 def material_gloomwood(c, x0, y0, salt, frame=0):
@@ -169,9 +259,36 @@ def material_gloomwood(c, x0, y0, salt, frame=0):
         seam_x = (Rng(0x600D + board * 31 + (y0 // 96) * 7).next() % 4) * 8 + 4
         for yy in range(board * 8 + 1, board * 8 + 8):
             c.put(x0 + (seam_x + x0) % 32, y0 + yy, ramp["deep"])
-    for _ in range(rng.range(3, 5)):
+    for _ in range(rng.range(1, 2)):
         c.put(x0 + rng.range(1, 30), y0 + rng.range(1, 30),
               ramp["hi"] if rng.chance(0.3) else ramp["deep"])
+
+
+def features_gloomwood(c, x0, y0, salt, k):
+    ramp = palette.GLOOMWOOD
+    rng = Rng(salt)
+    if k == 0:
+        return
+    if k == 1:  # knot in one board
+        kx, ky = x0 + rng.range(6, 24), y0 + rng.range(0, 3) * 8 + 4
+        c.put(kx, ky, ramp["deep"])
+        c.put(kx + 1, ky, ramp["deep"])
+        c.put(kx - 1, ky, ramp["light"])
+        c.put(kx + 2, ky, ramp["light"])
+        c.put(kx, ky - 1, ramp["light"])
+        c.put(kx, ky + 1, ramp["deep"])
+    elif k == 2:  # nail heads at a board seam
+        for _ in range(2):
+            nx, ny = x0 + rng.range(4, 27), y0 + rng.range(0, 3) * 8 + 1
+            c.put(nx, ny, ramp["hi"])
+            c.put(nx + 1, ny + 1, ramp["deep"])
+    else:  # grain streaks along a board
+        by = y0 + rng.range(0, 3) * 8 + rng.range(2, 6)
+        for _ in range(3):
+            gx = x0 + rng.range(2, 24)
+            for i in range(rng.range(3, 6)):
+                c.put(gx + i, by, ramp["deep"])
+            by += rng.pick((-1, 1))
 
 
 _PUFF_CACHE = {}
@@ -190,7 +307,7 @@ def _puff_field(hsalt, big_shift, small_shift):
         return cached
     layers = []
     # big billow masses, a medium layer breaking their edges, and fine detail
-    for grid, rmin, rmax, layer_salt in ((2, 11, 16, 0), (3, 6, 9, 0x77), (5, 3, 5, 0x33)):
+    for grid, rmin, rmax, layer_salt in ((2, 12, 17, 0), (3, 7, 10, 0x77), (5, 3, 5, 0x33)):
         centers = []
         step = 32.0 / grid
         for i in range(grid):
@@ -223,7 +340,7 @@ def _puff_field(hsalt, big_shift, small_shift):
             small = 0.0
             for (cx, cy, r) in layers[2]:
                 small = max(small, 1.0 - torus_d(sx, sy, cx, cy) / r)
-            field[y][x] = max(0.0, big) * 0.72 + max(0.0, mid) * 0.42 + max(0.0, small) * 0.26
+            field[y][x] = max(0.0, big) * 0.75 + max(0.0, mid) * 0.45 + max(0.0, small) * 0.22
     _PUFF_CACHE[key] = field
     return field
 
@@ -238,26 +355,30 @@ def material_mist(deep):
         ramp = palette.MISTSEA
         hsalt = salt & 0xFFFF0000
         field = _puff_field(hsalt, (frame * 4) % 32, (-frame * 4) % 32)
+
+        def band(gx, gy):
+            v = field[gy % 32][gx % 32]
+            if not deep:
+                v = 0.30 + v * 0.75  # shore mist: thinner, floor-lit
+            if v > 0.80:
+                return 3
+            if v > 0.52:
+                return 2
+            if v > 0.30:
+                return 1
+            return 0
+
+        tones = (ramp["deep"], ramp["base"], ramp["light"], ramp["hi"])
         for x in range(32):
             for y in range(32):
                 gx, gy = (x0 + x) % 32, (y0 + y) % 32
-                v = field[gy][gx]
-                if not deep:
-                    v = 0.34 + v * 0.72  # shore mist: thinner, floor-lit
-                if v > 0.86:
+                b = band(gx, gy)
+                col = tones[b]
+                # hard sunlit rim on the upper edge of every brightest lobe —
+                # the crisp cartoon-cloud top edge
+                if b == 3 and band(gx, gy - 1) < 3:
                     col = ramp["top"]
-                elif v > 0.62:
+                elif b == 2 and band(gx, gy - 1) < 2:
                     col = ramp["hi"]
-                elif v > 0.42:
-                    col = ramp["light"]
-                elif v > 0.24:
-                    col = ramp["base"]
-                else:
-                    col = ramp["deep"]
-                # single-pixel checker dither at the two brightest seams
-                if 0.60 < v <= 0.62 and (gx + gy) % 2 == 0:
-                    col = ramp["hi"]
-                elif 0.84 < v <= 0.86 and (gx + gy) % 2 == 0:
-                    col = ramp["top"]
                 c.put(x0 + x, y0 + y, col)
     return painter
