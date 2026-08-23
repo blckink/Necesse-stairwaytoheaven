@@ -64,15 +64,34 @@ def _ray_base(wing_spread, frame_seed):
     # tail whip
     for i in range(9):
         c.put(cx + (1 if i % 3 == 2 else 0), cy + 11 + i, ramp["deep"] if i > 4 else ramp["base"])
+    # wing finger ridges radiating toward the tips (drawn before shading)
+    for side in (-1, 1):
+        for k, back in ((0.45, 2), (0.75, 5)):
+            ex = cx + side * round(half_span * k)
+            ey = cy + round(sweep * k) + back
+            c.line(cx + side * 4, cy + back - 2, ex, ey, ramp["deep"])
+    # spine pattern: diamond chain down the back
+    for i, sy in enumerate(range(cy - 7, cy + 8, 4)):
+        c.put(cx, sy, ramp["deep"])
+        c.put(cx - 1, sy + 1, ramp["deep"])
+        c.put(cx + 1, sy + 1, ramp["deep"])
+        c.put(cx, sy + 1, ramp["hi"])
+        c.put(cx, sy + 2, ramp["deep"])
     # wing shading: leading edge light, trailing dark
     c.shade_topleft(ramp["hi"], ramp["deep"])
     c.outline(palette.OUTLINE)
-    # teal accent spots on the wings
+    # accents after the outline: teal spot rows + bright wing-tip rims
     for side in (-1, 1):
-        sx = cx + side * (6 + round(5 * wing_spread))
-        c.put(sx, cy, ramp["accent"])
-        if rng.chance(0.8):
-            c.put(sx + side, cy + 2, ramp["accent"])
+        for k in (0.5, 0.72, 0.9):
+            sx = cx + side * round((4 + (half_span - 4) * k))
+            sy = cy + round(sweep * k) + 1
+            c.put(sx, sy, ramp["accent"])
+        tipx = cx + side * half_span
+        c.put(tipx, cy + sweep - 1, ramp["hi"])
+    c.put(cx - 2, cy - 10, palette.OUTLINE)
+    c.put(cx + 2, cy - 10, palette.OUTLINE)
+    c.put(cx - 2, cy - 9, ramp["accent"])
+    c.put(cx + 2, cy - 9, ramp["accent"])
     return c
 
 
@@ -126,13 +145,47 @@ def _golem_frame(facing, step, swim=False):
         c.rect(cx + 3 + arm_swing, top + 12, 5, 13, r["light"])
         c.rect(cx - 5, top, 12, 10, r["light"])
         c.put(cx - 2, top + 24, r["moss"])
-    # weathering speckle
+    # armor plate seams: the torso reads as fitted stone slabs, not one box
+    if facing in ("up", "down"):
+        for dx in range(-12, 12):
+            c.put(cx + dx, top + 17, r["deep"])
+        for sy in range(top + 11, top + 29):
+            c.put(cx - 5, sy, r["deep"])
+            c.put(cx + 5, sy, r["deep"])
+        # pauldron caps on the arms
+        for ax in (cx - 17, cx + 12):
+            for dx in range(5):
+                c.put(ax + dx, top + 10, r["hi"])
+                c.put(ax + dx, top + 11, r["light"])
+        # aetherium crystal spur on the right shoulder
+        spur_x = cx + 13
+        for i in range(4):
+            c.put(spur_x + i // 2, top + 8 - i, palette.AETHERIUM["base"])
+        c.put(spur_x, top + 5, palette.AETHERIUM["hi"])
+        # knuckle grooves on the fists
+        for ax in (cx - 16, cx + 13):
+            c.put(ax, top + 24, r["deep"])
+            c.put(ax + 2, top + 24, r["deep"])
+    else:
+        for dx in range(-10, 10):
+            c.put(cx + dx, top + 17, r["deep"])
+        c.put(cx - 3, top + 12, r["deep"])
+        for dx in range(4):
+            c.put(cx + 3 + dx, top + 11, r["hi"])
+    # weathering speckle + moss clumps
     rng = Rng(0x601E + (1 if facing == "up" else 2 if facing == "right" else 3) * 97 + (step + 2) * 31)
-    for _ in range(10):
+    for _ in range(8):
         x = rng.range(cx - 12, cx + 12)
         y = rng.range(top, feet_y - 6)
         if c.filled(x, y):
             c.put(x, y, r["deep"] if rng.chance(0.7) else r["moss"])
+    for _ in range(2):
+        mx = rng.range(cx - 11, cx + 9)
+        my = rng.range(top + 2, top + 8)
+        if c.filled(mx, my):
+            c.put(mx, my, r["moss"])
+            c.put(mx + 1, my, r["moss"])
+            c.put(mx, my - 1, r["moss"])
     c.shade_topleft(r["hi"], r["deep"])
     c.outline(palette.OUTLINE)
     # face details go on AFTER shading/outline so they stay readable
@@ -141,8 +194,11 @@ def _golem_frame(facing, step, swim=False):
         c.rect(cx + 2, top + 4, 2, 2, r["eye"])
         c.put(cx - 4, top + 4, (240, 252, 252))
         c.put(cx + 2, top + 4, (240, 252, 252))
+        # cracked chest rune, glowing faintly
         c.line(cx - 1, top + 13, cx + 1, top + 21, r["deep"])
         c.put(cx, top + 17, r["eye"])
+        c.put(cx - 1, top + 19, r["eye"])
+        c.put(cx + 1, top + 15, r["eye"])
     elif facing == "up":
         c.rect(cx - 6, top + 1, 12, 3, r["moss"])
         c.rect(cx - 11, top + 11, 22, 2, r["light"])
@@ -180,19 +236,27 @@ def gen_stormwisp(path):
     sheet.ellipse(cx - 1, cy - 1, 10, 9, r["base"])
     sheet.ellipse(cx - 2, cy - 2, 6.5, 6, r["inner"])
     sheet.ellipse(cx - 2, cy - 3, 3.2, 3, r["core"])
-    # jagged static arcs around the rim
-    for _ in range(7):
-        ang_x = rng.pick((-1, 1))
-        ang_y = rng.pick((-1, 1))
-        x = cx + ang_x * rng.range(10, 14)
-        y = cy + ang_y * rng.range(6, 12)
+    # hollow eye voids with bright pupils + a jagged mouth crack
+    for ex in (cx - 6, cx + 1):
+        sheet.rect(ex, cy - 5, 3, 4, r["deep"])
+        sheet.put(ex + 1, cy - 4, r["core"])
+    for i, mx in enumerate(range(cx - 5, cx + 4)):
+        sheet.put(mx, cy + 3 + (i % 2), r["deep"])
+    sheet.put(cx - 2, cy + 5, r["inner"])
+    sheet.put(cx + 1, cy + 5, r["inner"])
+    # forked lightning arcs crawling around the rim
+    for (sx, sy, dx, dy) in ((-12, -4, -1, -1), (11, -7, 1, -1), (-10, 7, -1, 1), (12, 5, 1, 1)):
+        x, y = cx + sx, cy + sy
+        for i in range(4):
+            sheet.put(x, y, r["spark"] if i % 2 == 0 else r["inner"])
+            x += dx
+            y += dy if i % 2 == 0 else -dy
         sheet.put(x, y, r["spark"])
-        sheet.put(x + ang_x, y - ang_y, r["inner"])
-        sheet.put(x + 2 * ang_x, y, r["spark"])
-    # trailing wisps below
-    sheet.put(cx - 6, cy + 13, r["base"])
-    sheet.put(cx - 5, cy + 15, r["deep"])
-    sheet.put(cx + 5, cy + 14, r["base"])
+    # trailing wisp streamers below
+    for (tx, ln) in ((cx - 7, 5), (cx, 6), (cx + 6, 4)):
+        for i in range(ln):
+            tone = r["base"] if i < 2 else (r["deep"] if i < ln - 1 else r["inner"])
+            sheet.put(tx + (1 if i % 3 == 2 else 0), cy + 12 + i, tone)
     # outline pass for the body region only (glow row must stay outline-free)
     body = Canvas(64, 64)
     body.paste(sheet, 0, 0)

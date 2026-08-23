@@ -7,6 +7,8 @@ stormslatetile=Stormslate
 mistseatile=Mistsea
 
 [object]
+windwheat=Windwheat
+cloudberrybush=Cloudberry Bush
 stairwaytoheaven=Stairway to Heaven
 skystonerock=Skystone Rock
 aetheriumore=Aetherium
@@ -17,6 +19,10 @@ aurorabloomr=Aurora Bloom
 skyreeds=Sky Reeds
 
 [item]
+windwheat=Windwheat
+cloudberrybush=Cloudberry Bush
+cloudberry=Cloudberry
+cloudberrytip=Plump sky berries - sweet, cold, and faintly like a thunderstorm.
 skystone=Skystone
 aetheriumore=Aetherium Ore
 aetheriumbar=Aetherium Bar
@@ -36,6 +42,9 @@ cloudpufftreattip=Irresistible to sky cats. Smells faintly of thunderstorms
 silverbelltip=It was Siggi's. He hates it
 
 [mob]
+cloudlamb=Cloudlamb
+glowmoth=Glowmoth
+sparkbeetle=Sparkbeetle
 zephyrray=Zephyr Ray
 stormwisp=Storm Wisp
 skystonegolem=Skystone Golem

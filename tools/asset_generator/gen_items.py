@@ -244,24 +244,85 @@ def gen_skyreeds_item(path):
 def gen_stairway_item(path):
     c = Canvas(32, 32)
     r = palette.STAIRLIGHT
-    stone = palette.SKYSTONE
-    # solid mini staircase: connected stepped mass rising right
-    steps = [(5, 25), (10, 20), (15, 15), (20, 10)]
-    for sx, sy in steps:
-        for dx in range(8):
-            for dy in range(7):
+    iron = palette.IRONWORK
+    mist = palette.MISTSEA
+    # mini grand flight rising right with handrail (bold: icons must read at 1x)
+    steps = [(2, 24, 11), (9, 18, 10), (16, 12, 9), (22, 6, 8)]
+    for sx, sy, w in steps:
+        for dx in range(w):
+            for dy in range(8):
                 c.put(sx + dx, sy + dy, r["base"])
-    for sx, sy in steps:
-        for dx in range(8):
+        for dx in range(w):
             c.put(sx + dx, sy, r["light"])
             c.put(sx + dx, sy - 1, r["hi"] if dx % 3 == 0 else r["light"])
-            c.put(sx + dx, sy + 6, stone["deep"])
-        c.put(sx + 7, sy - 1, r["glow"])
-    c.put(26, 6, r["hi"])
-    c.put(24, 8, r["glow"])
+            c.put(sx + dx, sy + 5, r["deep"])
+    for sx, sy, w in steps:            # handrail posts + line
+        c.put(sx + w - 1, sy - 4, iron["deep"])
+        c.put(sx + w - 1, sy - 3, iron["deep"])
+        c.put(sx + w - 1, sy - 2, iron["deep"])
+    c.line(12, 21, 29, 6, iron["base"])
+    # cloud puff at the base + glow at the top
+    c.ellipse(6, 29, 5, 2.2, mist["hi"])
+    c.ellipse(11, 30, 4, 1.8, mist["light"])
+    _finish(c).save(path)
+    from px import with_alpha as _wa
+    from PIL import Image as _I
+    img = _I.open(path).convert("RGBA")
+    px = img.load()
+    for (gx, gy, a) in ((27, 4, 220), (25, 2, 150), (29, 6, 150)):
+        pr, pg, pb = palette.STAIRLIGHT["glow"]
+        px[gx, gy] = (pr, pg, pb, a)
+    img.save(path)
+
+
+def gen_windwheat_item(path):
+    """Tied bundle of wheat-grass."""
+    c = Canvas(32, 32)
+    W = palette.WINDWHEAT
+    for i, (x0, lean) in enumerate(((11, -2), (15, 0), (19, 2), (13, -1), (17, 1))):
+        for y in range(26, 8 + i % 3, -1):
+            t = (26 - y) / 18.0
+            px_ = x0 + round(lean * t)
+            c.put(px_ - 1, y, W["deep"])
+            c.put(px_, y, W["base"] if y > 14 else W["light"])
+            c.put(px_ + 1, y, W["base"])
+        hx = x0 + lean
+        for (dx, dy) in ((0, 0), (1, 0), (-1, 1), (0, 1), (1, 1), (0, 2), (1, 2), (0, 3)):
+            c.put(hx + dx, 6 + i % 3 + dy, W["head"])
+    # tie band
+    for x in range(12, 20):
+        c.put(x, 22, palette.WOOD["deep"])
+    c.put(13, 21, palette.WOOD["light"])
     _finish(c).save(path)
 
 
+def gen_cloudberrybush_item(path):
+    c = Canvas(32, 32)
+    B = palette.CLOUDBERRY
+    c.ellipse(16, 20, 9, 6, B["leaf"])
+    c.ellipse(13, 16, 4, 3, B["leaf"])
+    c.ellipse(20, 17, 4, 3, B["leaf"])
+    c.ellipse(13, 23, 6, 3, B["leaf_deep"])
+    for (bx, by) in ((11, 18), (17, 15), (21, 20), (14, 21), (19, 23)):
+        c.put(bx, by, B["berry"])
+        c.put(bx + 1, by, B["berry_deep"])
+        c.put(bx, by - 1, B["berry_hi"])
+    _finish(c).save(path)
+
+
+def gen_cloudberry_item(path):
+    """Three plump amber berries with a leaf."""
+    c = Canvas(32, 32)
+    B = palette.CLOUDBERRY
+    for (bx, by, r_) in ((13, 18, 4.5), (20, 16, 4), (17, 22, 4)):
+        c.ellipse(bx, by, r_, r_, B["berry"])
+        c.ellipse(bx + 1, by + 1, r_ * 0.6, r_ * 0.6, B["berry_deep"])
+        c.put(bx - 1, by - 2, B["berry_hi"])
+        c.put(bx - 2, by - 1, B["berry_hi"])
+    c.put(20, 11, B["leaf"])
+    c.put(21, 10, B["leaf"])
+    c.put(22, 11, B["leaf_deep"])
+    _finish(c).save(path)
 def gen_crystal_item(path, ramp, salt):
     c = Canvas(32, 32)
     rng = Rng(salt)

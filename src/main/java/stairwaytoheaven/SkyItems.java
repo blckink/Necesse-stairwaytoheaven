@@ -33,6 +33,12 @@ final class SkyItems {
         ItemRegistry.registerItem("aurorapetal",
                 new MatItem(500, Item.Rarity.UNCOMMON).setItemCategory("materials", "minerals"), 15.0F, true);
 
+        // Forage food (v0.2.6): sky berries, eaten raw or composted like
+        // vanilla forage crops (sugarbeet pattern).
+        ItemRegistry.registerItem("cloudberry",
+                new necesse.inventory.item.placeableItem.consumableItem.food.FoodMatItem(250, Item.Rarity.NORMAL)
+                        .spoilDuration(480), 3.0F, true);
+
         // Weapons
         ItemRegistry.registerItem("tempestedge", new TempestEdgeSwordToolItem(), 220.0F, true);
         ItemRegistry.registerItem("galehowl", new GalehowlProjectileToolItem(), 220.0F, true);
@@ -57,5 +63,10 @@ final class SkyItems {
         Recipes.registerModRecipe(new Recipe(
                 "galehowl", 1, RecipeTechRegistry.TUNGSTEN_WORKSTATION,
                 Recipes.ingredientsFromScript("{{aetheriumbar, 4}, {windsilk, 6}, {aurorapetal, 3}}")));
+
+        // Forage loop: spin harvested wheat-grass into windsilk by hand
+        Recipes.registerModRecipe(new Recipe(
+                "windsilk", 1, RecipeTechRegistry.NONE,
+                Recipes.ingredientsFromScript("{{windwheat, 3}}")));
     }
 }

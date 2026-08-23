@@ -129,12 +129,19 @@ public final class SkyTerrainPainter {
             if (roll < 0.128F) return SkyRegistry.skystoneRockID;
             return 0;
         }
-        // Driftlands: reeds prefer soft ground, rocks prefer outcrops
+        // Driftlands: grasses prefer soft ground, rocks prefer outcrops
         if (roll < 0.090F) {
             return isRockPatch ? SkyRegistry.skystoneRockID : SkyRegistry.skyreedsID;
         }
         if (roll < 0.135F) return SkyRegistry.skystoneRockID;
         if (roll < 0.145F) return SkyRegistry.aetheriumRockID;
+        // v0.2.6 forage: generous wheat-grass, occasional berry bush
+        if (roll < 0.200F) {
+            return isRockPatch ? 0 : SkyRegistry.windwheatID;
+        }
+        if (roll < 0.212F) {
+            return isRockPatch ? 0 : SkyRegistry.cloudberryBushID;
+        }
         return 0;
     }
 }

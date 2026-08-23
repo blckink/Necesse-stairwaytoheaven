@@ -15,95 +15,173 @@ import palette
 
 # --- Stairway to Heaven ------------------------------------------------------
 
-def _stair_steps(c, rng, ramp, x_start, y_bottom, rising_right):
-    """One connected staircase body seen from the side, glowing softly.
-
-    The flight is drawn as a single filled stepped polygon (tread + riser per
-    step, mass continuous down to the flight's underside), so it reads as one
-    solid silhouette instead of floating slabs. Treads get a light lip, risers
-    fall into shadow, and a faint glow seam runs along the leading edge.
-    """
-    stone = palette.SKYSTONE
-    dir_ = 1 if rising_right else -1
-    tread_w = 7
-    rise = 7
-    steps = []
-    x = x_start
-    y = y_bottom
-    for i in range(8):
-        steps.append((x, y))
-        x += dir_ * 4
-        x = max(2, min(30 - tread_w, x))
-        y -= rise
-    # filled body: every step column extends down to just below the next
-    # step's level, forming a continuous zig-zag mass ~2 steps thick
-    for i, (sx, sy) in enumerate(steps):
-        depth = rise + 6
-        for dx in range(tread_w):
-            for dy in range(depth):
-                c.put(sx + dx, sy + dy - 0, ramp["base"])
-    # shading pass: treads light, undersides dark
-    for i, (sx, sy) in enumerate(steps):
-        for dx in range(tread_w):
-            c.put(sx + dx, sy, ramp["light"])
-            c.put(sx + dx, sy - 1, ramp["hi"] if dx % 3 == 0 else ramp["light"])
-            c.put(sx + dx, sy + rise + 4, stone["deep"])
-            c.put(sx + dx, sy + rise + 5, stone["deep"])
-        # glow seam on the leading edge of each tread
-        lead = sx + (tread_w - 1 if rising_right else 0)
-        c.put(lead, sy - 1, ramp["glow"])
-        c.put(lead, sy, ramp["glow"])
-    c.outline(palette.OUTLINE)
-    # crowning shimmer above the top step
-    tx, ty = steps[-1]
-    c.put(tx + tread_w // 2, ty - 4, ramp["hi"])
-    c.put(tx + tread_w // 2 - 2, ty - 3, ramp["glow"])
-    c.put(tx + tread_w // 2 + 2, ty - 5, ramp["glow"])
+def _marble_plate(c, ramp):
+    """Walkable 32x32 base cell: pale marble plate with corner balusters."""
+    iron = palette.IRONWORK
+    c.rect(2, 2, 28, 28, ramp["base"])
+    c.rect(2, 2, 28, 1, ramp["light"])
+    c.rect(2, 29, 28, 1, ramp["deep"])
+    c.rect(2, 2, 1, 28, ramp["light"])
+    c.rect(29, 2, 1, 28, ramp["deep"])
+    # subtle checker sheen
+    for x in range(3, 29):
+        for y in range(3, 29):
+            if ((x // 6) + (y // 6)) % 2 == 0 and (x + y) % 7 == 0:
+                c.put(x, y, ramp["light"])
+    # worn chips + corner balusters
+    c.put(6, 27, ramp["deep"])
+    c.put(25, 5, ramp["light"])
+    for (bx, by) in ((4, 4), (27, 4), (4, 27), (27, 27)):
+        c.put(bx, by, iron["base"])
+        c.put(bx, by - 1, iron["light"])
 
 
-def _floor_plate(c, ramp, y0=0):
-    """32x32 floor part: a worn skystone ring with a faint glow seam."""
-    stone = palette.SKYSTONE
-    rng = Rng(0xF10E)
-    c.ellipse(15.5, y0 + 15.5, 13, 10, stone["base"])
-    c.ellipse(15.5, y0 + 14.5, 10, 7.5, stone["light"])
-    c.ellipse(15.5, y0 + 14.0, 6.5, 4.5, ramp["base"])
-    c.ellipse(15.5, y0 + 13.5, 4.0, 2.6, ramp["glow"])
-    for _ in range(10):
-        x = rng.range(4, 27)
-        yy = y0 + rng.range(7, 24)
-        c.put(x, yy, stone["deep"])
-    c.outline(palette.OUTLINE)
+def _flight(c, y_bottom, y_top, wide_at_bottom, curve, ramp, rail_side):
+    """A grand stone flight between two heights: 6px steps, perspective taper,
+    slight S-curve, iron handrail with posts on one side."""
+    iron = palette.IRONWORK
+    steps = list(range(y_bottom, y_top, -6))
+    n = max(len(steps) - 1, 1)
+    rail = []
+    for i, sy in enumerate(steps):
+        t = i / n
+        half = round((13 - 6 * t) if wide_at_bottom else (7 + 6 * t))
+        off = round(curve * (t * (1 - t)) * 4)
+        cx = 16 + off
+        # riser block
+        for y in range(sy - 5, sy + 1):
+            for dx in range(-half, half + 1):
+                tone = ramp["base"]
+                if dx <= -half + 1:
+                    tone = ramp["light"]
+                elif dx >= half - 1:
+                    tone = ramp["deep"]
+                c.put(cx + dx, y, tone)
+        # tread: bright top face + shadow under the nose
+        for dx in range(-half, half + 1):
+            c.put(cx + dx, sy - 5, ramp["light"])
+            c.put(cx + dx, sy - 4, ramp["hi"] if dx % 4 == 0 else ramp["light"])
+            c.put(cx + dx, sy + 1, ramp["deep"])
+        rail.append((cx + rail_side * (half - 1), sy - 5))
+    # handrail: posts + rail line following the flight
+    for (rx, ry) in rail:
+        for y in range(ry - 5, ry):
+            c.put(rx, y, iron["deep"])
+        c.put(rx, ry - 6, iron["light"])
+    for i in range(len(rail) - 1):
+        (x0, y0), (x1, y1) = rail[i], rail[i + 1]
+        c.line(x0, y0 - 6, x1, y1 - 6, iron["base"])
+
+
+def _cloud_puff(c, cx, cy, rx, ry):
+    mist = palette.MISTSEA
+    c.ellipse(cx, cy, rx, ry, mist["hi"])
+    c.ellipse(cx - rx * 0.4, cy - 1, rx * 0.5, ry * 0.8, mist["top"])
+    c.ellipse(cx + rx * 0.5, cy + 1, rx * 0.45, ry * 0.7, mist["light"])
+    c.put(int(cx - rx * 0.2), int(cy - ry), mist["top"])
 
 
 def gen_stairway_down(path):
-    """Surface-side stairway: floor plate + stairs rising into a cloud wisp."""
+    """Surface-side Stairway to Heaven: a grand pale flight rising through a
+    cloud ring into a soft light burst (32x96; bottom 32x32 = floor cell is
+    drawn last so its outline stays local)."""
     c = Canvas(32, 96)
     ramp = palette.STAIRLIGHT
-    rng = Rng(0x57A1)
-    # upper section (y 32..95), bottom-aligned on the tile
-    _stair_steps(c, rng, ramp, 4, 90, rising_right=True)
-    # cloud wisp around the top of the flight
-    cloud = palette.MISTSEA
-    c.ellipse(18, 38, 9, 4, with_alpha(cloud["hi"], 245))
-    c.ellipse(9, 41, 6, 3, with_alpha(cloud["light"], 230))
-    c.ellipse(26, 41, 5, 2.5, with_alpha(cloud["light"], 210))
-    # floor plate LAST so the outline pass stays local to the top-left cell
-    _floor_plate(c, ramp)
+    _flight(c, 88, 46, wide_at_bottom=True, curve=2, ramp=ramp, rail_side=1)
+    # cloud ring wrapping the flight
+    _cloud_puff(c, 7, 62, 6.5, 3.5)
+    _cloud_puff(c, 26, 70, 6, 3.2)
+    _cloud_puff(c, 24, 52, 5, 2.8)
+    c.outline(palette.OUTLINE)
+    # light burst at the top (after outline so the glow floats)
+    for (gx, gy, a) in ((16, 38, 220), (13, 36, 160), (19, 35, 160),
+                        (16, 33, 130), (11, 40, 110), (21, 40, 110)):
+        c.put(gx, gy, with_alpha(ramp["glow"], a))
+    c.put(16, 30, ramp["hi"])
+    c.put(12, 33, ramp["hi"])
+    c.put(20, 32, ramp["hi"])
+    _marble_plate(c, ramp)
     c.save(path)
 
 
 def gen_stairway_up(path):
-    """Sky-side stairway: same silhouette, steps descending into the clouds."""
+    """Sky-side return stairway: the flight descends from the island's edge
+    into the cloud deck below."""
     c = Canvas(32, 96)
     ramp = palette.STAIRLIGHT
-    rng = Rng(0x57A2)
-    _stair_steps(c, rng, ramp, 15, 90, rising_right=False)
-    cloud = palette.MISTSEA
-    c.ellipse(9, 86, 7, 3.5, with_alpha(cloud["hi"], 245))
-    c.ellipse(23, 90, 8, 4, with_alpha(cloud["light"], 230))
-    _floor_plate(c, ramp)
+    _flight(c, 88, 46, wide_at_bottom=False, curve=-2, ramp=ramp, rail_side=-1)
+    # the cloud deck swallows the lowest steps
+    _cloud_puff(c, 8, 88, 7.5, 4)
+    _cloud_puff(c, 24, 91, 8, 4.2)
+    _cloud_puff(c, 16, 94, 9, 3.5)
+    c.outline(palette.OUTLINE)
+    for (gx, gy, a) in ((16, 40, 180), (12, 38, 120), (20, 37, 120)):
+        c.put(gx, gy, with_alpha(ramp["glow"], a))
+    _marble_plate(c, ramp)
     c.save(path)
+
+
+def gen_windwheat(path):
+    """128x32 grass strip: 4 variants of tall wheat-grass with seed heads."""
+    sheet = Canvas(128, 32)
+    W = palette.WINDWHEAT
+    for v in range(4):
+        c = Canvas(32, 32)
+        rng = Rng(0x3EA7 + v * 131)
+        # 2px stalks (the outline pass eats 1px lines) with fat seed heads
+        for s in range(rng.range(4, 5)):
+            x = 6 + s * 6 + rng.range(-1, 1)
+            h = rng.range(12, 18)
+            lean = rng.pick((-2, -1, 1, 2))
+            top_x = x
+            for i in range(h):
+                top_x = x + round(lean * (i / h))
+                # 3px stalk: inside-outline eats both edge columns, the bright
+                # core must survive on its own
+                mid = W["base"] if i < h - 4 else W["light"]
+                c.put(top_x - 1, 29 - i, W["deep"])
+                c.put(top_x, 29 - i, mid)
+                c.put(top_x + 1, 29 - i, W["deep"] if i < 3 else W["base"])
+            # seed head: plump 3x4 grain cluster
+            hy = 29 - h
+            for (dx, dy) in ((0, 0), (1, 0), (-1, 1), (0, 1), (1, 1), (2, 1),
+                             (-1, 2), (0, 2), (1, 2), (0, 3), (1, 3)):
+                c.put(top_x + dx, hy - 3 + dy, W["head"])
+            c.put(top_x, hy - 4, W["light"])
+            c.put(top_x + 2, hy - 1, W["base"])
+        # base tuft shadow
+        for dx in range(6, 27, 2):
+            c.put(dx, 30, W["deep"])
+        c.outline(palette.OUTLINE)
+        sheet.paste(c, v * 32, 0)
+    sheet.save(path)
+
+
+def gen_cloudberrybush(path):
+    """64x32 strip: 2 variants of a low berry bush with amber cloudberries."""
+    sheet = Canvas(64, 32)
+    B = palette.CLOUDBERRY
+    for v in range(2):
+        c = Canvas(32, 32)
+        rng = Rng(0xBE44 + v * 977)
+        # foliage mound with lumpy top
+        c.ellipse(16, 22, 10, 6, B["leaf"])
+        for bx in (-6, -1, 4, 8):
+            c.ellipse(16 + bx, 17 + rng.range(0, 2), 3, 2.4, B["leaf"])
+        c.ellipse(13, 24, 7, 3.5, B["leaf_deep"])
+        # stem base
+        c.put(15, 28, B["leaf_deep"])
+        c.put(16, 28, B["leaf_deep"])
+        # berries: amber clusters with a single highlight each
+        for _ in range(rng.range(5, 7)):
+            bx = 16 + rng.range(-8, 8)
+            by = 18 + rng.range(-3, 4)
+            c.put(bx, by, B["berry"])
+            c.put(bx + 1, by, B["berry_deep"])
+            c.put(bx, by - 1, B["berry_hi"])
+        c.outline(palette.OUTLINE)
+        sheet.paste(c, v * 32, 0)
+    sheet.save(path)
 
 
 # --- Crystal clusters --------------------------------------------------------

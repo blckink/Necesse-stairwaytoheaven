@@ -2,6 +2,7 @@ package stairwaytoheaven;
 
 import necesse.engine.registries.MobRegistry;
 import necesse.gfx.gameTexture.GameTexture;
+import stairwaytoheaven.mobs.SkyCritterMob;
 import stairwaytoheaven.mobs.SkyWardenMob;
 import stairwaytoheaven.mobs.SkystoneGolemMob;
 import stairwaytoheaven.mobs.SpireCatMob;
@@ -24,6 +25,10 @@ final class SkyMobs {
         MobRegistry.registerMob("skywarden", SkyWardenMob.class, false);
         MobRegistry.registerMob("spirecatblack", SpireCatMob.Black.class, false);
         MobRegistry.registerMob("spirecattabby", SpireCatMob.Tabby.class, false);
+        // ambient critters, one per sub-biome
+        MobRegistry.registerMob("cloudlamb", SkyCritterMob.CloudLamb.class, false);
+        MobRegistry.registerMob("glowmoth", SkyCritterMob.GlowMoth.class, false);
+        MobRegistry.registerMob("sparkbeetle", SkyCritterMob.SparkBeetle.class, false);
     }
 
     /** Called from initResources — runs on the client only, never on servers. */
@@ -34,5 +39,8 @@ final class SkyMobs {
         SkyWardenMob.texture = GameTexture.fromFile("mobs/skywarden");
         SpireCatMob.blackTexture = GameTexture.fromFile("mobs/spirecatblack");
         SpireCatMob.tabbyTexture = GameTexture.fromFile("mobs/spirecattabby");
+        SkyCritterMob.lambTexture = GameTexture.fromFile("mobs/cloudlamb");
+        SkyCritterMob.mothTexture = GameTexture.fromFile("mobs/glowmoth");
+        SkyCritterMob.beetleTexture = GameTexture.fromFile("mobs/sparkbeetle");
     }
 }

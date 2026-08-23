@@ -42,8 +42,10 @@ public class ZephyrRayMob extends HostileMob {
         super(220);
         this.setSpeed(52.0F);
         this.setFriction(2.0F);
-        // Skyreach mobs spawn in daylight, like crypt bats spawn in lit crypts
-        this.spawnLightThreshold = new ModifierValue<>(BuffModifiers.MOB_SPAWN_LIGHT_THRESHOLD, 0).min(150, Integer.MAX_VALUE);
+        // Vanilla spawn-light rules: torch-lit and daylit areas stay SAFE.
+        // (v0.1 raised the threshold for daytime spawns — playtests showed that
+        // breaks the game's core "light = safety" contract, so nights and dark
+        // corners are the Skyreach's danger windows now.)
         this.collision = new Rectangle(-10, -7, 20, 14);
         this.hitBox = new Rectangle(-14, -12, 28, 24);
         this.selectBox = new Rectangle(-16, -40, 32, 40);

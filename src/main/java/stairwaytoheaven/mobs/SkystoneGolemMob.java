@@ -44,7 +44,7 @@ public class SkystoneGolemMob extends HostileMob {
         this.setFriction(3.0F);
         this.setArmor(30);
         this.setKnockbackModifier(0.25F);
-        this.spawnLightThreshold = new ModifierValue<>(BuffModifiers.MOB_SPAWN_LIGHT_THRESHOLD, 0).min(150, Integer.MAX_VALUE);
+        // vanilla spawn-light rules: lit areas are safe (see ZephyrRayMob note)
         this.collision = new Rectangle(-12, -8, 24, 16);
         this.hitBox = new Rectangle(-16, -14, 32, 28);
         this.selectBox = new Rectangle(-16, -44, 32, 52);

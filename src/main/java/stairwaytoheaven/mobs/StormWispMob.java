@@ -47,7 +47,7 @@ public class StormWispMob extends FlyingHostileMob {
         this.setKnockbackModifier(0.3F);
         this.setArmor(10);
         this.moveAccuracy = 10;
-        this.spawnLightThreshold = new ModifierValue<>(BuffModifiers.MOB_SPAWN_LIGHT_THRESHOLD, 0).min(150, Integer.MAX_VALUE);
+        // vanilla spawn-light rules: lit areas are safe (see ZephyrRayMob note)
         this.collision = new Rectangle(-14, -14, 28, 28);
         this.hitBox = new Rectangle(-18, -18, 36, 36);
         this.selectBox = new Rectangle(-22, -22, 44, 44);

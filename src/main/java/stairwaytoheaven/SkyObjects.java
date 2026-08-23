@@ -44,13 +44,34 @@ final class SkyObjects {
         skyreeds.mapColor = new Color(168, 184, 178);
         SkyRegistry.skyreedsID = ObjectRegistry.registerObject("skyreeds", skyreeds, 1.0F, true);
 
+        // v0.2.6 forage plants (Driftlands): harvestable wheat-grass and a
+        // berry bush that drops food instead of its own object item.
+        GrassObject windwheat = new GrassObject("windwheat", 4);
+        windwheat.mapColor = new Color(196, 196, 156);
+        SkyRegistry.windwheatID = ObjectRegistry.registerObject("windwheat", windwheat, 1.0F, true);
+
+        GrassObject cloudberryBush = new GrassObject("cloudberrybush", 2) {
+            @Override
+            public necesse.inventory.lootTable.LootTable getLootTable(
+                    necesse.level.maps.Level level, int layerID, int tileX, int tileY) {
+                return cloudberryLoot;
+            }
+        };
+        cloudberryBush.mapColor = new Color(150, 172, 160);
+        SkyRegistry.cloudberryBushID = ObjectRegistry.registerObject("cloudberrybush", cloudberryBush, 1.0F, true);
+
         // Sky islands are small: most tiles border the Mistsea, and right after
         // region generation the liquid height map is still settling, so
         // Level.isShore reports true across fresh islands. Without this flag
         // Region.checkGenerationValid would sweep every crystal/reed away
         // (verified via the skyreachstatus diagnostics).
-        allowShore("stormcrystal", "stormcrystalr", "aurorabloom", "aurorabloomr", "skyreeds");
+        allowShore("stormcrystal", "stormcrystalr", "aurorabloom", "aurorabloomr", "skyreeds",
+                "windwheat", "cloudberrybush");
     }
+
+    static final necesse.inventory.lootTable.LootTable cloudberryLoot =
+            new necesse.inventory.lootTable.LootTable(
+                    necesse.inventory.lootTable.lootItem.LootItem.between("cloudberry", 1, 2));
 
     private static void allowShore(String... objectStringIDs) {
         for (String stringID : objectStringIDs) {

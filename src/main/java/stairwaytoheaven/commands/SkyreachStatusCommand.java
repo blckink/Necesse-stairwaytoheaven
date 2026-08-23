@@ -38,6 +38,19 @@ public class SkyreachStatusCommand extends ModularChatCommand {
             return;
         }
 
+        // Console commands run on the scanner thread while the server thread
+        // ticks the level. The server thread's lock order is Level monitor ->
+        // region locks (spawning, ensureWardenSpire); region generation from
+        // THIS thread takes region locks first and then needs the Level
+        // monitor inside generateRegion -> classic deadlock (reproduced once
+        // critter spawning made server-side region activity constant). Taking
+        // the Level monitor up front gives both threads the same lock order.
+        synchronized (level) {
+            runLocked(level, server, serverClient, logs);
+        }
+    }
+
+    private void runLocked(Level level, Server server, ServerClient serverClient, CommandLog logs) {
         int r = SCAN_RADIUS_TILES;
         level.regionManager.ensureTilesAreLoaded(-r, -r, r, r);
 

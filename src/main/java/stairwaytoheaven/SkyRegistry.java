@@ -65,6 +65,8 @@ public final class SkyRegistry {
     public static int auroraBloomID;
     public static int auroraBloomRID;
     public static int skyreedsID;
+    public static int windwheatID;
+    public static int cloudberryBushID;
 
     // ===== v0.2: building set & quest structure =====
 

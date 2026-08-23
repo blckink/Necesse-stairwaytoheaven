@@ -3,6 +3,43 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [0.2.6] — 2026-08-23
+
+The "living world" release: light is safe again, the sky gets wildlife and
+forage, and the stairway finally looks like its name.
+
+### Fixed
+- **Torchlight protects again.** v0.1 raised the mobs' spawn-light threshold
+  so they could appear in daylight — which silently broke the game's core
+  "light = safety" contract: enemies kept spawning inside lit, cleared areas.
+  All three enemies are back on vanilla spawn-light rules (they spawn only in
+  darkness), and every biome table now uses local caps (`addLimited`), so a
+  cleared area STAYS calm instead of refilling endlessly.
+- Difficulty is tiered per biome: Driftlands stay light (few Zephyr Rays),
+  the Stormveil is the pressure biome (Wisps + Rays), Aurora Shoals spawn
+  rare-but-hard Golems.
+
+### Added
+- **Ambient wildlife**, one species per biome, huntable for small forage
+  drops: the **Cloudlamb** (Driftlands, windsilk), the **Glowmoth** (Aurora
+  Shoals, aurora petal — the moths from the Warden's cat story), and the
+  **Sparkbeetle** (Stormveil, storm shard). Bestiary icons included.
+- **Forage plants** in the Driftlands: **Windwheat** (harvest 3, spin into
+  1 Windsilk by hand) and the **Cloudberry Bush**, dropping **Cloudberries**
+  — the sky's first food item (vanilla forage-food pattern, spoils).
+
+### Changed
+- **Stairway pair completely redrawn**: a grand pale flight with readable
+  6px steps, iron handrail with posts, a cloud ring wrapping the climb, a
+  soft light burst at the top and a marble base plate with corner balusters
+  (sky-side version descends into the cloud deck). Bold new inventory icon.
+- **Enemy detail pass** to the vanilla character bar: the Zephyr Ray gains
+  wing-finger ridges, a diamond spine pattern and teal accent rows; the
+  Skystone Golem gains armor-plate seams, pauldron caps, knuckle grooves, an
+  aetherium crystal spur, moss clumps and a glowing chest rune; the Storm
+  Wisp gains hollow eye voids with bright pupils, a jagged mouth crack,
+  forked lightning arcs and longer trailing streamers.
+
 ## [0.2.5] — 2026-08-23
 
 Art batch 2 — the quest landmarks reach vanilla detail density (measured

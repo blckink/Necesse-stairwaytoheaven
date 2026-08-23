@@ -7,6 +7,8 @@ stormslatetile=Sturmschiefer
 mistseatile=Nebelmeer
 
 [object]
+windwheat=Windweizen
+cloudberrybush=Wolkenbeeren-Busch
 stairwaytoheaven=Stairway to Heaven
 skystonerock=Himmelsstein-Felsen
 aetheriumore=Aetherium
@@ -17,6 +19,10 @@ aurorabloomr=Aurorablüte
 skyreeds=Himmelsried
 
 [item]
+windwheat=Windweizen
+cloudberrybush=Wolkenbeeren-Busch
+cloudberry=Wolkenbeere
+cloudberrytip=Pralle Himmelsbeeren - süß, kalt und mit einem Hauch Gewitter.
 skystone=Himmelsstein
 aetheriumore=Aetheriumerz
 aetheriumbar=Aetheriumbarren
@@ -36,6 +42,9 @@ cloudpufftreattip=Unwiderstehlich für Himmelskatzen. Riecht schwach nach Gewitt
 silverbelltip=Sie war Siggis. Er hasst sie
 
 [mob]
+cloudlamb=Wolkenschaf
+glowmoth=Glühfalter
+sparkbeetle=Funkenkäfer
 zephyrray=Zephyrrochen
 stormwisp=Sturmirrlicht
 skystonegolem=Himmelsstein-Golem

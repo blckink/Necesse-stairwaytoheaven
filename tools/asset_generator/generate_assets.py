@@ -23,7 +23,8 @@ import gen_objects  # noqa: E402
 import gen_mobs  # noqa: E402
 import gen_items  # noqa: E402
 import gen_misc  # noqa: E402
-import gen_npcs  # noqa: E402
+import gen_npcs
+import gen_critters  # noqa: E402
 import gen_splats  # noqa: E402
 import gen_walls  # noqa: E402
 import gen_furniture  # noqa: E402
@@ -65,6 +66,8 @@ def main():
     # Objects
     gen_objects.gen_stairway_down(f"{out}/objects/skystairwaydown.png")
     gen_objects.gen_stairway_up(f"{out}/objects/skystairwayup.png")
+    gen_objects.gen_windwheat(f"{out}/objects/windwheat.png")
+    gen_objects.gen_cloudberrybush(f"{out}/objects/cloudberrybush.png")
     gen_objects.gen_crystal_cluster(f"{out}/objects/stormcrystal.png", palette.STORMCRYSTAL, 0x57C7)
     gen_objects.gen_aurorabloom(f"{out}/objects/aurorabloom.png")
     gen_objects.gen_skyreeds(f"{out}/objects/skyreeds.png")
@@ -79,6 +82,8 @@ def main():
     gen_npcs.gen_warden(f"{out}/mobs/skywarden.png")
     gen_npcs.gen_cats(f"{out}/mobs/spirecatblack.png", f"{out}/mobs/spirecattabby.png")
     gen_npcs.gen_npc_icons(f"{out}/mobs/icons")
+    gen_critters.gen_critters(f"{out}/mobs")
+    gen_critters.gen_critter_icons(f"{out}/mobs/icons")
 
     # Item icons
     gen_items.gen_skystone(f"{out}/items/skystone.png")
@@ -92,6 +97,9 @@ def main():
     gen_items.gen_skystonerock_item(f"{out}/items/skystonerock.png")
     gen_items.gen_skyreeds_item(f"{out}/items/skyreeds.png")
     gen_items.gen_stairway_item(f"{out}/items/skystairwaydown.png")
+    gen_items.gen_windwheat_item(f"{out}/items/windwheat.png")
+    gen_items.gen_cloudberrybush_item(f"{out}/items/cloudberrybush.png")
+    gen_items.gen_cloudberry_item(f"{out}/items/cloudberry.png")
     gen_items.gen_crystal_item(f"{out}/items/stormcrystal.png", palette.STORMCRYSTAL, 0x1CE1)
     gen_items.gen_crystal_item(f"{out}/items/aurorabloom.png", palette.AURORA, 0x1CE2)
 
