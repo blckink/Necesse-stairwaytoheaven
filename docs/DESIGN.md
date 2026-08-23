@@ -380,3 +380,96 @@ The sky should feel connected to the rest of the game, not parallel to it:
   sky materials — pulling players back down and up again.
 - **Skyward Trader** (moved here from v0.4): occasionally visits claimed surface
   settlements once the beacon burns, selling a rotating sliver of sky stock.
+
+---
+
+# Part IV — "The Veil Below" (the afterlife layer)
+
+The mod's second world-pole. Where the Skyreach is the bright vertical, the
+**Veil** is its shadow: a gothic-comedy afterlife of moonlit marshes, dusty
+bureaucracy and mischievous ghosts — night violet, acid-green ghostlight,
+black-and-violet stripes, cute-macabre silhouettes. Everything here is
+original design in that mood; reference material stays outside the repo.
+
+Priority note: after playtest enthusiasm, this part is scheduled as **v0.3**,
+ahead of Part III ("The Living Sky", now v0.4). The two share the art
+direction, and rolling art batches continue through both.
+
+## 24. Getting in: the Séance Circle
+
+No new surface ladder — the Veil is entered by **ritual**. The player crafts a
+**Séance Circle** (chalk ring, candle stubs, and one key reagent: the
+**Silver Bell** the Warden gives when both cats are home — the sky quest
+literally hands you the key to the underworld). Placing and using the circle
+at night tears a **Rift**: a swirling portal object that persists (one-world
+dimension via the same proven `LevelIdentifier` pattern as the Skyreach,
+dimension below the deep caves). The Rift's other side lands in the Veil's
+arrival shrine; the way back mirrors it. Multiplayer rides the same portal
+netcode as the stairways.
+
+## 25. The Veil (level + sub-biomes)
+
+Infinite, region-streamed, seeded per world — the Skyreach engine reused.
+Permanent night; its "weather" is mood variants of darkness.
+
+| Sub-biome | Ground | Look | Signature |
+|---|---|---|---|
+| **Gloomfen** (common) | murkmoss, black peat | moonlit marsh under a green moon, crooked bare trees, will-o-wisps | ghost-lantern light, whisper reeds |
+| **Ashen Reach** (uncommon) | ash sand, cinder rock | grey dune waste with bone-dry ridges | home of the **Ashwyrm** (see §27) |
+| **The Model Town** (structure) | cobble miniature streets | a town built at doll scale — walk its streets like a giant | miniature-house loot, Model Wardens |
+| **Office of Eternity** (structure) | checkered linoleum | an endless waiting room: benches, flickering signage, a NOW SERVING board that is always wrong | ticket-number quest humor |
+
+## 26. Surface integration (the Veil leaks into the overworld)
+
+The player's first contact happens in the NORMAL world, before any portal:
+
+- **Wormsign in the desert**: once a world's Rift has ever been opened (or a
+  vanilla mid-game boss has fallen), vanilla desert islands can roll a
+  **Wormground** patch — trembling sand, half-buried ribcages, eggs. Standing
+  there too long calls a juvenile Ashwyrm eruption (set-piece fight, not a
+  wandering spawn — desert stays vanilla-compatible).
+- **A wandering huckster**: **Mortimer the Broker**, a lanky trickster ghost
+  in a black-and-violet striped suit (original design: ashen face, crooked
+  top hat, absolutely no manners), occasionally visits claimed settlements
+  selling haunted deco — and sells the Séance chalk that starts everything.
+- **The medium**: **Vesper**, a deadpan gothic seer NPC at the Veil's arrival
+  shrine (and later recruitable), handles the quest chain: she reads the
+  ticket numbers, translates the Office's forms, and dryly comments on
+  everything the player drags home.
+
+## 27. The Ashwyrm
+
+The Veil's mid-boss and the desert set-piece creature: a colossal burrowing
+worm with **ember-cracked ash-grey hide** (glowing fissures between armor
+rings — deliberately its own design language: no stripes), erupting in
+telegraphed arcs. Veil version is the full fight at a summoning altar in the
+Ashen Reach; desert juveniles are the appetizer. Drops: Wyrmash chitin
+(armor/deco material), Cinder Pearl (light source), a trophy segment.
+
+## 28. "Haunted & Homely" deco set (craftable, overworld-usable)
+
+The gothic building set the sky started, completed by its dark half — all
+usable in normal bases so the theme travels home:
+
+ghost lantern (green flame, flickers), striped fence + gate (black/violet),
+zigzag runner carpet (violet/black), crooked iron gate, self-playing haunted
+piano (plays a bar when walked past), model-house set (3 sizes; the largest
+is **enterable** — a doll-scale instanced room, the "walk-in dollhouse"),
+wanted-poster board, ticket dispenser (dispenses "Form 13-K: Welcome to the
+Hereafter", a flavor-text book item), ghost-train platform pieces (bench,
+sign, lamp, rail buffer) for a station diorama.
+
+## 29. Quest sketch: "Three Stamps for Eternity"
+
+1. *Wormsign* — investigate the desert patch, survive the juvenile, find a
+   sealed Form 13-K → Mortimer appears, sells chalk, grins too much.
+2. *The Séance* — build the circle (needs the Silver Bell → sky quest tie-in),
+   open the Rift, meet Vesper.
+3. *Take a Number* — the Office of Eternity refuses to stamp your form;
+   fetch-and-deliver chain through Gloomfen and the Model Town, each stage a
+   new absurd requirement (in triplicate).
+4. *The Third Stamp* — the final clerk is asleep inside the Ashwyrm. Summon,
+   defeat, stamp, done: the Veil recognizes the player as "properly deceased
+   (honorary)" — unlocks Mortimer's full stock and Vesper's recruitment.
+
+Tone rule for all dialogue: dry, warm, a little morbid, never gory.

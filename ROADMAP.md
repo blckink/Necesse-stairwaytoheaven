@@ -39,10 +39,35 @@ Story, quests, and a reason to build. The Skyreach gets a resident.
 - [x] Warden's shop (opens after stage 2) selling the building set
 - [x] Spire visibly evolves with quest progress (beacon, basket, anchor)
 
-## v0.3.0 — "The Living Sky" (next)
+## v0.3.0 — "The Veil Below" (next)
 
-Playtest verdict drives this milestone: full vanilla-fidelity art, a dense living
-world, weather, and ties to the surface. Full concept: DESIGN.md Part III.
+The afterlife layer: gothic-comedy underworld, entered by ritual, leaking into
+the overworld. Full concept: DESIGN.md Part IV. Rolling art batches (terrain,
+mobs, building sets — see the style guide's art direction) continue throughout.
+
+- [ ] **Séance Circle ritual** (chalk + candles + the Silver Bell) opening a
+      persistent **Rift** portal to the Veil (one-world dimension below the
+      deep caves, same proven pattern as the Skyreach)
+- [ ] **The Veil** level: permanent-night region streaming; sub-biomes
+      **Gloomfen** (green-moon marsh) and **Ashen Reach** (ash waste)
+- [ ] Structures: **The Model Town** (doll-scale streets) and the
+      **Office of Eternity** (waiting-room dungeon, ticket-number humor)
+- [ ] **Ashwyrm**: summoned mid-boss in the Ashen Reach + juvenile
+      **Wormground** set-piece eruptions on vanilla desert islands
+- [ ] NPCs: **Mortimer the Broker** (wandering trickster ghost peddler, sells
+      the séance chalk) and **Vesper** (deadpan medium, quest handler)
+- [ ] Quest chain **"Three Stamps for Eternity"** (Wormsign → Séance →
+      Take a Number → The Third Stamp)
+- [ ] **"Haunted & Homely" deco set**, usable in overworld bases: ghost
+      lantern, striped fence/gate, zigzag runner, crooked gate, self-playing
+      piano, model-house set (largest is enterable), ticket dispenser +
+      Form 13-K, ghost-train platform pieces
+- [ ] New materials: Wyrmash chitin, Cinder Pearl
+
+## v0.4.0 — "The Living Sky"
+
+Full vanilla-fidelity art across the sky, a dense living world, weather, and
+ties to the surface. Full concept: DESIGN.md Part III.
 
 - [ ] **Art overhaul** of every existing sprite to vanilla detail density
       (terrain splats → Mistsea → nodes/plants → mobs/NPCs → building set → items),
@@ -66,7 +91,7 @@ world, weather, and ties to the surface. Full concept: DESIGN.md Part III.
 - [ ] Mistsea **fishing loot table** (new fish + rare catches)
 - [ ] Balance pass from playtest feedback
 
-## v0.4.0 — "The Aviary"
+## v0.5.0 — "The Aviary"
 
 Making the sky a place to live.
 
@@ -82,7 +107,7 @@ Making the sky a place to live.
 - [ ] Sound pass: wind ambience, mob sounds (reuse-plus-pitch first, custom later)
 - [ ] Journal/quest hooks expanded into a full sky questline
 
-## v0.5.0 — "Crown of the Sky"
+## v0.6.0 — "Crown of the Sky"
 
 The endgame of the sky arc.
 
