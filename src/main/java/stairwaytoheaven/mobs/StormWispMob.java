@@ -98,16 +98,19 @@ public class StormWispMob extends FlyingHostileMob {
             return;
         }
         GameLight light = level.getLightLevel(getTileCoordinate(x), getTileCoordinate(y));
-        int res = texture.getWidth();
+        // Sheet layout (vanilla flying-spirit pattern): column 0 = 4 stacked
+        // body frames, column 1 = matching glow overlays.
+        int res = 64;
         int resHalf = res / 2;
         int drawX = camera.getDrawX(x) - resHalf;
         int drawY = camera.getDrawY(y) - resHalf;
         long time = level.getWorldEntity().getTime();
+        int anim = Math.abs(GameUtils.getAnim(time, 4, 900) - 3);
         float bobbing = GameUtils.getBobbing(time, 1100) * 3.0F;
         float glowPulse = GameUtils.getAnimFloatContinuous(time, 900) / 1.5F;
         final DrawOptions body = texture
                 .initDraw()
-                .sprite(0, 0, res)
+                .sprite(0, anim, res)
                 .startGlowOptions(this, (long) this.getID())
                 .light(light)
                 .applyEnemyTracker(this, perspective)
@@ -116,7 +119,7 @@ public class StormWispMob extends FlyingHostileMob {
         glowLight.setLevel((float) ((int) (glowPulse * 150.0F)));
         final DrawOptions glow = texture
                 .initDraw()
-                .sprite(0, 1, res)
+                .sprite(1, anim, res)
                 .startGlowOptions(this, (long) this.getID())
                 .light(glowLight)
                 .applyEnemyTracker(this, perspective)

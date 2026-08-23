@@ -128,12 +128,21 @@ Fix, in order:
 1. Ensure exactly ONE `Stairway_to_Heaven-*.jar` sits in the mods folder and
    the Mods menu shows it enabled without warnings. If the game updated past
    the jar's version, rebuild the jar against the new game version.
-2. With the game CLOSED, open the world save
-   (`%appdata%/Necesse/saves/<world>.zip`) and delete `levels/skyreach.dat`
-   (and/or `levels/veil.dat`) inside it. Only the sky/Veil resets — the level
-   regenerates cleanly (same layout — the seed derives from the world seed)
-   on the next ascent; quest progress up there restarts. The rest of the
-   world is untouched, no cheats involved.
+2. With the game CLOSED, open the world save zip — usually
+   `%appdata%/Necesse/saves/<world>.zip`; some co-op/server tools keep it in a
+   `worlds/<world>/` folder instead — and delete BOTH artifacts of the level:
+   - the level file `levels/skyreach.dat` (and/or `levels/veil.dat`), and
+   - the matching region folder `levels/regions/skyreach/`
+     (and/or `levels/regions/veil/`).
+
+   The `.dat` holds the level header, the `regions/` folder holds the explored
+   terrain — leaving either behind keeps the corruption. Only the sky/Veil
+   resets: it regenerates cleanly on the next ascent (same layout — the seed
+   derives from the world seed); quest progress up there restarts. The rest of
+   the world is untouched, no cheats involved.
+3. Multiplayer: world data lives ONLY in the host's save. Only the host does
+   step 2 — joining players store no world files, so there is nothing to
+   delete on their side. They just need the same single, current mod jar.
 
 ## Repository layout
 

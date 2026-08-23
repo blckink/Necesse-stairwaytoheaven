@@ -12,6 +12,7 @@ every art batch; the result is meant to be published/shared for review.
 """
 import base64
 import html
+import io
 import os
 import sys
 
@@ -20,6 +21,20 @@ from PIL import Image
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RES = os.path.join(REPO, "src", "main", "resources")
 OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(REPO, "build", "sprite-gallery.html")
+
+
+def _mod_version():
+    try:
+        with open(os.path.join(REPO, "settings.gradle"), encoding="utf-8") as f:
+            for line in f:
+                if "modVersion" in line:
+                    return line.split('"')[1]
+    except OSError:
+        pass
+    return "?"
+
+
+VERSION = _mod_version()
 
 # (label, note) per resource-relative path; missing files fall back to filename.
 META = {
@@ -57,7 +72,7 @@ META = {
     "objects/wardenbeaconon.png": ("Leuchtfeuer (entzuendet)", "Nach der Abgabe - leuchtet kalt-tuerkis."),
     "objects/skyanchor.png": ("Inselanker", "Erscheint nach der Anker-Quest neben dem Leuchtfeuer."),
     "mobs/zephyrray.png": ("Zephyrrochen", "Schneller Nahkampf-Flieger. 6 Spalten (Idle, Lauf x4, Schwimmen) x 4 Reihen (Oben/Rechts/Unten/Links)."),
-    "mobs/stormwisp.png": ("Sturmirrlicht", "Fernkampf-Geist: Reihe 1 Koerper, Reihe 2 Gluehen."),
+    "mobs/stormwisp.png": ("Sturmirrlicht", "Fernkampf-Geist im Vanilla-Spirit-Layout: Spalte 1 = 4 Koerper-Frames (Schweif & Flamme wandern), Spalte 2 = passende Glueh-Overlays."),
     "mobs/skystonegolem.png": ("Himmelsstein-Golem", "Gepanzerter Brocken, gleiches Lauf-Layout."),
     "mobs/skywarden.png": ("Der Sky Warden", "Quest-NPC: hagerer Waechter mit Laternenstab."),
     "mobs/spirecatblack.png": ("Siggi", "Die schwarze Turmkatze (versteckt im Sturmschleier)."),
@@ -159,6 +174,26 @@ def mist_block():
     return "".join(out)
 
 
+def wisp_block():
+    """Live preview of the Storm Wisp's 4-frame loop, body + glow composited."""
+    im = Image.open(os.path.join(RES, "mobs/stormwisp.png")).convert("RGBA")
+    strip = Image.new("RGBA", (256, 64), (0, 0, 0, 0))
+    for f in range(4):
+        cell = im.crop((0, f * 64, 64, (f + 1) * 64))
+        glow = im.crop((64, f * 64, 128, (f + 1) * 64))
+        strip.paste(Image.alpha_composite(cell, glow), (f * 64, 0))
+    buf = io.BytesIO()
+    strip.save(buf, "PNG")
+    uri = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
+    return ('<figure class="card"><figcaption><span class="nm">Sturmirrlicht — live</span>'
+            '<span class="meta">mobs/stormwisp.png · 4 Frames · 3×</span></figcaption>'
+            f'<div class="wisp"><img class="wisproll" src="{uri}" width="768" height="192" '
+            'alt="Sturmirrlicht-Animation"></div>'
+            '<p class="note">Die echte 4-Frame-Schleife aus der Datei (Körper + Glühen übereinander): '
+            'Schweif-Tentakel wandern, die Flammenspitze pendelt, die Blitzbögen kriechen um den Körper.</p>'
+            '</figure>')
+
+
 def mini_grid(subdir, names):
     cells = []
     d = os.path.join(RES, subdir)
@@ -184,6 +219,8 @@ def build():
         body.append(f'<section id="{sid}"><h2>{title}</h2><p class="intro">{intro}</p>')
         if sid == "terrain":
             body.append(mist_block())
+        if sid == "bewohner":
+            body.append(wisp_block())
         body.extend(card(rel) for rel in files)
         if sid == "bewohner":
             body.append('<p class="intro">Bestiarium-Icons (32×32):</p>')
@@ -195,7 +232,8 @@ def build():
                 '<p class="intro">Alle Inventar-Icons (32×32, hier 2×).</p>' + items_grid() + "</section>")
 
     n = sum(len(f) for _, _, _, f in SECTIONS) + len(os.listdir(os.path.join(RES, "items"))) + 2
-    page = PAGE.replace("__CHIPS__", chips).replace("__BODY__", "".join(body)).replace("__COUNT__", str(n))
+    page = (PAGE.replace("__CHIPS__", chips).replace("__BODY__", "".join(body))
+            .replace("__COUNT__", str(n)).replace("__VER__", VERSION))
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
         f.write(page)
@@ -255,7 +293,7 @@ figcaption{display:flex;justify-content:space-between;gap:10px;align-items:basel
   flex-wrap:wrap;margin-bottom:8px;}
 .nm{font-weight:700;}
 .meta{font:12px "IBM Plex Mono",monospace;color:var(--mut);}
-.vp,.mist,.ivp{background:
+.vp,.mist,.wisp,.ivp{background:
   conic-gradient(var(--chk-a) 25%,var(--chk-b) 0 50%,var(--chk-a) 0 75%,var(--chk-b) 0)
   0 0/16px 16px;border-radius:4px;}
 .vp{overflow-x:auto;padding:10px;}
@@ -265,7 +303,10 @@ figcaption{display:flex;justify-content:space-between;gap:10px;align-items:basel
 .mist{overflow:hidden;width:448px;max-width:100%;height:192px;position:relative;}
 .mistroll{animation:roll 1.9s steps(8) infinite;}
 @keyframes roll{to{transform:translateX(-3584px)}}
-@media (prefers-reduced-motion: reduce){.mistroll{animation:none}}
+.wisp{overflow:hidden;width:192px;height:192px;position:relative;}
+.wisproll{animation:wroll .9s steps(4) infinite reverse;}
+@keyframes wroll{to{transform:translateX(-768px)}}
+@media (prefers-reduced-motion: reduce){.mistroll,.wisproll{animation:none}}
 .itemgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:10px;}
 .it{background:var(--panel);border:1px solid var(--line);border-radius:8px;
   padding:8px;text-align:center;font-size:12px;color:var(--mut);}
@@ -273,7 +314,7 @@ figcaption{display:flex;justify-content:space-between;gap:10px;align-items:basel
 </style>
 <header>
   <h1>Skyreach Sprite-Atlas</h1>
-  <p class="sub">Stairway to Heaven <b>v0.2.3</b> · __COUNT__ Assets · alle Größen in Original-Pixeln, hochskaliert ohne Glättung</p>
+  <p class="sub">Stairway to Heaven <b>v__VER__</b> · __COUNT__ Assets · alle Größen in Original-Pixeln, hochskaliert ohne Glättung</p>
   <div class="bar">
     <button id="ground" type="button"><span class="dot"></span><span id="glabel">Untergrund: Stormslate</span></button>
     <nav>__CHIPS__</nav>

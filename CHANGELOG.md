@@ -3,6 +3,25 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [0.3.2] — 2026-08-23
+
+Art release: living sprites, organic construction.
+
+### Changed
+- **The Storm Wisp is finally alive**: rebuilt on the vanilla flying-spirit
+  pattern with a 4-frame animation — a flame-teardrop spirit whose trailing
+  tendrils undulate, whose top lick sways, and whose rim lightning crawls
+  around the body, with a breathing glow halo synced to the crackle. It was a
+  static orb ("an unanimated dot") before.
+- Storm Wisp bestiary icon redrawn to match the new flame-teardrop body.
+
+### Fixed
+- README troubleshooting now covers BOTH artifacts a broken sky/Veil level
+  leaves in the world save — `levels/<level>.dat` AND the
+  `levels/regions/<level>/` folder — plus the `worlds/` folder layout some
+  co-op tools use, and clarifies that in multiplayer only the host's save
+  holds world data (joining players have nothing to repair).
+
 ## [0.3.1] — 2026-08-23
 
 Playtest feedback release: real livestock, real landmasses.

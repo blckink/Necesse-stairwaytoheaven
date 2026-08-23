@@ -2,8 +2,9 @@
 
 Walking/flying 4-direction sheets are 6 columns x 4 rows of 64x64 cells
 (384x256): columns = idle, walk 1-4, in-liquid; rows = Up, Right, Down, Left
-(see docs/research/asset-formats.md). The Storm Wisp uses the simple stacked
-layout its draw code slices: 64 wide, row 0 = body, row 1 = glow.
+(see docs/research/asset-formats.md). The Storm Wisp uses the vanilla
+flying-spirit layout: column 0 = 4 stacked body frames, column 1 = matching
+glow overlays (128x256).
 """
 
 from PIL import Image
@@ -262,54 +263,130 @@ def gen_skystonegolem(path):
 
 
 # --- Storm Wisp --------------------------------------------------------------
+# Animated like the vanilla flying-spirit mobs: 4 body frames stacked down
+# column 0 (rows 0-3) with matching glow overlays in column 1. The draw code
+# picks the row via GameUtils.getAnim(time, 4, ...) — see StormWispMob.
 
-def gen_stormwisp(path):
+WISP_FRAMES = 4
+
+# Tendril skirt per frame: (x offset from center, length below the root line,
+# sway dir). Lengths/sways shift frame to frame so the tail undulates like a
+# flame. Tendrils are drawn as tapering wedges rooted INSIDE the body mass.
+_WISP_TENDRILS = (
+    ((-8, 8, -1), (-2, 13, 0), (4, 10, 1), (9, 6, 1)),
+    ((-8, 11, -1), (-2, 9, 1), (4, 13, 0), (9, 5, 1)),
+    ((-8, 6, 0), (-2, 14, -1), (4, 8, 1), (9, 9, 0)),
+    ((-8, 9, -1), (-2, 11, 1), (4, 12, -1), (9, 7, 1)),
+)
+
+# Top flame-lick lean per frame (x offset of the lick tip).
+_WISP_LICK = (-2, 0, 2, 0)
+
+# Rim lightning arcs per frame: (rim dx, rim dy, step dx, step dy) with the
+# start point ON the head rim so the crackle visibly crawls along the body.
+_WISP_ARCS = (
+    ((-10, -3, -1, -1), (9, -6, 1, -1)),
+    ((-7, -8, -1, -1), (10, 1, 1, 1)),
+    ((-10, 3, -1, 1), (5, -9, 1, -1)),
+    ((-10, -5, -1, -1), (9, 4, 1, 1)),
+)
+
+
+def _wisp_frame(frame):
+    """One 64x64 body frame: a luminous flame-teardrop spirit — bright head
+    mass with hollow eyes, a swaying lick on top, and long ragged tendrils
+    trailing below, all re-posed per frame."""
     r = palette.WISP
-    sheet = Canvas(64, 128)
-    rng = Rng(0x3157)
-    cx, cy = 32, 32
-    # body: layered storm core
-    sheet.ellipse(cx, cy, 13, 12, r["deep"])
-    sheet.ellipse(cx - 1, cy - 1, 10, 9, r["base"])
-    sheet.ellipse(cx - 2, cy - 2, 6.5, 6, r["inner"])
-    sheet.ellipse(cx - 2, cy - 3, 3.2, 3, r["core"])
-    # hollow eye voids with bright pupils + a jagged mouth crack
-    for ex in (cx - 6, cx + 1):
-        sheet.rect(ex, cy - 5, 3, 4, r["deep"])
-        sheet.put(ex + 1, cy - 4, r["core"])
-    for i, mx in enumerate(range(cx - 5, cx + 4)):
-        sheet.put(mx, cy + 3 + (i % 2), r["deep"])
-    sheet.put(cx - 2, cy + 5, r["inner"])
-    sheet.put(cx + 1, cy + 5, r["inner"])
-    # forked lightning arcs crawling around the rim
-    for (sx, sy, dx, dy) in ((-12, -4, -1, -1), (11, -7, 1, -1), (-10, 7, -1, 1), (12, 5, 1, 1)):
+    c = Canvas(CELL, CELL)
+    cx, cy = 32, 25  # head center; tendrils fill the lower third
+    swell = (0, 1, 0, -1)[frame]
+    lick = _WISP_LICK[frame]
+    # head: overlapping round masses forming a bumpy teardrop
+    c.ellipse(cx - 5, cy + 2, 7, 6.5, r["deep"])
+    c.ellipse(cx + 5, cy + 2, 7, 6.5, r["deep"])
+    c.ellipse(cx, cy - 2, 10 + swell, 9, r["deep"])
+    # lower body tapers toward the tendril roots
+    c.ellipse(cx, cy + 8, 8, 6, r["deep"])
+    c.ellipse(cx, cy + 12, 6, 4, r["deep"])
+    # flame-lick on top, leaning with the frame
+    c.ellipse(cx + lick, cy - 11, 3.5, 3.5, r["deep"])
+    c.ellipse(cx + lick * 2, cy - 14, 2, 2.5, r["deep"])
+    # tendrils: tapering wedges rooted well inside the body (no outline gap),
+    # fading base -> deep toward the tips like a dying flame
+    for (tx, ln, sway) in _WISP_TENDRILS[frame]:
+        x = cx + tx
+        root = cy + 10
+        for i in range(ln + 4):
+            y = root + i - 4  # first 4 rows overlap the body mass
+            f = max(0, i - 4) / max(1, ln - 1)
+            w = 4 if f < 0.35 else (3 if f < 0.6 else (2 if f < 0.85 else 1))
+            if sway != 0 and i > 6 and i % 3 == 0:
+                x += sway
+            tone = r["base"] if f < 0.45 else r["deep"]
+            for k in range(w):
+                c.put(x - w // 2 + k, y, tone)
+    # volumetric light: bright inner masses in the upper-left of the head
+    c.ellipse(cx - 1, cy, 8.5, 7.5, r["base"])
+    c.ellipse(cx, cy + 7, 6, 4.5, r["base"])
+    c.ellipse(cx + lick, cy - 10, 2.2, 2.4, r["base"])
+    c.ellipse(cx - 2, cy - 2, 6.5, 5.5, r["inner"])
+    c.ellipse(cx - 3, cy - 3 - (1 if swell > 0 else 0), 3.6, 3.2, r["core"])
+    # face: round hollow sockets + bright pupils + jagged mouth crack
+    for ex in (cx - 5, cx + 3):
+        c.ellipse(ex, cy - 2, 1.8, 2.2, r["deep"])
+        c.put(ex, cy - 2, r["core"])
+        c.put(ex, cy - 1, r["core"])
+    for i, mx in enumerate(range(cx - 4, cx + 4)):
+        c.put(mx, cy + 4 + (i % 2), r["deep"])
+    c.put(cx - 1, cy + 6, r["inner"])
+    c.put(cx + 2, cy + 6, r["inner"])
+    c.outline(palette.OUTLINE)
+    # accents AFTER the outline: rim arcs (starting on the rim) + pupils
+    for arc in _WISP_ARCS[frame]:
+        sx, sy, dx, dy = arc
         x, y = cx + sx, cy + sy
         for i in range(4):
-            sheet.put(x, y, r["spark"] if i % 2 == 0 else r["inner"])
+            c.put(x, y, r["spark"] if i % 2 == 0 else r["inner"])
             x += dx
             y += dy if i % 2 == 0 else -dy
-        sheet.put(x, y, r["spark"])
-    # trailing wisp streamers below
-    for (tx, ln) in ((cx - 7, 5), (cx, 6), (cx + 6, 4)):
-        for i in range(ln):
-            tone = r["base"] if i < 2 else (r["deep"] if i < ln - 1 else r["inner"])
-            sheet.put(tx + (1 if i % 3 == 2 else 0), cy + 12 + i, tone)
-    # outline pass for the body region only (glow row must stay outline-free)
-    body = Canvas(64, 64)
-    body.paste(sheet, 0, 0)
-    body.outline(palette.OUTLINE)
-    sheet.rect(0, 0, 64, 64, (0, 0, 0, 0))
-    sheet.paste(body, 0, 0)
-    # glow row: soft halo, drawn additively by the game with a pulsing light
-    for x in range(64):
-        for y in range(64):
-            dx = (x - cx) / 22.0
-            dy = (y - cy) / 20.0
+        c.put(x, y, r["spark"])
+    for ex in (cx - 5, cx + 3):
+        c.put(ex, cy - 2, r["core"])
+        c.put(ex, cy - 1, r["core"])
+    return c
+
+
+def _wisp_glow(frame):
+    """Matching 64x64 glow overlay: breathing violet halo centered on the
+    head + arc echoes so the additive glow flickers with the crackle."""
+    r = palette.WISP
+    c = Canvas(CELL, CELL)
+    cx, cy = 32, 25
+    strength = (140, 175, 140, 110)[frame]
+    for x in range(CELL):
+        for y in range(CELL):
+            dx = (x - cx) / 20.0
+            dy = (y - cy) / 19.0
             d = dx * dx + dy * dy
             if d <= 1.0:
-                alpha = int(150 * (1.0 - d) ** 2)
+                alpha = int(strength * (1.0 - d) ** 2)
                 if alpha > 8:
-                    sheet.put(x, 64 + y, with_alpha(mix(r["inner"], r["core"], 1.0 - d), alpha))
+                    c.put(x, y, with_alpha(mix(r["inner"], r["core"], (1.0 - d) * 0.35), alpha))
+    for arc in _WISP_ARCS[frame]:
+        sx, sy, dx, dy = arc
+        x, y = cx + sx, cy + sy
+        for i in range(5):
+            c.put(x, y, with_alpha(r["spark"], 200))
+            x += dx
+            y += dy if i % 2 == 0 else -dy
+    return c
+
+
+def gen_stormwisp(path):
+    sheet = Canvas(2 * CELL, WISP_FRAMES * CELL)
+    for frame in range(WISP_FRAMES):
+        sheet.paste(_wisp_frame(frame), 0, frame * CELL)
+        sheet.paste(_wisp_glow(frame), CELL, frame * CELL)
     sheet.save(path)
 
 
@@ -339,16 +416,22 @@ def gen_icons(dir_path):
     c.put(22, 17, z["accent"])
     c.save(f"{dir_path}/zephyrray.png")
 
-    # Storm Wisp: mini orb
+    # Storm Wisp: mini flame-teardrop matching the animated body
     c = _icon_canvas()
     w = palette.WISP
-    c.ellipse(16, 16, 9, 8.5, w["deep"])
-    c.ellipse(15, 15, 6.5, 6, w["base"])
-    c.ellipse(14, 14, 4, 3.5, w["inner"])
-    c.ellipse(14, 13, 2, 2, w["core"])
-    c.put(25, 12, w["spark"])
-    c.put(7, 20, w["spark"])
+    c.ellipse(16, 14, 8, 7, w["deep"])
+    c.ellipse(16, 20, 5.5, 4, w["deep"])
+    c.ellipse(16, 6, 2, 2.5, w["deep"])
+    for tx, ln in ((12, 4), (16, 6), (20, 3)):
+        for i in range(ln):
+            for k in range(2):
+                c.put(tx - 1 + k, 22 + i, w["deep"] if i > 1 else w["base"])
+    c.ellipse(15, 13, 6, 5.5, w["base"])
+    c.ellipse(14, 12, 4, 3.5, w["inner"])
+    c.ellipse(14, 11, 2, 2, w["core"])
     c.outline(palette.OUTLINE)
+    c.put(25, 10, w["spark"])
+    c.put(7, 18, w["spark"])
     c.save(f"{dir_path}/stormwisp.png")
 
     # Skystone Golem: face block — eyes and moss go on AFTER shading/outline
