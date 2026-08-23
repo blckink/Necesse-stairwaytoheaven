@@ -458,21 +458,24 @@ def gen_cloudbell(path, variants=2):
         rng = Rng(0xC10B + v * 977)
         root = 15 + rng.pick((-2, 1))
         _ground_tufts(c, rng, turf["deep"], turf["tuft"], root)
-        # two nodding stems, one tall one short, opposite leans
-        for (dx0, h, lean) in ((-2, rng.range(15, 18), rng.range(4, 6)),
-                               (3, rng.range(9, 12), -rng.range(3, 5))):
+        # two nodding stems; the short one draws FIRST so the tall stem and
+        # its bell stay in front (windwheat's tall-in-front rule)
+        for (dx0, h, lean) in ((3, rng.range(9, 12), -rng.range(3, 5)),
+                               (-2, rng.range(15, 18), rng.range(4, 6))):
             x0 = root + dx0
             tip = _arc_stem(c, x0, 29, h, lean, S["stem_deep"], S["stem"])
             # the stem hooks over; the bell hangs from the hook tip
             hx = tip[0] + (2 if lean > 0 else -2)
             c.put(tip[0] + (1 if lean > 0 else -1), tip[1], S["stem"])
             bell(c, hx - 2, tip[1] + 1)
-        # one mid-stem bud (closed bell)
+        # one closed bud nodding off its own short stalk
         bx = root + rng.pick((-4, 5))
-        c.put(bx, 21, B["deep"])
-        c.put(bx + 1, 21, B["base"])
-        c.put(bx, 20, B["light"])
-        c.put(bx + 1, 20, B["light"])
+        _arc_stem(c, bx, 29, 6, 1 if bx < root else -1,
+                  S["stem_deep"], S["stem"], thick=False)
+        c.put(bx, 23, B["deep"])
+        c.put(bx + 1, 23, B["base"])
+        c.put(bx, 22, B["light"])
+        c.put(bx + 1, 22, B["light"])
         # leaf blades from the root
         for lean in (-3, 2):
             _arc_stem(c, root + lean, 30, rng.range(5, 7), lean,
@@ -559,6 +562,19 @@ def gen_staticmoss(path, variants=2):
                 if c.get(x, y)[:3] == M["base"][:3] and (x + 2 * y) % 5 == 0 \
                         and rng.chance(0.7):
                     c.put(x, y, M["deep"])
+        # velvety lit crowns: light dapple on the upper-left of each mound
+        for (mx, my, r, ry) in mounds:
+            for _ in range(int(r)):
+                dx = -rng.range(0, int(r * 0.6))
+                dy = -rng.range(1, max(int(ry * 0.7), 2))
+                if c.get(mx + dx, my + dy)[3] > 0:
+                    c.put(mx + dx, my + dy, M["light"])
+        # tiny moss-fuzz hairs poking off the crowns (pre-outline: they
+        # pick up the outline and read as soft fuzz, not stray pixels)
+        for (mx, my, r, ry) in mounds[:2]:
+            fx = mx + rng.range(-2, 2)
+            c.put(fx, int(my - ry) - 1, M["base"])
+            c.put(fx + rng.pick((-1, 1)), int(my - ry), M["light"])
         c.outline(palette.OUTLINE)
         # sparks AFTER the outline: charge motes crawling on the moss
         for (sx, sy) in ((mounds[0][0] - 3, 22), (mounds[0][0] + 4, 24),
@@ -653,13 +669,19 @@ def gen_glowfern(path, variants=2):
                 spine.append((x, y, t))
             for (x, y, t) in spine:                    # spine: deep -> base
                 c.put(x, y, G["deep"] if t < 0.5 else G["base"])
-            # paired leaflet ticks, longest mid-frond, none at the tip curl
-            for i in range(2, h - 3, 2):
+            # alternating leaflet ticks (left row, then right row) so the
+            # frond reads feathered, not ladder-rigid; longest mid-frond
+            for i in range(2, h - 3):
                 x, y, t = spine[i]
                 ln = 2 if 0.2 < t < 0.7 else 1
-                for d in range(1, ln + 1):
-                    c.put(x - d, y, G["base"] if d == 1 else G["deep"])
-                    c.put(x + d, y, G["light"] if d == 1 else G["base"])
+                if i % 2 == 0:
+                    for d in range(1, ln + 1):
+                        c.put(x - d, y, G["base"] if d == 1 else G["deep"])
+                    c.put(x - ln, y - 1, G["light"] if t > 0.4 else G["base"])
+                else:
+                    for d in range(1, ln + 1):
+                        c.put(x + d, y, G["light"] if d == 1 else G["base"])
+                    c.put(x + ln, y - 1, G["light"])
             # curled glowing tip
             tx, ty, _ = spine[-1]
             hook = 1 if lean > 0 else -1
