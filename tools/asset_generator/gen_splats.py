@@ -200,17 +200,22 @@ def features_skystone(c, x0, y0, salt, k):
 
 def material_stormslate(c, x0, y0, salt, frame=0):
     """Layered night-violet slate: position-locked dashed diagonal strata
-    (period 16 divides the 32px tile, so it stays seamless)."""
+    (period 16 divides the 32px tile, so it stays seamless).
+
+    v0.5 art sprint: measured LRNGE 118 / EDGE 5.2 vs vanilla stone ~10-47 /
+    1.1 — the old double-noise read as visual static. Speckle halved, strata
+    softened to single-step accents; character now comes from the per-variant
+    feature clusters (veins/ridges), like vanilla."""
     ramp = palette.STORMSLATE
-    _speckle_cell(c, x0, y0, ramp, 0x570A0000, density=0.08)
+    _speckle_cell(c, x0, y0, ramp, 0x570A0000, density=0.04)
     for x in range(32):
         for y in range(32):
             gx, gy = (x0 + x) % 32, (y0 + y) % 32
             m = (gx + gy) % 16
             h = Rng((gx * 5081 + gy * 947) ^ 0x570A5EED)
-            if m == 0 and h.chance(0.72):
+            if m == 0 and h.chance(0.45):
                 c.put(x0 + x, y0 + y, ramp["deep"])
-            elif m == 1 and h.chance(0.35):
+            elif m == 1 and h.chance(0.18):
                 c.put(x0 + x, y0 + y, ramp["light"])
 
 

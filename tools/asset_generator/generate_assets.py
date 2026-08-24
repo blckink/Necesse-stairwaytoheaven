@@ -44,11 +44,13 @@ def main():
 
     # Terrain + liquid: modern _splat atlases (the 1.3.2 renderer's primary
     # path; the marble checker deliberately stays legacy — see gen_furniture)
-    gen_splats.build_splat(f"{out}/tiles/cloudturf_splat.png", gen_splats.material_cloudturf, 3, 0xC1,
+    # v0.5 art sprint: sky grounds ship 6 variants like vanilla grass (was 3) —
+    # richer repetition breakup across large meadows.
+    gen_splats.build_splat(f"{out}/tiles/cloudturf_splat.png", gen_splats.material_cloudturf, 6, 0xC1,
                            features=gen_splats.features_cloudturf)
-    gen_splats.build_splat(f"{out}/tiles/skystone_splat.png", gen_splats.material_skystone, 3, 0x51,
+    gen_splats.build_splat(f"{out}/tiles/skystone_splat.png", gen_splats.material_skystone, 5, 0x51,
                            features=gen_splats.features_skystone)
-    gen_splats.build_splat(f"{out}/tiles/stormslate_splat.png", gen_splats.material_stormslate, 3, 0x57,
+    gen_splats.build_splat(f"{out}/tiles/stormslate_splat.png", gen_splats.material_stormslate, 6, 0x57,
                            features=gen_splats.features_stormslate)
     gen_splats.build_splat(f"{out}/tiles/gloomwoodfloor_splat.png", gen_splats.material_gloomwood, 2, 0x6D,
                            features=gen_splats.features_gloomwood)

@@ -11,13 +11,14 @@ OUTLINE = (34, 34, 46)
 # --- Terrain -----------------------------------------------------------------
 
 CLOUDTURF = {
-    # v0.4.1 quality pass: hue pushed toward silver-green so islands read as
-    # living meadows against the pale Mistsea (the old ramp sat almost grey).
-    "deep":  (114, 138, 118),
-    "base":  (156, 180, 154),
-    "light": (186, 205, 180),
-    "hi":    (214, 229, 205),
-    "tuft":  (124, 155, 126),
+    # v0.5 art sprint: chroma pushed further toward living silver-green so the
+    # Driftlands floor reads as MEADOW against the pale Mistsea at 1x zoom
+    # (measured sat was 0.14 vs vanilla grass ~0.9 on its full cells).
+    "deep":  (104, 138, 108),
+    "base":  (148, 184, 144),
+    "light": (180, 210, 170),
+    "hi":    (212, 233, 198),
+    "tuft":  (110, 152, 112),
 }
 
 SKYSTONE = {
@@ -302,10 +303,13 @@ NIMBUSWOOD = {
 }
 
 NIMBUSLEAF = {
-    "deep":  (150, 168, 178),
-    "base":  (196, 210, 214),
-    "light": (224, 233, 232),
-    "hi":    (245, 250, 247),
+    # v0.5 art sprint: the old "pale blue-grey leaf" ramp measured sat 0.11 —
+    # the willow read as fog, not foliage. Now a true silver-green (sat ~0.30,
+    # vanilla willow-cell reference 0.37) while staying cool-toned.
+    "deep":  (92, 132, 106),
+    "base":  (138, 178, 142),
+    "light": (176, 208, 172),
+    "hi":    (216, 236, 204),
 }
 
 CHARWOOD = {
@@ -317,10 +321,13 @@ CHARWOOD = {
 }
 
 FULGURPINE_NEEDLE = {
-    "deep":  (52, 62, 74),
-    "base":  (76, 90, 104),
-    "light": (104, 120, 134),
-    "hi":    (168, 196, 214),
+    # v0.5 art sprint: measured sat 0.27 vs vanilla pine-cell 0.72 — the pine
+    # read as grey scrub. Now a cold electric violet-blue ramp (Stormveil
+    # identity) with bright charge-tipped highlights.
+    "deep":  (48, 54, 96),
+    "base":  (74, 84, 140),
+    "light": (110, 124, 184),
+    "hi":    (176, 200, 244),
 }
 
 PRISMWOOD = {

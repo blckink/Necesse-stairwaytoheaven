@@ -126,47 +126,62 @@ def _roots(c, rng, ramp, base_x, base_y, half_w):
 # --- Nimbus Willow (Driftlands) ---------------------------------------------
 
 def _nimbuswillow_cell(variant):
+    """v0.5 art sprint: canopy mass doubled (35% -> ~65% of the cell — the
+    vanilla willow reference fills 71%) with four distinct silhouettes."""
     cell = Canvas(128, 128)
     rng = Rng(0x1717B05 + variant * 4099)
     wood = palette.NIMBUSWOOD
     leaf = palette.NIMBUSLEAF
     base_x, base_y = 64 + rng.pick((-2, 2)), 123
 
-    cell.ellipse(base_x + 2, base_y + 2, 24, 4.2, with_alpha(SHADOW, 110))
+    cell.ellipse(base_x + 3, base_y + 2, 30, 5, with_alpha(SHADOW, 110))
 
     body = Canvas(128, 128)
-    _trunk(body, rng, wood, base_x, base_y, 56, 12, 5,
-           amp=rng.pick((2.0, 2.5)), drift=rng.pick((-4, 4)))
-    _roots(body, rng, wood, base_x, base_y, 6)
+    _trunk(body, rng, wood, base_x, base_y, 50, 17, 8,
+           amp=rng.pick((2.0, 2.5)), drift=rng.pick((-5, 5)))
+    _roots(body, rng, wood, base_x, base_y, 9)
 
-    # canopy: BIG heavily-overlapping cloud lobes drooping around the trunk
+    # canopy: BIG heavily-overlapping cloud lobes filling the frame width,
+    # crown reaching near the top edge; per-variant mass distribution
     if variant == 0:
-        lobes = [(64, 20, 20, 12), (42, 27, 17, 11), (87, 26, 16, 11),
-                 (64, 42, 25, 15), (30, 47, 15, 12), (98, 46, 14, 12),
-                 (46, 61, 15, 10), (82, 62, 14, 10)]
+        lobes = [(64, 18, 26, 15), (36, 26, 21, 14), (93, 25, 20, 13),
+                 (64, 41, 37, 21), (20, 46, 17, 13), (108, 44, 17, 13),
+                 (40, 60, 18, 12), (88, 59, 17, 12), (64, 66, 20, 11)]
+        strand_top = 74
+    elif variant == 1:
+        lobes = [(56, 16, 24, 14), (92, 22, 22, 14), (30, 32, 19, 13),
+                 (62, 37, 35, 20), (102, 48, 16, 12), (24, 54, 16, 12),
+                 (52, 58, 19, 12), (86, 57, 18, 12), (68, 68, 16, 10)]
+        strand_top = 78
+    elif variant == 2:
+        lobes = [(72, 20, 27, 15), (40, 28, 22, 14), (98, 34, 18, 13),
+                 (60, 43, 36, 21), (18, 52, 16, 12), (106, 56, 15, 12),
+                 (44, 62, 18, 12), (84, 63, 17, 11)]
+        strand_top = 80
     else:
-        lobes = [(58, 18, 18, 11), (36, 30, 16, 11), (84, 24, 17, 12),
-                 (62, 42, 24, 15), (28, 50, 13, 11), (98, 44, 14, 13),
-                 (44, 63, 14, 9), (86, 61, 15, 11)]
+        lobes = [(60, 20, 25, 14), (94, 30, 19, 13), (34, 24, 20, 13),
+                 (66, 39, 35, 21), (22, 48, 17, 12), (104, 50, 16, 12),
+                 (48, 62, 18, 11), (90, 61, 16, 11), (66, 70, 15, 10)]
+        strand_top = 82
     _lobed_mass(body, lobes, leaf)
 
     body.outline(palette.OUTLINE)
-    _sunlit_rim(body, leaf["hi"], leaf["light"], y_max=76)
+    _sunlit_rim(body, leaf["hi"], leaf["light"], y_max=strand_top)
 
     # weeping strands AFTER the outline pass (a generic outline would eat
     # them). Chunky 2px cores with a deep trail edge, strongly staggered
     # lengths (long-short alternation like vanilla willow), each rooted
     # INSIDE the canopy underside and tipped with outline so it grounds.
     long_next = rng.chance(0.5)
-    for sx in range(20, 111, 7):
+    for sx in range(14, 116, 6):
         sx += rng.range(-1, 1)
-        edge = _bottom_edge(body, sx, 95)
-        if edge is None or edge < 30 or not rng.chance(0.9):
+        edge = _bottom_edge(body, sx, strand_top + 4)
+        if edge is None or edge < 26 or not rng.chance(0.92):
             continue
         if long_next:
-            ln = rng.range(20, 30) - abs(sx - 64) // 5
+            ln = rng.range(22, 32) - abs(sx - 64) // 5
         else:
-            ln = rng.range(9, 14)
+            ln = rng.range(10, 15)
         long_next = not long_next
         x, top = sx, edge - 2
         # light attachment clump where the strand leaves the canopy
@@ -186,7 +201,7 @@ def _nimbuswillow_cell(variant):
         body.put(x + 2, top + ln - 1, palette.OUTLINE)
         body.put(x, top + ln - 1, leaf["deep"])
     # one tiny detached drift-puff beside the crown (sky-island charm)
-    px_, py_ = (110, 12) if variant == 0 else (16, 16)
+    px_, py_ = ((112, 12), (14, 14), (110, 18), (18, 10))[variant]
     body.ellipse(px_, py_, 4, 2.4, leaf["base"])
     body.ellipse(px_ - 1, py_ - 1, 2.4, 1.4, leaf["hi"])
     body.put(px_ + 3, py_ + 2, leaf["deep"])
@@ -196,9 +211,9 @@ def _nimbuswillow_cell(variant):
 
 
 def gen_nimbuswillow(path):
-    """128x256 tree sheet: Driftlands cloud-canopy willow, 2 variants."""
-    sheet = Canvas(128, 256)
-    for v in range(2):
+    """128x512 tree sheet: Driftlands cloud-canopy willow, 4 variants."""
+    sheet = Canvas(128, 512)
+    for v in range(4):
         sheet.paste(_nimbuswillow_cell(v), 0, v * 128)
     sheet.save(path)
 
@@ -270,16 +285,18 @@ def _fulgurpine_cell(variant):
     cell.ellipse(base_x + 1, base_y + 2, 18, 3.6, with_alpha(SHADOW, 110))
 
     body = Canvas(128, 128)
-    top_y = 26 if variant == 0 else 62
+    top_y = 22 if variant in (0, 2) else 62
     _trunk(body, rng, wood, base_x, base_y, top_y, 10, 3,
            amp=1.5, drift=rng.pick((-2, 2)))
     _roots(body, rng, wood, base_x, base_y, 5)
 
-    if variant == 0:
+    if variant in (0, 2):
         # asymmetric cone of overlapping bough tiers, trunk in the gaps
-        tiers = [(base_x, 103, 30, 25, 1), (base_x + 1, 87, 22, 28, -1),
-                 (base_x - 1, 71, 25, 19, 1), (base_x + 1, 56, 16, 21, -1),
-                 (base_x, 42, 17, 13, 0), (base_x, 30, 11, 10, 0)]
+        # (v2 = taller, narrower spire)
+        s = 0.85 if variant == 2 else 1.0
+        tiers = [(base_x, 103, int(30 * s), 25, 1), (base_x + 1, 87, int(22 * s), 28, -1),
+                 (base_x - 1, 71, int(25 * s), 19, 1), (base_x + 1, 56, int(16 * s), 21, -1),
+                 (base_x, 42, int(17 * s), 13, 0), (base_x, 30, int(11 * s), 10, 0)]
         for (cx, cy, sl, sr, tl) in tiers:
             _bough_tier(body, rng, ndl, cx, cy, sl, sr, tl)
         # pointed crown clump
@@ -348,16 +365,17 @@ def _fulgurpine_cell(variant):
 
     body.outline(palette.OUTLINE)
     _sunlit_rim(body, ndl["hi"], ndl["light"], y_max=base_y - 10)
-    for (cx, cy, sl, sr, tl) in tiers if variant else tiers:
+    for (cx, cy, sl, sr, tl) in tiers:
         _needle_texture(body, rng, ndl, cx, cy, sl, sr)
-    if variant == 0:
-        _needle_texture(body, rng, ndl, base_x, 18, 5, 5, h=12)
-    _needle_fringe(body, rng, ndl)
-    # sparse ember clusters still glowing in the charred bark (SPARSE:
-    # 2-3 per tree; a bright core pixel + one dimmer neighbor reads at 1x)
-    embers = ((base_x - 2, 116), (base_x + 2, 95), (base_x - 2, 64)) \
-        if variant == 0 else \
-        ((base_x + 6, 58), (round(fx) - 2, round(fy) + 3), (base_x - 2, 117))
+    if variant in (0, 2):
+        _needle_texture(body, rng, ndl, base_x, 16, 5, 5, h=12)
+        embers = ((base_x - 2, 116), (base_x + 2, 95), (base_x - 3, 64))
+    else:
+        _needle_fringe(body, rng, ndl)
+        # sparse ember clusters still glowing in the charred bark (SPARSE:
+        # a bright core pixel + one dimmer neighbor reads at 1x)
+        embers = ((base_x + 6, 58), (round(fx) - 2, round(fy) + 3),
+                  (base_x - 2, 117))
     for (ex, ey) in embers:
         if body.filled(ex, ey):
             body.put(ex, ey, wood["ember"])
@@ -368,10 +386,10 @@ def _fulgurpine_cell(variant):
 
 
 def gen_fulgurpine(path):
-    """128x256 tree sheet: Stormveil lightning-charred pine, 2 variants
-    (variant 1 carries the lightning-split fork)."""
-    sheet = Canvas(128, 256)
-    for v in range(2):
+    """128x512 tree sheet: Stormveil lightning-charred pine, 4 variants
+    (0/2 = full cone & narrow spire, 1/3 = lightning-split fork)."""
+    sheet = Canvas(128, 512)
+    for v in range(4):
         sheet.paste(_fulgurpine_cell(v), 0, v * 128)
     sheet.save(path)
 
@@ -409,15 +427,24 @@ def _prismabirch_cell(variant):
         body.put(x + dx + rng.pick((0, 1)), y + 1, _BARK_DASH)
         side = -side
 
-    # canopy: lumpy mushroom dome of overlapping lobes
+    # canopy: lumpy mushroom dome of overlapping lobes — v0.5: four distinct
+    # silhouettes, mass pushed toward the vanilla birch reference
     if variant == 0:
-        dome = [(64, 30, 30, 20), (40, 40, 17, 12), (89, 38, 16, 12),
-                (48, 16, 15, 10), (81, 17, 14, 10), (64, 46, 20, 12),
-                (26, 32, 10, 8), (102, 30, 9, 8)]
-    else:
+        dome = [(64, 28, 34, 22), (38, 40, 18, 13), (91, 37, 17, 12),
+                (46, 13, 16, 10), (83, 14, 15, 10), (64, 47, 22, 13),
+                (22, 32, 11, 8), (106, 28, 10, 8), (112, 40, 8, 7)]
+    elif variant == 1:
         dome = [(60, 26, 27, 19), (36, 38, 15, 11), (85, 40, 16, 12),
                 (72, 12, 14, 9), (46, 18, 13, 9), (62, 44, 19, 11),
                 (98, 26, 10, 9), (24, 44, 9, 7)]
+    elif variant == 2:
+        dome = [(66, 28, 31, 21), (34, 36, 18, 13), (94, 34, 18, 13),
+                (52, 14, 16, 10), (84, 15, 15, 10), (58, 46, 22, 13),
+                (20, 30, 11, 8), (108, 26, 10, 8), (76, 50, 14, 9)]
+    else:
+        dome = [(58, 30, 29, 20), (88, 42, 15, 11), (38, 44, 15, 11),
+                (44, 18, 16, 10), (78, 16, 14, 9), (70, 48, 19, 11),
+                (104, 32, 9, 8), (22, 36, 9, 7), (64, 14, 12, 8)]
     _lobed_mass(body, dome, leaf)
 
     # clustered iridescent leaf texture (clumps, not salt-and-pepper):
@@ -472,9 +499,9 @@ def _prismabirch_cell(variant):
 
 
 def gen_prismabirch(path):
-    """128x256 tree sheet: Aurora Shoals iridescent birch, 2 variants."""
-    sheet = Canvas(128, 256)
-    for v in range(2):
+    """128x512 tree sheet: Aurora Shoals iridescent birch, 4 variants."""
+    sheet = Canvas(128, 512)
+    for v in range(4):
         sheet.paste(_prismabirch_cell(v), 0, v * 128)
     sheet.save(path)
 
