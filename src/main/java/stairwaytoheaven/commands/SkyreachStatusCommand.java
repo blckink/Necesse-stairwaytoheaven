@@ -165,6 +165,17 @@ public class SkyreachStatusCommand extends ModularChatCommand {
             String spireFloor = TileRegistry.getTileStringID(level.getTileID(quest.spireX, quest.spireY));
             logs.add("spire check: beaconObject=" + beaconObj + " wardenFloor=" + spireFloor);
         }
+        // Force the regions the NPCs are anchored to into memory before
+        // counting. Without this the count measures which regions happen to be
+        // streamed in — after a restart the spire loads but a cat lair 60 tiles
+        // out may not, which reads as "a cat is missing" when it is only
+        // asleep on disk.
+        level.regionManager.ensureTileIsLoaded(quest.spireX, quest.spireY);
+        level.regionManager.ensureTileIsLoaded(quest.blackLairX, quest.blackLairY);
+        level.regionManager.ensureTileIsLoaded(quest.tabbyLairX, quest.tabbyLairY);
+        if (quest.blackHome || quest.tabbyHome) {
+            level.regionManager.ensureTileIsLoaded(quest.basketX, quest.basketY);
+        }
         long wardens = 0, cats = 0;
         for (necesse.entity.mobs.Mob mob : level.entityManager.mobs) {
             String id = mob.getStringID();
@@ -174,7 +185,7 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                 cats++;
             }
         }
-        logs.add("npc check: wardens=" + wardens + " cats=" + cats + " (loaded regions only)");
+        logs.add("npc check: wardens=" + wardens + " cats=" + cats + " (spire + lair regions forced loaded)");
 
         // Settler wiring for the recruited Warden. HumanMob.getSettler() resolves
         // settlerStringID through SettlerRegistry, and LevelSettler's constructor
