@@ -3,6 +3,66 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [0.5.0] — "The Skywatch Opens" — 2026-08-24
+
+The Skyreach becomes a place you travel TO. The surface stays your world —
+your base, your settlement, your progression — and the sky is the layer you
+ascend into to explore, fight and gather before coming home again.
+
+### Changed
+- **The Stairway is a portal, not a ladder.** Wherever it is built, it routes
+  to ONE canonical Skyreach origin: the Old Warden Spire hub. `SkyOrigin`
+  derives that position from the world-generation seed alone, so the terrain
+  painter, the surface stairways and the spire stamper all agree without any
+  shared state — and everyone in a multiplayer world arrives at the same
+  landmark instead of scattering across an empty sky.
+- **Terrain radiates from the hub.** The island mask and biome mask are clamped
+  inside `HUB_RADIUS`, so the first ascent always lands on walkable, safe,
+  recognizable ground; the immediate spire grounds stay an open plaza so the
+  landmark reads clean. Ore density then widens with the distance band, which
+  makes travelling outward pay.
+- **Recruitment replaced the fetch chain.** The Warden's four-stage delivery
+  quest is gone. He is now a single goal: find him, then pay 100,000 coins —
+  the top vanilla settlement-expansion tier — and he leaves the sky to join
+  your surface settlement. The payment IS the recruitment; there is no spawn
+  item to buy.
+
+### Added
+- `SkywatchGateObjectEntity`: the return gate resolves each player's own bound
+  stairway, and re-places it if it was broken while they were away.
+- `WardenSettlerMob` / `WardenSettler`: the Warden as a real Necesse settler
+  (a `HumanShop` on the same branch as the Elder), with his own settlement
+  icon — the same man bare-headed, in the storm-blue Skywatch shirt.
+- `/skyreachstatus` reports the settler wiring alongside the world state, so a
+  broken registration is visible from the server console instead of only in a
+  playtest.
+
+### Fixed
+- **The recruited Warden could never move in.** `"wardensettler"` was never
+  registered with `SettlerRegistry`, so `HumanMob.getSettler()` resolved to
+  null, the vanilla recruit path answered "not a settler", and the payoff of
+  the whole sky progression dead-ended at the doorstep. He is now a registered
+  settler type modelled on the Elder — never spawns on his own, never moves
+  out, cannot be banished — and moving in costs nothing, because the fee was
+  already paid in the sky.
+- **The settler arrived thousands of tiles from home.** `findTeleportLocation`
+  already returns pixel coordinates; the placement multiplied them by the tile
+  size a second time, so a 100,000-coin payment dropped the Warden deep in the
+  wilderness.
+- **The Veil was unreachable.** The Seance Circle checks for the Silver Bell,
+  but the quest that awarded it disappeared with the old fetch chain. The
+  Warden now hands it over as part of the recruitment.
+- `SkyOrigin`'s documented ±192 range did not match its arithmetic (Java's `%`
+  keeps the dividend's sign, so the real box is -576..+192). The behaviour is
+  now part of the world contract and is documented as such rather than
+  "corrected" — changing it would move the spire in every existing save.
+
+### Notes
+- Siggi and Peanut are unkillable and save-persistent by native means, and
+  `SpireCatMob` now records WHY: `canTakeDamage() == false` gates every damage
+  path in `Mob`, and `CritterMob.shouldSave()` is `shouldSave && !canDespawn()`
+  — so the `canDespawn = false` line is also what keeps them in the save file.
+
 ## [0.4.1] — 2026-08-24
 
 Art quality pass + full project review.

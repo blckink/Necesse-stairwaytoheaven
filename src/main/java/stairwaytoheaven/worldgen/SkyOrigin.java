@@ -70,10 +70,18 @@ public final class SkyOrigin {
     }
 
     /**
-     * The canonical spire position: a seed-deterministic offset within
-     * ±192 tiles of the world origin (0, 0). Deterministic, allocation-free,
-     * and identical on every call — this is the one sky position everything
-     * else is defined relative to.
+     * The canonical spire position: a seed-deterministic offset near the world
+     * origin (0, 0). Deterministic, allocation-free, and identical on every
+     * call — this is the one sky position everything else is defined relative
+     * to.
+     *
+     * RANGE: Java's % keeps the sign of the dividend, so each axis lands in
+     * -576..+192 rather than the symmetric ±192 the arithmetic reads like.
+     * That is a wider, negatively-biased box than intended, but it is harmless
+     * (the hub clamp in SkyTerrainPainter guarantees land wherever it falls,
+     * and the level streams regions in every direction), and it is now part of
+     * the world contract: correcting the arithmetic would move the spire in
+     * every existing save. Left as-is deliberately — do not "fix" it.
      */
     public static Point compute(int worldGenSeed) {
         int h = mix(worldGenSeed);
