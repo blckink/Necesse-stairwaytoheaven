@@ -32,6 +32,11 @@ final class SkyMobs {
         // transaction transfers him directly (see SkyWardenMob.tryRecruit);
         // there is no spawn-item purchase.
         MobRegistry.registerMob("wardensettler", WardenSettlerMob.class, false);
+        // ...and the settlement-side type for that mob. Without it the mob is
+        // not a settler at all (SettlerRegistry lookup returns null, and
+        // LevelSettler requireNonNulls it), so he could never move in.
+        necesse.engine.registries.SettlerRegistry.registerSettler("wardensettler",
+                new stairwaytoheaven.settlement.WardenSettler());
         // ambient critters, one per sub-biome
         MobRegistry.registerMob("cloudlamb", stairwaytoheaven.mobs.CloudLambMob.class, false);
         MobRegistry.registerMob("glowmoth", SkyCritterMob.GlowMoth.class, false);

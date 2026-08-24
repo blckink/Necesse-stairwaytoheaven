@@ -456,6 +456,78 @@ def gen_npc_icons(dir_path):
             c.put(sx_, y, w["hair_shade"])
     c.save(f"{dir_path}/skywarden.png")
 
+    # The same man after the recruitment, as the settlement UI shows him: the
+    # feather-collar regalia is gone, replaced by the storm-blue settler shirt
+    # he wears on the surface (WardenSettlerMob pins that exact color), with
+    # the gold trim kept as his one warm accent.
+    #
+    # Built to the vanilla settler-icon recipe (elderhuman/farmerhuman): the
+    # head fills the frame corner to corner, and hair / beard / face each sit
+    # on their OWN tone with a dark separator between them. The earlier draft
+    # drew hair and beard in one near-white and the beard simply vanished.
+    shirt = (86, 96, 122)
+    shirt_hi = (114, 126, 156)
+    shirt_deep = (58, 66, 88)
+    hair_base = w["hair_shade"]                  # mid grey — the mass
+    hair_lit = w["hair"]                         # near-white — top-left plane
+    beard = (240, 242, 246)                      # brighter than the hair
+    beard_shade = (196, 200, 210)
+    c = Canvas(32, 32)
+
+    for x in range(3, 30):                       # shoulder line, near full width
+        c.put(x, 27, shirt_hi)
+    c.rect(2, 28, 29, 4, shirt)
+    c.rect(2, 28, 3, 4, shirt_hi)
+    c.rect(28, 28, 3, 4, shirt_deep)
+    for x in range(13, 20):                      # open collar notch
+        c.put(x, 28, shirt_deep)
+    for x in (14, 16, 18):                       # gold placket studs
+        c.put(x, 30, w["trim"])
+    c.rect(14, 25, 5, 3, w["skin_shade"])        # neck into the collar
+
+    c.ellipse(16, 12.0, 12.4, 11.0, hair_base)   # hair mass, frame to frame
+    for y in range(11, 24):                      # curtains falling past the jaw
+        for x in range(3, 8):
+            c.put(x, y, hair_base)
+        for x in range(25, 30):
+            c.put(x, y, hair_base)
+    for yy in range(2, 12):                      # lit top-left plane
+        for xx in range(4, 30):
+            if (xx - 16) * 0.7 + (yy - 12) * 1.5 < -6.0 and c.get(xx, yy)[:3] == hair_base:
+                c.put(xx, yy, hair_lit)
+
+    c.ellipse(16, 14.5, 9.0, 8.4, w["skin"])     # face opening
+    for i, bw in enumerate((7, 7, 6, 5, 4)):     # beard, own tone, own shape
+        for dx in range(-bw, bw + 1):
+            c.put(16 + dx, 20 + i, beard)
+    for dx in range(-4, 5):                      # moustache above the beard
+        c.put(16 + dx, 19, beard_shade)
+
+    c.outline(palette.OUTLINE)
+
+    for x in range(9, 24):                       # hairline shadow onto the brow
+        if c.get(x, 9)[:3] == hair_lit:
+            c.put(x, 9, hair_base)
+    for x in list(range(10, 14)) + list(range(19, 23)):
+        c.put(x, 10, w["skin_shade"])            # brow shade
+    for x in list(range(10, 14)) + list(range(19, 23)):
+        c.put(x, 11, palette.OUTLINE)            # heavy brow bars
+    for x in (11, 12, 20, 21):
+        c.put(x, 12, w["eye"])                   # 2x2 eyes
+        c.put(x, 13, w["eye"])
+        c.put(x, 14, w["skin_shade"])            # under-eye bags
+    c.rect(15, 12, 2, 4, w["skin"])              # nose bridge
+    c.rect(15, 16, 2, 2, w["skin_shade"])        # nose tip
+    for x in range(9, 24):                       # cheek seam under the moustache
+        if c.get(x, 18)[:3] == w["skin"]:
+            c.put(x, 18, w["skin_shade"])
+    for x in (11, 12, 13, 19, 20, 21):           # cheek shade beside the beard
+        c.put(x, 17, w["skin_shade"])
+    for (sx_, y0, y1) in ((13, 21, 24), (19, 21, 24)):
+        for y in range(y0, y1 + 1):              # beard streaks
+            c.put(sx_, y, beard_shade)
+    c.save(f"{dir_path}/wardensettler.png")
+
     for name, colors in (("spirecatblack", palette.CAT_BLACK), ("spirecattabby", palette.CAT_TABBY)):
         c = Canvas(32, 32)
         body = colors.get("base", colors.get("white"))

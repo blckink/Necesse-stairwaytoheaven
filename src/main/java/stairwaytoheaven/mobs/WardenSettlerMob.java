@@ -2,6 +2,8 @@ package stairwaytoheaven.mobs;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import necesse.engine.network.server.ServerClient;
 import necesse.engine.util.GameRandom;
@@ -51,6 +53,29 @@ public class WardenSettlerMob extends HumanShop {
     @Override
     public ArrayList<ContainerQuest> getQuests(ServerClient client) {
         return null;
+    }
+
+    /**
+     * The recruitment fee was already paid, in coin, to his sky-side self —
+     * so moving in costs nothing here. An EMPTY list is the vanilla idiom for
+     * a free recruit (the Trader uses it after being freed from a trap): it
+     * makes the shop's recruit button live and shows "recruit for free",
+     * whereas the inherited {@code null} would leave the button permanently
+     * dead and strand him outside the settlement forever.
+     */
+    @Override
+    public List<necesse.inventory.InventoryItem> getRecruitItems(ServerClient client) {
+        return Collections.emptyList();
+    }
+
+    /**
+     * Open on the recruit page the first time the player talks to him at home:
+     * "build me something with a view" is the next step, and the shop tab would
+     * otherwise bury it.
+     */
+    @Override
+    public boolean startInRecruitForm(ServerClient client) {
+        return super.startInRecruitForm(client) || !this.isSettler();
     }
 
     /**

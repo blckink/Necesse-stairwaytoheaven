@@ -175,6 +175,16 @@ public class SkyreachStatusCommand extends ModularChatCommand {
             }
         }
         logs.add("npc check: wardens=" + wardens + " cats=" + cats + " (loaded regions only)");
+
+        // Settler wiring for the recruited Warden. HumanMob.getSettler() resolves
+        // settlerStringID through SettlerRegistry, and LevelSettler's constructor
+        // does Objects.requireNonNull on the result — an unregistered settler can
+        // never move into a settlement, so the 100,000-coin payoff would dead-end.
+        necesse.level.maps.levelData.settlementData.settler.Settler wardenSettler =
+                necesse.engine.registries.SettlerRegistry.getSettler("wardensettler");
+        logs.add("settler check: wardensettler="
+                + (wardenSettler == null ? "NOT REGISTERED" : wardenSettler.getClass().getSimpleName())
+                + " mobRegistered=" + (necesse.engine.registries.MobRegistry.getMobID("wardensettler") >= 0));
     }
 
     /** Recomputes what the painter SHOULD have placed and probes a live set/get. */
