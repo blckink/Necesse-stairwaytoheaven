@@ -26,3 +26,9 @@ latest-crash.log
 ### Python ###
 __pycache__/
 *.pyc
+
+### OS ###
+.DS_Store
+
+### Vanilla sprite dump (never committed; local QA reference only) ###
+vanilla-sprites/

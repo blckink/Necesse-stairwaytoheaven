@@ -25,23 +25,40 @@ import stairwaytoheaven.SkyRegistry;
 import stairwaytoheaven.quest.SkywatchQuestData;
 
 /**
- * The Sky Warden — the last keeper of the Skywatch and the quest giver of
- * "The Warden's Call". Stationary, invulnerable, save-persistent.
+ * The Sky Warden — the last keeper of the Skywatch, resident of the Old
+ * Warden Spire and the entry point of the whole Skyreach progression.
  *
- * All quest logic is interact-driven and server-authoritative: turn-ins use
+ * v0.5 DESIGN: the Warden is the first major goal. The old four-stage fetch
+ * chain is gone; his flow is now:
+ *   stage 0 — first meeting: intro dialogue, "find the spire" journal quest
+ *             completes, he opens up about the Skywatch.
+ *   stage 1 — recruitment: he offers to leave the sky and join the player's
+ *             surface settlement for {@link #RECRUIT_COST} coins (server-
+ *             authoritative inventory check, vanilla DeliverItems idiom).
+ *             On payment he lights the beacon (the Skywatch wakes up), hands
+ *             over his contract (a vanilla mob spawn item) and departs.
+ *   stage 2 — he is gone: the player uses the contract at home and builds his
+ *             new tower with the unlocked Skywatch building set. The settler
+ *             Warden (see {@link WardenSettlerMob}) takes over as the
+ *             progression interface.
+ *
+ * All interaction is interact-driven and server-authoritative: turn-ins use
  * the vanilla DeliverItemsQuest idiom (count what is in the player's own
  * inventory, then remove on success — never trusting the client). Progress
- * lives in the level's {@link SkywatchQuestData}, shared by all players;
- * whoever delivers receives the rewards.
+ * lives in the level's {@link SkywatchQuestData}, shared by all players.
  */
 public class SkyWardenMob extends FriendlyMob {
 
     public static GameTexture texture;
 
-    private static final int BEACON_SHARDS = 12;
-    private static final int BEACON_SILK = 8;
-    private static final int ANCHOR_BARS = 5;
-    private static final int ANCHOR_STONE = 20;
+    /**
+     * The recruitment price. Intentional design value: it equals the top
+     * vanilla settlement expansion tier (100,000 coins), so an endgame player
+     * who has finished incursion-tier content pays a meaningful but achievable
+     * lump sum — the single largest NPC purchase in the mod, benchmarked
+     * against the wiki economy (Elder's priciest stock item is ~6,000).
+     */
+    public static final int RECRUIT_COST = 100_000;
 
     public SkyWardenMob() {
         super(500);
@@ -80,168 +97,96 @@ public class SkyWardenMob extends FriendlyMob {
         necesse.engine.network.server.Server server = level.getServer();
         switch (quest.stage) {
             case 0:
+                // First meeting: intro, then he opens up. The "find the spire"
+                // journal quest completes here for everyone.
                 say(client, "wardenintro1");
                 say(client, "wardenintro2");
                 say(client, "wardenintro3");
                 give(client, "windsilk", 6);
                 quest.stage = 1;
-                // Journal: "find the spire" is done for everyone; the beacon
-                // delivery quest takes its place for this player.
                 stairwaytoheaven.quest.SkyQuests.removeAllOfType(server, stairwaytoheaven.quest.FindSpireQuest.class);
-                stairwaytoheaven.quest.SkyQuests.giveOnce(server, client, new stairwaytoheaven.quest.BeaconDeliveryQuest());
-                sayBeaconTask(client);
+                sayRecruitmentOffer(client);
                 break;
             case 1:
-                stairwaytoheaven.quest.BeaconDeliveryQuest held =
-                        stairwaytoheaven.quest.SkyQuests.findHeld(client, stairwaytoheaven.quest.BeaconDeliveryQuest.class);
-                boolean delivered;
-                if (held != null && held.canComplete(client)) {
-                    held.complete(client); // consumes the items (vanilla idiom)
-                    delivered = true;
-                } else if (held == null) {
-                    // No journal copy (e.g. save from an older version): fall
-                    // back to the direct inventory turn-in.
-                    delivered = tryTurnIn(client, "stormshard", BEACON_SHARDS, "windsilk", BEACON_SILK);
+                if (tryRecruit(client, level, quest)) {
+                    say(client, "wardenrecruitdone1");
+                    say(client, "wardenrecruitdone2");
                 } else {
-                    delivered = false;
-                }
-                if (delivered) {
-                    quest.stage = 2;
-                    igniteBeacon(level, quest);
-                    say(client, "wardenbeacondone");
-                    give(client, "flickerlightgarland", 2);
-                    stairwaytoheaven.quest.SkyQuests.removeAllOfType(server, stairwaytoheaven.quest.BeaconDeliveryQuest.class);
-                } else {
-                    stairwaytoheaven.quest.SkyQuests.giveOnce(server, client, new stairwaytoheaven.quest.BeaconDeliveryQuest());
-                    sayBeaconTask(client);
-                    say(client, "wardenbeaconwait");
+                    sayRecruitmentOffer(client);
+                    say(client, "wardenrecruitwait");
                 }
                 break;
             default:
-                interactAfterBeacon(client, level, quest);
+                // Recruited worlds should not still have him here; a stale mob
+                // (e.g. from a hand-edited save) politely says goodbye.
+                say(client, "wardenfarewell");
                 break;
         }
     }
 
-    private void sayBeaconTask(ServerClient client) {
-        say(client, new LocalMessage("misc", "wardenbeacon1"));
-        say(client, new LocalMessage("misc", "wardenbeacon2",
-                "shards", String.valueOf(BEACON_SHARDS), "silk", String.valueOf(BEACON_SILK)));
+    /** The recruitment pitch: what he offers and what it costs. */
+    private void sayRecruitmentOffer(ServerClient client) {
+        say(client, "wardenrecruit1");
+        say(client, "wardenrecruit2");
     }
 
-    private void interactAfterBeacon(ServerClient client, Level level, SkywatchQuestData quest) {
-        necesse.engine.network.server.Server server = level.getServer();
-        // One-time intros for the two parallel quests
-        if (!quest.catsIntroShown) {
-            quest.catsIntroShown = true;
-            say(client, "wardencats1");
-            say(client, "wardencats2");
-            say(client, "wardencats3");
-            say(client, catDirectionsMessage("wardencats4", quest));
-            give(client, "cloudpufftreat", 3);
-            giveCatsQuest(server, client, quest);
-            return;
-        }
-        if (!quest.anchorIntroShown) {
-            quest.anchorIntroShown = true;
-            say(client, "wardenanchor1");
-            say(client, "wardenanchor2");
-            stairwaytoheaven.quest.SkyQuests.giveOnce(server, client, new stairwaytoheaven.quest.AnchorDeliveryQuest());
-            return;
-        }
-        // Journal copies for players who join the chain later
-        if (!quest.catsRewardGiven) {
-            giveCatsQuest(server, client, quest);
-        }
-        if (!quest.anchorDone) {
-            stairwaytoheaven.quest.SkyQuests.giveOnce(server, client, new stairwaytoheaven.quest.AnchorDeliveryQuest());
-        }
-        // Cats reward
-        if (quest.blackHome && quest.tabbyHome && !quest.catsRewardGiven) {
-            quest.catsRewardGiven = true;
-            say(client, "wardencatsdone");
-            give(client, "catbasket", 1);
-            give(client, "silverbell", 1);
-            placeBasket(level, quest);
-            stairwaytoheaven.quest.SkyQuests.removeAllOfType(server, stairwaytoheaven.quest.SpireCatsQuest.class);
-            return;
-        }
-        // Anchor turn-in
-        if (!quest.anchorDone) {
-            stairwaytoheaven.quest.AnchorDeliveryQuest heldAnchor =
-                    stairwaytoheaven.quest.SkyQuests.findHeld(client, stairwaytoheaven.quest.AnchorDeliveryQuest.class);
-            boolean delivered;
-            if (heldAnchor != null && heldAnchor.canComplete(client)) {
-                heldAnchor.complete(client);
-                delivered = true;
-            } else if (heldAnchor == null) {
-                delivered = tryTurnIn(client, "aetheriumbar", ANCHOR_BARS, "skystone", ANCHOR_STONE);
-            } else {
-                delivered = false;
-            }
-            if (delivered) {
-                quest.anchorDone = true;
-                say(client, "wardenanchordone");
-                give(client, "skywatchbanner", 1);
-                give(client, "aurorapetal", 5);
-                placeAnchor(level, quest);
-                stairwaytoheaven.quest.SkyQuests.removeAllOfType(server, stairwaytoheaven.quest.AnchorDeliveryQuest.class);
-                return;
-            }
-        }
-        // Finale once everything is done
-        if (quest.anchorDone && quest.catsRewardGiven && !quest.finaleShown) {
-            quest.finaleShown = true;
-            say(client, "wardenfinale");
-            return;
-        }
-        // Idle lines reflecting what is still open
-        if (!quest.blackHome || !quest.tabbyHome) {
-            if (quest.blackHome != quest.tabbyHome) {
-                say(client, "wardenonecat");
-            } else {
-                say(client, catDirectionsMessage("wardencatswait", quest));
-            }
-        } else if (!quest.anchorDone) {
-            say(client, "wardenanchorwait");
-        } else {
-            say(client, "wardenanchordone");
-        }
-    }
-
-    /** Journal copy of the cats quest, pre-filled with the current world state. */
-    private void giveCatsQuest(necesse.engine.network.server.Server server, ServerClient client, SkywatchQuestData quest) {
-        stairwaytoheaven.quest.SpireCatsQuest catsQuest = new stairwaytoheaven.quest.SpireCatsQuest();
-        catsQuest.blackHome = quest.blackHome;
-        catsQuest.tabbyHome = quest.tabbyHome;
-        stairwaytoheaven.quest.SkyQuests.giveOnce(server, client, catsQuest);
-    }
-
-    /** Server-authoritative delivery: both stacks must be present, then both are consumed. */
-    private boolean tryTurnIn(ServerClient client, String itemA, int amountA, String itemB, int amountB) {
+    /**
+     * Server-authoritative recruitment — the 100,000-coin payment IS the
+     * recruitment transaction, exactly like vanilla's coin hiring of world
+     * NPCs ("most NPCs can be hired with coins ... and become settlers in the
+     * player's settlement" — wiki). There is no item: the server consumes the
+     * coins, then performs the transfer itself:
+     *
+     *   1. consume {@link #RECRUIT_COST} coins from the paying player's own
+     *      inventory (vanilla DeliverItems idiom, never trusting the client),
+     *   2. light the beacon — the Skywatch wakes up,
+     *   3. create the settler Warden (a real {@link WardenSettlerMob}, i.e. a
+     *      HumanShop settler) on the SURFACE level, placed with the Elder's
+     *      own placement recipe (setHome → Waystone.findTeleportLocation →
+     *      entityManager.addMob) at the stairway this player ascended from —
+     *      the verified, persisted spot at the heart of their base,
+     *   4. remove this sky-side warden; the player assigns his bed/home
+     *      through the normal settlement menu afterwards.
+     */
+    private boolean tryRecruit(ServerClient client, Level level, SkywatchQuestData quest) {
         PlayerMob player = client.playerMob;
-        Level level = this.getLevel();
-        boolean hasA = player.getInv().main.getAmount(level, player, ItemRegistry.getItem(itemA), "skywatch") >= amountA;
-        boolean hasB = player.getInv().main.getAmount(level, player, ItemRegistry.getItem(itemB), "skywatch") >= amountB;
-        if (!hasA || !hasB) {
+        // The transfer target: this player's bound surface stairway. Everyone
+        // who reached the spire through a stairway has one; without it we
+        // refuse before taking any coins rather than guessing a destination.
+        long[] homeTile = quest.getReturnStairway(client.authentication);
+        if (homeTile == null) {
+            say(client, "wardenrecruitnohome");
             return false;
         }
-        player.getInv().main.removeItems(level, player, ItemRegistry.getItem(itemA), amountA, "skywatch");
-        player.getInv().main.removeItems(level, player, ItemRegistry.getItem(itemB), amountB, "skywatch");
+        necesse.inventory.item.Item coin = ItemRegistry.getItem("coin");
+        if (player.getInv().main.getAmount(level, player, coin, "skywatch") < RECRUIT_COST) {
+            return false;
+        }
+        player.getInv().main.removeItems(level, player, coin, RECRUIT_COST, "skywatch");
+
+        quest.stage = 2;
+        quest.recruited = true;
+        quest.recruitedAuth = client.authentication;
+        igniteBeacon(level, quest);
+
+        // The transfer: spawn the settler on the surface level (always loaded)
+        // at the player's home-side stairway, Elder-preset placement recipe.
+        Level surface = level.getServer().world.getLevel(necesse.engine.util.LevelIdentifier.SURFACE_IDENTIFIER);
+        WardenSettlerMob settler = new WardenSettlerMob();
+        int homeX = (int) homeTile[0];
+        int homeY = (int) homeTile[1] + 1; // just below the stairway pad
+        settler.setHome(new java.awt.Point(homeX, homeY));
+        java.awt.Point spot = necesse.level.maps.levelData.settlementData.Waystone
+                .findTeleportLocation(surface, homeX, homeY, settler);
+        surface.entityManager.addMob(settler, spot.x * 32 + 16, spot.y * 32 + 16);
+
+        // This sky-side keeper departs; the settler at home takes over.
+        this.remove();
         return true;
     }
 
     private void igniteBeacon(Level level, SkywatchQuestData quest) {
         swapObject(level, quest.beaconX, quest.beaconY, SkyRegistry.wardenBeaconOffID, SkyRegistry.wardenBeaconOnID);
-    }
-
-    private void placeBasket(Level level, SkywatchQuestData quest) {
-        swapObject(level, quest.basketX, quest.basketY, 0, SkyRegistry.catBasketID);
-    }
-
-    private void placeAnchor(Level level, SkywatchQuestData quest) {
-        // The anchor stands beside the beacon
-        swapObject(level, quest.beaconX + 2, quest.beaconY + 1, 0, SkyRegistry.skyAnchorID);
     }
 
     private void swapObject(Level level, int tileX, int tileY, int expectedID, int newID) {
@@ -255,17 +200,6 @@ public class SkyWardenMob extends FriendlyMob {
                     new necesse.engine.network.packet.PacketChangeObject(level, 0, tileX, tileY, newID),
                     level, tileX, tileY);
         }
-    }
-
-    /** A misc line with <blackdir>/<tabbydir> filled with directions from the spire to each lair. */
-    private GameMessage catDirectionsMessage(String miscKey, SkywatchQuestData quest) {
-        return new LocalMessage("misc", miscKey,
-                "blackdir", translatedDirection(quest.spireX, quest.spireY, quest.blackLairX, quest.blackLairY),
-                "tabbydir", translatedDirection(quest.spireX, quest.spireY, quest.tabbyLairX, quest.tabbyLairY));
-    }
-
-    private static String translatedDirection(int fromX, int fromY, int toX, int toY) {
-        return new LocalMessage("misc", SkywatchQuestData.directionKey(fromX, fromY, toX, toY)).translate();
     }
 
     private void say(ServerClient client, String miscKey) {

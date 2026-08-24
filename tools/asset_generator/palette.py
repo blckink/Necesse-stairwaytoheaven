@@ -11,11 +11,13 @@ OUTLINE = (34, 34, 46)
 # --- Terrain -----------------------------------------------------------------
 
 CLOUDTURF = {
-    "deep":  (128, 143, 138),
-    "base":  (170, 184, 176),
-    "light": (196, 208, 199),
-    "hi":    (222, 231, 222),
-    "tuft":  (146, 168, 152),
+    # v0.4.1 quality pass: hue pushed toward silver-green so islands read as
+    # living meadows against the pale Mistsea (the old ramp sat almost grey).
+    "deep":  (114, 138, 118),
+    "base":  (156, 180, 154),
+    "light": (186, 205, 180),
+    "hi":    (214, 229, 205),
+    "tuft":  (124, 155, 126),
 }
 
 SKYSTONE = {
@@ -76,21 +78,26 @@ WINDSILK = {
 }
 
 GOLEM = {
-    "deep":  (74, 82, 98),
-    "base":  (108, 118, 135),
-    "light": (140, 150, 166),
-    "hi":    (172, 181, 196),
-    "moss":  (122, 148, 132),
-    "eye":   (136, 216, 220),
+    # v0.4.1 quality pass: deeper plate shadows for readable boulder separation,
+    # greener moss, brighter eye glow.
+    "deep":  (54, 62, 80),
+    "base":  (104, 114, 132),
+    "light": (144, 154, 170),
+    "hi":    (184, 193, 206),
+    "moss":  (106, 160, 122),
+    "eye":   (116, 236, 226),
 }
 
 ZEPHYR = {
-    "deep":  (96, 112, 128),
-    "base":  (156, 174, 189),
-    "light": (198, 212, 223),
-    "hi":    (232, 240, 246),
-    "belly": (226, 232, 238),
-    "accent": (108, 196, 186),
+    # v0.4.1 quality pass: back ramp deepened ~2 steps — the old base sat at
+    # the Mistsea's luminance and the ray vanished against open cloud; the
+    # belly stays pale for counter-shading, the accent teal is strengthened.
+    "deep":  (58, 78, 100),
+    "base":  (120, 142, 162),
+    "light": (176, 196, 210),
+    "hi":    (226, 238, 244),
+    "belly": (230, 236, 240),
+    "accent": (62, 210, 190),
 }
 
 WISP = {
@@ -142,6 +149,10 @@ WARDEN = {
     "staff":      (110, 86, 62),
     "staff_hi":   (148, 118, 86),
     "lanternglow": (186, 226, 230),
+    # v0.4.1 quality pass: warm gold trim — one warm accent so the warden
+    # stops reading as a grey-lavender mass among the grey mobs.
+    "trim":       (204, 160, 82),
+    "trim_hi":    (238, 202, 124),
 }
 
 CAT_BLACK = {
@@ -397,11 +408,14 @@ FINCH = {
 }
 
 GALEHOUND = {
-    "deep":  (92, 104, 124),
-    "base":  (132, 146, 166),
-    "light": (172, 186, 202),
-    "hi":    (216, 226, 236),
-    "eye":   (150, 232, 226),
+    # v0.4.1 quality pass: darker storm back / brighter highlights for value
+    # contrast, stronger eye glow, new "wind" cyan for detached mane flecks.
+    "deep":  (58, 70, 92),
+    "base":  (114, 128, 150),
+    "light": (166, 182, 200),
+    "hi":    (216, 228, 238),
+    "eye":   (108, 242, 228),
+    "wind":  (148, 234, 222),
 }
 
 DEWSNAIL = {

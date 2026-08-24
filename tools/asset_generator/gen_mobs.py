@@ -677,6 +677,11 @@ def _hound_frame(facing, col, swim=False):
         c.put(tx - 5, ty - 2, with_alpha(r["hi"], 150))
         c.put(tx - 7, ty, with_alpha(r["hi"], 110))
         c.put(cx + 1, g0 - 24, with_alpha(r["hi"], 120))
+        # v0.4.1: cyan wind flecks streaming off the mane tufts and tail tip —
+        # the hound's color identity, readable at a glance at night.
+        c.put(cx + 5, g0 - 30, r["wind"])
+        c.put(cx - 1, g0 - 26, with_alpha(r["wind"], 170))
+        c.put(tx - 3, ty - 4, r["wind"])
     elif facing == "up":
         cx = 32
         g0 = ground - bob
@@ -816,6 +821,7 @@ def _hound_frame(facing, col, swim=False):
         tx, ty, _ = chain[-1]
         c.put(tx + 2, ty - 3, with_alpha(r["hi"], 140))
         c.put(tx + 4, ty - 5, with_alpha(r["hi"], 110))
+        c.put(tx + 3, ty - 4, with_alpha(r["wind"], 190))   # v0.4.1 wind fleck
         for i in (1, 3):
             px, py, rad = chain[i]
             c.put(px, py - round(rad * 0.7), r["hi"])

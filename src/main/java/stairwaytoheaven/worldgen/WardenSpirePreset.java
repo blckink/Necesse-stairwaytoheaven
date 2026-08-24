@@ -35,6 +35,7 @@ public class WardenSpirePreset extends Preset {
         int lantern = ObjectRegistry.getObjectID("mistglasslantern");
         int statue = ObjectRegistry.getObjectID("gloomravenstatue");
         int willow = ObjectRegistry.getObjectID("gloomwillow");
+        int banner = SkyRegistry.skywatchBannerID;
 
         // Any Mistsea under the footprint becomes solid ground first (the
         // ElderHousePreset liquid-fill idiom), so the ruin never half-floats
@@ -69,6 +70,20 @@ public class WardenSpirePreset extends Preset {
         this.setObject(BEACON_X, BEACON_Y, SkyRegistry.wardenBeaconOffID);
         this.setObject(5, 9, candelabra);
         this.setObject(10, 4, lantern);
+
+        // The Skywatch Gate: the permanent way home, standing east of the
+        // south approach path. Unbreakable (see SkySideStairwayObject) — it
+        // routes each player back to the stairway they ascended from.
+        this.setObject(10, 13, SkyRegistry.stairwayUpID);
+
+        // Hero-location framing: Skywatch banners flank the grand door, and a
+        // pair of lit mistglass lanterns marks the arrival pad south of the
+        // path — the player materializes between two lights facing the tower
+        // (arrival tile is local (7,13), see SkyOrigin.ARRIVAL_OFFSET_Y).
+        this.setObject(6, 11, banner);
+        this.setObject(8, 11, banner);
+        this.setObject(6, 14, lantern);
+        this.setObject(8, 14, lantern);
 
         // Grounds: raven statue, two gloomwillows, fence stubs by the path
         this.setObject(1, 10, statue);

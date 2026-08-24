@@ -3,6 +3,28 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [0.4.1] — 2026-08-24
+
+Art quality pass + full project review.
+
+### Changed
+- **Color identity & contrast pass** across the sky roster (deterministic
+  palette regeneration, 18 textures): the **Zephyr Ray**'s back ramp was
+  deepened two steps — its old base sat at the Mistsea's luminance and the
+  ray vanished against open cloud — with a strengthened teal accent; the
+  **Galehound** gained a storm-dark back, brighter highlights and detached
+  cyan wind flecks off mane and tail (night-readable color identity); the
+  **Skystone Golem**'s plates separate through deeper shadows with greener
+  moss and brighter eye glow; the **Sky Warden** wears a dotted gold hem
+  trim as one warm accent; **Cloudturf** shifted hue to silver-green so
+  islands read as living meadows against the pale Mistsea.
+
+### Added
+- `docs/REVIEW-2026-08-24.md`: full professional review — verification of the
+  modding structure against the official wiki, asset-quality findings, and a
+  prioritized expansion plan (map division with distance rings + landmarks,
+  random events/weather, NPCs, recipes, weapons, fishing).
+
 ## [0.4.0] — "The Living Sky" — 2026-08-24
 
 The fill release: every sky biome gets its own trees, meadows, flowers,

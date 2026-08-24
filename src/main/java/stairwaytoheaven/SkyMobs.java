@@ -2,11 +2,13 @@ package stairwaytoheaven;
 
 import necesse.engine.registries.MobRegistry;
 import necesse.gfx.gameTexture.GameTexture;
+import stairwaytoheaven.mobs.CloudLambMob;
 import stairwaytoheaven.mobs.SkyCritterMob;
 import stairwaytoheaven.mobs.SkyWardenMob;
 import stairwaytoheaven.mobs.SkystoneGolemMob;
 import stairwaytoheaven.mobs.SpireCatMob;
 import stairwaytoheaven.mobs.StormWispMob;
+import stairwaytoheaven.mobs.WardenSettlerMob;
 import stairwaytoheaven.mobs.ZephyrRayMob;
 
 /**
@@ -25,6 +27,11 @@ final class SkyMobs {
         MobRegistry.registerMob("skywarden", SkyWardenMob.class, false);
         MobRegistry.registerMob("spirecatblack", SpireCatMob.Black.class, false);
         MobRegistry.registerMob("spirecattabby", SpireCatMob.Tabby.class, false);
+        // v0.5: the recruited Warden as a real surface settler (HumanShop).
+        // NOT registered with createSpawnItem — the 100,000-coin recruitment
+        // transaction transfers him directly (see SkyWardenMob.tryRecruit);
+        // there is no spawn-item purchase.
+        MobRegistry.registerMob("wardensettler", WardenSettlerMob.class, false);
         // ambient critters, one per sub-biome
         MobRegistry.registerMob("cloudlamb", stairwaytoheaven.mobs.CloudLambMob.class, false);
         MobRegistry.registerMob("glowmoth", SkyCritterMob.GlowMoth.class, false);

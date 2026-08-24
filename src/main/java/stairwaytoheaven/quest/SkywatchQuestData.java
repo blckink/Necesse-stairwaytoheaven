@@ -17,13 +17,36 @@ public class SkywatchQuestData extends LevelData {
 
     public static final String KEY = "skywatchquest";
 
+    /**
+     * Save-schema version. v1 (pre-0.5) saves stored the old fetch-chain stage
+     * semantics (stage >= 2 meant "beacon lit") and a stairway-anchored spire
+     * position. v2 is the portal/recruitment design. A save without this field
+     * is v1: its sky-side state is reset ONCE here (idempotent — every v2 save
+     * writes the field), so the canonical-origin spire re-stamps cleanly and
+     * nobody gets stuck in a farewell loop with a Warden they never recruited.
+     * Surface data is never touched by this.
+     */
+    public static final int CURRENT_SCHEMA_VERSION = 2;
+
     public int stage = 0;
+
+    // v0.5 recruitment: the Warden joins the player's surface settlement.
+    // stage 0 = not met · 1 = met (intro done, recruitment open) ·
+    // 2 = recruited (spire warden gone, contract issued)
+    public boolean recruited = false;
+    /** Auth of the player whose contract it was (multiplayer bookkeeping). */
+    public long recruitedAuth = 0L;
 
     // Warden's Spire (set once when the structure is stamped)
     public boolean spirePlaced = false;
     public int spireX, spireY;          // warden tile
     public int beaconX, beaconY;        // beacon object tile
     public int basketX, basketY;        // cat basket / cat home tile
+
+    // v0.5 portal routing: per-player memory of the surface stairway each
+    // player ascended from, so the spire's Skywatch Gate sends them home.
+    // Keyed by client authentication; values are surface tile X, Y pairs.
+    public final java.util.HashMap<Long, long[]> returnStairs = new java.util.HashMap<>();
 
     // Cats
     public boolean catsSpawned = false;
@@ -75,7 +98,10 @@ public class SkywatchQuestData extends LevelData {
     @Override
     public void addSaveData(SaveData save) {
         super.addSaveData(save);
+        save.addInt("schemaVersion", CURRENT_SCHEMA_VERSION);
         save.addInt("stage", this.stage);
+        save.addBoolean("recruited", this.recruited);
+        save.addLong("recruitedAuth", this.recruitedAuth);
         save.addBoolean("spirePlaced", this.spirePlaced);
         save.addInt("spireX", this.spireX);
         save.addInt("spireY", this.spireY);
@@ -97,6 +123,21 @@ public class SkywatchQuestData extends LevelData {
         save.addBoolean("finaleShown", this.finaleShown);
         save.addLongArray("spireMarkerAuths", toLongArray(this.spireMarkerAuths));
         save.addLongArray("stairsMarkerAuths", toLongArray(this.stairsMarkerAuths));
+        // v0.5 return-stairway bindings: auths, Xs and Ys as parallel arrays
+        long[] auths = new long[this.returnStairs.size()];
+        long[] xs = new long[this.returnStairs.size()];
+        long[] ys = new long[this.returnStairs.size()];
+        int i = 0;
+        for (java.util.Map.Entry<Long, long[]> entry : this.returnStairs.entrySet()) {
+            auths[i] = entry.getKey();
+            long[] tile = entry.getValue();
+            xs[i] = tile.length > 0 ? tile[0] : 0;
+            ys[i] = tile.length > 1 ? tile[1] : 0;
+            i++;
+        }
+        save.addLongArray("returnAuths", auths);
+        save.addLongArray("returnXs", xs);
+        save.addLongArray("returnYs", ys);
     }
 
     private static long[] toLongArray(java.util.Set<Long> set) {
@@ -121,6 +162,8 @@ public class SkywatchQuestData extends LevelData {
     public void applyLoadData(LoadData save) {
         super.applyLoadData(save);
         this.stage = save.getInt("stage", 0, false);
+        this.recruited = save.getBoolean("recruited", false, false);
+        this.recruitedAuth = save.getLong("recruitedAuth", 0L, false);
         this.spirePlaced = save.getBoolean("spirePlaced", false, false);
         this.spireX = save.getInt("spireX", 0, false);
         this.spireY = save.getInt("spireY", 0, false);
@@ -142,6 +185,81 @@ public class SkywatchQuestData extends LevelData {
         this.finaleShown = save.getBoolean("finaleShown", false, false);
         loadLongSet(save, "spireMarkerAuths", this.spireMarkerAuths);
         loadLongSet(save, "stairsMarkerAuths", this.stairsMarkerAuths);
+        // v0.5 return-stairway bindings
+        this.returnStairs.clear();
+        if (save.hasLoadDataByName("returnAuths")) {
+            long[] auths = save.getLongArray("returnAuths");
+            long[] xs = save.hasLoadDataByName("returnXs") ? save.getLongArray("returnXs") : new long[0];
+            long[] ys = save.hasLoadDataByName("returnYs") ? save.getLongArray("returnYs") : new long[0];
+            for (int i = 0; i < auths.length; i++) {
+                this.returnStairs.put(auths[i], new long[]{
+                        i < xs.length ? xs[i] : 0,
+                        i < ys.length ? ys[i] : 0});
+            }
+        }
+        this.migrateLegacySave(save);
+    }
+
+    /**
+     * One-time, idempotent v1 → v2 migration. A v1 save (pre-0.5) has no
+     * "schemaVersion" entry; its sky-side progression used different stage
+     * semantics and a stairway-anchored spire position, which would leave the
+     * new flow hard-stuck (e.g. old stage >= 2 reads as "already recruited").
+     * We reset ONLY Skyreach-side quest/landmark state so the canonical-origin
+     * spire re-stamps on the next ascent; the Surface level, settlements,
+     * inventories and world data are not part of this object and stay intact.
+     */
+    private void migrateLegacySave(LoadData save) {
+        if (save.hasLoadDataByName("schemaVersion")) {
+            return;
+        }
+        this.stage = 0;
+        this.recruited = false;
+        this.recruitedAuth = 0L;
+        this.spirePlaced = false;
+        this.spireX = 0;
+        this.spireY = 0;
+        this.beaconX = 0;
+        this.beaconY = 0;
+        this.basketX = 0;
+        this.basketY = 0;
+        this.catsSpawned = false;
+        this.blackLairX = 0;
+        this.blackLairY = 0;
+        this.tabbyLairX = 0;
+        this.tabbyLairY = 0;
+        this.blackHome = false;
+        this.tabbyHome = false;
+        this.catsIntroShown = false;
+        this.catsRewardGiven = false;
+        this.anchorIntroShown = false;
+        this.anchorDone = false;
+        this.finaleShown = false;
+        this.spireMarkerAuths.clear();
+        this.stairsMarkerAuths.clear();
+        this.returnStairs.clear();
+    }
+
+    /** Remembers which surface stairway tile this player ascended from. */
+    public void setReturnStairway(long clientAuth, int tileX, int tileY) {
+        this.returnStairs.put(clientAuth, new long[]{tileX, tileY});
+    }
+
+    /**
+     * The surface tile this player's Skywatch Gate should open onto: their own
+     * last-used stairway if known, otherwise any recorded stairway (the first
+     * ascent of a second player should lead somewhere sensible), otherwise
+     * null — the gate then refuses politely instead of guessing.
+     */
+    public long[] getReturnStairway(long clientAuth) {
+        long[] own = this.returnStairs.get(clientAuth);
+        if (own != null) {
+            return own;
+        }
+        for (long[] tile : this.returnStairs.values()) {
+            return tile;
+        }
+        return null;
     }
 
     /** Fetches the quest data of a level, creating and attaching it if absent. */

@@ -4,6 +4,8 @@ import necesse.engine.registries.ObjectLayerRegistry;
 import necesse.level.maps.regionSystem.Region;
 import stairwaytoheaven.SkyRegistry;
 
+import java.awt.Point;
+
 /**
  * Paints one region of the Skyreach: floating islands over the Mistsea, with the
  * three sky sub-biomes written into the region's biome layer — the exact same
@@ -47,12 +49,23 @@ public final class SkyTerrainPainter {
     public static final float MEADOW_THRESHOLD = 0.60F;
     public static final float MEADOW_DENSITY = 0.72F;
 
+    /**
+     * Radius around the canonical spire origin kept as an open plaza: natural
+     * object placement (meadows, trees, ores) is suppressed here so the hero
+     * landmark's silhouette reads clean on first arrival. Slightly larger than
+     * the 15x15 preset footprint plus its props.
+     */
+    public static final float SPIRE_GROUNDS_RADIUS = 18.0F;
+
     private SkyTerrainPainter() {
     }
 
     public static void paintRegion(Region region, int seed) {
         int tileWidth = region.tileLayer.region.tileWidth;
         int tileHeight = region.tileLayer.region.tileHeight;
+        // The canonical sky origin (Old Warden Spire hub) — computed once per
+        // region; every radial rule below derives from it.
+        Point origin = SkyOrigin.compute(seed);
         // Tiles already claimed by the second half of a 2x1 crystal cluster
         boolean[][] reserved = new boolean[tileWidth][tileHeight];
         for (int regionTileX = 0; regionTileX < tileWidth; regionTileX++) {
@@ -61,6 +74,20 @@ public final class SkyTerrainPainter {
                 int tileY = regionTileY + region.tileYOffset;
 
                 float biomeValue = SkyNoise.fbm(seed + SALT_BIOME, tileX, tileY, BIOME_SCALE, 2);
+
+                // The hub guarantee: around the Old Warden Spire the island
+                // mask is clamped to solid land and the biome pulled into the
+                // Driftlands band, so the first ascent always lands on a
+                // walkable, safe, recognizable home island — regardless of
+                // what the raw noise wanted there.
+                float hubDx = tileX - origin.x;
+                float hubDy = tileY - origin.y;
+                float hubDist = (float) Math.sqrt(hubDx * hubDx + hubDy * hubDy);
+                if (hubDist < SkyOrigin.HUB_RADIUS) {
+                    float force = 1.0F - hubDist / SkyOrigin.HUB_RADIUS; // 1 center → 0 rim
+                    biomeValue = biomeValue + (0.5F - biomeValue) * Math.min(1.0F, force * 1.6F);
+                }
+
                 boolean isStormveil = biomeValue < STORMVEIL_BELOW;
                 boolean isAurora = biomeValue > AURORA_ABOVE;
 
@@ -75,6 +102,10 @@ public final class SkyTerrainPainter {
                 region.biomeLayer.setBiomeByRegion(regionTileX, regionTileY, biomeID);
 
                 float islandValue = SkyNoise.fbm(seed, tileX, tileY, ISLAND_SCALE, 3);
+                if (hubDist < SkyOrigin.HUB_RADIUS) {
+                    float force = 1.0F - hubDist / SkyOrigin.HUB_RADIUS;
+                    islandValue = Math.max(islandValue, ISLAND_THRESHOLD + 0.02F + 0.20F * force);
+                }
                 if (islandValue <= ISLAND_THRESHOLD) {
                     region.tileLayer.setTileByRegion(regionTileX, regionTileY, SkyRegistry.mistseaID);
                     continue;
@@ -90,6 +121,15 @@ public final class SkyTerrainPainter {
                     groundID = SkyRegistry.cloudturfID;
                 }
                 region.tileLayer.setTileByRegion(regionTileX, regionTileY, groundID);
+
+                // Spire grounds: the immediate surroundings of the Old Warden
+                // Spire stay an open plaza — natural objects (grass carpets,
+                // trees, ores) are suppressed so nothing buries or crowds the
+                // landmark's silhouette on first arrival. The preset's own
+                // props (lanterns, banners, willows) stamp afterwards.
+                if (hubDist < SPIRE_GROUNDS_RADIUS) {
+                    continue;
+                }
 
                 // Keep island rims object-free so coastlines stay walkable
                 if (islandValue <= ISLAND_THRESHOLD + ISLAND_RIM || reserved[regionTileX][regionTileY]) {
@@ -107,7 +147,8 @@ public final class SkyTerrainPainter {
                     continue;
                 }
 
-                int objectID = rollObject(seed, tileX, tileY, isStormveil, isAurora, isRockPatch);
+                int band = SkyOrigin.bandFor(hubDist);
+                int objectID = rollObject(seed, tileX, tileY, isStormveil, isAurora, isRockPatch, band);
                 if (objectID == 0) {
                     continue;
                 }
@@ -134,31 +175,38 @@ public final class SkyTerrainPainter {
     /**
      * Picks the natural object for a land tile, or 0 for none. Chances are exclusive
      * bands of a single per-tile roll, so total density stays easy to reason about.
+     *
+     * v0.5 radial progression: the ore bands (aetherium, fulgurite, prismshard)
+     * widen with the distance band from the Old Warden Spire — the outer reaches
+     * pay better, so exploring outward is intrinsically rewarded. All other band
+     * widths are unchanged.
      */
-    public static int rollObject(int seed, int tileX, int tileY, boolean isStormveil, boolean isAurora, boolean isRockPatch) {
+    public static int rollObject(int seed, int tileX, int tileY, boolean isStormveil, boolean isAurora,
+                                 boolean isRockPatch, int band) {
         float roll = SkyNoise.tileRoll(seed, tileX, tileY, SALT_OBJECT_ROLL);
-        // Densities tuned up ~1.6x after playtests: the sky read as bare next to
-        // vanilla biomes. Grass-likes are generous (walk-through), blockers moderate.
+        float oreMul = 1.0F + 0.55F * band;
         if (isStormveil) {
             if (roll < 0.035F) return SkyRegistry.stormCrystalID;
             if (roll < 0.090F) return SkyRegistry.skystoneRockID;
-            if (roll < 0.102F) return SkyRegistry.aetheriumRockID;
-            // v0.4: charred pines, fulgurite glass, sparking growth
-            if (roll < 0.114F) return isRockPatch ? 0 : SkyRegistry.fulgurpineID;
-            if (roll < 0.124F) return SkyRegistry.fulguriteRockID;
-            if (roll < 0.152F) return SkyRegistry.staticmossID;
-            if (roll < 0.164F) return isRockPatch ? 0 : SkyRegistry.thunderbloomID;
+            float aeth = 0.090F + 0.012F * oreMul;
+            if (roll < aeth) return SkyRegistry.aetheriumRockID;
+            if (roll < aeth + 0.012F) return isRockPatch ? 0 : SkyRegistry.fulgurpineID;
+            float fulg = aeth + 0.012F + 0.010F * oreMul;
+            if (roll < fulg) return SkyRegistry.fulguriteRockID;
+            if (roll < fulg + 0.028F) return SkyRegistry.staticmossID;
+            if (roll < fulg + 0.040F) return isRockPatch ? 0 : SkyRegistry.thunderbloomID;
             return 0;
         }
         if (isAurora) {
             if (roll < 0.042F) return SkyRegistry.auroraBloomID;
-            if (roll < 0.072F) return SkyRegistry.aetheriumRockID;
-            if (roll < 0.128F) return SkyRegistry.skystoneRockID;
-            // v0.4: prisma birches, prismshard veins, glowing undergrowth
-            if (roll < 0.140F) return isRockPatch ? 0 : SkyRegistry.prismabirchID;
-            if (roll < 0.150F) return SkyRegistry.prismshardRockID;
-            if (roll < 0.178F) return isRockPatch ? 0 : SkyRegistry.glowfernID;
-            if (roll < 0.192F) return isRockPatch ? 0 : SkyRegistry.auroralilyID;
+            float aeth = 0.042F + 0.030F * oreMul;
+            if (roll < aeth) return SkyRegistry.aetheriumRockID;
+            if (roll < aeth + 0.056F) return SkyRegistry.skystoneRockID;
+            if (roll < aeth + 0.068F) return isRockPatch ? 0 : SkyRegistry.prismabirchID;
+            float prism = aeth + 0.068F + 0.010F * oreMul;
+            if (roll < prism) return SkyRegistry.prismshardRockID;
+            if (roll < prism + 0.028F) return isRockPatch ? 0 : SkyRegistry.glowfernID;
+            if (roll < prism + 0.042F) return isRockPatch ? 0 : SkyRegistry.auroralilyID;
             return 0;
         }
         // Driftlands: grasses prefer soft ground, rocks prefer outcrops
@@ -166,22 +214,23 @@ public final class SkyTerrainPainter {
             return isRockPatch ? SkyRegistry.skystoneRockID : SkyRegistry.skyreedsID;
         }
         if (roll < 0.135F) return SkyRegistry.skystoneRockID;
-        if (roll < 0.145F) return SkyRegistry.aetheriumRockID;
+        float aeth = 0.135F + 0.010F * oreMul;
+        if (roll < aeth) return SkyRegistry.aetheriumRockID;
         // v0.2.6 forage: generous wheat-grass, occasional berry bush
-        if (roll < 0.200F) {
+        if (roll < aeth + 0.055F) {
             return isRockPatch ? 0 : SkyRegistry.windwheatID;
         }
-        if (roll < 0.212F) {
+        if (roll < aeth + 0.067F) {
             return isRockPatch ? 0 : SkyRegistry.cloudberryBushID;
         }
         // v0.4: nimbus willows and meadow flowers
-        if (roll < 0.226F) {
+        if (roll < aeth + 0.081F) {
             return isRockPatch ? 0 : SkyRegistry.nimbuswillowID;
         }
-        if (roll < 0.246F) {
+        if (roll < aeth + 0.101F) {
             return isRockPatch ? 0 : SkyRegistry.cloudbellID;
         }
-        if (roll < 0.260F) {
+        if (roll < aeth + 0.115F) {
             return isRockPatch ? 0 : SkyRegistry.skytulipID;
         }
         return 0;

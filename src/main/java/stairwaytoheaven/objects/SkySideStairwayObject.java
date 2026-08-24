@@ -2,41 +2,36 @@ package stairwaytoheaven.objects;
 
 import java.awt.Color;
 import java.awt.Rectangle;
-import java.util.ArrayList;
 import java.util.List;
 
 import necesse.engine.gameLoop.tickManager.TickManager;
 import necesse.engine.localization.Localization;
 import necesse.engine.localization.message.GameMessage;
 import necesse.engine.localization.message.LocalMessage;
-import necesse.engine.network.packet.PacketChangeObject;
-import necesse.engine.network.server.ServerClient;
-import necesse.engine.registries.ObjectRegistry;
-import necesse.engine.util.LevelIdentifier;
-import necesse.entity.mobs.Attacker;
 import necesse.entity.mobs.PlayerMob;
-import necesse.entity.objectEntity.LadderUpObjectEntity;
 import necesse.entity.objectEntity.ObjectEntity;
 import necesse.entity.objectEntity.PortalObjectEntity;
-import necesse.entity.pickup.ItemPickupEntity;
 import necesse.gfx.camera.GameCamera;
 import necesse.gfx.drawOptions.texture.TextureDrawOptions;
 import necesse.gfx.drawables.LevelSortedDrawable;
 import necesse.gfx.drawables.OrderableDrawables;
-import necesse.gfx.gameTexture.GameSprite;
 import necesse.gfx.gameTexture.GameTexture;
 import necesse.inventory.item.toolItem.ToolType;
-import necesse.inventory.lootTable.LootTable;
 import necesse.level.gameObject.GameObject;
 import necesse.level.maps.Level;
 import necesse.level.maps.light.GameLight;
 import stairwaytoheaven.SkyRegistry;
 
 /**
- * The Skyreach-side stairway leading back down to the surface. Functional twin
- * of the vanilla (package-private) LadderUpObject: auto-placed on first ascent,
- * usable to descend, restricted to the Skyreach, and it drops/cleans up its
- * surface counterpart exactly like vanilla ladder pairs do.
+ * The Skywatch Gate: the Skyreach-side return portal standing at the Old
+ * Warden Spire. 
+ *
+ * v0.5 DESIGN: the old auto-placed coordinate ladder is gone. This is now a
+ * permanent, unbreakable fixture of the spire preset (placed by
+ * {@link WardenSpirePreset}) and the ONLY way home — it routes each player
+ * back to the surface stairway they ascended from (per-player server-side
+ * binding, see {@link SkywatchGateObjectEntity}). Unbreakable for the same
+ * reason the quest beacon is: mining your way home must not be possible.
  */
 public class SkySideStairwayObject extends GameObject {
 
@@ -44,7 +39,7 @@ public class SkySideStairwayObject extends GameObject {
 
     public SkySideStairwayObject() {
         this.mapColor = new Color(196, 206, 219);
-        this.toolType = ToolType.ALL;
+        this.toolType = ToolType.UNBREAKABLE;
         this.isLightTransparent = true;
         this.lightLevel = 75;
         this.hoverHitbox = new Rectangle(0, -20, 32, 52);
@@ -54,19 +49,13 @@ public class SkySideStairwayObject extends GameObject {
 
     @Override
     public GameMessage getNewLocalization() {
-        return new LocalMessage("object", "stairwaytoheaven");
+        return new LocalMessage("object", "skywatchgate");
     }
 
     @Override
     public void loadTextures() {
         super.loadTextures();
         this.texture = GameTexture.fromFile("objects/skystairwayup");
-    }
-
-    @Override
-    public LootTable getLootTable(Level level, int layerID, int tileX, int tileY) {
-        // Breaking either side yields the craftable stairway item
-        return ObjectRegistry.getObject(SkyRegistry.stairwayDownID).getLootTable(level, layerID, tileX, tileY);
     }
 
     @Override
@@ -131,36 +120,7 @@ public class SkySideStairwayObject extends GameObject {
     }
 
     @Override
-    public void onDestroyed(Level level, int layerID, int x, int y, Attacker attacker, ServerClient client, ArrayList<ItemPickupEntity> itemsDropped) {
-        if (level.isServer()) {
-            ObjectEntity objectEntity = level.entityManager.getObjectEntity(x, y);
-            if (objectEntity instanceof PortalObjectEntity) {
-                PortalObjectEntity portal = (PortalObjectEntity) objectEntity;
-                if (level.getServer().world.levelExists(portal.getDestinationIdentifier())) {
-                    Level nextLevel = level.getServer().world.getLevel(portal.getDestinationIdentifier());
-                    nextLevel.regionManager.ensureTileIsLoaded(portal.destinationTileX, portal.destinationTileY);
-                    if (nextLevel.getObjectID(portal.destinationTileX, portal.destinationTileY) == SkyRegistry.stairwayDownID) {
-                        nextLevel.setObject(portal.destinationTileX, portal.destinationTileY, 0);
-                        level.getServer().network.sendToClientsWithTile(
-                                new PacketChangeObject(nextLevel, 0, portal.destinationTileX, portal.destinationTileY, 0),
-                                nextLevel, portal.destinationTileX, portal.destinationTileY);
-                    }
-                }
-            }
-        }
-
-        super.onDestroyed(level, layerID, x, y, attacker, client, itemsDropped);
-    }
-
-    @Override
     public ObjectEntity getNewObjectEntity(Level level, int x, int y) {
-        return new LadderUpObjectEntity(
-                "skystairwayup",
-                level,
-                x,
-                y,
-                LevelIdentifier.SURFACE_IDENTIFIER,
-                SkyRegistry.stairwayDownID,
-                this.texture == null ? null : new GameSprite(this.texture, 0, 0, 32));
+        return new SkywatchGateObjectEntity(level, x, y);
     }
 }

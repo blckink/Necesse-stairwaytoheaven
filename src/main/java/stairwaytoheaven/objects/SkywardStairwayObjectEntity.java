@@ -1,39 +1,56 @@
 package stairwaytoheaven.objects;
 
 import necesse.engine.localization.message.GameMessage;
+import necesse.engine.localization.message.LocalMessage;
 import necesse.engine.network.packet.PacketChangeObject;
 import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
-import necesse.engine.registries.ObjectRegistry;
 import necesse.engine.util.ComputedFunction;
 import necesse.entity.objectEntity.PortalObjectEntity;
-import necesse.level.gameObject.GameObject;
 import necesse.level.maps.Level;
 import stairwaytoheaven.SkyRegistry;
 import stairwaytoheaven.quest.SkyMapMarkers;
+import stairwaytoheaven.quest.SkywatchQuestData;
+import stairwaytoheaven.worldgen.SkyOrigin;
+
+import java.awt.Point;
 
 /**
- * Portal entity of the surface-side stairway. Mirrors the vanilla
- * LadderDownObjectEntity flow (blocked-exit check, lazy level generation,
- * counterpart placement, mob clearing, ladder-use stat) with one difference:
- * where the vanilla ladder fills destination liquid with dirt, ascending onto
- * the Mistsea forms a small Cloudturf landing instead — dirt islands in the sky
- * would break the scene.
+ * Portal entity of the surface-side Stairway to Heaven.
+ *
+ * v0.5 DESIGN: the stairway is a PORTAL, not a coordinate ladder. No matter
+ * where on the surface it is placed or used, it always opens onto the canonical
+ * Skyreach arrival point at the Old Warden Spire hub — the radial center of the
+ * whole sky. This kills the placement exploit outright: a player cannot walk
+ * 10,000 tiles from spawn, place another stairway, and skip straight into a
+ * distant high-intensity region. Progression radiates from the hub; every
+ * ascent starts there.
+ *
+ * The return trip is the Skywatch Gate at the spire (see
+ * {@link SkywatchGateObjectEntity}), which routes each player back to the
+ * stairway they ascended from — recorded server-side here at ascent time.
+ *
+ * The vanilla ladder-entity flow (blocked-exit check, lazy level generation,
+ * mob clearing, ladder-use stat) is kept; the old auto-placed return stairway
+ * is gone, and a Mistsea landing at the arrival tile still forms Cloudturf as
+ * a belt-and-braces measure (the painter already guarantees hub land).
  */
 public class SkywardStairwayObjectEntity extends PortalObjectEntity {
 
     public SkywardStairwayObjectEntity(Level level, int x, int y) {
-        super(level, "skystairwaydown", x, y, SkyRegistry.SKYREACH_IDENTIFIER, x, y);
+        super(level, "skystairwaydown", x, y, SkyRegistry.SKYREACH_IDENTIFIER,
+                SkyOrigin.arrival(level.getWorldEntity()).x,
+                SkyOrigin.arrival(level.getWorldEntity()).y);
         this.saveDestination = false;
     }
 
     @Override
     public void use(Server server, ServerClient client) {
+        int arrivalX = this.destinationTileX;
+        int arrivalY = this.destinationTileY;
         ComputedFunction<Level, GameMessage> isBlockingExit = new ComputedFunction<>(level -> {
-            level.regionManager.ensureTilesAreLoaded(this.destinationTileX, this.destinationTileY, this.destinationTileX, this.destinationTileY);
-            return level.getObjectID(this.destinationTileX, this.destinationTileY) != SkyRegistry.stairwayUpID
-                    ? level.preventsLadderPlacement(this.destinationTileX, this.destinationTileY)
-                    : null;
+            level.regionManager.ensureTilesAreLoaded(arrivalX, arrivalY, arrivalX, arrivalY);
+            return level.preventsLadderPlacement(arrivalX, arrivalY);
         });
         if (server.world.levelManager.isLoaded(this.getDestinationIdentifier())) {
             Level level = server.world.getLevel(this.getDestinationIdentifier());
@@ -53,80 +70,66 @@ public class SkywardStairwayObjectEntity extends PortalObjectEntity {
                 }
             }
 
-            level.regionManager.ensureTileIsLoaded(this.destinationTileX, this.destinationTileY);
-            if (level.getObjectID(this.destinationTileX, this.destinationTileY) != SkyRegistry.stairwayUpID) {
-                clearAndPlaceSkyLanding(server, level, this.destinationTileX, this.destinationTileY, SkyRegistry.stairwayUpID);
-            }
+            level.regionManager.ensureTileIsLoaded(arrivalX, arrivalY);
+            clearArrivalLanding(server, level, arrivalX, arrivalY);
 
             client.newStats.ladders_used.increment(1);
-            this.runClearMobs(level, this.destinationTileX, this.destinationTileY);
-            stairwaytoheaven.quest.SkywatchQuestData quest = stairwaytoheaven.quest.SkywatchQuestData.get(level);
-            // Stamp the spire on any ascent (idempotent), anchored to THIS
-            // arrival stairway — the spire spawns within walking distance of
-            // where the player comes up, and hint + map markers get exact
-            // coordinates.
+            this.runClearMobs(level, arrivalX, arrivalY);
             if (level instanceof stairwaytoheaven.level.SkyLevel) {
-                ((stairwaytoheaven.level.SkyLevel) level).ensureWardenSpire(this.destinationTileX, this.destinationTileY);
+                // Stamp the spire at the canonical origin (idempotent) — the
+                // hub exists before the player takes a step.
+                ((stairwaytoheaven.level.SkyLevel) level).ensureWardenSpire();
             }
+            SkywatchQuestData quest = SkywatchQuestData.get(level);
+            // Bind this stairway as the player's way home (the Skywatch Gate
+            // at the spire reads this back).
+            quest.setReturnStairway(client.authentication, this.tileX, this.tileY);
             if (quest.stage == 0) {
                 // First quest hook: a flicker over the mist points toward the
                 // Warden.
-                String directionWord = new necesse.engine.localization.message.LocalMessage("misc",
-                        stairwaytoheaven.quest.SkywatchQuestData.directionKey(
-                                this.destinationTileX, this.destinationTileY, quest.spireX, quest.spireY)).translate();
-                client.sendChatMessage(new necesse.engine.localization.message.LocalMessage(
+                String directionWord = new LocalMessage("misc",
+                        SkywatchQuestData.directionKey(arrivalX, arrivalY, quest.spireX, quest.spireY)).translate();
+                client.sendChatMessage(new LocalMessage(
                         "misc", "skyreachhint", "dir", directionWord));
-            }
-            SkyMapMarkers.onAscent(client, quest, this.destinationTileX, this.destinationTileY);
-            if (quest.stage == 0) {
                 // Journal entry "find the spire" — completed by the Warden's
                 // first dialogue.
                 stairwaytoheaven.quest.SkyQuests.giveOnce(server, client, new stairwaytoheaven.quest.FindSpireQuest());
             }
+            SkyMapMarkers.onAscent(client, quest, arrivalX, arrivalY);
             return true;
         }, true);
     }
 
     /**
-     * Sky-side variant of LadderDownObjectEntity.clearAndPlaceLadder: clears the
-     * 3x3 arrival area, places the return stairway, and turns any Mistsea tiles
-     * into a Cloudturf landing.
+     * Clears the 3x3 arrival area (objects the vanilla ladder flow would clear)
+     * and turns any Mistsea tile into Cloudturf — the arrival pad without the
+     * old auto-placed return stairway. The Skywatch Gate at the spire is the
+     * way home now.
      */
-    public static void clearAndPlaceSkyLanding(Server server, Level level, int tileX, int tileY, int stairwayObjectID) {
-        GameObject stairwayObject = ObjectRegistry.getObject(stairwayObjectID);
-
+    public static void clearArrivalLanding(Server server, Level level, int tileX, int tileY) {
         for (int i = -1; i <= 1; i++) {
-            int currentTileX = tileX + i;
-
             for (int j = -1; j <= 1; j++) {
+                int currentTileX = tileX + i;
                 int currentTileY = tileY + j;
                 level.regionManager.ensureTileIsLoaded(currentTileX, currentTileY);
-                GameObject obj = level.getObject(currentTileX, currentTileY);
+                necesse.level.gameObject.GameObject obj = level.getObject(currentTileX, currentTileY);
                 boolean shouldClearObject = obj.isClearedOnLadderPlacement(level, currentTileX, currentTileY);
                 if (i == 0 && j == 0) {
-                    if (!shouldClearObject) {
+                    if (!shouldClearObject && level.getObjectID(currentTileX, currentTileY) != 0) {
                         level.entityManager.destroyObjectOverride(0, currentTileX, currentTileY);
                     }
-
-                    stairwayObject.placeObject(level, currentTileX, currentTileY, 0, false);
                     if (level.getTile(currentTileX, currentTileY).isLiquid) {
                         level.setTile(currentTileX, currentTileY, SkyRegistry.cloudturfID);
                     }
-
+                } else if (shouldClearObject
+                        && obj.preventsLadderPlacement(level, currentTileX, currentTileY) == null) {
+                    level.setObject(currentTileX, currentTileY, 0);
                     server.network.sendToClientsWithTile(
-                            new PacketChangeObject(level, 0, currentTileX, currentTileY, stairwayObjectID),
+                            new PacketChangeObject(level, 0, currentTileX, currentTileY, 0),
                             level, currentTileX, currentTileY);
-                } else {
-                    if (shouldClearObject && obj.preventsLadderPlacement(level, currentTileX, currentTileY) == null) {
-                        level.setObject(currentTileX, currentTileY, 0);
-                        server.network.sendToClientsWithTile(
-                                new PacketChangeObject(level, 0, currentTileX, currentTileY, 0),
-                                level, currentTileX, currentTileY);
-                    }
-
-                    if (level.getTile(currentTileX, currentTileY).isLiquid) {
-                        level.sendTileChangePacket(server, currentTileX, currentTileY, SkyRegistry.cloudturfID);
-                    }
+                }
+                if (level.getTile(currentTileX, currentTileY).isLiquid) {
+                    level.sendTileChangePacket(server, currentTileX, currentTileY, SkyRegistry.cloudturfID);
                 }
             }
         }

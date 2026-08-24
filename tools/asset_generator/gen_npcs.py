@@ -117,6 +117,10 @@ def _warden_frame(facing, step, swim=False):
             c.put(cx + dx + sway_off(54), 54, w["coat_light"])
             if rng.chance(0.6):
                 c.put(cx + dx + sway_off(55), 55, w["coat_deep"])
+            if dx % 3 == 0:                      # dotted gold hem trim (v0.4.1)
+                c.put(cx + dx + sway_off(53), 53, w["trim"])
+                if dx % 6 == 0:
+                    c.put(cx + dx + sway_off(52), 52, w["trim_hi"])
 
     def collar(ccx):
         for dx in range(-10, 11):                # scallop tips, row 1

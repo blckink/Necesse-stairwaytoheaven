@@ -10,6 +10,7 @@ import necesse.level.maps.regionSystem.Region;
 import stairwaytoheaven.SkyRegistry;
 import stairwaytoheaven.quest.SkywatchQuestData;
 import stairwaytoheaven.worldgen.SkyNoise;
+import stairwaytoheaven.worldgen.SkyOrigin;
 import stairwaytoheaven.worldgen.SkyTerrainPainter;
 import stairwaytoheaven.worldgen.WardenSpirePreset;
 
@@ -114,17 +115,20 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
 
     /**
      * Lazily stamps the Warden's Spire and spawns the spire cats, exactly
-     * once per world (persisted in SkywatchQuestData). Anchored to the given
-     * point — the player's arrival stairway on the first ascent — so the
-     * spire always sits within walking distance of where they come up
-     * (playtests: a spire anchored to the world origin could be hundreds of
-     * tiles from a base far from spawn). The status command passes the origin
-     * as a headless fallback.
+     * once per world (persisted in SkywatchQuestData).
+     *
+     * v0.5: the spire is THE canonical sky origin (see {@link SkyOrigin}) —
+     * every Stairway ascends to it, and the terrain painter guarantees a solid
+     * Driftlands hub island around this exact position, so no site search is
+     * needed anymore (the old player-anchored sweep is gone: stairway placement
+     * on the surface must not influence sky geography, or players could
+     * relocate the hub — and with it the whole difficulty gradient — by
+     * placing stairways far from spawn).
      */
-    public void ensureWardenSpire(int anchorX, int anchorY) {
+    public void ensureWardenSpire() {
         SkywatchQuestData quest = SkywatchQuestData.get(this);
         if (!quest.spirePlaced) {
-            Point site = this.findSpireSite(anchorX, anchorY);
+            Point site = SkyOrigin.compute(this.getWorldGenSeed());
             int half = WardenSpirePreset.SIZE / 2;
             this.regionManager.ensureTilesAreLoaded(site.x - half - 2, site.y - half - 2,
                     site.x + half + 2, site.y + half + 2);
@@ -139,39 +143,7 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
         }
     }
 
-    /**
-     * Deterministic spire site: sweep outward from the anchor and take the
-     * first spot whose 15x15 footprint is solidly on Driftlands land. Starts
-     * close (radius 20) so the spire lands near the arrival stairway.
-     */
-    private Point findSpireSite(int anchorX, int anchorY) {
-        int seed = this.getWorldGenSeed();
-        for (int radius = 20; radius <= 400; radius += 6) {
-            for (int angleStep = 0; angleStep < 24; angleStep++) {
-                double angle = (angleStep / 24.0 + (radius % 12) / 24.0) * Math.PI * 2;
-                int x = anchorX + (int) Math.round(Math.cos(angle) * radius);
-                int y = anchorY + (int) Math.round(Math.sin(angle) * radius);
-                if (this.isSolidDriftland(seed, x, y, 7)) {
-                    return new Point(x, y);
-                }
-            }
-        }
-        return new Point(anchorX, anchorY); // pathological seed: land here regardless
-    }
-
-    private boolean isSolidDriftland(int seed, int cx, int cy, int half) {
-        for (int dx = -half; dx <= half; dx += half) {
-            for (int dy = -half; dy <= half; dy += half) {
-                float island = SkyNoise.fbm(seed, cx + dx, cy + dy, SkyTerrainPainter.ISLAND_SCALE, 3);
-                if (island <= SkyTerrainPainter.ISLAND_THRESHOLD + 0.03F) {
-                    return false;
-                }
-            }
-        }
-        float biome = SkyNoise.fbm(seed + SkyTerrainPainter.SALT_BIOME, cx, cy, SkyTerrainPainter.BIOME_SCALE, 2);
-        return biome >= SkyTerrainPainter.STORMVEIL_BELOW && biome <= SkyTerrainPainter.AURORA_ABOVE;
-    }
-
+    /** First land spot in the right sub-biome, sweeping outward from the spire. */
     private void spawnSpireCats(SkywatchQuestData quest) {
         int seed = this.getWorldGenSeed();
         Point blackLair = this.findLairSite(seed, quest, true);
@@ -218,13 +190,14 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
      * generator stack), so we derive a per-world seed from the persisted world
      * seed string, salted so the sky never mirrors another layer's layout. An
      * explicit non-zero seed (tests, tools) takes precedence.
+     *
+     * The derivation itself lives in {@link SkyOrigin#worldGenSeed} so surface
+     * code (stairway portals) computes identical sky positions.
      */
     public int getWorldGenSeed() {
         if (this.seed != 0) {
             return this.seed;
         }
-        String worldSeed = this.getWorldEntity() != null ? this.getWorldEntity().worldSeed : null;
-        int derived = (worldSeed != null ? worldSeed.hashCode() : 0) ^ 0x5EED51CE;
-        return derived != 0 ? derived : 1;
+        return SkyOrigin.worldGenSeed(this.getWorldEntity());
     }
 }

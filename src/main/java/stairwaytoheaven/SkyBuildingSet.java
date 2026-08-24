@@ -122,8 +122,18 @@ final class SkyBuildingSet {
         // Walls & floors: cheap in sky materials, workstation tier
         Recipes.registerModRecipe(new Recipe("skystonebrickwall", 4, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{skystone, 2}}")));
+        // Doors and windows complete the wall kits (the objects/items already
+        // exist via WallObject.registerWallObjects — they were just uncraftable)
+        Recipes.registerModRecipe(new Recipe("skystonebrickdoor", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{skystone, 3}}")));
+        Recipes.registerModRecipe(new Recipe("skystonebrickwindow", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{skystone, 2}}")));
         Recipes.registerModRecipe(new Recipe("nightfellwall", 4, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{skystone, 2}, {stormshard, 1}}")));
+        Recipes.registerModRecipe(new Recipe("nightfelldoor", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{skystone, 2}, {stormshard, 1}}")));
+        Recipes.registerModRecipe(new Recipe("nightfellwindow", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{skystone, 1}, {stormshard, 1}}")));
         Recipes.registerModRecipe(new Recipe("marblecheckertile", 6, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{skystone, 2}}")));
         Recipes.registerModRecipe(new Recipe("gloomwoodfloortile", 6, RecipeTechRegistry.WORKSTATION,
@@ -140,7 +150,7 @@ final class SkyBuildingSet {
         Recipes.registerModRecipe(new Recipe("skyironfencegate", 1, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{ironbar, 2}, {skystone, 1}}")));
         Recipes.registerModRecipe(new Recipe("ghostlantern", 1, RecipeTechRegistry.WORKSTATION,
-                Recipes.ingredientsFromScript("{{cinderpearl, 2}, {skystone, 8}}")));
+                Recipes.ingredientsFromScript("{{aurorapetal, 2}, {skystone, 8}}")));
         Recipes.registerModRecipe(new Recipe("wardencandelabra", 1, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{ironbar, 2}, {stormshard, 2}, {skystone, 2}}")));
         Recipes.registerModRecipe(new Recipe("mistglasslantern", 1, RecipeTechRegistry.WORKSTATION,
