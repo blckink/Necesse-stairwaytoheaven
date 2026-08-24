@@ -123,25 +123,47 @@ def gen_stairway_up(path):
     c.save(path)
 
 
+def _mass(c):
+    """Opaque-pixel count at the size-audit threshold (alpha > 24)."""
+    return sum(1 for x in range(c.width) for y in range(c.height)
+               if c.px[x, y][3] > 24)
+
+
 def gen_windwheat(path):
-    """128x32 grass strip: 4 variants of a wheat-grass CLUMP. Stalks fan out
-    of one root and arc toward their lean (t^2 bend), heights vary widely,
-    heavy seed heads nod sideways, and 1px awn whiskers poke off the grain.
-    Like vanilla grass there is no generic outline pass — the deep ramp edge
-    carries the silhouette (an outline pass would eat the awns and tips)."""
+    """128x32 grass strip: 4 variants of a DENSE wheat-grass clump at vanilla
+    swampgrass mass (26x30 bbox, 500+ opaque px per variant — size law).
+    A solid skirt of short overlapping blades grounds the clump, 8-9 full
+    stalks fan out of the root and arc toward their lean (t^2 bend), heavy
+    seed heads nod sideways with 1px awn whiskers. Like vanilla grass there
+    is no generic outline pass — the deep ramp edge carries the silhouette
+    (an outline pass would eat the awns and tips)."""
     sheet = Canvas(128, 32)
     W = palette.WINDWHEAT
     for v in range(4):
         c = Canvas(32, 32)
         rng = Rng(0x3EA7 + v * 131)
-        root = 15 + rng.pick((-2, 0, 1))
-        n = rng.range(5, 6)
+        root = 15 + rng.pick((-1, 0, 1))
+        # solid ground ribbon under the skirt anchors the clump at 1x
+        c.ellipse(root, 30, 11, 2.2, W["deep"])
+        c.ellipse(root - 2, 29, 7, 1.5, W["deep"])
+        c.ellipse(root + 3, 29.5, 6, 1.4, W["deep"])
+        # solid ground skirt: overlapping short arcs = the clump's dark body
+        for _ in range(18):
+            bx = root + rng.range(-8, 8)
+            sh = rng.range(3, 7)
+            lean = rng.pick((-3, -2, -1, 1, 2, 3))
+            for i in range(sh):
+                t = i / sh
+                x = min(28, max(2, bx + round(lean * t * t)))
+                c.put(x, 30 - i, W["deep"])
+                c.put(x + 1, 30 - i, W["deep"] if i < sh - 2 else W["base"])
+        n = rng.range(10, 11)
         stalks = []
         for s in range(n):
-            bx = root + round((s - (n - 1) / 2.0) * 3.2) + rng.range(-1, 1)
-            h = rng.range(9, 18)
-            lean = round((s - (n - 1) / 2.0) * 2.2) + rng.range(-2, 2)
-            lean = max(-6, min(6, lean))
+            bx = root + round((s - (n - 1) / 2.0) * 2.2) + rng.range(-1, 1)
+            h = rng.range(12, 20)
+            lean = round((s - (n - 1) / 2.0) * 1.8) + rng.range(-2, 2)
+            lean = max(-5, min(5, lean))
             if lean == 0:
                 lean = rng.pick((-1, 1))
             stalks.append((h, bx, lean, rng.chance(0.8)))
@@ -150,23 +172,28 @@ def gen_windwheat(path):
             top_x = bx
             for i in range(h):
                 t = i / h
-                top_x = bx + round(lean * t * t)         # arc, not a tilt
+                top_x = min(27, max(4, bx + round(lean * t * t)))  # arc, not a tilt
                 mid = W["base"] if i < h - 4 else W["light"]
                 c.put(top_x - 1, base_y - i, W["deep"])
                 c.put(top_x, base_y - i, mid)
                 if i < h - 2:
-                    c.put(top_x + 1, base_y - i, W["deep"] if i < 3 else W["base"])
+                    c.put(top_x + 1, base_y - i, W["deep"] if i < 4 else W["base"])
+                if i < h * 0.4:                          # 4px root third
+                    c.put(top_x - 2, base_y - i, W["deep"])
             hy = base_y - h
             if headed:
                 nod = (1 if lean > 0 else -1) * (2 if abs(lean) > 3 else 1)
-                hx = top_x + nod
+                hx = min(25, max(5, top_x + nod))
+                # plump grain head: 3-wide kernel stack with shaded right edge
                 for (dx, dy) in ((0, 0), (1, 0), (-1, 1), (0, 1), (1, 1), (2, 1),
-                                 (-1, 2), (0, 2), (1, 2), (0, 3), (1, 3)):
-                    c.put(hx + dx, hy - 3 + dy, W["head"])
-                c.put(hx, hy - 4, W["light"])
+                                 (-1, 2), (0, 2), (1, 2), (2, 2), (-1, 3), (0, 3),
+                                 (1, 3), (0, 4), (1, 4)):
+                    c.put(hx + dx, hy - 4 + dy, W["head"])
+                c.put(hx, hy - 5, W["light"])
+                c.put(hx + 1, hy - 3, W["light"])         # kernel glint
                 c.put(hx + (2 if nod > 0 else -1), hy - 1, W["base"])
-                c.put(hx + nod, hy - 5, W["deep"])        # awn whiskers
-                c.put(hx + nod * 2, hy - 4, W["deep"])
+                c.put(min(27, max(4, hx + nod)), hy - 6, W["deep"])       # awns
+                c.put(min(27, max(4, hx + nod * 2)), hy - 5, W["deep"])
             else:
                 c.put(top_x, hy - 1, W["light"])          # bare blade tip
         # irregular root tufts (no dotted line)
@@ -175,6 +202,18 @@ def gen_windwheat(path):
             c.put(tx, 30, W["deep"])
             c.put(tx + 1, 30, W["deep"])
             c.put(tx + rng.pick((0, 1)), 29, W["deep"])
+        # size-law top-up: grow the ground skirt until the clump carries
+        # vanilla swampgrass mass (500+ opaque px), never past the margins
+        for _ in range(24):
+            if _mass(c) >= 505:
+                break
+            bx = root + rng.range(-9, 9)
+            sh = rng.range(4, 7)
+            lean = rng.pick((-3, -2, 2, 3))
+            for i in range(sh):
+                x = min(28, max(3, bx + round(lean * (i / sh) ** 2)))
+                c.put(x, 30 - i, W["deep"])
+                c.put(x + 1, 30 - i, W["base"] if i >= sh - 2 else W["deep"])
         sheet.paste(c, v * 32, 0)
     sheet.save(path)
 
@@ -223,38 +262,88 @@ def gen_cloudberrybush(path):
 
 # --- Crystal clusters --------------------------------------------------------
 
-def _shard(c, x, y_base, h, w, ramp, lean=0):
-    """One faceted shard: a leaning diamond with a light facet line."""
+def _shard(c, x, y_base, h, w, ramp, lean=0, seam=False, cut=True, bright=False):
+    """One CHUNKY faceted crystal (vanilla amethystcluster construction):
+    kite profile — widest about a third of the way up, tapering to a point —
+    deep rim edges, a light facet stripe up the left-center, 2px hi tip.
+    w is the max HALF-width, so a w=5 shard is 11px across at its belly.
+    cut=True stamps a 1px OUTLINE seam wherever this shard overlaps art
+    already on the canvas, and bright shards use the light ramp step as
+    their body — neighboring shards alternate value like vanilla amethyst,
+    so touching spikes never fuse into one cone (the blob failure mode)."""
+    body = ramp["light"] if bright else ramp["base"]
+    stripe = ramp["hi"] if bright else ramp["light"]
+    tip_x = x
     for i in range(h):
         t = i / max(h - 1, 1)
-        half = max(1, round(w * (1.0 - abs(t * 2 - 1))))
+        if t < 0.3:
+            frac = 0.45 + 0.55 * (t / 0.3)           # base -> belly
+        else:
+            frac = (1.0 - (t - 0.3) / 0.7) ** 0.85   # belly -> point
+        half = max(1, round(w * frac))
         cx = x + round(lean * t)
+        tip_x = cx
+        if cut:
+            for sx in (cx - half - 1, cx + half + 1):
+                if c.filled(sx, y_base - i):
+                    c.put(sx, y_base - i, palette.OUTLINE)
         for dx in range(-half, half + 1):
-            tone = ramp["base"]
+            tone = body
             if dx == -half or dx == half:
                 tone = ramp["deep"]
+            elif dx == -half + 1 and 0.08 < t < 0.85:
+                tone = stripe                         # lit facet stripe
+            elif seam and dx == max(1, half - 2) and t < 0.6:
+                tone = ramp["deep"] if not bright else ramp["base"]
             c.put(cx + dx, y_base - i, tone)
-        if 0.25 < t < 0.9:
-            c.put(cx - max(0, half - 1), y_base - i, ramp["light"])
-    c.put(x + round(lean * 0.9), y_base - h + 1, ramp["hi"])
+    c.put(tip_x, y_base - h + 1, ramp["hi"])          # 2px bright tip cap
+    c.put(tip_x, y_base - h, ramp["hi"])
 
 
 def _crystal_column(salt, ramp):
+    """32x48 half of a 2x1 crystal cluster, rebuilt at vanilla mass
+    (amethystcluster half: ~30x58, ~1170 opaque; crystalwall cell: 28x42,
+    1116). A dark slate rubble bed grounds 6-7 FAT shards in a staggered
+    skyline — every shard its own spike, separated by cut seams."""
     c = Canvas(32, 48)
     rng = Rng(salt)
-    ground = palette.SKYSTONE
-    # rubble base
-    c.ellipse(15.5, 43, 9, 3, ground["base"])
-    c.ellipse(12, 44, 4, 2, ground["deep"])
-    c.ellipse(21, 44, 4, 2, ground["light"])
-    # 3 shards, tallest centered
-    _shard(c, 15, 42, rng.range(20, 26), 3, ramp, lean=rng.pick((-2, 2)))
-    _shard(c, 9, 43, rng.range(12, 16), 2, ramp, lean=rng.pick((-2, -1)))
-    _shard(c, 22, 43, rng.range(13, 17), 2, ramp, lean=rng.pick((1, 2)))
+    ground = palette.STORMSLATE
+    # rubble bed: overlapping rock mounds with lit tops and corner stones
+    c.ellipse(16, 43.5, 15, 4.4, ground["deep"])
+    c.ellipse(9, 42, 6.5, 3.0, ground["base"])
+    c.ellipse(22, 42.5, 7, 3.2, ground["base"])
+    c.ellipse(16, 45, 9, 2.6, ground["deep"])
+    c.ellipse(9, 40.5, 4, 1.4, ground["light"])
+    c.ellipse(23, 41, 3.5, 1.3, ground["light"])
+    c.rect(2, 43, 4, 3, ground["base"])
+    c.rect(26, 43, 4, 3, ground["deep"])
+    c.put(2, 43, ground["light"])
+    c.put(3, 43, ground["light"])
+    c.put(26, 43, ground["base"])
+    # shards back-to-front, staggered heights + alternating bright/dark
+    # bodies so the skyline reads as separate spikes, never one cone
+    _shard(c, 10, 40, rng.range(25, 28), 5, ramp, lean=rng.pick((-2, -1)))
+    _shard(c, 21, 40, rng.range(19, 22), 5, ramp, lean=rng.pick((1, 2)), bright=True)
+    _shard(c, 16, 43, rng.range(36, 40), 7, ramp, lean=rng.pick((-1, 1)), seam=True, bright=True)
+    _shard(c, 7, 44, rng.range(17, 20), 4, ramp, lean=rng.pick((-2, -1)), bright=True)
+    _shard(c, 24, 44, rng.range(27, 30), 6, ramp, lean=rng.pick((1, 2)), seam=True)
+    _shard(c, 11, 46, rng.range(9, 11), 3, ramp, lean=rng.pick((-1, 1)), bright=True)
+    _shard(c, 20, 47, rng.range(7, 8), 2, ramp, lean=1)
+    # size-law top-up: sprout extra front nubs out of the rubble until the
+    # cluster carries vanilla crystal mass (~900 opaque px per half)
+    for (nx, ny) in ((4, 47), (15, 47), (24, 47), (8, 47), (19, 47), (28, 46)):
+        if _mass(c) >= 900:
+            break
+        _shard(c, nx, ny, rng.range(6, 9), 2, ramp, lean=rng.pick((-1, 1)),
+               bright=rng.chance(0.5))
     c.outline(palette.OUTLINE)
-    # glow motes
-    for _ in range(3):
-        c.put(rng.range(6, 26), rng.range(14, 34), ramp["hi"])
+    # glow motes drifting in EMPTY air beside the tips (never on the mass)
+    placed = 0
+    while placed < 3:
+        mx, my = rng.range(3, 29), rng.range(5, 18)
+        if not c.filled(mx, my):
+            c.put(mx, my, with_alpha(ramp["hi"], 170 - placed * 30))
+            placed += 1
     return c
 
 
@@ -269,41 +358,90 @@ def gen_crystal_cluster(path, ramp, salt, variants=2):
 
 
 def gen_aurorabloom(path, variants=2):
-    """Crystalline bloom: geometric petals around a bright core, on a stem."""
+    """Crystalline bloom cluster, rebuilt at crystal-cluster mass (size law:
+    the old single bloom was 22% of the vanilla crystal refs). Each 32x48
+    half now carries a mounded tuft base, a BIG bloom — thick stem, broad
+    blade leaves, five fat faceted petals around a teal core — plus a
+    smaller second bloom leaning outward and a sprouting bud."""
     ramp = palette.AURORA
     sheet = Canvas(variants * 64, 48)
     for v in range(variants):
         for col in range(2):
             c = Canvas(32, 48)
             rng = Rng(0xB100 + v * 101 + col * 55)
-            cx = 15 + rng.pick((-1, 0, 1))
-            top = 28 + rng.pick((-1, 0, 1))
-            # short curved stem, 2px thick, head nodding slightly right
-            for y in range(top + 2, 45):
-                t = (y - top) / 17.0
-                sx = cx + round(3 * t * t)
-                c.put(sx, y, ramp["deep"])
-                c.put(sx + 1, y, ramp["deep"])
-            c.ellipse(cx + 3, 44, 4, 1.5, palette.CLOUDTURF["tuft"])
-            # crystalline petals: three faceted spikes fanning up-left,
-            # up, and right — deliberately asymmetric, with real mass
-            for (dx, dy, h, w) in ((-5, -2, 10, 3), (0, -4, 13, 3), (5, -1, 9, 3)):
-                for i in range(h):
-                    t = i / max(h - 1, 1)
-                    half = max(1, round(w * (1.0 - abs(t * 2 - 1))))
-                    px_ = cx + dx + round(dx * 0.35 * t)
-                    py_ = top + dy - i
-                    for ddx in range(-half, half + 1):
-                        c.put(px_ + ddx, py_, ramp["deep"] if ddx in (-half, half) else ramp["base"])
-                    if 0.3 < t < 0.85:
-                        c.put(px_ - half + 1, py_, ramp["light"])
-                c.put(cx + dx + round(dx * 0.35), top + dy - h, ramp["hi"])
-            # teal core where the petals meet + one hanging bud
-            c.ellipse(cx, top - 1, 2.2, 2.0, ramp["teal"])
-            c.put(cx, top - 2, ramp["hi"])
-            c.put(cx + 5, top + 4, ramp["base"])
-            c.put(cx + 5, top + 5, ramp["teal"])
+
+            # grounding mound of rose-tinged turf
+            tuft = palette.CLOUDTURF
+            c.ellipse(15, 44, 14.5, 3.4, tuft["deep"])
+            c.ellipse(11, 42.5, 7.5, 2.6, tuft["tuft"])
+            c.ellipse(21, 43, 7, 2.4, tuft["tuft"])
+            c.ellipse(16, 45, 9, 2.2, tuft["deep"])
+            c.put(6, 40, tuft["tuft"])
+            c.put(24, 40, tuft["tuft"])
+            c.put(15, 41, tuft["tuft"])
+            c.put(10, 40, tuft["tuft"])
+
+            def bloom(cx, top, scale, lean):
+                # stem: 3px thick, 4px near the root, arcing toward its lean
+                for y in range(top + 2, 45):
+                    t = (y - top) / float(45 - top)
+                    sx = cx + round(lean * t * t)
+                    c.put(sx - 1, y, ramp["deep"])
+                    c.put(sx, y, palette.AURORALILY["stem"])
+                    c.put(sx + 1, y, ramp["deep"])
+                    if t > 0.6:
+                        c.put(sx + 2, y, ramp["deep"])
+                # broad blade leaves off the lower stem
+                for (side, ly) in ((-1, 40), (1, 38)):
+                    for i in range(round(6 * scale)):
+                        lx = cx + round(lean * 0.5) + side * (1 + i)
+                        yy = ly - (i * i) // 5
+                        c.put(lx, yy, palette.AURORALILY["stem"])
+                        c.put(lx, yy + 1, ramp["deep"])
+                # five fat faceted petals fanning from the head, drawn
+                # back-to-front (sides, diagonals, then the tall center) —
+                # the shard cut seams keep each petal a separate blade
+                petals = ((-7, 1, round(10 * scale), 3), (7, 1, round(10 * scale), 3),
+                          (-5, -2, round(14 * scale), 3), (5, -2, round(13 * scale), 3),
+                          (0, -5, round(18 * scale), 4))
+                for k, (dx, dy, h, w) in enumerate(petals):
+                    _shard(c, cx + dx, top + dy, max(5, h), w, ramp,
+                           lean=round(dx * 0.4), bright=(k % 2 == 0))
+                # rimmed teal core over the petal bases + hanging bud
+                c.ellipse(cx, top - 1, 2.8, 2.4, ramp["deep"])
+                c.ellipse(cx, top - 1, 2.0, 1.7, ramp["teal"])
+                c.put(cx - 1, top - 2, ramp["hi"])
+                c.put(cx + 6, top + 4, ramp["deep"])
+                c.rect(cx + 6, top + 5, 2, 3, ramp["base"])
+                c.put(cx + 6, top + 5, ramp["light"])
+                c.put(cx + 6, top + 8, ramp["teal"])
+
+            bloom(12 + rng.pick((-1, 0, 1)), 24 + rng.pick((-1, 0, 1)), 1.0,
+                  rng.pick((-3, -2)))
+            bloom(23 + rng.pick((-1, 0)), 33 + rng.pick((-1, 0, 1)), 0.8,
+                  rng.pick((3, 4)))
+            # sprouting bud poking out of the mound on its own stalk
+            bx = 5 + rng.pick((0, 1))
+            c.put(bx, 41, ramp["deep"])
+            c.put(bx, 40, ramp["deep"])
+            c.rect(bx - 1, 37, 3, 3, ramp["base"])
+            c.put(bx - 1, 37, ramp["light"])
+            c.put(bx, 36, ramp["teal"])
+            # two fallen petal shards resting on the mound
+            _shard(c, 17, 45, 6, 2, ramp, lean=3, bright=True)
+            _shard(c, 8, 46, 5, 2, ramp, lean=-3)
+            # size-law top-up: extra crystal buds sprouting from the mound
+            # until each half carries vanilla crystal mass (~900 opaque px)
+            for (nx, ny) in ((4, 46), (14, 47), (19, 46), (27, 45), (10, 47),
+                             (24, 47), (16, 46)):
+                if _mass(c) >= 900:
+                    break
+                _shard(c, nx, ny, rng.range(6, 9), 2, ramp,
+                       lean=rng.pick((-1, 1)), bright=rng.chance(0.5))
             c.outline(palette.OUTLINE)
+            # drifting aurora motes (after outline so they float)
+            c.put(rng.range(6, 26), rng.range(8, 14), with_alpha(ramp["hi"], 150))
+            c.put(rng.range(6, 26), rng.range(15, 20), with_alpha(ramp["teal"], 130))
             sheet.paste(c if col == 0 else c.mirrored(), v * 64 + col * 32, 0)
     sheet.save(path)
 
@@ -311,45 +449,69 @@ def gen_aurorabloom(path, variants=2):
 # --- Sky reeds ---------------------------------------------------------------
 
 def gen_skyreeds(path, variants=4):
-    """N*32 strip: silky reeds in TWO uneven clumps. Blades fan outward from
-    their clump root, arc with per-blade curvature, and half of them hook
-    over at the tip like vanilla tall grass. No outline pass (grass rule)."""
+    """N*32 strip: silky reeds in TWO uneven clumps, rebuilt at vanilla
+    tall-grass mass (500+ opaque px per variant — size law). Wide grounding
+    tufts anchor 10-12 blades; every blade stays 2px thick for most of its
+    height (3px near the root), fans outward from its clump root, arcs with
+    per-blade curvature, and half hook over at the tip like vanilla tall
+    grass. No outline pass (grass rule)."""
     ramp = palette.WINDSILK
     tuft = palette.CLOUDTURF
     sheet = Canvas(variants * 32, 32)
     for v in range(variants):
         c = Canvas(32, 32)
         rng = Rng(0x4EED + v * 313)
-        # two uneven grounding tufts over a deep shadow that anchors the
+        # wide uneven grounding tufts over a deep shadow that anchors the
         # pale blades on pale cloudturf at 1x
-        c.ellipse(12 + rng.range(-2, 1), 30, 6.5, 1.6, tuft["deep"])
-        c.ellipse(21 + rng.range(-1, 2), 30.5, 5.5, 1.4, tuft["deep"])
-        c.ellipse(11 + rng.range(-2, 1), 29, 6, 1.6, tuft["tuft"])
-        c.ellipse(22 + rng.range(-1, 2), 30, 5, 1.4, tuft["tuft"])
+        c.ellipse(15, 30.5, 11, 2.0, tuft["deep"])
+        c.ellipse(12 + rng.range(-2, 1), 30, 7.5, 2.0, tuft["deep"])
+        c.ellipse(21 + rng.range(-1, 2), 30.5, 6.5, 1.8, tuft["deep"])
+        c.ellipse(11 + rng.range(-2, 1), 29, 7, 1.9, tuft["tuft"])
+        c.ellipse(22 + rng.range(-1, 2), 30, 6, 1.7, tuft["tuft"])
+        c.ellipse(16 + rng.range(-1, 1), 30, 4, 1.4, tuft["deep"])
         blades = []
-        for (cx0, cnt) in ((rng.range(9, 12), rng.range(3, 4)),
-                           (rng.range(19, 22), rng.range(2, 3))):
+        for (cx0, cnt) in ((rng.range(9, 11), rng.range(10, 11)),
+                           (rng.range(20, 22), rng.range(8, 9))):
             for _ in range(cnt):
-                blades.append((rng.range(8, 19), cx0 + rng.range(-2, 2), cx0))
+                blades.append((rng.range(14, 28), cx0 + rng.range(-3, 3), cx0))
         for (h, bx, cx0) in sorted(blades):          # tall blades in front
             base_y = rng.range(27, 29)
             out = 1 if bx >= cx0 else -1
-            lean = out * rng.range(2, 5)
+            lean = out * rng.range(2, 4)
             bend = rng.pick((1.6, 2.0, 2.4))
             hook = rng.chance(0.5)
             x = bx
             y = base_y
             for i in range(h):
                 t = i / h
-                x = bx + round(lean * (t ** bend))
+                x = min(28, max(3, bx + round(lean * (t ** bend))))
                 if hook and i > h - 3:
                     x += out * (i - (h - 3))         # tip curls over
                 y = base_y - i
                 tone = ramp["deep"] if t < 0.35 else (ramp["base"] if t < 0.7 else ramp["light"])
                 c.put(x, y, tone)
-                if t < 0.6:
-                    c.put(x + 1, y, ramp["deep"] if t < 0.45 else ramp["base"])
+                if t < 0.95:                         # 2px body almost to tip
+                    c.put(x + 1, y, ramp["deep"] if t < 0.4 else ramp["base"])
+                if t < 0.5:                          # 3px root half
+                    c.put(x - 1, y, ramp["deep"])
+                if t < 0.2:                          # 4px flare at the root
+                    c.put(x + 2, y, ramp["deep"])
             c.put(x, y, ramp["hi"])                  # glint ON the tip pixel
+        # size-law top-up: extra short sprouts around the roots until the
+        # sheaf carries vanilla tall-grass mass (500+ opaque px)
+        for _ in range(20):
+            if _mass(c) >= 505:
+                break
+            bx = rng.pick((8, 10, 12, 15, 19, 21, 23))
+            sh = rng.range(5, 9)
+            lean = rng.pick((-2, -1, 1, 2))
+            for i in range(sh):
+                t = i / sh
+                x = min(28, max(3, bx + round(lean * t * t)))
+                tone = ramp["deep"] if t < 0.5 else ramp["base"]
+                c.put(x, 29 - i, tone)
+                if t < 0.7:
+                    c.put(x + 1, 29 - i, ramp["deep"])
         sheet.paste(c, v * 32, 0)
     sheet.save(path)
 

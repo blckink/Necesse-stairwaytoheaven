@@ -21,32 +21,54 @@ def _candelabra_state(lit):
     base_y = 90
     cx = 16
     # stone foot: chunky two-step plinth
-    c.rect(cx - 7, base_y - 3, 14, 4, palette.SKYSTONE["base"])
-    c.rect(cx - 7, base_y - 3, 14, 1, palette.SKYSTONE["light"])
-    c.rect(cx - 5, base_y - 6, 10, 3, palette.SKYSTONE["base"])
-    c.rect(cx - 5, base_y - 6, 10, 1, palette.SKYSTONE["light"])
+    c.rect(cx - 9, base_y - 4, 18, 5, palette.SKYSTONE["base"])
+    c.rect(cx - 9, base_y - 4, 18, 1, palette.SKYSTONE["light"])
+    c.rect(cx - 9, base_y, 18, 1, palette.SKYSTONE["deep"])
+    c.rect(cx - 6, base_y - 8, 12, 4, palette.SKYSTONE["base"])
+    c.rect(cx - 6, base_y - 8, 12, 1, palette.SKYSTONE["light"])
+    c.rect(cx - 4, base_y - 11, 8, 3, palette.SKYSTONE["base"])
+    c.rect(cx - 4, base_y - 11, 8, 1, palette.SKYSTONE["light"])
     # solid wrought post: 3px with lit left edge
-    for y in range(26, base_y - 6):
-        c.put(cx - 1, y, iron["light"])
+    for y in range(26, base_y - 10):
+        c.put(cx - 3, y, iron["light"])
+        c.put(cx - 2, y, iron["light"])
+        c.put(cx - 1, y, iron["base"])
         c.put(cx, y, iron["base"])
-        c.put(cx + 1, y, iron["deep"])
+        c.put(cx + 1, y, iron["base"])
+        c.put(cx + 2, y, iron["deep"])
+        c.put(cx + 3, y, iron["deep"])
     # collar rings
     for ry in (38, 58, 76):
-        for dx in range(-3, 4):
-            c.put(cx + dx, ry, iron["hi"] if abs(dx) < 2 else iron["base"])
+        for dx in range(-5, 6):
+            c.put(cx + dx, ry, iron["hi"] if abs(dx) < 3 else iron["base"])
+            c.put(cx + dx, ry + 1, iron["base"] if abs(dx) < 4 else iron["deep"])
     # crown: crossbar with three cup arms
-    for dx in range(-9, 10):
+    for dx in range(-11, 12):
+        c.put(cx + dx, 27, iron["deep"])
         c.put(cx + dx, 26, iron["base"])
         c.put(cx + dx, 25, iron["light"] if dx % 3 else iron["base"])
-    for side in (-1, 1):  # curled arm ends
-        c.put(cx + side * 10, 25, iron["deep"])
-        c.put(cx + side * 10, 24, iron["base"])
+    for side in (-1, 1):  # curled arm ends rising to the outer cups
+        for dy in range(0, 4):
+            c.put(cx + side * 11, 25 - dy, iron["base"])
+            c.put(cx + side * 12, 25 - dy, iron["deep"])
     # three sockets (cups)
-    cups = ((cx - 8, 23), (cx, 21), (cx + 8, 23))
+    # central glass housing: the lamp head carries most of the visual mass
+    c.rect(cx - 5, 8, 11, 12, iron["base"])
+    c.rect(cx - 4, 9, 9, 10, palette.STAIRLIGHT["glow"])
+    c.rect(cx - 5, 8, 11, 1, iron["light"])
+    c.rect(cx - 5, 19, 11, 1, iron["deep"])
+    for hx in (cx - 5, cx, cx + 5):
+        for hy in range(9, 19):
+            c.put(hx, hy, iron["base"])
+    c.rect(cx - 7, 5, 15, 3, iron["base"])          # roof cap
+    c.rect(cx - 7, 5, 15, 1, iron["light"])
+    c.rect(cx - 2, 2, 5, 3, iron["base"])           # finial
+    cups = ((cx - 11, 21), (cx + 11, 21))
     for fx, fy in cups:
-        c.rect(fx - 2, fy, 5, 2, iron["base"])
-        c.put(fx - 2, fy, iron["light"])
-        c.put(fx + 2, fy + 1, iron["deep"])
+        c.rect(fx - 3, fy, 7, 3, iron["base"])
+        c.rect(fx - 3, fy, 7, 1, iron["light"])
+        c.rect(fx - 3, fy + 2, 7, 1, iron["deep"])
+        c.rect(fx - 1, fy - 2, 3, 2, palette.STAIRLIGHT["light"])   # wax stub
     c.outline(palette.OUTLINE)
     # flames after outline
     for fx, fy in cups:
@@ -100,27 +122,30 @@ def gen_ravenstatue(path):
 # --- Gloomwillow (crooked bare tree, bottom-anchored 48x80) -----------------
 
 def gen_gloomwillow(path, variants=2):
-    sheet = Canvas(variants * 48, 80)
+    # Size law: this deco tree measured 351 opaque px against a vanilla dead
+    # tree's ~4600 — it read as a twig. Grown to a 64x112 cell (variantWidth
+    # 64 on the Java side) with a heavier trunk and a fuller weeping crown.
+    sheet = Canvas(variants * 64, 112)
     wood = palette.GLOOMWOOD
     for v in range(variants):
-        c = Canvas(48, 80)
+        c = Canvas(64, 112)
         rng = Rng(0x610C + v * 313)
-        base_x = 22 + rng.pick((-2, 2))
-        base_y = 76
-        top_y = 24
+        base_x = 30 + rng.pick((-2, 2))
+        base_y = 106
+        top_y = 22
         H = base_y - top_y
         # soft ground shadow so the tree sits in the world
-        c.ellipse(base_x + 3, base_y + 2, 9, 2, with_alpha((20, 19, 26), 70))
+        c.ellipse(base_x + 4, base_y + 3, 14, 3, with_alpha((20, 19, 26), 80))
         # crooked trunk as one CONTINUOUS S-curve (no hard kinks), taper 6->2
-        amp = rng.pick((2.5, 3.0, 3.5))
+        amp = rng.pick((3.5, 4.2, 5.0))
         ph = rng.float() * 3.0
-        drift = rng.pick((-4, -3, 3, 4))
+        drift = rng.pick((-6, -5, 5, 6))
         path_x = {}
         for y in range(base_y, top_y - 1, -1):
             t = (base_y - y) / H
             x = base_x + round(amp * math.sin(t * 3.2 + ph) + drift * t)
             path_x[y] = x
-            width = max(3, round(6 - 3.5 * t))
+            width = max(4, round(10 - 5.5 * t))
             for dx in range(width):
                 tone = wood["light"] if dx == 0 else (wood["deep"] if dx >= width - 1 else wood["base"])
                 c.put(x + dx, y, tone)
@@ -134,8 +159,9 @@ def gen_gloomwillow(path, variants=2):
         # 8-connected) that open outward and droop, each with a claw twig
         perch = (top_x + 4, top_y + 2)
         for bi, (start_dy, ang0, turn, ln) in enumerate(
-                ((1, 115, 7, 12), (5, 62, -7, 11), (10, 92, 4, 7),
-                 (26, 148, -9, 6))):              # low upturned snag
+                ((1, 115, 6, 20), (4, 62, -6, 19), (9, 95, 4, 15),
+                 (14, 48, -5, 14), (20, 132, 6, 12), (30, 70, -6, 11),
+                 (40, 148, -8, 9))):              # low upturned snag
             fx = float(path_x[top_y + start_dy] + 1)
             fy = float(top_y + start_dy)
             ang = ang0 + rng.range(-8, 8)
@@ -156,11 +182,27 @@ def gen_gloomwillow(path, variants=2):
                         sx += math.cos(math.radians(sang))
                         sy -= math.sin(math.radians(sang))
                         c.put(round(sx), round(sy), wood["deep"])
+                # weeping veil: hanging strands make this read as a WILLOW
+                # (and carry the mass a bare frame was missing)
+                if i >= 3 and i % 3 == 0:
+                    vx = float(x)
+                    for k in range(rng.range(7, 15)):
+                        vy = yy + 1 + k
+                        if vy > base_y - 2:
+                            break
+                        vx += 0.35 * math.sin((k + i) * 0.5)
+                        vxi = round(vx)
+                        tone = wood["base"] if k < 3 else wood["deep"]
+                        c.put(vxi, vy, tone)
+                        if k % 2 == 0:
+                            c.put(vxi + 1, vy, wood["deep"])
         # flared roots
         for side in (-1, 1):
-            for i in range(5):
-                c.put(base_x + (2 if side > 0 else 0) + side * (2 + i), base_y - i // 3, wood["deep"])
-                c.put(base_x + (2 if side > 0 else 0) + side * (2 + i), base_y + 1 - i // 3, wood["base"])
+            for i in range(9):
+                rx = base_x + (4 if side > 0 else 0) + side * (3 + i)
+                c.put(rx, base_y - i // 3, wood["deep"])
+                c.put(rx, base_y + 1 - i // 3, wood["base"])
+                c.put(rx, base_y + 2 - i // 3, wood["deep"])
         # one perched tiny raven on variant 0, sitting on the branch elbow
         if v == 0:
             px_, py_ = perch
@@ -271,17 +313,26 @@ def gen_mistglasslantern(path):
         c = Canvas(32, 32)
         iron = palette.IRONWORK
         glow = palette.STAIRLIGHT
-        # bracket
-        for y in range(6, 12):
-            c.put(15, y, iron["base"])
-        c.put(15, 5, iron["light"])
-        # glass housing
-        c.rect(11, 12, 10, 12, iron["deep"])
-        c.rect(12, 13, 8, 10, glow["glow"] if lit else (60, 66, 78))
+        # wall plate + arm bracket (chunky, vanilla wall-light mass)
+        c.rect(13, 2, 6, 4, iron["base"])
+        c.rect(13, 2, 6, 1, iron["light"])
+        for y in range(4, 10):
+            c.rect(14, y, 4, 1, iron["base"])
+            c.put(14, y, iron["light"])
+            c.put(17, y, iron["deep"])
+        # glass housing: broad lantern box with cage bars and a roof cap
+        c.rect(8, 8, 16, 3, iron["base"])                    # roof
+        c.rect(8, 8, 16, 1, iron["light"])
+        c.rect(9, 11, 14, 14, iron["deep"])                  # frame
+        c.rect(10, 12, 12, 12, glow["glow"] if lit else (60, 66, 78))
         if lit:
-            c.rect(14, 15, 4, 5, glow["hi"])
-        c.put(15, 24, iron["base"])
-        c.put(16, 25, iron["deep"])
+            c.rect(13, 14, 6, 8, glow["hi"])
+        for bx in (10, 15, 21):                              # cage bars
+            for by in range(12, 24):
+                c.put(bx, by, iron["base"])
+        c.rect(9, 25, 14, 2, iron["base"])                   # base tray
+        c.rect(9, 25, 14, 1, iron["light"])
+        c.rect(14, 27, 4, 2, iron["deep"])                   # drop finial
         c.outline(palette.OUTLINE)
         sheet.paste(c, col * 32, 0)
     sheet.save(path)
@@ -495,11 +546,20 @@ def _wall_light_cell(kind, orientation, lit):
             for i in range(6):
                 c.put(bx + step * i, 12, iron["base"])
             cy = 16
-        c.rect(cx - 5, cy - 6, 10, 12, iron["deep"])
-        c.rect(cx - 4, cy - 5, 8, 10, glow["glow"] if lit else (60, 66, 78))
+        # Size law: a vanilla wall torch fills ~236 opaque px per cell; the
+        # old 10x12 box came to ~127, reading as a pinprick on the wall.
+        c.rect(cx - 8, cy - 9, 16, 3, iron["base"])                  # roof cap
+        c.rect(cx - 8, cy - 9, 16, 1, iron["light"])
+        c.rect(cx - 7, cy - 6, 14, 14, iron["deep"])                 # frame
+        c.rect(cx - 6, cy - 5, 12, 12, glow["glow"] if lit else (60, 66, 78))
         if lit:
-            c.rect(cx - 2, cy - 3, 4, 5, glow["hi"])
-        c.put(cx, cy - 7, iron["light"])
+            c.rect(cx - 3, cy - 3, 6, 8, glow["hi"])
+        for bx in (cx - 6, cx - 1, cx + 5):                          # cage bars
+            for by in range(cy - 5, cy + 7):
+                c.put(bx, by, iron["base"])
+        c.rect(cx - 7, cy + 8, 14, 2, iron["base"])                  # base tray
+        c.rect(cx - 7, cy + 8, 14, 1, iron["light"])
+        c.put(cx, cy - 10, iron["light"])
         c.outline(palette.OUTLINE)
     else:  # garland
         wire = palette.GLOOMWOOD
@@ -555,26 +615,35 @@ def gen_gloomraven_statue(path):
     rng = Rng(0x6B1D)
 
     # --- two-step plinth ---
-    c.rect(15, 82, 34, 8, stone["base"])
-    c.rect(15, 82, 34, 2, stone["light"])
-    c.rect(15, 88, 34, 2, stone["deep"])
-    c.rect(20, 76, 24, 6, stone["base"])
-    c.rect(20, 76, 24, 2, stone["light"])
-    c.put(17, 85, stone["deep"])   # plinth chip
-    c.put(46, 84, stone["light"])
+    # Size law: a vanilla statue cell carries ~2880 opaque px, most of it in
+    # the plinth; the old two-step base left the sprite at ~1050.
+    c.rect(8, 84, 48, 10, stone["base"])            # ground step
+    c.rect(8, 84, 48, 2, stone["light"])
+    c.rect(8, 92, 48, 2, stone["deep"])
+    c.rect(12, 74, 40, 10, stone["base"])           # mid step
+    c.rect(12, 74, 40, 2, stone["light"])
+    c.rect(12, 82, 40, 2, stone["deep"])
+    c.rect(17, 62, 30, 12, stone["base"])           # column block
+    c.rect(17, 62, 30, 2, stone["light"])
+    c.rect(17, 62, 2, 12, stone["light"])
+    c.rect(45, 62, 2, 12, stone["deep"])
+    for py in range(65, 74, 3):                     # masonry courses
+        c.rect(19, py, 26, 1, stone["deep"])
+    c.put(11, 88, stone["deep"])   # plinth chips
+    c.put(52, 87, stone["light"])
 
     # --- raven silhouette (dark mass first — outline pass eats thin shapes) ---
     # tail: thick wedge from the body's rear, sweeping down-left
-    for i in range(13):
-        t = 4 - i // 4
-        for w in range(max(1, t)):
-            c.put(22 - i, 57 + i // 2 + w, body["base"])
+    for i in range(15):
+        t = 5 - i // 4
+        for w in range(max(2, t)):
+            c.put(22 - i, 46 + i // 2 + w, body["base"])
     # body, chest and head as one overlapping mass (no "two balls" gap)
-    c.ellipse(31, 62, 11, 9, body["base"])
-    c.ellipse(36, 54, 8, 8, body["base"])
-    c.ellipse(40, 45, 7, 6, body["base"])
+    c.ellipse(31, 50, 13, 11, body["base"])
+    c.ellipse(36, 41, 10, 9, body["base"])
+    c.ellipse(40, 32, 8, 7, body["base"])
     # crown + hunched nape
-    c.ellipse(37, 42, 5, 4, body["base"])
+    c.ellipse(37, 29, 6, 5, body["base"])
 
     # --- big pale beak, slightly hooked at the tip ---
     for i in range(10):
@@ -635,29 +704,31 @@ def gen_banner_painting(path):
         trim = palette.STAIRLIGHT
         iron = palette.IRONWORK
         # mounting rod with end caps and rings
-        c.rect(4, 2, 24, 2, iron["base"])
-        c.rect(4, 2, 24, 1, iron["light"])
-        c.put(3, 2, iron["light"])
-        c.put(28, 2, iron["light"])
-        c.put(8, 4, iron["deep"])
-        c.put(23, 4, iron["deep"])
+        c.rect(2, 1, 28, 3, iron["base"])
+        c.rect(2, 1, 28, 1, iron["light"])
+        c.put(1, 2, iron["light"])
+        c.put(30, 2, iron["light"])
+        c.put(6, 4, iron["deep"])
+        c.put(25, 4, iron["deep"])
         # cloth field with border trim
-        for y in range(4, 24):
-            for x in range(7, 26):
+        # Size law: vanilla wall banners fill ~776 opaque px per 32px cell;
+        # the old 19x20 cloth came to 491 and read as a pennant.
+        for y in range(4, 26):
+            for x in range(4, 29):
                 tone = cloth["base"]
-                if x in (7, 25) or y == 4:
+                if x in (4, 28) or y == 4:
                     tone = trim["base"]            # silver border
-                elif x in (11,) or x in (19,):
+                elif x in (10, 22):
                     tone = cloth["deep"]           # fold shadows
-                elif x in (9, 15):
+                elif x in (7, 16, 25):
                     tone = cloth["light"]          # fold ridges
                 c.put(x, y, tone)
         # swallowtail: two tails + notch
-        for i in range(5):
-            for x in range(7, 14 - i):
-                c.put(x, 24 + i, cloth["base"] if x > 7 else trim["base"])
-            for x in range(19 + i, 26):
-                c.put(x, 24 + i, cloth["base"] if x < 25 else trim["base"])
+        for i in range(6):
+            for x in range(4, 15 - i):
+                c.put(x, 26 + i, cloth["base"] if x > 4 else trim["base"])
+            for x in range(18 + i, 29):
+                c.put(x, 26 + i, cloth["base"] if x < 28 else trim["base"])
         for x in range(14, 19):                    # notch upper edge
             c.put(x, 24, cloth["deep"])
         # fringe tips

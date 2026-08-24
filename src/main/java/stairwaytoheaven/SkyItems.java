@@ -49,25 +49,16 @@ final class SkyItems {
         ItemRegistry.registerItem("tempestedge", new TempestEdgeSwordToolItem(), 220.0F, true);
         ItemRegistry.registerItem("galehowl", new GalehowlProjectileToolItem(), 220.0F, true);
 
-        // v0.4 "The Living Sky": logs, flowers, mosses, ores
+        // v0.4 "The Living Sky": logs and ores. The pickable plants are NOT
+        // registered here — their GrassObject registration already creates an
+        // item of the same stringID (the windwheat pattern), and that auto-item
+        // is what the plants drop.
         ItemRegistry.registerItem("nimbuswood",
-                new MatItem(1000, Item.Rarity.NORMAL).setItemCategory("materials", "wood"), 1.5F, true);
+                new MatItem(500, "anylog").setItemCategory("materials", "logs"), 2.0F, true);
         ItemRegistry.registerItem("charwood",
-                new MatItem(1000, Item.Rarity.NORMAL).setItemCategory("materials", "wood"), 1.5F, true);
+                new MatItem(500, "anylog").setItemCategory("materials", "logs"), 2.0F, true);
         ItemRegistry.registerItem("prismwood",
-                new MatItem(1000, Item.Rarity.NORMAL).setItemCategory("materials", "wood"), 1.5F, true);
-        ItemRegistry.registerItem("cloudbell",
-                new MatItem(250, Item.Rarity.NORMAL).setItemCategory("materials", "flowers"), 2.0F, true);
-        ItemRegistry.registerItem("skytulip",
-                new MatItem(250, Item.Rarity.NORMAL).setItemCategory("materials", "flowers"), 2.0F, true);
-        ItemRegistry.registerItem("thunderbloom",
-                new MatItem(250, Item.Rarity.UNCOMMON).setItemCategory("materials", "flowers"), 6.0F, true);
-        ItemRegistry.registerItem("glowfern",
-                new MatItem(250, Item.Rarity.NORMAL).setItemCategory("materials", "flowers"), 3.0F, true);
-        ItemRegistry.registerItem("auroralily",
-                new MatItem(250, Item.Rarity.UNCOMMON).setItemCategory("materials", "flowers"), 6.0F, true);
-        ItemRegistry.registerItem("staticmoss",
-                new MatItem(250, Item.Rarity.NORMAL).setItemCategory("materials", "flowers"), 3.0F, true);
+                new MatItem(500, "anylog").setItemCategory("materials", "logs"), 2.0F, true);
         ItemRegistry.registerItem("fulgurite",
                 new MatItem(250, Item.Rarity.UNCOMMON).setItemCategory("materials", "minerals"), 12.0F, true);
         ItemRegistry.registerItem("prismshard",

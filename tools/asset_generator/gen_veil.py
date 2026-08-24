@@ -199,19 +199,21 @@ def gen_gloomshroom(path):
 
         def shroom(cx, ground, r, tilt=0):
             """r = cap half-width. Dome height ~ r, cap overhangs the stem."""
-            stem_h = r + 3
+            stem_h = r + 6
             cap_y = ground - stem_h            # cap skirt line
             # peat mound the stem grows out of
-            c.ellipse(cx, ground, r - 1, 1.4, P["base"])
+            c.ellipse(cx, ground, r + 1, 2.0, P["base"])
             c.put(cx - 1, ground - 1, P["light"])
             # stem: 3px pale column with a subtle lean
             for i in range(stem_h + 1):
                 sx = cx + (tilt if i > stem_h // 2 else 0)
-                c.put(sx - 1, ground - i, S["hi"])
+                c.put(sx - 2, ground - i, S["hi"])
+                c.put(sx - 1, ground - i, S["light"])
                 c.put(sx, ground - i, S["light"])
                 c.put(sx + 1, ground - i, S["base"])
+                c.put(sx + 2, ground - i, S["base"])
             # cap: stacked dome rows (quarter-ellipse profile), wavy skirt
-            H = max(3, round(r * 0.9))
+            H = max(4, round(r * 1.05))
             for j in range(H + 1):
                 u = j / H
                 half = max(1, round((r + 1) * math.sqrt(max(0.0, 1 - (1 - u) ** 2))))
@@ -239,13 +241,15 @@ def gen_gloomshroom(path):
                 c.put(cx + tilt + 2, cap_y, G["glow"])
                 c.put(cx + tilt, cap_y - H + 1, G["core"])
 
-        big = rng.range(6, 7)
+        big = rng.range(8, 9)
         if v == 0:
-            shroom(9, 28, big)
-            shroom(23, 29, 4, tilt=-1)         # companion leans toward the big one
+            shroom(10, 29, big)
+            shroom(23, 30, 6, tilt=-1)         # companion leans toward the big one
+            shroom(28, 31, 3, tilt=1)          # button at the edge of the clump
         else:
-            shroom(21, 28, big)
-            shroom(7, 29, 4, tilt=1)
+            shroom(21, 29, big)
+            shroom(8, 30, 6, tilt=1)
+            shroom(3, 31, 3, tilt=-1)
         c.outline(palette.OUTLINE)
         # drifting spore motes (after outline so they float)
         c.put(6 + v * 18, 13, with_alpha(G["glow"], 150))
@@ -331,30 +335,85 @@ def gen_ashbones(path):
 
 
 def gen_seancecircle(path):
-    c = Canvas(32, 32)
+    """32x64 ritual set piece (bottom 32x32 = the tile, upper half stands up).
+
+    Size law: the old version filled 80 opaque px against a vanilla ritual
+    altar's 5280 — it was practically invisible in game. This one fills the
+    whole tile with a heavy chalk-and-stone ring, four standing candles, a
+    rune plate and rising motes."""
+    import math
+    c = Canvas(32, 64)
     chalk = palette.BONEASH
     G = palette.GHOSTFLAME
-    # dashed chalk ring
-    import math
-    for a in range(0, 360, 9):
-        if (a // 9) % 3 == 2:
-            continue
-        x = 16 + round(11 * math.cos(math.radians(a)))
-        y = 20 + round(6.5 * math.sin(math.radians(a)))
-        c.put(x, y, chalk["hi"])
-        if a % 27 == 0:
-            c.put(x, y + 1, chalk["base"])
-    # center rune: small crescent
-    for (mx, my) in ((15, 18), (14, 19), (14, 20), (15, 21), (16, 21)):
+    stone = palette.VEILROCK
+    cx, cy = 16, 48          # ring center inside the tile cell
+    CANDLES = ((5, cy - 1, 16), (27, cy - 1, 16), (11, cy - 8, 21), (21, cy - 8, 21))
+
+    # --- stone ring plate: broad ellipse band filling the tile ---
+    c.ellipse(cx, cy + 1, 15.5, 11, stone["deep"])
+    c.ellipse(cx, cy, 15, 10, stone["base"])
+    c.ellipse(cx, cy - 1, 13, 8.5, stone["light"])
+    c.ellipse(cx, cy - 1, 11.5, 7.5, stone["deep"])
+    # cobble texture on the band
+    for a in range(0, 360, 18):
+        r = math.radians(a)
+        x = cx + round(12.5 * math.cos(r))
+        y = cy - 1 + round(7.5 * math.sin(r))
+        c.put(x, y, stone["light"])
+        c.put(x, y + 1, stone["deep"])
+
+    # --- inner chalk field + double rune ring ---
+    c.ellipse(cx, cy - 1, 11, 7, chalk["deep"])
+    c.ellipse(cx, cy - 2, 10, 6, chalk["base"])
+    for rad_x, rad_y, tone in ((9.5, 5.5, chalk["hi"]), (6.0, 3.4, chalk["light"])):
+        for a in range(0, 360, 7):
+            if (a // 7) % 4 == 3:
+                continue                     # dashed chalk, not a solid line
+            r = math.radians(a)
+            c.put(cx + round(rad_x * math.cos(r)), cy - 2 + round(rad_y * math.sin(r)), tone)
+
+    # --- rune glyphs between the rings (bold 2px marks) ---
+    for a in (0, 60, 120, 180, 240, 300):
+        r = math.radians(a)
+        gx = cx + round(7.8 * math.cos(r))
+        gy = cy - 2 + round(4.5 * math.sin(r))
+        c.rect(gx - 1, gy, 2, 2, chalk["hi"])
+        c.put(gx, gy - 1, chalk["light"])
+
+    # --- centre sigil: crescent over a filled disc ---
+    c.ellipse(cx, cy - 2, 3.4, 2.2, chalk["hi"])
+    for (mx, my) in ((cx - 2, cy - 4), (cx - 1, cy - 5), (cx, cy - 5),
+                     (cx + 1, cy - 4), (cx + 2, cy - 3)):
         c.put(mx, my, chalk["light"])
-    # three candle stubs with tiny green flames
-    for (cx_, cy_) in ((7, 14), (25, 15), (16, 26)):
-        c.rect(cx_ - 1, cy_, 3, 4, chalk["light"])
-        c.put(cx_ - 1, cy_ + 3, chalk["base"])
-        c.put(cx_, cy_ - 1, G["glow"])
-        c.put(cx_, cy_ - 2, G["core"])
+
+    # --- four standing candles: thick stems rising out of the tile ---
+    for (sx, base_y, h) in CANDLES:
+        c.rect(sx - 3, base_y - h, 6, h, chalk["base"])          # 6px wax column
+        c.rect(sx - 3, base_y - h, 2, h, chalk["light"])         # lit left edge
+        c.rect(sx + 2, base_y - h, 1, h, chalk["deep"])          # shaded right edge
+        for dy in range(2, h, 4):                                # wax drips
+            c.put(sx + 2, base_y - h + dy, chalk["base"])
+        c.rect(sx - 4, base_y - 2, 8, 3, stone["light"])         # holder foot
+        c.rect(sx - 4, base_y + 1, 8, 1, stone["deep"])
+
     c.outline(palette.OUTLINE)
-    c.put(16, 20, with_alpha(G["glow"], 160))
+
+    # --- flames + glow AFTER the outline so they stay bright ---
+    for (sx, base_y, h) in CANDLES:
+        top = base_y - h
+        c.rect(sx - 2, top - 4, 4, 4, G["glow"])
+        c.rect(sx - 1, top - 6, 2, 2, G["core"])
+        c.put(sx - 1, top - 7, with_alpha(G["glow"], 180))
+        c.put(sx, top - 7, with_alpha(G["glow"], 180))
+    # rune ring pulse + rising motes
+    for a in range(0, 360, 24):
+        r = math.radians(a)
+        c.put(cx + round(9.5 * math.cos(r)), cy - 2 + round(5.5 * math.sin(r)),
+              with_alpha(G["glow"], 190))
+    for (mx, my, al) in ((cx - 5, cy - 14, 170), (cx + 6, cy - 18, 150), (cx, cy - 22, 130),
+                         (cx - 8, cy - 24, 110), (cx + 3, cy - 28, 95)):
+        c.put(mx, my, with_alpha(G["core"], al))
+    c.ellipse(cx, cy - 2, 4, 2.4, with_alpha(G["glow"], 120))
     c.save(path)
 
 

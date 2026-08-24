@@ -82,7 +82,7 @@ final class SkyBuildingSet {
         ObjectRegistry.registerObject("gloomravenstatue",
                 new StatueObject("gloomraven", 16, 1), 20.0F, true);
         ObjectRegistry.registerObject("gloomwillow",
-                new SkyDecoObject("gloomwillow", 48, new Color(60, 48, 56),
+                new SkyDecoObject("gloomwillow", 64, new Color(60, 48, 56),
                         new Rectangle(8, 12, 16, 16), "objects", "landscaping", "plants"), 15.0F, true);
 
         FurnitureObject catBasket = new FurnitureObject();
