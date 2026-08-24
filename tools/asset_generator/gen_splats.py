@@ -397,27 +397,30 @@ def _plank_flecks(c, x0, y0, salt, ramp, chance_hi=0.3):
 
 
 def material_nimbusfloor(c, x0, y0, salt, frame=0):
-    """Pale nimbuswood planks: horizontal boards, soft position-locked grain
-    ticks, staggered seams — the Driftlands' airy floor."""
+    """Pale nimbuswood planks: horizontal boards, staggered seams, a sunlit
+    lip on alternating boards. Boards stay CALM (vanilla floor rule); grain
+    is a few position-locked dashes per board, not per-pixel noise."""
     ramp = palette.NIMBUSWOOD
     for x in range(32):
         for y in range(32):
-            gx, gy = (x0 + x) % 32, (y0 + y) % 32
+            gy = (y0 + y) % 32
             board = gy // 8
             tone = ramp["base"] if board % 2 == 0 else ramp["light"]
             if gy % 8 == 0:
                 tone = ramp["deep"]
             elif gy % 8 == 1 and board % 2 == 1:
                 tone = ramp["hi"]                     # sunlit plank lip
-            else:
-                h = Rng((gx * 5081 + gy * 947) ^ 0x81B0F1)
-                if (gx + gy * 3) % 11 == 0 and h.chance(0.5):
-                    tone = ramp["deep"] if h.chance(0.6) else ramp["light"]
             c.put(x0 + x, y0 + y, tone)
     for board in range(4):
-        seam_x = (Rng(0x81B + board * 31 + (y0 // 96) * 7).next() % 4) * 8 + 4
+        h = Rng(0x81B + board * 31 + (y0 // 96) * 7)
+        seam_x = (h.next() % 4) * 8 + 4
         for yy in range(board * 8 + 1, board * 8 + 8):
             c.put(x0 + (seam_x + x0) % 32, y0 + yy, ramp["deep"])
+        for _ in range(2):                            # grain dashes
+            gx = h.next() % 26 + 2
+            gy2 = board * 8 + 3 + h.next() % 4
+            for i in range(3 + h.next() % 2):
+                c.put(x0 + (gx + i) % 32, y0 + gy2, ramp["deep"])
     _plank_flecks(c, x0, y0, salt, ramp)
 
 
@@ -450,24 +453,29 @@ def features_nimbusfloor(c, x0, y0, salt, k):
 
 def material_charfloor(c, x0, y0, salt, frame=0):
     """Charwood planks: VERTICAL boards (turned 90 degrees from the pale
-    floors — each wood reads distinct at a glance), charred flecks."""
+    floors — each wood reads distinct at a glance). Calm boards; char grain
+    is a few position-locked vertical scorch dashes per board."""
     ramp = palette.CHARWOOD
     for x in range(32):
         for y in range(32):
-            gx, gy = (x0 + x) % 32, (y0 + y) % 32
+            gx = (x0 + x) % 32
             board = gx // 8
             tone = ramp["base"] if board % 2 == 0 else ramp["light"]
             if gx % 8 == 0:
                 tone = ramp["deep"]
-            else:
-                h = Rng((gx * 5081 + gy * 947) ^ 0xC4AF1)
-                if (gx * 3 + gy) % 13 == 0 and h.chance(0.45):
-                    tone = ramp["deep"] if h.chance(0.7) else ramp["hi"]
+            elif gx % 8 == 1 and board % 2 == 0:
+                tone = ramp["light"]                  # lit left plank edge
             c.put(x0 + x, y0 + y, tone)
     for board in range(4):
-        seam_y = (Rng(0xC4A + board * 31 + (y0 // 96) * 7).next() % 4) * 8 + 4
+        h = Rng(0xC4A + board * 31 + (y0 // 96) * 7)
+        seam_y = (h.next() % 4) * 8 + 4
         for xx in range(board * 8 + 1, board * 8 + 8):
             c.put(x0 + xx, y0 + (seam_y + y0) % 32, ramp["deep"])
+        for _ in range(2):                            # vertical scorch dashes
+            gy = h.next() % 26 + 2
+            gx2 = board * 8 + 3 + h.next() % 4
+            for i in range(3 + h.next() % 2):
+                c.put(x0 + gx2, y0 + (gy + i) % 32, ramp["deep"])
     _plank_flecks(c, x0, y0, salt, ramp, chance_hi=0.25)
 
 
@@ -500,29 +508,31 @@ def features_charfloor(c, x0, y0, salt, k):
 
 
 def material_prismfloor(c, x0, y0, salt, frame=0):
-    """Polished prismwood planks: horizontal boards with a bright sheen lip
-    and the faintest iridescent shimmer along the grain."""
+    """Polished prismwood planks: horizontal boards; each board carries one
+    long position-locked sheen streak (polished glint) and one grain dash —
+    calm otherwise."""
     ramp = palette.PRISMWOOD
     for x in range(32):
         for y in range(32):
-            gx, gy = (x0 + x) % 32, (y0 + y) % 32
+            gy = (y0 + y) % 32
             board = gy // 8
             tone = ramp["base"] if board % 2 == 0 else ramp["light"]
             if gy % 8 == 0:
                 tone = ramp["deep"]
-            elif gy % 8 == 2:
-                h = Rng((gx * 7349 + gy * 947) ^ 0x9810F1)
-                if h.chance(0.55):
-                    tone = ramp["hi"]                 # polished sheen line
-            else:
-                h = Rng((gx * 5081 + gy * 947) ^ 0x9810F1)
-                if (gx + gy * 5) % 12 == 0 and h.chance(0.4):
-                    tone = ramp["deep"]
             c.put(x0 + x, y0 + y, tone)
     for board in range(4):
-        seam_x = (Rng(0x981 + board * 31 + (y0 // 96) * 7).next() % 4) * 8 + 4
+        h = Rng(0x981 + board * 31 + (y0 // 96) * 7)
+        seam_x = (h.next() % 4) * 8 + 4
         for yy in range(board * 8 + 1, board * 8 + 8):
             c.put(x0 + (seam_x + x0) % 32, y0 + yy, ramp["deep"])
+        gx = h.next() % 22 + 2                        # polished sheen streak
+        gy2 = board * 8 + 2 + h.next() % 2
+        for i in range(5 + h.next() % 3):
+            c.put(x0 + (gx + i) % 32, y0 + gy2, ramp["hi"])
+        dx_ = h.next() % 24 + 3                       # one grain dash
+        dy_ = board * 8 + 5 + h.next() % 2
+        for i in range(3):
+            c.put(x0 + (dx_ + i) % 32, y0 + dy_, ramp["deep"])
     _plank_flecks(c, x0, y0, salt, ramp, chance_hi=0.45)
 
 

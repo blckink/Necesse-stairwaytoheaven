@@ -822,3 +822,443 @@ def gen_prismshardore(path, variants=2):
         for _ in range(rng.range(2, 4)):               # sparkle dust
             sheet.put(x0 + rng.range(3, 28), rng.range(3, 28), P["light"])
     sheet.save(path)
+
+
+# --- v0.4 item icons (32x32, established icon style: chunky read at 1x,
+# soft dark outline; thin stems drawn 3px so the outline leaves a core) ------
+
+def gen_cloudbell_item(path):
+    """A picked cloudbell sprig: arced stem with two hanging bells."""
+    c = Canvas(32, 32)
+    B = palette.CLOUDBELL
+    S = palette.SKYTULIP
+    # arced stem (3px mass so the outline pass keeps a lit core)
+    arc = []
+    for i in range(18):
+        t = i / 17.0
+        x = 7 + round(16 * t)
+        y = 22 - round(15 * (t - 0.5 * t * t) * 1.5)
+        arc.append((x, y))
+        c.put(x, y, S["stem"] if t < 0.75 else S["stem_deep"])
+        c.put(x, y + 1, S["stem_deep"])
+        c.put(x + 1, y, S["stem_deep"])
+    # leaf pair at the cut end
+    for d in range(4):
+        c.put(6 - d, 23 + d // 2, S["stem"])
+        c.put(6 - d, 24 + d // 2, S["stem_deep"])
+    # two bells hanging FROM the arc: short stalk pixels tie each bell top
+    # to its arc point so nothing floats
+    hang = ((arc[9], 3), (arc[16], 4))
+    bells = []
+    for ((ax, ay), s) in hang:
+        c.put(ax, ay + 1, S["stem_deep"])
+        c.put(ax, ay + 2, S["stem_deep"])
+        bells.append((ax - (s + 2) // 2 + 1, ay + 3, s))
+    for (bx, by, s) in bells:
+        for dy in range(s + 3):
+            for dx in range(s + 2):
+                if dy == 0 and dx in (0, s + 1):
+                    continue
+                tone = B["base"]
+                if dx == 0:
+                    tone = B["light"]
+                elif dx >= s:
+                    tone = B["deep"]
+                if dy >= s + 2:
+                    tone = B["deep"]
+                c.put(bx + dx, by + dy, tone)
+        c.put(bx + 1, by + 1, B["hi"])
+        c.put(bx, by + s + 3, B["deep"])            # flared mouth
+        c.put(bx + s + 1, by + s + 3, B["deep"])
+        c.put(bx + (s + 1) // 2, by + s + 3, B["hi"])  # clapper
+    c.outline(palette.OUTLINE)
+    c.save(path)
+
+
+def gen_skytulip_item(path):
+    """One tall rose sky tulip with a small gold companion."""
+    c = Canvas(32, 32)
+    S = palette.SKYTULIP
+    A = palette.AURORA
+    CB = palette.CLOUDBERRY
+
+    def head(tx, ty, w, h, base, deep, hi):
+        for dy in range(1, h):
+            for dx in range(w):
+                tone = base if dx < w - 2 and dy < h - 2 else deep
+                c.put(tx + dx, ty + dy, tone)
+        for dx in (0, w // 2, w - 1):               # petal tips
+            c.put(tx + dx, ty, base if dx < w - 1 else deep)
+        c.put(tx + 1, ty + 1, hi)
+        c.put(tx + 1, ty + 2, hi)
+        for dx in range(w):                          # rounded cup bottom
+            c.put(tx + dx, ty + h, deep)
+
+    # stems (3px masses)
+    for i in range(14):
+        c.put(12, 27 - i, S["stem"])
+        c.put(13, 27 - i, S["stem_deep"])
+        c.put(11, 27 - i, S["stem_deep"])
+    for i in range(8):
+        c.put(21 + i // 4, 27 - i, S["stem"])
+        c.put(22 + i // 4, 27 - i, S["stem_deep"])
+    # leaves
+    for d in range(5):
+        c.put(10 - d // 1, 26 - d, S["stem"])
+        c.put(10 - d, 27 - d, S["stem_deep"])
+    for d in range(4):
+        c.put(16 + d, 25 - d, S["stem"])
+        c.put(16 + d, 26 - d, S["stem_deep"])
+    head(8, 5, 9, 9, S["rose"], A["base"], A["hi"])
+    head(19, 13, 7, 7, S["gold"], CB["berry_deep"], CB["berry_hi"])
+    c.outline(palette.OUTLINE)
+    c.save(path)
+
+
+def gen_thunderbloom_item(path):
+    """Sparking violet bloom head; spark tips re-added after the outline."""
+    c = Canvas(32, 32)
+    T = palette.THUNDERBLOOM
+    hx, hy = 16, 13
+    # stem
+    for i in range(13):
+        c.put(15 + i // 6, 28 - i, T["stem"])
+        c.put(16 + i // 6, 28 - i, T["stem"])
+        c.put(17 + i // 6, 28 - i, T["stem"])
+    # petal spikes: chunky 3px masses radiating
+    for (a, ln) in ((90, 8), (30, 7), (150, 7), (-15, 6), (195, 6), (60, 7), (120, 7)):
+        dx = math.cos(math.radians(a))
+        dy = -math.sin(math.radians(a))
+        for i in range(ln):
+            x, y = round(hx + dx * i), round(hy + dy * i)
+            c.put(x, y, T["deep"])
+            c.put(x + 1, y, T["deep"])
+            c.put(x, y + 1, T["deep"])
+        for i in range(ln - 1):
+            x, y = round(hx + dx * i), round(hy + dy * i)
+            c.put(x, y, T["light"] if i >= ln - 3 else T["base"])
+    c.ellipse(hx, hy, 2.6, 2.4, T["deep"])
+    c.ellipse(hx, hy, 1.6, 1.4, T["light"])
+    c.outline(palette.OUTLINE)
+    # charged heart + crackling spark tips (after outline so they float)
+    c.put(hx, hy, T["spark"])
+    c.put(hx + 1, hy, T["spark"])
+    c.put(hx, hy - 1, T["light"])
+    for (a, ln) in ((90, 8), (30, 7), (150, 7), (-15, 6), (195, 6)):
+        x = round(hx + math.cos(math.radians(a)) * (ln + 1))
+        y = round(hy - math.sin(math.radians(a)) * (ln + 1))
+        c.put(x, y, T["spark"])
+    c.put(hx + 8, hy - 6, with_alpha(T["spark"], 170))
+    c.put(hx - 8, hy + 2, with_alpha(T["spark"], 150))
+    c.save(path)
+
+
+def gen_auroralily_item(path):
+    """Glow lily bloom: open cup with a radiant core."""
+    c = Canvas(32, 32)
+    L = palette.AURORALILY
+    hx, hy = 15, 12
+    # stem with one leaf
+    for i in range(14):
+        c.put(15 + i // 5, 28 - i, L["stem"])
+        c.put(16 + i // 5, 28 - i, L["stem"])
+        c.put(17 + i // 5, 28 - i, L["stem"])
+    for d in range(5):
+        c.put(18 + d, 23 - d + d // 3, L["stem"])
+        c.put(18 + d, 24 - d + d // 3, L["stem"])
+    # back petals peeking over the cup
+    for (dx, dy) in ((-4, -4), (3, -5), (0, -6)):
+        c.put(hx + dx, hy + dy, L["deep"])
+        c.put(hx + dx + 1, hy + dy, L["deep"])
+        c.put(hx + dx + 1, hy + dy - 1, L["base"])
+    # cup body
+    c.ellipse(hx, hy, 6.4, 4.6, L["base"])
+    c.ellipse(hx - 2, hy - 2, 3.8, 2.6, L["light"])
+    # petal separations
+    c.put(hx - 5, hy + 2, L["deep"])
+    c.put(hx - 2, hy + 4, L["deep"])
+    c.put(hx + 2, hy + 4, L["deep"])
+    c.put(hx + 5, hy + 2, L["deep"])
+    c.outline(palette.OUTLINE)
+    # radiant heart + halo, after the outline so the glow floats
+    c.put(hx, hy, L["core"])
+    c.put(hx + 1, hy, L["core"])
+    c.put(hx, hy - 1, L["core"])
+    c.put(hx + 1, hy - 1, with_alpha(L["core"], 200))
+    c.put(hx - 1, hy, with_alpha(L["core"], 160))
+    c.put(hx + 2, hy + 1, with_alpha(L["core"], 120))
+    c.put(hx, hy - 3, with_alpha(L["core"], 110))
+    c.save(path)
+
+
+def gen_glowfern_item(path):
+    """A cut glowfern frond (silhouette-first, no outline pass — the
+    skyreeds-item trick keeps the feathered leaflets crisp)."""
+    c = Canvas(32, 32)
+    G = palette.GLOWFERN
+    spine = []
+    for i in range(22):
+        t = i / 21.0
+        x = 8 + round(16 * (t + 0.2 * t * t))
+        y = 27 - round(20 * (t - 0.28 * t * t))
+        spine.append((x, y, t))
+    # dark silhouette mass behind spine + leaflets
+    for (x, y, t) in spine:
+        c.put(x - 1, y, palette.OUTLINE)
+        c.put(x + 1, y, palette.OUTLINE)
+        c.put(x, y + 1, palette.OUTLINE)
+        c.put(x, y - 1, palette.OUTLINE)
+    for i in range(2, 20, 2):
+        x, y, t = spine[i]
+        ln = 4 if 0.15 < t < 0.5 else (3 if t < 0.7 else 2)
+        for d in range(1, ln + 1):
+            sx = x - d if i % 4 == 0 else x + d
+            sy = y - d // 2
+            c.put(sx, sy, palette.OUTLINE)
+            c.put(sx, sy + 1, palette.OUTLINE)
+    # lit frond on top
+    for (x, y, t) in spine:
+        c.put(x, y, G["deep"] if t < 0.4 else G["base"])
+    for i in range(2, 20, 2):
+        x, y, t = spine[i]
+        ln = 4 if 0.15 < t < 0.5 else (3 if t < 0.7 else 2)
+        for d in range(1, ln + 1):
+            sx = x - d if i % 4 == 0 else x + d
+            sy = y - d // 2
+            c.put(sx, sy, G["light"] if d == ln else G["base"])
+    tx, ty, _ = spine[-1]
+    c.put(tx, ty, G["hi"])                          # curled glowing tip
+    c.put(tx - 1, ty - 1, G["hi"])
+    c.put(spine[0][0], spine[0][1] + 1, G["hi"])    # clean-cut stem end
+    c.put(spine[0][0] - 1, spine[0][1] + 1, G["light"])
+    c.put(9, 6, with_alpha(G["hi"], 150))           # spore mote
+    c.save(path)
+
+
+def gen_staticmoss_item(path):
+    """A pulled clump of static moss, roots dangling, sparks crawling."""
+    c = Canvas(32, 32)
+    M = palette.STATICMOSS
+    mounds = [(15, 14, 8, 5), (9, 17, 4.5, 3), (22, 16, 5, 3.4)]
+    for (mx, my, r, ry) in mounds:
+        c.ellipse(mx + 1, my + 1, r, ry, M["deep"])
+    for (mx, my, r, ry) in mounds:
+        c.ellipse(mx, my, r, ry, M["base"])
+    for (mx, my, r, ry) in mounds:
+        c.ellipse(mx - r * 0.25, my - ry * 0.4, r * 0.6, ry * 0.55, M["light"])
+    # scale dapple + spark velvet
+    for x in range(4, 28):
+        for y in range(8, 22):
+            p = c.get(x, y)[:3]
+            if p == M["base"][:3] and (x + 2 * y) % 5 == 0:
+                c.put(x, y, M["deep"])
+            elif p == M["light"][:3] and (2 * x + y) % 7 == 0:
+                c.put(x, y, M["spark"])
+    # dangling root threads (2px masses)
+    for (rx, ln) in ((11, 4), (16, 6), (21, 3)):
+        for k in range(ln):
+            c.put(rx, 20 + k, M["deep"])
+            c.put(rx + 1, 20 + k, M["deep"])
+        c.put(rx, 20 + ln, M["base"])
+    c.outline(palette.OUTLINE)
+    # crawling sparks after the outline
+    c.put(12, 10, M["spark"])
+    c.put(20, 12, M["spark"])
+    c.put(16, 8, with_alpha(M["spark"], 180))
+    c.put(24, 9, with_alpha(M["spark"], 130))
+    c.save(path)
+
+
+def gen_fulgurite_item(path):
+    """A fulgurite shard: fused lightning-glass, jagged and branching."""
+    c = Canvas(32, 32)
+    F = palette.FULGURITE
+    # main zigzag column, 4-5px wide; kinks stay 1px so rows keep >=3px of
+    # overlap and the outline pass cannot shred the column into dashes
+    x = 16
+    kinks = (0, 0, -1, 0, 0, 1, 0, 1, 0, -1, 0, 1, 0, -1, -1, 0, 1, 0, 0, -1)
+    for i, k in enumerate(kinks):
+        y = 27 - i
+        x += k
+        w = 5 if 4 < i < 14 else 4
+        for dx in range(w):
+            tone = F["base"]
+            if dx == 0:
+                tone = F["light"]
+            elif dx >= w - 1:
+                tone = F["deep"]
+            c.put(x + dx, y, tone)
+        if k != 0:                                  # glint at each kink
+            c.put(x + 1, y, F["hi"])
+    # branch spur (2px thick so it survives the outline)
+    bx, by = x + 2, 14
+    for k in range(4):
+        c.put(bx + 2 + k, by - k, F["base"])
+        c.put(bx + 3 + k, by - k, F["base"])
+        c.put(bx + 3 + k, by - k + 1, F["deep"])
+    c.put(bx + 6, by - 4, F["light"])
+    # hollow glassy tip (fulgurites are tubes)
+    c.put(x + 1, 8, F["deep"])
+    c.put(x + 2, 8, F["deep"])
+    c.put(x + 1, 7, F["hi"])
+    c.outline(palette.OUTLINE)
+    c.put(x - 1, 12, F["hi"])                       # outer glass sparkle
+    c.put(16, 22, F["hi"])
+    c.save(path)
+
+
+def gen_prismshard_item(path):
+    """Prismshard crystal: faceted shards with the Shoals' teal glint."""
+    c = Canvas(32, 32)
+    P = palette.PRISMSHARD
+    for (sx, h, w, lean) in ((15, 16, 3, 1), (9, 10, 2, -2), (22, 11, 2, 2)):
+        for i in range(h):
+            t = i / max(h - 1, 1)
+            half = max(1, round(w * (1.0 - abs(t * 2 - 1))))
+            cx = sx + round(lean * t)
+            for dx in range(-half, half + 1):
+                c.put(cx + dx, 27 - i, P["deep"] if dx in (-half, half) else P["base"])
+            if 0.25 < t < 0.9:
+                c.put(cx - max(0, half - 1), 27 - i, P["light"])
+        c.put(sx + lean, 27 - h + 1, P["hi"])
+    c.outline(palette.OUTLINE)
+    # teal refraction glints after the outline
+    c.put(14, 20, P["teal"])
+    c.put(15, 21, P["teal"])
+    c.put(23, 22, P["teal"])
+    c.put(10, 23, P["teal"])
+    c.put(17, 13, P["hi"])
+    c.save(path)
+
+
+# --- v0.4 walk-through tall-grass carpets ------------------------------------
+# Vanilla deepswamptallgrass construction: blade FEET spread across the FULL
+# 32px cell width (edge blades clip mid-arc into the neighbor cell), a layer
+# of darker back blades fills between the lit front blades, and everything
+# reaches y<=2 so tiled cells read as one continuous meadow. Grass rule: no
+# outline pass — the deep ramp edge carries the silhouette.
+
+def _carpet_cell(c, rng, back_tone, foot_tone, blade_tones, spark=None):
+    """One 32x32 carpet cell. blade_tones(rng, k) -> (deep, mid, tip) per
+    front blade; spark=(tone, chance) optionally electrifies one tip.
+    Leans stay small and bends high so blades keep standing shoulder to
+    shoulder all the way up — wide fans thin out the cell top and tiled
+    rows band apart (caught in the carpet-mock QA)."""
+    # near-solid dark baseline: the feet zone must stay covered or tiled
+    # rows band apart (bright ground stripe at every cell seam)
+    for x in range(32):
+        if rng.chance(0.8):
+            c.put(x, 30, foot_tone)
+        if rng.chance(0.75):
+            c.put(x, 31, foot_tone)
+        if rng.chance(0.3):
+            c.put(x, 29, foot_tone)
+    # back layer: thin dark blades between the front ones, two height bands
+    for k in range(10):
+        bx = round((k + 0.5) * 32 / 10.0) + rng.range(-2, 2)
+        h = rng.range(15, 20) if k % 2 else rng.range(21, 27)
+        lean = rng.pick((-3, -2, 2, 3))
+        base_y = 30 + rng.pick((0, 1))
+        for i in range(h):
+            t = i / h
+            x = bx + round(lean * t * t)
+            c.put(x, base_y - i, back_tone)
+    # front layer: tall lit blades, gentle arcs + short hooks, tall-last.
+    # Heights stagger widely so blade tips distribute vertically — same-tall
+    # blades put every bright tip on one line and tiled rows band again.
+    blades = []
+    for k in range(12):
+        bx = round((k + 0.5) * 32 / 12.0 - 0.5) + rng.range(-1, 1)
+        h = rng.range(24, 29) if k % 3 else rng.range(18, 23)
+        blades.append((h, bx, k))
+    sparked = False
+    for (h, bx, k) in sorted(blades):
+        deep, mid, tip = blade_tones(rng, k)
+        base_y = 29 + rng.pick((0, 1, 1))
+        lean = rng.pick((-4, -3, -2, 2, 3, 4))
+        out = 1 if lean > 0 else -1
+        bend = rng.pick((2.0, 2.3, 2.6))
+        hook = rng.chance(0.4)
+        x = bx
+        y = base_y
+        for i in range(h):
+            t = i / h
+            x = bx + round(lean * (t ** bend))
+            if hook and i > h - 3:
+                x += out * (i - (h - 3))
+            y = base_y - i
+            tone = deep if t < 0.35 else (mid if t < 0.72 else tip)
+            c.put(x, y, tone)
+            if t < 0.55:
+                c.put(x + 1, y, deep)
+        if spark is not None and not sparked and rng.chance(spark[1]):
+            c.put(x, y - 1, spark[0])               # charged tip mote
+            c.put(x + out, y, spark[0])
+            sparked = True
+        else:
+            c.put(x, y, tip)
+
+
+def gen_tallcloudgrass(path, variants=4):
+    """128x32: lush sky-pale tall grass carpet (Driftlands). Windwheat-family
+    greens with white-lit tips; tiles into a continuous half-hiding meadow."""
+    sheet = Canvas(variants * 32, 32)
+    W = palette.WINDWHEAT
+    turf = palette.CLOUDTURF
+
+    def tones(rng, k):
+        if rng.chance(0.2):                         # paler seed-silk blade
+            return (W["deep"], W["light"], W["head"])
+        return (W["deep"], W["base"], W["light"])
+
+    for v in range(variants):
+        c = Canvas(32, 32)
+        rng = Rng(0x7A11C + v * 509)
+        _carpet_cell(c, rng, turf["tuft"], W["deep"], tones)
+        sheet.paste(c, v * 32, 0)
+    sheet.save(path)
+
+
+def gen_stormsedge(path, variants=4):
+    """128x32: blue-gray sedge carpet (Stormveil) with an occasional violet
+    slate-tint blade and a rare static spark on one tip."""
+    sheet = Canvas(variants * 32, 32)
+    N = palette.FULGURPINE_NEEDLE
+    slate = palette.STORMSLATE
+    spark = palette.STATICMOSS["spark"]
+
+    def tones(rng, k):
+        if rng.chance(0.2):                         # charged violet blade
+            return (slate["base"], slate["light"], slate["charge"])
+        return (N["deep"], N["base"], N["light"] if rng.chance(0.7) else N["hi"])
+
+    for v in range(variants):
+        c = Canvas(32, 32)
+        rng = Rng(0x570A6E + v * 613)
+        _carpet_cell(c, rng, slate["light"], N["deep"], tones,
+                     spark=(spark, 0.35))
+        sheet.paste(c, v * 32, 0)
+    sheet.save(path)
+
+
+def gen_prismgrass(path, variants=4):
+    """128x32: pale iridescent grass carpet (Aurora Shoals) with sparse
+    teal/rose accent blades — the Shoals' exclusive shimmer."""
+    sheet = Canvas(variants * 32, 32)
+    P = palette.PRISMWOOD
+    L = palette.PRISMLEAF
+
+    def tones(rng, k):
+        r = rng.float()
+        if r < 0.12:                                # teal accent blade
+            return (L["deep"], L["teal"], P["hi"])
+        if r < 0.24:                                # rose accent blade
+            return (L["deep"], L["rose"], P["hi"])
+        return (P["deep"], P["base"], P["hi"] if rng.chance(0.25) else P["light"])
+
+    for v in range(variants):
+        c = Canvas(32, 32)
+        rng = Rng(0x9816A + v * 431)
+        _carpet_cell(c, rng, L["deep"], P["deep"], tones)
+        sheet.paste(c, v * 32, 0)
+    sheet.save(path)

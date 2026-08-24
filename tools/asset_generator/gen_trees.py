@@ -566,59 +566,56 @@ def gen_prismabirch_leaves(path):
 
 # --- Log-bundle item icons (32x32) ------------------------------------------
 
-def _log(c, x, y, ln, ramp, rng, dash_tone=None):
-    """One horizontal log: bark cylinder + ringed end cap on the right."""
-    for dx in range(ln):
-        for dy in range(6):
-            tone = ramp["base"]
-            if dy == 0:
-                tone = ramp["light"]
-            elif dy >= 4:
-                tone = ramp["deep"]
-            c.put(x + dx, y + dy, tone)
-    for k in range(rng.range(2, 3)):        # bark grain dashes
-        gx = x + rng.range(2, max(ln - 5, 3))
-        gy = y + rng.range(1, 4)
+def _log_icon(c, ramp, rng, dash_tone=None, cap_hi=None):
+    """One chunky diagonal log, vanilla items/pinelog build: rounded bark
+    cylinder lower-left -> upper-right, big ringed end cap facing the
+    viewer on the left end, bark dashes along the length."""
+    x0, y0, x1, y1 = 10, 19, 24, 12
+    steps = 12
+    axis = [(x0 + (x1 - x0) * i / steps, y0 + (y1 - y0) * i / steps)
+            for i in range(steps + 1)]
+    for (cx, cy) in axis:                       # rounded body
+        c.ellipse(cx, cy, 4.4, 4.6, ramp["base"])
+    for (cx, cy) in axis[2:]:                   # sunlit top-left band
+        c.ellipse(cx - 0.5, cy - 2.2, 2.6, 1.5, ramp["light"])
+    for (cx, cy) in axis[1:]:                   # shaded belly
+        c.ellipse(cx + 0.6, cy + 2.6, 2.8, 1.2, ramp["deep"])
+    # far cut end (small, dark)
+    c.ellipse(x1 + 1, y1 - 0.5, 1.6, 3.4, ramp["deep"])
+    # bark dashes
+    for _ in range(3):
+        i = rng.range(3, steps - 1)
+        gx, gy = int(axis[i][0]), int(axis[i][1]) + rng.range(-1, 2)
         c.put(gx, gy, dash_tone if dash_tone else ramp["deep"])
-        c.put(gx + 1, gy, dash_tone if dash_tone else ramp["deep"])
-    # end cap: rings
-    ex = x + ln - 1
-    c.ellipse(ex, y + 2.5, 2.4, 3, ramp["deep"])
-    c.ellipse(ex, y + 2.5, 1.6, 2.2, ramp["light"])
-    c.ellipse(ex, y + 2.5, 0.8, 1.2, ramp["hi"])
-    c.put(ex, y + 2, ramp["deep"])
+        c.put(gx + 1, gy + 1, dash_tone if dash_tone else ramp["deep"])
+    # big ringed end cap on the near end
+    c.ellipse(x0 - 2, y0 + 1, 3.4, 4.4, ramp["deep"])
+    c.ellipse(x0 - 2, y0 + 1, 2.4, 3.2, cap_hi if cap_hi else ramp["hi"])
+    c.ellipse(x0 - 2, y0 + 1.5, 1.3, 1.8, ramp["light"])
+    c.put(x0 - 2, y0, ramp["hi"] if cap_hi is None else cap_hi)
+    c.put(x0 - 1, y0 + 2, ramp["deep"])         # growth-ring tick
+    c.outline(palette.OUTLINE)
 
 
 def gen_nimbuswood_item(path):
     c = Canvas(32, 32)
-    rng = Rng(0x817B)
-    _log(c, 5, 8, 21, palette.NIMBUSWOOD, rng)
-    _log(c, 7, 15, 20, palette.NIMBUSWOOD, rng)
-    _log(c, 4, 22, 22, palette.NIMBUSWOOD, rng)
-    c.outline(palette.OUTLINE)
+    _log_icon(c, palette.NIMBUSWOOD, Rng(0x817B))
     c.save(path)
 
 
 def gen_charwood_item(path):
     c = Canvas(32, 32)
-    rng = Rng(0xC4A2)
     wood = palette.CHARWOOD
-    _log(c, 5, 8, 21, wood, rng, dash_tone=wood["hi"])
-    _log(c, 7, 15, 20, wood, rng, dash_tone=wood["hi"])
-    _log(c, 4, 22, 22, wood, rng, dash_tone=wood["hi"])
-    c.outline(palette.OUTLINE)
-    c.put(12, 16, wood["ember"])            # one live ember in the stack
-    c.put(21, 10, with_alpha(wood["ember"], 190))
+    # charred log: pale scorched heartwood cap, cracked bark, one live ember
+    _log_icon(c, wood, Rng(0xC4A2), dash_tone=wood["hi"], cap_hi=wood["hi"])
+    c.put(17, 14, wood["ember"])
+    c.put(20, 17, with_alpha(wood["ember"], 170))
     c.save(path)
 
 
 def gen_prismwood_item(path):
     c = Canvas(32, 32)
-    rng = Rng(0x9817)
-    _log(c, 5, 8, 21, palette.PRISMWOOD, rng, dash_tone=_BARK_DASH)
-    _log(c, 7, 15, 20, palette.PRISMWOOD, rng, dash_tone=_BARK_DASH)
-    _log(c, 4, 22, 22, palette.PRISMWOOD, rng, dash_tone=_BARK_DASH)
-    c.outline(palette.OUTLINE)
-    c.put(24, 9, palette.PRISMLEAF["teal"])   # iridescent glints on the grain
-    c.put(10, 23, palette.PRISMLEAF["rose"])
+    _log_icon(c, palette.PRISMWOOD, Rng(0x9817), dash_tone=_BARK_DASH)
+    c.put(21, 11, palette.PRISMLEAF["teal"])   # iridescent glints on the grain
+    c.put(14, 20, palette.PRISMLEAF["rose"])
     c.save(path)

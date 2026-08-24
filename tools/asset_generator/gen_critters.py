@@ -253,3 +253,371 @@ def gen_cloudlamb(path, sheared):
         chunk.outline(palette.OUTLINE)
         sheet.paste(chunk, i * 64 + 16, 4 * 64 + 16)
     sheet.save(path)
+
+
+# --- v0.4 "The Living Sky" fauna: Zephyr Finch + Dew Snail --------------------
+# Same 32px critter layout as the glowmoth/sparkbeetle above: 6 cols
+# (idle, walk x4, in-liquid) x 4 rows (Up, Right, Down, Left).
+
+
+def _finch_frame(facing, col):
+    """Zephyr Finch: tiny darting song-bird. Blue-gray back and cap, pale
+    belly, gold beak/feet. Walk frames are a dart cycle: the wings flick open
+    on cols 1/3 while the body hops; col 4 settles into a little head-bob."""
+    c = Canvas(32, 32)
+    F = palette.FINCH
+    flick = col in (1, 3)
+    hop = 1 if flick else 0
+    peck = 1 if col == 4 else 0
+    cx, ground = 16, 26
+
+    if facing == "right":
+        by = ground - 7 - hop
+        hy = by - 4 + peck                       # head center y
+        # tail: pointed, behind; flicks up on the settle frame between darts
+        tf = 1 if col == 2 else 0
+        for i in range(4):
+            x = cx - 6 - i
+            y = by - 2 - (i // 2) - tf
+            c.put(x, y, F["deep"])
+            c.put(x, y + 1, F["deep"])
+            if i < 2:
+                c.put(x, y + 2, F["base"])
+        # body + head masses, belly patch, back sheen
+        c.ellipse(cx - 1, by, 5.4, 4.2, F["base"])
+        c.ellipse(cx + 4, hy, 3.2, 3.0, F["base"])
+        c.ellipse(cx + 1, by + 1.5, 3.6, 2.4, F["belly"])
+        c.ellipse(cx - 2, by - 2, 3.0, 1.7, F["light"])
+        c.put(cx + 3, hy + 2, F["belly"])        # throat
+        c.put(cx + 4, hy + 2, F["belly"])
+        # dark cap over the head
+        for dx in range(-2, 3):
+            c.put(cx + 4 + dx, hy - 3 + (1 if abs(dx) == 2 else 0), F["deep"])
+        c.put(cx + 3, hy - 2, F["deep"])
+        # wing
+        if flick:
+            for i in range(6):                   # flicked open: swept up-back
+                x = cx - i
+                y = by - 3 - i // 2
+                c.put(x, y, F["base"])
+                c.put(x, y + 1, F["deep"])
+                if i in (3, 5):
+                    c.put(x, y + 2, F["deep"])   # feather fingers
+        else:
+            c.ellipse(cx - 1, by - 1, 3.2, 2.2, F["deep"])
+            c.put(cx - 3, by - 1, F["light"])    # folded feather edges
+            c.put(cx - 2, by, F["light"])
+            c.put(cx - 1, by + 1, F["light"])
+        # beak silhouette mass (gold core repainted after the outline)
+        c.put(cx + 7, hy, F["base"])
+        c.put(cx + 8, hy, F["base"])
+        c.put(cx + 7, hy + 1, F["base"])
+        # legs
+        if flick:
+            c.put(cx, by + 4, F["deep"])         # tucked feet nub
+            c.put(cx + 1, by + 4, F["deep"])
+        else:
+            for lx in (cx - 1, cx + 2):
+                c.put(lx, ground - 1, F["deep"])
+                c.put(lx, ground, F["deep"])
+    elif facing == "down":
+        by = ground - 7 - hop
+        hy = by - 5 + peck
+        c.ellipse(cx, by, 4.6, 4.8, F["base"])   # body
+        c.ellipse(cx, hy, 3.4, 3.0, F["base"])   # head
+        c.ellipse(cx, by + 2, 3.0, 2.4, F["belly"])
+        c.put(cx - 3, by, F["belly"])
+        c.put(cx + 3, by, F["belly"])
+        for side in (-1, 1):                     # wings
+            if flick:
+                for i in range(5):
+                    x = cx + side * (4 + i)
+                    y = by - 1 - i // 2
+                    c.put(x, y, F["base"])
+                    c.put(x, y + 1, F["deep"])
+                    if i in (2, 4):
+                        c.put(x, y + 2, F["deep"])
+            else:
+                c.ellipse(cx + side * 4, by, 1.7, 3.0, F["deep"])
+                c.put(cx + side * 4, by - 2, F["light"])
+        for dx in range(-2, 3):                  # cap
+            c.put(cx + dx, hy - 3 + (1 if abs(dx) == 2 else 0), F["deep"])
+        c.put(cx - 1, hy - 3, F["light"])
+        # beak nub (center of the face)
+        c.put(cx, hy + 1, F["base"])
+        c.put(cx, hy + 2, F["base"])
+        if not flick:
+            for lx in (cx - 2, cx + 1):
+                c.put(lx, ground - 1, F["deep"])
+                c.put(lx, ground, F["deep"])
+    else:  # up
+        by = ground - 7 - hop
+        hy = by - 5
+        c.ellipse(cx, by, 4.6, 4.8, F["base"])
+        c.ellipse(cx, hy, 3.4, 3.0, F["base"])
+        for dx in range(-2, 3):                  # cap on the back of the head
+            c.put(cx + dx, hy - 2 + (1 if abs(dx) == 2 else 0), F["deep"])
+            if abs(dx) <= 1:
+                c.put(cx + dx, hy - 1, F["deep"])
+        c.put(cx - 1, hy - 2, F["light"])        # cap sheen
+        if flick:
+            for side in (-1, 1):                 # wings out mid-flick
+                for i in range(5):
+                    x = cx + side * (4 + i)
+                    y = by - 1 - i // 2
+                    c.put(x, y, F["base"])
+                    c.put(x, y + 1, F["deep"])
+                    if i in (2, 4):
+                        c.put(x, y + 2, F["deep"])
+        else:
+            for side in (-1, 1):                 # folded wings hugging the sides
+                c.ellipse(cx + side * 3, by + 1, 2.0, 3.6, F["deep"])
+                c.put(cx + side * 4, by - 1, F["deep"])
+                c.put(cx + side * 2, by + 4, F["deep"])   # tips crossing low
+            c.put(cx - 1, by - 2, F["light"])    # small shoulder sheen
+            c.put(cx - 2, by - 1, F["light"])
+            c.put(cx - 1, by - 1, F["light"])
+        # pointed tail toward the viewer
+        c.rect(cx - 1, by + 4, 3, 2, F["deep"])
+        c.put(cx, by + 6, F["deep"])
+        c.put(cx + 1, by + 6, F["deep"])
+        c.put(cx, by + 7, F["deep"])
+        c.put(cx, by + 4, F["base"])
+        c.put(cx, by + 5, F["base"])
+        if not flick:
+            for lx in (cx - 3, cx + 2):
+                c.put(lx, ground, F["deep"])
+    c.outline(palette.OUTLINE)
+    # face, beak and feet after the outline pass
+    if facing == "right":
+        by = ground - 7 - hop
+        hy = by - 4 + peck
+        c.put(cx + 7, hy, F["beak"])
+        c.put(cx + 8, hy, F["beak"])
+        c.put(cx + 7, hy + 1, F["beak"])
+        c.put(cx + 5, hy - 1, palette.OUTLINE)   # eye
+        c.put(cx + 4, hy, F["belly"])            # cheek
+        if not flick:
+            for lx in (cx - 1, cx + 2):
+                c.put(lx, ground, F["beak"])     # gold feet
+    elif facing == "down":
+        by = ground - 7 - hop
+        hy = by - 5 + peck
+        c.put(cx - 2, hy, palette.OUTLINE)
+        c.put(cx + 2, hy, palette.OUTLINE)
+        c.put(cx, hy + 1, F["beak"])
+        c.put(cx, hy + 2, F["beak"])
+        if not flick:
+            for lx in (cx - 2, cx + 1):
+                c.put(lx, ground, F["beak"])
+    if col == 5:
+        _mist_clip(c, 21)
+    return c
+
+
+def _snail_frame(facing, col):
+    """Dew Snail: slow glowing shoal snail. Teal foot with glow dots along the
+    rim, sandy spiral shell, glowing eye-stalk tips. Walk cols are a gentle
+    inchworm: col 1 gathers into a hump, col 3 stretches out."""
+    import math
+    c = Canvas(32, 32)
+    S = palette.DEWSNAIL
+    gather = 2 if col == 1 else 0
+    stretch = 2 if col == 3 else 0
+    sway = {0: 0, 1: 1, 2: 0, 3: -1, 4: 0, 5: 0}[col]
+    cx, ground = 16, 26
+    glow_pts = []                                 # painted after the outline
+    tips = []
+
+    def spiral(sx, sy, r0, squish=0.92):
+        for t in range(26):
+            a = 2.6 + t * 0.42
+            rr = r0 - t * 0.155
+            c.put(round(sx + math.cos(a) * rr), round(sy + math.sin(a) * rr * squish),
+                  S["shell_deep"])
+
+    shafts = []                                   # stalk cores, repainted after
+    if facing == "right":
+        foot_l = cx - 8 + gather - stretch
+        foot_r = cx + 11
+        fx = (foot_l + foot_r) / 2.0
+        c.ellipse(fx, ground - 1.5, (foot_r - foot_l) / 2.0, 2.5, S["base"])
+        if gather:
+            c.ellipse(fx - 2, ground - 3, 3.5, 2.0, S["base"])     # hump
+        for x in range(foot_l + 1, foot_r - 1):                    # lit top edge
+            c.put(x, ground - 3 - (1 if gather and abs(x - fx + 2) < 3 else 0), S["light"])
+        for x in range(foot_l + 3, foot_r - 2, 3):                 # muscle ripples
+            c.put(x, ground - 1, S["deep"])
+        # neck + head knob clearly in front of the shell
+        c.ellipse(cx + 7, ground - 4, 2.6, 3.0, S["base"])
+        c.ellipse(cx + 8, ground - 7, 2.4, 2.4, S["base"])
+        c.put(cx + 7, ground - 9, S["light"])
+        c.put(cx + 6, ground - 7, S["light"])
+        c.put(cx + 9, ground - 4, S["deep"])                       # chin shade
+        # eye stalks: 2px masses leaning with the frame
+        for sx, ln in ((cx + 6, 3), (cx + 9, 2)):
+            for i in range(ln):
+                x = sx + (i * sway) // 2
+                c.put(x, ground - 9 - i, S["base"])
+                c.put(x + 1, ground - 9 - i, S["base"])
+                shafts.append((x, ground - 9 - i))
+            tips.append((sx + ((ln - 1) * sway) // 2, ground - 10 - ln))
+        # shell riding the back, well clear of the head
+        shx, shy = cx - 4, ground - 10
+        c.ellipse(shx + 1, shy + 1, 5.4, 5.0, S["shell_deep"])
+        c.ellipse(shx, shy, 5.2, 4.9, S["shell"])
+        spiral(shx, shy, 4.6)
+        c.put(shx - 2, shy - 4, S["glow"])       # one dew glint, top-left
+        for x in (foot_l + 3, foot_l + 7, foot_r - 4):
+            glow_pts.append((x, ground - 1))
+    elif facing == "down":
+        # shell behind/above, head sliding toward the camera
+        shx, shy = cx, ground - 11
+        c.ellipse(shx + 1, shy + 1, 5.6, 5.2, S["shell_deep"])
+        c.ellipse(shx, shy, 5.4, 5.0, S["shell"])
+        spiral(shx, shy, 4.7)
+        c.put(shx - 2, shy - 4, S["glow"])
+        # wide foot below, head knob centered on it
+        c.ellipse(cx, ground - 2, 5.4 + stretch * 0.5 - gather * 0.5, 2.4, S["base"])
+        for x in range(cx - 4, cx + 5):
+            c.put(x, ground - 4, S["light"])
+        c.ellipse(cx, ground - 6, 2.8, 2.8, S["base"])
+        c.put(cx - 1, ground - 8, S["light"])
+        c.put(cx - 2, ground - 6, S["light"])
+        for x in (cx - 3, cx + 2):
+            c.put(x, ground - 1, S["deep"])
+        # stalks rise in a V above the head
+        for side in (-1, 1):
+            sx = cx + side * 2
+            for i in range(3):
+                x = sx + side * (i // 2) + (i * sway) // 2
+                c.put(x, ground - 9 - i, S["base"])
+                c.put(x + 1, ground - 9 - i, S["base"])
+                shafts.append((x, ground - 9 - i))
+            tips.append((sx + side + (2 * sway) // 2, ground - 12))
+        glow_pts += [(cx - 4, ground - 1), (cx, ground - 1), (cx + 4, ground - 1)]
+    else:  # up: the shell dominates, stalk tips peek over the top
+        c.ellipse(cx, ground - 1, 5.2 + stretch * 0.5, 2.2, S["base"])
+        for x in range(cx - 4, cx + 5, 2):
+            c.put(x, ground, S["deep"])
+        shx, shy = cx, ground - 8
+        c.ellipse(shx + 1, shy + 1, 5.8, 5.4, S["shell_deep"])
+        c.ellipse(shx, shy, 5.6, 5.2, S["shell"])
+        spiral(shx, shy, 4.9)
+        c.put(shx - 2, shy - 4, S["glow"])
+        for sx in (cx - 3, cx + 2):              # stalks emerging behind the shell
+            for i in range(3):
+                x = sx + (i * sway) // 2
+                c.put(x, ground - 13 - i, S["base"])
+                c.put(x + 1, ground - 13 - i, S["base"])
+                if i > 0:
+                    shafts.append((x, ground - 13 - i))
+            tips.append((sx + (2 * sway) // 2, ground - 16))
+        glow_pts += [(cx - 4, ground - 1), (cx + 4, ground - 1)]
+    c.outline(palette.OUTLINE)
+    # after the outline: stalk cores, glowing tips, dew dots on the foot
+    for (px_, py_) in shafts:
+        c.put(px_, py_, S["base"])
+    for (tx, ty) in tips:
+        c.put(tx, ty, S["glow"])
+        c.put(tx + 1, ty, S["glow"])
+        c.put(tx, ty - 1, with_alpha(S["glow"], 130))
+    for pt in glow_pts:
+        c.put(pt[0], pt[1], S["glow"])
+    if col == 5:
+        _mist_clip(c, 21)
+    return c
+
+
+def gen_zephyrfinch(path):
+    _gen_sheet(path, _finch_frame)
+
+
+def gen_dewsnail(path):
+    _gen_sheet(path, _snail_frame)
+
+
+def gen_critters_v04(mob_dir):
+    gen_zephyrfinch(f"{mob_dir}/zephyrfinch.png")
+    gen_dewsnail(f"{mob_dir}/dewsnail.png")
+
+
+def gen_critter_icons_v04(icon_dir):
+    import math
+    # finch: perched side profile, gold beak forward
+    c = Canvas(32, 32)
+    F = palette.FINCH
+    for i in range(6):                            # tail
+        x = 8 - i
+        y = 15 - i // 2
+        c.put(x, y, F["deep"])
+        c.put(x, y + 1, F["deep"])
+        if i < 3:
+            c.put(x, y + 2, F["base"])
+    c.ellipse(14, 17, 7.0, 5.4, F["base"])        # body
+    c.ellipse(21, 11, 4.4, 4.0, F["base"])        # head
+    c.ellipse(16, 19, 4.6, 3.2, F["belly"])       # belly
+    c.put(19, 15, F["belly"])
+    c.put(20, 15, F["belly"])
+    c.ellipse(12, 14, 4.0, 2.2, F["light"])       # back sheen
+    for dx in range(-3, 4):                       # cap
+        c.put(21 + dx, 7 + (1 if abs(dx) >= 2 else 0), F["deep"])
+    c.ellipse(13, 17, 4.2, 2.8, F["deep"])        # folded wing
+    c.put(10, 16, F["light"])
+    c.put(12, 18, F["light"])
+    c.put(14, 19, F["light"])
+    for i in range(3):                            # beak mass
+        c.put(25 + i, 11, F["base"])
+        if i < 2:
+            c.put(25 + i, 12, F["base"])
+    for lx in (13, 17):                           # legs
+        c.put(lx, 23, F["deep"])
+        c.put(lx, 24, F["deep"])
+    c.outline(palette.OUTLINE)
+    c.put(25, 11, F["beak"])
+    c.put(26, 11, F["beak"])
+    c.put(27, 11, F["beak"])
+    c.put(25, 12, F["beak"])
+    c.put(22, 10, palette.OUTLINE)                # eye
+    c.put(21, 11, F["belly"])                     # cheek
+    for lx in (13, 17):
+        c.put(lx, 24, F["beak"])
+    c.save(f"{icon_dir}/zephyrfinch.png")
+
+    # dew snail: side profile, big spiral shell, glow dots
+    c = Canvas(32, 32)
+    S = palette.DEWSNAIL
+    c.ellipse(15, 24, 9.0, 3.0, S["base"])        # foot
+    for x in range(8, 20):
+        c.put(x, 21, S["light"])
+    for x in range(9, 22, 3):
+        c.put(x, 25, S["deep"])
+    c.ellipse(23, 19, 3.2, 4.0, S["base"])        # neck
+    c.ellipse(24, 15, 2.8, 2.6, S["base"])        # head
+    c.put(23, 13, S["light"])
+    for sx, ln in ((22, 4), (26, 3)):             # stalks
+        for i in range(ln):
+            c.put(sx, 12 - i, S["base"])
+            c.put(sx + 1, 12 - i, S["base"])
+    shx, shy = 13, 13
+    c.ellipse(shx + 1, shy + 1, 7.0, 6.6, S["shell_deep"])
+    c.ellipse(shx, shy, 6.8, 6.4, S["shell"])
+    for t in range(34):
+        a = 2.6 + t * 0.38
+        rr = 6.0 - t * 0.16
+        c.put(round(shx + math.cos(a) * rr), round(shy + math.sin(a) * rr * 0.92),
+              S["shell_deep"])
+    c.put(shx - 3, shy - 4, S["glow"])
+    c.put(shx - 4, shy - 3, S["glow"])
+    c.outline(palette.OUTLINE)
+    for sx, ln in ((22, 4), (26, 3)):             # stalk cores
+        for i in range(1, ln - 1):
+            c.put(sx, 12 - i, S["base"])
+            c.put(sx + 1, 12 - i, S["base"])
+    for (tx, ty) in ((22, 8), (26, 9)):
+        c.put(tx, ty, S["glow"])
+        c.put(tx + 1, ty, S["glow"])
+        c.put(tx, ty - 1, with_alpha(S["glow"], 130))
+    for x, y in ((10, 25), (14, 26), (18, 25)):
+        c.put(x, y, S["glow"])
+    c.save(f"{icon_dir}/dewsnail.png")
