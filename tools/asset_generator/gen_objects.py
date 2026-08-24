@@ -554,21 +554,18 @@ def gen_staticmoss(path, variants=2):
             c.ellipse(mx + 1, my + 1, r, ry, M["deep"])
         for (mx, my, r, ry) in mounds:
             c.ellipse(mx, my, r, ry, M["base"])
-        for (mx, my, r, ry) in mounds:                 # lit top-left crowns
-            c.ellipse(mx - r * 0.3, my - ry * 0.4, r * 0.5, ry * 0.5, M["light"])
-        # mossy scale dapple, broken so it never reads as a grid
+        for (mx, my, r, ry) in mounds:                 # broad lit crown caps
+            c.ellipse(mx - r * 0.22, my - ry * 0.4, r * 0.62, ry * 0.55,
+                      M["light"])
+        # mossy scale dapple: deep pits lower-right, spark-lit velvet on the
+        # crowns — this glow dapple is what says "charged moss", not rock
         for x in range(2, 30):
-            for y in range(20, 31):
-                if c.get(x, y)[:3] == M["base"][:3] and (x + 2 * y) % 5 == 0 \
-                        and rng.chance(0.7):
+            for y in range(18, 31):
+                p = c.get(x, y)[:3]
+                if p == M["base"][:3] and (x + 2 * y) % 5 == 0 and rng.chance(0.7):
                     c.put(x, y, M["deep"])
-        # velvety lit crowns: light dapple on the upper-left of each mound
-        for (mx, my, r, ry) in mounds:
-            for _ in range(int(r)):
-                dx = -rng.range(0, int(r * 0.6))
-                dy = -rng.range(1, max(int(ry * 0.7), 2))
-                if c.get(mx + dx, my + dy)[3] > 0:
-                    c.put(mx + dx, my + dy, M["light"])
+                elif p == M["light"][:3] and (2 * x + y) % 7 == 0 and rng.chance(0.6):
+                    c.put(x, y, M["spark"])
         # tiny moss-fuzz hairs poking off the crowns (pre-outline: they
         # pick up the outline and read as soft fuzz, not stray pixels)
         for (mx, my, r, ry) in mounds[:2]:
@@ -610,7 +607,8 @@ def gen_thunderbloom(path, variants=2):
                 c.put(x + 1, y, T["deep"])
             for i in range(ln - 1):                    # lit core
                 x, y = round(hx + dx * i), round(hy + dy * i)
-                c.put(x + (1 if dx > 0.3 else 0), y, T["base"] if i > 0 else T["light"])
+                core = T["light"] if (i == 0 or i >= ln - 2) else T["base"]
+                c.put(x + (1 if dx > 0.3 else 0), y, core)
             tx, ty = round(hx + dx * ln), round(hy + dy * ln)
             c.put(tx, ty, T["light"] if k % 2 else T["spark"])
         c.put(hx, hy, T["spark"])                      # charged heart
@@ -780,11 +778,17 @@ def gen_fulguriteore(path, variants=2):
             sheet.put(sx, sy, F["hi"])                 # fused node at the top
             sheet.put(sx - 1, sy + 1, F["light"])
         # loose glass beads between the veins
-        for _ in range(rng.range(3, 4)):
+        for _ in range(rng.range(4, 6)):
             bx, by = x0 + rng.range(3, 28), rng.range(3, 28)
             sheet.put(bx, by, F["light"])
             sheet.put(bx + 1, by, F["deep"])
             sheet.put(bx, by - 1, F["hi"] if rng.chance(0.4) else F["light"])
+        # one short fused stub vein for density (vanilla ore fills the face)
+        sx, sy = x0 + rng.range(10, 20), rng.range(20, 24)
+        for k in range(4):
+            sheet.put(sx + (k % 2), sy + k, F["base"])
+            sheet.put(sx + (k % 2) + 1, sy + k, F["deep"])
+        sheet.put(sx, sy - 1, F["hi"])
     sheet.save(path)
 
 
