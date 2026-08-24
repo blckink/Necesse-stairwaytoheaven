@@ -84,3 +84,27 @@ micro-detail", "silhouette mushy at 1×", "outline swallowed the diagonal",
 "wrong sheet layout (rendering shows sub-rect misalignment)", "palette drift
 (color not in ramp)", "density too sparse (world reads empty)". Each maps to a
 concrete generator fix above.
+
+## Size law: measure vanilla FIRST (mandatory since v0.3.4)
+
+Playtests proved we systematically undershoot mass: the warden shipped at a
+third of the player's width, the seance circle at 2% of a vanilla ritual
+altar's opaque pixels. Vanilla Necesse art is CHUNKY — big heads, thick
+props, set pieces that fill their tiles.
+
+Before drawing ANY asset:
+1. Find the closest vanilla analogue in the sprite dump and MEASURE its
+   opaque-pixel bounding box and pixel count (one representative cell).
+2. Target >= 80% of the analogue's opaque mass. When in doubt, go bigger.
+3. After drawing, run `python3 tools/size_audit.py` (add a mapping row for
+   every new asset class) — a FIX flag blocks shipping.
+
+Measured anchors (opaque bbox, representative cells):
+- Player bare head 28px wide; torso 20px; hair pushes heads to 32-36px.
+- Settler-type humanoids: figure ~46-52px tall in the 64 cell, hem 22-24px.
+- Trees: 128px cells; vanilla deadwood deco fills 62x116 of a 64x128 cell.
+- Wall banner objects: 64x96 opaque (two tiles tall).
+- Streetlamps: ~24x86 opaque in the 32x96 half.
+- Wall torch: ~12x26 in a 32 cell. Mushroom: 24x28 (TALL, not squat).
+- Grass clump: ~26x30 and 500+ opaque px (SOLID, not wispy).
+- Ritual/set-piece objects (altars): 80x80+ multi-tile presence.
