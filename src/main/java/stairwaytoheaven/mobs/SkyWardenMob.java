@@ -176,9 +176,14 @@ public class SkyWardenMob extends FriendlyMob {
         int homeX = (int) homeTile[0];
         int homeY = (int) homeTile[1] + 1; // just below the stairway pad
         settler.setHome(new java.awt.Point(homeX, homeY));
+        // findTeleportLocation already returns PIXEL coordinates (it builds
+        // its candidates as tile*32+16 internally) — vanilla call sites pass
+        // the Point straight into addMob. Converting again here placed the
+        // settler at 32x the intended distance, i.e. thousands of tiles out
+        // in the wilderness after a 100,000-coin payment.
         java.awt.Point spot = necesse.level.maps.levelData.settlementData.Waystone
                 .findTeleportLocation(surface, homeX, homeY, settler);
-        surface.entityManager.addMob(settler, spot.x * 32 + 16, spot.y * 32 + 16);
+        surface.entityManager.addMob(settler, (float) spot.x, (float) spot.y);
 
         // This sky-side keeper departs; the settler at home takes over.
         this.remove();
