@@ -44,6 +44,17 @@ public abstract class SpireCatMob extends CritterMob {
     protected SpireCatMob(boolean isBlackCat) {
         super(50);
         this.isBlackCat = isBlackCat;
+        // DESIGN INVARIANT — Siggi and Peanut must never be permanently lost.
+        // Three native mechanisms carry that, and they are coupled:
+        //   1. canTakeDamage() == false below gates EVERY damage entry point in
+        //      Mob (verified against the 1.3.2 jar: isHit/addHealth/setHealth
+        //      all check it; setHealth only ever allows increases when false).
+        //   2. canDespawn = false stops CritterMob's distance despawn.
+        //   3. CritterMob.shouldSave() is `shouldSave && !canDespawn()` — so
+        //      (2) is ALSO what makes them save-persistent. Flipping canDespawn
+        //      back to true would silently make them despawn AND stop being
+        //      written to the save, and since SkywatchQuestData.catsSpawned
+        //      stays true they would never respawn. Do not change this line.
         this.canDespawn = false;
         this.setSpeed(24.0F);
         this.setFriction(2.5F);

@@ -111,6 +111,12 @@ public class SkyWardenMob extends FriendlyMob {
                 if (tryRecruit(client, level, quest)) {
                     say(client, "wardenrecruitdone1");
                     say(client, "wardenrecruitdone2");
+                    // The keeper's Silver Bell changes hands here. It is the
+                    // key the Seance Circle checks for, and since the old cat
+                    // quest that used to award it is gone this is its only
+                    // source — without it the Veil is unreachable.
+                    give(client, "silverbell", 1);
+                    say(client, "wardengivesbell");
                 } else {
                     sayRecruitmentOffer(client);
                     say(client, "wardenrecruitwait");
