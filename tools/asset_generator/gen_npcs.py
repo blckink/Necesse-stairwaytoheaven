@@ -410,50 +410,69 @@ def gen_cats(black_path, tabby_path):
 
 def gen_npc_icons(dir_path):
     w = palette.WARDEN
+    # The keeper's bestiary icon — it shows up in thought bubbles, chat glyphs
+    # and journal entries, so it has to read at 32px. Built to the vanilla
+    # settler-icon recipe (elderhuman 656 opaque px, farmerhuman 772, both
+    # filling the frame corner to corner): head fills the frame, and hood,
+    # hair, beard and face each sit on their OWN tone with a dark separator
+    # between them. The earlier version drew hood, hair and beard in one
+    # near-white, so the beard disappeared and he read as a helmet.
+    hood = w["coat"]                             # the cowl is coat cloth
+    hood_hi = w["coat_hi"]
+    hood_deep = w["coat_deep"]
+    hair = w["hair_shade"]                       # mid grey, the mane mass
+    beard = (240, 242, 246)                      # brighter than the mane
+    beard_shade = (198, 202, 212)
     c = Canvas(32, 32)
-    # warden bust on chibi proportions: big hair dome + curtains, face
-    # opening, beard over a feather collar and coat shoulders.
-    for x in range(7, 26):                       # coat shoulders
-        c.put(x, 28, w["coat_hi"])
-    c.rect(6, 29, 21, 3, w["coat"])
-    c.rect(6, 29, 2, 3, w["coat_light"])
-    c.rect(25, 29, 2, 3, w["coat_deep"])
-    for y in (25, 26, 27):                       # feather collar
-        for x in range(6, 27):
-            c.put(x, y, w["feather"])
-    for x in range(8, 25):                       # scallop texture row
-        if x % 2 == 0:
-            c.put(x, 25, w["feather_hi"])
-    c.ellipse(16, 13.5, 10.2, 8.2, w["hair"])    # hair dome
-    for y in range(19, 25):                      # jaw band down to the collar
-        for x in range(8, 25):
-            c.put(x, y, w["hair"])
-    for y in range(12, 27):                      # curtains: L 5px, R 4px
-        for x in range(4, 9):
-            c.put(x, y, w["hair_shade"] if (x == 4 and y > 17) else w["hair"])
-        for x in range(24, 28):
-            c.put(x, y, w["hair_shade"] if (x == 27 and y > 18) else w["hair"])
-    for (xx, yy) in ((21, 8), (22, 9), (23, 10)):
-        c.put(xx, yy, w["hair_shade"])           # dome shade, light TL
-    c.ellipse(16, 15.0, 6.6, 6.2, w["skin"])     # face opening
-    for i, bw in enumerate((6, 6, 5, 5, 4, 4, 3, 2)):
-        for dx in range(-bw, bw + 1):            # beard mass over the collar
-            c.put(16 + dx, 19 + i, w["hair"])
+
+    # cowl: a broad hood shell reaching the frame edges, with the mane and
+    # face inset into its opening
+    c.ellipse(16, 13.0, 14.4, 12.4, hood)
+    for y in range(12, 32):                      # shoulders of the cowl
+        for x in range(1, 31):
+            c.put(x, y, hood)
+    for yy in range(1, 14):                      # lit top-left plane
+        for xx in range(2, 30):
+            if (xx - 16) * 0.7 + (yy - 13) * 1.4 < -7.0 and c.get(xx, yy)[:3] == hood:
+                c.put(xx, yy, hood_hi)
+    for yy in range(14, 32):                     # shaded right flank
+        for xx in range(24, 31):
+            if c.get(xx, yy)[:3] == hood:
+                c.put(xx, yy, hood_deep)
+    for x in (13, 15, 17, 19):                   # gold trim across the chest
+        c.put(x, 30, w["trim"])
+        c.put(x, 29, w["trim_hi"])
+
+    # the mane inside the hood opening, then the face inset into that
+    c.ellipse(16, 14.0, 10.4, 10.0, hair)
+    c.ellipse(16, 15.0, 7.6, 7.4, w["skin"])
+    for i, bw in enumerate((6, 6, 5, 4, 3)):     # beard, its own tone
+        for dx in range(-bw, bw + 1):
+            c.put(16 + dx, 21 + i, beard)
+    for dx in range(-4, 5):                      # moustache
+        c.put(16 + dx, 20, beard_shade)
+
     c.outline(palette.OUTLINE)
-    # face details after the outline pass
+
+    for x in range(8, 25):                       # hood rim shadow on the mane
+        if c.get(x, 8)[:3] == hair:
+            c.put(x, 8, hood_deep)
     for x in list(range(10, 14)) + list(range(19, 23)):
-        c.put(x, 11, w["skin_shade"])            # hooded brow shade
-    for x in list(range(11, 14)) + list(range(19, 22)):
+        c.put(x, 11, w["skin_shade"])            # brow shade
+    for x in list(range(10, 14)) + list(range(19, 23)):
         c.put(x, 12, palette.OUTLINE)            # heavy brow bars
     for x in (11, 12, 20, 21):
-        c.put(x, 13, w["eye"])                   # bright 2x2 eyes
+        c.put(x, 13, w["eye"])                   # teal 2x2 eyes
         c.put(x, 14, w["eye"])
         c.put(x, 15, w["skin_shade"])            # under-eye bags
-    c.rect(15, 13, 2, 3, w["skin"])              # nose bridge
-    c.rect(15, 16, 2, 2, w["skin_shade"])        # nose tip
-    for (sx_, y0, y1) in ((12, 20, 22), (14, 21, 24), (19, 20, 23)):
+    c.rect(15, 13, 2, 4, w["skin"])              # nose bridge
+    c.rect(15, 17, 2, 2, w["skin_shade"])        # nose tip
+    for x in range(10, 23):                      # cheek seam under the moustache
+        if c.get(x, 19)[:3] == w["skin"]:
+            c.put(x, 19, w["skin_shade"])
+    for (sx_, y0, y1) in ((13, 22, 25), (19, 22, 25)):
         for y in range(y0, y1 + 1):              # beard streaks
-            c.put(sx_, y, w["hair_shade"])
+            c.put(sx_, y, beard_shade)
     c.save(f"{dir_path}/skywarden.png")
 
     # The same man after the recruitment, as the settlement UI shows him: the
