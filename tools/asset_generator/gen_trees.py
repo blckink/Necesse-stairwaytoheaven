@@ -619,3 +619,122 @@ def gen_prismwood_item(path):
     c.put(21, 11, palette.PRISMLEAF["teal"])   # iridescent glints on the grain
     c.put(14, 20, palette.PRISMLEAF["rose"])
     c.save(path)
+
+
+# --- Saplings (32x32 object sprites) -----------------------------------------
+# Size law: measured vanilla analogues (cell 0 opaque bbox / pixels) —
+# pinesapling 16x28 / 288 px, willowsapling 16x26 / 280 px, birchsapling
+# 24x26 / 336 px. Vanilla saplings are chunky MINI-TREES (full crown on a
+# thick stub trunk over a dark base mound), not thin sprouts; each of ours
+# targets >= 80% of its analogue's opaque mass and is audited in QA.
+
+def _sapling_base(body, rng, wood, mound_top, mound_deep, cx=15):
+    """Stub trunk + soil mound, ground-anchored bottom-center. Returns the
+    y of the trunk top where the crown sits."""
+    lean = rng.pick((-1, 0, 1))
+    for i in range(11):                          # trunk stub, 4px wide
+        y = 27 - i
+        x = cx - 1 + (lean if i > 5 else 0)
+        body.put(x, y, wood["light"])
+        body.put(x + 1, y, wood["base"])
+        body.put(x + 2, y, wood["base"])
+        body.put(x + 3, y, wood["deep"])
+    body.put(cx, 24, wood["deep"])               # bark notch
+    body.put(cx + 1, 20, wood["hi"])
+    # rooty soil mound over the trunk foot
+    body.ellipse(cx + 1, 28.2, 6.5, 2.6, mound_deep)
+    body.ellipse(cx + 1, 27.4, 5.0, 1.8, mound_top)
+    body.put(cx - 4, 27, mound_deep)
+    body.put(cx + 6, 28, mound_top)
+    return 17 + (lean if lean else 0)
+
+
+def gen_saplings(dir_path):
+    """32x32 sapling objects: nimbussapling / fulgursapling / prismasapling.
+    Mini versions of their parent trees (same palettes, same construction
+    language) standing in a small soil mound with a soft ground shadow."""
+    turf = palette.CLOUDTURF
+    slate = palette.STORMSLATE
+
+    # --- Nimbus Willow sapling: little cloud crown + two weeping nubs
+    cell = Canvas(32, 32)
+    rng = Rng(0x5A811)
+    cell.ellipse(16, 29, 8.5, 2.2, with_alpha(SHADOW, 110))
+    body = Canvas(32, 32)
+    _sapling_base(body, rng, palette.NIMBUSWOOD, turf["tuft"], turf["deep"])
+    leaf = palette.NIMBUSLEAF
+    _lobed_mass(body, [(11, 12, 6.5, 5.0), (20, 11, 6.0, 4.6),
+                       (15, 6, 6.0, 4.4), (15, 13, 6.5, 5.0)], leaf)
+    body.outline(palette.OUTLINE)
+    _sunlit_rim(body, leaf["hi"], leaf["light"], y_max=20)
+    for (sx, ln) in ((10, 4), (21, 3)):          # weeping strand nubs
+        edge = _bottom_edge(body, sx, 24)
+        if edge is not None:
+            for i in range(ln):
+                body.put(sx, edge - 1 + i, leaf["base"] if i < ln - 1 else leaf["deep"])
+                body.put(sx + 1, edge - 1 + i, leaf["deep"])
+            body.put(sx, edge - 1 + ln, palette.OUTLINE)
+    body.put(13, 4, leaf["hi"])
+    cell.paste(body, 0, 0)
+    cell.save(f"{dir_path}/nimbussapling.png")
+
+    # --- Fulgur Pine sapling: two droopy needle tiers + spiky top, 1 ember
+    cell = Canvas(32, 32)
+    rng = Rng(0x5AF16)
+    cell.ellipse(16, 29, 8, 2.2, with_alpha(SHADOW, 110))
+    body = Canvas(32, 32)
+    wood = palette.CHARWOOD
+    _sapling_base(body, rng, wood, slate["light"], slate["deep"])
+    ndl = palette.FULGURPINE_NEEDLE
+    _lobed_mass(body, [(11, 17, 6.0, 3.2), (20, 16, 5.5, 3.0),
+                       (15, 16, 5.0, 3.4)], ndl, fold=False, sheen=False)
+    _lobed_mass(body, [(13, 10, 5.0, 3.0), (18, 9, 4.6, 2.8)],
+                ndl, fold=False, sheen=False)
+    for k in range(6):                           # spiky crown tip
+        w = max(1, 2 - k // 2)
+        for dx in range(-w, w + 1):
+            body.put(15 + dx, 6 - k, ndl["deep"] if abs(dx) >= w else ndl["base"])
+    body.outline(palette.OUTLINE)
+    _sunlit_rim(body, ndl["hi"], ndl["light"], y_max=22)
+    for (tx, ty) in ((11, 15), (17, 9), (13, 10)):   # lit needle ticks
+        body.put(tx, ty, ndl["light"])
+        body.put(tx + 1, ty, ndl["light"])
+    for (tx, ty) in ((19, 18), (14, 19), (21, 11)):  # deep clump ticks
+        if body.filled(tx, ty):
+            body.put(tx, ty, ndl["deep"])
+    for x in range(11, 21, 3):                   # hanging fringe nubs
+        edge = _bottom_edge(body, x, 23)
+        if edge is not None and body.get(x, edge)[:3] == palette.OUTLINE:
+            body.put(x, edge + 1, ndl["deep"])
+            body.put(x, edge + 2, palette.OUTLINE)
+    if body.filled(15, 22):
+        body.put(15, 22, wood["ember"])          # one live ember on the stub
+    cell.paste(body, 0, 0)
+    cell.save(f"{dir_path}/fulgursapling.png")
+
+    # --- Prisma Birch sapling: round dome + accents, dashed pale trunk
+    cell = Canvas(32, 32)
+    rng = Rng(0x5AB12)
+    cell.ellipse(16, 29, 8.5, 2.2, with_alpha(SHADOW, 110))
+    body = Canvas(32, 32)
+    _sapling_base(body, rng, palette.PRISMWOOD, turf["tuft"], turf["deep"])
+    leaf = palette.PRISMLEAF
+    _lobed_mass(body, [(15, 9, 8.5, 6.5), (9, 13, 4.5, 3.6),
+                       (22, 12, 4.5, 3.8)], leaf)
+    body.outline(palette.OUTLINE)
+    _sunlit_rim(body, leaf["hi"], leaf["light"], y_max=18)
+    for (tx, ty, tone) in ((11, 7, leaf["light"]), (13, 5, leaf["hi"]),
+                           (18, 13, leaf["deep"]), (13, 14, leaf["deep"]),
+                           (19, 6, leaf["light"])):
+        body.put(tx, ty, tone)
+        body.put(tx + 1, ty, tone)
+    body.put(11, 11, leaf["teal"])               # the Shoals' accents
+    body.put(12, 11, leaf["teal"])
+    body.put(19, 9, leaf["rose"])
+    body.put(20, 9, leaf["rose"])
+    body.put(14, 22, palette.OUTLINE)            # birch bark dashes
+    body.put(15, 22, _BARK_DASH)
+    body.put(15, 25, palette.OUTLINE)
+    body.put(16, 25, _BARK_DASH)
+    cell.paste(body, 0, 0)
+    cell.save(f"{dir_path}/prismasapling.png")
