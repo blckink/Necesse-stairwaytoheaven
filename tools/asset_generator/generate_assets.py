@@ -29,6 +29,7 @@ import gen_veil  # noqa: E402
 import gen_splats  # noqa: E402
 import gen_walls  # noqa: E402
 import gen_furniture  # noqa: E402
+import gen_trees  # noqa: E402
 
 
 def main():
@@ -38,7 +39,7 @@ def main():
     args = parser.parse_args()
     out = args.out
 
-    for sub in ("tiles", "objects", "objects/statues", "items", "mobs", "mobs/icons", "player/weapons", "locale", "ui/mapicons"):
+    for sub in ("tiles", "objects", "objects/statues", "items", "mobs", "mobs/icons", "player/weapons", "locale", "ui/mapicons", "particles"):
         os.makedirs(os.path.join(out, sub), exist_ok=True)
 
     # Terrain + liquid: modern _splat atlases (the 1.3.2 renderer's primary
@@ -92,6 +93,52 @@ def main():
     gen_objects.gen_aurorabloom(f"{out}/objects/aurorabloom.png")
     gen_objects.gen_skyreeds(f"{out}/objects/skyreeds.png")
     gen_objects.gen_mapicons(f"{out}/ui/mapicons")
+
+    # ===== v0.4 "The Living Sky": per-biome fill =====
+    # Trees (vanilla TreeObject 128px cells) + leaf particles + saplings
+    gen_trees.gen_nimbuswillow(f"{out}/objects/nimbuswillow.png")
+    gen_trees.gen_fulgurpine(f"{out}/objects/fulgurpine.png")
+    gen_trees.gen_prismabirch(f"{out}/objects/prismabirch.png")
+    gen_trees.gen_nimbuswillow_leaves(f"{out}/particles/nimbusleaves.png")
+    gen_trees.gen_fulgurpine_leaves(f"{out}/particles/fulgurleaves.png")
+    gen_trees.gen_prismabirch_leaves(f"{out}/particles/prismaleaves.png")
+    gen_trees.gen_saplings(f"{out}/objects")
+    gen_trees.gen_nimbuswood_item(f"{out}/items/nimbuswood.png")
+    gen_trees.gen_charwood_item(f"{out}/items/charwood.png")
+    gen_trees.gen_prismwood_item(f"{out}/items/prismwood.png")
+    # Plants + meadow carpet grasses + ore overlays
+    gen_objects.gen_cloudbell(f"{out}/objects/cloudbell.png")
+    gen_objects.gen_skytulip(f"{out}/objects/skytulip.png")
+    gen_objects.gen_staticmoss(f"{out}/objects/staticmoss.png")
+    gen_objects.gen_thunderbloom(f"{out}/objects/thunderbloom.png")
+    gen_objects.gen_glowfern(f"{out}/objects/glowfern.png")
+    gen_objects.gen_auroralily(f"{out}/objects/auroralily.png")
+    gen_objects.gen_tallcloudgrass(f"{out}/objects/tallcloudgrass.png")
+    gen_objects.gen_stormsedge(f"{out}/objects/stormsedge.png")
+    gen_objects.gen_prismgrass(f"{out}/objects/prismgrass.png")
+    gen_objects.gen_fulguriteore(f"{out}/objects/fulguriteore.png")
+    gen_objects.gen_prismshardore(f"{out}/objects/prismshardore.png")
+    gen_objects.gen_cloudbell_item(f"{out}/items/cloudbell.png")
+    gen_objects.gen_skytulip_item(f"{out}/items/skytulip.png")
+    gen_objects.gen_thunderbloom_item(f"{out}/items/thunderbloom.png")
+    gen_objects.gen_auroralily_item(f"{out}/items/auroralily.png")
+    gen_objects.gen_glowfern_item(f"{out}/items/glowfern.png")
+    gen_objects.gen_staticmoss_item(f"{out}/items/staticmoss.png")
+    gen_objects.gen_fulgurite_item(f"{out}/items/fulgurite.png")
+    gen_objects.gen_prismshard_item(f"{out}/items/prismshard.png")
+    # Buildable wood floors
+    gen_splats.build_splat(f"{out}/tiles/nimbusfloor_splat.png", gen_splats.material_nimbusfloor, 2, 0x81B,
+                           features=gen_splats.features_nimbusfloor)
+    gen_splats.build_splat(f"{out}/tiles/charfloor_splat.png", gen_splats.material_charfloor, 2, 0xC4A,
+                           features=gen_splats.features_charfloor)
+    gen_splats.build_splat(f"{out}/tiles/prismfloor_splat.png", gen_splats.material_prismfloor, 2, 0x981,
+                           features=gen_splats.features_prismfloor)
+    # Fauna: two critters, two enemies, bestiary icons
+    gen_critters.gen_critters_v04(f"{out}/mobs")
+    gen_critters.gen_critter_icons_v04(f"{out}/mobs/icons")
+    gen_mobs.gen_galehound(f"{out}/mobs/galehound.png")
+    gen_mobs.gen_dawnpiercer(f"{out}/mobs/dawnpiercer.png")
+    gen_mobs.gen_icons_v04(f"{out}/mobs/icons")
 
     # Mobs + bestiary icons
     gen_mobs.gen_zephyrray(f"{out}/mobs/zephyrray.png")
