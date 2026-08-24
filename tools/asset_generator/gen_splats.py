@@ -11,6 +11,8 @@ The material is painted once across each block (position-locked, seamless),
 then masked per cell — so full tiles and blend edges always agree.
 """
 
+import math
+
 from px import Canvas, Rng
 import palette
 
@@ -296,96 +298,187 @@ def features_gloomwood(c, x0, y0, salt, k):
             by += rng.pick((-1, 1))
 
 
-_PUFF_CACHE = {}
+# --- Mistsea: a rolling cloud deck ------------------------------------------
+#
+# How the engine plays these frames (TerrainSplatterTile.getSplattingTexture,
+# read from the decompiled source): for a `frames`-wide _splat it computes
+#     frame = GameUtils.getAnim(localTime, frames * 2 - 2, frames * 400)
+#     if frame >= frames: frame = frames * 2 - frame - 2
+# so our 8 frames run 0,1..7,6..1 — a PING-PONG over 3.2 s, ~229 ms a step.
+# Motion therefore has to read naturally played in either direction: a roll and
+# a swell, never a one-way conveyor.
+#
+# Two seamlessness rules follow, and the code below obeys both strictly:
+#  * every spatial term is an integer harmonic of the 32 px tile, so the field
+#    wraps exactly in x and y — neighbouring tiles never show a seam;
+#  * every per-frame motion is a multiple of 4 px, so eight frames advance
+#    exactly 32 px = one full tile period. Frame 8 lands back on frame 0, so
+#    the loop closes whether the engine ping-pongs it or cycles it.
+#
+# Why this was rebuilt: the previous field was a three-layer puff mottle
+# translating 4 px a frame. It measured as moving (13 mean abs RGB delta per
+# frame, five times vanilla water) yet did not READ as moving, because nothing
+# in it was larger than a few pixels — there was no edge for the eye to track,
+# so it only shimmered. The dominant layer is now a long rolling ridge that
+# stays continuous across tile borders, so the whole deck visibly rolls.
+
+_FIELD_CACHE = {}
+_TWO_PI = math.pi * 2.0
 
 
-def _puff_field(hsalt, big_shift, small_shift):
-    """32x32 toroidal 'cloudiness' map: 3x3 big puffs + 5x5 small detail puffs.
+def _billow_centres(salt, grid, rmin, rmax, layer_salt):
+    centres = []
+    step = 32.0 / grid
+    for i in range(grid):
+        for j in range(grid):
+            r = Rng((salt >> 16) ^ (i * 733 + j * 2711 + layer_salt) * 40503)
+            cx = (i + 0.5) * step + (r.float() - 0.5) * step * 0.9
+            cy = (j + 0.5) * step + (r.float() - 0.5) * step * 0.9
+            centres.append((cx % 32, cy % 32, rmin + r.float() * (rmax - rmin)))
+    return centres
 
-    Both layers wrap (distances mod 32), so the tile is seamless; shifting the
-    sample point by multiples of 4 px per frame keeps the 8-frame loop seamless
-    too (8 * 4 = 32 = one full period).
+
+def _torus_d(ax, ay, bx, by):
+    dx = abs(ax - bx)
+    dy = abs(ay - by)
+    return (min(dx, 32 - dx) ** 2 + min(dy, 32 - dy) ** 2) ** 0.5
+
+
+def _mist_field(salt, frame):
+    """32x32 cloud-deck height field for one frame, normalised to about 0..1.
+
+    roll   long rolling ridges advancing exactly one ridge spacing per 8
+           frames. This is the readable structure: because it is built from
+           integer harmonics it stays continuous across tile borders, so a
+           whole screen of Mistsea rolls as one surface.
+    big    toroidal billow masses drifting 4 px/frame, breaking the ridges into
+           organic lobes so the roll never reads as a sine grating.
+    mid    a second billow layer drifting 4 px/frame diagonally, so lobes
+           deform as they travel instead of sliding rigidly.
+    fine   a low-weight detail layer counter-drifting 4 px/frame: texture
+           without noise.
     """
-    key = (hsalt, big_shift, small_shift)
-    cached = _PUFF_CACHE.get(key)
+    key = (salt, frame)
+    cached = _FIELD_CACHE.get(key)
     if cached is not None:
         return cached
-    layers = []
-    # big billow masses, a medium layer breaking their edges, and fine detail
-    for grid, rmin, rmax, layer_salt in ((2, 12, 17, 0), (3, 7, 10, 0x77), (5, 3, 5, 0x33)):
-        centers = []
-        step = 32.0 / grid
-        for i in range(grid):
-            for j in range(grid):
-                r = Rng((hsalt >> 16) ^ (i * 733 + j * 2711 + layer_salt) * 40503)
-                cx = (i + 0.5) * step + (r.float() - 0.5) * step * 0.9
-                cy = (j + 0.5) * step + (r.float() - 0.5) * step * 0.9
-                centers.append((cx % 32, cy % 32, rmin + r.float() * (rmax - rmin)))
-        layers.append(centers)
 
-    def torus_d(ax, ay, bx, by):
-        dx = abs(ax - bx)
-        dy = abs(ay - by)
-        dx = min(dx, 32 - dx)
-        dy = min(dy, 32 - dy)
-        return (dx * dx + dy * dy) ** 0.5
+    big_c = _billow_centres(salt, 2, 13, 18, 0)
+    mid_c = _billow_centres(salt, 3, 8, 11, 0x77)
+    fine_c = _billow_centres(salt, 6, 3, 5, 0x33)
+    phase = _TWO_PI * frame / 8.0
+    dx_big = (frame * 4) % 32
+    dx_mid = (frame * 4) % 32
+    dy_mid = (frame * 4) % 32
+    dx_fine = (-frame * 4) % 32
 
     field = [[0.0] * 32 for _ in range(32)]
     for y in range(32):
         for x in range(32):
-            bx, by = (x + big_shift) % 32, y
-            mx, my = (x + big_shift) % 32, (y + 5) % 32
-            sx, sy = (x + small_shift) % 32, (y + 11) % 32
+            # meandering ridge: both warp terms are integer harmonics of 32,
+            # so adding them inside the phase keeps the field exactly seamless
+            warp = (4.4 * math.sin(_TWO_PI * y / 32.0)
+                    + 2.2 * math.sin(_TWO_PI * 2 * x / 32.0)
+                    + 1.4 * math.sin(_TWO_PI * 3 * y / 32.0 + 1.7))
+            roll = 0.5 + 0.5 * math.sin(_TWO_PI * ((x + warp) + y) / 32.0 + phase)
+            bx = (x + dx_big) % 32
             big = 0.0
-            for (cx, cy, r) in layers[0]:
-                big = max(big, 1.0 - torus_d(bx, by, cx, cy) / r)
+            for (cx, cy, r) in big_c:
+                big = max(big, 1.0 - _torus_d(bx, y, cx, cy) / r)
+            mx, my = (x + dx_mid) % 32, (y + dy_mid) % 32
             mid = 0.0
-            for (cx, cy, r) in layers[1]:
-                mid = max(mid, 1.0 - torus_d(mx, my, cx, cy) / r)
-            small = 0.0
-            for (cx, cy, r) in layers[2]:
-                small = max(small, 1.0 - torus_d(sx, sy, cx, cy) / r)
-            field[y][x] = max(0.0, big) * 0.75 + max(0.0, mid) * 0.45 + max(0.0, small) * 0.22
-    _PUFF_CACHE[key] = field
+            for (cx, cy, r) in mid_c:
+                mid = max(mid, 1.0 - _torus_d(mx, my, cx, cy) / r)
+            fx = (x + dx_fine) % 32
+            fine = 0.0
+            for (cx, cy, r) in fine_c:
+                fine = max(fine, 1.0 - _torus_d(fx, y, cx, cy) / r)
+            field[y][x] = (0.72 * roll + 0.18 * max(0.0, big)
+                           + 0.07 * max(0.0, mid) + 0.03 * max(0.0, fine))
+    _FIELD_CACHE[key] = field
     return field
 
 
+# Band edges are quantiles of the field measured over all 8 frames, chosen so
+# the two mid-light tones carry the surface (deep 7%, base 17%, light 28%,
+# hi 28%, top 22%). A background surface the player stands on wants its mass
+# in the middle of the ramp: the dark trough and the sunlit crest are accents
+# that make the roll readable, not the bulk of the picture.
+_MIST_BANDS = (0.14, 0.24, 0.50, 0.79)
+
+
 def material_mist(deep):
-    """The Mistsea as a rolling CLOUD deck, not water: bright puffy tops with
-    self-shadowed billows. Big puffs drift east, the detail layer drifts west
-    (counter-parallax); both loop seamlessly over the 8 liquid frames.
-    Deep = the open cloudsea (full contrast between sunlit tops and shadowed
-    valleys); shallow = the thinner shore band (compressed to lighter tones)."""
+    """The Mistsea as a rolling CLOUD deck, not water: sunlit crests riding
+    over shadowed troughs, the whole deck rolling one ridge-spacing per loop.
+    Deep = the open cloudsea (full contrast between crest and trough);
+    shallow = the thin shore band, compressed to the light end of the ramp and
+    combed by wisps that travel twice as fast as the deck itself."""
+    # build_splat hands the painter a DIFFERENT salt per cell (cx*17 + cy*53);
+    # deriving the cloud layout from it would give every cell its own billows
+    # and seam them together. One constant per surface instead — and the two
+    # surfaces get different constants, so the shore band is not just a
+    # recoloured copy of the open cloudsea it borders.
+    field_salt = 0x51D30000 if deep else 0x2A870000
+    # One banding of the field, two tone LUTs. The shore band is THIN mist, so
+    # it maps the same five bands onto a compressed, lighter run of the ramp —
+    # fewer distinct steps means fewer hard contours, which is what keeps the
+    # shallow reading as haze instead of as a graphic lattice.
+    ramp = palette.MISTSEA
+    if deep:
+        lut = (ramp["deep"], ramp["base"], ramp["light"], ramp["hi"], ramp["top"])
+    else:
+        lut = (ramp["base"], ramp["light"], ramp["light"], ramp["hi"], ramp["top"])
+    wisp_gate = 0.955 if deep else 0.930
+
     def painter(c, x0, y0, salt, frame=0):
-        ramp = palette.MISTSEA
-        hsalt = salt & 0xFFFF0000
-        field = _puff_field(hsalt, (frame * 4) % 32, (-frame * 4) % 32)
+        field = _mist_field(field_salt, frame)
+        wphase = _TWO_PI * 2.0 * frame / 8.0   # 2 cycles per loop: still exact
 
         def band(gx, gy):
             v = field[gy % 32][gx % 32]
-            if not deep:
-                v = 0.30 + v * 0.75  # shore mist: thinner, floor-lit
-            if v > 0.80:
-                return 3
-            if v > 0.52:
-                return 2
-            if v > 0.30:
-                return 1
-            return 0
+            for i, edge in enumerate(_MIST_BANDS):
+                if v < edge:
+                    return i
+            return 4
 
-        tones = (ramp["deep"], ramp["base"], ramp["light"], ramp["hi"])
+        def edge_gap(gx, gy, b):
+            """How close this pixel sits to the ramp border above/below it."""
+            v = field[gy % 32][gx % 32]
+            up = _MIST_BANDS[b] - v if b < 4 else 9.0
+            dn = v - _MIST_BANDS[b - 1] if b > 0 else 9.0
+            return up, dn
+
         for x in range(32):
             for y in range(32):
                 gx, gy = (x0 + x) % 32, (y0 + y) % 32
                 b = band(gx, gy)
-                col = tones[b]
-                # hard sunlit rim on the upper edge of every brightest lobe —
-                # the crisp cartoon-cloud top edge
-                if b == 3 and band(gx, gy - 1) < 3:
-                    col = ramp["top"]
-                elif b == 2 and band(gx, gy - 1) < 2:
-                    col = ramp["hi"]
-                c.put(x0 + x, y0 + y, col)
+                above = band(gx, gy - 1)
+                tone = b
+                # sunlit crest: the pixel where a lobe first rises above its
+                # neighbour to the north. It travels with the roll, and that
+                # travelling highlight is what makes the motion legible.
+                if b >= 3 and above < b:
+                    tone = min(4, b + 1)
+                # and the shaded underside of the lobe above it
+                elif b <= 1 and above > b:
+                    tone = max(0, b - 1)
+                # wisps: thin filaments combing across the deck at twice the
+                # deck's own rate. Integer harmonics, so seamless; 2 cycles per
+                # 8 frames, so they land back on frame 0 with the rest.
+                elif b >= 2 and math.sin(_TWO_PI * (2 * gx - gy) / 32.0 + wphase) > wisp_gate:
+                    tone = min(4, b + 1)
+                else:
+                    # sparse single-pixel dither, ONLY at the ramp borders —
+                    # the house rule, and here it does real work: it breaks the
+                    # smooth band contours into pixel art and stops the deck
+                    # looking airbrushed. Position-locked, so it stays seamless;
+                    # the borders themselves travel, so the dither travels too.
+                    up, dn = edge_gap(gx, gy, b)
+                    if up < 0.024 and (gx + gy) % 2 == 0:
+                        tone = b + 1
+                    elif dn < 0.024 and (gx + gy) % 2 == 1:
+                        tone = b - 1
+                c.put(x0 + x, y0 + y, lut[tone])
     return painter
 
 

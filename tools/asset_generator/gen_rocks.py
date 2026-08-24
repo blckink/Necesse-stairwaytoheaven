@@ -127,25 +127,256 @@ def gen_rock_sheet(path, ramp, variants=2, salt=0xACE):
     sheet.save(path)
 
 
+
+# --- ore overlay ------------------------------------------------------------
+#
+# Engine contract, read from the decompiled RockOreObject.loadTextures():
+# objects/<ore>.png is a strip of N 32x32 pattern cells (width/32 == N). For
+# each variant i the engine COPIES objects/oremask.png (128x208 — the rock
+# quadrant grid itself) and multiplies pattern cell i over it in 32x32 steps,
+# colour AND alpha. Rendering then indexes that masked texture with the exact
+# same 16px quadrant coordinates as the rock, so ore stays glued to stone.
+#
+# Three consequences drive the art:
+#  * oremask rows 6/7 (full rock interior) are alpha 255 and are the common
+#    on-screen case, so a 32x32 pattern reproduces intact there. Rows 3/4/8/9
+#    (the cliff faces) are alpha 80 -> face ore renders at ~31%; the density
+#    that players read has to live on the top surface.
+#  * rock row r samples the pattern's TOP half when r is even and its BOTTOM
+#    half when r is odd, and neighbour adjacency decides which rows pair up —
+#    the two halves get recombined in either order. Every 16x16 quadrant must
+#    therefore stand on its own, so one crystal cluster is anchored per
+#    quadrant rather than composing a single centred motif.
+#  * the left/right 16px halves of a variant are always drawn side by side, so
+#    detail may cross x=16 freely; crossing y=16 must stay rare (vanilla
+#    ironore crosses on only 6 columns).
+#
+# Size law: vanilla objects/ironore.png carries 328 / 292 opaque px per 32x32
+# cell (30% coverage) and copperore 364 / 380. The old speckle-scatter version
+# of this sheet sat at 120 px (11%), which is why the node read as empty.
+
+# The pattern is authored TOROIDALLY (see _put). Both axes matter: on screen a
+# tile draws pattern x 0-15 at drawX and x 16-31 at drawX+16 while the next
+# tile starts again at x 0, and rows 6/7 put pattern y 0-15 above y 16-31 with
+# the tile below repeating from y 0 — so the pattern already tiles at 32px in
+# both axes across a rock body. Wrapping it means the vein reads as one
+# continuous field instead of a grid of stamps, and it also makes the
+# half-swapped cases (cliff-face rows 3/4) join cleanly.
+
+# Crystal shard stamps. Vanilla crystal ores (objects/frostshardore.png,
+# glacialore.png) are chunky 45-degree bars with a pale core down the axis, a
+# lit facet on one long side and a dark rim on the other — not round nuggets.
+# L = lit facet, H = bright core, B = shadow facet, D = deep contact rim.
+# "NE" bars run up-right, so their up-left long side takes the light; "SE" bars
+# run down-right and are edge-on to it, so the light rides their upper side.
+_FAT_NE = (
+    ".....LHHBBB",
+    "....LHHBBB.",
+    "...LHHBBB..",
+    "..LHHBBB...",
+    ".LHHBBB....",
+    "LHHBBB.....",
+)
+_FAT_SE = (
+    "BBBHHL.....",
+    ".BBBHHL....",
+    "..BBBHHL...",
+    "...BBBHHL..",
+    "....BBBHHL.",
+    ".....BBBHHL",
+)
+_LONG_NE = (
+    "......LHBB",
+    ".....LHBB.",
+    "....LHBB..",
+    "...LHBB...",
+    "..LHBB....",
+    ".LHBB.....",
+    "LHBB......",
+)
+_LONG_SE = (
+    "BBHL......",
+    ".BBHL.....",
+    "..BBHL....",
+    "...BBHL...",
+    "....BBHL..",
+    ".....BBHL.",
+    "......BBHL",
+)
+_STEEP_NE = (
+    "...LHBB",
+    "...LHBB",
+    "..LHBB.",
+    "..LHBB.",
+    ".LHBB..",
+    ".LHBB..",
+)
+_STEEP_SE = (
+    "BBHL...",
+    "BBHL...",
+    ".BBHL..",
+    ".BBHL..",
+    "..BBHL.",
+    "..BBHL.",
+)
+_SHORT_NE = (
+    "....LHB",
+    "...LHB.",
+    "..LHB..",
+    ".LHB...",
+    "LHB....",
+)
+_SHORT_SE = (
+    "BHL....",
+    ".BHL...",
+    "..BHL..",
+    "...BHL.",
+    "....BHL",
+)
+_CHIP = (
+    "LH",
+    "BB",
+)
+_GRAIN = (
+    "LB",
+)
+
+# grouped by chunk: FAT reads as a solid crystal block, MED/STEEP as slivers,
+# SHORT as the small crystals crowding a cluster's root. Mixing all three is
+# what stops the field reading as uniform diagonal hatching.
+_FAT = (_FAT_NE, _FAT_SE)
+_MED = (_LONG_NE, _LONG_SE, _STEEP_NE, _STEEP_SE)
+_SHORT = (_SHORT_NE, _SHORT_SE)
+
+
+def _put(c, x, y, col):
+    c.put(x % 32, y % 32, col)
+
+
+def _stamp(c, gem, x, y, ramp, rim=True):
+    """Blit a shard. `rim` lays the ramp's deep tone into the empty pixels
+    around it FIRST — the soft dark contour the style guide asks for. It is
+    what makes a bright crystal read against pale skystone as well as against
+    dark rock, and it stops adjacent shards fusing into one pale mass. It never
+    overwrites anything already drawn, so seams and earlier crystals survive."""
+    tones = {"H": ramp["hi"], "L": ramp["light"], "B": ramp["base"], "D": ramp["deep"]}
+    cells = [(x + i, y + j, tones[ch])
+             for j, line in enumerate(gem)
+             for i, ch in enumerate(line) if ch != "."]
+    if rim:
+        body = {(px % 32, py % 32) for px, py, _ in cells}
+        for px, py, _ in cells:
+            for nx, ny in ((px - 1, py), (px + 1, py), (px, py - 1), (px, py + 1)):
+                if (nx % 32, ny % 32) in body or c.filled(nx % 32, ny % 32):
+                    continue
+                _put(c, nx, ny, ramp["deep"])
+    for px, py, col in cells:
+        _put(c, px, py, col)
+
+
+def _cluster(c, cx, cy, ramp, rng, big):
+    """A long shard with a shorter one nested alongside it (vanilla's paired
+    -shard idiom) plus a chip at the root — the chunky cluster silhouette."""
+    k = rng.range(0, 1)                      # 0 = runs up-right, 1 = down-right
+    main = _FAT[k] if big else rng.pick(_MED if rng.chance(0.65) else _SHORT)
+    _stamp(c, main, cx - len(main[0]) // 2, cy - len(main) // 2, ramp)
+    if big:
+        # nest the second shard ALONGSIDE the first (offset perpendicular to
+        # the bar), never through it — overlapping stamps read as mush
+        d = rng.pick((-7, -6, 6, 7))
+        ox, oy = (d, d) if k == 0 else (d, -d)
+        second = _SHORT[k]
+        _stamp(c, second, cx + ox - len(second[0]) // 2, cy + oy - len(second) // 2, ramp)
+    if rng.chance(0.45):
+        _stamp(c, _CHIP, cx + rng.range(-8, 6), cy + rng.range(-8, 6), ramp)
+
+
+def _seam(c, x, y, dx, dy, length, ramp, rng):
+    """A thin mineral seam threading between clusters — vanilla ironore's
+    connective tissue, and what turns scattered nuggets into one vein."""
+    for _ in range(length):
+        _put(c, x, y, ramp["base"] if rng.chance(0.72) else ramp["light"])
+        if rng.chance(0.5):
+            _put(c, x + 1, y + 1, ramp["deep"])
+        x += dx
+        y += dy
+        if rng.chance(0.34):  # wander, so seams never read as ruled lines
+            if dy == 0:
+                y += rng.pick((-1, 1))
+            elif dx == 0:
+                x += rng.pick((-1, 1))
+            else:
+                x += rng.pick((0, 1)) - 1
+
+
+def _ore_cell(ramp, salt):
+    """One 32x32 ore pattern. Anchors come off a jittered 3x3 lattice so
+    coverage stays even in every 16x16 quadrant (the renderer recombines
+    quadrants independently, so each has to carry its own mass) without the
+    stamps lining up into visible rows."""
+    c = Canvas(32, 32)
+    rng = Rng(salt)
+    step = 32.0 / 3.0
+
+    anchors = []
+    for j in range(3):
+        for i in range(3):
+            ax = int((i + 0.5) * step + (rng.float() - 0.5) * step * 0.8) % 32
+            ay = int((j + 0.5) * step + (rng.float() - 0.5) * step * 0.8) % 32
+            anchors.append((ax, ay))
+    order = list(range(9))
+    for i in range(8, 0, -1):                      # deterministic shuffle
+        j = rng.range(0, i)
+        order[i], order[j] = order[j], order[i]
+
+    # 1) seams first, so crystals sit on top of their own vein
+    for k in range(3):
+        ax, ay = anchors[order[k]]
+        dx, dy = rng.pick(((1, 1), (1, -1), (1, 0), (0, 1)))
+        _seam(c, ax, ay, dx, dy, rng.range(9, 14), ramp, rng)
+
+    # 2) two paired clusters and four single shards over six of the nine
+    #    anchors — the three empty anchors are deliberate: vanilla always
+    #    leaves bare stone between shards, and that gap is what lets each
+    #    crystal read instead of fusing into a crust
+    for rank, idx in enumerate(order[:6]):
+        _cluster(c, anchors[idx][0], anchors[idx][1], ramp, rng, big=rank < 2)
+
+    # 3) chips in the remaining gaps, kept clear of the cluster cores
+    for _ in range(5):
+        x, y = rng.range(0, 31), rng.range(0, 31)
+        if any(min(abs(x - ax), 32 - abs(x - ax)) < 5
+               and min(abs(y - ay), 32 - abs(y - ay)) < 5 for ax, ay in anchors[:6]):
+            continue
+        _stamp(c, _GRAIN, x, y, ramp, rim=False)
+
+    # 4) row equaliser: the renderer can pair any two 16px bands, so no row may
+    #    be left bare. Deterministic, and it is what kills the banded look.
+    for y in range(32):
+        row = sum(1 for x in range(32) if c.filled(x, y))
+        tries = 0
+        while row < 4 and tries < 10:
+            x = rng.range(0, 31)
+            tries += 1
+            if not c.filled(x, y):
+                c.put(x, y, ramp["base"] if rng.chance(0.65) else ramp["light"])
+                _put(c, x + 1, y + 1, ramp["deep"])
+                row = sum(1 for xx in range(32) if c.filled(xx, y))
+
+    # 5) single-pixel sparkle grit — the last 5% vanilla ore always carries
+    for _ in range(6):
+        x, y = rng.range(0, 31), rng.range(0, 31)
+        if not c.filled(x, y):
+            c.put(x, y, ramp["light"] if rng.chance(0.55) else ramp["deep"])
+    return c
+
+
 def gen_ore_sheet(path, ramp, variants=2, salt=0xE77):
     """Ore pattern strip in the vanilla format (verified against ironore.png,
-    64x32): N variants of 32x32 side by side, each a scatter of ore nuggets on
-    transparency. RockOreObject tiles this pattern through the engine's ore
-    mask onto the parent rock at runtime; the same 32x32 also feeds the
-    auto-generated ore item icon."""
+    64x32): N variants of 32x32 side by side, on transparency. RockOreObject
+    multiplies this through objects/oremask.png onto the parent rock at
+    runtime; variant 0 also feeds the auto-generated ore item icon."""
     sheet = Canvas(variants * 32, 32)
     for v in range(variants):
-        x0 = v * 32
-        rng = Rng(salt + v * 131)
-        for _ in range(rng.range(6, 8)):
-            cx = x0 + rng.range(3, 28)
-            cy = rng.range(3, 28)
-            r = rng.range(2, 3)
-            sheet.ellipse(cx, cy, r, r * 0.85, ramp["deep"])
-            sheet.ellipse(cx, cy - 1, r * 0.65, r * 0.6, ramp["base"])
-            sheet.put(cx - 1, cy - 1, ramp["light"])
-            sheet.put(cx, cy - 2, ramp["hi"] if rng.chance(0.6) else ramp["light"])
-        # a few loose sparkle pixels between nuggets
-        for _ in range(rng.range(3, 5)):
-            sheet.put(x0 + rng.range(2, 29), rng.range(2, 29), ramp["base"])
+        sheet.paste(_ore_cell(ramp, salt + v * 131), v * 32, 0)
     sheet.save(path)
