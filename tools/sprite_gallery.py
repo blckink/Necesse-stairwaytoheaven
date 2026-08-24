@@ -348,7 +348,9 @@ figcaption{display:flex;justify-content:space-between;gap:10px;align-items:basel
 .mistroll{animation:roll 1.9s steps(8) infinite;}
 @keyframes roll{to{transform:translateX(-3584px)}}
 .wisp{overflow:hidden;width:192px;height:192px;position:relative;}
-.wisproll{animation:wroll .9s steps(4) infinite reverse;}
+/* No 'reverse': with steps(4) it adds a -768px position where the strip is
+   scrolled fully out of the window — that blank quarter read as a blink. */
+.wisproll{animation:wroll .9s steps(4) infinite;}
 @keyframes wroll{to{transform:translateX(-768px)}}
 @media (prefers-reduced-motion: reduce){.mistroll,.wisproll{animation:none}}
 .itemgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:10px;}
