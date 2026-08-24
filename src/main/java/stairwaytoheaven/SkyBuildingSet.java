@@ -19,7 +19,6 @@ import necesse.level.gameObject.StreetlampObject;
 import necesse.level.gameObject.WallObject;
 import necesse.level.gameObject.furniture.FurnitureObject;
 import necesse.level.gameTile.SimpleFloorTile;
-import necesse.level.gameTile.SimpleTiledFloorTile;
 import stairwaytoheaven.objects.SkyDecoObject;
 import stairwaytoheaven.objects.SkyWallLightObject;
 
@@ -44,11 +43,17 @@ final class SkyBuildingSet {
         SkyRegistry.nightfellWallID = nightfellWall[0];
 
         // ===== Floors =====
-        // Checkerboard: SimpleTiledFloorTile locks the pattern to world
-        // coordinates; deliberately ships WITHOUT a _splat file (a splat
-        // atlas would randomize the cells and destroy the checker).
+        // Checkerboard: the pattern is locked to world coordinates so it runs
+        // continuously across separately built rooms, which is why this floor
+        // deliberately ships WITHOUT a _splat file — a splat atlas randomizes
+        // the cells per tile and would destroy the checker.
+        //
+        // That also makes it the only tile in the game to reach
+        // TerrainSplatterTile's legacy splatting path, where vanilla's
+        // SimpleTiledFloorTile crashes on negative tile coordinates. See
+        // CheckerFloorTile for the stacktrace and the one-line reason.
         SkyRegistry.marbleCheckerID = TileRegistry.registerTile("marblecheckertile",
-                new SimpleTiledFloorTile("marblechecker", new Color(130, 128, 138)), 1.0F, true);
+                new stairwaytoheaven.tiles.CheckerFloorTile("marblechecker", new Color(130, 128, 138)), 1.0F, true);
         SkyRegistry.gloomwoodFloorID = TileRegistry.registerTile("gloomwoodfloortile",
                 new SimpleFloorTile("gloomwoodfloor", new Color(66, 52, 60)), 1.0F, true);
         // v0.4: one buildable plank floor per sky wood
