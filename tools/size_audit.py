@@ -53,6 +53,13 @@ PAIRS = [
      "objects/bannerstand.png", None, "tall quest prop"),
     ("mobs/skywarden.png", (0, 0, 64, 64),
      None, None, "humanoid: compare by hand vs player (28px head)"),
+    # v0.4 saplings (chunky mini-trees like vanilla, not thin shoots)
+    ("objects/nimbussapling.png", None,
+     "objects/willowsapling.png", None, "sapling"),
+    ("objects/fulgursapling.png", None,
+     "objects/pinesapling.png", None, "sapling"),
+    ("objects/prismasapling.png", None,
+     "objects/birchsapling.png", None, "sapling"),
 ]
 
 THRESHOLD = 0.75

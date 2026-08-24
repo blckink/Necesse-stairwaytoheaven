@@ -3,6 +3,43 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [0.4.0] — "The Living Sky" — 2026-08-24
+
+The fill release: every sky biome gets its own trees, meadows, flowers,
+ores and animals — plus a size correction across the old art.
+
+### Added
+- **Trees, wood and floors, one family per biome**: the **Nimbus Willow**
+  (Driftlands, cloud-lobe canopy with weeping strands), the **Fulgur Pine**
+  (Stormveil, charred tiers with live embers — one variant lightning-split)
+  and the **Prisma Birch** (Aurora Shoals, banded bark, iridescent crown).
+  Full vanilla tree mechanics: axe them for their own logs, saplings drop
+  and replant, leaf particles drift on the wind. Each wood crafts its own
+  buildable plank floor (Workstation).
+- **Meadow carpets**: large walk-through tall-grass fields (~70% ground
+  coverage inside meadow patches, calibrated against vanilla lush areas) —
+  Tall Cloudgrass, Storm Sedge and Prism Grass, tiling edge-to-edge so
+  whole stretches read as one living meadow you wade through.
+- **Six pickable plants**: Cloudbell, Sky Tulip (3 colors), Static Moss,
+  Thunderbloom, Glowfern, Aurora Lily — all drop materials.
+- **Two new ores**: **Fulgurite** (lightning glass, Stormveil) and
+  **Prismshard** (crystal veins, Aurora Shoals), mined off skystone
+  deposits like Aetherium.
+- **Four new animals**: the **Galehound** (night pack hunter of the
+  Driftlands meadows), the **Dawnpiercer** (glass-cannon dive bird of the
+  Shoals), and two critters — the **Zephyr Finch** and the **Dew Snail**.
+- All new content localized (en/de) and fed into world generation with
+  per-biome density bands.
+
+### Changed
+- **Size correction pass**: a new audit tool (`tools/size_audit.py`)
+  measures every mod sprite against its vanilla analogue; ten undersized
+  sprites were rebuilt to vanilla mass — most dramatically the Séance
+  Circle (2% of a vanilla ritual altar before), the Skywatch Banner (now a
+  proper two-tile wall drop), the gloom willow, streetlamp, wall lantern,
+  raven statue, gloomshroom, both crystal clusters, windwheat and
+  skyreeds. The size law is codified in the art pipeline rules.
+
 ## [0.3.4] — 2026-08-23
 
 Playtest fixes: real journal quests, correct walls, a warden with presence.
