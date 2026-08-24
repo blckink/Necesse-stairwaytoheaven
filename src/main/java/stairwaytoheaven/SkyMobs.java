@@ -31,6 +31,11 @@ final class SkyMobs {
         MobRegistry.registerMob("sparkbeetle", SkyCritterMob.SparkBeetle.class, false);
         // v0.3: the Veil
         MobRegistry.registerMob("gloomshade", stairwaytoheaven.mobs.GloomShadeMob.class, true);
+        // v0.4: The Living Sky
+        MobRegistry.registerMob("galehound", stairwaytoheaven.mobs.GalehoundMob.class, true);
+        MobRegistry.registerMob("dawnpiercer", stairwaytoheaven.mobs.DawnpiercerMob.class, true);
+        MobRegistry.registerMob("zephyrfinch", SkyCritterMob.ZephyrFinch.class, false);
+        MobRegistry.registerMob("dewsnail", SkyCritterMob.DewSnail.class, false);
     }
 
     /** Called from initResources — runs on the client only, never on servers. */
@@ -46,5 +51,9 @@ final class SkyMobs {
         SkyCritterMob.mothTexture = GameTexture.fromFile("mobs/glowmoth");
         SkyCritterMob.beetleTexture = GameTexture.fromFile("mobs/sparkbeetle");
         stairwaytoheaven.mobs.GloomShadeMob.texture = GameTexture.fromFile("mobs/gloomshade");
+        stairwaytoheaven.mobs.GalehoundMob.texture = GameTexture.fromFile("mobs/galehound");
+        stairwaytoheaven.mobs.DawnpiercerMob.texture = GameTexture.fromFile("mobs/dawnpiercer");
+        SkyCritterMob.finchTexture = GameTexture.fromFile("mobs/zephyrfinch");
+        SkyCritterMob.snailTexture = GameTexture.fromFile("mobs/dewsnail");
     }
 }

@@ -38,6 +38,15 @@ public final class SkyTerrainPainter {
     public static final float ROCK_PATCH_SCALE = 22.0F;
     public static final float ROCK_PATCH_THRESHOLD = 0.67F;
 
+    // v0.4 meadow carpets: low-frequency patches where walk-through tall
+    // grass covers most of the ground (vanilla lush-area density), layered
+    // over the sparse per-tile rolls that fill the rest of the island.
+    public static final long SALT_MEADOW = 0x4D0E;
+    public static final int SALT_MEADOW_ROLL = 11;
+    public static final float MEADOW_SCALE = 48.0F;
+    public static final float MEADOW_THRESHOLD = 0.60F;
+    public static final float MEADOW_DENSITY = 0.72F;
+
     private SkyTerrainPainter() {
     }
 
@@ -87,6 +96,17 @@ public final class SkyTerrainPainter {
                     continue;
                 }
 
+                // Meadow carpets: inside a meadow patch, dense walk-through
+                // tall grass takes the tile before the sparse rolls run.
+                if (!isRockPatch
+                        && SkyNoise.fbm(seed + SALT_MEADOW, tileX, tileY, MEADOW_SCALE, 2) > MEADOW_THRESHOLD
+                        && SkyNoise.tileRoll(seed, tileX, tileY, SALT_MEADOW_ROLL) < MEADOW_DENSITY) {
+                    int meadowGrassID = isStormveil ? SkyRegistry.stormsedgeID
+                            : (isAurora ? SkyRegistry.prismgrassID : SkyRegistry.tallcloudgrassID);
+                    region.objectLayer.setObjectByRegion(ObjectLayerRegistry.BASE_LAYER, regionTileX, regionTileY, meadowGrassID);
+                    continue;
+                }
+
                 int objectID = rollObject(seed, tileX, tileY, isStormveil, isAurora, isRockPatch);
                 if (objectID == 0) {
                     continue;
@@ -123,12 +143,22 @@ public final class SkyTerrainPainter {
             if (roll < 0.035F) return SkyRegistry.stormCrystalID;
             if (roll < 0.090F) return SkyRegistry.skystoneRockID;
             if (roll < 0.102F) return SkyRegistry.aetheriumRockID;
+            // v0.4: charred pines, fulgurite glass, sparking growth
+            if (roll < 0.114F) return isRockPatch ? 0 : SkyRegistry.fulgurpineID;
+            if (roll < 0.124F) return SkyRegistry.fulguriteRockID;
+            if (roll < 0.152F) return SkyRegistry.staticmossID;
+            if (roll < 0.164F) return isRockPatch ? 0 : SkyRegistry.thunderbloomID;
             return 0;
         }
         if (isAurora) {
             if (roll < 0.042F) return SkyRegistry.auroraBloomID;
             if (roll < 0.072F) return SkyRegistry.aetheriumRockID;
             if (roll < 0.128F) return SkyRegistry.skystoneRockID;
+            // v0.4: prisma birches, prismshard veins, glowing undergrowth
+            if (roll < 0.140F) return isRockPatch ? 0 : SkyRegistry.prismabirchID;
+            if (roll < 0.150F) return SkyRegistry.prismshardRockID;
+            if (roll < 0.178F) return isRockPatch ? 0 : SkyRegistry.glowfernID;
+            if (roll < 0.192F) return isRockPatch ? 0 : SkyRegistry.auroralilyID;
             return 0;
         }
         // Driftlands: grasses prefer soft ground, rocks prefer outcrops
@@ -143,6 +173,16 @@ public final class SkyTerrainPainter {
         }
         if (roll < 0.212F) {
             return isRockPatch ? 0 : SkyRegistry.cloudberryBushID;
+        }
+        // v0.4: nimbus willows and meadow flowers
+        if (roll < 0.226F) {
+            return isRockPatch ? 0 : SkyRegistry.nimbuswillowID;
+        }
+        if (roll < 0.246F) {
+            return isRockPatch ? 0 : SkyRegistry.cloudbellID;
+        }
+        if (roll < 0.260F) {
+            return isRockPatch ? 0 : SkyRegistry.skytulipID;
         }
         return 0;
     }

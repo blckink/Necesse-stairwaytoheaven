@@ -1,6 +1,9 @@
 // Stairway to Heaven — English localization
 
 [tile]
+nimbusfloortile=Nimbuswood Floor
+charfloortile=Charwood Floor
+prismfloortile=Prismwood Floor
 murkmosstile=Murkmoss
 blackpeattile=Black Peat
 ashsandtile=Ash Sand
@@ -11,6 +14,23 @@ stormslatetile=Stormslate
 mistseatile=Mistsea
 
 [object]
+nimbuswillow=Nimbus Willow
+fulgurpine=Fulgur Pine
+prismabirch=Prisma Birch
+nimbussapling=Nimbus Sapling
+fulgursapling=Fulgur Sapling
+prismasapling=Prisma Sapling
+cloudbell=Cloudbell
+skytulip=Sky Tulip
+thunderbloom=Thunderbloom
+glowfern=Glowfern
+auroralily=Aurora Lily
+staticmoss=Static Moss
+tallcloudgrass=Tall Cloudgrass
+stormsedge=Storm Sedge
+prismgrass=Prism Grass
+fulguriterock=Fulgurite Deposit
+prismshardrock=Prismshard Vein
 veilrift=Veil Rift
 seancecircle=Seance Circle
 whisperreeds=Whisper Reeds
@@ -31,6 +51,23 @@ aurorabloomr=Aurora Bloom
 skyreeds=Sky Reeds
 
 [item]
+nimbuswood=Nimbuswood
+charwood=Charwood
+prismwood=Prismwood
+cloudbell=Cloudbell
+skytulip=Sky Tulip
+thunderbloom=Thunderbloom
+glowfern=Glowfern
+auroralily=Aurora Lily
+staticmoss=Static Moss
+fulgurite=Fulgurite
+prismshard=Prismshard
+nimbusfloortile=Nimbuswood Floor
+charfloortile=Charwood Floor
+prismfloortile=Prismwood Floor
+nimbussapling=Nimbus Sapling
+fulgursapling=Fulgur Sapling
+prismasapling=Prisma Sapling
 veilessence=Veil Essence
 veilessencetip=What a shade is made of. Cold to hold, colder to lose.
 cinderpearl=Cinder Pearl
@@ -60,6 +97,10 @@ cloudpufftreattip=Irresistible to sky cats. Smells faintly of thunderstorms
 silverbelltip=It was Siggi's. He hates it
 
 [mob]
+galehound=Galehound
+dawnpiercer=Dawnpiercer
+zephyrfinch=Zephyr Finch
+dewsnail=Dew Snail
 gloomshade=Gloom Shade
 cloudlamb=Cloudlamb
 glowmoth=Glowmoth

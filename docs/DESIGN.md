@@ -518,6 +518,16 @@ comes in variants, and feeds at least one loop (build, craft, cook or fight).
   guards.
 - **Aurora Shrine** (Aurora Shoals preset): prism arch, deco landmark.
 
+## Meadow carpets — the density calibration
+Reference playtest screenshot (vanilla swamp): lush areas cover 30-60% of
+the ground with WALK-THROUGH tall grass the player visibly wades through —
+density comes from carpets, not scattered clumps. Therefore each biome gets
+a dense tall grass built to tile edge-to-edge (Tall Cloudgrass / Storm
+Sedge / Prism Grass, 4 variants each), and the terrain painter gets a
+low-frequency MEADOW mask: inside a meadow patch tall-grass coverage is
+~70%, outside the sparse per-tile rolls apply as before. Separated hazard/
+accent pools remain a candidate for the weather pass.
+
 Ship order: (a) flora + wood/plank blocks + ores, (b) fauna, (c) structures
 + NPC. Each sub-batch passes the pixel-art QA gate and the headless
 integration test before release.

@@ -1,6 +1,9 @@
 // Stairway to Heaven — Deutsche Lokalisierung
 
 [tile]
+nimbusfloortile=Nimbusholz-Boden
+charfloortile=Kohlenholz-Boden
+prismfloortile=Prismenholz-Boden
 murkmosstile=Düstermoos
 blackpeattile=Schwarztorf
 ashsandtile=Aschesand
@@ -11,6 +14,23 @@ stormslatetile=Sturmschiefer
 mistseatile=Nebelmeer
 
 [object]
+nimbuswillow=Nimbusweide
+fulgurpine=Fulgur-Kiefer
+prismabirch=Prismenbirke
+nimbussapling=Nimbus-Setzling
+fulgursapling=Fulgur-Setzling
+prismasapling=Prismen-Setzling
+cloudbell=Wolkenglöckchen
+skytulip=Himmelstulpe
+thunderbloom=Donnerblüte
+glowfern=Glühfarn
+auroralily=Auroralilie
+staticmoss=Statikmoos
+tallcloudgrass=Hohes Wolkengras
+stormsedge=Sturmsegge
+prismgrass=Prismengras
+fulguriterock=Fulgurit-Vorkommen
+prismshardrock=Prismensplitter-Ader
 veilrift=Schleier-Riss
 seancecircle=Séance-Zirkel
 whisperreeds=Flüsterried
@@ -31,6 +51,23 @@ aurorabloomr=Aurorablüte
 skyreeds=Himmelsried
 
 [item]
+nimbuswood=Nimbusholz
+charwood=Kohlenholz
+prismwood=Prismenholz
+cloudbell=Wolkenglöckchen
+skytulip=Himmelstulpe
+thunderbloom=Donnerblüte
+glowfern=Glühfarn
+auroralily=Auroralilie
+staticmoss=Statikmoos
+fulgurite=Fulgurit
+prismshard=Prismensplitter
+nimbusfloortile=Nimbusholz-Boden
+charfloortile=Kohlenholz-Boden
+prismfloortile=Prismenholz-Boden
+nimbussapling=Nimbus-Setzling
+fulgursapling=Fulgur-Setzling
+prismasapling=Prismen-Setzling
 veilessence=Schleier-Essenz
 veilessencetip=Das, woraus ein Schemen besteht. Kalt in der Hand, kälter im Verlust.
 cinderpearl=Glutperle
@@ -60,6 +97,10 @@ cloudpufftreattip=Unwiderstehlich für Himmelskatzen. Riecht schwach nach Gewitt
 silverbelltip=Sie war Siggis. Er hasst sie
 
 [mob]
+galehound=Sturmwindhund
+dawnpiercer=Morgenstecher
+zephyrfinch=Zephyrfink
+dewsnail=Tauschnecke
 gloomshade=Düsterschemen
 cloudlamb=Wolkenschaf
 glowmoth=Glühfalter

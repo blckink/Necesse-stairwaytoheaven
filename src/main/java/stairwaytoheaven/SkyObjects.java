@@ -68,7 +68,92 @@ final class SkyObjects {
         allowShore("stormcrystal", "stormcrystalr", "aurorabloom", "aurorabloomr", "skyreeds",
                 "windwheat", "cloudberrybush");
 
+        registerLivingSky(skystoneRock);
         registerVeilObjects();
+    }
+
+    /** v0.4 "The Living Sky": per-biome trees, plants, meadow grasses, ores. */
+    private static void registerLivingSky(RockObject skystoneRock) {
+        // --- Trees (vanilla TreeObject: axe, log drops, sapling drops, map icon) ---
+        SkyRegistry.nimbuswillowID = ObjectRegistry.registerObject("nimbuswillow",
+                new necesse.level.gameObject.TreeObject("nimbuswillow", "nimbuswood", "nimbussapling",
+                        new Color(198, 210, 214), 32, 60, 120, "nimbusleaves"),
+                0.0F, false, false, true);
+        SkyRegistry.fulgurpineID = ObjectRegistry.registerObject("fulgurpine",
+                new necesse.level.gameObject.TreeObject("fulgurpine", "charwood", "fulgursapling",
+                        new Color(76, 90, 104), 32, 60, 120, "fulgurleaves"),
+                0.0F, false, false, true);
+        SkyRegistry.prismabirchID = ObjectRegistry.registerObject("prismabirch",
+                new necesse.level.gameObject.TreeObject("prismabirch", "prismwood", "prismasapling",
+                        new Color(210, 196, 210), 32, 60, 120, "prismaleaves"),
+                0.0F, false, false, true);
+        SkyRegistry.nimbusSaplingID = ObjectRegistry.registerObject("nimbussapling",
+                new necesse.level.gameObject.TreeSaplingObject("nimbussapling", new Color(198, 210, 214),
+                        "nimbuswillow", 1800, 2700, true, "cloudturftile"),
+                5.0F, true);
+        SkyRegistry.fulgurSaplingID = ObjectRegistry.registerObject("fulgursapling",
+                new necesse.level.gameObject.TreeSaplingObject("fulgursapling", new Color(76, 90, 104),
+                        "fulgurpine", 1800, 2700, true, "stormslatetile"),
+                5.0F, true);
+        SkyRegistry.prismaSaplingID = ObjectRegistry.registerObject("prismasapling",
+                new necesse.level.gameObject.TreeSaplingObject("prismasapling", new Color(210, 196, 210),
+                        "prismabirch", 1800, 2700, true, "cloudturftile"),
+                5.0F, true);
+
+        // --- Plants: pickable flowers and glowing growth ---
+        SkyRegistry.cloudbellID = registerPickable("cloudbell", 2, new Color(112, 138, 204), "cloudbell", 1, 2);
+        SkyRegistry.skytulipID = registerPickable("skytulip", 3, new Color(226, 130, 162), "skytulip", 1, 1);
+        SkyRegistry.thunderbloomID = registerPickable("thunderbloom", 2, new Color(140, 116, 198), "thunderbloom", 1, 1);
+        SkyRegistry.glowfernID = registerPickable("glowfern", 2, new Color(104, 172, 156), "glowfern", 1, 2);
+        SkyRegistry.auroralilyID = registerPickable("auroralily", 2, new Color(214, 150, 190), "auroralily", 1, 1);
+        SkyRegistry.staticmossID = registerPickable("staticmoss", 2, new Color(86, 108, 116), "staticmoss", 1, 2);
+
+        // --- Dense meadow tall grasses: walk-through carpets (drop nothing,
+        // clear on a swing like vanilla tall grass) ---
+        SkyRegistry.tallcloudgrassID = registerMeadowGrass("tallcloudgrass", new Color(186, 202, 186));
+        SkyRegistry.stormsedgeID = registerMeadowGrass("stormsedge", new Color(96, 110, 128));
+        SkyRegistry.prismgrassID = registerMeadowGrass("prismgrass", new Color(206, 190, 214));
+
+        // --- Ores (same RockOreObject mask idiom as aetherium) ---
+        SkyRegistry.fulguriteRockID = ObjectRegistry.registerObject("fulguriterock",
+                new RockOreObject(skystoneRock, "oremask", "fulguriteore", new Color(222, 196, 140), "fulgurite", SKY_CATEGORY),
+                -1.0F, true);
+        SkyRegistry.prismshardRockID = ObjectRegistry.registerObject("prismshardrock",
+                new RockOreObject(skystoneRock, "oremask", "prismshardore", new Color(186, 156, 214), "prismshard", SKY_CATEGORY),
+                -1.0F, true);
+
+        allowShore("nimbuswillow", "fulgurpine", "prismabirch",
+                "nimbussapling", "fulgursapling", "prismasapling",
+                "cloudbell", "skytulip", "thunderbloom", "glowfern", "auroralily", "staticmoss",
+                "tallcloudgrass", "stormsedge", "prismgrass",
+                "fulguriterock", "prismshardrock");
+    }
+
+    /** GrassObject variant that drops a material when cleared. */
+    private static int registerPickable(String stringID, int variants, Color mapColor,
+            String lootItem, int min, int max) {
+        final necesse.inventory.lootTable.LootTable loot = new necesse.inventory.lootTable.LootTable(
+                necesse.inventory.lootTable.lootItem.LootItem.between(lootItem, min, max));
+        GrassObject plant = new GrassObject(stringID, variants) {
+            @Override
+            public necesse.inventory.lootTable.LootTable getLootTable(
+                    necesse.level.maps.Level level, int layerID, int tileX, int tileY) {
+                return loot;
+            }
+        };
+        plant.mapColor = mapColor;
+        int id = ObjectRegistry.registerObject(stringID, plant, 1.0F, true);
+        ObjectRegistry.getObject(id).canPlaceOnShore = true;
+        return id;
+    }
+
+    /** Walk-through carpet grass: 4 variants, no drops. */
+    private static int registerMeadowGrass(String stringID, Color mapColor) {
+        GrassObject grass = new GrassObject(stringID, 4);
+        grass.mapColor = mapColor;
+        int id = ObjectRegistry.registerObject(stringID, grass, 0.0F, false);
+        ObjectRegistry.getObject(id).canPlaceOnShore = true;
+        return id;
     }
 
     /** Natural objects of the Veil (v0.3): fen flora, ash bones, dark rock. */

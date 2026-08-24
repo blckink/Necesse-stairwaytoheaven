@@ -115,4 +115,23 @@ public final class SkyRegistry {
     public static int ashbonesID;
     public static int deadtreeID;
     public static int ghostLanternID;
+
+    // ===== v0.4 "The Living Sky": per-biome fill =====
+
+    // Trees + saplings
+    public static int nimbuswillowID, fulgurpineID, prismabirchID;
+    public static int nimbusSaplingID, fulgurSaplingID, prismaSaplingID;
+
+    // Plants
+    public static int cloudbellID, skytulipID, staticmossID;
+    public static int thunderbloomID, glowfernID, auroralilyID;
+
+    // Dense meadow tall grasses (walk-through carpets)
+    public static int tallcloudgrassID, stormsedgeID, prismgrassID;
+
+    // Ores
+    public static int fulguriteRockID, prismshardRockID;
+
+    // Buildable wood floors
+    public static int nimbusFloorID, charFloorID, prismFloorID;
 }

@@ -48,6 +48,30 @@ final class SkyItems {
         // Weapons
         ItemRegistry.registerItem("tempestedge", new TempestEdgeSwordToolItem(), 220.0F, true);
         ItemRegistry.registerItem("galehowl", new GalehowlProjectileToolItem(), 220.0F, true);
+
+        // v0.4 "The Living Sky": logs, flowers, mosses, ores
+        ItemRegistry.registerItem("nimbuswood",
+                new MatItem(1000, Item.Rarity.NORMAL).setItemCategory("materials", "wood"), 1.5F, true);
+        ItemRegistry.registerItem("charwood",
+                new MatItem(1000, Item.Rarity.NORMAL).setItemCategory("materials", "wood"), 1.5F, true);
+        ItemRegistry.registerItem("prismwood",
+                new MatItem(1000, Item.Rarity.NORMAL).setItemCategory("materials", "wood"), 1.5F, true);
+        ItemRegistry.registerItem("cloudbell",
+                new MatItem(250, Item.Rarity.NORMAL).setItemCategory("materials", "flowers"), 2.0F, true);
+        ItemRegistry.registerItem("skytulip",
+                new MatItem(250, Item.Rarity.NORMAL).setItemCategory("materials", "flowers"), 2.0F, true);
+        ItemRegistry.registerItem("thunderbloom",
+                new MatItem(250, Item.Rarity.UNCOMMON).setItemCategory("materials", "flowers"), 6.0F, true);
+        ItemRegistry.registerItem("glowfern",
+                new MatItem(250, Item.Rarity.NORMAL).setItemCategory("materials", "flowers"), 3.0F, true);
+        ItemRegistry.registerItem("auroralily",
+                new MatItem(250, Item.Rarity.UNCOMMON).setItemCategory("materials", "flowers"), 6.0F, true);
+        ItemRegistry.registerItem("staticmoss",
+                new MatItem(250, Item.Rarity.NORMAL).setItemCategory("materials", "flowers"), 3.0F, true);
+        ItemRegistry.registerItem("fulgurite",
+                new MatItem(250, Item.Rarity.UNCOMMON).setItemCategory("materials", "minerals"), 12.0F, true);
+        ItemRegistry.registerItem("prismshard",
+                new MatItem(250, Item.Rarity.UNCOMMON).setItemCategory("materials", "minerals"), 12.0F, true);
     }
 
     /** Runs in postInit — the mod recipe registry closes right afterwards. */

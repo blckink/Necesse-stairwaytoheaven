@@ -51,6 +51,13 @@ final class SkyBuildingSet {
                 new SimpleTiledFloorTile("marblechecker", new Color(130, 128, 138)), 1.0F, true);
         SkyRegistry.gloomwoodFloorID = TileRegistry.registerTile("gloomwoodfloortile",
                 new SimpleFloorTile("gloomwoodfloor", new Color(66, 52, 60)), 1.0F, true);
+        // v0.4: one buildable plank floor per sky wood
+        SkyRegistry.nimbusFloorID = TileRegistry.registerTile("nimbusfloortile",
+                new SimpleFloorTile("nimbusfloor", new Color(150, 136, 124)), 1.0F, true);
+        SkyRegistry.charFloorID = TileRegistry.registerTile("charfloortile",
+                new SimpleFloorTile("charfloor", new Color(62, 58, 72)), 1.0F, true);
+        SkyRegistry.prismFloorID = TileRegistry.registerTile("prismfloortile",
+                new SimpleFloorTile("prismfloor", new Color(210, 196, 210)), 1.0F, true);
 
         // ===== Fence + gate (vanilla ironfence registration pattern) =====
         SkyRegistry.skyironFenceID = ObjectRegistry.registerObject("skyironfence",
@@ -121,6 +128,13 @@ final class SkyBuildingSet {
                 Recipes.ingredientsFromScript("{{skystone, 2}}")));
         Recipes.registerModRecipe(new Recipe("gloomwoodfloortile", 6, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{anylog, 2}, {stormshard, 1}}")));
+        // v0.4: sky wood floors from their own logs
+        Recipes.registerModRecipe(new Recipe("nimbusfloortile", 6, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{nimbuswood, 2}}")));
+        Recipes.registerModRecipe(new Recipe("charfloortile", 6, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{charwood, 2}}")));
+        Recipes.registerModRecipe(new Recipe("prismfloortile", 6, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{prismwood, 2}}")));
         Recipes.registerModRecipe(new Recipe("skyironfence", 4, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{ironbar, 1}, {skystone, 1}}")));
         Recipes.registerModRecipe(new Recipe("skyironfencegate", 1, RecipeTechRegistry.WORKSTATION,

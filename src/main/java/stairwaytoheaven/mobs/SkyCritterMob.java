@@ -30,13 +30,19 @@ public abstract class SkyCritterMob extends CritterMob {
 
     public static GameTexture mothTexture;
     public static GameTexture beetleTexture;
+    public static GameTexture finchTexture;
+    public static GameTexture snailTexture;
 
     public static final LootTable mothLoot = new LootTable(
             new ChanceLootItemList(0.4F, LootItem.between("aurorapetal", 1, 1)));
     public static final LootTable beetleLoot = new LootTable(
             new ChanceLootItemList(0.4F, LootItem.between("stormshard", 1, 1)));
+    public static final LootTable finchLoot = new LootTable(
+            new ChanceLootItemList(0.4F, LootItem.between("windsilk", 1, 1)));
+    public static final LootTable snailLoot = new LootTable(
+            new ChanceLootItemList(0.35F, LootItem.between("prismshard", 1, 1)));
 
-    private final int kind; // 0 = lamb, 1 = moth, 2 = beetle
+    private final int kind; // 0 = lamb, 1 = moth, 2 = beetle, 3 = finch, 4 = snail
 
     protected SkyCritterMob(int kind, int health, float speed) {
         super(health);
@@ -49,12 +55,22 @@ public abstract class SkyCritterMob extends CritterMob {
     }
 
     private GameTexture texture() {
-        return this.kind == 1 ? mothTexture : beetleTexture;
+        switch (this.kind) {
+            case 1: return mothTexture;
+            case 3: return finchTexture;
+            case 4: return snailTexture;
+            default: return beetleTexture;
+        }
     }
 
     @Override
     public LootTable getLootTable() {
-        return this.kind == 1 ? mothLoot : beetleLoot;
+        switch (this.kind) {
+            case 1: return mothLoot;
+            case 3: return finchLoot;
+            case 4: return snailLoot;
+            default: return beetleLoot;
+        }
     }
 
     @Override
@@ -96,6 +112,20 @@ public abstract class SkyCritterMob extends CritterMob {
     public static class SparkBeetle extends SkyCritterMob {
         public SparkBeetle() {
             super(2, 20, 22.0F);
+        }
+    }
+
+    /** Zephyr Finch — a tiny darting meadow bird (Driftlands, v0.4). */
+    public static class ZephyrFinch extends SkyCritterMob {
+        public ZephyrFinch() {
+            super(3, 15, 34.0F);
+        }
+    }
+
+    /** Dew Snail — a slow glowing snail of the shoals (Aurora, v0.4). */
+    public static class DewSnail extends SkyCritterMob {
+        public DewSnail() {
+            super(4, 25, 8.0F);
         }
     }
 }
