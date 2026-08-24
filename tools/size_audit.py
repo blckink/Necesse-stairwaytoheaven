@@ -53,6 +53,16 @@ PAIRS = [
      "objects/bannerstand.png", None, "tall quest prop"),
     ("mobs/skywarden.png", (0, 0, 64, 64),
      None, None, "humanoid: compare by hand vs player (28px head)"),
+    # v0.5 art pass: the assets the last playtest called out as too thin.
+    # Ore overlays are masked onto the rock, so compare overlay to overlay;
+    # mob sheets compare their densest 64px frame against a vanilla quadruped
+    # of the same footprint.
+    ("objects/aetheriumore.png", ("auto", 32, 32),
+     "objects/ironore.png", ("auto", 32, 32), "ore overlay (densest 32px cell)"),
+    ("mobs/galehound.png", ("auto", 64, 64),
+     "mobs/boar.png", ("auto", 64, 64), "quadruped mob (densest 64px frame)"),
+    ("mobs/skystonegolem.png", ("auto", 64, 64),
+     "mobs/boar.png", ("auto", 64, 64), "heavy mob (densest 64px frame)"),
     # v0.4 saplings (chunky mini-trees like vanilla, not thin shoots)
     ("objects/nimbussapling.png", None,
      "objects/willowsapling.png", None, "sapling"),
