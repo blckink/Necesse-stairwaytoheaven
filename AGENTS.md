@@ -1,6 +1,6 @@
 # Agent entrypoint
 
-Every agent — Claude, Codex, or anything else — reads this file before
+Every agent — Claude, Codex, Ox, or anything else — reads this file before
 modifying anything in this repository.
 
 ## Read these first, in order
@@ -10,10 +10,13 @@ modifying anything in this repository.
 3. `docs/DESIGN_DECISIONS.md` — invariants you must not silently reverse
 4. `docs/TECHNICAL_LEARNINGS.md` — verified Necesse behaviour, so you do not
    rediscover the same APIs and bugs
-5. the domain doc for what you are touching — `docs/ART_DIRECTION.md`,
+5. `docs/IMPLEMENTATION_RULES.md` — production rules for complete, vanilla-like
+   content families, tool behaviour, UI/icon completeness, worldgen composition,
+   and verification states
+6. the domain doc for what you are touching — `docs/ART_DIRECTION.md`,
    `docs/PLAYTEST_LOG.md`, `docs/ARCHITECTURE.md`, `docs/DESIGN.md`,
    `docs/research/`
-6. recent git history (`git log --oneline -20` and the diff of anything your
+7. recent git history (`git log --oneline -20` and the diff of anything your
    task touches)
 
 ## Rules
@@ -30,6 +33,12 @@ real class before calling it. Never write "should be" reasoning into code.
 records something and you believe it is wrong, say so to the user and wait.
 Do not quietly implement the opposite.
 
+**Build complete content, not isolated assets.** Any new content family must
+follow `docs/IMPLEMENTATION_RULES.md`: correct native archetype, registry/category,
+world sprite/sheet, item/menu icon where applicable, locale, crafting/obtainability,
+tool interaction, drops, persistence/despawn semantics, and relevant QA. A PNG
+or compiling class alone is not finished content.
+
 **Real in-game player feedback outranks automated metrics.** `tools/size_audit.py`
 is a safety net that catches sprites which are objectively too small. It is not
 art direction, and passing it does not mean an asset reads well in game. When a
@@ -42,7 +51,8 @@ Only write things you actually observed. Mark anything unproven as a hypothesis.
 
 **Do not claim something is verified when it was only read out of source.**
 "The decompiled code says X" and "I ran it and saw X" are different claims.
-Say which one you have.
+Say which one you have. Use the verification states defined in
+`docs/IMPLEMENTATION_RULES.md`.
 
 ## Build and test
 
@@ -62,5 +72,6 @@ The server integration test **cannot see client rendering bugs**. See
 
 `docs/AGENT_WORKFLOW.md` defines the phases and the file-ownership rules for
 parallel work. The short version: two agents never edit the same file at the
-same time, and generated assets are changed by editing the generator, never by
-editing the PNG.
+same time, generated assets are changed by editing the generator, never by
+editing the PNG, and every new content family must be completed according to
+`docs/IMPLEMENTATION_RULES.md` rather than left as an art/code placeholder.
