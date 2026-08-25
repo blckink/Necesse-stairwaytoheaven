@@ -22,6 +22,7 @@ decompiled sources before calling it. Build after each batch, not at the end.
 scripts/integration_test.sh    # server boot, generation, restart persistence
 scripts/tile_sprite_check.sh   # client-side tile sprite indices, headless
 python3 tools/size_audit.py    # 0 flags required
+python3 tools/locale_audit.py  # no registered ID may show as a raw string ID
 ```
 
 Match the gate to the change. A client rendering change is not covered by the

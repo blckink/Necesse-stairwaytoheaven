@@ -13,6 +13,8 @@ skystonetile=Skystone
 stormslatetile=Stormslate
 mistseatile=Mistsea
 
+gloomwoodfloortile=Gloomwood Floor
+marblecheckertile=Marble Checker Floor
 [object]
 nimbuswillow=Nimbus Willow
 fulgurpine=Fulgur Pine
@@ -51,6 +53,22 @@ aurorabloom=Aurora Bloom
 aurorabloomr=Aurora Bloom
 skyreeds=Sky Reeds
 
+aetheriumrock=Aetherium Deposit
+catbasket=Cat Basket
+flickerlightgarland=Flickerlight Garland
+gloomravenstatue=Gloomraven Statue
+gloomwillow=Gloom Willow
+mistglasslantern=Mistglass Lantern
+skyanchor=Isle Anchor
+skyironfence=Skyiron Fence
+skystairwaydown=Stairway to Heaven
+skystairwayup=Return Stairway
+skywatchbanner=Skywatch Banner
+veilriftdown=Veil Rift
+veilriftup=Returning Rift
+wardenbeaconoff=Dark Beacon
+wardenbeaconon=Skywatch Beacon
+wardencandelabra=Warden's Candelabra
 [item]
 nimbuswood=Nimbuswood
 charwood=Charwood

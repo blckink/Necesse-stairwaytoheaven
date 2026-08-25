@@ -52,6 +52,7 @@ export NECESSE_GAME_DIR=/path/to/necesse-dedicated-server   # contains Server.ja
 scripts/integration_test.sh           # boots a real server, generates, restarts
 scripts/tile_sprite_check.sh          # client-side tile sprite indices (headless)
 python3 tools/size_audit.py           # sprite mass vs vanilla; must print 0 flags
+python3 tools/locale_audit.py         # every registered ID named in both locales
 ```
 
 The server integration test **cannot see client rendering bugs**. See
