@@ -28,6 +28,7 @@ import gen_critters  # noqa: E402
 import gen_veil  # noqa: E402
 import gen_splats  # noqa: E402
 import gen_walls  # noqa: E402
+import gen_props  # noqa: E402
 import gen_furniture  # noqa: E402
 import gen_trees  # noqa: E402
 
@@ -74,7 +75,9 @@ def main():
             os.remove(legacy_path)
 
     # Rocks + ore overlay
-    gen_rocks.gen_rock_sheet(f"{out}/objects/skystonerock.png", palette.SKYSTONE)
+    # v0.6 rock family: 8 Skystone variants / 6 Veilrock variants (vanilla
+    # rock ships 4, caverock 8 — two variants read as repetition in game).
+    gen_rocks.gen_rock_sheet(f"{out}/objects/skystonerock.png", palette.SKYSTONE, variants=8)
     gen_rocks.gen_ore_sheet(f"{out}/objects/aetheriumore.png", palette.AETHERIUM)
 
     # Objects
@@ -82,7 +85,7 @@ def main():
     gen_objects.gen_stairway_up(f"{out}/objects/skystairwayup.png")
     gen_objects.gen_windwheat(f"{out}/objects/windwheat.png")
     gen_objects.gen_cloudberrybush(f"{out}/objects/cloudberrybush.png")
-    gen_rocks.gen_rock_sheet(f"{out}/objects/veilrock.png", palette.VEILROCK, salt=0x3E1F)
+    gen_rocks.gen_rock_sheet(f"{out}/objects/veilrock.png", palette.VEILROCK, variants=6, salt=0x3E1F)
     gen_veil.gen_whisperreeds(f"{out}/objects/whisperreeds.png")
     gen_veil.gen_gloomshroom(f"{out}/objects/gloomshroom.png")
     gen_veil.gen_ashbones(f"{out}/objects/ashbones.png")
@@ -185,8 +188,12 @@ def main():
     gen_items.gen_tempestedge_held(f"{out}/player/weapons/tempestedge.png")
     gen_items.gen_galehowl_held(f"{out}/player/weapons/galehowl.png")
 
-    # v0.2: building set, quest structure pieces, NPC-adjacent deco
+    # v0.6: building set, quest structure pieces, NPC-adjacent deco
     gen_walls.gen_walls(f"{out}/objects")
+    # v0.6 prop families: Spire hero accents, Stormveil/Aurora environmental
+    # props, sky-oddity seeds (see gen_props.py docstring for the split)
+    gen_props.gen_all(f"{out}/objects")
+    gen_props.gen_prop_icons(f"{out}/items")
     gen_furniture.gen_skyironfence(f"{out}/objects/skyironfence.png")
     gen_furniture.gen_skyironfencegate(f"{out}/objects/skyironfencegate.png")
     gen_furniture.gen_candelabra(f"{out}/objects/wardencandelabra.png")

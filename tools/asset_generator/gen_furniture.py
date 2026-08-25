@@ -760,106 +760,110 @@ def gen_banner_painting(path):
 
 
 def gen_beacon(path, lit):
-    """32x96 bottom-anchored beacon: masonry base, riveted iron column and a
-    caged brazier head. OFF = dead coals behind dark glass with soot streaks;
-    ON = blazing cold-teal flame with white core, halo and sparks."""
+    """32x96 bottom-anchored beacon, v0.6 hero redesign (playtest: the spire
+    reads as 'a small normal house' — the old beacon read as a streetlamp).
+
+    Weathered Skywatch machinery now: a wide observatory plinth carrying a
+    carved stair-sigil, a banded pillar with one intact armature ring and one
+    SNAPPED stub (ancient damage), and a brass yoke cradling a big faceted
+    storm-glass lens. ON = cold-teal core burning inside the lens with halo
+    and sparks; OFF = dark lens, faint violet sheen, soot below the yoke."""
     c = Canvas(32, 96)
     stone = palette.SKYSTONE
     iron = palette.IRONWORK
     glow = palette.STAIRLIGHT
+    trim = palette.WARDEN["trim"]
+    trim_hi = palette.WARDEN["trim_hi"]
 
-    # --- masonry base: two brick steps ---
-    c.rect(4, 88, 24, 5, stone["base"])
-    c.rect(4, 88, 24, 1, stone["light"])
-    c.rect(4, 92, 24, 1, stone["deep"])
-    for x in (10, 17, 24):
-        c.put(x, 90, stone["deep"])
-        c.put(x, 91, stone["deep"])
-    c.rect(7, 80, 18, 8, stone["base"])
-    c.rect(7, 80, 18, 1, stone["light"])
-    for x in (12, 19):
-        c.put(x, 81, stone["deep"])
-        c.put(x, 82, stone["deep"])
-    c.rect(7, 84, 18, 1, stone["deep"])
-    for x in (15, 22):
-        c.put(x, 85, stone["deep"])
-        c.put(x, 86, stone["deep"])
-    c.put(24, 82, stone["deep"])   # crack
-    c.put(25, 83, stone["deep"])
+    # --- observatory plinth: three stone steps + carved sigil ---
+    c.rect(2, 91, 28, 4, stone["base"])
+    c.rect(2, 91, 28, 1, stone["light"])
+    c.rect(2, 94, 28, 1, stone["deep"])
+    c.rect(5, 86, 22, 5, stone["base"])
+    c.rect(5, 86, 22, 1, stone["light"])
+    c.rect(5, 90, 22, 1, stone["deep"])
+    c.rect(8, 82, 16, 4, stone["base"])
+    c.rect(8, 82, 16, 1, stone["light"])
+    for (sx, sy) in ((12, 88), (15, 86), (18, 88)):   # stair sigil, deep-cut
+        for dx in range(3):
+            c.put(sx + dx, sy, stone["deep"])
+            c.put(sx + dx, sy + 1, stone["light"] if dx == 0 else stone["deep"])
+    c.put(9, 84, stone["deep"])                        # weathering pits
+    c.put(22, 85, stone["deep"])
 
-    # --- iron column with rivet bands ---
-    for y in range(46, 80):
-        t = (y - 46) / 34.0
+    # --- pillar: stone core, iron banding, one brass band ---
+    for y in range(56, 82):
+        t = (y - 56) / 26.0
         half = 4 + round(2 * t)
         for dx in range(-half, half + 1):
-            tone = iron["base"]
+            tone = stone["base"]
             if dx <= -half + 1:
-                tone = iron["light"]
+                tone = stone["light"]
             elif dx >= half - 1:
-                tone = iron["deep"]
+                tone = stone["deep"]
             c.put(16 + dx, y, tone)
-    for band_y in (52, 68):
-        half = 4 + round(2 * (band_y - 46) / 34.0) + 1
+    for band_y in (60, 74):                             # iron bands
+        half = 4 + round(2 * (band_y - 56) / 26.0) + 1
         for dx in range(-half, half + 1):
             c.put(16 + dx, band_y, iron["deep"])
-            c.put(16 + dx, band_y - 1, iron["light"])
-        c.put(16 - half, band_y - 1, glow["hi"] if lit else iron["light"])
-        c.put(16 + half, band_y - 1, iron["deep"])
-    c.put(14, 60, iron["deep"])    # hairline crack
-    c.put(15, 61, iron["deep"])
-    c.put(15, 62, iron["deep"])
+            c.put(16 + dx, band_y - 1, iron["base"])
+        c.put(16 - half, band_y - 1, iron["light"])
+    for dx in range(-6, 7):                             # brass band
+        c.put(16 + dx, 66, trim if abs(dx) < 5 else iron["deep"])
+        c.put(16 + dx, 65, trim_hi if abs(dx) < 3 else iron["base"])
+    # armature: intact ring arm left, snapped stub right (ancient damage)
+    for ang in range(0, 360, 20):
+        import math
+        x = 9 + int(3.4 * math.cos(math.radians(ang)))
+        y = 62 + int(3.4 * math.sin(math.radians(ang)))
+        c.put(x, y, iron["base"])
+    c.put(6, 60, iron["light"])
+    for k in range(5):                                  # snapped stub
+        c.put(23 + (k % 2), 61 + k, iron["base"] if k < 3 else iron["deep"])
+    c.put(24, 66, iron["deep"])
+    c.put(23, 66, trim)                                 # torn bolt
 
-    # --- brazier bowl ---
-    for i, y in enumerate(range(36, 46)):
-        half = 9 - i // 2
-        for dx in range(-half, half + 1):
-            tone = iron["base"]
-            if dx <= -half + 1:
-                tone = iron["light"]
-            elif dx >= half - 1 or y >= 44:
-                tone = iron["deep"]
-            c.put(16 + dx, y, tone)
-    c.rect(7, 35, 18, 1, iron["light"])          # rim
-    c.put(7, 36, iron["light"])
-    c.put(24, 36, iron["deep"])
-    c.put(9, 36, glow["hi"] if lit else iron["light"])   # rim rivets
-    c.put(22, 36, iron["deep"])
+    # --- brass yoke cradling the storm-glass lens ---
+    for i in range(14):                                 # yoke arms
+        lx = 16 - 8 + i // 2
+        ly = 40 - i
+        c.put(lx, ly, trim if i > 4 else iron["base"])
+        c.put(lx + 1, ly, trim_hi if i > 4 else iron["base"])
+        rx = 16 + 8 - i // 2
+        c.put(rx, ly, trim if i > 4 else iron["deep"])
+        c.put(rx - 1, ly, iron["deep"])
+    c.rect(8, 40, 16, 2, iron["base"])                  # yoke collar
+    c.rect(8, 40, 16, 1, iron["light"])
+    c.rect(13, 36, 6, 4, iron["base"])                  # lens mount
+    c.put(14, 36, trim)
+    c.put(15, 36, trim_hi)
 
-    # --- cage: four ribs + top ring + finial ---
-    for rx in (8, 13, 18, 23):
-        for y in range(23, 35):
-            c.put(rx, y, iron["deep"])
-        c.put(rx, 23, iron["base"])
-    c.rect(8, 21, 16, 2, iron["base"])
-    c.rect(8, 21, 16, 1, iron["light"])
-    c.rect(14, 17, 4, 4, iron["base"])
-    c.put(15, 16, iron["light"])
-    c.put(16, 16, iron["light"])
-
-    # --- core ---
+    # the lens: 14px faceted sphere
     if lit:
-        c.ellipse(16, 29, 6, 5, glow["glow"])
-        c.ellipse(16, 28, 3.5, 3.5, glow["hi"])
-        c.put(15, 24, glow["glow"])              # flame tongue
-        c.put(16, 23, glow["hi"])
-        c.put(17, 25, glow["glow"])
+        c.ellipse(16, 27, 7, 7, glow["glow"])
+        c.ellipse(16, 27, 5, 5, glow["hi"])
+        c.ellipse(14, 25, 2.4, 2.2, (255, 255, 255))
+        for (fx, fy) in ((12, 27), (20, 27), (16, 21), (16, 33)):
+            c.put(fx, fy, glow["glow"])                 # facet seams
+        c.put(11, 24, glow["hi"])
+        c.put(21, 30, glow["glow"])
     else:
-        c.ellipse(16, 30, 5.5, 4, palette.NIGHTFELL["deep"])
-        c.ellipse(15, 31, 3, 2, palette.NIGHTFELL["base"])
-        c.put(14, 32, palette.STORMCRYSTAL["deep"])   # dead coals
-        c.put(18, 31, palette.STORMCRYSTAL["deep"])
-        c.put(16, 30, palette.STORMSLATE["charge"])   # one faint live ember
-        c.put(11, 38, iron["deep"])                   # soot streaks on the bowl
-        c.put(12, 39, iron["deep"])
-        c.put(20, 38, iron["deep"])
+        c.ellipse(16, 27, 7, 7, palette.NIGHTFELL["deep"])
+        c.ellipse(16, 27, 5, 5, palette.NIGHTFELL["base"])
+        c.ellipse(14, 25, 2.2, 2.0, palette.NIGHTFELL["hi"])  # dead sheen
+        c.put(20, 30, palette.STORMCRYSTAL["deep"])          # violet ghost
+        c.put(12, 30, palette.STORMCRYSTAL["deep"])
+        for k in range(4):                                   # soot under yoke
+            c.put(13 + k, 35, iron["deep"])
+            c.put(14 + k, 34, iron["deep"])
 
     c.outline(palette.OUTLINE)
     if lit:
-        # glow halo + sparks float outside the silhouette (after outline)
-        for (hx, hy, a) in ((5, 27, 150), (27, 25, 150), (16, 13, 170),
-                            (9, 18, 130), (23, 17, 130), (12, 11, 110), (21, 9, 110)):
+        # halo + sparks float outside the silhouette (after outline)
+        for (hx, hy, a) in ((4, 26, 150), (28, 24, 150), (16, 12, 170),
+                            (8, 16, 130), (24, 15, 130), (12, 9, 110), (21, 8, 110)):
             c.put(hx, hy, with_alpha(glow["glow"], a))
-        c.put(16, 11, with_alpha(glow["hi"], 200))
+        c.put(16, 10, with_alpha(glow["hi"], 200))
     c.save(path)
 
 

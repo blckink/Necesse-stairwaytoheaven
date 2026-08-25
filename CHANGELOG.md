@@ -3,6 +3,62 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [Unreleased] — v0.6 visual production sprint — 2026-08-25
+
+The large visual assets finally match the mini vegetation, critters and
+atmosphere that already worked. Everything regenerated through the pipeline;
+inspected on contact sheets; NOT yet played by a human.
+
+### Changed
+- **Rock family rebuilt** (`gen_rocks.py`): 8 Skystone / 6 Veilrock variants
+  with real geological characters (slab, strata, boulder domes, fracture,
+  split fissure, rubble, weathered pits, broken terrace) instead of two
+  speckle-jittered twins; exposed edges are carved so perimeters stop reading
+  as ruled rectangles. Faces are base-dominant and the base fades out through
+  vanilla's measured soft-alpha skirt (195/195/113/78/55/29, no bottom
+  outline) — the old opaque deep-ramp band WAS the "far too long and dark"
+  rock shadow. Engine side needed no changes: `RockObject` picks
+  `width/32` variants per tile (verified by disassembly).
+- **Storm Shards redesigned** (`gen_objects.py`): 4 asymmetric 64x64 cluster
+  formations of tilted, overlapping, value-alternating crystal blades with
+  deep violet internal planes and restrained pale edges on a shared rubble
+  bed — no more row of teeth. Size-audit ratio 0.74 → 1.01 of vanilla
+  `crystalwall`.
+- **Tree volume pass** (`gen_trees.py`): new `_canopy_volume` shared by Nimbus
+  Willow, Prismabirch and Fulgur Pine — overlap shadows where one lobe/tier
+  sits under a higher one, one canopy-scale light field, per-lobe sheens
+  demoted on the shadow side, trunk collar. Fixes "stacked pancakes" without
+  touching the size and silhouettes the playtest approved.
+- **Cloudberry bush rebuilt** (`gen_objects.py`): a dense leaf-clump dome
+  (~30x20) over woody stems with amber berry clusters sunk into the mass —
+  no longer two mushrooms. Greener leaf ramp in `palette.py`.
+- **Warden identity pass** (`gen_npcs.py`, `palette.py`): storm-blue coat
+  ramp matching the recruited settler's pinned livery, hood-down cowl behind
+  the hair (the icon's silhouette), brass Skywatch collar clasp, weathered
+  mend patches, cheek lines. Renderers untouched.
+- **Warden beacon rebuilt** (`gen_furniture.py`): observatory machinery —
+  sigil plinth, banded pillar with a snapped armature, brass yoke cradling a
+  faceted storm-glass lens (burning cold-teal when lit).
+
+### Added
+- **Spire hero accents**: `skywatchtelescope` (brass refractor on a stone
+  tripod) and `skywatchastrolabe` (navigation table with armillary rings).
+- **Stormveil prop families**: `stormscreed` (scorched ground decal),
+  `skywatchrubble` (broken carved stone), `chargecrystal` (lit), `withershrub`
+  — registered, craftable, ready for worldgen composition.
+- **Aurora accents**: `aurorashards` (lit, teal/rose), `starfall` (lit).
+- **Sky oddity seeds** — `skyballoon`, `aeronautwreck`, `skyparcel` —
+  registered + craftable but deliberately absent from worldgen; rare
+  encounters for later.
+- New props live in `tools/asset_generator/gen_props.py` with item icons
+  (`gen_prop_icons`) so no crafting entry shows the error texture.
+- 11 new locale entries in both languages (locale audit now gates 77 IDs).
+
+### Verified
+- Regeneration byte-identical; `size_audit` 0 flags; `locale_audit` 77/77;
+  `buildModJar` builds; `scripts/integration_test.sh` passes (generate,
+  restart, spire/warden/cats persist, no errors).
+
 ## [0.5.0] — "The Skywatch Opens" — 2026-08-24
 
 The Skyreach becomes a place you travel TO. The surface stays your world —

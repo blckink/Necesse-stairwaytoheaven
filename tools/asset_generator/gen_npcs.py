@@ -135,6 +135,40 @@ def _warden_frame(facing, step, swim=False):
         for dx in range(-10, 11):
             c.put(ccx + dx, 31 + hd, w["feather"])
 
+    def hood_back(ccx, wide=14.5):
+        """v0.6: the Skywatch storm hood, worn DOWN — a cowl mass behind the
+        hair (drawn BEFORE the hair so the white hair spills out of it).
+        This is the silhouette the warden icon always showed; on the world
+        sprite it is what breaks the 'generic wizard' read."""
+        c.ellipse(ccx, 18.2 + hd, wide, 12.2, w["coat_deep"])
+        c.ellipse(ccx, 21.0 + hd, wide - 1.5, 10.2, w["coat"])
+        for dx in range(-int(wide) + 1, int(wide)):     # lit rim, light TL
+            if abs(dx) > wide - 5:
+                c.put(ccx + dx, 10 + hd, w["coat_light"])
+        c.put(ccx - int(wide) + 2, 11 + hd, w["coat_light"])
+        c.put(ccx + int(wide) - 3, 11 + hd, w["coat_light"])
+
+    def weather(ccx, y0, y1, seed):
+        """Pale weathered mend patches on the coat — a few 2-3px clusters,
+        never uniform, plus one stitched tear."""
+        rng = Rng(seed)
+        for _ in range(3):
+            px_, py_ = ccx + rng.range(-7, 7), rng.range(y0, y1)
+            for k in range(rng.range(2, 4)):
+                if c.filled(px_ + k, py_) and c.get(px_ + k, py_)[:3] in (
+                        w["coat"], w["coat_light"]):
+                    c.put(px_ + k, py_, w["patch"])
+        tx = ccx + rng.pick((-6, 5))
+        for k in range(3):
+            c.put(tx + k, y1 - 2 + (k % 2), w["coat_deep"])   # tear
+        c.put(tx, y1 - 2, w["patch"])                          # stitch
+
+    def clasp(ccx, cy):
+        """Brass Skywatch clasp holding the hood at the throat."""
+        c.rect(ccx - 1, cy, 3, 2, w["trim"])
+        c.put(ccx - 1, cy, w["trim_hi"])
+        c.put(ccx + 1, cy + 1, w["coat_deep"])
+
     def staff_arm(side):
         """Sleeve wedge from the shoulder out toward the pole."""
         for i, y in enumerate(range(32, 36)):
@@ -157,6 +191,7 @@ def _warden_frame(facing, step, swim=False):
         if facing == "down":                     # hanging hand on the free arm
             c.rect(cx + 8, 40, 2, 2, w["skin"])
         collar(cx)
+        hood_back(cx)
         # --- head: hair mass -> face opening -> beard mass ---
         c.ellipse(cx, 17.5 + hd, 12.8, 10.0, w["hair"])    # 25px hair dome
         for y in range(25 + hd, 28 + hd):                  # jaw band under dome
@@ -229,6 +264,7 @@ def _warden_frame(facing, step, swim=False):
             if rng.chance(0.6):
                 c.put(cx + dx + sway_off(55), 55, w["coat_deep"])
         collar(cx + 2)
+        hood_back(cx - 2, 12.5)
         # --- head: back-heavy hair mass, face opening at the front ---
         c.ellipse(cx + 1, 17.5 + hd, 10.8, 9.8, w["hair"])
         for y in range(24 + hd, 27 + hd):                  # jaw band
@@ -260,6 +296,8 @@ def _warden_frame(facing, step, swim=False):
 
     # ---------------------------------------------- after-outline detail pass
     if facing == "down":
+        clasp(cx, 29 + hd)                       # brass pin on the collar
+        weather(cx, 40, 52, 0x9A11)
         for dx in list(range(-6, -2)) + list(range(3, 7)):
             c.put(cx + dx, 15 + hd, w["skin_shade"])       # hooded brow shade
         for dx in list(range(-5, -2)) + list(range(3, 6)):
@@ -291,6 +329,10 @@ def _warden_frame(facing, step, swim=False):
             c.put(cx + dx, 18 + hd, w["eye"])
             c.put(cx + dx, 19 + hd, w["skin_shade"])
         c.put(cx + 11, 19 + hd, w["skin_shade"])           # nostril
+        c.put(cx + 7, 21 + hd, w["skin_shade"])            # cheek line
+        c.put(cx + 8, 22 + hd, w["skin_shade"])
+        clasp(cx + 3, 29 + hd)                   # brass pin on the collar
+        weather(cx, 40, 52, 0x9A12)
         for (sx_, y0, y1) in ((6, 23, 26), (8, 22, 25)):
             for y in range(y0, y1 + 1):                    # beard streaks
                 c.put(cx + sx_, y + hd, w["hair_shade"])

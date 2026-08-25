@@ -90,6 +90,58 @@ final class SkyBuildingSet {
                 new SkyDecoObject("gloomwillow", 64, new Color(60, 48, 56),
                         new Rectangle(8, 12, 16, 16), "objects", "landscaping", "plants"), 15.0F, true);
 
+        // ===== v0.6 prop families (tools/asset_generator/gen_props.py) =====
+        // Spire hero accents — the observatory instruments the Spire layout
+        // can build its landmark read from.
+        ObjectRegistry.registerObject("skywatchtelescope",
+                new SkyDecoObject("skywatchtelescope", 32, new Color(204, 160, 82),
+                        new Rectangle(8, 40, 16, 24), "objects", "decorations"), 25.0F, true);
+        ObjectRegistry.registerObject("skywatchastrolabe",
+                new SkyDecoObject("skywatchastrolabe", 32, new Color(204, 160, 82),
+                        new Rectangle(4, 40, 24, 12), "objects", "decorations"), 25.0F, true);
+        // Stormveil environmental props — small reusable pieces worldgen can
+        // compose later; craftable now so builders can place them.
+        ObjectRegistry.registerObject("stormscreed",
+                new SkyDecoObject("stormscreed", 32, new Color(66, 60, 95),
+                        null, "objects", "decorations"), 0.0F, false);
+        ObjectRegistry.registerObject("skywatchrubble",
+                new SkyDecoObject("skywatchrubble", 32, new Color(126, 138, 154),
+                        new Rectangle(8, 12, 16, 20), "objects", "decorations"), 0.0F, false);
+        ObjectRegistry.registerObject("chargecrystal",
+                new SkyDecoObject("chargecrystal", 32, new Color(122, 108, 210),
+                        new Rectangle(10, 20, 12, 12), "objects", "decorations")
+                        .setLight(70, 0.72F, 0.45F), 5.0F, true);
+        ObjectRegistry.registerObject("withershrub",
+                new SkyDecoObject("withershrub", 32, new Color(62, 58, 72),
+                        new Rectangle(12, 24, 8, 8), "objects", "decorations"), 0.0F, false);
+        // Aurora Shoals accents — the same restrained teal/rose language.
+        ObjectRegistry.registerObject("aurorashards",
+                new SkyDecoObject("aurorashards", 32, new Color(214, 130, 172),
+                        new Rectangle(10, 20, 12, 10), "objects", "decorations")
+                        .setLight(70, 0.90F, 0.40F), 5.0F, true);
+        ObjectRegistry.registerObject("starfall",
+                new SkyDecoObject("starfall", 32, new Color(136, 216, 206),
+                        new Rectangle(10, 16, 12, 12), "objects", "decorations")
+                        .setLight(80, 0.50F, 0.40F), 10.0F, true);
+        // Sky oddities: rare-encounter SEEDS. Registered + craftable so they
+        // exist and map builders can place them, but deliberately absent from
+        // normal worldgen (docs/DESIGN.md keeps rare discoveries special).
+        ObjectRegistry.registerObject("skyballoon",
+                new SkyDecoObject("skyballoon", 32, new Color(196, 206, 216),
+                        null, "objects", "decorations"), 0.0F, false);
+        ObjectRegistry.registerObject("aeronautwreck",
+                new SkyDecoObject("aeronautwreck", 48, new Color(122, 96, 72),
+                        new Rectangle(8, 24, 32, 24), "objects", "decorations"), 0.0F, false);
+        ObjectRegistry.registerObject("skyparcel",
+                new SkyDecoObject("skyparcel", 32, new Color(122, 96, 72),
+                        new Rectangle(6, 14, 20, 14), "objects", "decorations"), 0.0F, false);
+        // Natural props must survive the shore sweep if worldgen later places
+        // them near the Mistsea (same reason SkyObjects calls allowShore).
+        for (String propId : new String[]{"stormscreed", "skywatchrubble",
+                "chargecrystal", "withershrub", "aurorashards", "starfall"}) {
+            ObjectRegistry.getObject(ObjectRegistry.getObjectID(propId)).canPlaceOnShore = true;
+        }
+
         FurnitureObject catBasket = new FurnitureObject();
         catBasket.furnitureType = "petbed";
         SkyRegistry.catBasketID = ObjectRegistry.registerObject("catbasket", catBasket, 50.0F, true);
@@ -164,6 +216,30 @@ final class SkyBuildingSet {
                 Recipes.ingredientsFromScript("{{skystone, 12}, {stormshard, 2}}")));
         Recipes.registerModRecipe(new Recipe("gloomwillow", 1, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{anylog, 6}, {stormshard, 1}}")));
+        // v0.6 prop families (craftable so builders can compose with them;
+        // the oddities stay out of worldgen — see the registration note above)
+        Recipes.registerModRecipe(new Recipe("skywatchtelescope", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{ironbar, 4}, {aetheriumore, 2}, {skystone, 6}}")));
+        Recipes.registerModRecipe(new Recipe("skywatchastrolabe", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{ironbar, 2}, {stormshard, 2}, {skystone, 4}}")));
+        Recipes.registerModRecipe(new Recipe("stormscreed", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{skystone, 1}, {stormshard, 1}}")));
+        Recipes.registerModRecipe(new Recipe("skywatchrubble", 2, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{skystone, 3}}")));
+        Recipes.registerModRecipe(new Recipe("chargecrystal", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{stormshard, 2}, {skystone, 2}}")));
+        Recipes.registerModRecipe(new Recipe("withershrub", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{charwood, 2}}")));
+        Recipes.registerModRecipe(new Recipe("aurorashards", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{aurorapetal, 2}, {skystone, 2}}")));
+        Recipes.registerModRecipe(new Recipe("starfall", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{prismshard, 2}, {skystone, 1}}")));
+        Recipes.registerModRecipe(new Recipe("skyballoon", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{windsilk, 3}, {ironbar, 1}, {anylog, 1}}")));
+        Recipes.registerModRecipe(new Recipe("aeronautwreck", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{anylog, 4}, {ironbar, 2}}")));
+        Recipes.registerModRecipe(new Recipe("skyparcel", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{anylog, 2}, {ironbar, 1}}")));
         // The Warden teaches this one in the story, but it is craftable from
         // the start — the gate is finding him and learning what it's for.
         Recipes.registerModRecipe(new Recipe("cloudpufftreat", 3, RecipeTechRegistry.NONE,

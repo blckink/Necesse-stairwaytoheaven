@@ -73,6 +73,77 @@ def _lobed_mass(c, lobes, ramp, fold=True, sheen=True):
                     c.put(x, y - 1, ramp["deep"])
 
 
+def _canopy_volume(c, lobes, ramp, rng, light_spread=0.55):
+    """v0.6 volume pass (playtest: canopies read as 'stacked pancakes').
+
+    Three flat-band passes over an existing _lobed_mass, all true pixel art:
+    1. OVERLAP SHADOWS — where one lobe sits under an up-left neighbour, the
+       covered band darkens two steps. This is the missing 'shadow where one
+       canopy lobe overlaps another'.
+    2. GLOBAL LIGHT FIELD — one big lit plane toward the top-left of the whole
+       canopy and a deep field toward the lower right (quantised, dithered at
+       the boundary), so value structure is canopy-scale instead of repeating
+       per lobe.
+    3. TRUNK COLLAR — canopy pixels around the trunk entry darken, seating
+       the mass on the trunk.
+    """
+    import math
+    # pixel -> topmost lobe index that owns it
+    owner = {}
+    for i, (cx, cy, rx, ry) in enumerate(lobes):
+        for x in range(int(cx - rx) - 1, int(cx + rx) + 2):
+            for y in range(int(cy - ry) - 1, int(cy + ry) + 2):
+                if not c.filled(x, y):
+                    continue
+                dx = (x - cx) / max(rx, 0.001)
+                dy = (y - cy) / max(ry, 0.001)
+                if dx * dx + dy * dy <= 1.05 and (x, y) not in owner:
+                    owner[(x, y)] = i
+    # 1. overlap shadows: a pixel whose up-left neighbour belongs to a
+    #    different, higher lobe is under that lobe -> shadow band
+    shadow_px = []
+    for (x, y), i in owner.items():
+        for (ox, oy) in ((-2, -3), (-3, -2), (-2, -2)):
+            j = owner.get((x + ox, y + oy))
+            if j is None or j == i:
+                continue
+            if lobes[j][1] < lobes[i][1] - 2:      # j sits higher
+                shadow_px.append((x, y))
+                break
+    for (x, y) in shadow_px:
+        c.put(x, y, ramp["deep"])
+    # 2. global light field, quantised with a jittered boundary
+    xs = [p[0] for p in owner]
+    ys = [p[1] for p in owner]
+    if not xs:
+        return
+    mx, my = sum(xs) / len(xs), sum(ys) / len(ys)
+    radius = max(max(x for x in xs) - mx, max(y for y in ys) - my, 1)
+    for (x, y), i in owner.items():
+        d = ((x - mx) * 0.62 + (y - my) * 1.0) / radius
+        jitter = (rng.float() - 0.5) * 0.16
+        cur = c.get(x, y)[:3]
+        if d < -light_spread + jitter and cur not in (palette.OUTLINE, ramp["hi"], ramp["light"]):
+            c.put(x, y, ramp["light"])
+        elif d > light_spread + jitter:
+            # demote the per-lobe sheens on the shadow side too — otherwise
+            # every lobe keeps its own bright ellipse and the canopy keeps
+            # reading as stacked pancakes
+            if cur == ramp["base"] and rng.chance(0.5):
+                c.put(x, y, ramp["deep"])
+            elif cur == ramp["light"] and rng.chance(0.6):
+                c.put(x, y, ramp["base"])
+    # 3. trunk collar: darken a small arc where the mass meets the trunk
+    bx = min(owner, key=lambda p: abs(p[0] - mx)) if owner else None
+    if bx is not None:
+        col_x, base_y = bx[0], max(y for (x, y) in owner
+                                   if abs(x - bx[0]) <= 6)
+        for x in range(col_x - 6, col_x + 7):
+            for y in range(base_y - 4, base_y + 1):
+                if c.filled(x, y) and rng.chance(0.75):
+                    c.put(x, y, ramp["deep"])
+
+
 def _bottom_edge(c, x, y_from=127):
     """Lowest filled y in column x (or None)."""
     for y in range(y_from, -1, -1):
@@ -164,6 +235,7 @@ def _nimbuswillow_cell(variant):
                  (48, 62, 18, 11), (90, 61, 16, 11), (66, 70, 15, 10)]
         strand_top = 82
     _lobed_mass(body, lobes, leaf)
+    _canopy_volume(body, lobes, leaf, rng)
 
     body.outline(palette.OUTLINE)
     _sunlit_rim(body, leaf["hi"], leaf["light"], y_max=strand_top)
@@ -297,12 +369,16 @@ def _fulgurpine_cell(variant):
         tiers = [(base_x, 103, int(30 * s), 25, 1), (base_x + 1, 87, int(22 * s), 28, -1),
                  (base_x - 1, 71, int(25 * s), 19, 1), (base_x + 1, 56, int(16 * s), 21, -1),
                  (base_x, 42, int(17 * s), 13, 0), (base_x, 30, int(11 * s), 10, 0)]
+        tier_lobes = []
         for (cx, cy, sl, sr, tl) in tiers:
-            _bough_tier(body, rng, ndl, cx, cy, sl, sr, tl)
+            tier_lobes.extend(_bough_tier(body, rng, ndl, cx, cy, sl, sr, tl))
         # pointed crown clump
         crown = [(base_x, 21, 6, 4), (base_x - 1, 15, 4, 3.2),
                  (base_x + 1, 10, 2.6, 2.6)]
         _lobed_mass(body, crown, ndl, fold=False, sheen=False)
+        tier_lobes.extend(crown)
+        # v0.6 volume: overlap shadows between tiers + one global light field
+        _canopy_volume(body, tier_lobes, ndl, rng, light_spread=0.5)
         # re-assert the trunk through the tier gaps (pale bark flecks so the
         # trunk clearly reads between boughs like vanilla pine)
         for gy in (94, 78, 63, 48):
@@ -315,8 +391,9 @@ def _fulgurpine_cell(variant):
         # lightning-split fork: needle side survives, charred snag side dies
         tiers = [(base_x, 105, 28, 24, 1), (base_x - 2, 90, 24, 20, -1),
                  (base_x - 3, 75, 19, 15, 1)]
+        tier_lobes = []
         for (cx, cy, sl, sr, tl) in tiers:
-            _bough_tier(body, rng, ndl, cx, cy, sl, sr, tl)
+            tier_lobes.extend(_bough_tier(body, rng, ndl, cx, cy, sl, sr, tl))
         # living prong: leans up-left with two smaller tiers
         for i in range(22):
             x = base_x - 2 - round(i * 0.45)
@@ -326,8 +403,9 @@ def _fulgurpine_cell(variant):
             body.put(x + 2, y, wood["deep"])
         small = [(base_x - 8, 52, 12, 9, -1), (base_x - 12, 38, 9, 7, 0)]
         for (cx, cy, sl, sr, tl) in small:
-            _bough_tier(body, rng, ndl, cx, cy, sl, sr, tl)
+            tier_lobes.extend(_bough_tier(body, rng, ndl, cx, cy, sl, sr, tl))
         tiers += small
+        _canopy_volume(body, tier_lobes, ndl, rng, light_spread=0.5)
         # dead prong: thick charred snag leaning hard right, jagged, with
         # stub branches and a splintered broken tip — the lightning scar
         fx, fy = float(base_x + 2), 66.0
@@ -446,6 +524,7 @@ def _prismabirch_cell(variant):
                 (44, 18, 16, 10), (78, 16, 14, 9), (70, 48, 19, 11),
                 (104, 32, 9, 8), (22, 36, 9, 7), (64, 14, 12, 8)]
     _lobed_mass(body, dome, leaf)
+    _canopy_volume(body, dome, leaf, rng)
 
     # clustered iridescent leaf texture (clumps, not salt-and-pepper):
     cx0, cy0, rx0, ry0 = dome[0]

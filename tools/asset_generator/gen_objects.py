@@ -219,42 +219,70 @@ def gen_windwheat(path):
 
 
 def gen_cloudberrybush(path):
-    """64x32 strip: 2 variants of a low cloudberry bush. Canopy built from a
-    ring of jittered lobes (lumpy silhouette, mirror-free), dappled with a
-    broken leaf-scale texture; berries sit in clusters of 2-3 like vanilla
-    berry bushes, each a 2x2 ball with glint and rim shadow."""
+    """64x32 strip: 2 variants of a low cloudberry bush (v0.6 readability
+    redesign — the old ~18x10 puff read as two mushrooms/stones in game).
+
+    Vanilla berrybush construction compressed into the 32px grass-object
+    tile: a dense leaf-clump DOME roughly 30px wide and 20px tall over dark
+    woody stems, with amber berry clusters sunk into the mass. Variant 0 is
+    a round dome, variant 1 wider with a slight saddle — same species, not
+    copies. True pixel art: clumps and dither, no gradients."""
     sheet = Canvas(64, 32)
     B = palette.CLOUDBERRY
     for v in range(2):
         c = Canvas(32, 32)
         rng = Rng(0xBE44 + v * 977)
-        lobes = [(16, 21, 7, 4.5)]
-        for (lx, ly) in ((9, 20), (13, 17), (18, 16), (23, 19), (25, 22), (7, 23)):
-            lobes.append((lx + rng.range(-1, 1), ly + rng.range(0, 1),
-                          rng.range(3, 4), 2.6))
-        for (lx, ly, r, ry) in lobes:            # deep under-lobes = volume
-            c.ellipse(lx + 1, ly + 1, r, ry, B["leaf_deep"])
-        for (lx, ly, r, ry) in lobes:
-            c.ellipse(lx, ly, r, ry, B["leaf"])
-        # dappled leaf-scale texture, broken so it never reads as a grid
-        for x in range(3, 29):
-            for y in range(12, 28):
-                if c.get(x, y)[:3] == B["leaf"][:3] and (x + 2 * y) % 5 == 0 \
-                        and rng.chance(0.8):
-                    c.put(x, y, B["leaf_deep"])
-        c.ellipse(13, 26, 7, 2, B["leaf_deep"])  # shaded underside
-        c.put(15, 28, B["leaf_deep"])            # stem base peeking out
-        c.put(16, 28, B["leaf_deep"])
-        # berries: two clusters + one loner
-        pts = []
-        for (bx0, by0) in ((11 + rng.range(-1, 1), 20), (21 + rng.range(-1, 1), 17)):
+        # dome silhouette: overlapping leaf masses filling the tile width
+        if v == 0:
+            masses = [(16, 20, 13, 9), (8, 22, 7, 6.5), (24, 22, 7, 6.5),
+                      (12, 16, 6, 5), (21, 16, 6, 5), (16, 13, 6, 4.5)]
+        else:
+            masses = [(10, 21, 9, 8), (23, 21, 8, 7.5), (16, 17, 8, 6),
+                      (5, 24, 5, 4.5), (27, 24, 5, 4.5), (13, 13, 5.5, 4.5),
+                      (20, 13, 5, 4)]
+        for (mx, my, rx, ry) in masses:          # deep under-mass first
+            c.ellipse(mx + 1, my + 2, rx, ry, B["leaf_deep"])
+        for (mx, my, rx, ry) in masses:
+            c.ellipse(mx, my, rx, ry, B["leaf"])
+        # leaf-clump texture: lit 2px ticks upper-left, deep creases below,
+        # clustered so the mass reads as leaves rather than noise
+        for _ in range(46):
+            x, y = rng.range(3, 28), rng.range(9, 28)
+            if c.get(x, y)[:3] != B["leaf"][:3]:
+                continue
+            rel = (x - 16) * 0.6 + (y - 18)
+            if rel < -4:
+                tone = B["leaf_light"] if rng.chance(0.75) else B["leaf"]
+            elif rel > 6:
+                tone = B["leaf_deep"]
+            else:
+                tone = B["leaf_light"] if rng.chance(0.3) else B["leaf_deep"]
+            c.put(x, y, tone)
+            c.put(x + 1, y, tone)
+            if rng.chance(0.5):
+                c.put(x, y + 1, B["leaf_deep"])
+        # woody stems visible at the base between the leaf skirts
+        for sx in (11, 16, 22):
+            for i in range(3):
+                c.put(sx + (i % 2), 28 - i, B["wood"])
+        c.ellipse(16, 29, 12, 2, B["leaf_deep"])  # grounded shaded underside
+        # amber berry clusters sunk INTO the mass (vanilla berry idiom:
+        # 2x2 berry, hi glint top-left, deep rim bottom-right)
+        clusters = ([(9, 18), (14, 13), (22, 16)] if v == 0
+                    else [(7, 20), (15, 14), (24, 19), (19, 22)])
+        for (bx0, by0) in clusters:
             for k in range(rng.range(2, 3)):
-                pts.append((bx0 + (k * 3) % 5 - 1, by0 + (k * 2) % 3))
-        pts.append((16 + rng.pick((-5, 4)), 23))
-        for (bx, by) in pts:
-            c.rect(bx, by, 2, 2, B["berry"])
-            c.put(bx + 1, by + 1, B["berry_deep"])
-            c.put(bx, by, B["berry_hi"])
+                bx = bx0 + (k * 3) % 4 - 1
+                by = by0 + (k * 2) % 3
+                c.rect(bx, by, 2, 2, B["berry"])
+                c.put(bx, by, B["berry_hi"])
+                c.put(bx + 1, by + 1, B["berry_deep"])
+        for _ in range(2):                        # lone berries near the rim
+            bx, by = rng.range(4, 26), rng.range(20, 26)
+            if c.filled(bx, by):
+                c.rect(bx, by, 2, 2, B["berry"])
+                c.put(bx, by, B["berry_hi"])
+                c.put(bx + 1, by + 1, B["berry_deep"])
         c.outline(palette.OUTLINE)
         sheet.paste(c, v * 32, 0)
     sheet.save(path)
@@ -300,60 +328,155 @@ def _shard(c, x, y_base, h, w, ramp, lean=0, seam=False, cut=True, bright=False)
     c.put(tip_x, y_base - h, ramp["hi"])
 
 
-def _crystal_column(salt, ramp):
-    """32x48 half of a 2x1 crystal cluster, rebuilt at vanilla mass
-    (amethystcluster half: ~30x58, ~1170 opaque; crystalwall cell: 28x42,
-    1116). A dark slate rubble bed grounds 6-7 FAT shards in a staggered
-    skyline — every shard its own spike, separated by cut seams."""
-    c = Canvas(32, 48)
-    rng = Rng(salt)
+def _blade(c, x, y_base, h, w, ramp, lean_deg=0.0, bright=False):
+    """One TILTED crystal blade (v0.6 Storm Shards rebuild).
+
+    The old _shard stacked vertical kites with a 1-2px tip offset, which the
+    player read as 'a row of teeth'. A blade instead walks an ANGLED axis
+    (lean_deg from vertical, positive = leaning right) and stamps horizontal
+    runs whose half-width follows a belly profile — so width and angle are
+    real, not jitter. Faceting per run, top-left light:
+      deep rim | light facet | body | deep plane (right/lower side)
+    with a hi tip cap. bright=True swaps the body to the light step so
+    neighbouring blades alternate value like vanilla amethyst and never
+    fuse into one cone."""
+    import math
+    body = ramp["light"] if bright else ramp["base"]
+    plane = ramp["base"] if bright else ramp["deep"]
+    stripe = ramp["hi"] if bright else ramp["light"]
+    dx_step = math.tan(math.radians(lean_deg))
+    ax = float(x)
+    for i in range(h):
+        t = i / max(h - 1, 1)
+        if t < 0.18:
+            frac = 0.3 + 0.7 * (t / 0.18)            # root -> full belly
+        elif t < 0.55:
+            frac = 1.0                                # hold the belly
+        else:
+            frac = max(0.1, (1.0 - (t - 0.55) / 0.45) ** 0.8)
+        half = max(1, round(w * frac))
+        cx = int(round(ax))
+        # cut seam: where this blade overlaps art already on the canvas,
+        # lay a deep contour just outside the run so the blades stay
+        # individually readable (vanilla amethyst idiom)
+        for sx in (cx - half - 1, cx + half + 1):
+            p = c.get(sx, y_base - i)
+            if p[3] > 0 and p[:3] != palette.OUTLINE and p[:3] != ramp["deep"]:
+                c.put(sx, y_base - i, ramp["deep"])
+        for dx in range(-half, half + 1):
+            if dx == -half or dx == half:
+                tone = ramp["deep"]                   # rims
+            elif dx <= -half + 1:
+                tone = stripe                         # light facet stripe
+            elif dx >= max(1, half - 1):
+                tone = plane                          # internal shadow plane
+            else:
+                tone = body
+            c.put(cx + dx, y_base - i, tone)
+        ax += dx_step
+    # bright tip cap, one pixel past the last run
+    c.put(int(round(ax)), y_base - h, ramp["hi"])
+    c.put(int(round(ax)) - 1, y_base - h + 1, ramp["hi"])
+
+
+def _storm_cluster(salt, variant):
+    """One 64x64 Storm Shard cluster (v0.6 redesign).
+
+    Playtest verdict on the old art: 'a flat white wall / teeth / tiny trees
+    in a row' — thin vertical spikes of near-equal height on a small mound.
+    The rebuild: a WIDE shared rubble bed grounds 5 real blades that differ
+    in height (12-54px), belly width and lean (up to ~34 deg), arranged into
+    an asymmetric silhouette. Deep violet internal planes against restrained
+    pale edges; value alternation keeps every blade readable at 1x. Four
+    variants, each a different formation:
+      0 trident spire   1 low wide roost   2 twin crowns   3 leaning tower
+    """
+    ramp = palette.STORMCRYSTAL
     ground = palette.STORMSLATE
-    # rubble bed: overlapping rock mounds with lit tops and corner stones
-    c.ellipse(16, 43.5, 15, 4.4, ground["deep"])
-    c.ellipse(9, 42, 6.5, 3.0, ground["base"])
-    c.ellipse(22, 42.5, 7, 3.2, ground["base"])
-    c.ellipse(16, 45, 9, 2.6, ground["deep"])
-    c.ellipse(9, 40.5, 4, 1.4, ground["light"])
-    c.ellipse(23, 41, 3.5, 1.3, ground["light"])
-    c.rect(2, 43, 4, 3, ground["base"])
-    c.rect(26, 43, 4, 3, ground["deep"])
-    c.put(2, 43, ground["light"])
-    c.put(3, 43, ground["light"])
-    c.put(26, 43, ground["base"])
-    # shards back-to-front, staggered heights + alternating bright/dark
-    # bodies so the skyline reads as separate spikes, never one cone
-    _shard(c, 10, 40, rng.range(25, 28), 5, ramp, lean=rng.pick((-2, -1)))
-    _shard(c, 21, 40, rng.range(19, 22), 5, ramp, lean=rng.pick((1, 2)), bright=True)
-    _shard(c, 16, 43, rng.range(36, 40), 7, ramp, lean=rng.pick((-1, 1)), seam=True, bright=True)
-    _shard(c, 7, 44, rng.range(17, 20), 4, ramp, lean=rng.pick((-2, -1)), bright=True)
-    _shard(c, 24, 44, rng.range(27, 30), 6, ramp, lean=rng.pick((1, 2)), seam=True)
-    _shard(c, 11, 46, rng.range(9, 11), 3, ramp, lean=rng.pick((-1, 1)), bright=True)
-    _shard(c, 20, 47, rng.range(7, 8), 2, ramp, lean=1)
-    # size-law top-up: sprout extra front nubs out of the rubble until the
-    # cluster carries vanilla crystal mass (~900 opaque px per half)
-    for (nx, ny) in ((4, 47), (15, 47), (24, 47), (8, 47), (19, 47), (28, 46)):
-        if _mass(c) >= 900:
-            break
-        _shard(c, nx, ny, rng.range(6, 9), 2, ramp, lean=rng.pick((-1, 1)),
-               bright=rng.chance(0.5))
+    c = Canvas(64, 64)
+    rng = Rng(salt)
+
+    # shared rubble bed across the full 2-tile footprint: a CHUNKY base mound
+    # (vanilla amethyst sits on a dark mass ~14px tall) with lit slate tops
+    c.ellipse(32, 56, 31, 6.5, ground["deep"])
+    c.ellipse(32, 58, 26, 6.0, ground["deep"])
+    c.ellipse(13, 53, 11, 5.0, ground["base"])
+    c.ellipse(33, 52, 14, 5.5, ground["base"])
+    c.ellipse(51, 54, 10, 4.6, ground["base"])
+    c.ellipse(22, 49, 7, 3.2, ground["base"])
+    c.ellipse(43, 48.5, 6, 3.0, ground["base"])
+    c.ellipse(32, 61, 22, 3.2, ground["deep"])
+    c.ellipse(8, 51, 4.5, 2.0, ground["light"])
+    c.ellipse(24, 47.5, 4.5, 1.8, ground["light"])
+    c.ellipse(45, 47, 4, 1.7, ground["light"])
+    c.rect(1, 55, 5, 6, ground["base"])
+    c.rect(58, 55, 5, 6, ground["deep"])
+    c.put(1, 55, ground["light"])
+    c.put(59, 55, ground["base"])
+
+    v = variant % 4
+    if v == 0:
+        # trident: dominant spire slightly left of centre, fan out both ways
+        _blade(c, 14, 52, 24, 5, ramp, lean_deg=-16)
+        _blade(c, 50, 52, 26, 5, ramp, lean_deg=16)
+        _blade(c, 26, 50, 34, 6, ramp, lean_deg=-8)
+        _blade(c, 40, 50, 36, 6, ramp, lean_deg=10)
+        _blade(c, 32, 50, 54, 8, ramp, lean_deg=-2, bright=True)
+        _blade(c, 22, 52, 16, 3, ramp, lean_deg=-24, bright=True)
+        _blade(c, 45, 53, 14, 3, ramp, lean_deg=22, bright=True)
+    elif v == 1:
+        # low wide roost: broad leaning slab plus a fan of mid blades
+        _blade(c, 8, 53, 18, 4, ramp, lean_deg=-26)
+        _blade(c, 54, 53, 20, 4, ramp, lean_deg=26)
+        _blade(c, 22, 50, 32, 6, ramp, lean_deg=-14)
+        _blade(c, 42, 50, 34, 6, ramp, lean_deg=12, bright=True)
+        _blade(c, 31, 49, 44, 7, ramp, lean_deg=-2, bright=True)
+        _blade(c, 16, 52, 22, 4, ramp, lean_deg=-20, bright=True)
+    elif v == 2:
+        # twin crowns: tall pair left, lower pair right, a saddle between
+        _blade(c, 34, 51, 30, 6, ramp, lean_deg=8)
+        _blade(c, 50, 52, 22, 5, ramp, lean_deg=18, bright=True)
+        _blade(c, 57, 54, 13, 3, ramp, lean_deg=30)
+        _blade(c, 24, 50, 38, 6, ramp, lean_deg=-6)
+        _blade(c, 14, 51, 50, 7, ramp, lean_deg=-12, bright=True)
+        _blade(c, 43, 52, 16, 3, ramp, lean_deg=14, bright=True)
+    else:
+        # leaning tower: one heavy blade tipped right over a dense fan
+        _blade(c, 12, 53, 22, 4, ramp, lean_deg=-18)
+        _blade(c, 54, 53, 18, 4, ramp, lean_deg=26)
+        _blade(c, 24, 50, 32, 6, ramp, lean_deg=-4, bright=True)
+        _blade(c, 44, 50, 34, 6, ramp, lean_deg=8)
+        _blade(c, 32, 49, 50, 8, ramp, lean_deg=14, bright=True)
+        _blade(c, 18, 52, 16, 3, ramp, lean_deg=-24, bright=True)
+
     c.outline(palette.OUTLINE)
-    # glow motes drifting in EMPTY air beside the tips (never on the mass)
+    # electric edge: restrained pale ticks on lit upper edges, AFTER the
+    # outline so they read as energy on the crystal, not as part of the sky
+    er = Rng(salt * 7 + 13)
+    for x in range(2, 62):
+        for y in range(4, 58):
+            p = c.get(x, y)
+            if p[3] == 0 or p[:3] == palette.OUTLINE:
+                continue
+            if c.get(x, y - 1)[:3] == palette.OUTLINE and not c.filled(x, y - 2):
+                if er.chance(0.30):
+                    c.put(x, y, ramp["hi"])
+    # a few drifting charge motes in empty air beside the tips
     placed = 0
-    while placed < 3:
-        mx, my = rng.range(3, 29), rng.range(5, 18)
+    while placed < 4:
+        mx, my = er.range(2, 61), er.range(4, 30)
         if not c.filled(mx, my):
             c.put(mx, my, with_alpha(ramp["hi"], 170 - placed * 30))
             placed += 1
     return c
 
 
-def gen_crystal_cluster(path, ramp, salt, variants=2):
-    sheet = Canvas(variants * 64, 48)
+def gen_crystal_cluster(path, ramp, salt, variants=4):
+    """v0.6: 4 meaningfully different cluster formations at vanilla 64px
+    height (amethystcluster ships 4 variants x 64x64; we shipped 2 x 64x48)."""
+    sheet = Canvas(variants * 64, 64)
     for v in range(variants):
-        normal = _crystal_column(salt + v * 101, ramp)
-        alt = _crystal_column(salt + v * 101 + 55, ramp).mirrored()
-        sheet.paste(normal, v * 64, 0)
-        sheet.paste(alt, v * 64 + 32, 0)
+        sheet.paste(_storm_cluster(salt + v * 101, v), v * 64, 0)
     sheet.save(path)
 
 

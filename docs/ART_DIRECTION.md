@@ -98,6 +98,29 @@ rare rich formations as jackpots.
 spacing, occasional singles, an occasional richer patch. Identical mirrored
 copies at even spacing announce that the world is procedural.
 
+## Rules proven in the v0.6 sprint
+
+**Variant sets must differ in FORM, not pixel jitter.** Two rock sheets that
+differ only by speckle salt read as one sprite repeated. Give every variant a
+geological character (slab, strata, domes, crack, fissure, rubble, pits,
+terrace) painted into every quadrant, plus 1-2px bites carved out of genuinely
+exposed edges — never into edges that tile against a neighbour. Because the
+engine picks the variant per tile, adjacent tiles of one formation mix
+characters automatically and the repetition disappears for free.
+
+**Ground with baked soft-alpha skirts, not opaque dark bands.** Vanilla's
+"shadow" under rocks is a semi-transparent dissolve (measured: alpha
+195/195/113/78/55/29 over the last 6px, no bottom outline), and its cliff
+faces are base-dominant. An opaque deep-ramp band plus a hard outline reads
+as a long black shadow and turns small rocks into pillars. Copy the fade.
+
+**Canopy volume = overlap shadows + ONE global light field.** Repeating a
+lit ellipse per lobe produces "stacked pancakes": every lobe carries its own
+bright circle. The fix is canopy-scale value structure — darken the band
+where a lobe sits under a higher one, split the whole canopy into a lit
+top-left plane and a deep lower-right plane with a dithered boundary, and
+demote per-lobe highlights that fall on the shadow side.
+
 ## Review procedure
 
 Before calling an art change done:

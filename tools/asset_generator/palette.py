@@ -134,12 +134,15 @@ NIGHTFELL = {
 }
 
 WARDEN = {
-    # coat ramp lifted well above the outline color (34,34,46) — the old ramp
-    # started at 36 luminance and the whole figure melted into a black cone
-    "coat_deep":  (52, 47, 76),
-    "coat":       (74, 68, 102),
-    "coat_light": (100, 93, 132),
-    "coat_hi":    (126, 119, 160),
+    # v0.6 identity pass: the coat ramp moved from lavender to STORM-BLUE
+    # (the Skywatch livery the settler pins in WardenSettlerMob), so the
+    # Warden stops reading as a generic purple wizard. Trim stays the single
+    # warm brass accent; "patch" is the pale weathered mend tone.
+    "coat_deep":  (48, 52, 76),
+    "coat":       (68, 76, 104),
+    "coat_light": (94, 104, 136),
+    "coat_hi":    (120, 132, 166),
+    "patch":      (134, 142, 160),
     "feather":    (152, 148, 174),
     "feather_hi": (196, 194, 212),
     "skin":       (203, 192, 176),
@@ -203,11 +206,16 @@ WINDWHEAT = {
 }
 
 CLOUDBERRY = {
+    # v0.6 readability redesign: the old sage-grey leaf tone helped the bush
+    # read as pebbles; the ramp now sits in the Driftlands green family with
+    # a lit step, and the berries stay amber for contrast against it.
     "berry":      (232, 186, 120),
     "berry_hi":   (250, 228, 186),
     "berry_deep": (188, 138, 84),
-    "leaf":       (146, 168, 152),
-    "leaf_deep":  (110, 132, 118),
+    "leaf":       (110, 152, 106),
+    "leaf_light": (150, 190, 134),
+    "leaf_deep":  (76, 114, 80),
+    "wood":       (86, 66, 50),
 }
 
 LAMB = {

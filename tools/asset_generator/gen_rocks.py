@@ -24,13 +24,41 @@ Decoded from RockObject.addRockDrawables (see docs/research/asset-formats.md):
 The ore overlay sheet (RockOreObject) uses the exact same grid; the engine
 draws it with identical indices, so veins stay glued to the rock. The top-left
 32x32 of variant 0 is also the source of the auto-generated ore item icon.
+
+v0.6 rock family (playtest: "rectangular tombstones", "shadows far too long
+and dark"). Three fixes, all measured off vanilla rock.png:
+
+1. FORM, not jitter: 8 variants each carry a geological character (slab,
+   strata, boulder domes, fracture crack, split fissure, rubble chips,
+   weathered pits, broken terrace) painted into every quadrant, plus 1-2px
+   bites carved out of exposed top/side edges so the perimeter is irregular.
+2. LIGHT faces: the old face cells were ~86% ramp-deep — one hard dark band
+   across every rock, which read as a long black shadow. Faces are now
+   base-dominant with deep edges, like vanilla.
+3. GROUNDED base: vanilla bakes a soft contact skirt into the bottom face
+   rows (row 9 measured: alpha 195/195/113/78/55/29 over the last 6px, and
+   NO bottom outline). We bake the same fade instead of a hard outline, so
+   the rock dissolves into its shadow the way vanilla's does.
+
+The engine picks the variant PER TILE: RockObject computes
+`variants = texture.getWidth() / 32` and draws
+`seeded(getTileSeed(x, y) * 4621).nextInt(variants) * 2` (verified by
+disassembling Server.jar 1.3.2), so any variant count works without code
+changes. Neighbouring tiles of one formation mix variants freely, which is
+what breaks the "same slab everywhere" repetition.
 """
 
-from px import Canvas, Rng
+from px import Canvas, Rng, with_alpha
 import palette
 
 ROWS = 13
 CELL = 16
+
+# Vanilla's universal shadow tone (same constant gen_trees uses).
+SHADOW = (18, 32, 32)
+# Bottom fade profile for the ground-contact rows 4/9, measured off vanilla
+# rock.png row 9: y10..15 -> alpha 195,195,113,78,55,29 and no outline.
+_FADE = {10: 195, 11: 195, 12: 113, 13: 78, 14: 55, 15: 29}
 
 
 def _surface(canvas, x0, y0, ramp, salt):
@@ -48,14 +76,18 @@ def _surface(canvas, x0, y0, ramp, salt):
 
 
 def _face(canvas, x0, y0, ramp, salt, upper):
-    """16x16 front-cliff fill; upper row carries the lip highlight."""
+    """16x16 front-cliff fill. v0.6: base-dominant (the old 86%-deep fill
+    was the 'long dark shadow' band the playtest flagged); the upper row
+    carries the lit lip where the top surface overhangs it."""
     for x in range(CELL):
         for y in range(CELL):
             r = Rng((x * 9173 + y * 14591) ^ salt ^ 0xFACE)
             v = r.float()
-            base = ramp["deep"]
-            if v < 0.14:
-                base = ramp["base"]
+            base = ramp["base"]
+            if v < 0.22:
+                base = ramp["deep"]
+            elif v < 0.28:
+                base = ramp["light"]
             canvas.put(x0 + x, y0 + y, base)
     if upper:
         for x in range(CELL):
@@ -64,7 +96,164 @@ def _face(canvas, x0, y0, ramp, salt, upper):
                 canvas.put(x0 + x, y0 + 1, ramp["base"])
 
 
-def _cell(ramp, salt, row, outer_left):
+# --- per-variant geological character ----------------------------------------
+#
+# Each painter decorates ONE 16x16 quadrant for a variant. They never touch
+# fills/outlines/adjacency (that stays in _cell), so every variant still
+# tiles correctly in all 13 adjacency rows. All randomness flows from
+# (salt, variant, row) so output stays deterministic.
+
+def _crack_line(c, ramp, rng, horizontal=True):
+    """One wandering 1px deep crack with a 1px lit lip below/beside it."""
+    x, y = rng.range(2, 13), rng.range(2, 13)
+    for _ in range(rng.range(7, 12)):
+        c.put(x, y, ramp["deep"])
+        if horizontal:
+            if c.filled(x, y + 1):
+                c.put(x, y + 1, ramp["light"])
+            x += rng.pick((1, 1, 0))
+            if x > 15:
+                break
+            y = max(0, min(15, y + rng.pick((-1, 0, 0, 1))))
+        else:
+            if c.filled(x + 1, y):
+                c.put(x + 1, y, ramp["light"])
+            y += rng.pick((1, 1, 0))
+            if y > 15:
+                break
+            x = max(0, min(15, x + rng.pick((-1, 0, 0, 1))))
+
+
+def _fissure(c, ramp, rng):
+    """2-3px split with a lit inner lip — reads as the stone having parted."""
+    x = rng.range(3, 12)
+    for y in range(CELL):
+        w = 2 + (1 if (y // 4) % 2 == 0 else 0)
+        for dx in range(w):
+            if 0 <= x + dx < CELL:
+                c.put(x + dx, y, ramp["deep"])
+        if 0 <= x + w < CELL and c.filled(x + w, y):
+            c.put(x + w, y, ramp["light"])
+        x = max(1, min(13, x + rng.pick((-1, 0, 0, 1))))
+
+
+def _strata(c, ramp, salt, face=False):
+    """Sediment bands: two lit bands and one deep band with dithered edges."""
+    for band_y in (3, 9, 13):
+        tone = ramp["deep"] if band_y == 9 else ramp["light"]
+        for x in range(CELL):
+            r = Rng((x * 613 ^ salt) + band_y)
+            if r.chance(0.85):
+                c.put(x, band_y, tone)
+            elif r.chance(0.4) and c.filled(x, band_y + 1):
+                c.put(x, band_y + 1, tone)
+
+
+def _domes(c, ramp, rng):
+    """Shaded boulder domes: deep crease arcs with lit top-left crescents."""
+    import math
+    for _ in range(2):
+        dx, dy = rng.range(4, 11), rng.range(4, 11)
+        r = rng.range(2, 4)
+        for deg in range(150, 340, 12):
+            px_ = round(dx + r * 0.8 * math.cos(math.radians(deg)))
+            py_ = round(dy + r * 0.7 * math.sin(math.radians(deg)))
+            if c.filled(px_, py_):
+                c.put(px_, py_, ramp["deep"])
+        for deg in range(200, 300, 14):
+            px_ = round(dx - 1 + (r - 1) * math.cos(math.radians(deg)))
+            py_ = round(dy - 1 + (r - 1) * math.sin(math.radians(deg)))
+            if c.filled(px_, py_):
+                c.put(px_, py_, ramp["light"])
+
+
+def _chips(c, ramp, rng, n):
+    """Loose stones lying on the surface: 1-3px, lit top, deep rim."""
+    for _ in range(n):
+        x, y = rng.range(1, 13), rng.range(2, 13)
+        w = rng.range(1, 3)
+        for dx in range(w):
+            if c.filled(x + dx, y):
+                c.put(x + dx, y, ramp["light"])
+                if c.filled(x + dx, y + 1):
+                    c.put(x + dx, y + 1, ramp["deep"])
+
+
+def _pits(c, ramp, rng):
+    """Weathering: pale patches and small deep pits."""
+    for _ in range(3):
+        x, y = rng.range(1, 12), rng.range(1, 12)
+        for dx in range(rng.range(2, 4)):
+            for dy in range(2):
+                if c.filled(x + dx, y + dy):
+                    c.put(x + dx, y + dy, ramp["light"])
+    for _ in range(4):
+        x, y = rng.range(1, 14), rng.range(1, 14)
+        if c.filled(x, y):
+            c.put(x, y, ramp["deep"])
+            if rng.chance(0.5) and c.filled(x + 1, y + 1):
+                c.put(x + 1, y + 1, ramp["deep"])
+
+
+def _decorate(c, ramp, variant, salt, face):
+    """Dispatch one quadrant's character feature for `variant`."""
+    rng = Rng(salt ^ (0xC0DE + variant * 7919) ^ (0xF if face else 0))
+    if variant == 0:                                   # slab
+        if not face:
+            _crack_line(c, ramp, rng, horizontal=True)
+    elif variant == 1:                                 # strata
+        _strata(c, ramp, salt, face)
+    elif variant == 2:                                 # boulder domes
+        _domes(c, ramp, rng)
+    elif variant == 3:                                 # fracture
+        _crack_line(c, ramp, rng, horizontal=rng.chance(0.5))
+        if rng.chance(0.6):
+            _crack_line(c, ramp, rng, horizontal=rng.chance(0.5))
+    elif variant == 4:                                 # split
+        if face:
+            _crack_line(c, ramp, rng, horizontal=False)
+        else:
+            _fissure(c, ramp, rng)
+    elif variant == 5:                                 # rubble
+        _chips(c, ramp, rng, rng.range(4, 7))
+    elif variant == 6:                                 # weathered pits
+        _pits(c, ramp, rng)
+    else:                                              # broken terrace
+        _strata(c, ramp, salt, face)
+        _chips(c, ramp, rng, 2)
+
+
+def _carve_edge(c, salt, variant, row):
+    """Bite 1-2px out of exposed edges so silhouettes stop reading as ruled
+    rectangles. Only rows with a genuinely exposed side/top are carved
+    (rows 0-4 and 11: outer side; rows 0/5: top). Bites get a fresh 1px
+    inner outline so they read as chipped edges, not holes."""
+    rng = Rng(salt ^ (0xB17E + variant * 3571) ^ (row * 97))
+
+    if row in (0, 1, 2, 3, 4, 11):                     # side bites
+        for _ in range(rng.range(1, 3)):
+            y = rng.range(2, CELL - 3)
+            depth = 1
+            h = rng.range(2, 5)
+            for dy in range(h):
+                c.put(0, min(CELL - 1, y + dy), (0, 0, 0, 0))
+            for dy in range(-1, h + 1):
+                yy = min(CELL - 1, max(0, y + dy))
+                if c.filled(1, yy):
+                    c.put(1, yy, palette.OUTLINE)
+    if row in (0, 5):                                  # top notches
+        for _ in range(rng.range(1, 3)):
+            x = rng.range(3, CELL - 4)
+            w = rng.range(2, 5)
+            for dx in range(w):
+                c.put(x + dx, 0, (0, 0, 0, 0))
+            for dx in range(-1, w + 1):
+                xx = min(CELL - 1, max(0, x + dx))
+                if c.filled(xx, 1):
+                    c.put(xx, 1, palette.OUTLINE)
+
+
+def _cell(ramp, salt, row, outer_left, variant=0):
     """Render one LEFT-half cell; the right half is its mirror."""
     c = Canvas(CELL, CELL)
     o = palette.OUTLINE
@@ -72,18 +261,19 @@ def _cell(ramp, salt, row, outer_left):
     if is_face:
         _face(c, 0, 0, ramp, salt + row * 31, upper=row in (3, 8))
     else:
-        _surface(c, 0, 0, ramp, salt + (0 if row in (6, 7) else 0))
+        _surface(c, 0, 0, ramp, salt)
+
+    # geological character (before outlines so features stay inside)
+    _decorate(c, ramp, variant, salt + row * 31, face=is_face)
 
     side_exposed = row in (0, 1, 2, 3, 4, 11)
-    if row in (0, 5):  # top cap
+    if row in (0, 5):  # top cap: outline + lit rim just below
         for x in range(CELL):
             c.put(x, 0, o)
-        for x in range(CELL):
             c.put(x, 1, ramp["hi"])
     if side_exposed:
         for y in range(CELL):
             c.put(0, y, o)
-        for y in range(CELL):
             if not is_face:
                 c.put(1, y, ramp["light"])
     if row == 0:  # rounded outer-top corner
@@ -104,24 +294,35 @@ def _cell(ramp, salt, row, outer_left):
         c.put(0, CELL - 1, o)
         c.put(1, CELL - 1, o)
         c.put(0, CELL - 2, o)
-    if row in (4, 9):  # ground contact
-        for x in range(CELL):
-            c.put(x, CELL - 1, o)
-            c.put(x, CELL - 2, ramp["deep"] if Rng(x * 17 ^ salt).chance(0.7) else ramp["base"])
     if row == 4:  # rounded outer-bottom corner of the face
         c.put(0, CELL - 1, (0, 0, 0, 0))
         c.put(1, CELL - 1, o)
         c.put(0, CELL - 2, o)
+
+    # perimeter carving (after outline so bites get a fresh inner edge)
+    _carve_edge(c, salt, variant, row)
+
+    # vanilla contact skirt: the bottom face rows fade out through
+    # alpha 195/195/113/78/55/29 with NO hard bottom outline (measured off
+    # vanilla row 9). This is what makes rocks sit ON the ground instead of
+    # ending in a dark rule — the playtest's "long dark shadow".
+    if row in (4, 9):
+        for y in _FADE:
+            for x in range(CELL):
+                if c.filled(x, y):
+                    c.put(x, y, with_alpha(SHADOW, _FADE[y]))
     return c if outer_left else c.mirrored()
 
 
-def gen_rock_sheet(path, ramp, variants=2, salt=0xACE):
+def gen_rock_sheet(path, ramp, variants=8, salt=0xACE):
+    """v0.6: 8 geological variants by default (vanilla rock ships 4, vanilla
+    caverock 8; we shipped 2, which the playtest read as repetition)."""
     sheet = Canvas(variants * 32, ROWS * CELL)
     for v in range(variants):
         vsalt = salt + v * 7919
         for row in range(ROWS):
-            left = _cell(ramp, vsalt, row, outer_left=True)
-            right = _cell(ramp, vsalt + 13, row, outer_left=False)
+            left = _cell(ramp, vsalt, row, outer_left=True, variant=v)
+            right = _cell(ramp, vsalt + 13, row, outer_left=False, variant=v)
             sheet.paste(left, v * 32, row * CELL)
             sheet.paste(right, v * 32 + CELL, row * CELL)
     sheet.save(path)

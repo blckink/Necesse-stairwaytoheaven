@@ -256,3 +256,59 @@ clear of the back line, legs that change pose.
 5px horizontal paw block with a forward toe nub reads as a detached square
 furniture foot when the animal faces the camera; those frames need a compact
 rounded stub, and a head-on animal should simply not show its rear paws.
+
+## RockObject variant + geometry contract (v0.6 rock family)
+
+**[jar]** `RockObject` supports ANY variant count with zero code changes:
+`variants = rockTexture.getWidth() / 32`, picked per tile via
+`oreTextureRandom.seeded(getTileSeed(x, y) * 4621).nextInt(variants)`, then
+`* 2` for the 16px half-column. Verified by disassembling `RockObject`
+(`lambda$addRockDrawables$2`) in Server.jar 1.3.2 with `javap` — on this Mac
+the `$NECESSE_GAME_DIR/../decompiled` tree documented above does not exist;
+`javap -c` on the classes extracted from `Server.jar` is the working method
+here. Vanilla `rock.png` ships 4 variants, `caverock.png` 8; we shipped 2
+(the playtest's "same two shapes"), now 8 for Skystone / 6 for Veilrock.
+
+**[jar]** The draw geometry is NOT one 32x32 tile: top-cap rows 0/5 draw at
+`drawY - 16` (16px ABOVE the collision tile), and when the tile below is not
+rock the face draws as a stacked PAIR — row 3/8 (upper 16px, at `drawY`) plus
+row 4/9 (lower 16px, at `drawY + 16`, lit from below). A lone rock tile is
+therefore ~64px of visible sprite over a 32px footprint. Art consequence: the
+bottom 6px of rows 4/9 are the rock's ground line and rows 3/8 sit directly
+on top of them.
+
+**[jar]** Vanilla's "rock shadow" is a baked soft-alpha skirt, not a cast
+shadow: `rock.png` rows 9/4 fade alpha 195 → 195 → 113 → 78 → 55 → 29 over
+their bottom 6px with NO bottom outline (plus faint ~133-alpha AO under the
+top lip). The old mod sheet had zero semi-transparent pixels and filled the
+face rows ~86% with the deep ramp tone — that opaque dark band was the
+playtest's "far too long and dark" shadow. The v0.6 sheet copies the vanilla
+fade (shadow tone (18,32,32)) and fills faces base-dominant.
+
+## CrystalClusterObject variant contract
+
+**[jar]** `CrystalClusterObject.addDrawables` picks
+`variant = drawRandom.seeded(getTileSeed(x, y)).nextInt(texture.getWidth() / 64)`
+and draws each 32px half of the 64px variant bottom-anchored
+(`drawY - height + 32`), so sheet height is free (vanilla `amethystcluster`
+is 4 variants × 64×64). We shipped 2 variants × 48 tall; the v0.6 Storm
+Shards rebuild is 4 × 64 with tilted blades (`_blade` in gen_objects.py:
+angled axis walk + belly profile + overlap cut-seams), which took the size
+audit ratio from 0.74 to 1.01 of the `crystalwall` reference.
+
+## v0.6 sprint environment facts
+
+**[run]** This Mac has no Necesse Steam install; builds and the integration
+test run against the dedicated server at
+`~/Downloads/necesse-server-1-3-2-24650233` (export `NECESSE_GAME_DIR` to
+it). `./gradlew buildModJar` and `scripts/integration_test.sh` both pass
+there (2026-08-25): mod loads, Skyreach generates, world survives a restart,
+spire/beacon/warden/cats persist, no log errors. Long shell heredocs get
+mangled by this terminal's shell integration — write helper scripts to files
+instead.
+
+**[run]** Determinism re-verified after the whole sprint: regenerating into
+a temp dir reproduces `src/main/resources` byte-for-byte (only `.DS_Store`
+and the hand-maintained `locale/*.lang` differ, which the generator does not
+write). `tools/locale_audit.py` reports 77 IDs named in both locales; 
+`tools/size_audit.py --vanilla vanilla-sprites` reports 0 flags.
