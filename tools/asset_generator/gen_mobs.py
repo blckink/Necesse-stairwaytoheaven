@@ -689,62 +689,136 @@ def gen_icons(dir_path):
 # --- v0.4 "The Living Sky" fauna ---------------------------------------------
 # Galehound (Driftlands night pack hunter) + Dawnpiercer (Aurora Shoals dive
 # bird). Standard 6x4/64px walking-mob sheets; the swim column sinks into the
-# mist via _mist_overlay. Quadruped construction matched against the vanilla
-# wolf/boar sheets: chunky bean body, short 3px legs re-posed per stride, big
-# head, ears and tail carrying the silhouette.
+# mist via _mist_overlay.
+#
+# GALEHOUND -- v0.5.1 silhouette rebuild
+# --------------------------------------
+# The previous build passed the mass audit at 0.80 of a vanilla boar and was
+# still called "a grey sausage" in play, so this pass changes SHAPE, not mass.
+# The three things that made it a sausage, and what replaces each:
+#
+#   1. One unbroken top contour from tail tip to nose. -> the torso is drawn
+#      from an explicit top/bottom PROFILE instead of stacked ellipses, so the
+#      outline is guaranteed to show hip crest -> dipped waist -> withers, and
+#      the skull is carried forward on a neck with a real open nape gap
+#      between the mane crest and the ear spikes.
+#   2. A flat horizontal belly. -> chest 21px deep, waist 10px deep, haunch
+#      19px deep; the belly tucks up 8px behind the ribcage. That tuck-up is
+#      the single strongest "fast predator" cue available at 64px.
+#   3. Four 7px leg slabs touching each other. -> legs at vanilla-wolf
+#      thickness (7px thigh -> 4px shank -> 5px paw) with ~13px of empty
+#      ground showing between the front and rear pairs, under the waist.
+#
+# Vanilla references measured for this pass (sprite dump):
+#   mobs/snowwolf.png  side cell 58x34, mass ~1200, legs 4-5px wide. Head is a
+#                      lump carried forward of the chest; the tail leaves the
+#                      rump LOW and arcs up behind, separated from the back by
+#                      a notch; the belly arcs up between the leg pairs.
+#   mobs/boar.png      side cell 54x42, mass 1536. Nape notch, and a muzzle
+#                      block clearly narrower than the skull.
+#   mobs/cow.png       same 6-col walk order; confirms the paw-swing amplitude
+#                      vanilla uses (~+-6px) and the 2-3px body bob.
+
+_HOUND_GROUND = 52
+
+# Diagonal trot. Pair A = near-front + far-rear, pair B = far-front + near-rear.
+#   swing  -1 = paw driving back, +1 = paw reaching forward (fraction of reach)
+#   lift   paw raised clear of the ground, px
+#   body   torso vertical offset (+ = crouched lower)
+#   arch   0 = extended, flat topline; 1 = gathered, arched loin, hard tuck-up
+#   push   torso stretch, px (+ = hip driven back AND shoulder thrown forward)
+#   head   head bob (+ = lower)
+#   tail   plume sweep phase
+_HOUND_GAIT = {
+    #   swA     swB   lfA lfB  body  arch  push  head  tail
+    0: (0.25, -0.25,   0,  0,    0, 0.20,    0,    0,  0.0),   # idle, square
+    1: (1.00, -1.00,   0,  0,    1, 0.00,    2,    1,  0.5),   # contact A
+    2: (-0.25, 0.45,   0,  5,   -2, 1.00,   -1,   -1,  1.7),   # gather, B airborne
+    3: (-1.00, 1.00,   0,  0,    1, 0.00,    2,    1,  2.9),   # contact B
+    4: (0.45, -0.25,   5,  0,   -2, 1.00,   -1,   -1,  4.1),   # gather, A airborne
+    5: (0.25, -0.25,   0,  0,    0, 0.20,    0,    0,  0.0),   # in liquid
+}
 
 
-def _hound_leg(c, r, hip_x, hip_y, ground, foot_dx, far=False, lift=0):
-    """One CHUNKY canine leg (vanilla wolf/boar bar, v0.5): a 6px thigh that
-    leans out of the hip, a 5px shank and a 6px paw with a toe nub. The near
-    pair carries a lit leading column and a shaded trailing column; far-side
-    legs are drawn a full shade darker so the near pair reads in front.
-    After the outline pass a 6px limb still shows 4px of readable interior —
-    the old 3px sticks collapsed to 1px and read as wire."""
+def _hound_leg(c, r, hip_x, hip_y, ground, swing, lift=0, far=False,
+               front=True, head_on=False):
+    """One canine leg at vanilla-wolf thickness: a 7px thigh sunk into the
+    body, a 4px shank and a 5px paw with a forward toe nub.
+
+    Front legs bend back at the wrist (one joint); hind legs carry the canine
+    Z -- stifle forward, hock back -- which is most of what makes a quadruped
+    read as a DOG rather than a table. Far-side legs are a full shade darker
+    and stand 1px higher so the near pair reads in front of them.
+    """
     tone = r["deep"] if far else r["base"]
-    foot_x = hip_x + foot_dx
-    foot_y = ground - lift
-    knee_y = hip_y + max(2, (foot_y - hip_y) * 52 // 100)
-    knee_x = hip_x + foot_dx // 3
+    reach = 7 if front else 8
+    paw_x = hip_x + int(round(swing * reach))
+    paw_y = ground - lift - (1 if far else 0)
 
-    def column(x, y, w):
-        for k in range(w):
-            c.put(x - w // 2 + k, y, tone)
+    def seg(x0, y0, x1, y1, w0, w1):
+        n = max(abs(int(round(y1)) - int(round(y0))), 1)
+        for i in range(n + 1):
+            t = i / n
+            xi = int(round(x0 + (x1 - x0) * t))
+            yi = int(round(y0 + (y1 - y0) * t))
+            wi = max(2, int(round(w0 + (w1 - w0) * t)))
+            left = xi - wi // 2
+            for k in range(wi):
+                c.put(left + k, yi, tone)
+            if not far:
+                c.put(left, yi, r["light"])
+                c.put(left + wi - 1, yi, r["deep"])
+
+    span = max(paw_y - hip_y, 4)
+    if front:
+        el_x = hip_x + swing * 2.4
+        el_y = hip_y + span * 0.46
+        seg(hip_x, hip_y, el_x, el_y, 7.0, 5.0)
+        seg(el_x, el_y, paw_x, paw_y - 1, 5.0, 4.0)
+    else:
+        st_x = hip_x + swing * 3.6 + 2          # stifle, thrown forward
+        st_y = hip_y + span * 0.36
+        hk_x = hip_x + swing * 5.2 - 2          # hock, kicked back
+        hk_y = hip_y + span * 0.70
+        seg(hip_x, hip_y, st_x, st_y, 8.0, 5.5)
+        seg(st_x, st_y, hk_x, hk_y, 5.5, 4.0)
+        seg(hk_x, hk_y, paw_x, paw_y - 1, 4.0, 4.0)
+
+    if head_on:
+        # Seen from the front or the back a paw is a short rounded stub, not
+        # the 5px side-on block with a forward toe -- that block was reading as
+        # a square furniture foot under the up/down frames.
+        for k in range(3):
+            c.put(paw_x - 1 + k, paw_y, tone)
+        c.put(paw_x, paw_y - 1, tone)
         if not far:
-            c.put(x - w // 2, y, r["light"])
-            c.put(x - w // 2 + w - 1, y, r["deep"])
-
-    for y in range(hip_y, knee_y + 1):
-        t = (y - hip_y) / max(knee_y - hip_y, 1)
-        column(round(hip_x + (knee_x - hip_x) * t), y, 7 if t < 0.62 else 6)
-    ank_y = foot_y - 2
-    for y in range(knee_y, ank_y + 1):
-        t = (y - knee_y) / max(ank_y - knee_y, 1)
-        column(round(knee_x + (foot_x - knee_x) * t), y, 6)
-    for dy in (1, 0):                                    # paw block, 7 wide
-        for k in range(7):
-            c.put(foot_x - 3 + k, foot_y - dy, tone)
+            c.put(paw_x - 1, paw_y, r["deep"])
+            c.put(paw_x + 1, paw_y, r["deep"])
+            c.put(paw_x, paw_y - 1, r["light"])
+        return
+    for dy in (0, 1):                            # paw block, 5 wide x 2
+        for k in range(5):
+            c.put(paw_x - 2 + k, paw_y - dy, tone)
+    c.put(paw_x + 3, paw_y, tone)                # toe nub, points forward
     if not far:
-        for k in range(7):
-            c.put(foot_x - 3 + k, foot_y, r["light"])
-        c.put(foot_x - 3, foot_y - 1, r["light"])
-    c.put(foot_x + (4 if foot_dx >= 0 else -4), foot_y, tone)   # toe nub
-    c.put(foot_x + (4 if foot_dx >= 0 else -4), foot_y - 1, r["deep"])
+        for k in range(5):
+            c.put(paw_x - 2 + k, paw_y, r["deep"])
+        c.put(paw_x - 2, paw_y - 1, r["light"])
 
 
 def _hound_plume(c, r, chain, barbs=True):
     """Wind-streamed plume tail: fat overlapping lobes shrinking toward the
-    tip, each with a deep under-crescent and (every other lobe) a lit cap, plus
-    2px fur barbs flicking off the upper edge so it reads as fur, not a smear."""
+    tip, each with a deep under-crescent and (every other lobe) a lit cap,
+    plus 2px fur barbs flicking off the upper edge so it reads as fur."""
     for i, (px, py, rad) in enumerate(chain):
-        c.ellipse(px + 1, py + 1, rad, rad * 0.92, r["deep"])
-        c.ellipse(px, py, rad, rad * 0.92, r["base"])
+        c.ellipse(px + 1, py + 1, rad, rad * 0.94, r["deep"])
+        c.ellipse(px, py, rad * 0.94, rad * 0.88, r["base"])
         if i % 2 == 1:
-            c.ellipse(px - rad * 0.30, py - rad * 0.38, rad * 0.58, rad * 0.52,
-                      r["light"])
-        if barbs and i < len(chain) - 1 and rad >= 2.5:
-            bx = px - round(rad * 0.5)
-            by = py - round(rad * 0.85)
+            c.ellipse(px - rad * 0.30, py - rad * 0.38, rad * 0.55,
+                      rad * 0.50, r["light"])
+        if barbs and i < len(chain) - 1 and rad >= 2.4:
+            bx = px - int(round(rad * 0.5))
+            by = py - int(round(rad * 0.9))
             c.put(bx, by, r["light"])
             c.put(bx - 1, by - 1, r["base"])
 
@@ -771,322 +845,387 @@ def _hound_rim(c, r, y0, y1, width=2):
                 c.put(x1 - k, y, r["deep"])
 
 
-def _hound_frame(facing, col, swim=False):
-    """Galehound v0.5: a heavy wind-wolf rebuilt to vanilla quadruped mass.
+def _hound_side_keys(arch, push):
+    """Torso top/bottom profile for the side views, facing right.
 
-    The v0.4 build measured ~14% cell occupancy against a vanilla boar's ~26%
-    and read as a wire-legged whippet at 1x. This build follows the boar /
-    snowwolf construction instead: a deep three-mass barrel (haunch, ribcage,
-    chest) ~17px front-to-back, a heavy skull carried clear of the back line
-    on a thick neck, 6px legs with real paws, and a fat plume tail that arcs
-    up away from the rump so it separates in silhouette. Wind identity lives
-    in the swept mane ruff, the drift plume and the teal eye glow."""
-    step = {0: 0, 1: 1, 2: 0, 3: -1, 4: 0, 5: 0}[col]
+    (x, top, bottom). The chest is 21px deep, the waist 10px -- that ratio is
+    the entire point of this sprite, and drawing it as a profile rather than
+    as overlapping ellipses is what guarantees the waist survives into the
+    outline instead of being filled in by the next ellipse.
+    """
+    a = arch
+    r1 = int(round(a))
+    r2 = int(round(2 * a))
+    r3 = int(round(3 * a))
+    return [
+        (13 - push, 29 - r1, 35),               # rump, tail root
+        (16 - push, 25 - r1, 39),
+        (19 - push, 23 - r1, 41),
+        (23 - push, 22 - r1, 41 - r1),          # hip crest
+        (27 - push, 23 - r1, 37 - r2),
+        (30,        24 - r2, 33 - r3),          # WAIST: 10px deep -> 6px
+        (34,        24 - r2, 34 - r3),
+        (37 + push, 23 - r1, 38 - r1),
+        (41 + push, 21,      41),               # deep chest: 21px
+        (45 + push, 20,      40),               # shoulder
+        (48 + push, 23,      35),               # neck base
+    ]
+
+
+def _hound_profile_fill(c, keys, tone, bob):
+    """Fill a silhouette given as (x, top, bottom) keypoints; returns the
+    resolved {x: (top, bottom)} so the sculpt pass can follow the contour."""
+    cols = {}
+    for i in range(len(keys) - 1):
+        x0, t0, b0 = keys[i]
+        x1, t1, b1 = keys[i + 1]
+        for x in range(int(x0), int(x1) + 1):
+            f = (x - x0) / float(x1 - x0)
+            cols[x] = (int(round(t0 + (t1 - t0) * f)) + bob,
+                       int(round(b0 + (b1 - b0) * f)) + bob)
+    for x, (t, b) in cols.items():
+        for y in range(t, b + 1):
+            c.put(x, y, tone)
+    return cols
+
+
+def _hound_frame(facing, col, swim=False):
+    """One Galehound cell. See the block comment above for what changed and
+    which vanilla sheets each decision was measured against."""
+    swA, swB, lfA, lfB, body, arch, push, headb, tphase = _HOUND_GAIT[col]
     c = Canvas(CELL, CELL)
     r = palette.GALEHOUND
-    ground = 52
-    bob = 1 if step != 0 else 0
-    sway = col * 1.1                                          # tail phase
+    ground = _HOUND_GROUND
 
-    def lift_for(pair):
-        """Passing-pose paw lift on the in-between columns (0, 2, 4)."""
-        if col == 2:
-            return 1 if pair == 0 else 0
-        if col == 4:
-            return 1 if pair == 1 else 0
-        return 0
+    if facing in ("right",):
+        # ---- torso profile ------------------------------------------------
+        keys = _hound_side_keys(arch, push)
+        hip_x = 22 - push
+        sh_x = 43 + push
+        hip_y = 33 + body
+        sh_y = 31 + body
 
-    if facing == "right":
-        cx = 27
-        g0 = ground - bob
-        hip = g0 - 12                                         # top of the legs
-
-        # --- far-side legs first, behind the whole body -------------------
+        # far-side pair first, behind everything
         if not swim:
-            _hound_leg(c, r, cx - 11, hip - 2, ground, 4 * step, far=True,
-                       lift=lift_for(0))
-            _hound_leg(c, r, cx + 6, hip - 2, ground, -4 * step, far=True,
-                       lift=lift_for(1))
+            _hound_leg(c, r, sh_x - 1, sh_y, ground, swB, lfB, far=True,
+                       front=True)
+            _hound_leg(c, r, hip_x - 1, hip_y, ground, swA, lfA, far=True,
+                       front=False)
 
-        # --- drift-plume tail: a FAT comma sweeping up and back off the
-        # rump, so it clears the back line and reads as fur, not a spike ---
+        # ---- wind plume: leaves the rump LOW, arcs up and back ------------
         chain = []
-        for i, rad in enumerate((6.2, 5.9, 5.0, 3.9, 2.8)):
-            px = cx - 11 - round(i * 2.4)
-            py = g0 - 25 - round(i * 3.1 + 1.1 * math.sin(i * 0.85 + sway))
+        for i, rad in enumerate((4.6, 4.2, 3.5, 2.7, 2.0)):
+            sw = math.sin(tphase + i * 0.7)
+            px = 12 - push - int(round(i * 2.3 + 0.7 * sw))
+            py = 33 + body - int(round(i * 5.3 - 1.4 * sw))
             chain.append((px, py, rad))
         _hound_plume(c, r, chain)
 
-        # --- body: three deep overlapping masses (haunch / ribcage / chest) -
-        c.ellipse(cx - 9, g0 - 20, 9.5, 9.0, r["base"])       # haunch
-        c.ellipse(cx + 0, g0 - 20, 10.0, 8.5, r["base"])      # ribcage
-        c.ellipse(cx + 9, g0 - 21, 9.5, 9.0, r["base"])       # chest
-        c.ellipse(cx - 9, g0 - 14, 6.5, 3.4, r["deep"])       # haunch underside
-        c.ellipse(cx + 1, g0 - 13, 8.0, 2.8, r["deep"])       # belly shade
-        c.ellipse(cx + 9, g0 - 14, 6.0, 3.0, r["deep"])
-        c.ellipse(cx - 7, g0 - 25, 7.5, 2.4, r["light"])      # lit rear back
-        c.ellipse(cx + 7, g0 - 27, 4.5, 2.2, r["light"])      # lit withers
-        for hx in (cx + 6, cx + 7):                           # dashed sheen
-            c.put(hx, g0 - 27, r["hi"])
-        # haunch swirl + flank fur streaks (vanilla micro-detail density)
-        for i, (fx, fy) in enumerate(((-13, -18), (-11, -22), (-6, -15),
-                                      (-1, -18), (3, -14), (-9, -12),
-                                      (5, -19), (-4, -22))):
-            c.put(cx + fx, g0 + fy, r["deep"])
-            c.put(cx + fx + 1, g0 + fy + (i % 2), r["deep"])
+        cols = _hound_profile_fill(c, keys, r["base"], 0)
 
-        # --- far ear first so the skull buries its base -------------------
-        for i in range(6):
-            w = 2 + i // 2
-            for k in range(w):
-                c.put(cx + 12 - i // 2 + k, g0 - 38 + i, r["deep"])
-        # --- thick neck + heavy skull carried clear of the back -----------
-        c.ellipse(cx + 15, g0 - 25, 7.0, 7.0, r["base"])      # neck
-        c.ellipse(cx + 20, g0 - 31, 7.5, 6.5, r["base"])      # skull
-        c.ellipse(cx + 19, g0 - 27, 6.0, 5.0, r["base"])      # jaw / cheek
-        c.ellipse(cx + 18, g0 - 34, 4.4, 2.4, r["light"])     # crown light
-        c.ellipse(cx + 16, g0 - 23, 3.4, 2.4, r["deep"])      # throat shade
-        c.put(cx + 16, g0 - 35, r["hi"])
-        c.put(cx + 17, g0 - 35, r["hi"])
-        # muzzle: SHORT broad wedge (a long thin snout read bird-like at 1x)
-        for i, x in enumerate(range(cx + 25, cx + 31)):
-            top = g0 - 32 + (i + 1) // 2
-            c.put(x, top, r["light"])
-            for k in range(1, 6 - (i * 2) // 3):
-                c.put(x, top + k, r["base"])
-        for x in range(cx + 24, cx + 30):                     # mouth line
-            c.put(x, g0 - 28, r["deep"])
-        c.put(cx + 24, g0 - 27, r["deep"])
-        # near ear: chunky swept-back triangle whose base sinks 4px into the
-        # skull mass, so it never reads as a detached flag at 1x
-        for i in range(8):                                    # i=0 tip
-            w = 2 + (i + 1) // 2
-            x0 = cx + 17 - (7 - i) // 2
-            for k in range(w):
-                c.put(x0 + k, g0 - 40 + i,
-                      r["light"] if k >= w - 2 and i > 1 else r["base"])
-        for i in range(3):                                    # inner-ear shadow
-            c.put(cx + 15 + i // 2, g0 - 36 + i, r["deep"])
-        # mane RUFF: tufts swept off the throat and shoulder, kept below the
-        # nape so the head stays a separate lump in silhouette
-        for tx0, ty0, ln in ((cx + 11, g0 - 26, 5), (cx + 8, g0 - 22, 5)):
-            for i in range(ln):
-                c.put(tx0 - i, ty0 + i // 2, r["light"] if i < 2 else r["base"])
-                c.put(tx0 - i, ty0 + 1 + i // 2,
-                      r["base"] if i < ln - 1 else r["deep"])
+        # ---- sculpt: light rides the top-left, deep the underside ---------
+        for x, (t, b) in cols.items():
+            depth = b - t
+            for k in range(3 if x < 36 else 2):
+                c.put(x, t + k, r["light"])
+            for k in range(3 if depth > 13 else 2):
+                c.put(x, b - k, r["deep"])
+        for x in range(17 - push, 28 - push):        # haunch crest sheen
+            c.put(x, cols[x][0] + 1, r["hi"] if x % 3 == 0 else r["light"])
+        for x in range(39 + push, 46 + push):        # withers sheen
+            c.put(x, cols[x][0] + 1, r["hi"] if x % 3 == 1 else r["light"])
+        # storm-cloud flank markings: a dark saddle over the ribs and a
+        # dashed loin groove, so the mid-body is never one flat grey field
+        for x in range(33, 43 + push):
+            t, b = cols[x]
+            d = (x - 33) * 0.5
+            for k in range(int(4 + d), int(9 + d)):
+                if t + k < b - 2:
+                    c.put(x, t + k, r["deep"])
+        for i, (fx, fy) in enumerate(((-6, 4), (-3, 7), (0, 5), (3, 8),
+                                      (6, 4), (9, 7), (-9, 6), (12, 5))):
+            x = 24 + fx
+            if x in cols:
+                t, b = cols[x]
+                y = t + fy
+                if t + 2 < y < b - 2:
+                    c.put(x, y, r["deep"])
+                    c.put(x + 1, y + (i % 2), r["deep"])
 
-        # --- near legs on top, then the chest ruff ------------------------
+        # ---- neck + skull carried forward on the profile ------------------
+        hy = 18 + body + headb
+        for x in range(42 + push, 53):               # neck wedge
+            f = (x - (42 + push)) / float(52 - (42 + push))
+            t = int(round(21 + body + (hy - 4 - (21 + body)) * f))
+            b = int(round(37 + body + (hy + 7 - (37 + body)) * f))
+            for y in range(t, b + 1):
+                c.put(x, y, r["base"])
+            c.put(x, t, r["light"])
+            c.put(x, t + 1, r["light"])
+            c.put(x, b, r["deep"])
+        # mane crest: spiky storm ruff on the withers -- 2px above the back,
+        # serrated so the outline pass renders fur, not a smooth hump
+        for (mx, mh) in ((36, 2), (38, 3), (40, 4), (42, 4), (44, 3)):
+            x = mx + push
+            top = cols.get(x, (21 + body, 41))[0]
+            for k in range(mh + 1):
+                c.put(x, top - k, r["light"] if k >= mh - 1 else r["base"])
+                c.put(x + 1, top - k, r["base"] if k < mh else r["deep"])
+        # far ear (darker, drawn before the skull so its base is buried)
+        for i in range(9):
+            w = 2 + i // 3
+            ex = 48 - int(round(i * 0.42))
+            for k in range(w):
+                c.put(ex + k, hy - 12 + i, r["deep"])
+        c.ellipse(51, hy, 6.2, 5.4, r["base"])       # skull
+        c.ellipse(49, hy + 4, 5.4, 3.2, r["base"])   # cheek / jaw
+        c.ellipse(49, hy - 2, 4.2, 2.6, r["light"])  # lit crown
+        c.ellipse(52, hy + 4, 3.0, 2.0, r["deep"])   # jaw shade
+        c.put(48, hy - 4, r["hi"])
+        c.put(49, hy - 4, r["hi"])
+        # muzzle: a narrower block stepping off the front of the skull
+        for i, x in enumerate(range(54, 62)):
+            f = i / 7.0
+            t = int(round(hy + 1 + f))
+            b = int(round(hy + 7 - f * 3))
+            for y in range(t, b + 1):
+                c.put(x, y, r["base"])
+            c.put(x, t, r["light"])
+            c.put(x, b, r["deep"])
+        for x in range(52, 60):                      # mouth line
+            c.put(x, hy + 5, r["deep"])
+        # near ear: chunky swept-back spike over the open nape gap
+        for i in range(10):
+            w = 3 + i // 3
+            ex = 45 - int(round(i * 0.30))
+            for k in range(w):
+                c.put(ex + k, hy - 13 + i,
+                      r["light"] if k >= w - 2 and i > 2 else r["base"])
+        for i in range(4, 9):                        # inner-ear bowl
+            c.put(45 - int(round(i * 0.30)) + 1, hy - 13 + i, r["deep"])
+
+        # ---- near pair on top --------------------------------------------
         if not swim:
-            _hound_leg(c, r, cx - 5, hip, ground, -4 * step, lift=lift_for(1))
-            _hound_leg(c, r, cx + 12, hip, ground, 4 * step, lift=lift_for(0))
-        for i in range(5):                                    # chest fur strokes
-            c.put(cx + 16 - i // 2, g0 - 22 + i, r["light"])
-            c.put(cx + 17 - i // 2, g0 - 21 + i, r["hi"] if i == 1 else r["light"])
+            _hound_leg(c, r, hip_x + 1, hip_y, ground, swB, lfB, front=False)
+            _hound_leg(c, r, sh_x + 1, sh_y, ground, swA, lfA, front=True)
+        for i in range(5):                           # chest ruff strokes
+            c.put(46 + push - i // 2, 30 + body + i, r["light"])
+            c.put(47 + push - i // 2, 29 + body + i,
+                  r["hi"] if i == 1 else r["light"])
 
         c.outline(palette.OUTLINE)
-        # --- face + glow AFTER the outline --------------------------------
-        c.put(cx + 20, g0 - 34, palette.OUTLINE)              # angry brow
-        c.put(cx + 21, g0 - 34, palette.OUTLINE)
-        c.put(cx + 22, g0 - 33, palette.OUTLINE)
-        c.rect(cx + 20, g0 - 33, 2, 2, r["eye"])
-        c.put(cx + 20, g0 - 33, r["hi"])
-        c.put(cx + 22, g0 - 32, with_alpha(r["eye"], 110))
-        c.put(cx + 30, g0 - 31, palette.OUTLINE)              # nostril
-        for i in (1, 3):                                      # plume sheen
+        # ---- face + glow AFTER the outline pass ---------------------------
+        c.put(50, hy - 3, palette.OUTLINE)           # angry brow
+        c.put(51, hy - 3, palette.OUTLINE)
+        c.put(52, hy - 2, palette.OUTLINE)
+        c.rect(50, hy - 2, 2, 2, r["eye"])
+        c.put(50, hy - 2, r["hi"])
+        c.put(52, hy - 1, with_alpha(r["eye"], 110))
+        c.put(61, hy + 3, palette.OUTLINE)           # nostril
+        c.put(60, hy + 3, palette.OUTLINE)
+        for i in (1, 3):                             # plume sheen
             px, py, rad = chain[i]
-            c.put(px, py - round(rad * 0.85), r["hi"])
+            c.put(px, py - int(round(rad * 0.85)), r["hi"])
         tx, ty, _ = chain[-1]
-        c.put(tx - 3, ty - 2, with_alpha(r["hi"], 150))
-        c.put(tx - 5, ty, with_alpha(r["hi"], 110))
-        # cyan wind flecks off the mane and the tail tip
-        c.put(cx + 7, g0 - 30, r["wind"])
-        c.put(cx + 1, g0 - 23, with_alpha(r["wind"], 170))
-        c.put(tx - 2, ty - 4, r["wind"])
+        # wind trail streaming off the tail tip: the second half of the
+        # facing cue (nose right, storm trail left)
+        c.put(tx - 2, ty - 2, with_alpha(r["hi"], 165))
+        c.put(tx - 4, ty - 1, with_alpha(r["wind"], 190))
+        c.put(tx - 3, ty - 4, with_alpha(r["wind"], 130))
+        c.put(tx - 6, ty + 1, with_alpha(r["hi"], 100))
+        c.put(43 + push, 24 + body, r["wind"])       # mane flecks
+        c.put(38 + push, 21 + body, with_alpha(r["wind"], 170))
 
     elif facing == "up":
         cx = 32
-        g0 = ground - bob
-        # forepaws peeking past the shoulders (rounded, mostly buried by the
-        # shoulder mass — square stubs read as backpack handles at 1x)
-        if not swim:
-            for side, s_ in ((-1, step), (1, -step)):
-                c.ellipse(cx + side * 12, g0 - 24 + (1 if s_ > 0 else 0),
-                          2.6, 3.2, r["base"])
-        # back mass: broad rump, soft waist, broad shoulders, heavy skull
-        c.ellipse(cx, g0 - 13, 11.0, 8.5, r["base"])          # rump
-        c.ellipse(cx, g0 - 22, 9.5, 6.5, r["base"])           # waist
-        c.ellipse(cx, g0 - 29, 11.0, 6.0, r["base"])          # shoulders
-        c.ellipse(cx, g0 - 34, 5.5, 4.0, r["base"])           # nape notch
-        c.ellipse(cx, g0 - 38, 7.0, 5.5, r["base"])           # skull
-        # BIG pointed ears splaying up and out (matched to the snowwolf back
-        # view — short nubs read as horns and killed the canine silhouette)
+        g0 = body
+        # (y, half-width) back-view profile: wide rump, pinched waist, broad
+        # shoulders -- the same hourglass the side view carries, seen down
+        # the spine, so the hound reads athletic from behind too.
+        prof = [(g0 + 12, 4.0), (g0 + 15, 8.0), (g0 + 20, 11.0),
+                (g0 + 24, 10.5), (g0 + 28, 8.0), (g0 + 32, 7.0),
+                (g0 + 36, 9.5), (g0 + 41, 11.5), (g0 + 45, 10.5),
+                (g0 + 48, 7.0)]
+        if not swim:                                   # forepaws at the shoulders
+            for side, sw in ((-1, swA), (1, swB)):
+                c.ellipse(cx + side * 11, g0 + 26 + (1 if sw > 0 else 0),
+                          2.8, 3.4, r["base"])
+        for i in range(len(prof) - 1):
+            y0, w0 = prof[i]
+            y1, w1 = prof[i + 1]
+            for y in range(int(y0), int(y1) + 1):
+                f = (y - y0) / float(y1 - y0)
+                hw = w0 + (w1 - w0) * f
+                for x in range(int(round(cx - hw)), int(round(cx + hw)) + 1):
+                    c.put(x, y, r["base"])
+        c.ellipse(cx, g0 + 10, 7.0, 5.5, r["base"])    # skull
+        # ears splayed up and out
         for side in (-1, 1):
-            for i in range(9):                                # i=0 = tip
-                w = 2 + i // 2
-                ex = cx + side * (8 - i // 3)
+            for i in range(10):
+                w = 2 + i // 3
+                ex = cx + side * (8 - i // 4)
                 for k in range(w):
-                    c.put(ex - side * (w - 1) + side * k, g0 - 46 + i, r["base"])
-        # contour rim: lit left edge, shaded right edge, all the way down
-        _hound_rim(c, r, g0 - 46, g0 - 6)
-        for side in (-1, 1):                                  # inner-ear bowls
-            for i in range(3, 8):
-                w = 2 + i // 2
-                ex = cx + side * (8 - i // 3)
-                for k in range(1, w - 1):
-                    c.put(ex - side * (w - 1) + side * k, g0 - 46 + i, r["deep"])
-        c.put(cx - 3, g0 - 40, r["hi"])                       # crown glint
-        c.put(cx - 2, g0 - 40, r["hi"])
-        c.put(cx - 9, g0 - 30, r["hi"])
-        c.put(cx - 8, g0 - 15, r["hi"])
-        for dx in range(-5, 6):                               # nape shadow
-            c.put(cx + dx, g0 - 34, r["deep"])
-        # dark mane saddle: a SOLID wedge off the shoulders tapering to the
-        # waist, then a dashed spine groove — the marking that makes a back
-        # view read as a canine rather than a smooth grey capsule
-        for i in range(10):
-            half = 7 - (i * 6) // 10
+                    c.put(ex - side * (w - 1) + side * k, g0 + 1 + i, r["base"])
+        _hound_rim(c, r, g0 + 1, g0 + 48)
+        for side in (-1, 1):                           # inner-ear bowls
+            for i in range(4, 9):
+                w = 2 + i // 3
+                ex = cx + side * (8 - i // 4)
+                for k in range(1, max(2, w - 1)):
+                    c.put(ex - side * (w - 1) + side * k, g0 + 1 + i, r["deep"])
+        for dx in range(-5, 6):                        # nape shadow
+            c.put(cx + dx, g0 + 15, r["deep"])
+        c.put(cx - 3, g0 + 7, r["hi"])
+        c.put(cx - 2, g0 + 7, r["hi"])
+        # storm saddle: solid dark wedge off the shoulders, tapering into the
+        # waist, then a dashed spine groove down the loin
+        for i in range(11):
+            half = 7 - (i * 6) // 11
             for dx in range(-half, half + 1):
-                c.put(cx + dx, g0 - 32 + i, r["deep"])
-            if i < 7:
-                c.put(cx - half, g0 - 32 + i, r["base"])
-        for i in range(4):                                    # saddle sheen
-            c.put(cx - 4 + i, g0 - 31, r["base"])
-        for y in range(g0 - 22, g0 - 12):
+                c.put(cx + dx, g0 + 18 + i, r["deep"])
+            if i < 8:
+                c.put(cx - half, g0 + 18 + i, r["base"])
+        for i in range(4):
+            c.put(cx - 4 + i, g0 + 19, r["base"])
+        for y in range(g0 + 30, g0 + 41):
             if (y % 3) != 2:
                 c.put(cx, y, r["deep"])
-        for i, (fx, fy) in enumerate(((-7, -19), (6, -18), (-6, -13),
-                                      (5, -11), (-4, -9), (4, -22))):
+        for i, (fx, fy) in enumerate(((-7, 33), (6, 34), (-6, 39), (5, 42),
+                                      (-4, 44), (4, 30), (8, 44), (-8, 43))):
             c.put(cx + fx, g0 + fy, r["deep"])
             c.put(cx + fx + 1, g0 + fy + (i % 2), r["deep"])
-        # shoulder ruff tufts pointing down and out (wind identity)
-        for side in (-1, 1):
+        for side in (-1, 1):                           # shoulder ruff tufts
             sx = cx + side * 11
             for i in range(4):
-                c.put(sx + side * (i // 2), g0 - 28 + i,
+                c.put(sx + side * (i // 2), g0 + 20 + i,
                       r["light"] if i == 0 else r["base"])
-                c.put(sx + side * (1 + i // 2), g0 - 27 + i,
+                c.put(sx + side * (1 + i // 2), g0 + 21 + i,
                       r["deep"] if i >= 2 else r["base"])
-        # fat plume tail draped down the rump between the hind legs — drawn
-        # ON TOP of the rump (a tail tucked under it is simply invisible)
+        # plume trailing straight back off the rump (toward the camera)
         chain = []
-        for i, rad in enumerate((3.4, 3.8, 3.2, 2.3)):
-            px = cx + 1 + round(1.4 * math.sin(i * 0.9 + sway))
-            py = g0 - 15 + round(i * 4.0)
+        for i, rad in enumerate((3.6, 4.0, 3.4, 2.4)):
+            sw = math.sin(tphase + i * 0.8)
+            px = cx + 3 + int(round(i * 2.2 + 1.6 * sw))
+            py = g0 + 40 - int(round(i * 3.4))
             chain.append((px, py, rad))
         _hound_plume(c, r, chain, barbs=False)
-        # hind legs stride vertically
         if not swim:
-            for side, s_, pair in ((-1, step, 0), (1, -step, 1)):
-                _hound_leg(c, r, cx + side * 8, g0 - 14, ground, 0,
-                           lift=(2 if s_ > 0 else lift_for(pair)))
+            for side, sw, lf in ((-1, swB, lfB), (1, swA, lfA)):
+                _hound_leg(c, r, cx + side * 8, g0 + 40, ground,
+                           sw * 0.25, lf, front=False, head_on=True)
         c.outline(palette.OUTLINE)
         for i in (1, 3):
             px, py, rad = chain[i]
-            c.put(px - round(rad * 0.5), py, r["hi"])
+            c.put(px - int(round(rad * 0.5)), py, r["hi"])
         tx, ty, _ = chain[-1]
         c.put(tx + 2, ty + 2, with_alpha(r["hi"], 150))
-        c.put(cx - 9, g0 - 36, r["wind"])
-        c.put(cx + 9, g0 - 33, with_alpha(r["wind"], 160))
+        c.put(tx - 2, ty + 3, with_alpha(r["wind"], 170))
+        c.put(cx - 9, g0 + 9, r["wind"])
+        c.put(cx + 9, g0 + 12, with_alpha(r["wind"], 160))
 
-    else:  # down — front view, head-on
+    else:  # down -- head-on
         cx = 32
-        g0 = ground - bob
-        # plume tail tip peeking past the right haunch (behind everything)
+        g0 = body
+        # plume tip peeking past the right haunch, behind everything
         chain = []
-        for i, rad in enumerate((3.0, 3.0, 2.4, 1.7)):
-            px = cx + 13 + round(i * 1.0 + 0.9 * math.sin(i * 0.9 + sway))
-            py = g0 - 16 - round(i * 2.7)
+        for i, rad in enumerate((3.0, 2.8, 2.2, 1.6)):
+            sw = math.sin(tphase + i * 0.9)
+            px = cx + 11 + int(round(i * 1.4 + 0.8 * sw))
+            py = g0 + 43 - int(round(i * 1.6))
             chain.append((px, py, rad))
         _hound_plume(c, r, chain, barbs=False)
-        # rear paws: short stubs tucked under the haunch bulges (drawn first
-        # so the haunch mass overlaps them and they stay attached)
-        if not swim:
-            for side in (-1, 1):
-                for k in range(5):
-                    c.put(cx + side * 10 - 2 + k, ground - 4, r["deep"])
-                    c.put(cx + side * 10 - 2 + k, ground - 3, r["base"])
-                    c.put(cx + side * 10 - 2 + k, ground - 2, r["base"])
-                    c.put(cx + side * 10 - 2 + k, ground - 1, r["base"])
-                    c.put(cx + side * 10 - 2 + k, ground, r["base"])
-        # body: deep chest with haunch bulges at the sides
-        c.ellipse(cx, g0 - 14, 9.5, 8.0, r["base"])
-        c.ellipse(cx - 9, g0 - 11, 5.5, 5.5, r["base"])
-        c.ellipse(cx + 9, g0 - 11, 5.5, 5.5, r["base"])
-        c.ellipse(cx - 9, g0 - 8, 4.2, 2.8, r["deep"])
-        c.ellipse(cx + 9, g0 - 8, 4.2, 2.8, r["deep"])
-        c.ellipse(cx + 6, g0 - 15, 3.4, 5.0, r["deep"])       # right-flank shade
-        # chest bib: a broad lit ruff that tapers into the belly, with the
-        # dither confined to its lower ramp border (never used as texture)
+        # No rear paws head-on: a hound facing the camera hides them behind
+        # its own haunches. Drawing them produced four detached squares sitting
+        # on the ground line, and pulling them in just made floating specks
+        # outside the silhouette. The haunch bulges below carry their own
+        # contact shadow instead.
+        c.ellipse(cx - 10, g0 + 41, 5.5, 6.0, r["base"])   # haunch bulges
+        c.ellipse(cx + 10, g0 + 41, 5.5, 6.0, r["base"])
+        # (y, half-width) front profile: flared shoulder ruff, waist pinch,
+        # haunch flare -- an hourglass even head-on
+        prof = [(g0 + 27, 6.0), (g0 + 30, 10.5), (g0 + 33, 11.0),
+                (g0 + 37, 8.0), (g0 + 41, 9.0), (g0 + 45, 10.0),
+                (g0 + 48, 8.0)]
+        for i in range(len(prof) - 1):
+            y0, w0 = prof[i]
+            y1, w1 = prof[i + 1]
+            for y in range(int(y0), int(y1) + 1):
+                f = (y - y0) / float(y1 - y0)
+                hw = w0 + (w1 - w0) * f
+                for x in range(int(round(cx - hw)), int(round(cx + hw)) + 1):
+                    c.put(x, y, r["base"])
+        c.ellipse(cx - 10, g0 + 44, 4.2, 2.8, r["deep"])
+        c.ellipse(cx + 10, g0 + 44, 4.2, 2.8, r["deep"])
+        c.ellipse(cx + 7, g0 + 37, 3.2, 5.0, r["deep"])    # right-flank shade
+        # chest bib: broad lit ruff tapering into the belly
         for i in range(9):
             w = 9 - i
             for k in range(w):
-                c.put(cx - w // 2 + k, g0 - 21 + i, r["light"])
-        c.put(cx - 2, g0 - 20, r["hi"])
-        c.put(cx - 1, g0 - 19, r["hi"])
-        for i in range(5):                                    # ruff fur strokes
-            c.put(cx - 3 + i, g0 - 18 + (i % 2), r["base"])
+                c.put(cx - w // 2 + k, g0 + 29 + i, r["light"])
+        c.put(cx - 2, g0 + 30, r["hi"])
+        c.put(cx - 1, g0 + 31, r["hi"])
+        for i in range(5):
+            c.put(cx - 3 + i, g0 + 32 + (i % 2), r["base"])
         for x in range(cx - 4, cx + 4):
             if (x + g0) % 2 == 0:
-                c.put(x, g0 - 13, r["base"])
-        # front legs
-        if not swim:
-            for side, s, pair in ((-1, step, 0), (1, -step, 1)):
-                _hound_leg(c, r, cx + side * 5, g0 - 10, ground, 0,
-                           lift=(1 if s > 0 else lift_for(pair)))
-        # big head over the chest
-        c.ellipse(cx, g0 - 29, 9.5, 8.0, r["base"])
-        c.ellipse(cx - 3, g0 - 34, 5.2, 3.2, r["light"])      # crown
-        c.ellipse(cx - 6, g0 - 24, 2.6, 2.8, r["deep"])       # cheek shade
-        c.ellipse(cx + 6, g0 - 24, 2.6, 2.8, r["deep"])
-        c.put(cx - 5, g0 - 36, r["hi"])
-        c.put(cx - 4, g0 - 36, r["hi"])
-        # wide-based ears with a dark inner bowl
-        for side in (-1, 1):
-            for i in range(6):                                # i=0 tip
+                c.put(x, g0 + 37, r["base"])
+        if not swim:                                   # front legs, gap between
+            for side, sw, lf in ((-1, swA, lfA), (1, swB, lfB)):
+                _hound_leg(c, r, cx + side * 5, g0 + 38, ground,
+                           sw * 0.2, lf, front=True, head_on=True)
+        # head: skull above the chest, muzzle stepping DOWN and narrower
+        c.ellipse(cx, g0 + 18, 9.0, 7.2, r["base"])
+        c.ellipse(cx - 3, g0 + 13, 5.0, 3.0, r["light"])   # crown
+        c.ellipse(cx - 6, g0 + 22, 2.6, 2.8, r["deep"])    # cheek shade
+        c.ellipse(cx + 6, g0 + 22, 2.6, 2.8, r["deep"])
+        c.put(cx - 5, g0 + 11, r["hi"])
+        c.put(cx - 4, g0 + 11, r["hi"])
+        for i in range(8):                             # muzzle wedge
+            hw = 4 - i // 3
+            for k in range(-hw, hw + 1):
+                c.put(cx + k, g0 + 22 + i, r["base"] if i > 1 else r["light"])
+            c.put(cx - hw, g0 + 22 + i, r["light"])
+            c.put(cx + hw, g0 + 22 + i, r["deep"])
+        for side in (-1, 1):                           # ears, wide-based
+            for i in range(10):                        # reach into the skull
                 w = 3 + (i + 1) // 2
                 x0 = cx + side * (7 + (1 if i < 2 else 0)) - w // 2
                 for k in range(w):
-                    c.put(x0 + k, g0 - 42 + i, r["base"])
-            for i in range(2, 6):
+                    c.put(x0 + k, g0 + 4 + i, r["base"])
+            for i in range(2, 7):
                 w = 3 + (i + 1) // 2
                 x0 = cx + side * 7 - w // 2
                 for k in range(1, w - 1):
-                    c.put(x0 + k, g0 - 42 + i, r["deep"])
-        # brow blaze + broad muzzle
-        c.rect(cx - 1, g0 - 33, 3, 5, r["light"])
-        c.ellipse(cx, g0 - 25, 4.6, 3.4, r["light"])
-        c.put(cx - 2, g0 - 26, r["hi"])
-        c.put(cx - 1, g0 - 26, r["hi"])
-        # cheek wind-tufts pointing out
-        for side in (-1, 1):
+                    c.put(x0 + k, g0 + 4 + i, r["deep"])
+        c.rect(cx - 1, g0 + 12, 3, 5, r["light"])      # brow blaze
+        for side in (-1, 1):                           # cheek wind tufts
             for i in range(3):
-                c.put(cx + side * (10 + i // 2), g0 - 29 + i, r["base"])
-                c.put(cx + side * (10 + i // 2), g0 - 28 + i, r["deep"])
+                c.put(cx + side * (10 + i // 2), g0 + 18 + i, r["base"])
+                c.put(cx + side * (10 + i // 2), g0 + 19 + i, r["deep"])
         c.outline(palette.OUTLINE)
-        # face after the outline: angry brow, glowing eyes, nose, mouth
+        # face after the outline: brow, glowing eyes, nose, mouth
         for side in (-1, 1):
-            c.put(cx + side * 2, g0 - 33, palette.OUTLINE)
-            c.put(cx + side * 3, g0 - 33, palette.OUTLINE)
-            c.put(cx + side * 5, g0 - 34, palette.OUTLINE)
-            c.put(cx + side * 4, g0 - 33, palette.OUTLINE)
+            c.put(cx + side * 2, g0 + 15, palette.OUTLINE)
+            c.put(cx + side * 3, g0 + 15, palette.OUTLINE)
+            c.put(cx + side * 4, g0 + 15, palette.OUTLINE)
+            c.put(cx + side * 5, g0 + 14, palette.OUTLINE)
         for ex in (cx - 5, cx + 3):
-            c.rect(ex, g0 - 32, 3, 2, r["eye"])
-            c.put(ex, g0 - 32, r["hi"])
-        c.put(cx - 7, g0 - 32, with_alpha(r["eye"], 110))
-        c.put(cx + 6, g0 - 32, with_alpha(r["eye"], 110))
-        c.rect(cx - 1, g0 - 27, 3, 2, palette.OUTLINE)        # nose
-        for dx in range(-2, 3):                               # mouth
-            c.put(cx + dx, g0 - 23, r["deep"])
-        c.put(cx - 3, g0 - 22, r["deep"])
-        c.put(cx + 3, g0 - 22, r["deep"])
-        # drift flecks off the tail tip
+            c.rect(ex, g0 + 16, 3, 2, r["eye"])
+            c.put(ex, g0 + 16, r["hi"])
+        c.put(cx - 7, g0 + 16, with_alpha(r["eye"], 110))
+        c.put(cx + 6, g0 + 16, with_alpha(r["eye"], 110))
+        c.rect(cx - 1, g0 + 27, 3, 2, palette.OUTLINE)     # nose
+        for dx in range(-2, 3):                            # mouth
+            c.put(cx + dx, g0 + 30, r["deep"])
+        c.put(cx - 3, g0 + 29, r["deep"])
+        c.put(cx + 3, g0 + 29, r["deep"])
         tx, ty, _ = chain[-1]
         c.put(tx + 2, ty - 3, with_alpha(r["hi"], 140))
         c.put(tx + 3, ty - 4, with_alpha(r["wind"], 190))
-        c.put(cx - 10, g0 - 35, r["wind"])
+        c.put(cx - 10, g0 + 12, r["wind"])
         for i in (1, 3):
             px, py, rad = chain[i]
-            c.put(px, py - round(rad * 0.75), r["hi"])
+            c.put(px, py - int(round(rad * 0.75)), r["hi"])
     if swim:
         _mist_overlay(c)
     return c
