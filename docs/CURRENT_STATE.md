@@ -4,7 +4,7 @@ Short, current, and rewritten as things change. History belongs in
 `CHANGELOG.md` and `docs/PLAYTEST_LOG.md`, not here.
 
 **Version:** 0.5.0 · **Game:** Necesse 1.3.2 · **Branch:** `master`
-**Updated:** 2026-08-24, commit `ca2ddad`
+**Updated:** 2026-08-25, commit `b90dc2a`
 
 ## Architecture in one screen
 
@@ -40,27 +40,32 @@ PNG in `src/main/resources/`. Editing a PNG directly is always wrong.
 - `python3 tools/size_audit.py` reports 0 flags.
 - Marble Checker floor no longer crashes clients (`ca2ddad`); `scripts/tile_sprite_check.sh`
   proves it headlessly.
+- `python3 tools/locale_audit.py` reports 66 registered IDs all named in both
+  locales.
 
 ## Known issues — open
 
 Ordered by the player's own priority. Full detail in `docs/PLAYTEST_LOG.md`.
 
-**P1**
-- UI/localization: recipes showing internal IDs, Prism sapling missing icon,
-  incomplete building/menu entries. Needs a complete registry audit, not
-  spot fixes.
+**P1 — still open**
 - Warden frequently stands facing north, so the player sees his back during
   the introduction.
 - Warden's first dialogue dumps too much lore at once.
-- Rock/ore worldgen scatters single blocks on an even grid — reads as a
-  graveyard. Needs irregular outcrops and clusters.
 - Rock shadows are far too long and dark; they dominate the landscape.
 - Storm Shards read as a flat white wall of teeth. Volume and silhouette
   problem, not a size problem.
-- Galehound reads as a grey sausage in motion. Needs a silhouette and
-  animation redesign.
 - Old Warden Spire reads as a small ordinary house, not the origin of the
   Skyreach.
+- Only 2 rock sprite variants ship where vanilla `caverock` has 8, so every
+  outcrop repeats the same two shapes.
+
+**P1 — fixed, not yet player-confirmed**
+- Rock/ore worldgen now uses a formation field (`7ef6486`).
+- Aurora flora now grows in colonies (`7ef6486`).
+- Galehound silhouette rebuilt (`080ea26`).
+- Every registered object and tile has a display name, gated by
+  `tools/locale_audit.py` (`eb76cb2`); all six tree and sapling item icons
+  exist (`b90dc2a`).
 
 **P2**
 - Tree canopies are flat, like stacked pancakes (silhouette and size are good

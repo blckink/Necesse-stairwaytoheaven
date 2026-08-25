@@ -209,3 +209,50 @@ a 64×32 one — always check which function `generate_assets.py` actually calls
 vanilla analogue and must report 0 flags. It is a floor, not a target: it only
 sees sprites that have an entry, and passing it says nothing about whether a
 sprite reads in game. See `docs/ART_DIRECTION.md`.
+
+## Object item icons resolve to `items/<stringID>`
+
+**[jar]** `GameObject.generateItemTexture()` is `GameTexture.fromFile("items/" + getStringID())`.
+`TreeObject` and `TreeSaplingObject` do **not** override it, so any tree or
+sapling registered with `createItem=true` needs an `items/<id>.png` or it shows
+the engine's error texture. `RockObject` and `RockOreObject` DO override it
+(they resolve through their rock/ore texture name instead), so ore nodes are
+safe without their own item file.
+
+**[jar]** Vanilla ships a sapling's item icon as a byte-identical copy of its
+object sprite (`objects/birchsapling.png` == `items/birchsapling.png`), but
+draws a tree's item icon as its own compact 32x32 glyph rather than shrinking
+the 256x512 object sheet.
+
+**[run]** `tools/locale_audit.py` catches missing display names but NOT missing
+item textures — those are a separate class of "internal detail reaches the
+player" bug. There is currently no automated gate for them.
+
+## Placement is not a sprite problem
+
+**[game]** Rocks that came out of an independent per-tile probability roll read
+in game as "individual rectangular tombstones, evenly scattered". An
+independent roll is statistically even by definition, so no tuning of its
+chance could produce a formation — it needed a different mechanism.
+
+**[run]** The replacement is a lattice formation field (`SkyTerrainPainter.outcropAt`):
+lattice cells, hashed sites, elongated rotated lobes plus an offset second
+lobe, a noise-wobbled boundary and an apron of scree. Reading only the 3x3
+cells around a tile keeps cost constant and keeps region borders seamless.
+Tuned against rendered maps: the first attempt covered 39% of the world in
+rock. Judge such a field at **screen scale** (roughly 60x40 tiles) — a 300-tile
+overview makes a perfectly good 6-tile outcrop look like a speck and will
+mislead you into over-tuning.
+
+## A passing size audit does not mean the sprite works
+
+**[game]** The Galehound was raised from 0.43 to 0.80 of a vanilla boar's mass,
+passed `tools/size_audit.py`, and the player then played the build and called it
+"a grey sausage". The redesign that fixed it came out at 0.78 — slightly *less*
+mass, much better sprite. What was missing was silhouette: a waist, a head held
+clear of the back line, legs that change pose.
+
+**[run]** Side-view paw shapes do not transfer to head-on and rear frames. A
+5px horizontal paw block with a forward toe nub reads as a detached square
+furniture foot when the animal faces the camera; those frames need a compact
+rounded stub, and a head-on animal should simply not show its rear paws.
