@@ -164,6 +164,11 @@ def main():
     gen_items.gen_stormshard(f"{out}/items/stormshard.png")
     gen_items.gen_windsilk(f"{out}/items/windsilk.png")
     gen_items.gen_aurorapetal(f"{out}/items/aurorapetal.png")
+    # Tree and sapling item icons: GameObject.generateItemTexture loads
+    # items/<stringID>, and TreeObject/TreeSaplingObject do not override it,
+    # so without these the crafting menu shows the engine error texture.
+    gen_items.gen_sapling_item_icons(f"{out}/objects", f"{out}/items")
+    gen_items.gen_tree_item_icons(f"{out}/items")
     gen_items.gen_tempestedge_icon(f"{out}/items/tempestedge.png")
     gen_items.gen_galehowl_icon(f"{out}/items/galehowl.png")
     gen_items.gen_skystonerock_item(f"{out}/items/skystonerock.png")

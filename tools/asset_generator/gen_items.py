@@ -338,3 +338,71 @@ def gen_crystal_item(path, ramp, salt):
                 c.put(cx - max(0, half - 1), base_y - i, ramp["light"])
         c.put(x + lean, base_y - h + 1, ramp["hi"])
     _finish(c).save(path)
+
+
+# --- Tree and sapling item icons ---------------------------------------------
+#
+# GameObject.generateItemTexture() loads items/<stringID>, and TreeObject and
+# TreeSaplingObject do not override it. Our trees and saplings shipped with an
+# objects/ sprite but no items/ icon, so every one of them showed the engine's
+# error texture in the crafting menu and the inventory (playtest 2026-08-24
+# reported it on the Prism sapling; it was in fact all six).
+#
+# Vanilla's sapling item icon is a byte-identical copy of its object sprite --
+# verified against objects/birchsapling.png and items/birchsapling.png -- so
+# the saplings copy. Trees get their own compact glyph, the way vanilla draws
+# items/oaktree.png rather than shrinking the 256x512 object sheet.
+
+def gen_sapling_item_icons(objects_dir, items_dir):
+    """Copy each 32x32 sapling object sprite to its item icon, vanilla-style."""
+    from PIL import Image
+    for name in ("nimbussapling", "fulgursapling", "prismasapling"):
+        src = Image.open(f"{objects_dir}/{name}.png").convert("RGBA")
+        src.save(f"{items_dir}/{name}.png")
+
+
+def _tree_item(path, wood, leaf, conifer=False):
+    c = Canvas(32, 32)
+    for y in range(20, 31):                      # trunk, lit on the left
+        for x in range(14, 18):
+            c.put(x, y, wood["base"])
+        c.put(14, y, wood["light"])
+        c.put(17, y, wood["deep"])
+    for y in range(27, 31):                      # root flare
+        w = (y - 26)
+        for x in range(14 - w, 18 + w):
+            c.put(x, y, wood["deep"] if x < 14 or x > 17 else wood["base"])
+    if conifer:
+        # Tiers WIDEN downward and overlap by a row, so the needle mass reads
+        # as one connected cone. Drawing them as separate shrinking discs left
+        # gaps between the tiers and the icon looked like a stacked lamp.
+        for (top, half) in ((4, 3), (9, 6), (14, 8), (18, 10)):
+            for dy in range(6):
+                w = half - abs(dy - 4) if dy > 4 else half
+                w = max(1, w)
+                for x in range(16 - w, 16 + w + 1):
+                    c.put(x, top + dy, leaf["base"])
+            for dy in range(3):                  # lit left flank of the tier
+                w = max(1, half - dy)
+                for x in range(16 - w, 16 - w + 3):
+                    c.put(x, top + dy, leaf["light"])
+            for x in range(16 + 1, 16 + half + 1):   # shaded skirt
+                c.put(x, top + 4, leaf["deep"])
+        c.put(16, 2, leaf["light"])              # leader spike
+        c.put(16, 3, leaf["base"])
+    else:
+        c.ellipse(16, 13, 10.0, 8.0, leaf["base"])
+        c.ellipse(12, 10, 5.5, 4.5, leaf["light"])   # lit top-left mass
+        c.ellipse(21, 17, 5.0, 4.0, leaf["deep"])    # shaded underside
+        c.ellipse(11, 18, 4.0, 3.2, leaf["deep"])
+        c.ellipse(19, 8, 4.5, 3.5, leaf["light"])
+        for (x, y) in ((10, 8), (14, 6), (22, 12), (8, 14), (18, 20)):
+            c.put(x, y, leaf["hi"] if "hi" in leaf else leaf["light"])
+    return _finish(c).save(path)
+
+
+def gen_tree_item_icons(items_dir):
+    _tree_item(f"{items_dir}/nimbuswillow.png", palette.NIMBUSWOOD, palette.NIMBUSLEAF)
+    _tree_item(f"{items_dir}/fulgurpine.png", palette.CHARWOOD, palette.FULGURPINE_NEEDLE,
+               conifer=True)
+    _tree_item(f"{items_dir}/prismabirch.png", palette.PRISMWOOD, palette.PRISMLEAF)
