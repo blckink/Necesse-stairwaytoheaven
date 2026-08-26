@@ -1,26 +1,15 @@
 package stairwaytoheaven.mobs;
 
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.util.List;
 
-import necesse.engine.gameLoop.tickManager.TickManager;
 import necesse.engine.localization.message.GameMessage;
 import necesse.engine.localization.message.LocalMessage;
 import necesse.engine.network.packet.PacketMobChat;
 import necesse.engine.network.server.ServerClient;
 import necesse.engine.registries.ItemRegistry;
-import necesse.entity.mobs.MobDrawable;
 import necesse.entity.mobs.PlayerMob;
-import necesse.entity.mobs.friendly.FriendlyMob;
 import necesse.entity.pickup.ItemPickupEntity;
-import necesse.gfx.camera.GameCamera;
-import necesse.gfx.drawOptions.texture.TextureDrawOptionsEnd;
-import necesse.gfx.drawables.OrderableDrawables;
-import necesse.gfx.gameTexture.GameTexture;
 import necesse.inventory.InventoryItem;
 import necesse.level.maps.Level;
-import necesse.level.maps.light.GameLight;
 import stairwaytoheaven.SkyRegistry;
 import stairwaytoheaven.quest.SkywatchQuestData;
 
@@ -47,9 +36,7 @@ import stairwaytoheaven.quest.SkywatchQuestData;
  * inventory, then remove on success — never trusting the client). Progress
  * lives in the level's {@link SkywatchQuestData}, shared by all players.
  */
-public class SkyWardenMob extends FriendlyMob {
-
-    public static GameTexture texture;
+public class SkyWardenMob extends necesse.entity.mobs.friendly.human.humanShop.HumanShop {
 
     /**
      * The recruitment price. Intentional design value: it equals the top
@@ -61,12 +48,43 @@ public class SkyWardenMob extends FriendlyMob {
     public static final int RECRUIT_COST = 100_000;
 
     public SkyWardenMob() {
-        super(500);
+        // Same constructor shape as vanilla's Elder, (500, 500, "elder"). He is
+        // a HumanMob now, not a bespoke sprite: the body, the collision boxes
+        // and the four-direction animation all come from the human renderer.
+        super(500, 500, "skywarden");
         this.canDespawn = false;
         this.setSpeed(0.0F);
-        this.collision = new Rectangle(-10, -7, 20, 14);
-        this.hitBox = new Rectangle(-14, -12, 28, 24);
-        this.selectBox = new Rectangle(-16, -48, 32, 58);
+    }
+
+    /**
+     * His fixed face, shared with his settled form so recruiting him does not
+     * swap in a different man. See {@link WardenIdentity}.
+     */
+    @Override
+    public void randomizeLook(necesse.gfx.HumanLook look, necesse.gfx.HumanGender gender,
+                              necesse.engine.util.GameRandom random) {
+        this.gender = WardenIdentity.apply(look);
+    }
+
+    /**
+     * HumanMob.setDefaultArmor delegates to the mob's registered Settler, and
+     * the sky-side Warden deliberately has none — he is not a settler until he
+     * is recruited. Overriding it here is what gets the Skywatch clothes onto
+     * him in the spire.
+     */
+    @Override
+    public void setDefaultArmor(necesse.gfx.drawOptions.human.HumanDrawOptions drawOptions) {
+        WardenIdentity.dress(drawOptions);
+    }
+
+    /**
+     * No shop window in the sky. HumanShop.interact opens one by default;
+     * returning null suppresses it so his own dialogue is the whole interaction.
+     */
+    @Override
+    public necesse.engine.network.packet.PacketOpenContainer getOpenShopPacket(
+            necesse.engine.network.server.Server server, ServerClient client) {
+        return null;
     }
 
     @Override
@@ -84,9 +102,19 @@ public class SkyWardenMob extends FriendlyMob {
         return mob != null && mob.isPlayer;
     }
 
+    /**
+     * Deliberately does NOT call super.interact: HumanShop's version opens a
+     * shop container and runs settlement happiness and relationship updates,
+     * none of which apply to a keeper who is not a settler yet. What we do want
+     * from the human branch is turnTo — the native "face the player" behaviour
+     * that a FriendlyMob never had, which is why he used to stand facing north
+     * through his own introduction.
+     */
     @Override
     public void interact(PlayerMob player) {
-        super.interact(player);
+        if (!this.isAttacking) {
+            this.turnTo(player);
+        }
         if (!this.isServer() || !player.isServerClient()) {
             return;
         }
@@ -236,30 +264,8 @@ public class SkyWardenMob extends FriendlyMob {
         }
     }
 
-    @Override
-    public void addDrawables(List<MobDrawable> list, OrderableDrawables tileList, OrderableDrawables topList,
-            Level level, int x, int y, TickManager tickManager, GameCamera camera, PlayerMob perspective) {
-        super.addDrawables(list, tileList, topList, level, x, y, tickManager, camera, perspective);
-        if (texture == null) {
-            return;
-        }
-        GameLight light = level.getLightLevel(getTileCoordinate(x), getTileCoordinate(y));
-        int drawX = camera.getDrawX(x) - 32;
-        int drawY = camera.getDrawY(y) - 54;
-        int dir = this.getDir();
-        Point sprite = this.getAnimSprite(x, y, dir);
-        drawY += level.getTile(getTileCoordinate(x), getTileCoordinate(y)).getMobSinkingAmount(this);
-        final TextureDrawOptionsEnd drawOptions = texture
-                .initDraw()
-                .sprite(sprite.x, sprite.y, 64)
-                .light(light)
-                .pos(drawX, drawY);
-        list.add(new MobDrawable() {
-            @Override
-            public void draw(TickManager tickManager) {
-                drawOptions.draw();
-            }
-        });
-        this.addShadowDrawables(tileList, level, x, y, light, camera);
-    }
+    // NOTE: no addDrawables override any more. The bespoke 64px sheet that used
+    // to be blitted here is gone — the human renderer composes him from body,
+    // head, hair, eyes, facial feature and his armor layers, exactly like the
+    // Elder and exactly like the player.
 }

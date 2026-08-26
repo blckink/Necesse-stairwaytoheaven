@@ -63,6 +63,17 @@ public class WardenSettler extends Settler {
         return 0.0F;
     }
 
+    /**
+     * His Skywatch clothes on the settlement body — the same three armor items
+     * he wears in the spire, so he does not change outfit when he moves in.
+     * This is the hook vanilla uses for the Elder's hat, shirt and shoes.
+     */
+    @Override
+    public void setDefaultArmor(necesse.gfx.drawOptions.human.HumanDrawOptions drawOptions,
+                                int settlerSeed, necesse.gfx.HumanLook look, boolean customLook) {
+        stairwaytoheaven.mobs.WardenIdentity.dress(drawOptions);
+    }
+
     @Override
     public GameMessage getAcquireTip() {
         return new LocalMessage("misc", "wardensettlertip");

@@ -79,15 +79,14 @@ public class WardenSettlerMob extends HumanShop {
     }
 
     /**
-     * Fixed identity through the vanilla look system: any rolled face/hair,
-     * but always the Skywatch storm-blue robe with dark shoes — recognizable
-     * next to vanilla settlers without leaving the human renderer.
+     * His face, shared with the sky-side Warden through {@link WardenIdentity}.
+     * This used to roll a random face and hair and only pin the clothing
+     * colours, so recruiting the hooded keeper produced a completely different,
+     * randomly generated man standing in the settlement.
      */
     @Override
     public void randomizeLook(HumanLook look, HumanGender gender, GameRandom random) {
-        look.randomizeLook(random, true, gender, true, true, true, true);
-        look.setShirtColor(new Color(86, 96, 122));
-        look.setShoesColor(new Color(46, 44, 60));
+        this.gender = WardenIdentity.apply(look);
     }
 }
 

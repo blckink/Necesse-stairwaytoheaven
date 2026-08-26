@@ -55,7 +55,8 @@ final class SkyMobs {
         ZephyrRayMob.texture = GameTexture.fromFile("mobs/zephyrray");
         StormWispMob.texture = GameTexture.fromFile("mobs/stormwisp");
         SkystoneGolemMob.texture = GameTexture.fromFile("mobs/skystonegolem");
-        SkyWardenMob.texture = GameTexture.fromFile("mobs/skywarden");
+        // No SkyWardenMob texture any more: he is a HumanMob and the human
+        // renderer composes him from the body layers plus his armor items.
         SpireCatMob.blackTexture = GameTexture.fromFile("mobs/spirecatblack");
         SpireCatMob.tabbyTexture = GameTexture.fromFile("mobs/spirecattabby");
         stairwaytoheaven.mobs.CloudLambMob.texture = GameTexture.fromFile("mobs/cloudlamb");
