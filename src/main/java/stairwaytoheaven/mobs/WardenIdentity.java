@@ -67,7 +67,7 @@ public final class WardenIdentity {
      * wears his own shirt and shoes colours on the plain human body, which is
      * correct-looking rather than broken-looking.
      */
-    private static final boolean ARMOR_SHEETS_EXIST = false;
+    private static final boolean ARMOR_SHEETS_EXIST = true;
 
     /**
      * Puts the Skywatch clothes on the human body. This is how vanilla gives a

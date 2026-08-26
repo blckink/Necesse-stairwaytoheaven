@@ -21,6 +21,7 @@ import gen_tiles  # noqa: E402
 import gen_rocks  # noqa: E402
 import gen_objects  # noqa: E402
 import gen_mobs  # noqa: E402
+import gen_armor
 import gen_items  # noqa: E402
 import gen_misc  # noqa: E402
 import gen_npcs
@@ -172,6 +173,9 @@ def main():
     # so without these the crafting menu shows the engine error texture.
     gen_items.gen_sapling_item_icons(f"{out}/objects", f"{out}/items")
     gen_items.gen_tree_item_icons(f"{out}/items")
+    # The Warden's clothing as real armor sheets on the human body
+    # (player/armor/) plus their 32x32 item icons.
+    gen_armor.gen_all(out)
     gen_items.gen_tempestedge_icon(f"{out}/items/tempestedge.png")
     gen_items.gen_galehowl_icon(f"{out}/items/galehowl.png")
     gen_items.gen_skystonerock_item(f"{out}/items/skystonerock.png")
