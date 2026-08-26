@@ -44,6 +44,17 @@ is a safety net that catches sprites which are objectively too small. It is not
 art direction, and passing it does not mean an asset reads well in game. When a
 screenshot and a metric disagree, the screenshot wins.
 
+**Visual asset work must be bounded, never open-ended.** Do not let an LLM or
+subagent spend long reasoning loops repeatedly redrawing the same sprites. For a
+visual-only task, produce one coherent candidate set, perform at most one focused
+correction pass, then stop and hand it to the user for visual review. Do not
+spend more than about 10 minutes iterating on generated artwork, and do not burn
+large token budgets trying to make art "perfect" through repeated code-driven
+redraws. If the task is still visually uncertain after that pass, report what is
+uncertain and hand off rather than continuing autonomously. Prefer dedicated
+visual/image tooling for the artwork itself; use coding agents for format,
+integration, validation, generator reproducibility, and engine constraints.
+
 **Record what you verified.** After finishing, append newly proven behaviour to
 `docs/TECHNICAL_LEARNINGS.md`, update `docs/CURRENT_STATE.md` if the state
 changed, and append to `docs/PLAYTEST_LOG.md` if the user reported something.
