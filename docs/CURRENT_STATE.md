@@ -100,6 +100,8 @@ Ordered by the player's own priority. Full detail in `docs/PLAYTEST_LOG.md`.
 - Harvest tools audited object-by-object against vanilla archetypes; flora,
   bones and wooden oddities no longer need the pickaxe (`a58e43b`, gated by
   the integration test's tool-audit assertions).
+- Dewsnail is catchable with the net via the native `NetableMob` pattern
+  (asserted by the integration test; not yet swung in the real client).
 - v0.6 sprint (list above): rock variants + shadows, Storm Shards, tree
   volume, Cloudberry, Warden visuals, Spire hero kit, Stormveil/Aurora props,
   oddity seeds.
@@ -110,7 +112,6 @@ Ordered by the player's own priority. Full detail in `docs/PLAYTEST_LOG.md`.
 - Cloudberry bush rebuilt in v0.6 — awaiting player judgement.
 - Aurora plant placement was addressed by colonies (`7ef6486`); the new
   shard/starfall accents await player judgement.
-- Feature request: snails catchable with the net, native critter pattern.
 
 **Deferred**
 - Warden's shop is empty. The building set is fully craftable at a workstation,

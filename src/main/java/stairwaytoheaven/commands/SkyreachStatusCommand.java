@@ -95,6 +95,7 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         diagnoseGeneration((SkyLevel) level, logs);
         diagnoseQuest((SkyLevel) level, logs);
         diagnoseToolAudit(logs);
+        diagnoseNetAudit(logs);
         locateFromPlayer((SkyLevel) level, serverClient, logs);
         logs.add("SKYREACH_STATUS_DONE");
     }
@@ -170,6 +171,19 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                 continue;
             }
             logs.add("tool " + id + "=" + object.toolType.name() + "/" + object.objectHealth);
+        }
+    }
+
+    /**
+     * Reports which sky critters implement NetableMob — the marker the vanilla
+     * net checks (NetToolItem.canHitMob) — so the catchability decision is
+     * asserted by the integration test instead of living only in the source.
+     */
+    private void diagnoseNetAudit(CommandLog logs) {
+        for (necesse.entity.mobs.Mob mob : new necesse.entity.mobs.Mob[]{
+                new stairwaytoheaven.mobs.SkyCritterMob.DewSnail()}) {
+            logs.add("net " + mob.getStringID() + "="
+                    + (mob instanceof necesse.entity.mobs.misc.NetableMob ? "NETABLE" : "not netable"));
         }
     }
 

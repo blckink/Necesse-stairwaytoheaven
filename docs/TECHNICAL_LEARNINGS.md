@@ -296,6 +296,21 @@ Shards rebuild is 4 × 64 with tilted blades (`_blade` in gen_objects.py:
 angled axis walk + belly profile + overlap cut-seams), which took the size
 audit ratio from 0.74 to 1.01 of the `crystalwall` reference.
 
+## Net catching is one marker interface
+
+**[jar]** `NetToolItem.canHitMob` returns `mob instanceof
+necesse.entity.mobs.misc.NetableMob` — a marker interface with no members.
+Vanilla implementers are `HoneyBeeMob`, `QueenBeeMob` and
+`SmallFlyingBugCritterMob` (butterflies/fireflies); birds, rodents etc. are
+NOT netable. `hitMob` removes the mob via `mob.remove(0, 0, attacker, true)`,
+which runs the normal death path (`hasDied=true`, death particles/sound,
+`onDeath`) — so the mob's loot table still drops where it was caught.
+
+**[run]** Making a critter catchable = adding `implements NetableMob`.
+The Dewsnail does; `skyreachstatus` prints
+`net dewsnail=NETABLE` and the integration test asserts it. The real in-game
+swing is still only player-verifiable (the server test cannot swing nets).
+
 ## Object tool interaction: the `GameObject` pickaxe default
 
 **[jar]** Base `GameObject` sets `toolType = ToolType.PICKAXE` and

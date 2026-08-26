@@ -8,6 +8,7 @@ import necesse.engine.gameLoop.tickManager.TickManager;
 import necesse.entity.mobs.MobDrawable;
 import necesse.entity.mobs.PlayerMob;
 import necesse.entity.mobs.friendly.critters.CritterMob;
+import necesse.entity.mobs.misc.NetableMob;
 import necesse.gfx.camera.GameCamera;
 import necesse.gfx.drawOptions.texture.TextureDrawOptionsEnd;
 import necesse.gfx.drawables.OrderableDrawables;
@@ -122,8 +123,14 @@ public abstract class SkyCritterMob extends CritterMob {
         }
     }
 
-    /** Dew Snail — a slow glowing snail of the shoals (Aurora, v0.4). */
-    public static class DewSnail extends SkyCritterMob {
+    /**
+     * Dew Snail — a slow glowing snail of the shoals (Aurora, v0.4).
+     * NetableMob is the whole vanilla catchability mechanism (the net checks
+     * exactly this marker, then removes the mob through the normal death path,
+     * so the loot table still applies) — the same pattern as vanilla
+     * butterflies and bees.
+     */
+    public static class DewSnail extends SkyCritterMob implements NetableMob {
         public DewSnail() {
             super(4, 25, 8.0F);
         }
