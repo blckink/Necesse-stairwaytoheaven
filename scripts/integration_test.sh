@@ -63,7 +63,10 @@ start_server() { # log_file
     rm -f "$PIPE"
     mkfifo "$PIPE"
     unset JAVA_TOOL_OPTIONS
-    "$JAVA_BIN" -Xms256m -Xmx2G -jar "$GAME_DIR/Server.jar" -nogui -localdir \
+    # allowAttachSelf: on installs without a bundled jre/ (plain JDK >= 9 on
+    # PATH) ByteBuddy's self-attach fallback fails and kills the boot before
+    # mods load. The flag makes the game's own patching step work everywhere.
+    "$JAVA_BIN" -Xms256m -Xmx2G -Djdk.attach.allowAttachSelf=true -jar "$GAME_DIR/Server.jar" -nogui -localdir \
         -world "$WORLD" -owner tester -mod "\"$MOD_DIR\"" \
         < "$PIPE" > "$LOG" 2>&1 &
     SERVER_PID=$!
@@ -134,6 +137,20 @@ grep -qE "settler check: wardensettler=WardenSettler" "$LOG1" || { echo "FAIL: t
 grep -qE "Veil OK: class=VeilLevel" "$LOG1" || { echo "FAIL: VeilLevel was not instantiated"; STATUS=1; }
 grep -qE "tile (murkmosstile|murkwatertile)" "$LOG1" || { echo "FAIL: Veil terrain did not generate"; STATUS=1; }
 grep -qE "biome (gloomfen|ashenreach)" "$LOG1" || { echo "FAIL: Veil biomes did not paint"; STATUS=1; }
+
+echo "--- verifying the harvest-tool audit ---"
+# Every custom deco/prop object must report the tool type and HP decided in
+# the audit (vanilla archetypes: flora/clutter ALL, trees AXE, stone/crystal
+# PICKAXE, quest pieces UNBREAKABLE). See docs/TECHNICAL_LEARNINGS.md.
+for expected in \
+    "gloomwillow=AXE/100" "gloomshroom=ALL/1" "ashbones=ALL/50" "deadtree=AXE/100" \
+    "skywatchtelescope=PICKAXE/100" "skywatchastrolabe=PICKAXE/100" \
+    "stormscreed=ALL/1" "skywatchrubble=PICKAXE/100" "chargecrystal=PICKAXE/100" \
+    "withershrub=ALL/1" "aurorashards=PICKAXE/100" "starfall=PICKAXE/100" \
+    "skyballoon=ALL/100" "aeronautwreck=AXE/100" "skyparcel=ALL/1" \
+    "wardenbeaconoff=UNBREAKABLE/100" "wardenbeaconon=UNBREAKABLE/100" "skyanchor=UNBREAKABLE/100"; do
+    grep -qF "tool $expected" "$LOG1" || { echo "FAIL: tool audit expected $expected"; STATUS=1; }
+done
 
 echo "--- verifying persistence across restart ---"
 SPIRE1="$(grep -oE 'spire=-?[0-9]+,-?[0-9]+' "$LOG1" | tail -1)"

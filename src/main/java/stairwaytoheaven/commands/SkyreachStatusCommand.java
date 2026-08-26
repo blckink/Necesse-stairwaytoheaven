@@ -94,6 +94,7 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         diagnosePlacement(level, logs);
         diagnoseGeneration((SkyLevel) level, logs);
         diagnoseQuest((SkyLevel) level, logs);
+        diagnoseToolAudit(logs);
         locateFromPlayer((SkyLevel) level, serverClient, logs);
         logs.add("SKYREACH_STATUS_DONE");
     }
@@ -147,6 +148,29 @@ public class SkyreachStatusCommand extends ModularChatCommand {
             dir = ns + ew;
         }
         return dist + " tiles " + dir + ", at " + tx + "," + ty;
+    }
+
+    /**
+     * Prints the effective tool type and HP of every custom deco/prop object,
+     * so scripts/integration_test.sh can assert the harvest-tool audit (the
+     * GameObject pickaxe default is wrong for soft flora and woody trunks).
+     */
+    private void diagnoseToolAudit(CommandLog logs) {
+        String[] ids = {"gloomwillow", "gloomshroom", "ashbones", "deadtree",
+                "skywatchtelescope", "skywatchastrolabe", "stormscreed", "skywatchrubble",
+                "chargecrystal", "withershrub", "aurorashards", "starfall",
+                "skyballoon", "aeronautwreck", "skyparcel",
+                "wardenbeaconoff", "wardenbeaconon", "skyanchor"};
+        for (String id : ids) {
+            necesse.level.gameObject.GameObject object =
+                    necesse.engine.registries.ObjectRegistry.getObject(
+                            necesse.engine.registries.ObjectRegistry.getObjectID(id));
+            if (object == null) {
+                logs.add("tool " + id + "=MISSING");
+                continue;
+            }
+            logs.add("tool " + id + "=" + object.toolType.name() + "/" + object.objectHealth);
+        }
     }
 
     /** Verifies the Warden's Spire, the NPCs and the quest data integrity. */

@@ -97,6 +97,9 @@ Ordered by the player's own priority. Full detail in `docs/PLAYTEST_LOG.md`.
 - Every registered object and tile has a display name, gated by
   `tools/locale_audit.py` (`eb76cb2`); all six tree and sapling item icons
   exist (`b90dc2a`).
+- Harvest tools audited object-by-object against vanilla archetypes; flora,
+  bones and wooden oddities no longer need the pickaxe (`a58e43b`, gated by
+  the integration test's tool-audit assertions).
 - v0.6 sprint (list above): rock variants + shadows, Storm Shards, tree
   volume, Cloudberry, Warden visuals, Spire hero kit, Stormveil/Aurora props,
   oddity seeds.
@@ -107,8 +110,6 @@ Ordered by the player's own priority. Full detail in `docs/PLAYTEST_LOG.md`.
 - Cloudberry bush rebuilt in v0.6 — awaiting player judgement.
 - Aurora plant placement was addressed by colonies (`7ef6486`); the new
   shard/starfall accents await player judgement.
-- Harvest tools: much of the flora is pickaxe-harvestable regardless of
-  material. Trees correctly need an axe.
 - Feature request: snails catchable with the net, native critter pattern.
 
 **Deferred**

@@ -296,6 +296,46 @@ Shards rebuild is 4 × 64 with tilted blades (`_blade` in gen_objects.py:
 angled axis walk + belly profile + overlap cut-seams), which took the size
 audit ratio from 0.74 to 1.01 of the `crystalwall` reference.
 
+## Object tool interaction: the `GameObject` pickaxe default
+
+**[jar]** Base `GameObject` sets `toolType = ToolType.PICKAXE` and
+`objectHealth = 100`. Any object class that does not override them is
+pickaxe-only. Vanilla soft archetypes override in their constructors:
+
+| Class | toolType | objectHealth |
+|---|---|---|
+| `GrassObject` (and every grass/flower subclass) | ALL | 1 |
+| `FruitBushObject`, `BurnedBushObject` | ALL | 1 |
+| `StreetlampObject` | ALL | 1 |
+| `RandomBreakObject` (crates/clutter) | ALL | 1 |
+| `CowSkeletonObject` | ALL | 50 |
+| `BigTentObject` | ALL | 100 |
+| `TreeObject` | AXE | 100 |
+| `SaplingObject` | ALL | – |
+| `StatueObject` | PICKAXE | 100 |
+| `CrystalClusterObject`, `RockObject`, `FurnitureObject` | PICKAXE (inherited) | 100 |
+
+**[jar]** Matching semantics (`ToolType.canDealDamageTo(other)`): false only if
+the object is UNBREAKABLE or the types are disjoint; an object typed ALL is
+damaged by everything. All vanilla analogue classes leave `toolTier` at 0, so
+tier parity needs no code.
+
+**[run]** This was the root cause of the playtest's "flora is
+pickaxe-harvestable regardless of material": our custom `SkyDecoObject`s sat
+on the PICKAXE/100 default while native-archetype flora (GrassObject family)
+was already correct. Fixed per object in `a58e43b`; `skyreachstatus` prints a
+`tool <id>=TYPE/HP` block and `scripts/integration_test.sh` asserts all 18
+values, so regressions fail the gate.
+
+## Server boot needs `-Djdk.attach.allowAttachSelf=true` on plain JDK installs
+
+**[run]** On an install without a bundled `jre/` (system JDK on PATH), the
+dedicated server dies during mod loading with ByteBuddy
+`Could not self-attach to current VM using external process` — before any mod
+class runs, so it looks like a mod error but is environmental. Launching with
+`-Djdk.attach.allowAttachSelf=true` fixes it; `scripts/integration_test.sh`
+now passes the flag unconditionally.
+
 ## v0.6 sprint environment facts
 
 **[run]** This Mac has no Necesse Steam install; builds and the integration

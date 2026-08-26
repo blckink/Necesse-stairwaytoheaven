@@ -3,6 +3,7 @@ package stairwaytoheaven;
 import java.awt.Color;
 
 import necesse.engine.registries.ObjectRegistry;
+import necesse.inventory.item.toolItem.ToolType;
 import necesse.level.gameObject.CrystalClusterObject;
 import necesse.level.gameObject.GrassObject;
 import necesse.level.gameObject.RockObject;
@@ -165,13 +166,17 @@ final class SkyObjects {
         whisperreeds.mapColor = new Color(96, 110, 96);
         SkyRegistry.whisperreedsID = ObjectRegistry.registerObject("whisperreeds", whisperreeds, 1.0F, true);
 
-        // glowing fen shroom: the Veil's natural light source, replantable
+        // glowing fen shroom: the Veil's natural light source, replantable.
+        // Tool behaviour audited against vanilla soft flora (ToolType.ALL,
+        // 1 HP) — the GameObject pickaxe default was wrong for a plant.
         stairwaytoheaven.objects.SkyDecoObject gloomshroom = new stairwaytoheaven.objects.SkyDecoObject(
                 "gloomshroom", 32, new Color(122, 196, 160), null, "objects", "decorations")
+                .setTool(ToolType.ALL).setObjectHealth(1)
                 .setLight(70, 0.40F, 0.40F);
         SkyRegistry.gloomshroomID = ObjectRegistry.registerObject("gloomshroom", gloomshroom, 5.0F, true);
 
-        // half-buried ribcage: harvest node for Cinder Pearls (drops no item of itself)
+        // half-buried ribcage: harvest node for Cinder Pearls (drops no item of
+        // itself). Matches the vanilla CowSkeletonObject: ALL, 50 HP.
         stairwaytoheaven.objects.SkyDecoObject ashbones = new stairwaytoheaven.objects.SkyDecoObject(
                 "ashbones", 32, new Color(180, 174, 166), null, "objects", "decorations") {
             @Override
@@ -179,11 +184,13 @@ final class SkyObjects {
                     necesse.level.maps.Level level, int layerID, int tileX, int tileY) {
                 return ashbonesLoot;
             }
-        };
+        }.setTool(ToolType.ALL).setObjectHealth(50);
         SkyRegistry.ashbonesID = ObjectRegistry.registerObject("ashbones", ashbones, 0.0F, false);
 
+        // crooked bare tree: woody trunk, so axe like every TreeObject.
         stairwaytoheaven.objects.SkyDecoObject deadtree = new stairwaytoheaven.objects.SkyDecoObject(
-                "deadtree", 48, new Color(60, 52, 58), null, "objects", "decorations");
+                "deadtree", 48, new Color(60, 52, 58), null, "objects", "decorations")
+                .setTool(ToolType.AXE);
         SkyRegistry.deadtreeID = ObjectRegistry.registerObject("deadtree", deadtree, 4.0F, true);
 
         allowShore("veilrock", "whisperreeds", "gloomshroom", "ashbones", "deadtree");

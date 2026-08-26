@@ -12,6 +12,7 @@ import necesse.gfx.drawOptions.texture.TextureDrawOptionsEnd;
 import necesse.gfx.drawables.LevelSortedDrawable;
 import necesse.gfx.drawables.OrderableDrawables;
 import necesse.gfx.gameTexture.GameTexture;
+import necesse.inventory.item.toolItem.ToolType;
 import necesse.level.gameObject.GameObject;
 import necesse.level.maps.Level;
 import necesse.level.maps.light.GameLight;
@@ -50,6 +51,16 @@ public class SkyDecoObject extends GameObject {
         this.lightHue = hue;
         this.lightSat = sat;
         this.roomProperties.add("lights");
+        return this;
+    }
+
+    public SkyDecoObject setTool(ToolType toolType) {
+        this.toolType = toolType;
+        return this;
+    }
+
+    public SkyDecoObject setObjectHealth(int objectHealth) {
+        this.objectHealth = objectHealth;
         return this;
     }
 

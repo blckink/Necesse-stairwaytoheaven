@@ -9,6 +9,7 @@ import necesse.engine.registries.RecipeTechRegistry;
 import necesse.engine.registries.TileRegistry;
 import necesse.inventory.item.Item;
 import necesse.inventory.item.matItem.MatItem;
+import necesse.inventory.item.toolItem.ToolType;
 import necesse.inventory.recipe.Recipe;
 import necesse.inventory.recipe.Recipes;
 import necesse.level.gameObject.FenceGateObject;
@@ -88,9 +89,14 @@ final class SkyBuildingSet {
                 new StatueObject("gloomraven", 16, 1), 20.0F, true);
         ObjectRegistry.registerObject("gloomwillow",
                 new SkyDecoObject("gloomwillow", 64, new Color(60, 48, 56),
-                        new Rectangle(8, 12, 16, 16), "objects", "landscaping", "plants"), 15.0F, true);
+                        new Rectangle(8, 12, 16, 16), "objects", "landscaping", "plants")
+                        .setTool(ToolType.AXE), 15.0F, true);
 
         // ===== v0.6 prop families (tools/asset_generator/gen_props.py) =====
+        // Tool behaviour is audited against the nearest vanilla archetype:
+        // soft/fabric clutter breaks like vanilla clutter (ToolType.ALL),
+        // woody pieces need the axe, and stone/crystal/machinery keeps the
+        // GameObject pickaxe default exactly like statues and crystal clusters.
         // Spire hero accents — the observatory instruments the Spire layout
         // can build its landmark read from.
         ObjectRegistry.registerObject("skywatchtelescope",
@@ -103,7 +109,8 @@ final class SkyBuildingSet {
         // compose later; craftable now so builders can place them.
         ObjectRegistry.registerObject("stormscreed",
                 new SkyDecoObject("stormscreed", 32, new Color(66, 60, 95),
-                        null, "objects", "decorations"), 0.0F, false);
+                        null, "objects", "decorations")
+                        .setTool(ToolType.ALL).setObjectHealth(1), 0.0F, false);
         ObjectRegistry.registerObject("skywatchrubble",
                 new SkyDecoObject("skywatchrubble", 32, new Color(126, 138, 154),
                         new Rectangle(8, 12, 16, 20), "objects", "decorations"), 0.0F, false);
@@ -113,7 +120,8 @@ final class SkyBuildingSet {
                         .setLight(70, 0.72F, 0.45F), 5.0F, true);
         ObjectRegistry.registerObject("withershrub",
                 new SkyDecoObject("withershrub", 32, new Color(62, 58, 72),
-                        new Rectangle(12, 24, 8, 8), "objects", "decorations"), 0.0F, false);
+                        new Rectangle(12, 24, 8, 8), "objects", "decorations")
+                        .setTool(ToolType.ALL).setObjectHealth(1), 0.0F, false);
         // Aurora Shoals accents — the same restrained teal/rose language.
         ObjectRegistry.registerObject("aurorashards",
                 new SkyDecoObject("aurorashards", 32, new Color(214, 130, 172),
@@ -128,13 +136,16 @@ final class SkyBuildingSet {
         // normal worldgen (docs/DESIGN.md keeps rare discoveries special).
         ObjectRegistry.registerObject("skyballoon",
                 new SkyDecoObject("skyballoon", 32, new Color(196, 206, 216),
-                        null, "objects", "decorations"), 0.0F, false);
+                        null, "objects", "decorations")
+                        .setTool(ToolType.ALL), 0.0F, false);
         ObjectRegistry.registerObject("aeronautwreck",
                 new SkyDecoObject("aeronautwreck", 48, new Color(122, 96, 72),
-                        new Rectangle(8, 24, 32, 24), "objects", "decorations"), 0.0F, false);
+                        new Rectangle(8, 24, 32, 24), "objects", "decorations")
+                        .setTool(ToolType.AXE), 0.0F, false);
         ObjectRegistry.registerObject("skyparcel",
                 new SkyDecoObject("skyparcel", 32, new Color(122, 96, 72),
-                        new Rectangle(6, 14, 20, 14), "objects", "decorations"), 0.0F, false);
+                        new Rectangle(6, 14, 20, 14), "objects", "decorations")
+                        .setTool(ToolType.ALL).setObjectHealth(1), 0.0F, false);
         // Natural props must survive the shore sweep if worldgen later places
         // them near the Mistsea (same reason SkyObjects calls allowShore).
         for (String propId : new String[]{"stormscreed", "skywatchrubble",
@@ -154,16 +165,15 @@ final class SkyBuildingSet {
         // UNBREAKABLE: mining the beacon/anchor would drop nothing and soft-lock
         // the quest chain, so a pickaxe must not touch them.
         SkyDecoObject beaconOff = new SkyDecoObject("wardenbeaconoff", 32,
-                new Color(90, 96, 110), new Rectangle(4, 8, 24, 20));
-        beaconOff.toolType = necesse.inventory.item.toolItem.ToolType.UNBREAKABLE;
+                new Color(90, 96, 110), new Rectangle(4, 8, 24, 20)).setTool(ToolType.UNBREAKABLE);
         SkyRegistry.wardenBeaconOffID = ObjectRegistry.registerObject("wardenbeaconoff", beaconOff, 0.0F, false);
         SkyDecoObject beaconOn = new SkyDecoObject("wardenbeaconon", 32,
-                new Color(186, 226, 230), new Rectangle(4, 8, 24, 20)).setLight(180, 0.52F, 0.30F);
-        beaconOn.toolType = necesse.inventory.item.toolItem.ToolType.UNBREAKABLE;
+                new Color(186, 226, 230), new Rectangle(4, 8, 24, 20))
+                .setTool(ToolType.UNBREAKABLE).setLight(180, 0.52F, 0.30F);
         SkyRegistry.wardenBeaconOnID = ObjectRegistry.registerObject("wardenbeaconon", beaconOn, 0.0F, false);
         SkyDecoObject anchor = new SkyDecoObject("skyanchor", 32,
-                new Color(86, 178, 186), new Rectangle(4, 10, 24, 18)).setLight(100, 0.50F, 0.25F);
-        anchor.toolType = necesse.inventory.item.toolItem.ToolType.UNBREAKABLE;
+                new Color(86, 178, 186), new Rectangle(4, 10, 24, 18))
+                .setTool(ToolType.UNBREAKABLE).setLight(100, 0.50F, 0.25F);
         SkyRegistry.skyAnchorID = ObjectRegistry.registerObject("skyanchor", anchor, 0.0F, false);
     }
 
