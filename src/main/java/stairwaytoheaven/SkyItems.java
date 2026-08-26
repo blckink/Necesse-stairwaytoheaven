@@ -49,12 +49,19 @@ final class SkyItems {
         // The Warden's clothes, as real armor items on the vanilla human body
         // (the Elder pattern). This is what lets him be a HumanMob with a
         // distinctive silhouette instead of a bespoke sprite sheet.
-        ItemRegistry.registerItem("skywatchhood",
-                new stairwaytoheaven.items.SkywatchArmor.Hood(), 0.0F, true);
-        ItemRegistry.registerItem("wardenmantle",
-                new stairwaytoheaven.items.SkywatchArmor.Mantle(), 0.0F, true);
-        ItemRegistry.registerItem("wardenboots",
-                new stairwaytoheaven.items.SkywatchArmor.Boots(), 0.0F, true);
+        //
+        // Kept behind the same switch as WardenIdentity.dress: an ArmorItem
+        // loads its sheets during resource load, and registering one whose
+        // player/armor/ sheets do not exist yet would pull in the engine's
+        // error texture for no benefit. Flip both together when the art lands.
+        if (stairwaytoheaven.mobs.WardenIdentity.armorSheetsExist()) {
+            ItemRegistry.registerItem("skywatchhood",
+                    new stairwaytoheaven.items.SkywatchArmor.Hood(), 0.0F, true);
+            ItemRegistry.registerItem("wardenmantle",
+                    new stairwaytoheaven.items.SkywatchArmor.Mantle(), 0.0F, true);
+            ItemRegistry.registerItem("wardenboots",
+                    new stairwaytoheaven.items.SkywatchArmor.Boots(), 0.0F, true);
+        }
         ItemRegistry.registerItem("tempestedge", new TempestEdgeSwordToolItem(), 220.0F, true);
         ItemRegistry.registerItem("galehowl", new GalehowlProjectileToolItem(), 220.0F, true);
 

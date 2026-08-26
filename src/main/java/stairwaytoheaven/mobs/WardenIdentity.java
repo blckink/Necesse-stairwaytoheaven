@@ -58,12 +58,32 @@ public final class WardenIdentity {
     }
 
     /**
+     * Set to true once the sheets under {@code resources/player/armor/} exist.
+     *
+     * GameTexture.fromFile falls back to GameResources.error rather than
+     * throwing, so a missing armor sheet does not crash — it silently dresses
+     * him in the engine's error texture, and a dedicated server never loads
+     * textures at all, so no test here can see it. Until the art lands he
+     * wears his own shirt and shoes colours on the plain human body, which is
+     * correct-looking rather than broken-looking.
+     */
+    private static final boolean ARMOR_SHEETS_EXIST = false;
+
+    /**
      * Puts the Skywatch clothes on the human body. This is how vanilla gives a
      * settler a distinctive silhouette — the Elder is a plain human wearing
      * elderhat, eldershirt and eldershoes — rather than by replacing the body
      * with a bespoke sprite sheet.
      */
+    /** Whether the Skywatch armor sheets are shipped yet. */
+    public static boolean armorSheetsExist() {
+        return ARMOR_SHEETS_EXIST;
+    }
+
     public static void dress(HumanDrawOptions drawOptions) {
+        if (!ARMOR_SHEETS_EXIST) {
+            return;
+        }
         drawOptions.helmet(new InventoryItem("skywatchhood"));
         drawOptions.chestplate(new InventoryItem("wardenmantle"));
         drawOptions.boots(new InventoryItem("wardenboots"));
