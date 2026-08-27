@@ -9,12 +9,21 @@ scores BETTER on mass while rendering three tiles too tall.
 
 Checks:
 
-  Wall sheets (352x128). WallDoorObject/WallDoorOpenObject draw eight 32x128
-  cells at pos(drawX, drawY - 96), so sheet row 96 is the tile's top edge and
-  anything above it sticks out over the wall. The expected top rows below were
-  measured off vanilla stonewall.png; a wall segment itself only rises 16px
-  above its tile, so a door whose cell starts near row 0 towers over the wall
-  it sits in. Bottom row is always 127.
+  Wall sheets (352x128), doors. WallDoorObject/WallDoorOpenObject draw eight
+  32x128 cells at pos(drawX, drawY - 96), so sheet row 96 is the tile's top
+  edge and anything above it sticks out over the wall. The expected top rows
+  below were measured off vanilla stonewall.png; a wall segment itself only
+  rises 16px above its tile, so a door whose cell starts near row 0 towers over
+  the wall it sits in. Bottom row is always 127.
+
+  Wall sheets, windows. Same trap one strip to the left, and it shipped even
+  after the doors were fixed, because this audit was only looking at doors.
+  WallWindowObject reads x 64..96 as 16px cells and draws TWO windows from it:
+  head-on uses rows 0-1 at drawY-16 and drawY; edge-on uses rows 2..7 at
+  drawY-64, -48, -32, -16, 0 and +16. That second list can reach two tiles up,
+  and vanilla does not use the reach -- on stonewall and cryptwall rows 2-4 are
+  EMPTY, so the window ends up 48px, exactly as tall as its wall. Filling those
+  rows renders a window 96px tall against a 48px wall.
 
 Usage:  python3 tools/sheet_format_audit.py
 Exit code 1 if anything is out of format.
@@ -43,6 +52,13 @@ DOOR_CELLS = {
 }
 
 
+# 16px cell row -> whether the edge-on window may put anything there.
+# Rows 2, 3 and 4 are drawn at drawY-64, -48 and -32: two full tiles and more
+# above the tile the window sits on. Vanilla leaves all three empty.
+WINDOW_MUST_BE_EMPTY = (2, 3, 4)
+WINDOW_STRIP_X = (64, 96)
+
+
 def cell_extent(px, height, x0, x1):
     rows = [y for y in range(height)
             if any(px[x, y][3] > 0 for x in range(x0, x1))]
@@ -62,6 +78,17 @@ def main():
             problems.append(f"{rel}: {im.size}, expected (352, 128)")
             continue
         px = im.load()
+        for row in WINDOW_MUST_BE_EMPTY:
+            checked += 1
+            opaque = sum(1 for y in range(row * 16, row * 16 + 16)
+                         for x in range(*WINDOW_STRIP_X) if px[x, y][3] > 0)
+            if opaque:
+                drawn_at = {2: -64, 3: -48, 4: -32}[row]
+                problems.append(
+                    f"{rel} window row {row}: {opaque}/512 opaque, expected empty -- "
+                    f"it is drawn at drawY{drawn_at}, so the window would stand "
+                    f"{-drawn_at}px above its own tile against a 16px wall")
+
         for cell, (want_top, want_bot) in DOOR_CELLS.items():
             top, bot = cell_extent(px, 128, cell * 32, cell * 32 + 32)
             checked += 1
@@ -78,7 +105,8 @@ def main():
     if problems:
         print(f"\n{len(problems)} sheet cell(s) out of format.")
         return 1
-    print(f"OK: {checked} wall-sheet door cells sit at the extents the engine draws them at.")
+    print(f"OK: {checked} wall-sheet door and window cells sit at the extents "
+          f"the engine draws them at.")
     return 0
 
 

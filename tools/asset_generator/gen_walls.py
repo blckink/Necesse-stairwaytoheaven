@@ -170,6 +170,19 @@ def _build_wall(mat, salt):
     _mini_face(c, 3 * C, 7 * C + 10, 6, 6, mat, salt + 72)
 
     # ---- window insert (64-96) ----
+    # WallWindowObject.addWallDrawOptions reads this strip as 16px cells and
+    # draws two DIFFERENT windows from it, chosen by which way the wall runs:
+    #
+    #   head-on (windowDir 1): rows 0,1 at drawY-16 and drawY -> 32px tall.
+    #   edge-on (else):        rows 2..7 at drawY-64, -48, -32, -16, 0, +16.
+    #
+    # That second list is the trap. It CAN reach two tiles above the tile, and
+    # vanilla does not use the reach: measured on stonewall and cryptwall, rows
+    # 2-4 are EMPTY and row 5 is only the jambs, so the window ends up 48px --
+    # exactly as tall as the wall it sits in. Filling all six rows, which this
+    # generator used to do, renders a window 96px tall against a 48px wall:
+    # "Fenster ... sind halt doppelt so hoch wie die Wände", reported from the
+    # same base as the door bug, and it is the same bug one strip to the left.
     def window_pane(x0, y0, w, h):
         for x in range(w):
             for y in range(h):
@@ -183,14 +196,30 @@ def _build_wall(mat, salt):
         _edge_line(c, x0, y0, w, h, True, True, mat["face_hi"])
         _edge_line(c, x0, y0, w, h, True, False, mat["face_deep"])
 
-    # short high window (rows 0-1)
+    # head-on window (rows 0-1) -- already the right 32px, left alone
     _face(c, 64, 0, 32, True, mat, salt + 50)
     _face(c, 64, C, 32, False, mat, salt + 50)
     window_pane(68, 6, 24, 16)
-    # tall strip (rows 2-7)
-    for row in range(2, 8):
-        _ceiling(c, 64, row * C, 32, C, mat, salt + 60) if row < 3 else _face(c, 64, row * C, 32, row % 2 == 1, mat, salt + 60 + row)
-    window_pane(70, 3 * C + 2, 20, 4 * C - 8)
+
+    # edge-on window (rows 5-7 only; rows 2-4 stay transparent)
+    #
+    # Row 5 lands where the neighbouring wall segment draws its dark top CAP
+    # (its own row 0, also at drawY-16), and rows 6-7 where the wall draws its
+    # face halves (rows 3-4). Painting row 5 as brick instead of cap was the
+    # first attempt and the window sat visibly below the wall's dark band
+    # instead of inside it. Same material, same row, or it does not read as one
+    # wall.
+    _ceiling(c, 64, 5 * C, 32, C, mat, salt + 60)
+    _face(c, 64, 6 * C, 32, True, mat, salt + 61)
+    _face(c, 64, 7 * C, 32, False, mat, salt + 62)
+    # One opening with a cross bar, the same shape as the head-on window above.
+    # Two narrow lights either side of a wide mullion read as a pair of bars,
+    # not as a window.
+    window_pane(69, 5 * C + 2, 22, 24)
+    _edge_line(c, 68, 5 * C + 1, 24, 26, True, True, mat["face_hi"])
+    _edge_line(c, 68, 5 * C + 1, 24, 26, True, False, mat["face_deep"])
+    _edge_line(c, 68, 5 * C + 1, 24, 26, False, True, mat["face_hi"])
+    _edge_line(c, 68, 5 * C + 1, 24, 26, False, False, mat["face_deep"])
 
     # ---- door frames (96-352): eight 32x128 cells ----
     # WallDoorObject/WallDoorOpenObject draw EVERY one of these cells at
