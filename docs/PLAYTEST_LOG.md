@@ -116,3 +116,11 @@ The follow-up to "White floor places huge" above: not one floor, all of them.
 |---|---|---|
 | Floors bleed into their neighbours | Every mod ground tile paints far past the cell it was placed on. | **FIXED — NOT YET PLAYER CONFIRMED.** The four diagonal-only cells of every `_splat` atlas were the complement of their intended shape: a disc of radius 26 parked *inside* the cell, covering 83%-89% of it, where vanilla paints a nub in the named corner covering 0.8%-29.3% (measured over 66 vanilla sheets). `SplattingOptions` draws that cell on every tile that touches ours corner-to-corner, so one placed tile repainted its four diagonal neighbours almost completely and read as a 3x3 blob. Same root cause on all 14 sheets, terrain and liquids included. Fixed in `tools/asset_generator/gen_splats.py`; the three-side and all-four cells also kept their vanilla "eye" of the tile underneath, which they had lost by going solid. |
 | Is any floor secretly terrain? | The standing hypothesis was that a floor had been built as a terrain tile. | **NOT REPRODUCED — hypothesis retracted.** All five craftable floors (`marblecheckertile`, `gloomwoodfloortile`, `nimbusfloortile`, `charfloortile`, `prismfloortile`) pass `isFloor=true` and splat at PRIORITY_FLOOR 400, exactly like vanilla `stonefloor`. The six terrain tiles and two liquids are terrain and liquid on purpose — they are the ground the Skyreach and the Veil are generated from. Now asserted by `tools/tile_behaviour_audit.py`, which fails if a floor ever becomes terrain again. |
+
+---
+
+## 2026-08-27 (3) — v0.5.1 · one more from the same base
+
+| Area | Observation | Status |
+|---|---|---|
+| Wall windows | "Fenster in unserer dunklen Wand sehen eigentlich cool aus aber sind halt doppelt so hoch wie die Wände die sonst in Game sind... Gleiches Problem hatten wir ja bei der Tür auch." | **FIXED — NOT YET PLAYER CONFIRMED**. The player's diagnosis was exactly right, including that it was the same bug: same sheet, one strip left of the doors. `WallWindowObject`'s edge-on variant draws rows 2..7 at `drawY-64 … +16`; vanilla leaves rows 2-4 empty so the window is 48px, the height of its wall. Ours filled all six rows: 96px against 48px, precisely double. `sheet_format_audit` covers the window strip now, not just the doors — the door fix left that half unguarded, which is why this shipped. |

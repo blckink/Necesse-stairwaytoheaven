@@ -604,3 +604,43 @@ vanilla's `-1.0F` onto a bulk recipe would price each of the six at the full
 cost of the craft — a broker money printer. Our floors keep a flat positive
 value on purpose; `tools/tile_behaviour_audit.py` fails the combination
 "negative broker value + recipe yield > 1" rather than the flat value.
+
+## Judge worldgen at screen scale, and keep the renderer honest
+
+**[run]** A Necesse screen is roughly 40x22 tiles. Every density judgement in
+this repo that was made from a whole-world overview has been wrong in one
+direction or the other: the rock pass first left a good outcrop looking like a
+speck, then carpeted the world, and the landscape pass paved a 26-tile plaza
+that a 300-tile overview rendered as a tasteful detail and a real screen
+rendered as a chequerboard filling the view. Render 40x22 with real sprites at
+1x, or do not have an opinion about density.
+
+**[run]** An offline renderer that reads the generator directly is worth
+building — it needs no game boot and iterates in seconds — but it can silently
+drift from what the server actually writes, and then the calibration is
+calibrating a fiction. The fix is one assertion in the integration test:
+`painter oracle: tileMismatches=0`, every tile in a 129x129 scan of the live
+world compared against the pure function the renderer uses. Build the oracle
+at the same time as the renderer, not after.
+
+**[jar]** Two vanilla behaviours worth knowing before inventing your own:
+`PathTiledTile` (`snowstonepathtile`) blends its own edges into whatever
+terrain it crosses, bridges a shore tile below it, and grants +10% movement
+speed, so a road built from it pays the player to follow it. And a warp applied
+to the QUERY POINT rather than to the segments bends a whole network together:
+junctions stay joined while the roads between them curve.
+
+## One sheet, three readers, three chances to get the height wrong
+
+**[game]** The wall sheet's window strip shipped the same bug as its door
+cells, and survived the door fix, because the audit written for the doors only
+looked at doors. `WallWindowObject` draws its edge-on variant from rows 2..7 at
+`drawY-64, -48, -32, -16, 0, +16` — a reach of two full tiles above the tile —
+and vanilla leaves rows 2-4 empty so the window ends up 48px, the height of its
+wall. Ours filled all six.
+
+The general lesson is about the audit, not the pixels: when a gate is written
+for one consumer of a shared sheet, it does not cover the others, and the
+remaining ones are exactly where the next report will come from. Enumerate the
+readers first — the wall body, the window and the doors all read
+`objects/<wall>.png`, at three different cell sizes.
