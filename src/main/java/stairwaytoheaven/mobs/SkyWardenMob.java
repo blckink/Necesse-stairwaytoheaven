@@ -158,8 +158,6 @@ public class SkyWardenMob extends HumanShop {
                 quest.stage = 1;
                 stairwaytoheaven.quest.SkyQuests.removeAllOfType(
                         server, stairwaytoheaven.quest.FindSpireQuest.class);
-                stairwaytoheaven.quest.SkyQuests.giveOnce(server, client,
-                        new stairwaytoheaven.quest.RecruitWardenQuest());
                 // Three short lines. The playtest note was "too much text on
                 // first contact: large bubble plus a duplicate-looking chat
                 // block, full life story" -- the life story now lives in his
@@ -173,7 +171,7 @@ public class SkyWardenMob extends HumanShop {
             }
         }
         if (this.isServer() && player.isServerClient()) {
-            handleTurnIns(player.getServerClient());
+            advanceChain(player.getServerClient());
         }
 
         // HumanShop.interact turns him to face the player, updates happiness
@@ -182,63 +180,165 @@ public class SkyWardenMob extends HumanShop {
     }
 
     /**
-     * The chapters after recruitment, turned in wherever he is standing now.
+     * The Skyreach's story record, from wherever this Warden is standing.
      *
-     * Every one of these quests already existed, registered and fully
-     * implemented, and none of them had ever been handed to a player or taken
-     * back — so the whole chain after first contact was invisible in game.
-     * Cats: the treat, the coax interaction, the travel-home puff and the
-     * journal sync all shipped in v0.2. Anchor: DeliverItemsQuest tracks the
-     * item counts and removes them in {@code complete} by itself.
+     * WHY THIS FORCE-LOADS. The previous version asked
+     * {@code levelManager.isLoaded(SKYREACH_IDENTIFIER)} and gave up when the
+     * answer was no. But a level with no players on it is unloaded by the
+     * server after {@code Settings.unloadLevelsCooldown} (jar 1.3.2,
+     * Server.java:365-375) — so the ordinary case, a player who came down from
+     * the sky, played on the surface for a minute and then walked over to the
+     * Warden in the village, hit {@code sky == null} and skipped the ENTIRE
+     * catch-up: no cats quest, no lair markers, no anchor chapter, and the
+     * anchor's completion flag never written back. That is a player reporting
+     * "warden gibt weiterhin keine quests die ich finden kann" on a build that
+     * contains the fix.
      *
-     * Order matters — one chapter opens the next — so this runs before
-     * HumanShop opens its window, and each turn-in is idempotent because the
-     * quest is removed as it is handed in.
+     * {@code World.getLevel} loads the level when it is missing (World.java:273)
+     * and returns the loaded one otherwise, so this is a small disk read at most
+     * once per conversation-after-unload — on a deliberate player action, in the
+     * dimension the whole conversation is about.
      */
-    private void handleTurnIns(ServerClient client) {
-        Server server = client.getServer();
-        // Catch up worlds that were recruited by an older build. Recruitment is
-        // where the cats chapter is handed out, and a world that paid its
-        // 100,000 before that existed would never see the quest or the lair
-        // markers at all -- the cats would just be two animals somewhere in an
-        // endless dimension. Costs nothing in a fresh world: giveOnce is a
-        // no-op once the quest is held, and the markers remember who has had
-        // them.
-        Level sky = server.world.levelManager.isLoaded(SkyRegistry.SKYREACH_IDENTIFIER)
-                ? server.world.getLevel(SkyRegistry.SKYREACH_IDENTIFIER)
-                : null;
-        if (sky != null) {
-            SkywatchQuestData quest = SkywatchQuestData.get(sky);
-            if (quest.recruited && !(quest.blackHome && quest.tabbyHome)) {
-                stairwaytoheaven.quest.SkyQuests.giveOnce(server, client,
-                        new stairwaytoheaven.quest.SpireCatsQuest());
-                stairwaytoheaven.quest.SkyMapMarkers.sendCatLairs(client, quest);
-            }
+    private static Level skyLevel(Server server) {
+        return server.world.getLevel(SkyRegistry.SKYREACH_IDENTIFIER);
+    }
+
+    /**
+     * Which chapter of "The Warden's Call" a world is owed, as a pure function
+     * of the world record. No journal, no client, no level — so it can be
+     * enumerated over every reachable save state and asserted
+     * (see {@code /skyreachstatus}, "chain check").
+     *
+     * The point of writing it this way is the class of bug it exists to kill.
+     * The old code reacted to quests the player was ALREADY HOLDING, which left
+     * three states that could never produce a quest again:
+     *
+     *  · a world that met the Warden under an older build (stage already 1, not
+     *    recruited): {@code RecruitWardenQuest} was only handed out inside the
+     *    {@code stage == 0} branch, so talking to him again gave nothing;
+     *  · a world where BOTH cats were already home before the cats quest was
+     *    ever given — reachable today, because {@code SpireCatMob.interact} sets
+     *    blackHome/tabbyHome for anyone holding a treat, quest or not. The old
+     *    catch-up was gated on {@code !(blackHome && tabbyHome)}, so it refused
+     *    to hand out the quest, and the turn-in branch needed a held quest to
+     *    fire: no reward, and the anchor chapter never opened;
+     *  · a world past the cats with no anchor quest held: nothing re-issued it.
+     *
+     * {@code DONE} is the only chapter that hands out nothing, and it is only
+     * reachable once the whole chain has actually been finished.
+     */
+    public enum Chapter {
+        /** Hire him — hand out RecruitWardenQuest. */
+        RECRUIT,
+        /** Coax the cats — hand out SpireCatsQuest and the lair markers. */
+        CATS,
+        /** Both cats are home and unpaid for — turn the chapter in. */
+        CATS_TURNIN,
+        /** Anchor the island — hand out AnchorDeliveryQuest. */
+        ANCHOR,
+        /** The chain is finished. */
+        DONE
+    }
+
+    /**
+     * @param isSettler whether the Warden the player is talking to has already
+     *                  moved into a settlement. He can only be a settler if the
+     *                  world recruited him, so a settler plus
+     *                  {@code recruited == false} is a broken record, not a
+     *                  state — it is repaired rather than believed.
+     */
+    public static Chapter chapterFor(SkywatchQuestData quest, boolean isSettler) {
+        if (!quest.recruited && !isSettler) {
+            return Chapter.RECRUIT;
         }
-        stairwaytoheaven.quest.SpireCatsQuest cats = stairwaytoheaven.quest.SkyQuests
-                .findHeld(client, stairwaytoheaven.quest.SpireCatsQuest.class);
-        if (cats != null && cats.blackHome && cats.tabbyHome) {
-            cats.complete(client);
-            cats.remove();
-            give(client, "catbasket", 1);
-            give(client, "flickerlightgarland", 2);
-            say(client, "wardencatsdone");
+        if (!(quest.blackHome && quest.tabbyHome)) {
+            return Chapter.CATS;
+        }
+        if (!quest.catsRewardGiven) {
+            return Chapter.CATS_TURNIN;
+        }
+        return quest.anchorDone ? Chapter.DONE : Chapter.ANCHOR;
+    }
+
+    /**
+     * Hands out (or turns in) whatever {@link #chapterFor} says this world is
+     * owed. Every branch is keyed off that one function, so the chapter the
+     * probe reports and the chapter the player is given cannot drift apart.
+     */
+    private void advanceChain(ServerClient client) {
+        Server server = client.getServer();
+        Level sky = skyLevel(server);
+        if (sky == null) {
+            return;
+        }
+        SkywatchQuestData quest = SkywatchQuestData.get(sky);
+
+        // Repair first. He is standing here as a SETTLER, so this world
+        // recruited him; if the record disagrees it was written by a build
+        // whose bookkeeping did not survive an unloaded Skyreach (or by the
+        // v0.5.0 hand-spawned second mob, which never touched this record at
+        // all). Without this the chain dead-ends on a false `recruited`.
+        if (this.isSettler() && !quest.recruited) {
+            quest.recruited = true;
+            quest.stage = Math.max(quest.stage, 2);
+            if (quest.recruitedAuth == 0L) {
+                quest.recruitedAuth = client.authentication;
+            }
+            igniteBeacon(sky, quest);
+            stairwaytoheaven.quest.SkyQuests.removeAllOfType(
+                    server, stairwaytoheaven.quest.RecruitWardenQuest.class);
+        }
+
+        Chapter chapter = chapterFor(quest, this.isSettler());
+        if (chapter == Chapter.RECRUIT) {
+            stairwaytoheaven.quest.SkyQuests.removeAllOfType(
+                    server, stairwaytoheaven.quest.FindSpireQuest.class);
             stairwaytoheaven.quest.SkyQuests.giveOnce(server, client,
-                    new stairwaytoheaven.quest.AnchorDeliveryQuest());
+                    new stairwaytoheaven.quest.RecruitWardenQuest());
             return;
         }
 
-        stairwaytoheaven.quest.AnchorDeliveryQuest anchor = stairwaytoheaven.quest.SkyQuests
-                .findHeld(client, stairwaytoheaven.quest.AnchorDeliveryQuest.class);
-        if (anchor != null && anchor.canComplete(client)) {
-            // DeliverItemsQuest.complete removes the delivered items itself.
-            anchor.complete(client);
-            anchor.remove();
-            give(client, "skywatchbanner", 1);
-            give(client, "aurorapetal", 5);
-            say(client, "wardenanchordone");
-            if (sky != null) {
-                SkywatchQuestData.get(sky).anchorDone = true;
+        // Push world truth into the journal copy before anything else, so a
+        // player who coaxed a cat home while holding the quest sees the tick
+        // even if the sync at coax time reached a different level object.
+        stairwaytoheaven.quest.SkyQuests.syncCatQuests(server, quest);
+
+        if (chapter == Chapter.CATS) {
+            stairwaytoheaven.quest.SkyQuests.giveOnce(server, client,
+                    new stairwaytoheaven.quest.SpireCatsQuest());
+            stairwaytoheaven.quest.SkyMapMarkers.sendCatLairs(client, quest);
+            return;
+        }
+
+        if (chapter == Chapter.CATS_TURNIN) {
+            stairwaytoheaven.quest.SpireCatsQuest cats = stairwaytoheaven.quest.SkyQuests
+                    .findHeld(client, stairwaytoheaven.quest.SpireCatsQuest.class);
+            if (cats != null) {
+                cats.complete(client);
+            }
+            // Clear every player's copy, not just this one's: the chapter is
+            // world progression and the others' journals are now stale.
+            stairwaytoheaven.quest.SkyQuests.removeAllOfType(
+                    server, stairwaytoheaven.quest.SpireCatsQuest.class);
+            quest.catsRewardGiven = true;
+            give(client, "catbasket", 1);
+            give(client, "flickerlightgarland", 2);
+            say(client, "wardencatsdone");
+            chapter = chapterFor(quest, this.isSettler());
+        }
+
+        if (chapter == Chapter.ANCHOR) {
+            stairwaytoheaven.quest.AnchorDeliveryQuest anchor = stairwaytoheaven.quest.SkyQuests
+                    .giveOnce(server, client, new stairwaytoheaven.quest.AnchorDeliveryQuest());
+            if (anchor != null && anchor.canComplete(client)) {
+                // DeliverItemsQuest.complete removes the delivered items itself.
+                anchor.complete(client);
+                stairwaytoheaven.quest.SkyQuests.removeAllOfType(
+                        server, stairwaytoheaven.quest.AnchorDeliveryQuest.class);
+                quest.anchorDone = true;
+                give(client, "skywatchbanner", 1);
+                give(client, "aurorapetal", 5);
+                say(client, "wardenanchordone");
             }
         }
     }
@@ -256,9 +356,13 @@ public class SkyWardenMob extends HumanShop {
             return;
         }
         Server server = client.getServer();
-        Level sky = server.world.levelManager.isLoaded(SkyRegistry.SKYREACH_IDENTIFIER)
-                ? server.world.getLevel(SkyRegistry.SKYREACH_IDENTIFIER)
-                : null;
+        // Force-loaded, not "only if it happens to be loaded". The legacy
+        // WardenSettlerMob is recruited FOR FREE ON THE SURFACE, and by then
+        // the Skyreach has usually been unloaded again (Server.java:365-375) --
+        // so the old isLoaded() guard silently skipped the whole payoff:
+        // quest.recruited never became true, the beacon never lit, and the cat
+        // lair markers never arrived. World.getLevel loads it (World.java:273).
+        Level sky = server.world.getLevel(SkyRegistry.SKYREACH_IDENTIFIER);
         if (sky != null) {
             SkywatchQuestData quest = SkywatchQuestData.get(sky);
             quest.stage = 2;

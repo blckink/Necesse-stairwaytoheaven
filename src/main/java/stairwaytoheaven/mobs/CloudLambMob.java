@@ -17,6 +17,7 @@ import necesse.gfx.drawOptions.texture.TextureDrawOptions;
 import necesse.gfx.gameTexture.GameTexture;
 import necesse.entity.mobs.MaskShaderOptions;
 import necesse.gfx.drawables.OrderableDrawables;
+import necesse.inventory.InventoryItem;
 import necesse.inventory.lootTable.LootTable;
 import necesse.inventory.lootTable.lootItem.LootItem;
 import necesse.level.maps.Level;
@@ -25,8 +26,28 @@ import necesse.level.maps.light.GameLight;
 /**
  * The Cloudlamb — a REAL sky sheep, not a critter: extends the vanilla
  * SheepMob so ropes, feeding troughs, breeding, growing up and shearing all
- * work exactly like surface livestock (shearing yields vanilla wool). Only
- * the fleece and the kill loot are sky-flavored.
+ * work exactly like surface livestock. What makes it worth keeping instead of
+ * a surface sheep is what comes off it.
+ *
+ * WHAT IT IS FOR (the playtest question was literally "was bringen sie jetzt?
+ * und es gibt halt schon normale schafe"):
+ *
+ *  · Shearing yields WINDSILK, not vanilla wool. Windsilk is the mod's fibre:
+ *    the Galehowl bow, the Seance Circle that opens the Veil, the Sky Balloon
+ *    and — the one that matters most — the Cloudpuff Treats the spire cats
+ *    want are all made of it. Before this, every gram of windsilk in a world
+ *    came off a corpse or a windwheat harvest; a sheared flock is the only
+ *    renewable source there is, and a vanilla sheep can never produce any.
+ *  · It eats CLOUDBERRIES (see SkyItems: the berry is a GrainItem, so vanilla's
+ *    feeding trough accepts it and right-clicking with one feeds by hand), which
+ *    grow on cloudberry bushes in the Driftlands. Vanilla wheat still works —
+ *    every HusbandryMob eats grain — so a lamb is at home in a surface pen too.
+ *  · Which is the reason to haul one down: they are placed at Skyreach region
+ *    generation and can never be spawned any other way (see
+ *    SkyLevel.placeCloudLambFlock), so a breeding pair on a rope is how a
+ *    player turns a sky animal into a farm. FriendlyRopableMob drags a roped
+ *    animal along when the roper changes level (jar 1.3.2,
+ *    FriendlyRopableMob.java:45-52), so the stairway brings them home.
  *
  * Vanilla SheepMob draws through a private getTexture(), so the draw and
  * death-particle methods are overridden 1:1 with our textures (same sheet
@@ -38,8 +59,10 @@ public class CloudLambMob extends SheepMob {
     public static GameTexture texture;
     public static GameTexture shearedTexture;
 
+    /** What a sheared fleece is worth, and what one drops when killed. */
+    public static final String FLEECE_ITEM = "windsilk";
     public static final LootTable cloudLambLoot = new LootTable(
-            LootItem.between("rawmutton", 1, 2), LootItem.between("windsilk", 1, 2));
+            LootItem.between("rawmutton", 1, 2), LootItem.between(FLEECE_ITEM, 1, 2));
 
     private GameTexture bodyTexture() {
         GameTexture sheared = shearedTexture;
@@ -49,6 +72,55 @@ public class CloudLambMob extends SheepMob {
     @Override
     public LootTable getLootTable() {
         return !this.isGrown() ? new LootTable() : cloudLambLoot;
+    }
+
+    /**
+     * The product. SheepMob.onShear hands out vanilla {@code wool}; ours hands
+     * out windsilk on the same timer (vanilla rolls 1-3 items and re-arms
+     * nextShearTime for 20-30 in-game minutes, and hasWool() is what picks the
+     * sheared sprite — all of that is inherited unchanged).
+     */
+    @Override
+    public InventoryItem onShear(InventoryItem item, java.util.List<InventoryItem> products) {
+        java.util.ArrayList<InventoryItem> vanillaProducts = new java.util.ArrayList<>();
+        InventoryItem result = super.onShear(item, vanillaProducts);
+        for (InventoryItem ignored : vanillaProducts) {
+            products.add(new InventoryItem(FLEECE_ITEM));
+        }
+        return result;
+    }
+
+    /**
+     * SheepMob.getRandomChildMobStringID is
+     * {@code getOneOf(this.getStringID(), "ram")} — so half of every Cloudlamb
+     * born in the sky was a VANILLA RAM. There is no sky ram; the flock breeds
+     * true.
+     */
+    @Override
+    public String getRandomChildMobStringID(necesse.entity.mobs.friendly.HusbandryMob father) {
+        return this.getStringID();
+    }
+
+    /**
+     * SheepMob.getLocalization returns vanilla's {@code mob.lamb} for anything
+     * not grown up, so a Cloudlamb kid was labelled "Lamb" — another mod mob
+     * wearing a vanilla name, which is the class of bug this project has
+     * shipped twice. Ours is a Cloudlamb at every age.
+     */
+    @Override
+    public necesse.engine.localization.message.GameMessage getLocalization() {
+        return new necesse.engine.localization.message.LocalMessage("mob", this.getStringID());
+    }
+
+    /**
+     * Say what it eats and what it gives, on the animal itself. Neither fact is
+     * discoverable otherwise: vanilla's feeding trough silently refuses
+     * anything that is not a GrainItem, and shears only tell you afterwards.
+     */
+    @Override
+    protected void addHoverTooltips(necesse.gfx.gameTooltips.ListGameTooltips tooltips, boolean debug) {
+        super.addHoverTooltips(tooltips, debug);
+        tooltips.add(necesse.engine.localization.Localization.translate("misc", "cloudlambtip"));
     }
 
     @Override

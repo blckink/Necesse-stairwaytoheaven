@@ -86,8 +86,15 @@ public class SpireCatsQuest extends Quest {
             Color textColor, boolean outlined) {
         final DrawOptionsList drawOptions = new DrawOptionsList();
         int currentHeight = 0;
-        currentHeight += addCatLine(drawOptions, x, y + currentHeight, "swhcatblack", this.blackHome, textColor, outlined);
-        currentHeight += addCatLine(drawOptions, x, y + currentHeight, "swhcattabby", this.tabbyHome, textColor, outlined);
+        // Two different sentences, not one sentence in two colours. Before a cat
+        // is home the line has to say where to look; AFTER it is home the line
+        // has to say where it went, or the player is left with a ticked box and
+        // no idea what happened to the animal -- which is exactly what was
+        // reported ("Snack gegeben aber danach nie wieder gesehen").
+        currentHeight += addCatLine(drawOptions, x, y + currentHeight,
+                this.blackHome ? "swhcatblackhome" : "swhcatblack", this.blackHome, textColor, outlined);
+        currentHeight += addCatLine(drawOptions, x, y + currentHeight,
+                this.tabbyHome ? "swhcattabbyhome" : "swhcattabby", this.tabbyHome, textColor, outlined);
         int home = (this.blackHome ? 1 : 0) + (this.tabbyHome ? 1 : 0);
         float progress = home / 2.0F;
         Color barColor = progress == 1.0F ? Settings.UI.successTextColor : Settings.UI.errorTextColor;

@@ -26,11 +26,19 @@ public class SkyreachStatusCommand extends ModularChatCommand {
     private static final int SCAN_RADIUS_TILES = 64;
 
     public SkyreachStatusCommand() {
-        super("skyreachstatus", "Generates and inspects the Skyreach around the origin (debug)", PermissionLevel.ADMIN, false);
+        super("skyreachstatus", "Generates and inspects the Skyreach around the origin (debug)", PermissionLevel.ADMIN, false,
+                // Optional mode. "cats" coaxes both spire cats home before
+                // reporting, which is the only way to observe the travel-home
+                // path headlessly -- and therefore the only way for
+                // scripts/integration_test.sh to assert that a cat brought home
+                // is still at its basket after a save/load round trip.
+                new necesse.engine.commands.CmdParameter("mode",
+                        new necesse.engine.commands.parameterHandlers.StringParameterHandler("", "cats"), true));
     }
 
     @Override
     public void runModular(Client client, Server server, ServerClient serverClient, Object[] args, String[] errors, CommandLog logs) {
+        String mode = args.length > 0 && args[0] != null ? String.valueOf(args[0]) : "";
         Level level = server.world.getLevel(SkyRegistry.SKYREACH_IDENTIFIER);
         if (!(level instanceof SkyLevel)) {
             logs.add("FAIL: level for identifier \"" + SkyRegistry.SKYREACH_IDENTIFIER + "\" is " + level.getClass().getSimpleName()
@@ -46,11 +54,11 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         // critter spawning made server-side region activity constant). Taking
         // the Level monitor up front gives both threads the same lock order.
         synchronized (level) {
-            runLocked(level, server, serverClient, logs);
+            runLocked(level, server, serverClient, mode, logs);
         }
     }
 
-    private void runLocked(Level level, Server server, ServerClient serverClient, CommandLog logs) {
+    private void runLocked(Level level, Server server, ServerClient serverClient, String mode, CommandLog logs) {
         int r = SCAN_RADIUS_TILES;
         // v0.5: the sky radiates from the canonical Old Warden Spire origin —
         // scan (and guarantee) the hub there, not around the world origin.
@@ -93,7 +101,13 @@ public class SkyreachStatusCommand extends ModularChatCommand {
 
         diagnosePlacement(level, logs);
         diagnoseGeneration((SkyLevel) level, logs);
+        if ("cats".equalsIgnoreCase(mode)) {
+            coaxCatsHome((SkyLevel) level, logs);
+        }
         diagnoseQuest((SkyLevel) level, logs);
+        diagnoseCats((SkyLevel) level, logs);
+        diagnoseQuestChain(logs);
+        diagnoseHusbandry((SkyLevel) level, logs);
         diagnoseToolAudit(logs);
         diagnoseNetAudit(logs);
         locateFromPlayer((SkyLevel) level, serverClient, logs);
@@ -172,6 +186,199 @@ public class SkyreachStatusCommand extends ModularChatCommand {
             }
             logs.add("tool " + id + "=" + object.toolType.name() + "/" + object.objectHealth);
         }
+    }
+
+    /**
+     * Every reachable save state of "The Warden's Call", and the chapter each
+     * one is owed.
+     *
+     * This is the answer to "warden gibt weiterhin keine quests die ich finden
+     * kann" as a MEASUREMENT rather than a claim. The failure mode is not a
+     * crash and not a missing registration: it is a world whose flags land in a
+     * combination the hand-out code has no branch for, after which the journal
+     * stays empty forever and nothing in the game says why. Enumerating the
+     * states here means a future change that reintroduces such a hole fails the
+     * integration test instead of shipping.
+     *
+     * Names are the historical bug, not the code path: each row is a save the
+     * mod could actually produce, and the three marked (old build) are the ones
+     * that used to hand out nothing at all.
+     */
+    private void diagnoseQuestChain(CommandLog logs) {
+        String[][] states = {
+                // label                            recruited settler black tabby reward anchor
+                {"fresh",                           "0", "0", "0", "0", "0", "0"},
+                {"met-him-old-build",               "0", "0", "0", "0", "0", "0"},
+                {"recruited",                       "1", "1", "0", "0", "0", "0"},
+                {"legacy-settler-no-record",        "0", "1", "0", "0", "0", "0"},
+                {"one-cat-home",                    "1", "1", "1", "0", "0", "0"},
+                {"both-cats-home-never-had-quest",  "1", "1", "1", "1", "0", "0"},
+                {"cats-paid-out",                   "1", "1", "1", "1", "1", "0"},
+                {"anchored",                        "1", "1", "1", "1", "1", "1"},
+        };
+        StringBuilder line = new StringBuilder("chain check:");
+        boolean dead = false;
+        for (String[] state : states) {
+            stairwaytoheaven.quest.SkywatchQuestData probe = new stairwaytoheaven.quest.SkywatchQuestData();
+            probe.recruited = state[1].equals("1");
+            boolean isSettler = state[2].equals("1");
+            probe.blackHome = state[3].equals("1");
+            probe.tabbyHome = state[4].equals("1");
+            probe.catsRewardGiven = state[5].equals("1");
+            probe.anchorDone = state[6].equals("1");
+            stairwaytoheaven.mobs.SkyWardenMob.Chapter chapter =
+                    stairwaytoheaven.mobs.SkyWardenMob.chapterFor(probe, isSettler);
+            // Only the fully finished chain may hand out nothing.
+            boolean finished = probe.anchorDone;
+            if (chapter == stairwaytoheaven.mobs.SkyWardenMob.Chapter.DONE && !finished) {
+                dead = true;
+            }
+            line.append(' ').append(state[0]).append('=').append(chapter.name());
+        }
+        line.append(dead ? " DEAD_END_REACHABLE" : " no-dead-ends");
+        logs.add(line.toString());
+    }
+
+    /**
+     * Coaxes both spire cats home, exactly the way a Cloudpuff Treat does.
+     *
+     * "The cat is at the spire after being brought home" is the whole player
+     * report ("Siggi ... Snack gegeben aber danach nie wieder gesehen") and it
+     * is a claim about the SAVE, not about the source: the cats survive a
+     * restart only because CritterMob.shouldSave() is
+     * `shouldSave && !canDespawn()`, and after a coax they must survive it at
+     * a DIFFERENT position, in a different region, than the one they were
+     * written into at world generation. Driving the real path here is what lets
+     * the integration test observe that across a server restart.
+     */
+    private void coaxCatsHome(SkyLevel level, CommandLog logs) {
+        stairwaytoheaven.quest.SkywatchQuestData quest = stairwaytoheaven.quest.SkywatchQuestData.get(level);
+        if (!quest.spirePlaced || !quest.catsSpawned) {
+            logs.add("cat coax: SKIPPED (spirePlaced=" + quest.spirePlaced + " catsSpawned=" + quest.catsSpawned + ")");
+            return;
+        }
+        level.regionManager.ensureTileIsLoaded(quest.blackLairX, quest.blackLairY);
+        level.regionManager.ensureTileIsLoaded(quest.tabbyLairX, quest.tabbyLairY);
+        quest.blackHome = true;
+        quest.tabbyHome = true;
+        int sent = 0;
+        for (necesse.entity.mobs.Mob mob : level.entityManager.mobs) {
+            if (mob instanceof stairwaytoheaven.mobs.SpireCatMob) {
+                ((stairwaytoheaven.mobs.SpireCatMob) mob).sendHome(level, quest);
+                sent++;
+            }
+        }
+        if (level.getServer() != null) {
+            stairwaytoheaven.quest.SkyQuests.syncCatQuests(level.getServer(), quest);
+        }
+        logs.add("cat coax: sent " + sent + " cat(s) home to " + quest.basketX + "," + quest.basketY);
+    }
+
+    /**
+     * Where the cats actually are, and whether "home" is a real place.
+     *
+     * Three separate things have to be true for a coaxed cat to be findable,
+     * and each of them used to be unobserved: the basket tile has to carry a
+     * basket (WardenSpirePreset reserved the tile and placed nothing on it),
+     * the cat has to BE there, and its homesick tether has to point at the
+     * basket rather than at the lair it came from.
+     */
+    private void diagnoseCats(SkyLevel level, CommandLog logs) {
+        stairwaytoheaven.quest.SkywatchQuestData quest = stairwaytoheaven.quest.SkywatchQuestData.get(level);
+        if (!quest.spirePlaced) {
+            logs.add("cat home check: SKIPPED (no spire)");
+            return;
+        }
+        level.regionManager.ensureTileIsLoaded(quest.basketX, quest.basketY);
+        String basketObject = level.getObject(quest.basketX, quest.basketY).getStringID();
+        StringBuilder line = new StringBuilder("cat home check: basket=")
+                .append(quest.basketX).append(',').append(quest.basketY)
+                .append(" object=").append(basketObject)
+                .append(" homeFlags black=").append(quest.blackHome)
+                .append(" tabby=").append(quest.tabbyHome);
+        for (necesse.entity.mobs.Mob mob : level.entityManager.mobs) {
+            if (!(mob instanceof stairwaytoheaven.mobs.SpireCatMob)) {
+                continue;
+            }
+            stairwaytoheaven.mobs.SpireCatMob cat = (stairwaytoheaven.mobs.SpireCatMob) mob;
+            java.awt.Point tether = cat.getAiHomeTile();
+            int dx = cat.getTileX() - quest.basketX;
+            int dy = cat.getTileY() - quest.basketY;
+            int dist = (int) Math.round(Math.sqrt((double) dx * dx + (double) dy * dy));
+            // Two different claims, and the strict one is the TETHER.
+            // HomesickCritterAI only pulls a critter back once it is more than
+            // 96px (3 tiles) from home, and the wanderer keeps moving while it
+            // does, so a snapshot legitimately catches a cat several tiles out
+            // and walking back -- an exact position is not a property the AI
+            // has. What must be exact is where the tether points: that is what
+            // init() rebuilds on load, and pointing it at the old lair is the
+            // way "brought home" would silently stop meaning anything.
+            // SPIRE_RADIUS is the tower's own interior, so AT_BASKET reads as
+            // "a player who walks into the spire finds this cat".
+            final int spireRadius = 8;
+            boolean tetherOk = tether != null && tether.x == quest.basketX && tether.y == quest.basketY;
+            String state;
+            if (!cat.isHomeFlag(quest)) {
+                state = " STILL_WILD";
+            } else if (!tetherOk) {
+                state = " WRONG_TETHER";
+            } else if (dist > spireRadius) {
+                state = " AWAY_FROM_BASKET";
+            } else {
+                state = " AT_BASKET";
+            }
+            line.append(" | ").append(cat.getStringID())
+                    .append(" at=").append(cat.getTileX()).append(',').append(cat.getTileY())
+                    .append(" d=").append(dist)
+                    .append(" tether=").append(tether == null ? "none" : tether.x + "," + tether.y)
+                    .append(state);
+        }
+        logs.add(line.toString());
+    }
+
+    /**
+     * The Cloud Lamb as a husbandry animal, measured rather than asserted.
+     *
+     * The player's three questions were "was bringen sie jetzt?", "es gibt halt
+     * schon normale schafe" and "was muss in Trog bei wolkenschafen?". All three
+     * are answered by values the engine reads off the mob and the item, so all
+     * three are printed here: what shearing yields, what the trough accepts
+     * (FeedingTroughObjectEntity's filter is `instanceof GrainItem` and nothing
+     * else), and what a lamb's offspring is - vanilla SheepMob breeds a 50%
+     * chance of a plain `ram`.
+     */
+    private void diagnoseHusbandry(SkyLevel level, CommandLog logs) {
+        necesse.entity.mobs.Mob probe = necesse.engine.registries.MobRegistry.getMob("cloudlamb", level);
+        if (!(probe instanceof necesse.entity.mobs.friendly.HusbandryMob)) {
+            logs.add("husbandry check: cloudlamb is NOT a HusbandryMob");
+            return;
+        }
+        necesse.entity.mobs.friendly.HusbandryMob lamb =
+                (necesse.entity.mobs.friendly.HusbandryMob) probe;
+        java.util.ArrayList<necesse.inventory.InventoryItem> products = new java.util.ArrayList<>();
+        necesse.inventory.InventoryItem shears = new necesse.inventory.InventoryItem("shears");
+        String shorn = "CANNOT SHEAR";
+        if (lamb.canShear(shears)) {
+            lamb.onShear(shears, products);
+            StringBuilder sb = new StringBuilder();
+            for (necesse.inventory.InventoryItem product : products) {
+                sb.append(sb.length() == 0 ? "" : "+").append(product.item.getStringID())
+                        .append('x').append(product.getAmount());
+            }
+            shorn = sb.length() == 0 ? "NOTHING" : sb.toString();
+        }
+        StringBuilder feed = new StringBuilder();
+        for (String feedID : new String[]{"cloudberry", "wheat", "skystone"}) {
+            necesse.inventory.item.Item item = necesse.engine.registries.ItemRegistry.getItem(feedID);
+            boolean handFeed = item != null && lamb.canFeed(new necesse.inventory.InventoryItem(feedID));
+            // Exactly the predicate FeedingTroughObjectEntity.isValidFeed uses.
+            boolean trough = item instanceof necesse.inventory.item.placeableItem.consumableItem.food.GrainItem;
+            feed.append(' ').append(feedID).append("=hand:").append(handFeed).append("/trough:").append(trough);
+        }
+        logs.add("husbandry check: cloudlamb shear=" + shorn
+                + " child=" + lamb.getRandomChildMobStringID(lamb)
+                + " name=" + lamb.getLocalization().translate()
+                + " feed:" + feed);
     }
 
     /**

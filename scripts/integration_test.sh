@@ -30,6 +30,13 @@ MOD_DIR="$REPO_DIR/build/jar"
 # occurrence, not a corner case.
 WORK_DIR="${INTEGRATION_WORK_DIR:-$REPO_DIR/build/integration-test-$$}"
 WORLD="stairwaytest"
+# ...and its own PORT, for the same reason. Giving each run its own directory
+# fixed the world file being pulled out from under a concurrent run, but both
+# servers still bound the same default socket: the second one dies with
+# "java.net.BindException: Address already in use" while the FIRST one is left
+# holding a half-written world, which reads exactly like a mod crash in the
+# logs. ServerLoader accepts -port (ServerLoader.java:424).
+PORT="${INTEGRATION_PORT:-$(( 15000 + $$ % 2000 ))}"
 
 JAVA_BIN="$GAME_DIR/jre/bin/java"
 [ -x "$JAVA_BIN" ] || JAVA_BIN="java"
@@ -72,7 +79,7 @@ start_server() { # log_file
     # PATH) ByteBuddy's self-attach fallback fails and kills the boot before
     # mods load. The flag makes the game's own patching step work everywhere.
     "$JAVA_BIN" -Xms256m -Xmx2G -Djdk.attach.allowAttachSelf=true -jar "$GAME_DIR/Server.jar" -nogui -localdir \
-        -world "$WORLD" -owner tester -mod "\"$MOD_DIR\"" \
+        -world "$WORLD" -owner tester -port "$PORT" -mod "\"$MOD_DIR\"" \
         < "$PIPE" > "$LOG" 2>&1 &
     SERVER_PID=$!
     exec 3> "$PIPE"   # hold the pipe open
@@ -112,6 +119,18 @@ for _ in $(seq 1 60); do
     sleep 2
 done
 
+# Third pass: coax BOTH spire cats home the way a Cloudpuff Treat does, so the
+# travel-home path is actually executed rather than only read. Phase 2 then
+# checks they are still at the basket after the world has been written to disk
+# and read back -- a cat that is only saved at its LAIR would pass the old
+# "cats=2" count and still be missing from the place the quest sent it.
+echo "Running skyreachstatus cats (coax the cats home)..."
+echo "skyreachstatus cats" >&3
+for _ in $(seq 1 60); do
+    [ "$(grep -c SKYREACH_STATUS_DONE "$LOG")" -ge 3 ] && break
+    sleep 2
+done
+
 echo "Running veilstatus..."
 echo "veilstatus" >&3
 wait_for "VEIL_STATUS_DONE" 180
@@ -124,6 +143,13 @@ echo "Restarting server on the same world (persistence pass)..."
 start_server "$WORK_DIR/server2.log"
 echo "skyreachstatus" >&3
 wait_for "SKYREACH_STATUS_DONE" 180
+# Wander pass. Give the cats time to actually run their AI before the second
+# probe: the homesick tether is what is supposed to keep them at the basket
+# (HomesickCritterAI only pulls a critter back past 96px), and a tether rebuilt
+# around the WRONG tile only shows once the wanderer has picked a few targets.
+# The check immediately after load cannot see it.
+echo "Letting the cats wander for 25s..."
+sleep 25
 # Night pass. Hostiles carry spawnLightThreshold 0 and the Skyreach is a
 # NON-cave level, so its ambient light follows world time -- which means the
 # whole hostile roster is unreachable in daylight and the sky reads as empty.
@@ -167,6 +193,56 @@ for expected in \
 done
 # The snail must implement NetableMob — the marker the vanilla net checks.
 grep -qF "net dewsnail=NETABLE" "$LOG1" || { echo "FAIL: dewsnail is not netable"; STATUS=1; }
+
+echo "--- verifying the Cloud Lamb is a coherent husbandry animal ---"
+# Three player questions, three measured values: what shearing yields, what the
+# offspring is (vanilla SheepMob breeds a 50% chance of a plain `ram`), and what
+# the feeding trough accepts (FeedingTroughObjectEntity filters on
+# `instanceof GrainItem` and nothing else, so a berry that is not one can never
+# go in the trough no matter what canFeed says).
+grep -qE "husbandry check: cloudlamb shear=windsilkx[0-9]+" "$LOG1" \
+    || { echo "FAIL: shearing a Cloud Lamb does not yield windsilk"; \
+         grep -E "husbandry check:" "$LOG1" | tail -1; STATUS=1; }
+grep -qF "child=cloudlamb" "$LOG1" \
+    || { echo "FAIL: Cloud Lambs do not breed true (vanilla SheepMob rolls a ram)"; STATUS=1; }
+grep -qF "cloudberry=hand:true/trough:true" "$LOG1" \
+    || { echo "FAIL: cloudberries are not accepted as Cloud Lamb feed"; STATUS=1; }
+grep -qF "wheat=hand:true/trough:true" "$LOG1" \
+    || { echo "FAIL: vanilla wheat stopped working as feed"; STATUS=1; }
+grep -qF "skystone=hand:false/trough:false" "$LOG1" \
+    || { echo "FAIL: the feed check accepts things that are not food"; STATUS=1; }
+
+echo "--- verifying the Warden's quest chain has no dead ends ---"
+# Every reachable save state must be owed a chapter; only a finished chain may
+# hand out nothing. The three historically dead states are named explicitly so a
+# regression says which one broke rather than just "a state".
+grep -qF "chain check:" "$LOG1" \
+    || { echo "FAIL: the quest chain state probe never ran"; STATUS=1; }
+grep -qF "no-dead-ends" "$LOG1" \
+    || { echo "FAIL: a save state is owed no quest chapter at all"; \
+         grep -E "chain check:" "$LOG1" | tail -1; STATUS=1; }
+for expected in \
+    "met-him-old-build=RECRUIT" "legacy-settler-no-record=CATS" \
+    "both-cats-home-never-had-quest=CATS_TURNIN" "cats-paid-out=ANCHOR" \
+    "anchored=DONE"; do
+    grep -qF "$expected" "$LOG1" || { echo "FAIL: quest chain expected $expected"; \
+        grep -E "chain check:" "$LOG1" | tail -1; STATUS=1; }
+done
+
+echo "--- verifying the cats have somewhere to come home to ---"
+# The spire preset reserved the basket tile and put nothing on it, so "home"
+# was a bare floor square. SkyLevel heals it onto existing worlds too.
+grep -qE "cat home check: basket=-?[0-9]+,-?[0-9]+ object=catbasket" "$LOG1" \
+    || { echo "FAIL: no cat basket stands on the tile the quest calls home"; \
+         grep -E "cat home check:" "$LOG1" | tail -1; STATUS=1; }
+grep -qF "cat coax: sent 2 cat(s) home" "$LOG1" \
+    || { echo "FAIL: the travel-home path did not run for both cats"; \
+         grep -E "cat coax:" "$LOG1" | tail -1; STATUS=1; }
+COAXED="$(grep -E "cat home check:" "$LOG1" | tail -1)"
+[ "$(echo "$COAXED" | grep -c AT_BASKET)" -ge 1 ] \
+    || { echo "FAIL: a coaxed cat is not at its basket ($COAXED)"; STATUS=1; }
+echo "$COAXED" | grep -q "AWAY_FROM_BASKET" \
+    && { echo "FAIL: a cat is flagged home but is not at the basket ($COAXED)"; STATUS=1; }
 
 echo "--- verifying the built landscape ---"
 # The whole Skyreach comes out of one pure function
@@ -215,6 +291,27 @@ fi
 grep -qE "npc check: wardens=1 cats=2" "$LOG2" \
     || { echo "FAIL: Warden or cats did not survive a save/load round trip"; STATUS=1; }
 grep -qE "catsSpawned=true" "$LOG2" || { echo "FAIL: quest data did not persist"; STATUS=1; }
+# The point of the coax pass: a cat brought home must still be AT THE BASKET
+# after the world has been written to disk and read back. Its save home is a
+# region it was never generated in, and its homesick tether has to be rebuilt
+# around the basket by init() on load, not around the lair it came from.
+HOME2="$(grep -E "cat home check:" "$LOG2" | tail -1)"
+if [ -z "$HOME2" ]; then
+    echo "FAIL: the restarted server never reported the cats' home"; STATUS=1
+else
+    echo "$HOME2" | grep -qF "homeFlags black=true tabby=true" \
+        || { echo "FAIL: the cats' home flags did not survive the restart ($HOME2)"; STATUS=1; }
+    echo "$HOME2" | grep -qF "object=catbasket" \
+        || { echo "FAIL: the cat basket did not survive the restart ($HOME2)"; STATUS=1; }
+    [ "$(echo "$HOME2" | grep -o AT_BASKET | wc -l)" -eq 2 ] \
+        || { echo "FAIL: both cats should be at the basket after a restart ($HOME2)"; STATUS=1; }
+    echo "$HOME2" | grep -q "STILL_WILD" \
+        && { echo "FAIL: a cat forgot it was brought home ($HOME2)"; STATUS=1; }
+    echo "$HOME2" | grep -q "WRONG_TETHER" \
+        && { echo "FAIL: a cat's homesick tether does not point at the basket ($HOME2)"; STATUS=1; }
+    echo "$HOME2" | grep -q "AWAY_FROM_BASKET" \
+        && { echo "FAIL: a cat wandered out of the spire ($HOME2)"; STATUS=1; }
+fi
 
 for L in "$LOG1" "$LOG2"; do
     if grep -nE "Exception|ERROR|ModLoadException" "$L" | grep -vE "libraryPatches|SLF4J" > "$WORK_DIR/errors.txt"; then
@@ -229,7 +326,7 @@ if [ "$STATUS" -eq 0 ]; then
     echo "--- skyreachstatus output ---"
     sed -n '/Skyreach OK/,/SKYREACH_STATUS_DONE/p' "$LOG1"
     echo "--- after restart ---"
-    grep -E "quest: stage=|npc check:|settler check:|recruit check:|name check:" "$LOG2"
+    grep -E "quest: stage=|npc check:|settler check:|recruit check:|name check:|cat home check:|husbandry check:" "$LOG2"
     echo "--- spawn probe, midnight pass ---"
     awk '/Setting midnight|time midnight/{n=1} n && /spawn check:/' "$LOG2" | tail -13
     # Only after the logs have been read, and only on success: a failed run's

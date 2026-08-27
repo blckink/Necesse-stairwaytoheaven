@@ -42,6 +42,14 @@ public class SkywatchQuestData extends LevelData {
     public int spireX, spireY;          // warden tile
     public int beaconX, beaconY;        // beacon object tile
     public int basketX, basketY;        // cat basket / cat home tile
+    /**
+     * Whether the basket OBJECT has been placed on that tile. The tile was
+     * reserved from v0.2 and stood empty, so SkyLevel fills it in for worlds
+     * that already stamped their spire — but exactly once. Healing it the way
+     * the beacon is healed would make an uncraftable quest-reward furniture
+     * item farmable: break it, wait ten seconds, break it again.
+     */
+    public boolean basketPlaced = false;
 
     // v0.5 portal routing: per-player memory of the surface stairway each
     // player ascended from, so the spire's Skywatch Gate sends them home.
@@ -118,6 +126,7 @@ public class SkywatchQuestData extends LevelData {
         save.addInt("beaconY", this.beaconY);
         save.addInt("basketX", this.basketX);
         save.addInt("basketY", this.basketY);
+        save.addBoolean("basketPlaced", this.basketPlaced);
         save.addBoolean("catsSpawned", this.catsSpawned);
         save.addInt("blackLairX", this.blackLairX);
         save.addInt("blackLairY", this.blackLairY);
@@ -181,6 +190,7 @@ public class SkywatchQuestData extends LevelData {
         this.beaconY = save.getInt("beaconY", 0, false);
         this.basketX = save.getInt("basketX", 0, false);
         this.basketY = save.getInt("basketY", 0, false);
+        this.basketPlaced = save.getBoolean("basketPlaced", false, false);
         this.catsSpawned = save.getBoolean("catsSpawned", false, false);
         this.blackLairX = save.getInt("blackLairX", 0, false);
         this.blackLairY = save.getInt("blackLairY", 0, false);
@@ -234,6 +244,7 @@ public class SkywatchQuestData extends LevelData {
         this.beaconY = 0;
         this.basketX = 0;
         this.basketY = 0;
+        this.basketPlaced = false;
         this.catsSpawned = false;
         this.blackLairX = 0;
         this.blackLairY = 0;

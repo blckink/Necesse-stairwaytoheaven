@@ -74,6 +74,14 @@ public abstract class SpireCatMob extends CritterMob {
         return mob != null && mob.isPlayer;
     }
 
+    /**
+     * The tile init() last tethered this cat to. Kept so /skyreachstatus can
+     * report the LIVE tether rather than recomputing what it ought to be — the
+     * whole question after a coax is whether the AI was actually rebuilt around
+     * the basket, and a recomputation cannot answer that.
+     */
+    private Point aiHomeTile;
+
     @Override
     public void init() {
         super.init();
@@ -82,8 +90,14 @@ public abstract class SpireCatMob extends CritterMob {
         if (level != null && level.isServer()) {
             SkywatchQuestData quest = SkywatchQuestData.get(level);
             ai.homeTile = new Point(this.homeX(quest), this.homeY(quest));
+            this.aiHomeTile = new Point(ai.homeTile);
         }
         this.ai = new BehaviourTreeAI<>(this, ai);
+    }
+
+    /** Diagnostics: where this cat's homesick tether currently points. */
+    public Point getAiHomeTile() {
+        return this.aiHomeTile;
     }
 
     private boolean isHome(SkywatchQuestData quest) {
@@ -115,7 +129,12 @@ public abstract class SpireCatMob extends CritterMob {
         SkywatchQuestData quest = SkywatchQuestData.get(level);
 
         if (this.isHome(quest)) {
-            this.bubble("wardencatfound1");
+            // He lives here now. Saying so matters: the whole reason a player
+            // reported "Siggi gefunden und Snack gegeben aber danach nie wieder
+            // gesehen" is that being brought home said nothing about WHERE home
+            // is, and nothing at the spire showed that a cat lives there.
+            this.bubble("wardencatpurr");
+            client.sendChatMessage(new LocalMessage("misc", "wardencatathome"));
             return;
         }
         int treats = player.getInv().main.getAmount(level, player, ItemRegistry.getItem("cloudpufftreat"), "skywatch");
@@ -134,18 +153,55 @@ public abstract class SpireCatMob extends CritterMob {
         if (level.getServer() != null) {
             stairwaytoheaven.quest.SkyQuests.syncCatQuests(level.getServer(), quest);
         }
-        client.sendChatMessage(new LocalMessage("misc", "wardencattreat"));
+        // Name the destination and put it back on the map. "vanishes homeward"
+        // is not an address, and the spire marker may never have been delivered
+        // (or may have been deleted); onLocator is idempotent per player.
+        client.sendChatMessage(new LocalMessage("misc", "wardencattreat",
+                "dir", new LocalMessage("misc", SkywatchQuestData.directionKey(
+                        this.getTileX(), this.getTileY(), quest.spireX, quest.spireY)).translate(),
+                "dist", String.valueOf(tileDistance(this.getTileX(), this.getTileY(),
+                        quest.spireX, quest.spireY))));
+        stairwaytoheaven.quest.SkyMapMarkers.onLocator(client, quest);
         this.bubble("wardencatfound1");
-        this.travelHome(level, quest);
+        this.sendHome(level, quest);
     }
 
-    /** Vanishes in a puff of cloud and reappears at the spire basket spot. */
-    private void travelHome(Level level, SkywatchQuestData quest) {
+    private static int tileDistance(int fromX, int fromY, int toX, int toY) {
+        int dx = toX - fromX;
+        int dy = toY - fromY;
+        return (int) Math.round(Math.sqrt((double) dx * dx + (double) dy * dy));
+    }
+
+    /**
+     * Vanishes in a puff of cloud and reappears at the spire basket spot.
+     *
+     * Public because {@code /skyreachstatus cats} drives it: "the cat is at the
+     * basket after a save/load" is only worth anything as an observed fact, and
+     * the only way to observe it headlessly is to actually send them home.
+     */
+    public void sendHome(Level level, SkywatchQuestData quest) {
+        if (!quest.spirePlaced) {
+            return;  // no basket tile exists yet; teleporting to 0,0 would lose them
+        }
         this.spawnCloudPuff();
         level.regionManager.ensureTileIsLoaded(quest.basketX, quest.basketY);
         this.setPos(quest.basketX * 32 + 16, quest.basketY * 32 + 16, true);
+        // Re-file the mob under its NEW region immediately instead of waiting
+        // for the next EntityList tick. Region.onUnloaded (jar 1.3.2,
+        // Region.java:407-417) walks getSaveToRegion and calls
+        // limitWithinRegionBounds + remove on every mob still listed there, so
+        // a lair region that unloads inside that one-tick window would clamp
+        // the cat back into the lair it just left.
+        if (level.entityManager.mobs.getRegionList() != null) {
+            level.entityManager.mobs.getRegionList().updateRegion(this);
+        }
         this.init();  // rebuild the AI so its home tether points at the basket
         this.spawnCloudPuff();
+    }
+
+    /** True once this cat has been coaxed home (world state, not position). */
+    public boolean isHomeFlag(SkywatchQuestData quest) {
+        return this.isHome(quest);
     }
 
     private void spawnCloudPuff() {

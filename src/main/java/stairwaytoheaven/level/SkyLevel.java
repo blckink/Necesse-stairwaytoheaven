@@ -156,10 +156,17 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
 
     /**
      * Restores the quest beacon if it went missing (older jars allowed mining
-     * it, which dropped nothing and would soft-lock the chain). Only touches
-     * loaded regions — never forces region loads from the tick.
+     * it, which dropped nothing and would soft-lock the chain), and makes sure
+     * the cats' basket actually stands on the tile the quest data calls their
+     * home. Only touches loaded regions — never forces region loads from the
+     * tick.
      */
     private void healQuestStructure(SkywatchQuestData quest) {
+        healBeacon(quest);
+        healCatBasket(quest);
+    }
+
+    private void healBeacon(SkywatchQuestData quest) {
         if (!this.regionManager.isTileLoaded(quest.beaconX, quest.beaconY)) {
             return;
         }
@@ -168,11 +175,49 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
             return;
         }
         int wanted = quest.stage >= 2 ? SkyRegistry.wardenBeaconOnID : SkyRegistry.wardenBeaconOffID;
-        this.setObject(quest.beaconX, quest.beaconY, wanted);
+        setQuestObject(quest.beaconX, quest.beaconY, wanted);
+    }
+
+    /**
+     * The spire's cat basket.
+     *
+     * WardenSpirePreset reserves local (5,6) as BASKET_X/BASKET_Y and records it
+     * in SkywatchQuestData, and SpireCatMob teleports a coaxed cat exactly
+     * there — but the preset never placed anything on that tile, so "home" was
+     * a bare floor square in a tower the player had already left. That is the
+     * mechanical half of "Siggi gefunden und Snack gegeben aber danach nie
+     * wieder gesehen": there was nothing at the destination to see.
+     *
+     * Healing it here rather than in the preset is deliberate: every world that
+     * already stamped its spire gets the basket too, without re-stamping (and
+     * the preset belongs to the worldgen agent). The basket is a FurnitureObject
+     * with a 0x0 collision, so it is NOT solid — the cat stands on it the way a
+     * pet sits on a pet bed, and the tile stays walkable.
+     */
+    private void healCatBasket(SkywatchQuestData quest) {
+        // ONCE per world, unlike the beacon. The beacon is unbreakable and
+        // healing it can never mint anything; the basket is ordinary furniture
+        // with no recipe anywhere, so re-placing it on every empty tile would
+        // turn a quest reward into a ten-second farm.
+        if (quest.basketPlaced || SkyRegistry.catBasketID <= 0
+                || !this.regionManager.isTileLoaded(quest.basketX, quest.basketY)) {
+            return;
+        }
+        // Only ever fill an EMPTY tile: a player who put something of their own
+        // in the tower keeps it (and the flag is set either way, so we do not
+        // come back and argue about it every ten seconds).
+        if (this.getObjectID(quest.basketX, quest.basketY) == 0) {
+            setQuestObject(quest.basketX, quest.basketY, SkyRegistry.catBasketID);
+        }
+        quest.basketPlaced = true;
+    }
+
+    private void setQuestObject(int tileX, int tileY, int objectID) {
+        this.setObject(tileX, tileY, objectID);
         if (this.getServer() != null) {
             this.getServer().network.sendToClientsWithTile(
-                    new necesse.engine.network.packet.PacketChangeObject(this, 0, quest.beaconX, quest.beaconY, wanted),
-                    this, quest.beaconX, quest.beaconY);
+                    new necesse.engine.network.packet.PacketChangeObject(this, 0, tileX, tileY, objectID),
+                    this, tileX, tileY);
         }
     }
 
@@ -203,6 +248,12 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
         }
         if (!quest.catsSpawned && quest.spirePlaced) {
             this.spawnSpireCats(quest);
+        }
+        // Immediately, not in ten seconds' time: the spire's own regions are
+        // loaded right now, and an arriving player should never see the tower
+        // without its beacon or its cat basket.
+        if (quest.spirePlaced) {
+            this.healQuestStructure(quest);
         }
     }
 

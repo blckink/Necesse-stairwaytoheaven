@@ -45,8 +45,22 @@ final class SkyItems {
 
         // Forage food (v0.2.6): sky berries, eaten raw or composted like
         // vanilla forage crops (sugarbeet pattern).
+        //
+        // ...and, since v0.7, ANIMAL FEED. GrainItem is a FoodMatItem subclass
+        // that adds exactly one thing: it is the class vanilla's husbandry
+        // system recognises as food. HusbandryMob.canFeed is
+        // `item.item instanceof GrainItem` and FeedingTroughObjectEntity's
+        // inventory filter is the same check (jar 1.3.2,
+        // FeedingTroughObjectEntity.java:182) — a hard class test with no
+        // registry or tag behind it, so wheat was the ONLY thing in the game
+        // that could go in a trough. A player who caught Cloud Lambs in the sky
+        // asked "was muss in Trog bei wolkenschafen?" and the honest answer was
+        // "surface wheat, there is nothing up here". Now the berry that grows
+        // on Skyreach cloudberry bushes is feed, in the trough and in hand.
+        // Everything the berry already was — food, spoil timer, value, icon,
+        // both locales — is inherited unchanged.
         ItemRegistry.registerItem("cloudberry",
-                new necesse.inventory.item.placeableItem.consumableItem.food.FoodMatItem(250, Item.Rarity.NORMAL)
+                new necesse.inventory.item.placeableItem.consumableItem.food.GrainItem(250, Item.Rarity.NORMAL)
                         .spoilDuration(480), 3.0F, true);
 
         // v0.3: Veil materials
