@@ -285,20 +285,21 @@ public final class SkyTerrainPainter {
     }
 
     /**
-     * SURFACE code -> ground tile. Road, apron and court are paved; a garden
-     * keeps the terrain it grew on and only loses its wild growth.
+     * SURFACE code -> ground tile. Two materials build everything: one paving
+     * stone for the whole road system and its courts, and the Marble Checker as
+     * a small high-contrast accent for inlay bands and monument plinths. A
+     * garden keeps the terrain it grew on and only loses its wild growth.
      */
     public static int builtTile(int surface, int naturalTileID) {
-        if (surface == SkyLandscape.SURFACE_ROAD || surface == SkyLandscape.SURFACE_APRON) {
+        if (surface == SkyLandscape.SURFACE_ROAD
+                || surface == SkyLandscape.SURFACE_APRON
+                || surface == SkyLandscape.SURFACE_COURT) {
             return SkyRegistry.skyroadTileID != 0 ? SkyRegistry.skyroadTileID : naturalTileID;
         }
-        if (surface == SkyLandscape.SURFACE_COURT) {
-            return SkyRegistry.skycourtTileID != 0 ? SkyRegistry.skycourtTileID : naturalTileID;
-        }
-        if (surface == SkyLandscape.SURFACE_PLINTH) {
+        if (surface == SkyLandscape.SURFACE_INLAY || surface == SkyLandscape.SURFACE_PLINTH) {
             return SkyRegistry.skyplinthTileID != 0 ? SkyRegistry.skyplinthTileID : naturalTileID;
         }
-        return naturalTileID;
+        return naturalTileID;                    // SURFACE_GARDEN keeps its soil
     }
 
     /**

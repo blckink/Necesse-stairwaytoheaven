@@ -155,17 +155,13 @@ public final class SkyRegistry {
      */
     public static int skyroadTileID;
     /**
-     * Formal floor of a designed place. Vanilla {@code stonebrickfloor}: laid
-     * masonry that reads as built without shouting.
+     * The mod's Marble Checker, used ONLY as an accent: monument plinths and
+     * the decorative inlay bands inside a court.
      *
-     * The first calibration render used the mod's Marble Checker here and a
-     * 28-tile-wide black-and-white chequerboard swallowed the whole screen —
-     * exactly the "carpet the world" failure this pass exists to avoid. The
-     * checker is now an accent (see {@link #skyplinthTileID}), which is what a
-     * chequered floor is for.
+     * The first calibration render paved whole courts with it and a 26-tile
+     * chequerboard swallowed the screen — exactly the "carpet the world"
+     * failure this pass exists to avoid. A chequered floor is a highlight.
      */
-    public static int skycourtTileID;
-    /** The 3x3 plinth a monument or instrument stands on — Marble Checker. */
     public static int skyplinthTileID;
 
     // Props the built landscape composes with (registered in SkyBuildingSet).

@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import stairwaytoheaven.SkyRegistry;
+import stairwaytoheaven.worldgen.SkyLandscape;
 import stairwaytoheaven.worldgen.SkyOrigin;
 import stairwaytoheaven.worldgen.SkyTerrainPainter;
 
@@ -44,7 +45,8 @@ public class SkyMapDump {
         int width = Integer.parseInt(args[3]);
         int height = Integer.parseInt(args[4]);
         String out = args[5];
-        boolean relativeToOrigin = args.length > 6 && args[6].equals("origin");
+        String mode = args.length > 6 ? args[6] : "world";
+        boolean relativeToOrigin = mode.equals("origin") || mode.equals("station");
 
         assignSyntheticIDs();
 
@@ -52,6 +54,19 @@ public class SkyMapDump {
         if (relativeToOrigin) {
             x0 += origin.x;
             y0 += origin.y;
+        }
+        if (mode.equals("station")) {
+            // Frame the screen on a real designed place rather than a random
+            // patch: "is this composition legible" is the whole question.
+            int[] place = SkyLandscape.designedPlaceNear(seed, x0, y0, origin.x, origin.y, 4);
+            if (place == null) {
+                System.out.println("no designed place near " + x0 + "," + y0);
+                System.exit(1);
+            }
+            System.out.println("framing designed place kind=" + place[2] + " radius=" + place[3]
+                    + " at " + place[0] + "," + place[1]);
+            x0 = place[0] - width / 2;
+            y0 = place[1] - height / 2;
         }
 
         try (BufferedWriter w = new BufferedWriter(new FileWriter(out))) {
@@ -105,7 +120,6 @@ public class SkyMapDump {
         }
         // Readable aliases for what those two actually resolve to in game.
         NAMES.put(SkyRegistry.skyroadTileID, "skyroad");
-        NAMES.put(SkyRegistry.skycourtTileID, "skycourt");
         NAMES.put(SkyRegistry.skyplinthTileID, "skyplinth");
     }
 }

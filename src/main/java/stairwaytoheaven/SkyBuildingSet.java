@@ -187,7 +187,6 @@ final class SkyBuildingSet {
      */
     static void resolveWorldgenMaterials() {
         SkyRegistry.skyroadTileID = TileRegistry.getTileID("snowstonepathtile");
-        SkyRegistry.skycourtTileID = TileRegistry.getTileID("stonebrickfloor");
         SkyRegistry.skyplinthTileID = SkyRegistry.marbleCheckerID;
     }
 

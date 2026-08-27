@@ -42,7 +42,6 @@ TERRAIN = {
     "skystoneTile": ("mod", "skystone_splat.png", "splat"),
     "stormslate": ("mod", "stormslate_splat.png", "splat"),
     "mistsea": ("mod", "mistsea_shallow_splat.png", "splat"),
-    "skycourt": ("game", "stonebrickfloor_splat.png", "splat"),
     "skyplinth": ("mod", "marblechecker.png", "checker"),
     # vanilla snowstonepath.png: EdgedTiledTexture, body cells live at x >= 64
     "skyroad": ("game", "snowstonepath.png", "edged"),
@@ -133,7 +132,14 @@ def terrain_sprite(name, x, y):
     return img.crop((64, 0, 64 + TILE, TILE))
 
 
-def object_sprite(name, x, y):
+# What a fence links to, per FenceObject.attachesToObject: other fences, walls
+# and rocks. Needed because a lone post and a connected railing are completely
+# different amounts of visual mass, and the railing is the one being judged.
+FENCE_LINKS = {"skyironFence", "skystoneBrickWall", "nightfellWall",
+               "skystoneRock", "aetheriumRock", "fulguriteRock", "prismshardRock"}
+
+
+def object_sprite(name, x, y, neighbours=None):
     spec = OBJECTS.get(name)
     if spec is None or spec[0] is None:
         return None
@@ -146,7 +152,20 @@ def object_sprite(name, x, y):
         v = hash2(x, y, 3) % variants
         return img.crop((v * TILE, 3 * 16, (v + 1) * TILE, 3 * 16 + 48)), 48 - TILE
     if mode == "fence":
-        return img.crop((0, 0, TILE, img.height)), img.height - TILE
+        # FenceObject.addDrawables: column 0 is the post, 1/2 the vertical
+        # connectors, 3 left, 4 right; all bottom-anchored on the tile.
+        top, bot, left, right = neighbours or (None, None, None, None)
+        cell = Image.new("RGBA", (TILE, img.height), (0, 0, 0, 0))
+        if top in FENCE_LINKS:
+            cell.alpha_composite(img.crop((TILE, 0, TILE * 2, img.height)))
+        cell.alpha_composite(img.crop((0, 0, TILE, img.height)))
+        if bot in FENCE_LINKS:
+            cell.alpha_composite(img.crop((TILE * 2, 0, TILE * 3, img.height)))
+        if left in FENCE_LINKS:
+            cell.alpha_composite(img.crop((TILE * 3, 0, TILE * 4, img.height)))
+        if right in FENCE_LINKS:
+            cell.alpha_composite(img.crop((TILE * 4, 0, TILE * 5, img.height)))
+        return cell, img.height - TILE
     if mode == "wall":
         # Wall sheets are connection atlases; cell (0,1) is a plain body block.
         return img.crop((0, TILE, TILE, TILE * 2)), 0
@@ -178,9 +197,15 @@ def render(dump_path, out_path, scale=1):
                 img.alpha_composite(sprite, (rx * TILE, ry * TILE))
     # Objects after all terrain, in row order, so taller sprites overlap the
     # row behind them exactly like the game's sorted drawable list does.
+    def obj(rx, ry):
+        if 0 <= ry < h and 0 <= rx < w:
+            return rows[ry][rx][1]
+        return None
+
     for ry, row in enumerate(rows):
         for rx, cell in enumerate(row):
-            got = object_sprite(cell[1], x0 + rx, y0 + ry)
+            got = object_sprite(cell[1], x0 + rx, y0 + ry,
+                                (obj(rx, ry - 1), obj(rx, ry + 1), obj(rx - 1, ry), obj(rx + 1, ry)))
             if got is None:
                 continue
             sprite, overhang = got
@@ -220,9 +245,9 @@ def main():
     print("  land %d/%d (%.0f%%)   built %d (%.1f%% of land)"
           % (land, total, 100.0 * land / max(1, total), built, 100.0 * built / max(1, land)))
     road = tiles.get("skyroad", 0)
-    court = tiles.get("skycourt", 0)
-    print("  paved: road/apron %d (%.1f%% of land)  court %d (%.1f%%)"
-          % (road, 100.0 * road / max(1, land), court, 100.0 * court / max(1, land)))
+    inlay = tiles.get("skyplinth", 0)
+    print("  paved %d (%.1f%% of land)  chequered accent %d (%.1f%%)"
+          % (road, 100.0 * road / max(1, land), inlay, 100.0 * inlay / max(1, land)))
     top = ", ".join("%s x%d" % kv for kv in objects.most_common(10))
     print("  objects: %s" % (top or "none"))
 

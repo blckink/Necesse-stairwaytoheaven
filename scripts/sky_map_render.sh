@@ -41,6 +41,14 @@ for SEED in $SEEDS; do
     java -cp "$CP:$OUT" SkyMapDump "$SEED" -240 190 40 22 "$OUT/far2-$SEED.txt" origin
     python3 "$REPO_DIR/scripts/sky_map_render.py" "$OUT/far2-$SEED.txt" "$OUT/screen-far2-$SEED.png"
 
+    # One screen framed on a designed place, and on another one further out:
+    # the composition either reads at 40x22 or it does not exist.
+    java -cp "$CP:$OUT" SkyMapDump "$SEED" 0 0 40 22 "$OUT/place-$SEED.txt" station
+    python3 "$REPO_DIR/scripts/sky_map_render.py" "$OUT/place-$SEED.txt" "$OUT/screen-place-$SEED.png"
+
+    java -cp "$CP:$OUT" SkyMapDump "$SEED" 260 -180 40 22 "$OUT/place2-$SEED.txt" station
+    python3 "$REPO_DIR/scripts/sky_map_render.py" "$OUT/place2-$SEED.txt" "$OUT/screen-place2-$SEED.png"
+
     # Topology only: does the network connect, and are the gaps sane?
     java -cp "$CP:$OUT" SkyMapDump "$SEED" -200 -200 400 400 "$OUT/wide-$SEED.txt" origin
     python3 "$REPO_DIR/scripts/sky_map_render.py" "$OUT/wide-$SEED.txt" "$OUT/wide-$SEED.png"

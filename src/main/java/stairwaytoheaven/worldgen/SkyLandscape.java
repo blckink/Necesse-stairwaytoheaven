@@ -64,22 +64,34 @@ public final class SkyLandscape {
     // Result codes
     // ------------------------------------------------------------------
 
+    // Surface codes double as their own priority: a tile takes the HIGHEST
+    // code anything claiming it asks for.
+    //
+    // One paving stone builds the whole network — roads, aprons and courts —
+    // because it is one civilisation's road system and it should read as one.
+    // What separates a court from a road is composition (a railing, a lamp
+    // ring, a monument, planting), not a second floor material. The first
+    // calibration render tried a distinct court floor and produced a
+    // 26-tile-wide grey lake around the spire.
+
     /** Nothing built here — the natural painter owns this tile. */
     public static final int SURFACE_NONE = 0;
     /** Designed planting: keeps the natural ground, but no wild growth. */
     public static final int SURFACE_GARDEN = 1;
-    /** Formal floor of a designed place. */
+    /** Open paved ground of a designed place. */
     public static final int SURFACE_COURT = 2;
     /** Paved like a road, but allowed to carry road furniture. */
     public static final int SURFACE_APRON = 3;
+    /** Decorative chequered inlay: a band or platform inside a court. */
+    public static final int SURFACE_INLAY = 4;
     /** The road surface itself. Always kept walkable and prop-free. */
-    public static final int SURFACE_ROAD = 4;
+    public static final int SURFACE_ROAD = 5;
     /**
      * The centre of a designed place. Ranks ABOVE the road on purpose: the
      * roads converge on it and stop there, instead of paving straight over the
      * monument they were built to reach.
      */
-    public static final int SURFACE_PLINTH = 5;
+    public static final int SURFACE_PLINTH = 6;
 
     public static final int PROP_NONE = 0;
     /** Deliberately empty: a designed place needs its open ground. */
@@ -151,6 +163,9 @@ public final class SkyLandscape {
     /** The Warden's Forecourt: paved apron around the spire. */
     public static final float HUB_INNER_CLEAR = 5.0F;
     public static final float HUB_COURT_RADIUS = 13.0F;
+    /** Chequered inlay ring inside the forecourt, so it is not one flat field. */
+    public static final float HUB_INLAY_INNER = 8.5F;
+    public static final float HUB_INLAY_OUTER = 10.0F;
     /** Radius of the ring of candelabra standing on the forecourt. */
     public static final float HUB_LAMP_RADIUS = 11.0F;
     public static final int HUB_LAMP_COUNT = 6;
@@ -301,7 +316,15 @@ public final class SkyLandscape {
 
         // --- the Warden's Forecourt ---
         if (hubDist <= HUB_COURT_RADIUS + 0.5F) {
-            surface = Math.max(surface, hubDist > HUB_COURT_RADIUS - 0.5F ? SURFACE_APRON : SURFACE_COURT);
+            int hubSurface;
+            if (hubDist > HUB_COURT_RADIUS - 0.5F) {
+                hubSurface = SURFACE_APRON;                  // the railing line
+            } else if (hubDist >= HUB_INLAY_INNER && hubDist <= HUB_INLAY_OUTER) {
+                hubSurface = SURFACE_INLAY;                  // chequered ring
+            } else {
+                hubSurface = SURFACE_COURT;
+            }
+            surface = Math.max(surface, hubSurface);
             if (prop == PROP_NONE) {
                 if (hubDist > HUB_COURT_RADIUS - 0.5F) {
                     prop = PROP_FENCE;                       // the forecourt wall
@@ -331,6 +354,54 @@ public final class SkyLandscape {
     // ------------------------------------------------------------------
     // Lattice helpers
     // ------------------------------------------------------------------
+
+    /**
+     * The designed place nearest to (fromX, fromY), searching outward through
+     * the lattice, or null if there is none within {@code cellRadius} cells.
+     *
+     * Used by the offline map renderer to frame a screen on a real waystation
+     * instead of a random patch of sky, and by /skyreachstatus to assert that
+     * the world the server generated actually contains the one the field
+     * predicts. Not on any generation hot path.
+     *
+     * @return {@code {tileX, tileY, kind, radius}}
+     */
+    public static int[] designedPlaceNear(int seed, int fromX, int fromY,
+                                          int originX, int originY, int cellRadius) {
+        int cellX = Math.floorDiv(fromX, ROAD_CELL);
+        int cellY = Math.floorDiv(fromY, ROAD_CELL);
+        int hubCellX = Math.floorDiv(originX, ROAD_CELL);
+        int hubCellY = Math.floorDiv(originY, ROAD_CELL);
+        int[] best = null;
+        long bestDist = Long.MAX_VALUE;
+        for (int oy = -cellRadius; oy <= cellRadius; oy++) {
+            for (int ox = -cellRadius; ox <= cellRadius; ox++) {
+                int cx = cellX + ox;
+                int cy = cellY + oy;
+                if (cx == hubCellX && cy == hubCellY) {
+                    continue;                       // the hub has the forecourt
+                }
+                if (SkyNoise.hash(seed + SALT_STATION, cx, cy) >= STATION_CHANCE) {
+                    continue;
+                }
+                int kind = (int) (SkyNoise.hash(seed + SALT_STATION + 1, cx, cy) * 3.0F);
+                int radius = STATION_MIN_RADIUS
+                        + (int) (SkyNoise.hash(seed + SALT_STATION + 2, cx, cy) * STATION_RADIUS_SPAN);
+                int px = Math.round(cx * ROAD_CELL
+                        + (NODE_INSET + SkyNoise.hash(seed + SALT_ROAD_NODE, cx, cy) * NODE_SPAN) * ROAD_CELL);
+                int py = Math.round(cy * ROAD_CELL
+                        + (NODE_INSET + SkyNoise.hash(seed + SALT_ROAD_NODE + 1, cx, cy) * NODE_SPAN) * ROAD_CELL);
+                long dx = px - fromX;
+                long dy = py - fromY;
+                long d = dx * dx + dy * dy;
+                if (d < bestDist) {
+                    bestDist = d;
+                    best = new int[]{px, py, kind, radius};
+                }
+            }
+        }
+        return best;
+    }
 
     private static int nodeIndex(int ox, int oy) {
         return ((ox + 1) << 2) | (oy + 1);
@@ -599,14 +670,15 @@ public final class SkyLandscape {
             if (ax == ay && ax == radius - 2) {
                 return pack(SURFACE_APRON, PROP_LAMP);
             }
+            int field = mx <= radius - 4 ? SURFACE_INLAY : SURFACE_COURT;
             float fill = SkyNoise.tileRoll(seed, tileX, tileY, SALT_COURT);
             if (fill < 0.055F) {
-                return pack(SURFACE_COURT, PROP_RUBBLE);
+                return pack(field, PROP_RUBBLE);
             }
             if (fill < 0.095F) {
-                return pack(SURFACE_COURT, PROP_ACCENT);
+                return pack(field, PROP_ACCENT);
             }
-            return pack(SURFACE_COURT, PROP_CLEAR);
+            return pack(field, PROP_CLEAR);
         }
         // kind 2 — Overlook Terrace
         int w = radius;
@@ -629,11 +701,12 @@ public final class SkyLandscape {
             if (ax == w - 5 && ay == h - 3) {
                 return pack(SURFACE_COURT, PROP_ACCENT);
             }
+            int field = ay <= h - 4 ? SURFACE_INLAY : SURFACE_COURT;
             float fill = SkyNoise.tileRoll(seed, tileX, tileY, SALT_COURT);
             if (fill < 0.05F) {
-                return pack(SURFACE_COURT, PROP_RUBBLE);
+                return pack(field, PROP_RUBBLE);
             }
-            return pack(SURFACE_COURT, PROP_CLEAR);
+            return pack(field, PROP_CLEAR);
         }
         if (ay == 0) {
             return pack(SURFACE_ROAD, PROP_NONE);                // the way in
