@@ -18,7 +18,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import palette  # noqa: E402
 import gen_tiles  # noqa: E402
-import gen_rocks  # noqa: E402
+import gen_rocks
+import gen_serpent  # noqa: E402
 import gen_objects  # noqa: E402
 import gen_mobs  # noqa: E402
 import gen_armor
@@ -151,6 +152,8 @@ def main():
     gen_mobs.gen_stormwisp(f"{out}/mobs/stormwisp.png")
     gen_mobs.gen_skystonegolem(f"{out}/mobs/skystonegolem.png")
     gen_mobs.gen_icons(f"{out}/mobs/icons")
+    # The Mistserpent: worm sheet, dive mask, shadow and bestiary icon.
+    gen_serpent.gen_mistserpent(f"{out}/mobs", f"{out}/mobs/icons")
 
     # NPCs: the Sky Warden and the spire cats
     gen_npcs.gen_warden(f"{out}/mobs/skywarden.png")

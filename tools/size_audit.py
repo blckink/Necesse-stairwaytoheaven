@@ -59,6 +59,8 @@ PAIRS = [
     # of the same footprint.
     ("objects/aetheriumore.png", ("auto", 32, 32),
      "objects/ironore.png", ("auto", 32, 32), "ore overlay (densest 32px cell)"),
+    ("mobs/mistserpent.png", ("auto", 64, 64),
+     "mobs/sandworm.png", ("auto", 64, 64), "worm mob (densest 64px frame)"),
     ("mobs/galehound.png", ("auto", 64, 64),
      "mobs/boar.png", ("auto", 64, 64), "quadruped mob (densest 64px frame)"),
     ("mobs/skystonegolem.png", ("auto", 64, 64),
