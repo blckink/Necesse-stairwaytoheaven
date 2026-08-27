@@ -33,6 +33,7 @@ import gen_walls  # noqa: E402
 import gen_props  # noqa: E402
 import gen_furniture  # noqa: E402
 import gen_trees  # noqa: E402
+import gen_skyfurniture  # noqa: E402
 
 
 def main():
@@ -220,6 +221,9 @@ def main():
     gen_objects.gen_cragbloom_item(f"{out}/items/cragbloom.png")
     gen_objects.gen_skyscree(f"{out}/objects/skyscree.png")
     gen_objects.gen_skyscree_item(f"{out}/items/skyscree.png")
+
+    # Skywatch furniture family, on the vanilla furniture base classes
+    gen_skyfurniture.generate(f"{out}/objects", f"{out}/items")
 
     gen_furniture.gen_v2_item_icons(f"{out}/items")
     gen_furniture.gen_set_icons(f"{out}/items")
