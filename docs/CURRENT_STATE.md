@@ -35,14 +35,27 @@ PNG in `src/main/resources/`. Editing a PNG directly is always wrong.
 - Mod loads on a dedicated server; Skyreach and Veil generate; no log errors.
 - World survives a server restart: spire returns at identical coordinates,
   Warden and both cats still present (asserted every test run).
-- Warden settler registration resolves (`/skyreachstatus` reports
-  `wardensettler=WardenSettler`).
+- The Warden's recruit path is live per mob, not just registered:
+  `/skyreachstatus` reports
+  `recruit check: skywarden settler=WardenSettler price=coinx100000` and
+  `recruit check: wardensettler settler=WardenSettler price=free`. Those two
+  values are exactly what was null before, and null is what made vanilla's
+  recruit button impossible.
+- Every registered ID resolves to a display name, including the key classes
+  the engine builds rather than our source writing down:
+  `name check: skywarden=Test the Sky Warden | wardensettler=Test the Sky Warden`.
 - Siggi and Peanut are unkillable and save-persistent by native means.
 - `python3 tools/size_audit.py` reports 0 flags.
 - Marble Checker floor no longer crashes clients (`ca2ddad`); `scripts/tile_sprite_check.sh`
   proves it headlessly.
-- `python3 tools/locale_audit.py` reports 77 registered IDs all named in both
-  locales.
+- `python3 tools/locale_audit.py` reports 129 registered IDs and 42 literal
+  keys named in both locales, and fails if a new registration helper appears
+  that it does not know how to see through.
+- `python3 tools/tile_behaviour_audit.py` reports 13 tiles (5 floors, 6
+  terrain, 2 liquid) matching their declared role and 949 splat cells inside
+  the bands measured off vanilla's own sheets.
+- `python3 tools/sheet_format_audit.py` reports the 16 wall-sheet door cells
+  at the extents the engine draws them at.
 - v0.6 sprint gates (2026-08-25): generator output byte-identical on
   regeneration, `buildModJar` builds, `scripts/integration_test.sh` passes on
   this Mac against the Downloads dedicated-server install.
