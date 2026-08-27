@@ -380,3 +380,34 @@ as nothing while looking entirely plausible (the filename differs only subtly:
 The stock task is now disabled and `assemble` depends on `buildModJar`, so
 `buildModJar`, `assemble` and `build` all produce the same single correct jar
 and `build/libs` stays empty. Verified by running all three.
+
+## Some registered IDs appear nowhere in the source
+
+**[jar]** `WallObject.registerWallObjects(prefix, ...)` registers **six**
+objects from one call: `<prefix>wall`, `<prefix>door`, `<prefix>dooropen`,
+`<prefix>doorlocked`, `<prefix>doorunlocked` and `<prefix>window`. Not one of
+those strings is written anywhere in our source, so a source-scanning audit is
+blind to all of them. That is how the Skystone Brick window shipped with no
+display name and the engine's error icon: nothing was checking an ID nobody had
+typed.
+
+**[jar]** Vanilla names only three of the six in its own `en.lang` — the wall,
+the door and the locked door. The open and unlocked states inherit their name
+from their counterpart at runtime, and vanilla leaves its window unnamed
+because vanilla windows are not separately craftable. Ours are, so ours are
+named.
+
+**[jar]** Vanilla ships `items/` icons for exactly the three obtainable pieces:
+`stonewall.png`, `stonedoor.png`, `stonewindow.png`.
+
+**[run]** `tools/locale_audit.py` now derives the wall-set IDs from each
+`registerWallObjects` call, and separately requires that everything appearing
+as a `new Recipe("<id>", ...)` output has an `items/<id>.png` — because a
+craftable with no icon is what puts an error texture in the crafting menu.
+Floor tiles and rock nodes are exempt: `TerrainSplatterTile`, `RockObject` and
+`RockOreObject` all override `generateItemTexture` and build their icon
+themselves.
+
+The general lesson: audit what the registry actually contains, not what the
+source says it registers. A runtime dump of the mod's ID block would be
+stronger still than the current source-plus-derivation approach.

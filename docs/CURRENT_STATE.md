@@ -113,6 +113,10 @@ Ordered by the player's own priority. Full detail in `docs/PLAYTEST_LOG.md`.
 - Aurora plant placement was addressed by colonies (`7ef6486`); the new
   shard/starfall accents await player judgement.
 
+- The Veil's ghost lantern object sprite is thin: its item icon carries 77
+  opaque px against vanilla `copperstreetlamp`'s 240. The error icon is gone,
+  but the sprite itself wants more mass.
+
 **Deferred**
 - Warden's shop is empty. The building set is fully craftable at a workstation,
   so nothing is missing — but the recruited Warden currently does nothing.

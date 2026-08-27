@@ -410,6 +410,19 @@ def gen_set_icons(dir_path):
         mini_from(f"{obj}/{wall}.png", (0, 64, 32, 96), f"{wall}.png")
     mini_from(f"{obj}/skystonebrickwall.png", (96, 24, 128, 120), "skystonebrickdoor.png")
     mini_from(f"{obj}/nightfellwall.png", (96, 24, 128, 120), "nightfelldoor.png")
+    # Windows: the pane insert sits at x 64-96 of the wall sheet. Vanilla ships
+    # items/stonewindow.png alongside its wall and door, and WallObject's
+    # registerWallObjects creates a <prefix>window object for every set -- an ID
+    # that appears nowhere in our source, which is how both of these went
+    # missing and showed the engine error icon in the crafting menu.
+    mini_from(f"{obj}/skystonebrickwall.png", (64, 0, 96, 32), "skystonebrickwindow.png")
+    mini_from(f"{obj}/nightfellwall.png", (64, 0, 96, 32), "nightfellwindow.png")
+    # Veil pieces: both are craftable and both were falling through to the
+    # engine's error icon.
+    # The lantern head only: the full 80px post scaled into a 32px icon left a
+    # 6px-wide stick (48 opaque px against vanilla copperstreetlamp's 240).
+    mini_from(f"{obj}/ghostlantern.png", (6, 14, 27, 52), "ghostlantern.png")
+    mini_from(f"{obj}/seancecircle.png", (0, 8, 32, 64), "seancecircle.png")
     mini_from(f"{obj}/skyironfence.png", (0, 20, 32, 64), "skyironfence.png")
     mini_from(f"{obj}/skyironfencegate.png", (32, 20, 64, 64), "skyironfencegate.png")
 

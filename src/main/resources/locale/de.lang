@@ -80,6 +80,14 @@ skyballoon=Verlorener Wetterballon
 aeronautwreck=Luftschiffer-Wrack
 skyparcel=Himmelspost-Paket
 wardencandelabra=Kandelaber des Hüters
+skystonebrickwall=Himmelsstein-Ziegelwand
+skystonebrickdoor=Himmelsstein-Ziegeltür
+skystonebrickdoorlocked=Verschlossene Himmelsstein-Ziegeltür
+skystonebrickwindow=Himmelsstein-Ziegelfenster
+nightfellwall=Nightfell-Wand
+nightfelldoor=Nightfell-Tür
+nightfelldoorlocked=Verschlossene Nightfell-Tür
+nightfellwindow=Nightfell-Fenster
 [item]
 nimbuswood=Nimbusholz
 charwood=Kohlenholz

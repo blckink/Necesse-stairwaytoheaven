@@ -80,6 +80,14 @@ skyballoon=Lost Weather Balloon
 aeronautwreck=Aeronaut Wreckage
 skyparcel=Sky-Mail Parcel
 wardencandelabra=Warden's Candelabra
+skystonebrickwall=Skystone Brick Wall
+skystonebrickdoor=Skystone Brick Door
+skystonebrickdoorlocked=Locked Skystone Brick Door
+skystonebrickwindow=Skystone Brick Window
+nightfellwall=Nightfell Wall
+nightfelldoor=Nightfell Door
+nightfelldoorlocked=Locked Nightfell Door
+nightfellwindow=Nightfell Window
 [item]
 nimbuswood=Nimbuswood
 charwood=Charwood

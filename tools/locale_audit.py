@@ -25,18 +25,57 @@ REGISTRARS = {
 }
 
 
-def registered_ids():
-    found = {section: set() for section in REGISTRARS.values()}
+def source_text():
+    out = []
     for root, _dirs, files in os.walk(SRC):
         for name in files:
-            if not name.endswith(".java"):
-                continue
-            with open(os.path.join(root, name), encoding="utf-8") as handle:
-                text = handle.read()
-            for call, section in REGISTRARS.items():
-                for match in re.finditer(call + r'\(\s*"([^"]+)"', text):
-                    found[section].add(match.group(1))
+            if name.endswith(".java"):
+                with open(os.path.join(root, name), encoding="utf-8") as handle:
+                    out.append(handle.read())
+    return "\n".join(out)
+
+
+def registered_ids(text):
+    found = {section: set() for section in REGISTRARS.values()}
+    for call, section in REGISTRARS.items():
+        for match in re.finditer(call + r'\(\s*"([^"]+)"', text):
+            found[section].add(match.group(1))
+
+    # Wall sets register SIX object IDs from one call, and not one of them
+    # appears as a literal in our source. That is how the Skystone Brick window
+    # shipped nameless and with the engine's error icon: nothing was scanning
+    # for an ID nobody had written down. Vanilla names the wall, the door and
+    # the locked door (see its own en.lang) and leaves the open/unlocked states
+    # to inherit; ours also names the window, because ours is craftable.
+    for match in re.finditer(r'registerWallObjects\(\s*"([^"]+)"', text):
+        prefix = match.group(1)
+        found["object"].update({prefix + suffix
+                                for suffix in ("wall", "door", "doorlocked", "window")})
     return found
+
+
+def recipe_outputs(text):
+    """Everything the player can craft — it needs a name AND an icon."""
+    return {m.group(1) for m in re.finditer(r'new Recipe\(\s*"([^"]+)"', text)}
+
+
+# Item textures these resolve through a class override rather than
+# items/<id>.png: RockObject and RockOreObject build theirs from the rock/ore
+# texture name. Verified against the decompiled sources.
+TEXTURE_BY_CLASS = {
+    "skystonerock", "aetheriumrock", "fulguriterock", "prismshardrock", "veilrock",
+}
+
+
+def resolves_texture_by_class(output, ids):
+    """True when the engine builds this item's icon itself.
+
+    TerrainSplatterTile.generateItemTexture crops the tile's own texture and
+    merges tiles/itemmask, so every floor tile is covered without an items/
+    file. RockObject and RockOreObject resolve through their rock/ore texture
+    name. Both verified against the decompiled sources.
+    """
+    return output in TEXTURE_BY_CLASS or output in ids["tile"]
 
 
 def locale_keys(path):
@@ -52,7 +91,8 @@ def locale_keys(path):
 
 
 def main():
-    ids = registered_ids()
+    text = source_text()
+    ids = registered_ids(text)
     langs = {
         name: locale_keys(os.path.join(LOCALE, name + ".lang"))
         for name in ("en", "de")
@@ -77,6 +117,17 @@ def main():
             problems += 1
         for key in sorted(de_only):
             print(f"!! [{section}] {key} exists in de.lang but not en.lang")
+            problems += 1
+
+    # Anything craftable must also have an icon, or the crafting menu shows the
+    # engine's error texture where the item should be.
+    for output in sorted(recipe_outputs(text)):
+        if resolves_texture_by_class(output, ids):
+            continue
+        if not os.path.exists(os.path.join(REPO, "src", "main", "resources",
+                                           "items", output + ".png")):
+            print(f"!! craftable {output} has no items/{output}.png "
+                  f"-- the crafting menu would show an error icon")
             problems += 1
 
     total = sum(len(v) for v in ids.values())
