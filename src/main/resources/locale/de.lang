@@ -215,6 +215,7 @@ wardentalk5=Unten habt ihr Wetter. Hier oben haben wir Launen.
 wardentalk6=Ich habe vieles fallen sehen. Nur wenig davon kam wieder herauf.
 wardenmovedin=<settlement> hat einen neuen Bewohner - der Warden wartet dort. Gib ihm ein Bett, dann bleibt er.
 wardencatsdone=Beide. Unter einem Dach. Damit ist der Turm ordentlich geschlossen - nimm den Korb, sie kennen ihn.
+wardenanchordone=Metall und Stein, und die alte Insel hört auf zu wandern. Sie wird da sein, wo du sie verlassen hast. Das zählt, später.
 
 [quests]
 swhfindspiretitle=Der Ruf des Wardens
@@ -228,7 +229,7 @@ swhcatstitle=Die Turmkatzen
 swhcatsdesc=Zwei Katzen streunen noch durch Sturm und Bänke. Ein Wolkenzupf-Leckerli überzeugt sie vom Heimweg.
 swhcatblack=Lock die schwarze Katze heim (streunt im Sturmschleier)
 swhcattabby=Lock die getigerte Katze heim (streunt in den Aurorabänken)
-swhcatsreward=Katzenkorb + Silberglöckchen
+swhcatsreward=Katzenkorb + 2x Flackerlicht-Girlande
 swhanchortitle=Verankere die Insel
 swhanchordesc=Die Turminsel driftet. Der Warden kann sie verankern - mit deinem Metall und Stein.
 swhanchorreward=Skywatch-Banner + 5x Aurorablatt

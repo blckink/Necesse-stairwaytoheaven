@@ -160,31 +160,72 @@ public class SkyWardenMob extends HumanShop {
                         server, stairwaytoheaven.quest.FindSpireQuest.class);
                 stairwaytoheaven.quest.SkyQuests.giveOnce(server, client,
                         new stairwaytoheaven.quest.RecruitWardenQuest());
+                // Three short lines. The playtest note was "too much text on
+                // first contact: large bubble plus a duplicate-looking chat
+                // block, full life story" -- the life story now lives in his
+                // small talk and his recruitment pitch instead. The third line
+                // stays because it explains the windsilk; an item that appears
+                // in the inventory unannounced is worse than one more sentence.
                 say(client, "wardenintro1");
                 say(client, "wardenintro2");
+                say(client, "wardenintro3");
                 give(client, "windsilk", 6);
             }
         }
-        // Chapter close, wherever he is standing now: both cats home turns the
-        // journal entry in. The cat mechanic itself was already complete --
-        // treat, travel home, state sync -- but nothing ever handed the quest
-        // out or took it back, so it could not be seen or finished.
         if (this.isServer() && player.isServerClient()) {
-            ServerClient client = player.getServerClient();
-            stairwaytoheaven.quest.SpireCatsQuest cats = stairwaytoheaven.quest.SkyQuests
-                    .findHeld(client, stairwaytoheaven.quest.SpireCatsQuest.class);
-            if (cats != null && cats.blackHome && cats.tabbyHome) {
-                cats.complete(client);
-                cats.remove();
-                give(client, "catbasket", 1);
-                give(client, "flickerlightgarland", 2);
-                say(client, "wardencatsdone");
-            }
+            handleTurnIns(player.getServerClient());
         }
 
         // HumanShop.interact turns him to face the player, updates happiness
         // and opens the shop/recruit container.
         super.interact(player);
+    }
+
+    /**
+     * The chapters after recruitment, turned in wherever he is standing now.
+     *
+     * Every one of these quests already existed, registered and fully
+     * implemented, and none of them had ever been handed to a player or taken
+     * back — so the whole chain after first contact was invisible in game.
+     * Cats: the treat, the coax interaction, the travel-home puff and the
+     * journal sync all shipped in v0.2. Anchor: DeliverItemsQuest tracks the
+     * item counts and removes them in {@code complete} by itself.
+     *
+     * Order matters — one chapter opens the next — so this runs before
+     * HumanShop opens its window, and each turn-in is idempotent because the
+     * quest is removed as it is handed in.
+     */
+    private void handleTurnIns(ServerClient client) {
+        Server server = client.getServer();
+        stairwaytoheaven.quest.SpireCatsQuest cats = stairwaytoheaven.quest.SkyQuests
+                .findHeld(client, stairwaytoheaven.quest.SpireCatsQuest.class);
+        if (cats != null && cats.blackHome && cats.tabbyHome) {
+            cats.complete(client);
+            cats.remove();
+            give(client, "catbasket", 1);
+            give(client, "flickerlightgarland", 2);
+            say(client, "wardencatsdone");
+            stairwaytoheaven.quest.SkyQuests.giveOnce(server, client,
+                    new stairwaytoheaven.quest.AnchorDeliveryQuest());
+            return;
+        }
+
+        stairwaytoheaven.quest.AnchorDeliveryQuest anchor = stairwaytoheaven.quest.SkyQuests
+                .findHeld(client, stairwaytoheaven.quest.AnchorDeliveryQuest.class);
+        if (anchor != null && anchor.canComplete(client)) {
+            // DeliverItemsQuest.complete removes the delivered items itself.
+            anchor.complete(client);
+            anchor.remove();
+            give(client, "skywatchbanner", 1);
+            give(client, "aurorapetal", 5);
+            say(client, "wardenanchordone");
+            Level sky = server.world.levelManager.isLoaded(SkyRegistry.SKYREACH_IDENTIFIER)
+                    ? server.world.getLevel(SkyRegistry.SKYREACH_IDENTIFIER)
+                    : null;
+            if (sky != null) {
+                SkywatchQuestData.get(sky).anchorDone = true;
+            }
+        }
     }
 
     /**

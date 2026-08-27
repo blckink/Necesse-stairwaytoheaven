@@ -215,6 +215,7 @@ wardentalk5=Down there you have weather. Up here we have moods.
 wardentalk6=I have watched a great many things fall. Very few of them came back up.
 wardenmovedin=<settlement> has a new resident - the Warden is waiting there. Give him a bed and he will stay.
 wardencatsdone=Both of them. Under one roof. That is the tower closed properly - take the basket, they know it.
+wardenanchordone=Metal and stone, and the old island stops wandering. It will be where you left it. That matters, later.
 
 [quests]
 swhfindspiretitle=The Warden's Call
@@ -228,7 +229,7 @@ swhcatstitle=The Spire Cats
 swhcatsdesc=Two cats still roam the storm and the shoals. A cloud puff treat will convince them to come home.
 swhcatblack=Coax the black cat home (roams the Stormveil)
 swhcattabby=Coax the tabby cat home (roams the Aurora Shoals)
-swhcatsreward=Cat Basket + Silver Bell
+swhcatsreward=Cat Basket + 2x Flickerlight Garland
 swhanchortitle=Anchor the Island
 swhanchordesc=The spire island drifts. The Warden can anchor it - with your metal and stone.
 swhanchorreward=Skywatch Banner + 5x Aurora Petal

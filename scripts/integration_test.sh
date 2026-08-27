@@ -23,7 +23,12 @@ set -u
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 GAME_DIR="${NECESSE_GAME_DIR:?Set NECESSE_GAME_DIR to the dedicated server directory}"
 MOD_DIR="$REPO_DIR/build/jar"
-WORK_DIR="${INTEGRATION_WORK_DIR:-$REPO_DIR/build/integration-test}"
+# Unique per run. Two of these running at once used to share one directory and
+# one world: the second run's `rm -rf` pulled the world file out from under the
+# first, which then died inside WorldFile.write with a ClosedFileSystemException
+# that reads exactly like a mod bug. Parallel agents make that a normal
+# occurrence, not a corner case.
+WORK_DIR="${INTEGRATION_WORK_DIR:-$REPO_DIR/build/integration-test-$$}"
 WORLD="stairwaytest"
 
 JAVA_BIN="$GAME_DIR/jre/bin/java"
@@ -182,6 +187,9 @@ if [ "$STATUS" -eq 0 ]; then
     echo "--- skyreachstatus output ---"
     sed -n '/Skyreach OK/,/SKYREACH_STATUS_DONE/p' "$LOG1"
     echo "--- after restart ---"
-    grep -E "quest: stage=|npc check:|settler check:" "$LOG2"
+    grep -E "quest: stage=|npc check:|settler check:|recruit check:|name check:" "$LOG2"
+    # Only after the logs have been read, and only on success: a failed run's
+    # world and logs are the evidence for diagnosing it.
+    rm -rf "$WORK_DIR"
 fi
 exit "$STATUS"
