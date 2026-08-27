@@ -421,6 +421,9 @@ def recalibrate(dump):
                 for cx in range(7):
                     rows.setdefault((cx, cy), []).append(
                         cell_coverage(px, cx * CELL, cy * CELL))
+        if not rows:
+            print(f"--- vanilla {label}: no sheets found under {dump} ---")
+            continue
         print(f"--- vanilla {label} ({len(next(iter(rows.values())))} sheets) ---")
         for cy in range(3):
             for cx in range(7):
