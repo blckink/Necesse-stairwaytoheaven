@@ -14,7 +14,9 @@ from WallObject.addWallDrawOptions (the draw code is the ground truth — each
           mid pieces (small face nub at the bottom edge)
   x 64-96   window insert (2x8 cells: short high window rows 0-1,
             tall strip rows 2-7)
-  x 96-352  eight 32x128 door-frame columns (rot0..3, closed/open each)
+  x 96-352  eight 32x128 door-frame columns (rot0..3, closed/open each).
+            Every one is drawn at pos(drawX, drawY - 96), so row 96 is the
+            tile's top edge -- see the door section for the vanilla extents.
 """
 
 from px import Canvas, Rng
@@ -190,28 +192,174 @@ def _build_wall(mat, salt):
         _ceiling(c, 64, row * C, 32, C, mat, salt + 60) if row < 3 else _face(c, 64, row * C, 32, row % 2 == 1, mat, salt + 60 + row)
     window_pane(70, 3 * C + 2, 20, 4 * C - 8)
 
-    # ---- door frames (96-352): 8 columns of 32x128 ----
+    # ---- door frames (96-352): eight 32x128 cells ----
+    # WallDoorObject/WallDoorOpenObject draw EVERY one of these cells at
+    # pos(drawX, drawY - 96). Row 96 therefore lands on the tile's top edge and
+    # everything above row 96 sticks out over the tile. A wall segment only
+    # rises 16px above its own tile (its row-0 cap is drawn at drawY - 16), so
+    # a cell painted from row 0 renders a door that towers 96px -- three whole
+    # tiles -- over the wall it sits in. That is what "die Tuer ist 3x so hoch
+    # wie normale Tueren aber der Rest der Wand nicht" was.
+    #
+    # The extents below were measured off stonewall.png, which is the format's
+    # ground truth: closed head-on y88..127, closed edge-on y70..127, open
+    # edge-on y68..127, open head-on y68..127 (swung north) / y90..127 (south).
+    # Keep these. Changing a door's top row changes how far it sticks up.
+    TILE_TOP = 96
+
+    def brick_px(x, y, salt):
+        """One pixel of brick face, phase-locked to the sheet so the courses of
+        a door line up with the courses of the wall beside it."""
+        course = y // 8
+        shift = 4 if course % 2 else 0
+        if y % 8 == 7 or (x + shift) % 8 == 7:
+            return mat["face_deep"]
+        if y % 8 == 0:
+            return mat["face_hi"]
+        return mat["face_deep"] if Rng((x * 733 + y * 977) ^ salt).float() < 0.04 else mat["face"]
+
+    def cap_px(x, y, salt):
+        """One pixel of the dark top-down cap: wall thickness and thresholds."""
+        return mat["ceil_hi"] if Rng((x * 7349 + y * 12611) ^ salt).float() < 0.06 else mat["ceil"]
+
+    def plank_px(x, y, vertical):
+        """Gloomwood leaf. Plank seams run along the leaf's long axis, so a
+        head-on leaf gets vertical seams and an edge-on one horizontal."""
+        n = x if vertical else y
+        if n % 6 == 0:
+            return palette.GLOOMWOOD["deep"]
+        if n % 6 == 1:
+            return palette.GLOOMWOOD["light"]
+        return palette.GLOOMWOOD["base"]
+
+    def fill(bands, tone):
+        for y0, y1, bx0, bx1 in bands:
+            for y in range(y0, y1 + 1):
+                for x in range(bx0, bx1 + 1):
+                    c.put(x, y, tone(x, y))
+
+    def rim_arch(bands, tone=None):
+        """Light the top row of each band so a chamfered top reads as a curve.
+        Stone lintels take the wall rim; a swung leaf takes its own highlight,
+        or it reads as a lid on a chest instead of the top edge of a door."""
+        tone = mat["rim"] if tone is None else tone
+        for y0, _, bx0, bx1 in bands:
+            for x in range(bx0, bx1 + 1):
+                c.put(x, y0, tone)
+
+    def floor_line(y, x0, x1):
+        for x in range(x0, x1 + 1):
+            c.put(x, y, palette.OUTLINE)
+
+    def iron_band(y, x0, x1):
+        for x in range(x0, x1 + 1):
+            c.put(x, y, palette.IRONWORK["base"])
+            c.put(x, y + 1, palette.IRONWORK["deep"])
+
     for i in range(8):
         x0 = 96 + i * 32
+        salt_i = salt + 70 + i
+        rot = i // 2
         is_open = i % 2 == 1
-        # frame: ceiling strip on top, face pillars at the sides
-        _ceiling(c, x0, 0, 32, 24, mat, salt + 70 + i)
-        for side_x in (x0, x0 + 24):
-            _face(c, side_x, 24, 8, True, mat, salt + 80 + i)
-            for yy in range(40, 120, 16):
-                _face(c, side_x, yy, 8, (yy // 16) % 2 == 0, mat, salt + 80 + i)
+        # rot 0/2 sit in an east-west wall (we see the doorway head-on),
+        # rot 1/3 in a north-south wall (we see it edge-on) -- and opening the
+        # door swaps which of the two we are looking at.
+        head_on = (rot in (0, 2)) != is_open
+
+        if not is_open and head_on:
+            # Closed, head-on: the doorway itself. Brick jambs and a chamfered
+            # lintel around a planked leaf. 40px tall, so it clears the tile by
+            # the same 8px whichever way the wall runs.
+            arch = [(88, 89, x0 + 5, x0 + 26), (90, 91, x0 + 3, x0 + 28),
+                    (92, 93, x0 + 1, x0 + 30), (94, 127, x0, x0 + 31)]
+            fill(arch, lambda x, y: brick_px(x, y, salt_i))
+            rim_arch(arch[:3])   # chamfer steps only; a rim on row 94 would stripe the jambs
+            fill([(TILE_TOP + 1, 126, x0 + 8, x0 + 23)],
+                 lambda x, y: plank_px(x, y, True))
+            iron_band(104, x0 + 8, x0 + 23)
+            iron_band(118, x0 + 8, x0 + 23)
+            c.put(x0 + 21, 111, palette.IRONWORK["hi"])
+            c.put(x0 + 21, 112, palette.IRONWORK["hi"])
+            for y in range(TILE_TOP + 1, 127):        # jamb shadow beside the leaf
+                c.put(x0 + 7, y, mat["face_deep"])
+                c.put(x0 + 24, y, mat["face_deep"])
+            floor_line(127, x0, x0 + 31)
+
+        elif not is_open:
+            # Closed, edge-on: we only see the wall's narrow side, with the leaf
+            # lying inside the tile footprint. 58px tall.
+            mirror = rot == 3
+            strip = [(70, 71, 20, 25), (72, 95, 18, 27)]
+            foot = (96, 127, 14, 31)
+            if mirror:
+                strip = [(y0, y1, 31 - b, 31 - a) for y0, y1, a, b in strip]
+                foot = (96, 127, 0, 17)
+            strip = [(y0, y1, x0 + a, x0 + b) for y0, y1, a, b in strip]
+            fill(strip, lambda x, y: brick_px(x, y, salt_i))
+            rim_arch(strip)
+            fy0, fy1, fa, fb = foot
+            fill([(fy0, fy1 - 1, x0 + fa, x0 + fb)], lambda x, y: cap_px(x, y, salt_i))
+            for x in range(x0 + fa, x0 + fb + 1):     # rim where the cap meets air
+                c.put(x, fy0, mat["rim"])
+            leaf_x = x0 + (fa + 4 if mirror else fb - 6)
+            for y in range(fy0 + 4, fy1):             # the closed leaf, seen edgewise
+                for x in range(leaf_x, leaf_x + 3):
+                    c.put(x, y, plank_px(x, y, True))
+            c.put(leaf_x + 1, 112, palette.IRONWORK["hi"])
+            floor_line(fy1, x0 + fa, x0 + fb)
+
+        elif not head_on:
+            # Open, edge-on: the leaf has swung a quarter turn and now stands
+            # against the jamb as a narrow slab, with the threshold below it.
+            leaf = [(68, 69, x0 + 24, x0 + 29), (70, 115, x0 + 22, x0 + 31)]
+            fill(leaf, lambda x, y: plank_px(x, y, False))
+            rim_arch(leaf, palette.GLOOMWOOD["hi"])
+            iron_band(78, x0 + 22, x0 + 31)
+            iron_band(100, x0 + 22, x0 + 31)
+            for y in range(70, 116):                  # free edge of the leaf
+                c.put(x0 + 22, y, palette.GLOOMWOOD["deep"])
+            fill([(116, 126, x0, x0 + 31)], lambda x, y: cap_px(x, y, salt_i))
+            floor_line(127, x0, x0 + 31)
+
+        else:
+            # Open, head-on: the leaf swung into view across the tile. rot 1
+            # swings north (leaf drawn high), rot 3 swings south (leaf low).
+            top = 68 if rot == 1 else 90
+            arch = [(top, top + 1, x0 + 5, x0 + 26), (top + 2, top + 3, x0 + 3, x0 + 28),
+                    (top + 4, top + 5, x0 + 1, x0 + 30)]
+            body_top = top + 6
+            fill(arch, lambda x, y: plank_px(x, y, True))
+            rim_arch(arch, palette.GLOOMWOOD["hi"])
+            if rot == 1:
+                fill([(body_top, 103, x0, x0 + 31)], lambda x, y: plank_px(x, y, True))
+                iron_band(80, x0, x0 + 31)
+                iron_band(94, x0, x0 + 31)
+                floor_line(103, x0, x0 + 31)
+                fill([(104, 126, x0 + 16, x0 + 31)], lambda x, y: cap_px(x, y, salt_i))
+                floor_line(127, x0 + 16, x0 + 31)
+            else:
+                fill([(body_top, 126, x0, x0 + 31)], lambda x, y: plank_px(x, y, True))
+                iron_band(104, x0, x0 + 31)
+                iron_band(118, x0, x0 + 31)
+                fill([(120, 126, x0, x0 + 15)], lambda x, y: cap_px(x, y, salt_i))
+                floor_line(127, x0, x0 + 31)
+            # hinge post on the side the leaf swings from: without it a
+            # full-width plank panel reads as a chest lid rather than a door.
+            hinge_top = body_top if rot == 1 else top
+            hinge_bot = 103 if rot == 1 else 119
+            for y in range(hinge_top, hinge_bot + 1):
+                c.put(x0, y, palette.IRONWORK["deep"])
+                c.put(x0 + 1, y, palette.IRONWORK["base"])
+                c.put(x0 + 2, y, palette.IRONWORK["light"] if y % 8 == 2 else palette.IRONWORK["deep"])
+
+        # Jamb highlights: on a CLOSED door the cell's outer columns are where
+        # the leaf meets the wall, so they carry the wall's rim colour. An open
+        # leaf stands clear of the wall and keeps its own edges.
         if not is_open:
-            # closed leaf: gloomwood door with iron bands
-            for x in range(8, 24):
-                for y in range(30, 118):
-                    tone = palette.GLOOMWOOD["base"] if (y % 10) not in (0, 1) else palette.GLOOMWOOD["deep"]
-                    c.put(x0 + x, y, tone)
-            for y in (44, 82):
-                for x in range(8, 24):
-                    c.put(x0 + x, y, palette.IRONWORK["base"])
-            c.put(x0 + 20, 74, palette.IRONWORK["hi"])  # handle
-        _edge_line(c, x0, 0, 32, 128, True, True, mat["rim"])
-        _edge_line(c, x0, 0, 32, 128, True, False, mat["rim"])
+            for y in range(128):
+                for x in (x0, x0 + 31):
+                    if c.filled(x, y) and y < 127:
+                        c.put(x, y, mat["rim"])
     return c
 
 

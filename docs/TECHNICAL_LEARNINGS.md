@@ -411,3 +411,43 @@ themselves.
 The general lesson: audit what the registry actually contains, not what the
 source says it registers. A runtime dump of the mod's ID block would be
 stronger still than the current source-plus-derivation approach.
+
+## The wall sheet is addressed at fixed offsets, so cell geometry is load-bearing
+
+**[jar]** `objects/<wall>.png` is 352x128 and does triple duty. The wall body
+reads it as a 16px grid (columns 0-3, rows 0-7); the window insert as 16px
+columns 4-5; and the doors as **eight 32x128 cells** at 32-cell indices 3-10 —
+closed and open, once per rotation. `WallObject.registerWallObjects` creates
+all of those from one call, so a mod that never mentions a door still ships
+eight door cells.
+
+**[jar]** `WallDoorObject.addDrawables` and `WallDoorOpenObject.addDrawables`
+both draw their cell with `.pos(drawX, drawY - 96)`. Sheet row 96 is therefore
+the tile's top edge, and every row above 96 sticks out over the tile. The wall
+body beside it only rises 16px above its own tile (its row-0 cap is drawn at
+`drawY - 16`).
+
+**[jar]** Measured off vanilla `stonewall.png`, the eight cells occupy
+y88..127 (closed head-on), y68..127 (open, leaf edge-on), y70..127 (closed
+edge-on), y68..127 and y90..127 (open, leaf head-on, swung north / south).
+A closed door is 40px tall — 8px above its tile, i.e. deliberately *shorter*
+than the wall around it.
+
+**[game]** Our generator painted every door cell from row 0 to row 127. The
+door rendered 128px tall against a 48px wall: "die Tür ist 3x so hoch wie
+normale Türen aber der Rest der Wand ja nicht", reported from the spire.
+
+**[hypothesis]** `WallObject.loadTextures` defaults `outlineTextureName` to
+`"walloutlines"` and overlays that texture using the *same* 32x128 cells. The
+sprite dump we work from contains no `objects/walloutlines.png` — it also
+contains no `*_short.png` — which suggests the dumper only captured textures
+loaded via `fromFile` and skipped the `fromFileRaw` ones. If the file does ship,
+its door cells carry vanilla's geometry, so a door drawn outside those extents
+also gets an outline floating in mid-air. Not verified either way; matching
+vanilla's extents is correct regardless.
+
+**[run]** `tools/sheet_format_audit.py` asserts those extents. The size audit
+cannot catch this class of bug: it measures opaque mass, and a door painted
+over its whole cell scores *higher* on mass while rendering three tiles too
+tall. Verified by running the audit against the pre-fix sheets, where it
+reports all sixteen cells as 68-88px too tall.

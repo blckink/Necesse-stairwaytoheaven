@@ -23,10 +23,18 @@ scripts/integration_test.sh    # server boot, generation, restart persistence
 scripts/tile_sprite_check.sh   # client-side tile sprite indices, headless
 python3 tools/size_audit.py    # 0 flags required
 python3 tools/locale_audit.py  # no registered ID may show as a raw string ID
+python3 tools/sheet_format_audit.py  # sheets the engine reads at fixed offsets
 ```
 
 Match the gate to the change. A client rendering change is not covered by the
 server test — say so rather than implying it passed.
+
+The two sprite audits answer different questions and neither substitutes for
+the other. `size_audit` asks "is there enough ink" — it would happily pass a
+door painted over its whole cell, because that has *more* ink than a correct
+one. `sheet_format_audit` asks "is the ink in the rows the engine draws from",
+which is the only thing that catches a sprite rendering at the wrong size or
+in the wrong place.
 
 **5 — Record.** Append proven behaviour to `docs/TECHNICAL_LEARNINGS.md`,
 refresh `docs/CURRENT_STATE.md` if the state moved, append player feedback to

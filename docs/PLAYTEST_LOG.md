@@ -71,3 +71,18 @@ Skystone Golem · complete Warden settlement lifecycle · Warden bed and
 happiness behaviour · complete cat progression · all resource drops · outer
 radial difficulty · direct travel progression · all building materials and
 floors (Marble Checker blocked testing the others).
+
+---
+
+## 2026-08-27 — v0.5.0 · second pass, hub and building set
+
+Reported from the same Windows save after the P0 fix landed.
+
+| Area | Observation | Status |
+|---|---|---|
+| Spire door height | "Die Tür vom Warden-Turm ist irgendwie 3x so hoch wie normale Türen, aber der Rest der Wand ja nicht." | **FIXED — NOT YET PLAYER CONFIRMED**. Root cause in the wall sheet, not the preset: `WallDoorObject` draws its 32x128 cell at `drawY - 96`, so sheet row 96 is the tile's top edge. Our generator painted all eight door cells from row 0, giving a 128px door against a 48px wall. Cells rebuilt at the extents measured off vanilla `stonewall.png` (closed head-on 40px, i.e. 8px above the tile). Gated by `tools/sheet_format_audit.py`. |
+| Return ladder destination | Taking the ladder back down landed the player at their SKY coordinates on the surface instead of at their own stairway. | **FIXED** — `4948ed2`. The gate resolved the right destination and then teleported to the entity's dummy one. |
+| Paying the Warden | "Wie gibt man dem Warden denn das Geld? Ich sehe keinen Dialog o.Ä." | **FIXED** — `4948ed2`. There was no confirmation step at all: the first interaction silently took 100,000 coins. Now states the cost, then asks, then charges. |
+| Lamps and light sources | All lamps/lights should sort into the right workbench category and count as light sources. | **OPEN — needs a specific case.** Checked against vanilla: the mod's lights register as `StreetlampObject`/wall lights with light values and sit in the lights category. Which lamp is in the wrong place is not yet known. |
+| White floor places huge | One of the floors (white tile) places far larger than one block. | **OPEN — unconfirmed hypothesis.** Likely Skystone (`SkystoneTile` is a terrain tile, and terrain blends into its neighbours rather than placing a single cell). Not reproduced in game; needs the exact floor name. |
+| Skyreach difficulty | Enemies too easy so far. | **PARTIALLY ADDRESSED** — `0ec56dd` + `7062ce4` add the Mistserpent, a 1500 HP worm chain that swims the cloud sea. The existing roster is untouched. |

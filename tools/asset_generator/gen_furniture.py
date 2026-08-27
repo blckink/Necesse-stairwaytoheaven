@@ -408,8 +408,12 @@ def gen_set_icons(dir_path):
     # walls: crop a front-face piece; doors: rotation-0 closed leaf
     for wall in ("skystonebrickwall", "nightfellwall"):
         mini_from(f"{obj}/{wall}.png", (0, 64, 32, 96), f"{wall}.png")
-    mini_from(f"{obj}/skystonebrickwall.png", (96, 24, 128, 120), "skystonebrickdoor.png")
-    mini_from(f"{obj}/nightfellwall.png", (96, 24, 128, 120), "nightfelldoor.png")
+    # Door icon: crop the rotation-0 CLOSED cell, which occupies y88..127 of the
+    # sheet and nothing above it -- the same 40px the engine draws. The old crop
+    # started at y24 because the generator used to paint doors over the full
+    # 128px cell; against a correctly sized cell that crop is 64px of empty air.
+    mini_from(f"{obj}/skystonebrickwall.png", (96, 88, 128, 128), "skystonebrickdoor.png")
+    mini_from(f"{obj}/nightfellwall.png", (96, 88, 128, 128), "nightfelldoor.png")
     # Windows: the pane insert sits at x 64-96 of the wall sheet. Vanilla ships
     # items/stonewindow.png alongside its wall and door, and WallObject's
     # registerWallObjects creates a <prefix>window object for every set -- an ID
