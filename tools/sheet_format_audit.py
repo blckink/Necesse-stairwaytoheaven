@@ -78,6 +78,35 @@ def main():
             problems.append(f"{rel}: {im.size}, expected (352, 128)")
             continue
         px = im.load()
+        # The north-south view is the wall's ROOF, seen from directly above, and
+        # a roof has no holes: vanilla's rows 0 and 1 are 512/512 opaque. Ours
+        # once drew a front-facing pane here instead, which is what the player
+        # meant by "das Fenster links am Block zeigt weiterhin nach unten" --
+        # the window faced the camera instead of lying flat.
+        for row in (0, 1):
+            checked += 1
+            opaque = sum(1 for y in range(row * 16, row * 16 + 16)
+                         for x in range(*WINDOW_STRIP_X) if px[x, y][3] > 0)
+            if opaque != 512:
+                problems.append(
+                    f"{rel} window row {row}: {opaque}/512 opaque, expected 512 -- "
+                    f"this is the wall seen from ABOVE (getWindowDir 1, a "
+                    f"north-south wall), so it must be solid roof")
+
+        # The east-west view is the wall's FRONT, and its opening must be a
+        # hole you can see the ground through, not a solid pane. Vanilla leaves
+        # it fully transparent; ours tints it, so require some non-opaque
+        # pixels rather than a specific count.
+        see_through = sum(1 for row in (5, 6)
+                          for y in range(row * 16, row * 16 + 16)
+                          for x in range(*WINDOW_STRIP_X) if px[x, y][3] < 250)
+        checked += 1
+        if see_through < 40:
+            problems.append(
+                f"{rel} window rows 5-6: only {see_through} non-opaque pixels -- "
+                f"the east-west window is a hole in the wall's face and has to "
+                f"be see-through, or it reads as a pane stuck on the wall")
+
         for row in WINDOW_MUST_BE_EMPTY:
             checked += 1
             opaque = sum(1 for y in range(row * 16, row * 16 + 16)

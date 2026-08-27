@@ -19,7 +19,7 @@ from WallObject.addWallDrawOptions (the draw code is the ground truth — each
             tile's top edge -- see the door section for the vanilla extents.
 """
 
-from px import Canvas, Rng
+from px import Canvas, Rng, with_alpha, mix
 import palette
 
 
@@ -170,56 +170,97 @@ def _build_wall(mat, salt):
     _mini_face(c, 3 * C, 7 * C + 10, 6, 6, mat, salt + 72)
 
     # ---- window insert (64-96) ----
-    # WallWindowObject.addWallDrawOptions reads this strip as 16px cells and
-    # draws two DIFFERENT windows from it, chosen by which way the wall runs:
     #
-    #   head-on (windowDir 1): rows 0,1 at drawY-16 and drawY -> 32px tall.
-    #   edge-on (else):        rows 2..7 at drawY-64, -48, -32, -16, 0, +16.
+    # WallWindowObject draws TWO different windows from this strip and picks
+    # between them by which way the wall runs (getWindowDir):
     #
-    # That second list is the trap. It CAN reach two tiles above the tile, and
-    # vanilla does not use the reach: measured on stonewall and cryptwall, rows
-    # 2-4 are EMPTY and row 5 is only the jambs, so the window ends up 48px --
-    # exactly as tall as the wall it sits in. Filling all six rows, which this
-    # generator used to do, renders a window 96px tall against a 48px wall:
-    # "Fenster ... sind halt doppelt so hoch wie die Wände", reported from the
-    # same base as the door bug, and it is the same bug one strip to the left.
-    def window_pane(x0, y0, w, h):
-        for x in range(w):
-            for y in range(h):
-                c.put(x0 + x, y0 + y, mat["glass"])
-        for x in range(w):
-            c.put(x0 + x, y0 + h // 2, mat["face_deep"])
-        for y in range(h):
-            c.put(x0 + w // 2, y0 + y, mat["face_deep"])
-        _edge_line(c, x0, y0, w, h, False, True, mat["face_hi"])
-        _edge_line(c, x0, y0, w, h, False, False, mat["face_deep"])
-        _edge_line(c, x0, y0, w, h, True, True, mat["face_hi"])
-        _edge_line(c, x0, y0, w, h, True, False, mat["face_deep"])
+    #   dir 1  wall runs NORTH-SOUTH  -> rows 0-1, at drawY-16 and drawY.
+    #          You are looking down on the wall's ROOF. Vanilla's is fully
+    #          opaque -- 512/512 on both rows -- with the window drawn ONTO the
+    #          cap as a frame seen from above. There is no hole: from directly
+    #          overhead a window shows you roof, not floor.
+    #
+    #   dir 0  wall runs EAST-WEST    -> rows 2..7, at drawY-64 .. drawY+16.
+    #          Now you are looking at the wall's FRONT, and the opening is
+    #          genuinely TRANSPARENT: vanilla leaves the middle of rows 5 and 6
+    #          empty so the ground shows through, framed by jambs, a mullion
+    #          post and a bright sill. Rows 2-4 stay empty (see below).
+    #
+    # Both halves were wrong and in opposite directions. The strip carried one
+    # front-facing glazed pane for both cases, so a window in a north-south wall
+    # faced the camera instead of lying flat on the roof -- "das Fenster links
+    # am Block zeigt weiterhin nach unten" -- and the east-west one sat as a
+    # pane inside the wall's dark cap band instead of being a hole in its face.
+    # Getting the HEIGHT right (the previous fix) did not touch either.
+    def cap_px(x, y, salt):
+        return mat["ceil_hi"] if Rng((x * 7349 + y * 12611) ^ salt).float() < 0.06 else mat["ceil"]
 
-    # head-on window (rows 0-1) -- already the right 32px, left alone
-    _face(c, 64, 0, 32, True, mat, salt + 50)
-    _face(c, 64, C, 32, False, mat, salt + 50)
-    window_pane(68, 6, 24, 16)
+    # --- dir 1: north-south wall, seen from above (rows 0-1) ---
+    for y in range(0, 32):
+        for x in range(32):
+            c.put(64 + x, y, cap_px(64 + x, y, salt + 50))
+    for y in range(0, 32):                       # the cap's own rims, east+west
+        c.put(64, y, mat["rim"])
+        c.put(64 + 31, y, mat["rim"])
+    # The window itself, lying flat: a frame with the glass catching the sky.
+    # It runs ALONG the wall, so it is tall and narrow in the cell, not wide.
+    # Seen from above the glass is looking straight up at the sky, so it reads
+    # DARKER than the same glass does edge-on, not brighter. A full-strength
+    # pane here looks like a sticker on the roof rather than an opening in it.
+    roof_glass = mix(mat["glass"], mat["ceil"], 0.45)
+    roof_glass_hi = mix(mat["glass"], mat["ceil"], 0.25)
+    for y in range(5, 27):
+        for x in range(7, 25):
+            c.put(64 + x, y, mat["face"])
+    for y in range(7, 25):
+        for x in range(9, 23):
+            c.put(64 + x, y, roof_glass_hi if (x + y) % 7 == 0 else roof_glass)
+    for x in range(7, 25):                       # frame: lit top, shadowed foot
+        c.put(64 + x, 5, mat["face_hi"])
+        c.put(64 + x, 6, mat["face_hi"])
+        c.put(64 + x, 25, mat["face_deep"])
+        c.put(64 + x, 26, mat["face_deep"])
+    for y in range(5, 27):
+        c.put(64 + 7, y, mat["face_hi"])
+        c.put(64 + 8, y, mat["face_hi"])
+        c.put(64 + 23, y, mat["face_deep"])
+        c.put(64 + 24, y, mat["face_deep"])
+    for x in range(9, 23):                       # glazing bars: two lights each way
+        c.put(64 + x, 15, mat["face_deep"])
+        c.put(64 + x, 16, mat["face_deep"])
+    for y in range(7, 25):
+        c.put(64 + 15, y, mat["face_deep"])
+        c.put(64 + 16, y, mat["face_deep"])
 
-    # edge-on window (rows 5-7 only; rows 2-4 stay transparent)
-    #
-    # Row 5 lands where the neighbouring wall segment draws its dark top CAP
-    # (its own row 0, also at drawY-16), and rows 6-7 where the wall draws its
-    # face halves (rows 3-4). Painting row 5 as brick instead of cap was the
-    # first attempt and the window sat visibly below the wall's dark band
-    # instead of inside it. Same material, same row, or it does not read as one
-    # wall.
+    # --- dir 0: east-west wall, seen from the front (rows 5-7) ---
+    # Rows 2-4 are drawn at drawY-64/-48/-32 -- two whole tiles above the tile
+    # the window sits on. Vanilla leaves them empty and so do we; filling them
+    # is what made the window twice the height of its own wall.
     _ceiling(c, 64, 5 * C, 32, C, mat, salt + 60)
     _face(c, 64, 6 * C, 32, True, mat, salt + 61)
     _face(c, 64, 7 * C, 32, False, mat, salt + 62)
-    # One opening with a cross bar, the same shape as the head-on window above.
-    # Two narrow lights either side of a wide mullion read as a pair of bars,
-    # not as a window.
-    window_pane(69, 5 * C + 2, 22, 24)
-    _edge_line(c, 68, 5 * C + 1, 24, 26, True, True, mat["face_hi"])
-    _edge_line(c, 68, 5 * C + 1, 24, 26, True, False, mat["face_deep"])
-    _edge_line(c, 68, 5 * C + 1, 24, 26, False, True, mat["face_hi"])
-    _edge_line(c, 68, 5 * C + 1, 24, 26, False, False, mat["face_deep"])
+    JAMB = 6                                     # vanilla's jambs are 6px
+    MULL = (14, 18)                              # central post
+    HEAD = 5 * C + 2                             # y82: opening starts
+    SILL = 6 * C + 12                            # y108: opening ends
+    for y in range(HEAD, SILL):
+        for x in range(JAMB, 32 - JAMB):
+            if MULL[0] <= x < MULL[1]:
+                continue                         # the post stays wall
+            # Tinted, not solid. Vanilla leaves this fully transparent; a thin
+            # tint keeps the mod's blue-glass identity while still reading as a
+            # hole you can see the ground through, which is the whole point of
+            # a window in a top-down game.
+            c.put(64 + x, y, with_alpha(mat["glass"], 55))
+    for y in range(HEAD, SILL):                  # reveals: lit left, dark right
+        c.put(64 + JAMB, y, mat["face_hi"])
+        c.put(64 + 31 - JAMB, y, mat["face_deep"])
+        c.put(64 + MULL[0], y, mat["face_hi"])
+        c.put(64 + MULL[1] - 1, y, mat["face_deep"])
+    for x in range(JAMB, 32 - JAMB):             # lintel over, sill under
+        c.put(64 + x, HEAD - 1, mat["rim"])
+        c.put(64 + x, SILL, mat["face_hi"])
+        c.put(64 + x, SILL + 1, mat["face_hi"])
 
     # ---- door frames (96-352): eight 32x128 cells ----
     # WallDoorObject/WallDoorOpenObject draw EVERY one of these cells at
