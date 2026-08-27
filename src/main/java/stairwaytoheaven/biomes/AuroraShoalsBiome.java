@@ -14,7 +14,9 @@ public class AuroraShoalsBiome extends SkyBiome {
             .addLimited(55, "skystonegolem", 3, 96)
             .addLimited(40, "zephyrray", 2, 80)
             // v0.4: glass-cannon dive bird — the fast counterpart to the golem
-            .addLimited(40, "dawnpiercer", 2, 80);
+            .addLimited(40, "dawnpiercer", 2, 80)
+            // The cloud sea between the islands is not empty travelling ground
+            .add(28, stairwaytoheaven.mobs.MistserpentHead.IN_MISTSEA, "mistserpent");
 
     public static final MobSpawnTable critters = new MobSpawnTable()
             .addLimited(80, "glowmoth", 5, 60)

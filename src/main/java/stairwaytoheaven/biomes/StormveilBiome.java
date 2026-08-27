@@ -15,7 +15,9 @@ public class StormveilBiome extends SkyBiome {
             // playtests: golems were Aurora-only and the Aurora Shoals are the
             // rarest biome, so many players never met one — they patrol the
             // Stormveil crystal fields too now
-            .addLimited(25, "skystonegolem", 2, 96);
+            .addLimited(25, "skystonegolem", 2, 96)
+            // The cloud sea between the islands is not empty travelling ground
+            .add(28, stairwaytoheaven.mobs.MistserpentHead.IN_MISTSEA, "mistserpent");
 
     public static final MobSpawnTable critters = new MobSpawnTable()
             .addLimited(100, "sparkbeetle", 4, 60);

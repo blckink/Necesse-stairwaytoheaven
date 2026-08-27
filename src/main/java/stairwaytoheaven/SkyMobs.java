@@ -48,10 +48,19 @@ final class SkyMobs {
         MobRegistry.registerMob("dawnpiercer", stairwaytoheaven.mobs.DawnpiercerMob.class, true);
         MobRegistry.registerMob("zephyrfinch", SkyCritterMob.ZephyrFinch.class, false);
         MobRegistry.registerMob("dewsnail", SkyCritterMob.DewSnail.class, false);
+        // v0.5.1: the Mistserpent — a worm chain that swims the cloud sea.
+        // The body and tail are registered too: worm segments are real mobs and
+        // the chain cannot be rebuilt on load without their IDs.
+        MobRegistry.registerMob("mistserpent", stairwaytoheaven.mobs.MistserpentHead.class, true);
+        MobRegistry.registerMob("mistserpentbody", stairwaytoheaven.mobs.MistserpentBody.class, false);
+        MobRegistry.registerMob("mistserpenttail", stairwaytoheaven.mobs.MistserpentBody.Tail.class, false);
     }
 
     /** Called from initResources — runs on the client only, never on servers. */
     static void loadTextures() {
+        stairwaytoheaven.mobs.MistserpentHead.texture = GameTexture.fromFile("mobs/mistserpent");
+        stairwaytoheaven.mobs.MistserpentHead.maskTexture = GameTexture.fromFile("mobs/mistserpent_mask");
+        stairwaytoheaven.mobs.MistserpentHead.shadowTexture = GameTexture.fromFile("mobs/mistserpent_shadow");
         ZephyrRayMob.texture = GameTexture.fromFile("mobs/zephyrray");
         StormWispMob.texture = GameTexture.fromFile("mobs/stormwisp");
         SkystoneGolemMob.texture = GameTexture.fromFile("mobs/skystonegolem");

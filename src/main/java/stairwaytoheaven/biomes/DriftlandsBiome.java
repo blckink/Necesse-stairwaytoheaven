@@ -15,7 +15,9 @@ public class DriftlandsBiome extends SkyBiome {
             .addLimited(80, "zephyrray", 3, 80)
             // v0.4: night pack hunter of the meadows (darkness-only spawn
             // rules keep torch-lit ground safe as always)
-            .addLimited(45, "galehound", 3, 80);
+            .addLimited(45, "galehound", 3, 80)
+            // The cloud sea between the islands is not empty travelling ground
+            .add(28, stairwaytoheaven.mobs.MistserpentHead.IN_MISTSEA, "mistserpent");
 
     public static final MobSpawnTable critters = new MobSpawnTable()
             .addLimited(80, "cloudlamb", 4, 60)

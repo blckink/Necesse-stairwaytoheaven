@@ -22,6 +22,7 @@ REGISTRARS = {
     "registerItem": "item",
     "registerObject": "object",
     "registerTile": "tile",
+    "registerMob": "mob",
 }
 
 
