@@ -1,5 +1,17 @@
 """Mist Serpent — segmented worm-mob sheet for the Mistsea.
 
+CONSTRUCTION is taken from vanilla ``mobs/crystaldragon.png``; the sheet FORMAT
+is taken from ``mobs/sandworm.png``. Those are two different things and the
+first version of this file only did the second, which is why it read as a
+beetle: an armoured capsule with a plated skull.
+
+What actually makes the crystal dragon read as a creature, measured off its
+sheet: a COMPACT rounded cranium carrying two very large dark eyes, and every
+bit of the silhouette's width supplied by a fan of pale blades radiating out
+from behind it. Its body segments are the same — a small core inside a big fan.
+Ours are vapour fronds rather than crystal shards, in the Mistsea's blue-white
+instead of the dragon's pink-violet: that is the "trimmed towards clouds" part.
+
 Format is taken 1:1 from vanilla ``mobs/sandworm.png`` (measured, not guessed):
 
     mobs/mistserpent.png          128x384  = 2 cols x 6 rows of 64px cells
@@ -29,6 +41,7 @@ it survives being spun to any heading.
 Everything is deterministic: fixed seeds, no wall-clock, no dict ordering.
 """
 
+import math
 import os
 
 from PIL import Image
@@ -81,18 +94,20 @@ def _profile(points, y):
     return 0.0
 
 
-# Blunt serpent skull: rounded snout, wide cheeks/jaw, neck collar at the rear.
-HEAD_PROFILE = [(7, 4), (9, 8), (12, 12), (15, 15), (19, 17), (23, 18),
-                (27, 20), (31, 22), (35, 23), (39, 23), (43, 22), (47, 20),
-                (51, 17), (55, 12), (58, 7)]
+# Cranium only. The head's WIDTH comes from the frond fan, not from the skull --
+# that is the whole construction of vanilla's crystaldragon head: a compact
+# rounded braincase carrying two big eyes, with every bit of spread supplied by
+# blades radiating out from underneath it. The old profile was a wide armoured
+# skull filling the cell edge to edge, which read as a beetle shell at 1x.
+HEAD_PROFILE = [(7, 5), (9, 9), (12, 12), (15, 14), (19, 16), (25, 16),
+                (30, 15), (35, 13), (39, 10), (42, 6)]
 
 # Tail: tube tapering to a point, then a small caudal fin flare.
 # The tail TAPERS. An earlier profile pinched to 4 and then flared back out to
 # 10, which at 1x read as a goblet rather than a tail tip. The caudal fin is now
 # a small lift near the end, never wider than the tube above it.
-TAIL_PROFILE = [(8, 16), (12, 17), (16, 17), (20, 16), (24, 14), (28, 12),
-                (32, 9), (36, 7), (40, 5), (44, 4), (47, 6), (50, 5),
-                (52, 3), (54, 1)]
+TAIL_PROFILE = [(10, 11), (14, 13), (18, 14), (22, 13), (26, 11), (30, 9),
+                (34, 7), (38, 6), (42, 4), (46, 3), (50, 2), (53, 1)]
 
 
 def _seg_profile(y, half_w, y0=6, y1=57):
@@ -237,67 +252,139 @@ def _wisps(c, filled, rng, density=0.30, back_only=True):
                 c.put(x, ymax + 1 + k, with_alpha(VAPOUR, a))
 
 
+# --- frond fan --------------------------------------------------------------
+# Construction lifted from vanilla mobs/crystaldragon.png (measured, not
+# guessed): every segment of that boss is a compact core with long tapered
+# blades radiating backwards, and the silhouette a player actually reads is the
+# FAN, not the core. Ours are vapour fronds rather than crystal shards -- softer
+# tips, a cloud-white body, a cold edge -- which is the "mehr auf Wolken
+# getrimmt" part. Angles are degrees from straight-back (+Y); the sheet is
+# authored travelling UP, so a frond at 0 deg trails directly behind.
+
+def _fan(c, rng, x0, y0, reach, spread, blades, glow=None, seed=0, depth=0.34):
+    """One connected frond fan, drawn as a MASS rather than as separate blades.
+
+    Separate blades were the first two attempts and both failed the same way:
+    ``Canvas.outline`` traces every disconnected shape, so blades that part
+    company anywhere along their length each pick up their own black contour
+    and the result reads as an insect's legs, not a mane. Vanilla's
+    crystaldragon fan is one continuous pale mass -- the blades are told apart
+    by darker seams running out from the root and by the scalloped rim, not by
+    gaps. So: fill a polar silhouette whose radius is scalloped once per blade,
+    shade it root-dark to rim-light, then cut the seams in.
+
+    ``reach`` is the radius straight back, ``spread`` the half-angle in degrees
+    (0 = straight back, since the sheet is authored travelling up).
+    """
+    rng_local = Rng(0x51E3_0F00 + seed)
+    span = math.radians(spread)
+    step = 2.0 * span / blades
+
+    def radius(a):
+        t = min(1.0, abs(a) / span) if span > 0 else 0.0
+        base = reach * (1.0 - 0.34 * t ** 1.7)
+        u = (a + span) / (2.0 * span)
+        # Lobe crests at u = k/blades, notches halfway between. A shallow
+        # scallop reads as a lumpy blob; the notches have to cut a third of
+        # the radius before the eye separates the blades.
+        scallop = 1.0 - depth * (0.5 - 0.5 * math.cos(2.0 * math.pi * blades * u))
+        return base * scallop
+
+    lo = int(x0 - reach - 2), int(y0 - reach - 2)
+    hi = int(x0 + reach + 3), int(y0 + reach + 3)
+    for y in range(max(0, lo[1]), min(c.height, hi[1])):
+        for x in range(max(0, lo[0]), min(c.width, hi[0])):
+            dx, dy = x - x0, y - y0
+            r = math.hypot(dx, dy)
+            if r < 0.5:
+                continue
+            a = math.atan2(dx, dy)          # 0 = straight back (+Y)
+            if abs(a) > span:
+                continue
+            rr = radius(a)
+            if r > rr:
+                continue
+            t = r / rr
+            if t > 0.90:
+                tone = TEAL["light"] if rng_local.chance(0.35) else SERPENT["light"]
+            elif t > 0.68:
+                tone = SERPENT["light"] if rng_local.chance(0.7) else SERPENT["base"]
+            elif t > 0.40:
+                tone = SERPENT["base"] if rng_local.chance(0.75) else SERPENT["mid"]
+            else:
+                tone = SERPENT["mid"] if rng_local.chance(0.7) else SERPENT["deep"]
+            c.put(x, y, tone)
+            if glow is not None and t > 0.93 and rng_local.chance(0.25):
+                glow.put(x, y, (255, 255, 255, 90))
+
+    # Seams: one darker ray per blade boundary, so the mass separates visually
+    # without ever separating physically.
+    for k in range(blades):
+        a = -span + (k + 0.5) * step          # the notches, not the crests
+        rr = radius(a)
+        for i in range(int(rr * 2)):
+            r = 4.0 + (rr - 4.0) * i / max(1.0, rr * 2 - 1)
+            if r > rr - 0.6:
+                break
+            x = int(round(x0 + math.sin(a) * r))
+            y = int(round(y0 + math.cos(a) * r))
+            if 0 <= x < c.width and 0 <= y < c.height and c.filled(x, y):
+                c.put(x, y, SERPENT["deep"] if r / rr < 0.75 else SERPENT["mid"])
+
+
 # --- cells ------------------------------------------------------------------
 
 def _head_cell(glow):
     c = Canvas(CELL, CELL)
     rng = Rng(0x51E3_0001)
 
-    rows = [(y, _profile(HEAD_PROFILE, y)) for y in range(7, 59)]
-    filled = _fill_body(c, rows, rng, chevron=0.32, plate_phase=0)
+    # Fan first, cranium over it, so the blades read as growing from underneath.
+    # Seven pairs, 14 degrees apart, each wide enough at the root to overlap
+    # its neighbour: vanilla's fan is a continuous mass that only separates
+    # into blades near the tips. Widely spaced thin blades read as legs.
+    # Five pairs, all swept BACK. Two things decide whether this reads as a
+    # creature's mane or as insect legs, and neither is the count: the aspect
+    # ratio (vanilla's blades are about 1 wide to 6 long -- stubby ones read as
+    # claws) and the sweep (nothing may point sideways or forward, or the fan
+    # turns into a row of legs). Vanilla's own head measures 14x90 per blade.
+    # Rooted BEHIND the cranium's centre and held under 70 degrees of
+    # spread: rooted at the middle with a wide spread, the lobes emerge
+    # level with the eyes and the head reads as a sun with rays.
+    _fan(c, rng, CX, 30, 34, 76, 6, glow, seed=1, depth=0.24)
 
-    # Heavy brow band + jaw grooves: this is what makes the cell read as a
-    # skull rather than a rounder body segment.
-    for x in range(17, 48):
-        d = abs(x - CX)
-        c.put(x, 22 + d // 7, SERPENT["shadow"])
-        c.put(x, 23 + d // 7, SERPENT["deep"])
-    for side in (-1, 1):
-        for k in range(9):
-            c.put(CX + side * (10 + k), 33 + k // 2, SERPENT["shadow"])
-            c.put(CX + side * (10 + k), 34 + k // 2, SERPENT["deep"])
-    for y in range(52, 58):
-        hwi = int(round(_profile(HEAD_PROFILE, y)))
-        for x in range(CX - hwi, CX + hwi + 1):
-            if abs(x - CX) > 5 and rng.chance(0.7):
-                c.put(x, y, SERPENT["deep"])
-
-    # Eye sockets sunk into the skull (mirrored about x=32).
-    for ex in (21, 39):
-        for i in range(5):
-            for j in range(4):
-                c.put(ex + i, 24 + j, SERPENT["shadow"])
-
-    _spine_ridge(c, filled, rng, glow=glow, crystal_rows=tuple(range(15, 56, 9)))
+    rows = [(y, _profile(HEAD_PROFILE, y)) for y in range(8, 43)]
+    filled = _fill_body(c, rows, rng, chevron=0.30, plate_phase=0)
+    _spine_ridge(c, filled, rng, glow=glow, crystal_rows=tuple(range(14, 42, 8)))
     c.outline(OUT)
 
     # --- details after the outline pass so it cannot overwrite them ---
-    # Snout: chevron mouth line with two fangs, plus nostril slits.
-    for x in range(25, 40):
+    # Brow ridge over the eyes.
+    for x in range(21, 44):
         d = abs(x - CX)
-        c.put(x, 19 + d // 5, OUT)
-    c.put(28, 21, SERPENT["hi"])
-    c.put(35, 21, SERPENT["hi"])
-    c.put(29, 13, OUT)
-    c.put(34, 13, OUT)
+        c.put(x, 13 + d // 8, SERPENT["deep"])
 
-    # Teal eye glow.
-    for ex in (21, 39):
-        for i in range(5):
-            for j in range(4):
-                c.put(ex + i, 24 + j, TEAL["base"])
-        for i in range(1, 4):
-            for j in range(1, 3):
-                c.put(ex + i, 24 + j, TEAL["light"])
-        c.put(ex + 1, 25, TEAL["hi"])
-        c.put(ex + 2, 25, TEAL["hi"])
-        c.put(ex + 2, 26, TEAL["hi"])
-        for i in range(5):
-            for j in range(4):
-                glow.put(ex + i, 24 + j, (255, 255, 255, 255))
-        for i in range(-1, 6):
-            glow.put(ex + i, 23, (255, 255, 255, 120))
-            glow.put(ex + i, 28, (255, 255, 255, 120))
+    # Big almond eyes. Vanilla's crystaldragon carries two 20px eyes on a 224px
+    # head; scaled to our 64px cell that is roughly 6x8, which is exactly what
+    # makes the thing read as a creature and not a shell.
+    for side, ex in ((-1, 21), (1, 37)):
+        for j in range(8):
+            half = (2, 3, 3, 3, 3, 3, 2, 1)[j]
+            cxe = ex + 3
+            for i in range(cxe - half, cxe + half + 1):
+                c.put(i, 16 + j, OUT)
+        # pupil: cold slit, brightest at the top
+        for j in range(1, 6):
+            c.put(ex + 3 - (1 if side < 0 else 0), 16 + j,
+                  TEAL["hi"] if j <= 2 else TEAL["light"])
+        c.put(ex + 2 + (1 if side < 0 else 0), 17, TEAL["base"])
+        for j in range(-1, 9):
+            glow.put(ex + 3, 16 + j, (255, 255, 255, 110))
+        for i in range(-1, 8):
+            glow.put(ex + i, 20, (255, 255, 255, 110))
+
+    # Nostril slits on the snout.
+    c.put(30, 11, OUT)
+    c.put(34, 11, OUT)
 
     _wisps(c, filled, rng, density=0.26)
     return c
@@ -306,9 +393,21 @@ def _head_cell(glow):
 def _segment_cell(index, half_w):
     c = Canvas(CELL, CELL)
     rng = Rng(0x51E3_0100 + index)
-    rows = [(y, _seg_profile(y, half_w)) for y in range(6, 58)]
+    # Each segment carries its own smaller fan, which is what gives the chain a
+    # feathered edge instead of a row of identical capsules.
+    # Barely any taper between the four segment sprites: a 14-part chain
+    # cycles through them, so a strong taper never reads as one -- it just
+    # makes half the body thin. Vanilla's sandworm segments measure 1476,
+    # 1476, 1428, 1428 opaque, i.e. essentially the same size.
+    reach = 1.0 - index * 0.03
+    # One modest frill per segment. Four small fans per segment was the
+    # previous try and at 1x the chain read as fuzz -- high-frequency
+    # scallops all along a 14-segment worm turn into noise, whatever they
+    # look like zoomed in. Big lobes, shallow notches, close to the body.
+    _fan(c, rng, CX, 29, 29 * reach, 76, 4, seed=10 + index, depth=0.26)
+    rows = [(y, _seg_profile(y, half_w, y0=12, y1=52)) for y in range(12, 53)]
     filled = _fill_body(c, rows, rng, chevron=0.10, plate_phase=index)
-    _spine_ridge(c, filled, rng, crystal_rows=tuple(range(11 + index, 58, 9)))
+    _spine_ridge(c, filled, rng, crystal_rows=tuple(range(13 + index, 55, 9)))
     c.outline(OUT)
     _wisps(c, filled, rng, density=0.34, back_only=False)
     return c
@@ -317,15 +416,14 @@ def _segment_cell(index, half_w):
 def _tail_cell():
     c = Canvas(CELL, CELL)
     rng = Rng(0x51E3_0200)
+    _fan(c, rng, CX, 22, 25, 72, 3, seed=30, depth=0.26)
+    # Trailing streamers: the tail's silhouette is two long fronds, not a fin
+    # membrane. An earlier version flared back out at the very tip and read as
+    # a goblet at 1x.
+    _fan(c, rng, CX, 34, 26, 38, 2, seed=31, depth=0.30)
     rows = [(y, _profile(TAIL_PROFILE, y)) for y in range(8, 57)]
     filled = _fill_body(c, rows, rng, chevron=0.14, plate_phase=3)
     _spine_ridge(c, filled, rng, crystal_rows=tuple(range(13, 46, 9)))
-    # Caudal fin membrane reads brighter than the tube.
-    for y in range(44, 53):
-        hwi = int(round(_profile(TAIL_PROFILE, y)))
-        for x in range(CX - hwi, CX + hwi + 1):
-            if abs(x - CX) > 1 and rng.chance(0.55):
-                c.put(x, y, SERPENT["light"] if rng.chance(0.5) else TEAL["light"])
     c.outline(OUT)
     _wisps(c, filled, rng, density=0.40, back_only=False)
     return c
@@ -398,7 +496,7 @@ def gen_sheet(path):
     glow = Canvas(CELL, CELL)
 
     sheet.paste(_head_cell(glow), 0, 0)
-    for i, hw in enumerate((24, 23, 21, 19)):
+    for i, hw in enumerate((17, 17, 16, 16)):
         sheet.paste(_segment_cell(i, hw), 0, CELL * (1 + i))
     sheet.paste(_tail_cell(), 0, CELL * 5)
 
@@ -447,13 +545,18 @@ def gen_shadow(path):
 
 
 def gen_icon(path):
+    """32x32 mob icon: the HEAD, not a body segment. The icon is what names the
+    creature in the bestiary, so it carries the two things that identify it --
+    the cranium with its pale eyes and the frond fan behind it."""
     c = Canvas(32, 32)
     rng = Rng(0x51E3_0400)
-    prof = [(2, 3), (4, 6), (6, 8), (9, 10), (12, 11), (15, 12), (18, 11),
-            (21, 10), (24, 10), (27, 10), (29, 8)]
     icx = 16
+
+    _fan(c, rng, icx, 15, 16, 70, 5, seed=40, depth=0.24)
+
+    prof = [(3, 3), (5, 6), (7, 8), (10, 9), (14, 9), (17, 8), (20, 7), (22, 4)]
     filled = []
-    for y in range(2, 30):
+    for y in range(3, 23):
         hwi = int(round(_profile(prof, y)))
         if hwi <= 0:
             continue
@@ -465,30 +568,21 @@ def gen_icon(path):
                 step = min(5, step + 1)
             elif y % 5 == 4:
                 step = max(0, step - 1)
-            if 1 <= step <= 3 and rng.chance(0.09):
-                step = max(0, step - 1)
             c.put(x, y, RAMP[step])
-    # spine ridge
     for y, hwi in filled:
-        for x in range(icx - 2, icx + 3):
-            d = abs(x - icx)
-            c.put(x, y, TEAL["light"] if d <= 1 else TEAL["base"] if d == 2 else TEAL["deep"])
-        if y % 5 == 0:
-            c.put(icx, y, TEAL["hi"])
-    for ex in (10, 19):
-        for i in range(3):
-            for j in range(2):
-                c.put(ex + i, 11 + j, SERPENT["shadow"])
+        for x in range(icx - 1, icx + 2):
+            c.put(x, y, TEAL["light"] if x == icx else TEAL["base"])
     c.outline(OUT)
+
     for ex in (10, 19):
-        for i in range(3):
-            for j in range(2):
-                c.put(ex + i, 11 + j, TEAL["base"])
-        c.put(ex + 1, 11, TEAL["hi"])
-        c.put(ex + 1, 12, TEAL["light"])
+        for j in range(5):
+            half = (1, 2, 2, 2, 1)[j]
+            for i in range(ex - half, ex + half + 1):
+                c.put(i, 8 + j, OUT)
+        c.put(ex, 9, TEAL["hi"])
+        c.put(ex, 10, TEAL["light"])
     for x in range(13, 20):
-        c.put(x, 8, SERPENT["shadow"])
-    _wisps(c, filled, rng, density=0.0)
+        c.put(x, 6, SERPENT["deep"])
     c.save(path)
 
 

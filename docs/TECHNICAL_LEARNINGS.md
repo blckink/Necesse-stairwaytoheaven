@@ -451,3 +451,37 @@ cannot catch this class of bug: it measures opaque mass, and a door painted
 over its whole cell scores *higher* on mass while rendering three tiles too
 tall. Verified by running the audit against the pre-fix sheets, where it
 reports all sixteen cells as 68-88px too tall.
+
+## Two vanilla sprites, two different things to copy
+
+**[jar]** `mobs/crystaldragon.png` is 320x1792 and `CrystalDragonHead` /
+`CrystalDragonBody` address it as `GameSprite(texture, 0, row, 224)` — column 0
+only, eight 224px rows: head, shoulder, five body segments, tail. The extra
+96px of width is never sampled. It is a `BossWormMobHead`, i.e. the same worm
+chain the sandworm uses, at seven times the cell size.
+
+**[jar]** Measured off that sheet, what makes the crystal dragon read as a
+creature is not its size: it is a COMPACT rounded cranium carrying two very
+large dark eyes, with the entire width of the silhouette supplied by pale
+blades radiating out from behind it. Its body segments are built the same way —
+a small core inside a big fan. Blade aspect is roughly 14 wide to 90 long.
+
+**[game]** Building the Mist Serpent from the sandworm's *format* while
+ignoring the crystal dragon's *construction* produced an armoured capsule with
+a plated skull that read as a beetle. Format and construction are separate
+decisions and it is worth stating which sprite each one came from.
+
+**[run]** Three failed attempts at the fan, each instructive:
+1. Thin blades at wide angles read as insect legs.
+2. Longer blades at the same spacing still read as legs, because
+   `Canvas.outline` traces every disconnected shape — blades that part company
+   anywhere along their length each pick up their own black contour.
+3. A connected polar mass fixed the outline problem, but a fan per segment with
+   high-frequency scallops turned a 14-part chain into visual fuzz at 1x.
+
+What works: ONE connected polar silhouette per fan, scalloped once per blade
+with the notches cutting about a third of the radius, seams drawn as darker
+rays rather than gaps, and few large lobes rather than many small ones. The
+rule underneath all three failures is that a 14-segment worm multiplies
+whatever detail one segment carries by fourteen, so segment detail has to be
+judged on the whole chain at 1x, never on one cell zoomed in.
