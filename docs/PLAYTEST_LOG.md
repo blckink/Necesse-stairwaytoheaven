@@ -84,7 +84,7 @@ Reported from the same Windows save after the P0 fix landed.
 | Return ladder destination | Taking the ladder back down landed the player at their SKY coordinates on the surface instead of at their own stairway. | **FIXED** — `4948ed2`. The gate resolved the right destination and then teleported to the entity's dummy one. |
 | Paying the Warden | "Wie gibt man dem Warden denn das Geld? Ich sehe keinen Dialog o.Ä." | **FIXED** — `4948ed2`. There was no confirmation step at all: the first interaction silently took 100,000 coins. Now states the cost, then asks, then charges. |
 | Lamps and light sources | All lamps/lights should sort into the right workbench category and count as light sources. | **OPEN — needs a specific case.** Checked against vanilla: the mod's lights register as `StreetlampObject`/wall lights with light values and sit in the lights category. Which lamp is in the wrong place is not yet known. |
-| White floor places huge | One of the floors (white tile) places far larger than one block. | **OPEN — unconfirmed hypothesis.** Likely Skystone (`SkystoneTile` is a terrain tile, and terrain blends into its neighbours rather than placing a single cell). Not reproduced in game; needs the exact floor name. |
+| White floor places huge | One of the floors (white tile) places far larger than one block. | **FIXED — NOT YET PLAYER CONFIRMED.** The Skystone hypothesis was wrong and is retracted: every mod floor is a real `isFloor` floor at PRIORITY_FLOOR, and `TileItem.onPlace` always places exactly one tile. The cause was in the `_splat` atlases — see the 2026-08-27 floors section below. |
 | Skyreach difficulty | Enemies too easy so far. | **PARTIALLY ADDRESSED** — `0ec56dd` + `7062ce4` add the Mistserpent, a 1500 HP worm chain that swims the cloud sea. The existing roster is untouched. |
 | Mistserpent look | "Crystaldragon + crystaldragonhead wäre cooler Gegner der in Wolkenmeer rumschwimmt, bitte als Vorlage nehmen und mehr auf Wolken trimmen." | **FIXED — NOT YET PLAYER CONFIRMED**. The first sprite took the sandworm's format AND its construction, and read as a beetle. Rebuilt on the crystal dragon's construction — compact cranium, two large eyes, a radiating frond fan carrying the silhouette — in the Mistsea's blue-white rather than the dragon's pink-violet. |
 
@@ -103,3 +103,16 @@ The first session that actually paid the 100,000 and followed him home.
 | Generic villager dialogue | "wieso hat er normale Dialoge" — he greeted the player with "Ich denke oft über die großen Fragen des Lebens nach." | **FIXED — NOT YET PLAYER CONFIRMED**. `HumanMob.getMessages` defaults to `mobmsg.humantalk1..5`; he has his own six lines, and his recruitment pitch moved to the top of the dialogue window where the price is. |
 | No quests anywhere in the journal | "und wo sind seine quests? die quests von ihm seh ich auch nirgends im Journal oder sonst wo." | **FIXED — NOT YET PLAYER CONFIRMED**. `FindSpireQuest` was the only quest ever handed out, and meeting him removed it without giving anything back. Registration is not hand-out: `SpireCatsQuest` and `AnchorDeliveryQuest` were fully implemented and never given to anyone. The chain now runs stairway → find the spire → hire him (price in the objective line) → bring both cats home → anchor the island, each turned in by talking to him. |
 | Silver Bell | Received. | KEEP — it is handed over at recruitment, which is its only source. |
+
+---
+
+## 2026-08-27 — v0.5.0 · the floors
+
+> "fix die ganzen Boden tiles die sich anders verhalten als jeder normale Boden"
+
+The follow-up to "White floor places huge" above: not one floor, all of them.
+
+| Area | Observation | Status |
+|---|---|---|
+| Floors bleed into their neighbours | Every mod ground tile paints far past the cell it was placed on. | **FIXED — NOT YET PLAYER CONFIRMED.** The four diagonal-only cells of every `_splat` atlas were the complement of their intended shape: a disc of radius 26 parked *inside* the cell, covering 83%-89% of it, where vanilla paints a nub in the named corner covering 0.8%-29.3% (measured over 66 vanilla sheets). `SplattingOptions` draws that cell on every tile that touches ours corner-to-corner, so one placed tile repainted its four diagonal neighbours almost completely and read as a 3x3 blob. Same root cause on all 14 sheets, terrain and liquids included. Fixed in `tools/asset_generator/gen_splats.py`; the three-side and all-four cells also kept their vanilla "eye" of the tile underneath, which they had lost by going solid. |
+| Is any floor secretly terrain? | The standing hypothesis was that a floor had been built as a terrain tile. | **NOT REPRODUCED — hypothesis retracted.** All five craftable floors (`marblecheckertile`, `gloomwoodfloortile`, `nimbusfloortile`, `charfloortile`, `prismfloortile`) pass `isFloor=true` and splat at PRIORITY_FLOOR 400, exactly like vanilla `stonefloor`. The six terrain tiles and two liquids are terrain and liquid on purpose — they are the ground the Skyreach and the Veil are generated from. Now asserted by `tools/tile_behaviour_audit.py`, which fails if a floor ever becomes terrain again. |

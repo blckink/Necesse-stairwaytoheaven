@@ -539,3 +539,68 @@ interaction, travel-home puff and journal sync all working, and
 `makeActiveFor`, so no player could ever see it. Registration is not
 hand-out. The same was true of `BeaconDeliveryQuest` and `AnchorDeliveryQuest`,
 which are still dormant.
+
+## A tile that looks like it places 3x3 is over-splatting, not misplacing
+
+**[jar]** `TileItem.onPlace` calls `tile.placeTile(level, tileX, tileY, true)`
+exactly once, for the single tile under the cursor. There is no brush, no
+radius and no terrain-vs-floor difference in that path. So "this floor places
+far larger than one block" can never be a placement bug — it is the `_splat`
+atlas.
+
+**[jar]** `SplattingOptions` decides what a tile draws *over itself* from its
+neighbours, not the other way round. `splatsInto(current, adjacent)` returns
+true when `comparePriority(current, adjacent) < 0`, i.e. the HIGHER-priority
+neighbour bleeds into the lower-priority tile. Floors are PRIORITY_FLOOR 400
+and terrain is 0–200, so a floor always bleeds into the ground around it —
+that part is vanilla.
+
+**[jar]** How much it bleeds is pure sheet geometry. Within a 224x96 block
+(7x3 cells of 32px) the four orthogonal neighbours pick a cell by marching
+squares (`SplattingOptions.newTerrainSprites`), and the four *diagonal* cases
+are handled separately: adjacency index 0/2/5/7 (top-left / top-right /
+bottom-left / bottom-right) draw cells **(2,2) / (0,2) / (2,0) / (0,0)**
+respectively, at offset (0,0). Those four are the smallest pieces on the
+sheet — a nub in the named corner.
+
+**[run]** Measured with PIL over the vanilla sprite dump, 66 land `_splat`
+sheets and 10 liquid ones:
+
+| cell class | cells | vanilla coverage | median |
+|---|---|---|---|
+| full tile variants | (3..6, 0) | exactly 100% | 100% |
+| diagonal corner nub | (0,0) (2,0) (0,2) (2,2) | 0.8 – 29.3% | 12.5% |
+| one orthogonal side | (1,0) (0,1) (2,1) (1,2) | 23.4 – 66.4% | 47% |
+| two adjacent sides | (3,1) (4,1) (3,2) (4,2) | 41.4 – 82.4% | 65% |
+| three sides | (5,1) (6,1) (5,2) (6,2) | 60.5 – 90.2% | 82% |
+| all four sides | (1,1) | 51.6 – 81.6% | 71% |
+
+Vanilla never paints the three-side and all-four pieces solid: it keeps a
+ragged *eye* of the tile underneath, pulled toward whichever side is still
+open ((1,1) is bordered on all four, so its eye sits dead centre).
+
+**[run]** Our generator shipped the four diagonal cells at 83–89% — the
+complement of the intended nub, a disc of radius 26 parked inside the cell
+with a bite taken out of the far corner. Every mod tile therefore repainted
+each of its four diagonal neighbours almost completely, so one placed floor
+read as a 3x3 blob. This was the "White floor places huge" report, and it was
+on all 14 sheets, floors, terrain and liquids alike. The three-side and
+all-four cells had also gone solid (98–100%) because unioning the directional
+discs covers everything. Both are fixed in `gen_splats.py` and gated by
+`tools/tile_behaviour_audit.py`.
+
+## `-1.0F` broker value means "derive it from the recipe", and it ignores yield
+
+**[jar]** `ItemRegistry.calculateBrokerValues` feeds every item whose
+registered value is **negative** to `RecipeBrokerValueCompute`, using
+`Math.abs(value)` as a multiplier. The compute sums
+`brokerValue(ingredient) * amount` over the recipe's ingredients and **never
+divides by the recipe's yield**.
+
+**[jar]** That is safe in vanilla because *every* vanilla floor recipe is 1
+ingredient → 1 tile (`stonefloor`, `woodfloor`, `pinefloor`, `granitefloor`,
+… all `new Recipe("<id>", 1, …)`). Ours craft 6 tiles from 2 skystone. Copying
+vanilla's `-1.0F` onto a bulk recipe would price each of the six at the full
+cost of the craft — a broker money printer. Our floors keep a flat positive
+value on purpose; `tools/tile_behaviour_audit.py` fails the combination
+"negative broker value + recipe yield > 1" rather than the flat value.

@@ -141,6 +141,7 @@ public class StairwayToHeavenMod {
     public void postInit() {
         SkyItems.registerRecipes();
         SkyBuildingSet.registerRecipes();
+        SkyBuildingSet.resolveWorldgenMaterials();
         registerWorldGenerator();
         CommandsManager.registerServerCommand(new SkyreachStatusCommand());
         CommandsManager.registerServerCommand(new VeilStatusCommand());

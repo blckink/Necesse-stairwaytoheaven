@@ -74,6 +74,8 @@ scripts/integration_test.sh           # boots a real server, generates, restarts
 scripts/tile_sprite_check.sh          # client-side tile sprite indices (headless)
 python3 tools/size_audit.py           # sprite mass vs vanilla; must print 0 flags
 python3 tools/locale_audit.py         # every registered ID named in both locales
+python3 tools/sheet_format_audit.py   # sheets the engine reads at fixed offsets
+python3 tools/tile_behaviour_audit.py # every tile is what it is presented as
 ```
 
 The server integration test **cannot see client rendering bugs**. See

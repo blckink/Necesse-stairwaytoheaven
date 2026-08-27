@@ -139,6 +139,29 @@ public final class SkyTerrainPainter {
      */
     public static final float SPIRE_GROUNDS_RADIUS = 18.0F;
 
+    /**
+     * v0.7 built landscape: the Skywatch roads, the designed places they
+     * connect and the gates between them all come from
+     * {@link SkyLandscape}, which decides them as registry-free SURFACE/PROP
+     * codes. This is the one place those codes become real tiles and objects,
+     * so the field stays renderable offline (scripts/sky_map_render.sh) and the
+     * material choices stay in one readable table.
+     */
+    public static final int SALT_BUILT_PICK = 67;
+
+    /** Sub-biome classes as {@link #describeTile} reports them. */
+    public static final int BIOME_STORMVEIL = 0;
+    public static final int BIOME_DRIFTLANDS = 1;
+    public static final int BIOME_AURORA = 2;
+
+    /** Sub-biome class -> the registered biome the region layer stores. */
+    public static int biomeRegistryID(int biomeClass) {
+        if (biomeClass == BIOME_STORMVEIL) {
+            return SkyRegistry.stormveil.getID();
+        }
+        return biomeClass == BIOME_AURORA ? SkyRegistry.auroraShoals.getID() : SkyRegistry.driftlands.getID();
+    }
+
 
     /**
      * The formation field. Returns 0 for a tile that belongs to no outcrop, or
@@ -262,6 +285,68 @@ public final class SkyTerrainPainter {
     }
 
     /**
+     * SURFACE code -> ground tile. Road, apron and court are paved; a garden
+     * keeps the terrain it grew on and only loses its wild growth.
+     */
+    public static int builtTile(int surface, int naturalTileID) {
+        if (surface == SkyLandscape.SURFACE_ROAD || surface == SkyLandscape.SURFACE_APRON) {
+            return SkyRegistry.skyroadTileID != 0 ? SkyRegistry.skyroadTileID : naturalTileID;
+        }
+        if (surface == SkyLandscape.SURFACE_COURT) {
+            return SkyRegistry.skycourtTileID != 0 ? SkyRegistry.skycourtTileID : naturalTileID;
+        }
+        if (surface == SkyLandscape.SURFACE_PLINTH) {
+            return SkyRegistry.skyplinthTileID != 0 ? SkyRegistry.skyplinthTileID : naturalTileID;
+        }
+        return naturalTileID;
+    }
+
+    /**
+     * PROP code -> object, chosen per sub-biome so a Stormveil waystation is
+     * built out of Stormveil material and planted with Stormveil growth. This
+     * is the whole biome-specific vocabulary of the built layer in one table.
+     */
+    public static int builtObject(int prop, int seed, int tileX, int tileY,
+                                  boolean isStormveil, boolean isAurora) {
+        switch (prop) {
+            case SkyLandscape.PROP_LAMP:
+                return SkyRegistry.wardenCandelabraID;
+            case SkyLandscape.PROP_FENCE:
+                return SkyRegistry.skyironFenceID;
+            case SkyLandscape.PROP_PILLAR:
+                return isStormveil ? SkyRegistry.nightfellWallID : SkyRegistry.skystoneBrickWallID;
+            case SkyLandscape.PROP_STATUE:
+                return SkyRegistry.gloomRavenStatueID;
+            case SkyLandscape.PROP_TREE:
+                return isStormveil ? SkyRegistry.fulgurpineID
+                        : (isAurora ? SkyRegistry.prismabirchID : SkyRegistry.nimbuswillowID);
+            case SkyLandscape.PROP_FLOWER: {
+                float pick = SkyNoise.tileRoll(seed, tileX, tileY, SALT_BUILT_PICK);
+                if (isStormveil) {
+                    return pick < 0.62F ? SkyRegistry.thunderbloomID : SkyRegistry.staticmossID;
+                }
+                if (isAurora) {
+                    return pick < 0.62F ? SkyRegistry.auroralilyID : SkyRegistry.glowfernID;
+                }
+                return pick < 0.55F ? SkyRegistry.skytulipID : SkyRegistry.cloudbellID;
+            }
+            case SkyLandscape.PROP_GRASS:
+                return isStormveil ? SkyRegistry.stormsedgeID
+                        : (isAurora ? SkyRegistry.prismgrassID : SkyRegistry.tallcloudgrassID);
+            case SkyLandscape.PROP_ACCENT:
+                return isStormveil ? SkyRegistry.chargeCrystalID
+                        : (isAurora ? SkyRegistry.auroraShardsID : SkyRegistry.starfallID);
+            case SkyLandscape.PROP_RUBBLE:
+                return SkyRegistry.skywatchRubbleID;
+            case SkyLandscape.PROP_INSTRUMENT:
+                return SkyNoise.tileRoll(seed, tileX, tileY, SALT_BUILT_PICK) < 0.5F
+                        ? SkyRegistry.skywatchTelescopeID : SkyRegistry.skywatchAstrolabeID;
+            default:
+                return 0;                       // PROP_NONE / PROP_CLEAR
+        }
+    }
+
+    /**
      * Aurora flora colonies: the same lattice trick at a much smaller scale,
      * so blooms and lilies grow in patches of roughly one to five with real
      * gaps between them instead of an even per-tile sprinkle.
@@ -305,11 +390,166 @@ public final class SkyTerrainPainter {
     private SkyTerrainPainter() {
     }
 
+    // ------------------------------------------------------------------
+    // The per-tile decision, and the region painter that writes it out.
+    //
+    // describeTile() is the SINGLE source of truth for what a Skyreach tile
+    // becomes. paintRegion() only writes its answer into the region, and the
+    // offline map renderer (scripts/sky_map_render.sh) and the /skyreachstatus
+    // oracle call the very same function — so a calibration render and the
+    // world the player walks on can never drift apart.
+    // ------------------------------------------------------------------
+
+    /** Ground tile of a describeTile() result. */
+    public static int descTile(long desc) {
+        return (int) (desc & 0xFFFFFL);
+    }
+
+    /** Object of a describeTile() result, 0 for none. */
+    public static int descObject(long desc) {
+        return (int) ((desc >>> 20) & 0xFFFFFL);
+    }
+
+    /** Sub-biome CLASS of a describeTile() result (see BIOME_* above). */
+    public static int descBiome(long desc) {
+        return (int) ((desc >>> 40) & 0xFFFFFL);
+    }
+
+    /** True when the built landscape (road, court, garden) owns this tile. */
+    public static boolean descBuilt(long desc) {
+        return (desc & (1L << 60)) != 0L;
+    }
+
+    private static long pack(int tileID, int objectID, int biomeID, boolean built) {
+        return (tileID & 0xFFFFFL)
+                | ((objectID & 0xFFFFFL) << 20)
+                | ((biomeID & 0xFFFFFL) << 40)
+                | (built ? 1L << 60 : 0L);
+    }
+
+    /**
+     * What one Skyreach tile becomes: ground, object and sub-biome, as a pure
+     * function of the world-generation seed, the tile position and the
+     * canonical origin.
+     *
+     * Order of precedence, highest first:
+     * <ol>
+     *   <li>Mistsea, wherever the island mask says there is no land.</li>
+     *   <li>The BUILT landscape ({@link SkyLandscape}): roads, designed places,
+     *       gates. It paves its own ground and no wild growth appears on it.</li>
+     *   <li>The spire grounds, kept clear so the landmark reads on arrival.</li>
+     *   <li>Island rims, kept clear so coastlines stay walkable.</li>
+     *   <li>Geology: the outcrop formation field owns its tiles outright.</li>
+     *   <li>Aurora colonies, meadow carpets, then the even vegetation scatter.</li>
+     * </ol>
+     */
+    public static long describeTile(int seed, int tileX, int tileY, int originX, int originY) {
+        float biomeValue = SkyNoise.fbm(seed + SALT_BIOME, tileX, tileY, BIOME_SCALE, 2);
+
+        // The hub guarantee: around the Old Warden Spire the island mask is
+        // clamped to solid land and the biome pulled into the Driftlands band,
+        // so the first ascent always lands on a walkable, safe, recognizable
+        // home island — regardless of what the raw noise wanted there.
+        float hubDx = tileX - originX;
+        float hubDy = tileY - originY;
+        float hubDist = (float) Math.sqrt(hubDx * hubDx + hubDy * hubDy);
+        if (hubDist < SkyOrigin.HUB_RADIUS) {
+            float force = 1.0F - hubDist / SkyOrigin.HUB_RADIUS; // 1 center → 0 rim
+            biomeValue = biomeValue + (0.5F - biomeValue) * Math.min(1.0F, force * 1.6F);
+        }
+
+        boolean isStormveil = biomeValue < STORMVEIL_BELOW;
+        boolean isAurora = biomeValue > AURORA_ABOVE;
+        // A CLASS, not a registry ID: describeTile stays callable from the
+        // offline map renderer, which has no biome registry.
+        int biomeID = isStormveil ? BIOME_STORMVEIL : (isAurora ? BIOME_AURORA : BIOME_DRIFTLANDS);
+
+        float islandValue = SkyNoise.fbm(seed, tileX, tileY, ISLAND_SCALE, 3);
+        if (hubDist < SkyOrigin.HUB_RADIUS) {
+            float force = 1.0F - hubDist / SkyOrigin.HUB_RADIUS;
+            islandValue = Math.max(islandValue, ISLAND_THRESHOLD + 0.02F + 0.20F * force);
+        }
+        if (islandValue <= ISLAND_THRESHOLD) {
+            return pack(SkyRegistry.mistseaID, 0, biomeID, false);
+        }
+
+        boolean isRockPatch = SkyNoise.fbm(seed + SALT_ROCK_PATCH, tileX, tileY, ROCK_PATCH_SCALE, 2) > ROCK_PATCH_THRESHOLD;
+        int groundID;
+        if (isRockPatch) {
+            groundID = SkyRegistry.skystoneTileID;
+        } else if (isStormveil) {
+            groundID = SkyRegistry.stormslateID;
+        } else {
+            groundID = SkyRegistry.cloudturfID;
+        }
+
+        boolean rimSafe = islandValue > ISLAND_THRESHOLD + ISLAND_RIM;
+
+        // --- the built landscape ---
+        int built = SkyLandscape.at(seed, tileX, tileY, originX, originY);
+        if (built != SkyLandscape.SURFACE_NONE) {
+            int builtTileID = builtTile(SkyLandscape.surfaceOf(built), groundID);
+            // Nothing stands on a coastline tile: checkGenerationValid would
+            // only sweep it away again (the paving itself is fine, and a path
+            // tile even bridges the shore below it).
+            int builtObjectID = rimSafe
+                    ? builtObject(SkyLandscape.propOf(built), seed, tileX, tileY, isStormveil, isAurora)
+                    : 0;
+            return pack(builtTileID, builtObjectID, biomeID, true);
+        }
+
+        // Spire grounds: the immediate surroundings of the Old Warden Spire
+        // stay an open plaza — natural objects (grass carpets, trees, ores) are
+        // suppressed so nothing buries or crowds the landmark's silhouette on
+        // first arrival. The preset's own props stamp afterwards.
+        if (hubDist < SPIRE_GROUNDS_RADIUS || !rimSafe) {
+            return pack(groundID, 0, biomeID, false);
+        }
+
+        int band = SkyOrigin.bandFor(hubDist);
+
+        // Geology first. Rocks and ore no longer come out of the same per-tile
+        // roll as the plants — they belong to formations, and a formation owns
+        // its tiles outright so a plant cannot grow in the middle of an outcrop
+        // and break its silhouette.
+        int objectID = 0;
+        int outcrop = outcropAt(seed, tileX, tileY);
+        if (outcrop != 0) {
+            objectID = rollOutcropObject(seed, tileX, tileY, outcrop, isStormveil, isAurora, band);
+            if (objectID == 0 && (outcrop & OUTCROP_SOLID) != 0) {
+                return pack(groundID, 0, biomeID, false);   // bare formation floor
+            }
+        } else if (SkyNoise.tileRoll(seed, tileX, tileY, SALT_SOLITARY) < SOLITARY_CHANCE) {
+            objectID = SkyRegistry.skystoneRockID;          // the rare lone stone
+        }
+
+        // Aurora flora grows in colonies, not as an even sprinkle.
+        if (objectID == 0 && isAurora && !isRockPatch) {
+            objectID = auroraColonyObject(seed, tileX, tileY);
+        }
+
+        // Meadow carpets: inside a meadow patch, dense walk-through tall grass
+        // takes the tile before the sparse rolls run.
+        if (objectID == 0
+                && !isRockPatch
+                && SkyNoise.fbm(seed + SALT_MEADOW, tileX, tileY, MEADOW_SCALE, 2) > MEADOW_THRESHOLD
+                && SkyNoise.tileRoll(seed, tileX, tileY, SALT_MEADOW_ROLL) < MEADOW_DENSITY) {
+            objectID = isStormveil ? SkyRegistry.stormsedgeID
+                    : (isAurora ? SkyRegistry.prismgrassID : SkyRegistry.tallcloudgrassID);
+            return pack(groundID, objectID, biomeID, false);
+        }
+
+        if (objectID == 0) {
+            objectID = rollObject(seed, tileX, tileY, isStormveil, isAurora, isRockPatch, band);
+        }
+        return pack(groundID, objectID, biomeID, false);
+    }
+
     public static void paintRegion(Region region, int seed) {
         int tileWidth = region.tileLayer.region.tileWidth;
         int tileHeight = region.tileLayer.region.tileHeight;
         // The canonical sky origin (Old Warden Spire hub) — computed once per
-        // region; every radial rule below derives from it.
+        // region; every radial rule derives from it.
         Point origin = SkyOrigin.compute(seed);
         // Tiles already claimed by the second half of a 2x1 crystal cluster
         boolean[][] reserved = new boolean[tileWidth][tileHeight];
@@ -318,107 +558,12 @@ public final class SkyTerrainPainter {
                 int tileX = regionTileX + region.tileXOffset;
                 int tileY = regionTileY + region.tileYOffset;
 
-                float biomeValue = SkyNoise.fbm(seed + SALT_BIOME, tileX, tileY, BIOME_SCALE, 2);
+                long desc = describeTile(seed, tileX, tileY, origin.x, origin.y);
+                region.biomeLayer.setBiomeByRegion(regionTileX, regionTileY, biomeRegistryID(descBiome(desc)));
+                region.tileLayer.setTileByRegion(regionTileX, regionTileY, descTile(desc));
 
-                // The hub guarantee: around the Old Warden Spire the island
-                // mask is clamped to solid land and the biome pulled into the
-                // Driftlands band, so the first ascent always lands on a
-                // walkable, safe, recognizable home island — regardless of
-                // what the raw noise wanted there.
-                float hubDx = tileX - origin.x;
-                float hubDy = tileY - origin.y;
-                float hubDist = (float) Math.sqrt(hubDx * hubDx + hubDy * hubDy);
-                if (hubDist < SkyOrigin.HUB_RADIUS) {
-                    float force = 1.0F - hubDist / SkyOrigin.HUB_RADIUS; // 1 center → 0 rim
-                    biomeValue = biomeValue + (0.5F - biomeValue) * Math.min(1.0F, force * 1.6F);
-                }
-
-                boolean isStormveil = biomeValue < STORMVEIL_BELOW;
-                boolean isAurora = biomeValue > AURORA_ABOVE;
-
-                int biomeID;
-                if (isStormveil) {
-                    biomeID = SkyRegistry.stormveil.getID();
-                } else if (isAurora) {
-                    biomeID = SkyRegistry.auroraShoals.getID();
-                } else {
-                    biomeID = SkyRegistry.driftlands.getID();
-                }
-                region.biomeLayer.setBiomeByRegion(regionTileX, regionTileY, biomeID);
-
-                float islandValue = SkyNoise.fbm(seed, tileX, tileY, ISLAND_SCALE, 3);
-                if (hubDist < SkyOrigin.HUB_RADIUS) {
-                    float force = 1.0F - hubDist / SkyOrigin.HUB_RADIUS;
-                    islandValue = Math.max(islandValue, ISLAND_THRESHOLD + 0.02F + 0.20F * force);
-                }
-                if (islandValue <= ISLAND_THRESHOLD) {
-                    region.tileLayer.setTileByRegion(regionTileX, regionTileY, SkyRegistry.mistseaID);
-                    continue;
-                }
-
-                boolean isRockPatch = SkyNoise.fbm(seed + SALT_ROCK_PATCH, tileX, tileY, ROCK_PATCH_SCALE, 2) > ROCK_PATCH_THRESHOLD;
-                int groundID;
-                if (isRockPatch) {
-                    groundID = SkyRegistry.skystoneTileID;
-                } else if (isStormveil) {
-                    groundID = SkyRegistry.stormslateID;
-                } else {
-                    groundID = SkyRegistry.cloudturfID;
-                }
-                region.tileLayer.setTileByRegion(regionTileX, regionTileY, groundID);
-
-                // Spire grounds: the immediate surroundings of the Old Warden
-                // Spire stay an open plaza — natural objects (grass carpets,
-                // trees, ores) are suppressed so nothing buries or crowds the
-                // landmark's silhouette on first arrival. The preset's own
-                // props (lanterns, banners, willows) stamp afterwards.
-                if (hubDist < SPIRE_GROUNDS_RADIUS) {
-                    continue;
-                }
-
-                // Keep island rims object-free so coastlines stay walkable
-                if (islandValue <= ISLAND_THRESHOLD + ISLAND_RIM || reserved[regionTileX][regionTileY]) {
-                    continue;
-                }
-
-                int band = SkyOrigin.bandFor(hubDist);
-
-                // Geology first. Rocks and ore no longer come out of the same
-                // per-tile roll as the plants — they belong to formations, and
-                // a formation owns its tiles outright so a plant cannot grow in
-                // the middle of an outcrop and break its silhouette.
-                int objectID = 0;
-                int outcrop = outcropAt(seed, tileX, tileY);
-                if (outcrop != 0) {
-                    objectID = rollOutcropObject(seed, tileX, tileY, outcrop, isStormveil, isAurora, band);
-                    if (objectID == 0 && (outcrop & OUTCROP_SOLID) != 0) {
-                        continue;   // bare formation floor, deliberately empty
-                    }
-                } else if (SkyNoise.tileRoll(seed, tileX, tileY, SALT_SOLITARY) < SOLITARY_CHANCE) {
-                    objectID = SkyRegistry.skystoneRockID;   // the rare lone stone
-                }
-
-                // Aurora flora grows in colonies, not as an even sprinkle.
-                if (objectID == 0 && isAurora && !isRockPatch) {
-                    objectID = auroraColonyObject(seed, tileX, tileY);
-                }
-
-                // Meadow carpets: inside a meadow patch, dense walk-through
-                // tall grass takes the tile before the sparse rolls run.
-                if (objectID == 0
-                        && !isRockPatch
-                        && SkyNoise.fbm(seed + SALT_MEADOW, tileX, tileY, MEADOW_SCALE, 2) > MEADOW_THRESHOLD
-                        && SkyNoise.tileRoll(seed, tileX, tileY, SALT_MEADOW_ROLL) < MEADOW_DENSITY) {
-                    int meadowGrassID = isStormveil ? SkyRegistry.stormsedgeID
-                            : (isAurora ? SkyRegistry.prismgrassID : SkyRegistry.tallcloudgrassID);
-                    region.objectLayer.setObjectByRegion(ObjectLayerRegistry.BASE_LAYER, regionTileX, regionTileY, meadowGrassID);
-                    continue;
-                }
-
-                if (objectID == 0) {
-                    objectID = rollObject(seed, tileX, tileY, isStormveil, isAurora, isRockPatch, band);
-                }
-                if (objectID == 0) {
+                int objectID = descObject(desc);
+                if (objectID == 0 || reserved[regionTileX][regionTileY]) {
                     continue;
                 }
                 if (objectID == SkyRegistry.stormCrystalID || objectID == SkyRegistry.auroraBloomID) {
@@ -428,8 +573,12 @@ public final class SkyTerrainPainter {
                     int counterID = objectID == SkyRegistry.stormCrystalID
                             ? SkyRegistry.stormCrystalRID
                             : SkyRegistry.auroraBloomRID;
+                    long right = describeTile(seed, tileX + 1, tileY, origin.x, origin.y);
+                    // The right half needs open land: not Mistsea, and not a
+                    // road or court, which must stay clear.
                     if (regionTileX + 1 < tileWidth
-                            && SkyNoise.fbm(seed, tileX + 1, tileY, ISLAND_SCALE, 3) > ISLAND_THRESHOLD + ISLAND_RIM) {
+                            && descTile(right) != SkyRegistry.mistseaID
+                            && !descBuilt(right)) {
                         region.objectLayer.setObjectByRegion(ObjectLayerRegistry.BASE_LAYER, regionTileX, regionTileY, objectID);
                         region.objectLayer.setObjectByRegion(ObjectLayerRegistry.BASE_LAYER, regionTileX + 1, regionTileY, counterID);
                         reserved[regionTileX + 1][regionTileY] = true;

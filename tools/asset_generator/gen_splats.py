@@ -26,6 +26,24 @@ _S = (16, 46, 34)
 _E = (46, 16, 34)
 _W = (-14, 16, 34)
 
+# The diagonal-only pieces are a small NUB anchored IN the named corner. They
+# are drawn on a tile that only touches ours corner-to-corner, so they are the
+# smallest pieces on the sheet: measured over 66 vanilla `_splat` sheets they
+# cover 0.8%-29.3% of their cell (median 12.5%).
+#
+# They used to be discs of radius 26 parked at (8,8)/(24,24) INSIDE the cell,
+# which covers 83%-89% and only bites a notch out of the far corner — the exact
+# complement of the intended shape. Every one of our tiles therefore repainted
+# each of its four diagonal neighbours almost completely, so laying a single
+# floor tile read as a 3x3 blob. That is the "white floor places huge"
+# playtest report; placement itself was always one tile. Keep these small, and
+# keep tools/tile_behaviour_audit.py in the loop.
+_NUB = 15
+_SE = (32, 32, _NUB)
+_SW = (0, 32, _NUB)
+_NE = (32, 0, _NUB)
+_NW = (0, 0, _NUB)
+
 # (col,row) -> None for opaque, or list of discs to union
 CELL_MASKS = {
     (3, 0): None, (4, 0): None, (5, 0): None, (6, 0): None,   # full variants
@@ -42,18 +60,35 @@ CELL_MASKS = {
     (6, 1): [_N, _E, _S],
     (5, 2): [_E, _S, _W],
     (6, 2): [_N, _S, _W],
-    # isolated diagonal blobs: big disc toward the named corner, notch far side
-    (0, 0): [(24, 24, 26)],  # SE
-    (2, 0): [(8, 24, 26)],   # SW
-    (0, 2): [(24, 8, 26)],   # NE
-    (2, 2): [(8, 8, 26)],    # NW
+    # isolated diagonal pieces: a nub in the named corner
+    (0, 0): [_SE],
+    (2, 0): [_SW],
+    (0, 2): [_NE],
+    (2, 2): [_NW],
+}
+
+# Subtractive "eyes", punched out after the additive mask.
+#
+# Vanilla never paints a blend piece solid once three or four sides are
+# covered: it keeps a ragged eye of the UNDERLYING tile showing, pulled toward
+# whichever side is still open ((1,1) is bordered on all four, so its eye sits
+# dead centre). Measured vanilla coverage is 60.5%-90.2% for the three-side
+# pieces and 51.6%-81.6% for (1,1). Unioning our directional discs alone gives
+# 98%-100%: the S disc, say, reaches far enough to cover what the N+E+W union
+# misses, so the piece goes solid and the tile underneath disappears. Without
+# these eyes a lone gap inside a floor is painted over completely and the floor
+# reads one tile wider than it was laid.
+CELL_EYES = {
+    (1, 1): (16, 16, 11),   # all four sides  -> eye centred
+    (5, 1): (16, 25, 10),   # N+E+W, open S   -> eye toward S
+    (6, 1): (7, 16, 10),    # N+E+S, open W   -> eye toward W
+    (5, 2): (16, 7, 10),    # E+S+W, open N   -> eye toward N
+    (6, 2): (25, 16, 10),   # N+S+W, open E   -> eye toward E
 }
 
 
-def _mask_alpha(discs, x, y, salt):
+def _disc_alpha(discs, x, y, salt):
     """255 inside any disc core; dithered 4px falloff band; 0 outside."""
-    if discs is None:
-        return 255
     best = -1.0
     for (cx, cy, r) in discs:
         d = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
@@ -65,6 +100,14 @@ def _mask_alpha(discs, x, y, salt):
     t = best / 4.0
     speck = Rng((x * 7349 + y * 12611) ^ (salt * 0x9E37)).float()
     return 255 if speck < t else 0
+
+
+def _mask_alpha(discs, eye, x, y, salt):
+    """Additive disc union minus the cell's eye, both dithered at the rim."""
+    a = 255 if discs is None else _disc_alpha(discs, x, y, salt)
+    if a and eye is not None:
+        a = 255 - _disc_alpha([eye], x, y, salt ^ 0x5EED)
+    return a
 
 
 def build_splat(path, material, variants=3, salt=0x51A7, frames=1, features=None):
@@ -90,9 +133,10 @@ def build_splat(path, material, variants=3, salt=0x51A7, frames=1, features=None
                     if (cx, cy) not in CELL_MASKS:
                         continue
                     discs = CELL_MASKS[(cx, cy)]
+                    eye = CELL_EYES.get((cx, cy))
                     for x in range(CELL):
                         for y in range(CELL):
-                            a = _mask_alpha(discs, x, y, vsalt + cx * 31 + cy * 71)
+                            a = _mask_alpha(discs, eye, x, y, vsalt + cx * 31 + cy * 71)
                             if a > 0:
                                 r, g, b, _ = block.get(cx * CELL + x, cy * CELL + y)
                                 sheet.put(bx + cx * CELL + x, by + cy * CELL + y, (r, g, b, a))

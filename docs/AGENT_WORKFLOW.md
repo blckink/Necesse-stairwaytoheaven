@@ -24,6 +24,7 @@ scripts/tile_sprite_check.sh   # client-side tile sprite indices, headless
 python3 tools/size_audit.py    # 0 flags required
 python3 tools/locale_audit.py  # no registered ID may show as a raw string ID
 python3 tools/sheet_format_audit.py  # sheets the engine reads at fixed offsets
+python3 tools/tile_behaviour_audit.py  # every tile is what it is presented as
 ```
 
 Match the gate to the change. A client rendering change is not covered by the
@@ -35,6 +36,15 @@ door painted over its whole cell, because that has *more* ink than a correct
 one. `sheet_format_audit` asks "is the ink in the rows the engine draws from",
 which is the only thing that catches a sprite rendering at the wrong size or
 in the wrong place.
+
+`tile_behaviour_audit` is the third of that family and covers ground tiles on
+both of the sides a tile can be wrong on: the Java declaration (is this floor
+really `isFloor`, does it splat at PRIORITY_FLOOR, is it craftable) and the
+`_splat` atlas the renderer marches over (are the blend cells the size vanilla
+draws them at). It exists because a floor that ships as terrain, or a blend
+cell painted as the complement of its intended shape, reaches the player as
+"this floor does not behave like a normal floor" and neither of the other two
+audits can see it.
 
 **5 — Record.** Append proven behaviour to `docs/TECHNICAL_LEARNINGS.md`,
 refresh `docs/CURRENT_STATE.md` if the state moved, append player feedback to

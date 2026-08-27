@@ -85,7 +85,7 @@ final class SkyBuildingSet {
                 new SkyWallLightObject("flickerlightgarland", 120, 0.10F, 0.45F), 50.0F, true);
 
         // ===== Deco =====
-        ObjectRegistry.registerObject("gloomravenstatue",
+        SkyRegistry.gloomRavenStatueID = ObjectRegistry.registerObject("gloomravenstatue",
                 new StatueObject("gloomraven", 16, 1), 20.0F, true);
         ObjectRegistry.registerObject("gloomwillow",
                 new SkyDecoObject("gloomwillow", 64, new Color(60, 48, 56),
@@ -99,10 +99,10 @@ final class SkyBuildingSet {
         // GameObject pickaxe default exactly like statues and crystal clusters.
         // Spire hero accents — the observatory instruments the Spire layout
         // can build its landmark read from.
-        ObjectRegistry.registerObject("skywatchtelescope",
+        SkyRegistry.skywatchTelescopeID = ObjectRegistry.registerObject("skywatchtelescope",
                 new SkyDecoObject("skywatchtelescope", 32, new Color(204, 160, 82),
                         new Rectangle(8, 40, 16, 24), "objects", "decorations"), 25.0F, true);
-        ObjectRegistry.registerObject("skywatchastrolabe",
+        SkyRegistry.skywatchAstrolabeID = ObjectRegistry.registerObject("skywatchastrolabe",
                 new SkyDecoObject("skywatchastrolabe", 32, new Color(204, 160, 82),
                         new Rectangle(4, 40, 24, 12), "objects", "decorations"), 25.0F, true);
         // Stormveil environmental props — small reusable pieces worldgen can
@@ -111,10 +111,10 @@ final class SkyBuildingSet {
                 new SkyDecoObject("stormscreed", 32, new Color(66, 60, 95),
                         null, "objects", "decorations")
                         .setTool(ToolType.ALL).setObjectHealth(1), 0.0F, false);
-        ObjectRegistry.registerObject("skywatchrubble",
+        SkyRegistry.skywatchRubbleID = ObjectRegistry.registerObject("skywatchrubble",
                 new SkyDecoObject("skywatchrubble", 32, new Color(126, 138, 154),
                         new Rectangle(8, 12, 16, 20), "objects", "decorations"), 0.0F, false);
-        ObjectRegistry.registerObject("chargecrystal",
+        SkyRegistry.chargeCrystalID = ObjectRegistry.registerObject("chargecrystal",
                 new SkyDecoObject("chargecrystal", 32, new Color(122, 108, 210),
                         new Rectangle(10, 20, 12, 12), "objects", "decorations")
                         .setLight(70, 0.72F, 0.45F), 5.0F, true);
@@ -123,11 +123,11 @@ final class SkyBuildingSet {
                         new Rectangle(12, 24, 8, 8), "objects", "decorations")
                         .setTool(ToolType.ALL).setObjectHealth(1), 0.0F, false);
         // Aurora Shoals accents — the same restrained teal/rose language.
-        ObjectRegistry.registerObject("aurorashards",
+        SkyRegistry.auroraShardsID = ObjectRegistry.registerObject("aurorashards",
                 new SkyDecoObject("aurorashards", 32, new Color(214, 130, 172),
                         new Rectangle(10, 20, 12, 10), "objects", "decorations")
                         .setLight(70, 0.90F, 0.40F), 5.0F, true);
-        ObjectRegistry.registerObject("starfall",
+        SkyRegistry.starfallID = ObjectRegistry.registerObject("starfall",
                 new SkyDecoObject("starfall", 32, new Color(136, 216, 206),
                         new Rectangle(10, 16, 12, 12), "objects", "decorations")
                         .setLight(80, 0.50F, 0.40F), 10.0F, true);
@@ -175,6 +175,20 @@ final class SkyBuildingSet {
                 new Color(86, 178, 186), new Rectangle(4, 10, 24, 18))
                 .setTool(ToolType.UNBREAKABLE).setLight(100, 0.50F, 0.25F);
         SkyRegistry.skyAnchorID = ObjectRegistry.registerObject("skyanchor", anchor, 0.0F, false);
+    }
+
+    /**
+     * Resolves the ground materials the built landscape paves with. Called from
+     * postInit, after every registry (vanilla's included) has been filled, so
+     * the vanilla path lookup can never race core registration.
+     *
+     * See {@link SkyRegistry#skyroadTileID} for why the road is a vanilla
+     * {@code PathTiledTile} rather than a tile of our own.
+     */
+    static void resolveWorldgenMaterials() {
+        SkyRegistry.skyroadTileID = TileRegistry.getTileID("snowstonepathtile");
+        SkyRegistry.skycourtTileID = TileRegistry.getTileID("stonebrickfloor");
+        SkyRegistry.skyplinthTileID = SkyRegistry.marbleCheckerID;
     }
 
     static void registerItems() {

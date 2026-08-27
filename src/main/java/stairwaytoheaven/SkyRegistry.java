@@ -134,4 +134,46 @@ public final class SkyRegistry {
 
     // Buildable wood floors
     public static int nimbusFloorID, charFloorID, prismFloorID;
+
+    // ===== v0.7 "The Skywatch Roads": materials of the built landscape =====
+
+    /**
+     * Ground of the Skywatch roads, aprons and gate footings.
+     *
+     * This is vanilla's {@code snowstonepathtile}, deliberately: a road wants
+     * the native {@code PathTiledTile} archetype (it blends its own edges into
+     * whatever terrain it crosses, bridges a shore tile below it, and gives
+     * +10% movement speed, which is what makes following a road worth it), and
+     * the mod cannot ship a new tile texture without a generator change. Of
+     * the vanilla paths it is the only one that stays legible against all
+     * three sky grounds at once — pale blue cut stone over silver-green
+     * cloudturf, dark violet stormslate and blue-grey skystone.
+     *
+     * If a {@code tiles/skystonepath.png} is ever generated, registering
+     * {@code new PathTiledTile("skystonepath", ...)} and pointing this field at
+     * it is the entire migration for NEW regions.
+     */
+    public static int skyroadTileID;
+    /**
+     * Formal floor of a designed place. Vanilla {@code stonebrickfloor}: laid
+     * masonry that reads as built without shouting.
+     *
+     * The first calibration render used the mod's Marble Checker here and a
+     * 28-tile-wide black-and-white chequerboard swallowed the whole screen —
+     * exactly the "carpet the world" failure this pass exists to avoid. The
+     * checker is now an accent (see {@link #skyplinthTileID}), which is what a
+     * chequered floor is for.
+     */
+    public static int skycourtTileID;
+    /** The 3x3 plinth a monument or instrument stands on — Marble Checker. */
+    public static int skyplinthTileID;
+
+    // Props the built landscape composes with (registered in SkyBuildingSet).
+    public static int gloomRavenStatueID;
+    public static int skywatchRubbleID;
+    public static int chargeCrystalID;
+    public static int auroraShardsID;
+    public static int starfallID;
+    public static int skywatchTelescopeID;
+    public static int skywatchAstrolabeID;
 }
