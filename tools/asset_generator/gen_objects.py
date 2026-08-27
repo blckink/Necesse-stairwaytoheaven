@@ -1577,3 +1577,277 @@ def gen_prismgrass(path, variants=4):
         _carpet_cell(c, rng, L["deep"], P["deep"], tones)
         sheet.paste(c, v * 32, 0)
     sheet.save(path)
+
+
+# =====================================================================
+# v0.7 stone barrens
+#
+# The grey skystone ground measured 0.032 objects per tile against 0.311-0.384
+# on every other ground in the world, and its entire content was stone blocks.
+# These are what the barrens grow instead: a crust that colonises bare plate,
+# a hardy cushion flower that lives in the cracks, and heaps of broken plate.
+#
+# All three are drawn to LIE ON STONE, not to stand in soil: wide low masses,
+# a hard ground line, no wispy stalks. Size reference is vanilla
+# objects/swampgrass.png, whose densest 32px cell carries 516 opaque pixels.
+# =====================================================================
+
+def _lichen_rosette(c, cx, cy, rx, ry, ramp, rng, cups=0):
+    """One crust rosette: a squashed dome of overlapping lobes, lit top-left,
+    with a rim a step lighter than its body so the lobes stay separable."""
+    c.ellipse(cx + 1, cy + 1, rx + 0.6, ry + 0.6, ramp["deep"])
+    c.ellipse(cx, cy, rx, ry, ramp["base"])
+    for k in range(3):                       # ragged perimeter, never a disc
+        a = (k * 2.3) + rng.float() * 0.9
+        c.ellipse(cx + math.cos(a) * rx * 0.48, cy + math.sin(a) * ry * 0.44,
+                  rx * 0.55, ry * 0.62, ramp["base"])
+    c.ellipse(cx - rx * 0.26, cy - ry * 0.36, rx * 0.62, ry * 0.52, ramp["light"])
+    c.ellipse(cx - rx * 0.34, cy - ry * 0.46, rx * 0.32, ry * 0.26, ramp["hi"])
+    for x in range(int(cx - rx) - 1, int(cx + rx) + 2):
+        for y in range(int(cy - ry) - 1, int(cy + ry) + 2):
+            p = c.get(x, y)[:3]
+            if p == ramp["base"][:3] and (x + 3 * y) % 7 == 0 and rng.chance(0.55):
+                c.put(x, y, ramp["deep"])
+            elif p == ramp["light"][:3] and (3 * x + y) % 9 == 0 and rng.chance(0.5):
+                c.put(x, y, ramp["hi"])
+    out = []
+    for k in range(cups):
+        ox = int(-rx * 0.6 + (k + 0.5) * (2 * rx * 0.6) / max(1, cups))
+        out.append((int(cx + ox), int(cy - ry) + 1))
+    return out
+
+
+def _lichen_cups(c, cups, ramp):
+    """Fruiting cups, drawn AFTER the outline pass so they read as separate
+    bodies standing on the crust. A short 2px stalk and a 3px cap with ONE
+    highlight pixel — three bright pixels per cup read as sparkle, not as a
+    cup, which is how the first pass failed."""
+    for (sx, sy) in cups:
+        sy = max(4, min(28, sy))
+        c.put(sx, sy, ramp["deep"])
+        c.put(sx, sy - 1, ramp["base"])
+        c.put(sx - 1, sy - 2, ramp["light"])
+        c.put(sx, sy - 2, ramp["cup"])
+        c.put(sx + 1, sy - 2, ramp["light"])
+        c.put(sx, sy - 3, ramp["light"])
+
+
+def gen_skylichen(path, variants=3):
+    """96x32: Skystone Lichen — a low blue-green crust colonising bare plate,
+    with pale fruiting cups. Ground-hugging, so it keeps the outline pass.
+
+    The three variants differ in FORM, not in speckle: a broad single mat, a
+    two-lobed crust split by a bare channel, and a scattered colony of small
+    rosettes. Vanilla picks a variant per tile, so adjacent tiles of one patch
+    mix the three and the repetition disappears (docs/ART_DIRECTION.md)."""
+    sheet = Canvas(variants * 32, 32)
+    L = palette.SKYLICHEN
+    layouts = [
+        # (cx, cy, rx, ry, cups) — one broad mat with a smaller shoulder
+        [(15.0, 22.0, 13.0, 7.0, 3), (24.0, 27.0, 7.5, 4.5, 1), (6.0, 27.0, 6.5, 4.0, 1)],
+        # two lobes with a bare channel between them
+        [(8.0, 23.0, 8.5, 7.0, 2), (23.0, 25.0, 9.0, 6.5, 2), (16.0, 29.0, 6.0, 3.0, 0)],
+        # a scattered colony: many small rosettes, more open ground
+        [(10.0, 21.0, 6.5, 5.0, 1), (20.0, 23.0, 7.5, 5.5, 2),
+         (6.0, 28.0, 6.0, 4.0, 1), (24.0, 29.0, 6.5, 3.5, 1), (15.0, 27.0, 5.5, 3.5, 1)],
+    ]
+    for v in range(variants):
+        c = Canvas(32, 32)
+        rng = Rng(0x11C4E + v * 907)
+        cups = []
+        for (cx, cy, rx, ry, n) in layouts[v % len(layouts)]:
+            cups += _lichen_rosette(c, cx, cy, rx, ry, L, rng, n)
+        c.outline(palette.OUTLINE)
+        _lichen_cups(c, cups, L)
+        sheet.paste(c, v * 32, 0)
+    sheet.save(path)
+
+
+def gen_skylichen_item(path):
+    """A peeled sheet of lichen crust, curling at one edge."""
+    c = Canvas(32, 32)
+    L = palette.SKYLICHEN
+    rng = Rng(0x11C4E7)
+    cups = []
+    for (cx, cy, rx, ry, n) in ((15.0, 15.0, 12.0, 7.0, 3), (23.0, 20.0, 7.0, 4.0, 1),
+                                (6.0, 20.0, 6.0, 4.0, 1)):
+        cups += _lichen_rosette(c, cx, cy, rx, ry, L, rng, n)
+    for k in range(11):                      # the curled, peeled edge
+        x = 6 + k
+        y = 24 - abs(k - 5) // 2
+        c.put(x, y, L["light"])
+        c.put(x, y + 1, L["deep"])
+    c.outline(palette.OUTLINE)
+    _lichen_cups(c, cups, L)
+    c.save(path)
+
+
+def _cragbloom_cushion(c, cx, base_y, w, h, rng, flowers):
+    """A hardy cushion wedged into stone: THREE unequal lobes at different
+    heights with a waist between them, not one dome. The first pass drew a
+    single ellipse plus jitter and came out a perfect green ball with no
+    silhouette at all."""
+    B = palette.CRAGBLOOM
+    lobes = [(cx - w * 0.28, base_y - h * 0.30, w * 0.30, h * 0.34),
+             (cx + w * 0.06, base_y - h * 0.46, w * 0.34, h * 0.50),
+             (cx + w * 0.34, base_y - h * 0.24, w * 0.24, h * 0.28)]
+    for (lx, ly, lrx, lry) in lobes:         # under-bodies first
+        c.ellipse(lx + 1, ly + 1, lrx + 0.6, lry + 0.6, B["deep"])
+    for (lx, ly, lrx, lry) in lobes:
+        c.ellipse(lx, ly, lrx, lry, B["base"])
+    for (lx, ly, lrx, lry) in lobes:         # lit crowns, top-left of each
+        c.ellipse(lx - lrx * 0.28, ly - lry * 0.36, lrx * 0.52, lry * 0.42, B["light"])
+    # shadow in the waists where one lobe sits under the next
+    for (lx, ly, lrx, lry) in lobes[:2]:
+        c.ellipse(lx + lrx * 0.8, ly + lry * 0.2, lrx * 0.34, lry * 0.30, B["deep"])
+    # Leaf tips: three short tufts growing OUT of the top lobe, drawn as a
+    # dark mass first and lit afterwards. Drawn instead as 2px columns of
+    # base+deep they came out of the outline pass as solid black bars
+    # standing straight up — the skill's "outline eats the diagonal" trap,
+    # in its vertical form.
+    tip = lobes[1]
+    for (ox, oy, tw, th) in ((-4, -1, 2.4, 3.0), (0, -3, 2.6, 3.6), (4, -1, 2.2, 2.8)):
+        tx = tip[0] + ox
+        ty = tip[1] - tip[3] + oy
+        c.ellipse(tx, ty, tw, th, B["deep"])
+        c.ellipse(tx, ty, tw - 0.9, th - 0.9, B["base"])
+        c.ellipse(tx - 0.6, ty - 0.8, tw - 1.6, th - 1.8, B["light"])
+    for _ in range(10):                      # leaf texture
+        lx = cx + rng.range(-int(w * 0.42), int(w * 0.42))
+        ly = base_y - rng.range(int(h * 0.15), int(h * 0.62))
+        if c.get(lx, ly)[3]:
+            c.put(lx, ly, B["deep"])
+    # the crack it grows out of: chips of stone at the base, so the plant is
+    # visibly wedged into rock rather than standing in soil
+    S = palette.SKYSCREE
+    for (ox, cw) in ((-int(w * 0.46), 5), (int(w * 0.30), 6)):
+        for i in range(cw):
+            c.put(cx + ox + i, base_y, S["light"] if i % 3 else S["hi"])
+            c.put(cx + ox + i, base_y + 1, S["deep"])
+    return [(cx + fx, base_y - fy) for (fx, fy) in flowers]
+
+
+def gen_cragbloom(path, variants=3):
+    """96x32: Cragbloom — a hardy cushion plant wedged into bare stone, the one
+    warm accent in the barrens."""
+    sheet = Canvas(variants * 32, 32)
+    B = palette.CRAGBLOOM
+    layouts = [
+        (15, 28, 24, 20, ((-6, 13), (2, 18), (7, 11), (-1, 20))),
+        (17, 29, 20, 16, ((-5, 11), (3, 15), (8, 9))),
+        (14, 28, 26, 22, ((-8, 12), (0, 20), (6, 16), (-3, 17), (9, 10))),
+    ]
+    for v in range(variants):
+        c = Canvas(32, 32)
+        rng = Rng(0xC7A6B + v * 613)
+        cx, base_y, w, h, flowers = layouts[v % len(layouts)]
+        pts = _cragbloom_cushion(c, cx, base_y, w, h, rng, flowers)
+        c.outline(palette.OUTLINE)
+        for (fx, fy) in pts:                 # petals after the outline pass
+            c.put(fx, fy, B["heart"])
+            c.put(fx - 1, fy, B["petal"])
+            c.put(fx + 1, fy, B["petal"])
+            c.put(fx, fy - 1, B["petal_hi"])
+            c.put(fx, fy + 1, B["petal"])
+        sheet.paste(c, v * 32, 0)
+    sheet.save(path)
+
+
+def gen_cragbloom_item(path):
+    """A pulled cragbloom: cushion, flowers and its woody taproot."""
+    c = Canvas(32, 32)
+    B = palette.CRAGBLOOM
+    rng = Rng(0xC7A6B9)
+    pts = _cragbloom_cushion(c, 15, 23, 25, 20, rng, ((-7, 12), (1, 18), (7, 13), (-2, 16)))
+    for k in range(6):                       # taproot below the crack
+        c.put(14, 25 + k, B["deep"])
+        c.put(15, 25 + k, B["base"] if k < 3 else B["deep"])
+    c.put(12, 29, B["deep"])
+    c.put(18, 28, B["deep"])
+    c.outline(palette.OUTLINE)
+    for (fx, fy) in pts:
+        c.put(fx, fy, B["heart"])
+        c.put(fx - 1, fy, B["petal"])
+        c.put(fx + 1, fy, B["petal"])
+        c.put(fx, fy - 1, B["petal_hi"])
+        c.put(fx, fy + 1, B["petal"])
+    c.save(path)
+
+
+def _scree_plate(c, x, y, w, h, ramp, tilt, rng, vein=False):
+    """One broken plate of skystone, drawn as a LIT TOP SURFACE over a darker
+    front face — the same top/face split every stone object in this mod uses.
+    The first pass gave each plate one lit row over three dark ones, so a heap
+    of them read as dark scribbles instead of stone."""
+    for i in range(w):
+        top = y - int(round(tilt * (i - w / 2.0) / max(1.0, w / 2.0)))
+        c.put(x + i, top, ramp["hi"] if i % 4 else ramp["light"])
+        if h > 1:
+            c.put(x + i, top + 1, ramp["light"])
+        for k in range(2, h):
+            c.put(x + i, top + k, ramp["base"] if k < h - 1 else ramp["deep"])
+    if vein:
+        vx = x + rng.range(1, max(1, w - 2))
+        vy = y - int(round(tilt * (vx - x - w / 2.0) / max(1.0, w / 2.0))) + 1
+        c.put(vx, vy, ramp["vein"])
+        c.put(vx + 1, vy, ramp["vein"])
+
+
+def gen_skyscree(path, variants=4):
+    """128x32: Sky Scree — a heap of broken skystone plate. Geology, not a
+    plant: it gives the barrens the ground texture the meadow gets from grass,
+    without pretending anything grows there.
+
+    Built as a solid base mound with plates lying ON it, because a loose
+    scatter of thin plates is all outline and reads as scribble at 1x."""
+    sheet = Canvas(variants * 32, 32)
+    S = palette.SKYSCREE
+    layouts = [
+        # (mound cx, cy, rx, ry), [(x, y, w, h, tilt, vein) ...]
+        ((15, 27, 14, 7), [(3, 24, 14, 6, 2, False), (13, 20, 15, 7, -3, True),
+                           (8, 17, 11, 5, 2, False)]),
+        ((15, 28, 14, 6), [(4, 25, 17, 6, -2, True), (10, 21, 14, 6, 3, False),
+                           (15, 17, 12, 5, -2, False)]),
+        ((16, 27, 14, 7), [(4, 23, 13, 7, 3, False), (12, 25, 16, 6, -1, True),
+                           (14, 19, 13, 6, 2, False), (6, 18, 9, 4, -2, False)]),
+        ((15, 28, 15, 6), [(3, 26, 22, 5, 1, False), (8, 22, 15, 7, -3, True),
+                           (13, 16, 14, 6, 2, False)]),
+    ]
+    for v in range(variants):
+        c = Canvas(32, 32)
+        rng = Rng(0x5C4EE + v * 811)
+        (mx, my, mrx, mry), plates = layouts[v % len(layouts)]
+        c.ellipse(mx, my, mrx, mry, S["deep"])           # the rubble bed
+        c.ellipse(mx, my - 1, mrx * 0.9, mry * 0.8, S["base"])
+        for (x, y, w, h, tilt, vein) in plates:
+            _scree_plate(c, x, y, w, h, S, tilt, rng, vein)
+        # ONE chip standing on edge, 3px wide, for a broken silhouette. Two of
+        # them (the first pass) turned every heap into a shape with two
+        # protrusions, which at 1x read as a bird rather than as rubble.
+        ex, ey, eh = mx - mrx + 4, my - mry + 1, 5
+        for k in range(eh):
+            c.put(ex, ey - k, S["light"])
+            c.put(ex + 1, ey - k, S["hi"] if k > 1 else S["base"])
+            c.put(ex + 2, ey - k, S["base"])
+        c.outline(palette.OUTLINE)
+        # vanilla's baked soft-alpha ground skirt, never an opaque dark band
+        for k, a in enumerate((78, 55, 29)):
+            for x in range(1, 31):
+                if not c.filled(x, 30 - k) and c.filled(x, 29 - k):
+                    c.put(x, 30 - k, with_alpha(palette.OUTLINE, a))
+        sheet.paste(c, v * 32, 0)
+    sheet.save(path)
+
+
+def gen_skyscree_item(path):
+    """A double handful of scree: three plates stacked in the hand."""
+    c = Canvas(32, 32)
+    S = palette.SKYSCREE
+    rng = Rng(0x5C4EE3)
+    c.ellipse(16, 21, 14, 7, S["deep"])
+    c.ellipse(16, 20, 13, 6, S["base"])
+    for (x, y, w, h, tilt, vein) in ((2, 19, 23, 7, 2, False), (7, 14, 17, 7, -3, True),
+                                     (11, 8, 14, 6, 2, False)):
+        _scree_plate(c, x, y, w, h, S, tilt, rng, vein)
+    c.outline(palette.OUTLINE)
+    c.save(path)

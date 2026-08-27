@@ -213,6 +213,14 @@ def main():
     gen_furniture.gen_beacon(f"{out}/objects/wardenbeaconoff.png", False)
     gen_furniture.gen_beacon(f"{out}/objects/wardenbeaconon.png", True)
     gen_furniture.gen_skyanchor(f"{out}/objects/skyanchor.png")
+    # v0.7 stone barrens: what grows on the grey skystone ground
+    gen_objects.gen_skylichen(f"{out}/objects/skylichen.png")
+    gen_objects.gen_skylichen_item(f"{out}/items/skylichen.png")
+    gen_objects.gen_cragbloom(f"{out}/objects/cragbloom.png")
+    gen_objects.gen_cragbloom_item(f"{out}/items/cragbloom.png")
+    gen_objects.gen_skyscree(f"{out}/objects/skyscree.png")
+    gen_objects.gen_skyscree_item(f"{out}/items/skyscree.png")
+
     gen_furniture.gen_v2_item_icons(f"{out}/items")
     gen_furniture.gen_set_icons(f"{out}/items")
 

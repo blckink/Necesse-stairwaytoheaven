@@ -80,6 +80,9 @@ public final class SkyRegistry {
     public static int marbleCheckerID;
     public static int gloomwoodFloorID;
     public static int skyironFenceID;
+    /** The CLOSED fence gate. FenceGateObject.registerGatePair also registers
+     *  "skyironfencegateopen"; worldgen must only ever place the closed one. */
+    public static int skyironFenceGateID;
     public static int wardenCandelabraID;
     public static int flickerGarlandID;
     public static int catBasketID;
@@ -128,6 +131,8 @@ public final class SkyRegistry {
 
     // Dense meadow tall grasses (walk-through carpets)
     public static int tallcloudgrassID, stormsedgeID, prismgrassID;
+    /** v0.7 stone barrens: what grows on the grey skystone ground. */
+    public static int skylichenID, cragbloomID, skyscreeID;
 
     // Ores
     public static int fulguriteRockID, prismshardRockID;

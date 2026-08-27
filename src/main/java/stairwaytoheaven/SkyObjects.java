@@ -109,6 +109,19 @@ final class SkyObjects {
         SkyRegistry.auroralilyID = registerPickable("auroralily", 2, new Color(214, 150, 190), "auroralily", 1, 1);
         SkyRegistry.staticmossID = registerPickable("staticmoss", 2, new Color(86, 108, 116), "staticmoss", 1, 2);
 
+        // --- v0.7 stone barrens: what grows on the grey skystone ground ---
+        // Measured over three seeds and 235k natural land tiles, that ground
+        // carried 0.032 objects per tile against 0.311-0.384 on every other
+        // ground in the world, and its whole content was stone blocks. These
+        // three are its vegetation and its geology; SkyTerrainPainter.screeAt
+        // lays them down as formations, not as a per-tile sprinkle.
+        SkyRegistry.skylichenID = registerPickable("skylichen", 3,
+                new Color(140, 172, 164), "skylichen", 1, 2);
+        SkyRegistry.cragbloomID = registerPickable("cragbloom", 2,
+                new Color(108, 134, 112), "cragbloom", 1, 1);
+        SkyRegistry.skyscreeID = registerPickable("skyscree", 2,
+                new Color(124, 134, 152), "skyscree", 1, 2);
+
         // --- Dense meadow tall grasses: walk-through carpets (drop nothing,
         // clear on a swing like vanilla tall grass) ---
         SkyRegistry.tallcloudgrassID = registerMeadowGrass("tallcloudgrass", new Color(186, 202, 186));

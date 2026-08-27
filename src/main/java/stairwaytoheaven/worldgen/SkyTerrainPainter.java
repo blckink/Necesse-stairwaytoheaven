@@ -122,6 +122,64 @@ public final class SkyTerrainPainter {
 
     private static final float TAU = 6.2831855F;
 
+    // ------------------------------------------------------------------
+    // v0.7 stone barrens.
+    //
+    // isRockPatch turns any biome's ground grey and then rollObject answers
+    // `isRockPatch ? 0 : plant` for almost every plant, meadow carpets are
+    // gated on !isRockPatch and aurora colonies are too. Measured over three
+    // seeds and 235,528 natural land tiles that left:
+    //
+    //   Driftlands / cloudturf     157863 land   0.384 objects/tile
+    //   AuroraShoals / cloudturf    14481 land   0.347
+    //   Stormveil / stormslate      28586 land   0.311
+    //   Stormveil / skystone         4871 land   0.099
+    //   AuroraShoals / skystone      3247 land   0.044   (rock only)
+    //   Driftlands / skystone       26480 land   0.032   (rock only)
+    //
+    // 14.7% of all land, four to twelve times emptier than anything else, and
+    // nothing on it but stone blocks — "die Welt mit grauen Boeden viel leerer
+    // und hat eigentlich nur paar einzelne Steinbloecke".
+    //
+    // The fix is the same one the rock pass used: a FORMATION field, not a
+    // per-tile probability. Barren growth belongs to lichen beds, which are
+    // exactly what colonises bare plate in the real world, and the density is
+    // calibrated on 40x22 SCREEN renders of barren ground, never on an
+    // overview (docs/TECHNICAL_LEARNINGS.md).
+    public static final int SCREE_CELL = 9;
+    /** Chance a lattice cell carries a bed at all — gaps are the point. */
+    public static final float SCREE_BED_CHANCE = 0.80F;
+    /** Fraction of a bed's footprint that actually carries something. */
+    public static final float SCREE_FILL = 0.72F;
+    public static final float SCREE_EDGE_AMOUNT = 0.75F;
+    public static final float SCREE_EDGE_SCALE = 5.0F;
+    /**
+     * Shares within a bed: lichen, cragbloom, scree, boulder, then accent.
+     *
+     * The boulder share exists because the first screen-scale render of the
+     * new barrens was uniformly FLAT — lichen, bloom and scree are all low
+     * 32px objects, so 40x22 tiles of them read as one field of pebbles. The
+     * meadow gets its relief from trees; nothing tall grows on bare plate, so
+     * the barrens get theirs from boulders standing in the scree.
+     */
+    public static final float SCREE_LICHEN_SHARE = 0.50F;
+    public static final float SCREE_BLOOM_SHARE = 0.68F;
+    public static final float SCREE_RUBBLE_SHARE = 0.86F;
+    public static final float SCREE_BOULDER_SHARE = 0.93F;
+    /**
+     * Sparse growth OUTSIDE the beds, so the open plate between them is never
+     * dead flat. Tuned so the Driftlands barrens land inside the 0.31-0.38
+     * objects/tile band the three vegetated grounds occupy: at 0.11 they
+     * measured 0.280, still the emptiest ground in the world.
+     */
+    public static final float SCREE_STRAY_CHANCE = 0.150F;
+
+    public static final long SALT_SCREE_BED = 0x5C4EE1L;
+    public static final long SALT_SCREE_EDGE = 0x5C4EE2L;
+    public static final int SALT_SCREE_FILL = 71;
+    public static final int SALT_SCREE_PICK = 73;
+    public static final int SALT_SCREE_STRAY = 79;
+
     // v0.4 meadow carpets: low-frequency patches where walk-through tall
     // grass covers most of the ground (vanilla lush-area density), layered
     // over the sparse per-tile rolls that fill the rest of the island.
@@ -314,6 +372,8 @@ public final class SkyTerrainPainter {
                 return SkyRegistry.wardenCandelabraID;
             case SkyLandscape.PROP_FENCE:
                 return SkyRegistry.skyironFenceID;
+            case SkyLandscape.PROP_GATE:
+                return SkyRegistry.skyironFenceGateID;
             case SkyLandscape.PROP_PILLAR:
                 return isStormveil ? SkyRegistry.nightfellWallID : SkyRegistry.skystoneBrickWallID;
             case SkyLandscape.PROP_STATUE:
@@ -386,6 +446,74 @@ public final class SkyTerrainPainter {
         return SkyNoise.tileRoll(seed, tileX, tileY, SALT_AURORA_PICK) < AURORA_BLOOM_SHARE
                 ? SkyRegistry.auroraBloomID
                 : SkyRegistry.auroralilyID;
+    }
+
+    /**
+     * What grows on the grey skystone ground at this tile, or 0.
+     *
+     * Beds of lichen on a lattice, exactly like {@link #auroraColonyObject}:
+     * one hashed site per cell, a wobbled boundary, a fill roll inside. The
+     * pick inside a bed is lichen first (the ground cover), then cragbloom
+     * (the warm accent), then scree heaps, then one lit biome accent, so a
+     * barren reads as bed → flower → rubble → a point of light, the same
+     * vegetation → outcrop → reward rhythm the meadow already has.
+     *
+     * Outside every bed a small stray roll keeps the open plate from reading
+     * as a paved floor.
+     */
+    public static int screeObject(int seed, int tileX, int tileY,
+                                  boolean isStormveil, boolean isAurora) {
+        int cellX = Math.floorDiv(tileX, SCREE_CELL);
+        int cellY = Math.floorDiv(tileY, SCREE_CELL);
+        float best = Float.MAX_VALUE;
+        for (int ox = -1; ox <= 1; ox++) {
+            for (int oy = -1; oy <= 1; oy++) {
+                int cx = cellX + ox;
+                int cy = cellY + oy;
+                if (SkyNoise.hash(seed + SALT_SCREE_BED, cx, cy) >= SCREE_BED_CHANCE) {
+                    continue;
+                }
+                float siteX = cx * SCREE_CELL
+                        + SkyNoise.hash(seed + SALT_SCREE_BED + 1, cx, cy) * SCREE_CELL;
+                float siteY = cy * SCREE_CELL
+                        + SkyNoise.hash(seed + SALT_SCREE_BED + 2, cx, cy) * SCREE_CELL;
+                float radius = 1.6F + SkyNoise.hash(seed + SALT_SCREE_BED + 3, cx, cy) * 3.2F;
+                float dx = tileX - siteX;
+                float dy = tileY - siteY;
+                best = Math.min(best, (float) Math.sqrt(dx * dx + dy * dy) / radius);
+            }
+        }
+        boolean inBed = false;
+        if (best != Float.MAX_VALUE) {
+            float wobble = SkyNoise.fbm(seed + SALT_SCREE_EDGE, tileX, tileY, SCREE_EDGE_SCALE, 2) - 0.5F;
+            inBed = best - wobble * SCREE_EDGE_AMOUNT <= 1.0F;
+        }
+        if (inBed) {
+            if (SkyNoise.tileRoll(seed, tileX, tileY, SALT_SCREE_FILL) >= SCREE_FILL) {
+                return 0;
+            }
+        } else if (SkyNoise.tileRoll(seed, tileX, tileY, SALT_SCREE_STRAY) >= SCREE_STRAY_CHANCE) {
+            return 0;
+        }
+        float pick = SkyNoise.tileRoll(seed, tileX, tileY, SALT_SCREE_PICK);
+        if (pick < SCREE_LICHEN_SHARE) {
+            return SkyRegistry.skylichenID;
+        }
+        if (pick < SCREE_BLOOM_SHARE) {
+            return SkyRegistry.cragbloomID;
+        }
+        if (pick < SCREE_RUBBLE_SHARE) {
+            return SkyRegistry.skyscreeID;
+        }
+        if (pick < SCREE_BOULDER_SHARE) {
+            // A boulder standing in the scree: the barrens' vertical relief,
+            // and a mining reward inside the bed rather than out on its own.
+            return SkyRegistry.skystoneRockID;
+        }
+        // One lit accent per bed or so: the barrens get the same "there is
+        // something over there" hook the other grounds get from their flowers.
+        return isStormveil ? SkyRegistry.chargeCrystalID
+                : (isAurora ? SkyRegistry.auroraShardsID : SkyRegistry.starfallID);
     }
 
     private SkyTerrainPainter() {
@@ -527,6 +655,16 @@ public final class SkyTerrainPainter {
         // Aurora flora grows in colonies, not as an even sprinkle.
         if (objectID == 0 && isAurora && !isRockPatch) {
             objectID = auroraColonyObject(seed, tileX, tileY);
+        }
+
+        // The stone barrens have their own beds. This runs where every other
+        // growth rule is switched OFF by isRockPatch, which is what made the
+        // grey ground the emptiest thing in the world.
+        if (objectID == 0 && isRockPatch) {
+            objectID = screeObject(seed, tileX, tileY, isStormveil, isAurora);
+            if (objectID != 0) {
+                return pack(groundID, objectID, biomeID, false);
+            }
         }
 
         // Meadow carpets: inside a meadow patch, dense walk-through tall grass

@@ -72,6 +72,24 @@ PAIRS = [
      "objects/pinesapling.png", None, "sapling"),
     ("objects/prismasapling.png", None,
      "objects/birchsapling.png", None, "sapling"),
+    # v0.7 stone barrens. Lichen and cragbloom are ground flora, so they answer
+    # to a vanilla grass clump. Scree does NOT: it is loose broken stuff lying
+    # on the ground, and vanilla's own analogue for that is the debris family
+    # (cratesdebris' densest 32px cell carries 156 opaque px) -- measuring a
+    # rubble heap against a tall grass clump would be asking it to be a
+    # different kind of object.
+    ("objects/skylichen.png", ("auto", 32, 32),
+     "objects/swampgrass.png", ("auto", 32, 32), "stone crust (densest cell)"),
+    ("objects/cragbloom.png", ("auto", 32, 32),
+     "objects/swampgrass.png", ("auto", 32, 32), "cushion flower (densest cell)"),
+    ("objects/skyscree.png", ("auto", 32, 32),
+     "objects/cratesdebris.png", ("auto", 32, 32), "ground debris (densest cell)"),
+    # v0.7 fence: cell by cell against the vanilla fence the engine draws the
+    # same way. col 0 is the post, which is the cell that carries the sprite.
+    ("objects/skyironfence.png", (0, 0, 32, 64),
+     "objects/ironfence.png", (0, 0, 32, 64), "fence post cell (col 0)"),
+    ("objects/skyironfencegate.png", (32, 0, 64, 64),
+     "objects/ironfencegate.png", (32, 0, 64, 64), "fence gate closed cell (col 1)"),
 ]
 
 THRESHOLD = 0.75

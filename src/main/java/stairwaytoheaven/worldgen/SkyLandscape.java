@@ -106,9 +106,16 @@ public final class SkyLandscape {
     public static final int PROP_GRASS = 8;
     /** Small lit crystal accent (biome-specific). */
     public static final int PROP_ACCENT = 9;
+    /**
+     * The fence GATE, standing in the opening a road makes in a fence ring.
+     * An enclosure whose entrance is a gap reads as a broken fence; the same
+     * enclosure with a gate in the gap reads as a place with a way in.
+     */
+    public static final int PROP_GATE = 12;
     public static final int PROP_RUBBLE = 10;
     /** Observatory instrument: telescope or astrolabe. */
     public static final int PROP_INSTRUMENT = 11;
+    // PROP_GATE = 12, declared with the fence above.
 
     public static int surfaceOf(int packed) {
         return packed & 0xFF;
@@ -316,8 +323,9 @@ public final class SkyLandscape {
 
         // --- the Warden's Forecourt ---
         if (hubDist <= HUB_COURT_RADIUS + 0.5F) {
+            boolean onRail = discRing((int) hubDx, (int) hubDy, HUB_COURT_RADIUS);
             int hubSurface;
-            if (hubDist > HUB_COURT_RADIUS - 0.5F) {
+            if (onRail) {
                 hubSurface = SURFACE_APRON;                  // the railing line
             } else if (hubDist >= HUB_INLAY_INNER && hubDist <= HUB_INLAY_OUTER) {
                 hubSurface = SURFACE_INLAY;                  // chequered ring
@@ -326,7 +334,7 @@ public final class SkyLandscape {
             }
             surface = Math.max(surface, hubSurface);
             if (prop == PROP_NONE) {
-                if (hubDist > HUB_COURT_RADIUS - 0.5F) {
+                if (onRail) {
                     prop = PROP_FENCE;                       // the forecourt wall
                 } else if (isHubLamp(tileX, tileY, originX, originY)) {
                     prop = PROP_LAMP;
@@ -340,15 +348,69 @@ public final class SkyLandscape {
             return SURFACE_NONE;
         }
         // The carriageway stays walkable, always. This is also what opens every
-        // fence ring exactly where a road runs through it, for free.
+        // fence ring exactly where a road runs through it, for free — and a
+        // ring opened by a road is where the GATE belongs. Leaving a bare gap
+        // is what made the rings read as broken fences rather than as places
+        // with a way in; a fence gate is a door, so the road stays walkable.
         if (surface == SURFACE_ROAD) {
-            prop = PROP_NONE;
+            prop = prop == PROP_FENCE ? PROP_GATE : PROP_NONE;
         }
         // Never build inside the spire preset's reach.
         if (hubDist < HUB_PROP_MIN && prop != PROP_CLEAR) {
             prop = PROP_NONE;
         }
         return pack(surface, prop);
+    }
+
+    // ------------------------------------------------------------------
+    // Fence geometry
+    // ------------------------------------------------------------------
+
+    /**
+     * The minimum thickness, in tiles, of a STRAIGHT fence band that still
+     * comes out as one connected run at every angle.
+     *
+     * {@link necesse.level.gameObject.FenceObject} attaches to its four
+     * ORTHOGONAL neighbours only, so a fence band thin enough to step
+     * diagonally on the tile grid is not a fence at all — it is a row of
+     * unconnected posts, and that is exactly what the player saw. Rasterising
+     * a band at every angle from 0 to 90 degrees: at 0.9 and 1.4 tiles thick
+     * the band falls into fragments (the largest holds 2–3% of its tiles); at
+     * 1.6 it is one component at every angle, with no lone posts anywhere in
+     * the sweep. Any road-side fence must therefore be at least this thick.
+     */
+    public static final float FENCE_MIN_THICKNESS = 1.6F;
+
+    /**
+     * Is (dx, dy) on the fence ring of a disc of the given radius?
+     *
+     * Taking the ring as the annulus |d - r| &lt;= 0.5 is one tile thick, which
+     * looks right written down and is wrong here for the reason above: a thin
+     * digital circle steps diagonally near its 45-degree points. Measured over
+     * radii 7..20, that rule leaves 60–70% of the ring as lone posts and dead
+     * ends.
+     *
+     * The 8-neighbour inner boundary — inside the disc, with at least one of
+     * the eight neighbours outside — is a single closed loop in which EVERY
+     * tile has exactly two orthogonal neighbours, at every radius tested
+     * (7, 8, 9, 10, 11, 13, 20: degrees 2/2/2/2/2/2/2, no exceptions). It runs
+     * two tiles wide across the diagonals, and that second tile IS the fix.
+     */
+    public static boolean discRing(int dx, int dy, float radius) {
+        float r2 = (radius + 0.5F) * (radius + 0.5F);
+        if (dx * dx + dy * dy > r2) {
+            return false;
+        }
+        for (int ox = -1; ox <= 1; ox++) {
+            for (int oy = -1; oy <= 1; oy++) {
+                int nx = dx + ox;
+                int ny = dy + oy;
+                if (nx * nx + ny * ny > r2) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     // ------------------------------------------------------------------
@@ -519,17 +581,25 @@ public final class SkyLandscape {
         // --- crosses from one sub-biome into another.
         int gate = gateAt(s, len, ar, br, abiome != bbiome);
         if (gate != 0) {
+            // A gate is: opening, pillar, WING, lit end — in that order,
+            // outward from the road. The wing has to START at the pillar,
+            // because a fence attaches to a wall: the old layout put the lamp
+            // band between them, so the wing stood detached in open ground as
+            // a 2x2 patch of loose posts rather than a run leaving the gate.
             if (perp <= ROAD_HALF_WIDTH) {
                 return pack(SURFACE_ROAD, PROP_NONE);            // the opening
             }
-            if (perp <= ROAD_HALF_WIDTH + 2.0F) {
+            if (perp <= ROAD_HALF_WIDTH + 1.6F) {
                 return pack(SURFACE_APRON, PROP_PILLAR);
             }
-            if (perp <= ROAD_HALF_WIDTH + 3.2F) {
-                return pack(SURFACE_APRON, PROP_LAMP);
+            if (perp <= ROAD_HALF_WIDTH + 4.8F) {
+                return pack(SURFACE_APRON, PROP_FENCE);          // the wing
             }
-            if (perp <= ROAD_HALF_WIDTH + 5.4F) {
-                return pack(SURFACE_APRON, PROP_FENCE);
+            if (perp <= ROAD_HALF_WIDTH + 5.5F) {
+                // 0.7 tiles: one ring deep. A 1.2-wide band caught two rings
+                // on a slanted road and stood the lamps in stacks, the same
+                // failure isVergeTile was already narrowed to avoid.
+                return pack(SURFACE_APRON, PROP_LAMP);           // its lit end
             }
             return 0;
         }
@@ -578,20 +648,24 @@ public final class SkyLandscape {
             }
             return 0;
         }
-        // A tended bed beside the road, fenced on three sides.
-        if (side != pickSide || Math.abs(along) > 2.7F) {
+        // A tended bed beside the road, fenced on three sides and open to the
+        // path. Every border band is at least FENCE_MIN_THICKNESS wide: the
+        // old bed drew its ends and its far side 0.9 tiles thick, which on a
+        // slanted road rasterises into a diagonal staircase, and a diagonal
+        // staircase of fence tiles is a row of unconnected posts.
+        if (side != pickSide || Math.abs(along) > 3.8F) {
             return 0;
         }
         if (perp <= ROAD_HALF_WIDTH + 0.6F) {
             return 0;
         }
-        if (perp > ROAD_HALF_WIDTH + 4.4F) {
+        if (perp > ROAD_HALF_WIDTH + 5.6F) {
             return 0;
         }
         if (perp <= ROAD_HALF_WIDTH + 1.5F) {
             return pack(SURFACE_APRON, PROP_CLEAR);              // the verge
         }
-        if (Math.abs(along) > 1.8F || perp > ROAD_HALF_WIDTH + 3.5F) {
+        if (Math.abs(along) > 2.2F || perp > ROAD_HALF_WIDTH + 4.0F) {
             return pack(SURFACE_APRON, PROP_FENCE);
         }
         float fill = SkyNoise.tileRoll(seed, tileX, tileY, SALT_BED);
@@ -675,10 +749,14 @@ public final class SkyLandscape {
                         ? pack(SURFACE_PLINTH, PROP_STATUE)
                         : pack(SURFACE_PLINTH, PROP_CLEAR);
             }
+            boolean onRail = discRing(dx, dy, radius);
             if (mn <= 1) {
-                return pack(SURFACE_ROAD, PROP_NONE);            // four spokes
+                // The four spokes are the way in. Where a spoke crosses the
+                // ring the fence becomes a gate instead of simply stopping.
+                return onRail ? pack(SURFACE_ROAD, PROP_FENCE)
+                        : pack(SURFACE_ROAD, PROP_NONE);
             }
-            if (d > radius - 0.5F) {
+            if (onRail) {
                 return pack(SURFACE_GARDEN, PROP_FENCE);
             }
             if (ax == ay && ax == radius - 3) {
@@ -706,7 +784,11 @@ public final class SkyLandscape {
                         : pack(SURFACE_PLINTH, PROP_CLEAR);
             }
             if (mx == radius) {
-                return pack(SURFACE_APRON, PROP_FENCE);          // railing
+                // The spokes cut the railing, and the cut carries a gate. The
+                // railing used to be tested first, so a square whose node had
+                // no road link was sealed shut with no way in at all.
+                return mn <= 1 ? pack(SURFACE_ROAD, PROP_FENCE)
+                        : pack(SURFACE_APRON, PROP_FENCE);       // railing
             }
             if (mn <= 1) {
                 return pack(SURFACE_ROAD, PROP_NONE);
@@ -731,7 +813,10 @@ public final class SkyLandscape {
             return 0;
         }
         if (ax == w || ay == h) {
-            return pack(SURFACE_APRON, PROP_FENCE);              // railing
+            // Same as the square: the terrace's long axis is its way in, and
+            // the railing carries a gate there rather than simply stopping.
+            return ax == w && ay <= 1 ? pack(SURFACE_ROAD, PROP_FENCE)
+                    : pack(SURFACE_APRON, PROP_FENCE);           // railing
         }
         if (ax <= w - 3 && ay <= h - 2) {
             if (ax <= 1 && ay <= 1) {

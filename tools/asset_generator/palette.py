@@ -195,6 +195,58 @@ IRONWORK = {
 
 GARLAND_LIGHTS = [(235, 106, 106), (240, 200, 110), (120, 205, 130), (120, 160, 235), (200, 130, 220)]
 
+# --- v0.7 stone barrens: the grey skystone ground had 0.03 objects per tile
+# against 0.31-0.38 everywhere else, and its only content was stone blocks
+# ("die Welt mit grauen Boeden viel leerer ... nur paar einzelne Steinbloecke").
+# These three ramps are what grows on bare stone. They stay off the meadow's
+# green so the barrens read as their OWN place rather than as thin meadow.
+
+SKYLICHEN = {
+    # blue-green mineral crust, deliberately cooler than CLOUDTURF's leaf green
+    "deep":  (68, 96, 96),
+    "base":  (112, 142, 138),
+    "light": (156, 184, 176),
+    "hi":    (198, 220, 210),
+    "cup":   (226, 232, 192),
+}
+
+CRAGBLOOM = {
+    "deep":     (52, 70, 64),
+    "base":     (84, 108, 94),
+    "light":    (118, 144, 120),
+    "petal":    (236, 204, 136),
+    "petal_hi": (252, 236, 194),
+    "heart":    (194, 138, 76),
+}
+
+SKYSCREE = {
+    # broken skystone plate: SKYSTONE's ladder with a colder, dustier base so
+    # a scree heap separates from the skystone GROUND it lies on
+    "deep":  (70, 78, 94),
+    "base":  (104, 114, 132),
+    "light": (140, 151, 168),
+    "hi":    (178, 188, 203),
+    "vein":  (86, 178, 186),
+}
+
+
+# Sky-iron: the wrought iron of the Skywatch fences and gates. IRONWORK's own
+# ramp tops out at (128,134,150) and its "deep" step is two units off the global
+# OUTLINE tone, so anything drawn from it against a soft dark outline collapses
+# into one dark mass — measured on the pre-fix fence sheet, 79% of the sprite's
+# pixels were literally the outline colour. Vanilla's ironfence.png runs
+# 67/98/130/166 over an outline of (34,35,35): a four-step ramp with real
+# separation from the line. This is that ladder in the mod's cooler hue, with
+# the mod's teal as the verdigris accent where vanilla uses rust brown.
+SKYIRON = {
+    "deep":   (58, 64, 80),
+    "base":   (96, 104, 122),
+    "light":  (134, 144, 162),
+    "hi":     (176, 187, 204),
+    "patina":     (58, 118, 118),
+    "patina_hi":  (96, 166, 158),
+}
+
 
 # --- v0.2.6: forage plants + critters ----------------------------------------
 

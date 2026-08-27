@@ -427,118 +427,379 @@ def gen_set_icons(dir_path):
     # 6px-wide stick (48 opaque px against vanilla copperstreetlamp's 240).
     mini_from(f"{obj}/ghostlantern.png", (6, 14, 27, 52), "ghostlantern.png")
     mini_from(f"{obj}/seancecircle.png", (0, 8, 32, 64), "seancecircle.png")
-    mini_from(f"{obj}/skyironfence.png", (0, 20, 32, 64), "skyironfence.png")
-    mini_from(f"{obj}/skyironfencegate.png", (32, 20, 64, 64), "skyironfencegate.png")
+    # The fence and the gate get DRAWN icons rather than a crop of their object
+    # sheet. Vanilla does the same -- items/ironfence.png is a post with a rail
+    # run leaving on both sides (576 opaque px), not a picture of one column --
+    # and the old crop shipped 47 and 132 opaque px against those 576 and 652.
+    gen_skyironfence_icon(f"{dir_path}/skyironfence.png")
+    gen_skyironfencegate_icon(f"{dir_path}/skyironfencegate.png")
 
 
 # =====================================================================
-# v0.2 format-correct pieces (fence, gate, wall lights 64x128, statue
-# 64x96, painting-banner 32x128, beacon, anchor, checker floor)
+# Sky Iron fence + gate.
+#
+# The five/six columns of these two sheets are NOT a layout of our own: the
+# engine addresses them at fixed sub-rects and fixed offsets, read out of
+# necesse.level.gameObject.FenceObject.addDrawables and
+# FenceGateObject.addDrawables (Necesse 1.3.2).
+#
+#   objects/skyironfence.png     160x64, every cell drawn bottom-anchored at
+#                                drawY = tileDrawY - height + 32, so sheet row
+#                                32 is the tile's TOP edge and row 63 its
+#                                bottom edge.
+#     col 0  post         always drawn
+#     col 1  north joint  drawn when the tile ABOVE attaches; it is drawn
+#                         BEFORE col 0, so it must stay inside the post's
+#                         own footprint or it shows through as loose art
+#     col 2  south rail   drawn when the tile BELOW attaches, and drawn a
+#                         SECOND time at drawY-24 to bridge into a wall or
+#                         rock standing above the fence
+#     col 3  west rails   must reach x=0  — it is the run to the west
+#     col 4  east rails   must reach x=31 — it is the run to the east
+#
+#   objects/skyironfencegate.png 192x64
+#     col 0  open,   horizontal run (rotation 0/2)
+#     col 1  closed, horizontal run (rotation 0/2)
+#     col 2  vertical gate post, drawn TWICE: at drawY-14 and at drawY+14
+#     col 3  latch piece, drawn at drawY+14, rotation 3 only
+#     col 4  closed vertical leaf, drawn at drawY-14
+#     col 5  open   vertical leaf, drawn at (drawX-16, drawY+14)
+#
+# What shipped before this pass was drawn to an invented convention — "post /
+# horizontal run / top cap / left connector / right connector" — so the engine
+# drew a full-width horizontal rail whenever a fence connected NORTH, a 3px
+# hairline for the whole vertical run, and the west and east runs on each
+# other's side of the tile. That is the "perspektivisch schrecklich" report.
+#
+# Geometry and value structure are measured off vanilla objects/ironfence.png
+# and objects/ironfencegate.png, cell by cell:
+#
+#   cell        vanilla ironfence solid extent   mass
+#   col 0 post  x10..21  y22..51                 424 px (+ soft skirt to y55)
+#   col 1 joint x10..21  y26..33                 128 px
+#   col 2 rail  x12..19  y34..63                 360 px
+#   col 3 west  x0..9    y30..47                 220 px (+ skirt to y53)
+#   col 4 east  x22..31  y30..47                 228 px (+ skirt to y53)
+#
+# Two things carry the top-down lean the game draws fences in, and the old
+# sheet had neither: a horizontal rail is a LIT TOP band with a DARK FRONT
+# FACE under it (never a symmetric bar), and every piece stands on a baked
+# soft-alpha ground skirt (alpha 74 then 29) rather than an opaque shadow.
 # =====================================================================
 
-def _iron_post(c, x, base_y, height, spike=True):
-    iron = palette.IRONWORK
-    for y in range(base_y - height, base_y):
-        c.put(x, y, iron["light"])
-        c.put(x + 1, y, iron["base"])
-        c.put(x + 2, y, iron["deep"])
-    if spike:
-        c.put(x + 1, base_y - height - 1, iron["base"])
-        c.put(x + 1, base_y - height - 2, iron["hi"])
+# Everything below is painted in 2x2 blocks, which is how vanilla's fence
+# sheets are built: no odd rows, no single stray pixels.
+_SI_KEYS = {"d": "deep", "m": "base", "l": "light", "H": "hi",
+            "p": "patina", "P": "patina_hi"}
 
 
-def _iron_rails(c, x0, x1, base_y):
-    iron = palette.IRONWORK
-    for rail_y in (base_y - 18, base_y - 8):
-        for x in range(x0, x1):
-            c.put(x, rail_y, iron["base"])
-            c.put(x, rail_y + 1, iron["deep"])
-    # pickets between the rails, spiked
-    for x in range(x0 + 2, x1, 6):
-        for y in range(base_y - 20, base_y - 2):
-            c.put(x, y, iron["deep"])
-        c.put(x, base_y - 21, iron["light"])
-        c.put(x, base_y - 22, iron["hi"])
+def _si(key):
+    return palette.SKYIRON[_SI_KEYS[key]]
+
+
+def _si_blk(c, x, y, w, h, color):
+    c.rect(x, y, w, h, color)
+
+
+def _si_row(c, x0, y, keys, out_left=True, out_right=True, out=None):
+    """One 2px-tall band: optional 2px outline columns, then 2px ramp blocks."""
+    out = out or palette.OUTLINE
+    x = x0
+    if out_left:
+        _si_blk(c, x, y, 2, 2, out)
+        x += 2
+    for k in keys:
+        _si_blk(c, x, y, 2, 2, out if k == "#" else _si(k))
+        x += 2
+    if out_right:
+        _si_blk(c, x, y, 2, 2, out)
+
+
+def _si_skirt(c, x, y, w, h, alpha):
+    """Baked soft-alpha ground shadow — vanilla's rocks and fences both use
+    this instead of an opaque dark band (docs/TECHNICAL_LEARNINGS.md)."""
+    c.rect(x, y, w, h, with_alpha(palette.OUTLINE, alpha))
+
+
+# Post shaft, top to bottom, as 2px bands of four 2px interior columns.
+# Bright and alternating where it stands clear of the ground; the shaft goes
+# dark below the tile's top edge because that is the part in its own shadow;
+# verdigris creeps up from the foot.
+_SI_POST = [
+    "mHlm",   # y24
+    "lHlm",   # y26
+    "HHHH",   # y28  bright collar ring — the mod's own detail
+    "mllm",   # y30
+    "lddm",   # y32  <- tile top edge
+    "lddm",   # y34
+    "lddl",   # y36
+    "HllH",   # y38  lower collar
+    "lddm",   # y40
+    "lddm",   # y42
+    "lpPm",   # y44  verdigris
+    "pPPl",   # y46
+    "ppPp",   # y48
+]
+
+
+def _si_post_cell(c, x0=10, top=22):
+    """The 12px post body at x0..x0+11, cap at top, foot at y50, skirt to y55."""
+    _si_blk(c, x0 + 2, top, 8, 2, palette.OUTLINE)          # narrow domed cap
+    for i, band in enumerate(_SI_POST):
+        _si_row(c, x0, top + 2 + i * 2, band)
+    foot = top + 2 + len(_SI_POST) * 2                       # y50
+    _si_blk(c, x0 + 2, foot, 8, 2, palette.OUTLINE)          # ground line
+    # ground skirt: alpha 74 core, alpha 29 spread, exactly vanilla's fade
+    _si_skirt(c, x0, foot, 2, 2, 74)
+    _si_skirt(c, x0 + 10, foot, 2, 2, 74)
+    _si_skirt(c, x0 + 2, foot + 2, 8, 2, 74)
+    _si_skirt(c, x0, foot + 2, 2, 2, 29)
+    _si_skirt(c, x0 + 10, foot + 2, 2, 2, 29)
+    _si_skirt(c, x0 + 2, foot + 4, 8, 2, 29)
+    _si_skirt(c, x0 - 2, top + 22, 2, 10, 29)                # y44..53 flanks
+    _si_skirt(c, x0 + 12, top + 22, 2, 10, 29)
+
+
+def _si_rail_run(c, x0, keys_far, keys_near, width=10):
+    """A pair of horizontal rails leaving the post toward one tile edge.
+
+    Each rail is four 2px bands: outline, LIT TOP SURFACE, DARK FRONT FACE,
+    outline. That top/face split is the whole perspective — a fence in this
+    game is seen from above and slightly in front, never edge on."""
+    for y, keys in ((30, keys_far), (40, keys_near)):
+        c.rect(x0, y, width, 2, palette.OUTLINE)
+        for i, k in enumerate(keys):
+            _si_blk(c, x0 + i * 2, y + 2, 2, 2, _si(k))
+        for i, k in enumerate(keys):
+            face = "p" if k == "P" else ("d" if k != "p" else "p")
+            _si_blk(c, x0 + i * 2, y + 4, 2, 2, _si(face))
+        c.rect(x0, y + 6, width, 2, palette.OUTLINE)
+    c.rect(x0, 48, width, 4, with_alpha(palette.OUTLINE, 74))
+    c.rect(x0, 52, width, 2, with_alpha(palette.OUTLINE, 29))
 
 
 def gen_skyironfence(path):
-    """160x64: post / horizontal run / top cap / left connector / right connector."""
+    """160x64. Columns are the engine's: post / north joint / south rail /
+    west run / east run. See the block comment above."""
     sheet = Canvas(160, 64)
-    base_y = 58
-    # col 0: freestanding post
+
+    # --- col 0: the post ------------------------------------------------
     c = Canvas(32, 64)
-    _iron_post(c, 14, base_y, 30)
-    c.ellipse(15, base_y, 5, 2, palette.IRONWORK["deep"])
-    c.outline(palette.OUTLINE)
+    _si_post_cell(c)
     sheet.paste(c, 0, 0)
-    # col 1: horizontal run (rails across the full cell)
+
+    # --- col 1: north joint --------------------------------------------
+    # Drawn under the post, 8 rows straddling the tile's top edge, so the run
+    # continues past the boundary instead of ending in a notch. Same
+    # cross-section as the post's own shaft at those rows.
     c = Canvas(32, 64)
-    _iron_rails(c, 0, 32, base_y)
-    c.outline(palette.OUTLINE)
+    for i, band in enumerate(("lHlm", "HHHH", "mllm", "lddm")):
+        _si_row(c, 10, 26 + i * 2, band)
+    _si_skirt(c, 8, 26, 2, 8, 29)
+    _si_skirt(c, 22, 26, 2, 8, 29)
     sheet.paste(c, 32, 0)
-    # col 2: top cap (post with a downward connection stub)
+
+    # --- col 2: south rail ---------------------------------------------
+    # An 8px bar running the FULL height of the tile, so stacked tiles join
+    # seamlessly, and so the copy the engine draws at drawY-24 reaches into a
+    # wall standing above the fence.
     c = Canvas(32, 64)
-    _iron_post(c, 14, base_y, 30)
-    for y in range(base_y - 14, base_y - 4):
-        c.put(15, y + 4, palette.IRONWORK["deep"])
-    c.outline(palette.OUTLINE)
+    _si_skirt(c, 14, 32, 4, 2, 29)
+    c.rect(14, 34, 4, 2, palette.OUTLINE)                    # rounded top
+    _si_skirt(c, 12, 34, 2, 2, 29)
+    _si_skirt(c, 18, 34, 2, 2, 29)
+    bar = "lmmHlmmHlmpldd"                                   # left column
+    for i, k in enumerate(bar):
+        y = 36 + i * 2
+        c.rect(12, y, 2, 2, palette.OUTLINE)
+        _si_blk(c, 14, y, 2, 2, _si(k))
+        _si_blk(c, 16, y, 2, 2, _si("p" if k == "p" else "d"))
+        c.rect(18, y, 2, 2, palette.OUTLINE)
+        _si_skirt(c, 10, y, 2, 2, 29)
+        _si_skirt(c, 20, y, 2, 2, 29)
     sheet.paste(c, 64, 0)
-    # col 3: left connector (rails entering from the right, ending in a post)
+
+    # --- col 3: west run, reaching x=0 ----------------------------------
     c = Canvas(32, 64)
-    _iron_rails(c, 12, 32, base_y)
-    _iron_post(c, 10, base_y, 30)
-    c.outline(palette.OUTLINE)
+    _si_rail_run(c, 0, "mlHlH", "HlmlP")
     sheet.paste(c, 96, 0)
-    # col 4: right connector (mirror)
-    sheet.paste(c.mirrored(), 128, 0)
+
+    # --- col 4: east run, reaching x=31 ---------------------------------
+    # Not a mirror of col 3: the light stays top-left, so only the dash phase
+    # and the skirt overhang change sides.
+    c = Canvas(32, 64)
+    _si_rail_run(c, 22, "HlmHl", "lHPlm")
+    _si_skirt(c, 20, 48, 2, 4, 74)
+    _si_skirt(c, 20, 52, 2, 2, 29)
+    sheet.paste(c, 128, 0)
+
     sheet.save(path)
+
+
+# --- gate ------------------------------------------------------------------
+
+def _si_gate_post(c, x0, cap_inset=2, top=24, bands=None, width=8):
+    """A gate post: outline columns, 2 interior blocks, cap, foot and skirt."""
+    bands = bands or ("mH", "lH", "HH", "ml", "ld", "ld", "ll",
+                      "Hl", "ld", "lp", "pP", "pp")
+    inner = (width - 4) // 2
+    _si_blk(c, x0 + 2, top, width - 4, 2, palette.OUTLINE)
+    for i, band in enumerate(bands):
+        _si_row(c, x0, top + 2 + i * 2, band)
+    foot = top + 2 + len(bands) * 2
+    _si_blk(c, x0 + 2, foot, width - 4, 2, palette.OUTLINE)
+    _si_skirt(c, x0, foot, 2, 2, 74)
+    _si_skirt(c, x0 + width - 2, foot, 2, 2, 74)
+    _si_skirt(c, x0 + 2, foot + 2, width - 4, 2, 74)
+    _si_skirt(c, x0, foot + 2, 2, 2, 29)
+    _si_skirt(c, x0 + width - 2, foot + 2, 2, 2, 29)
+    _si_skirt(c, x0 + 2, foot + 4, width - 4, 2, 29)
+    return inner
+
+
+def _si_gate_leaf(c, x0, x1, crown_x0, crown_x1):
+    """The gate leaf seen head-on: crown, lit top rail, a dark lattice with
+    two open windows, and a verdigris kick rail on the ground line."""
+    out = palette.OUTLINE
+    w = x1 - x0
+    c.rect(crown_x0, 26, crown_x1 - crown_x0, 2, out)             # crown
+    c.rect(x0, 28, w, 2, out)                                     # rail top
+    top_keys = "mlHllHlm"
+    n = w // 2
+    for i in range(n):                                            # lit top face
+        _si_blk(c, x0 + i * 2, 30, 2, 2, _si(top_keys[i % len(top_keys)]))
+    _si_blk(c, x0, 32, 4, 2, _si("l"))                            # under the crown
+    c.rect(x0 + 4, 32, w - 8, 2, out)
+    _si_blk(c, x1 - 4, 32, 4, 2, _si("l"))
+    for y in (34, 42):                                            # windows
+        _si_blk(c, x0, y, 2, 2, _si("d"))
+        c.rect(x0 + 2, y, 2, 2, out)
+        c.rect(x1 - 4, y, 2, 2, out)
+        _si_blk(c, x1 - 2, y, 2, 2, _si("d"))
+    for y in (36, 40, 44):                                        # cross rails
+        _si_blk(c, x0, y, 2, 2, _si("d"))
+        c.rect(x0 + 2, y, w - 4, 2, out)
+        _si_blk(c, x1 - 2, y, 2, 2, _si("d"))
+    _si_blk(c, x0, 38, 2, 2, _si("p"))                            # dark middle
+    c.rect(x0 + 2, 38, w - 4, 2, _si("d"))
+    _si_blk(c, x1 - 2, 38, 2, 2, _si("d"))
+    # Kick rail: metal first, verdigris as an ACCENT. A rail painted patina
+    # end to end reads as a green stripe at 1x instead of a weathered gate.
+    kick = "mlPlmlPl"
+    for i in range(n):
+        _si_blk(c, x0 + i * 2, 46, 2, 2, _si(kick[i % len(kick)]))
+        _si_blk(c, x0 + i * 2, 48, 2, 2, _si("p" if i % 4 == 2 else "d"))
+    c.rect(x0, 50, w, 2, with_alpha(out, 74))
+    c.rect(x0, 52, w, 2, with_alpha(out, 29))
 
 
 def gen_skyironfencegate(path):
-    """192x64: 6 columns — frame post, closed leaf, open leaf, then the
-    vertical-orientation trio."""
+    """192x64. Columns are the engine's; see the block comment above."""
     sheet = Canvas(192, 64)
-    base_y = 58
-    iron = palette.IRONWORK
-    # col 0: gate post pair
+    out = palette.OUTLINE
+
+    # --- col 1: closed, horizontal (drawn whole, at the tile) -----------
+    closed = Canvas(32, 64)
+    _si_gate_post(closed, 0)
+    _si_gate_post(closed, 24)
+    _si_gate_leaf(closed, 8, 24, 12, 20)
+    sheet.paste(closed, 32, 0)
+
+    # --- col 0: open, horizontal ---------------------------------------
+    # The leaf has swung out of the opening and now stands edge-on: a tall
+    # narrow bar beside the hinge post. Vanilla's open cell reaches y14, well
+    # above the closed one, which is what sells the swing.
     c = Canvas(32, 64)
-    _iron_post(c, 4, base_y, 32)
-    _iron_post(c, 25, base_y, 32)
-    c.outline(palette.OUTLINE)
+    _si_gate_post(c, 0)
+    _si_gate_post(c, 24)
+    c.rect(8, 14, 2, 2, out)
+    leaf = "mmmmlHlHdddlddpPp"
+    for i, k in enumerate(leaf):
+        y = 16 + i * 2
+        c.rect(6, y, 2, 2, out)
+        _si_blk(c, 8, y, 2, 2, _si(k))
+        c.rect(10, y, 2, 2, out)
+    _si_skirt(c, 12, 34, 2, 16, 29)                    # its shadow on the ground
     sheet.paste(c, 0, 0)
-    # col 1: closed leaf between posts
+
+    # --- col 2: vertical gate post (drawn twice, at drawY-14 and +14) ---
     c = Canvas(32, 64)
-    _iron_post(c, 2, base_y, 32)
-    _iron_post(c, 27, base_y, 32)
-    _iron_rails(c, 5, 27, base_y)
-    c.put(16, base_y - 13, iron["hi"])
-    c.outline(palette.OUTLINE)
-    sheet.paste(c, 32, 0)
-    # col 2: open (leaves swung back, posts only + hinge stubs)
-    c = Canvas(32, 64)
-    _iron_post(c, 2, base_y, 32)
-    _iron_post(c, 27, base_y, 32)
-    for x in (5, 26):
-        c.put(x, base_y - 16, iron["base"])
-    c.outline(palette.OUTLINE)
+    _si_gate_post(c, 12, top=24)
+    _si_skirt(c, 10, 46, 2, 6, 29)
+    _si_skirt(c, 20, 46, 2, 6, 29)
     sheet.paste(c, 64, 0)
-    # cols 3-5: vertical orientation (posts top/bottom, leaf runs vertically)
-    for i, mode in enumerate(("post", "closed", "open")):
-        c = Canvas(32, 64)
-        _iron_post(c, 14, 24, 16)
-        _iron_post(c, 14, base_y + 2, 16)
-        if mode == "closed":
-            for y in range(14, base_y - 8):
-                c.put(14, y, iron["deep"])
-                c.put(16, y, iron["deep"])
-            for y in range(16, base_y - 10, 8):
-                c.put(15, y, iron["base"])
-        elif mode == "open":
-            c.put(12, 20, iron["base"])
-            c.put(18, base_y - 6, iron["base"])
-        c.outline(palette.OUTLINE)
-        sheet.paste(c, 96 + i * 32, 0)
+
+    # --- col 3: latch piece, rotation 3 only, drawn at drawY+14 ---------
+    c = Canvas(32, 64)
+    _si_skirt(c, 14, 30, 2, 2, 29)
+    c.rect(14, 32, 2, 2, out)
+    for i, k in enumerate("mlHldpdp"):
+        y = 34 + i * 2
+        c.rect(12, y, 2, 2, out)
+        _si_blk(c, 14, y, 2, 2, _si(k))
+        c.rect(16, y, 2, 2, out)
+        _si_skirt(c, 10, y, 2, 2, 29)
+        _si_skirt(c, 18, y, 2, 2, 29)
+    sheet.paste(c, 96, 0)
+
+    # --- col 4: closed vertical leaf, drawn at drawY-14 -----------------
+    c = Canvas(32, 64)
+    _si_skirt(c, 14, 28, 4, 2, 29)
+    c.rect(12, 30, 8, 2, out)
+    for i, k in enumerate("mmmmmlHddpdpPp"):
+        y = 32 + i * 2
+        c.rect(12, y, 2, 2, out)
+        _si_blk(c, 14, y, 2, 2, _si(k))
+        _si_blk(c, 16, y, 2, 2, _si("d" if k not in "pP" else "p"))
+        c.rect(18, y, 2, 2, out)
+        _si_skirt(c, 10, y, 2, 2, 29)
+        _si_skirt(c, 20, y, 2, 2, 29)
+    sheet.paste(c, 128, 0)
+
+    # --- col 5: open vertical leaf, drawn at (drawX-16, drawY+14) -------
+    c = Canvas(32, 64)
+    _si_gate_leaf(c, 8, 28, 16, 22)
+    _si_skirt(c, 6, 48, 2, 4, 29)
+    sheet.paste(c, 160, 0)
+
     sheet.save(path)
+
+
+def _si_cap_rail_end(c, x, keys_len=5):
+    """Close a rail run's open end with an outline column — an icon shows a
+    piece of fence, not a rail sawn off at the frame edge."""
+    for y in (32, 34, 42, 44):
+        c.rect(x, y, 2, 2, palette.OUTLINE)
+
+
+def gen_skyironfence_icon(path):
+    """items/skyironfence.png: one post with a rail run leaving on each side,
+    which is how vanilla draws items/ironfence.png (576 opaque px, post at
+    rows 2..29, rails at rows 8..25). The old icon was a crop of the object
+    sheet's post column and shipped 47 opaque px."""
+    c = Canvas(32, 64)
+    _si_rail_run(c, 2, "mlHlH", "HlmlP")
+    _si_rail_run(c, 20, "HlmHl", "lHPlm")
+    _si_cap_rail_end(c, 2)
+    _si_cap_rail_end(c, 28)
+    _si_post_cell(c)
+    icon = Canvas(32, 32)
+    icon.img.alpha_composite(c.img.crop((0, 20, 32, 52)), (0, 0))
+    icon.px = icon.img.load()
+    icon.save(path)
+
+
+def gen_skyironfencegate_icon(path):
+    """items/skyironfencegate.png: the closed leaf between its two posts,
+    matching vanilla items/ironfencegate.png (652 opaque px)."""
+    c = Canvas(32, 64)
+    _si_gate_post(c, 0)
+    _si_gate_post(c, 24)
+    _si_gate_leaf(c, 8, 24, 12, 20)
+    icon = Canvas(32, 32)
+    icon.img.alpha_composite(c.img.crop((0, 22, 32, 54)), (0, 0))
+    icon.px = icon.img.load()
+    icon.save(path)
 
 
 def _wall_light_cell(kind, orientation, lit):

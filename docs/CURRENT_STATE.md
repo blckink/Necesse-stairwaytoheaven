@@ -115,9 +115,40 @@ Ordered by the player's own priority. Full detail in `docs/PLAYTEST_LOG.md`.
   the integration test's tool-audit assertions).
 - Dewsnail is catchable with the net via the native `NetableMob` pattern
   (asserted by the integration test; not yet swung in the real client).
+- The spire's cat basket exists as a real object on the tile the quest calls
+  the cats' home, placed once per world including in existing saves; a coaxed
+  cat is at it after a save/load round trip and stays within ~7 tiles of it
+  (asserted every integration-test run).
+- The Warden's quest chain is a pure function of the world record
+  (`SkyWardenMob.chapterFor`); eight reachable save states are enumerated and
+  asserted to be owed a chapter (`chain check: ... no-dead-ends`). The
+  cross-dimension read no longer gives up when the Skyreach happens to be
+  unloaded, which is what made the earlier hand-out fix unreachable in the
+  ordinary case.
+- The Cloud Lamb is a coherent husbandry animal: shears for Windsilk, breeds
+  true, is named Cloudlamb at every age, and eats cloudberries (a `GrainItem`
+  now) as well as vanilla wheat — hand-fed or from a feeding trough. All four
+  values are measured by `/skyreachstatus` and asserted by the test.
 - v0.6 sprint (list above): rock variants + shadows, Storm Shards, tree
   volume, Cloudberry, Warden visuals, Spire hero kit, Stormveil/Aurora props,
   oddity seeds.
+- Fence and fence gate rebuilt against the engine's own column contract
+  (`FenceObject` / `FenceGateObject`, cell-by-cell against vanilla
+  `ironfence`/`ironfencegate`). The old sheets were drawn to an invented
+  layout, so a fence connecting north grew a horizontal rail, every vertical
+  run was a 3px hairline, and the west and east runs were on each other's
+  side of the tile. Both item icons redrawn (47 -> 672 and 132 -> 864 opaque
+  px against vanilla's 576 and 652).
+- Fence PLACEMENT: rings are 4-connected (`SkyLandscape.discRing`), road-side
+  fence bands are at least `FENCE_MIN_THICKNESS` (1.6 tiles), gate wings start
+  at their pillar instead of floating beside it, and a road crossing a ring
+  now carries a real fence gate. Lone posts 3.9% -> 0.2%, dead ends
+  26.2% -> 6.0% over the offline painter dumps for three seeds.
+- The grey `skystone` ground (14.7% of all land) is no longer empty:
+  `SkyTerrainPainter.screeObject` gives it a lichen-bed formation field and
+  three new objects - Skystone Lichen, Cragbloom, Sky Scree - plus boulders
+  and one lit biome accent. 0.032/0.044/0.099 objects per tile -> 0.304/0.352/
+  0.356, against 0.311-0.384 on the vegetated grounds.
 
 **P2**
 - Tree canopy volume addressed by the v0.6 pass — awaiting player judgement
@@ -134,8 +165,12 @@ Ordered by the player's own priority. Full detail in `docs/PLAYTEST_LOG.md`.
 - Warden's shop is empty. The building set is fully craftable at a workstation,
   so nothing is missing — but the recruited Warden currently does nothing.
 - Cat home / cat bed furniture and settled cat behaviour (post-playtest).
-- Three journal quests are registered but never handed out (`swh_beacon`,
-  `swh_cats`, `swh_anchor`).
+- `swh_beacon` (BeaconDeliveryQuest) is registered and never handed out — the
+  beacon is lit by recruitment now, so the delivery chapter has no place in the
+  chain. Either give it a place or retire it.
+- Cat behaviour once home is "sleep near the basket in the spire". The cats do
+  not yet live with the recruited Warden on the Surface (design decision:
+  their long-term home is with him once cat furniture exists).
 - `ROADMAP.md` still describes the pre-v0.5 direction.
 - Wiring the new Stormveil/Aurora prop families into `SkyTerrainPainter`
   (registered + craftable now; worldgen composition is a later, tuned pass).

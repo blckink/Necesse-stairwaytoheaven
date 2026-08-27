@@ -79,7 +79,11 @@ OBJECTS = {
     "auroraBloomR": (None, None, None),
     # built landscape
     "wardenCandelabra": ("mod", "wardencandelabra.png", 32),
+    "skylichen": ("mod", "skylichen.png", 32),
+    "cragbloom": ("mod", "cragbloom.png", 32),
+    "skyscree": ("mod", "skyscree.png", 32),
     "skyironFence": ("mod", "skyironfence.png", "fence"),
+    "skyironFenceGate": ("mod", "skyironfencegate.png", "gate"),
     "skystoneBrickWall": ("mod", "skystonebrickwall.png", "wall"),
     "nightfellWall": ("mod", "nightfellwall.png", "wall"),
     "gloomRavenStatue": ("mod", "statues/gloomraven.png", 32),
@@ -135,7 +139,7 @@ def terrain_sprite(name, x, y):
 # What a fence links to, per FenceObject.attachesToObject: other fences, walls
 # and rocks. Needed because a lone post and a connected railing are completely
 # different amounts of visual mass, and the railing is the one being judged.
-FENCE_LINKS = {"skyironFence", "skystoneBrickWall", "nightfellWall",
+FENCE_LINKS = {"skyironFence", "skyironFenceGate", "skystoneBrickWall", "nightfellWall",
                "skystoneRock", "aetheriumRock", "fulguriteRock", "prismshardRock"}
 
 
@@ -166,6 +170,22 @@ def object_sprite(name, x, y, neighbours=None):
         if right in FENCE_LINKS:
             cell.alpha_composite(img.crop((TILE * 4, 0, TILE * 5, img.height)))
         return cell, img.height - TILE
+    if mode == "gate":
+        # FenceGateObject.addDrawables: rotation 0/2 (attached east-west) draws
+        # the whole closed cell, column 1, at the tile. Rotation 1/3 (attached
+        # north-south) draws column 2 twice, at drawY-14 and drawY+14, with the
+        # closed leaf, column 4, at drawY-14.
+        top, bot, left, right = neighbours or (None, None, None, None)
+        vertical = top in FENCE_LINKS or bot in FENCE_LINKS
+        cell = Image.new("RGBA", (TILE, img.height + 16), (0, 0, 0, 0))
+        if not vertical:
+            cell.alpha_composite(img.crop((TILE, 0, TILE * 2, img.height)), (0, 14))
+        else:
+            post = img.crop((TILE * 2, 0, TILE * 3, img.height))
+            cell.alpha_composite(img.crop((TILE * 4, 0, TILE * 5, img.height)), (0, 0))
+            cell.alpha_composite(post, (0, 0))
+            cell.alpha_composite(post, (0, 28))
+        return cell, cell.height - TILE - 14
     if mode == "wall":
         # Wall sheets are connection atlases; cell (0,1) is a plain body block.
         return img.crop((0, TILE, TILE, TILE * 2)), 0

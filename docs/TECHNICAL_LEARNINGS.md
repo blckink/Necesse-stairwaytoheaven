@@ -731,3 +731,249 @@ window's orientation — each fix left the next reader unguarded, and each time
 the next player report came from exactly there. When a gate is written for one
 consumer of a shared sheet, enumerate the others in the same sitting; the audit
 now asserts both window views and all eight door cells.
+
+## A level nobody is standing on is unloaded, and `isLoaded` then lies
+
+**[jar]** `Server.tick` unloads every level whose `unloadLevelBuffer` exceeds
+`20 * max(2, Settings.unloadLevelsCooldown)` (Server.java:365-375). A level with
+no players on it therefore disappears from `levelManager` after a minute or so
+of ordinary play, and `levelManager.isLoaded(identifier)` starts answering
+false for a dimension that very much still exists on disk.
+
+**[jar]** `World.getLevel(identifier)` is the honest accessor: it loads the
+level when the manager does not have it (World.java:273-281), generating it as
+a last resort.
+
+**[jar]** Both `SkyWardenMob.handleTurnIns` and `onRecruited` guarded their
+Skyreach lookup with `isLoaded(...) ? getLevel(...) : null` and then silently
+did nothing when the answer was null. So the whole post-recruitment chapter
+machine — cats quest, lair markers, anchor chapter, and the write-back of
+`anchorDone` — was skipped for the single most ordinary case there is: a player
+who came down from the sky, played on the surface for a minute, and then walked
+over to the Warden in the village. The player-facing symptom is a build that
+contains the fix and behaves exactly like the build that did not: "warden gibt
+weiterhin keine quests die ich finden kann".
+
+The general rule: **`isLoaded` answers "is it in memory", never "does it
+exist"**. Any cross-dimension read on a deliberate player action should use
+`World.getLevel`, and an `isLoaded` guard around game logic is a silent
+early-return waiting to happen.
+
+## A quest chain must be a function of world state, not of the journal
+
+**[run]** Hand-out code that reacts to quests the player is *already holding*
+has one dead end per state it forgot. Three of them shipped at once:
+
+  * `RecruitWardenQuest` was only given inside the `stage == 0` branch, so a
+    world that met the Warden under an older build (stage already 1) could
+    never be given it again;
+  * the cats catch-up was gated on `!(blackHome && tabbyHome)` while the
+    turn-in needed a *held* quest — and `SpireCatMob.interact` sets those flags
+    for anyone carrying a treat, quest or not. A player who coaxed both cats
+    home without ever holding the quest got no reward and never opened the
+    anchor chapter;
+  * nothing ever re-issued `AnchorDeliveryQuest`.
+
+`SkyWardenMob.chapterFor(SkywatchQuestData, boolean isSettler)` is now a pure
+function with no client, journal or level in it, and `/skyreachstatus` prints
+the chapter for eight reachable save states (`chain check: fresh=RECRUIT
+met-him-old-build=RECRUIT ... anchored=DONE no-dead-ends`). The integration
+test fails if any state that is not a finished chain is owed nothing.
+
+**[jar]** `HumanMob.isSettler()` is world truth the mob carries itself: he can
+only be a settler if the world recruited him. A settler standing next to a
+record that says `recruited == false` is a broken record, not a state, and is
+repaired rather than believed.
+
+## A teleported mob is re-filed under its region on the next tick, not at once
+
+**[jar]** `EntityList.tick` calls `regionList.updateRegion(entity)` for every
+mob once per server tick (EntityList.java:362-371), and
+`Region.onUnloaded` walks `getSaveToRegion(rx, ry)` calling
+`limitWithinRegionBounds(thatRegion)` and `remove()` on everything still listed
+there (Region.java:407-417). A mob moved with `setPos` across a region boundary
+is therefore still filed under its OLD region for up to one tick, and a region
+unload inside that window would clamp it back into the region it just left.
+`EntityList.getRegionList().updateRegion(mob)` right after the move closes it;
+`SpireCatMob.sendHome` does exactly that.
+
+**[jar]** `Entity.shouldRemoveOnRegionUnload()` is `shouldSave()` on the
+server, and `Mob.shouldRemoveWhenInUnloadedRegion()` is `canDespawn`. For the
+spire cats that reads: they ARE written into their region file and dropped from
+memory when it unloads (correct persistence), and they are NEVER deleted for
+being in an unloaded region. Both follow from the same `canDespawn = false`.
+
+**[run]** Observed end to end: `/skyreachstatus cats` coaxes both cats to the
+basket, and after a full server restart they load back at it with the tether
+rebuilt — `spirecatblack at=127,154 d=0 tether=127,154 AT_BASKET`. After 25s of
+AI they sit 3-7 tiles out and come back: `HomesickCritterAI` only pulls a
+critter home past 96px (3 tiles), so an exact position is not a property the AI
+has and only the TETHER is worth asserting exactly.
+
+## Vanilla's animal feed is a class check, and only wheat passes it
+
+**[jar]** `HusbandryMob.canFeed` is `!isOnFeedCooldown() && item.item instanceof
+GrainItem`, and `FeedingTroughObjectEntity`'s inventory filter is the same test
+(FeedingTroughObjectEntity.java:182). There is no tag, no registry and no
+recipe behind it — and `ItemRegistry` registers exactly ONE `GrainItem` in the
+whole game: `wheat` (ItemRegistry.java:1955). So "what goes in the trough" has
+precisely one vanilla answer, and any mod animal kept away from a wheat farm
+cannot be fed at all.
+
+**[jar]** Overriding `canFeed` is not enough on its own: hand-feeding runs
+through `GrainItem.canMobInteract`/`onMobInteract`, so the ITEM has to be a
+GrainItem for a right-click to feed rather than to place or eat. `GrainItem
+extends FoodMatItem`, so promoting an existing food item costs nothing — ours
+(`cloudberry`) keeps its food behaviour, spoil timer, value, icon and locale
+and merely becomes feedable. Measured: `husbandry check: ...
+cloudberry=hand:true/trough:true wheat=hand:true/trough:true
+skystone=hand:false/trough:false`.
+
+**[jar]** `SheepMob` has two more vanilla behaviours a sky subclass does not
+want: `getRandomChildMobStringID` is `getOneOf(this.getStringID(), "ram")`, so
+half of every lamb bred in the Skyreach was a plain vanilla **ram**; and
+`getLocalization` returns `mob.lamb` for anything not grown up, so a mod lamb
+wore a vanilla display name until it matured. Both are one-line overrides and
+both are now asserted (`child=cloudlamb name=Cloudlamb`).
+
+**[jar]** `FriendlyRopableMob`'s rope tracker calls
+`changeMobLevel(this, roper.getLevel(), ...)` when the roper changes level
+(FriendlyRopableMob.java:45-52), so a roped animal follows the player down the
+Stairway. That is what makes "haul a breeding pair down" a real loop rather
+than a suggestion. **Not yet observed in a client.**
+
+
+## The fence sheet's five columns are the engine's, not the artist's
+
+**[jar]** `FenceObject.addDrawables` reads `objects/<name>.png` as five 32-wide
+columns of the full sheet height, all bottom-anchored at
+`drawY = tileDrawY - height + 32`. With the vanilla height of 64 that makes
+**sheet row 32 the tile's top edge and row 63 its bottom edge**.
+
+| col | what the engine draws it as | when | where |
+|---|---|---|---|
+| 0 | the post | always | `(drawX, drawY)` |
+| 1 | north joint | the tile ABOVE attaches | `(drawX, drawY)`, **before** col 0 |
+| 2 | south rail | the tile BELOW attaches | `(drawX, drawY)` |
+| 2 | again, to bridge into a wall | the tile above attaches and is NOT a fence attaching back | `(drawX, drawY - 24)` |
+| 3 | the run to the WEST | the tile to the left attaches | `(drawX, drawY)` |
+| 4 | the run to the EAST | the tile to the right attaches | `(drawX, drawY)` |
+
+**[jar]** Measured off vanilla `ironfence.png`, `woodfence.png` and
+`stonefence.png`, all three agree on the geometry (ironfence's solid extents):
+
+| cell | solid extent | opaque px |
+|---|---|---|
+| col 0 post | x10..21, y22..51, soft skirt to y55 | 424 |
+| col 1 joint | x10..21, y26..33 — **8 rows, inside the post's own footprint** | 128 |
+| col 2 rail | x12..19, y34..63 — **runs to the tile's bottom edge** | 360 |
+| col 3 west | x0..9, y30..47, skirt to y53 — **reaches x=0** | 220 |
+| col 4 east | x22..31, y30..47, skirt to y53 — **reaches x=31** | 228 |
+
+Three consequences the mod's own sheet got wrong, each visible in a run:
+
+- col 1 is drawn BEFORE col 0 and sits inside its footprint, so anything wide
+  painted there shows past the post. Ours held a full-width horizontal rail,
+  which is why a fence connecting north sprouted a rail across the tile.
+- col 2 must tile with itself at a 32px pitch and still read when shifted 24px
+  up. Ours was a 3px hairline, so every vertical run was a thread.
+- cols 3 and 4 are NOT mirrors of each other in the world: 3 must reach the
+  left edge and 4 the right. Ours were mirrored the wrong way round, so a
+  horizontal run had a gap at each tile boundary and a doubled post.
+
+**[jar]** The perspective is carried by two things and neither is optional. A
+horizontal rail is **2 rows of outline, 2 rows of LIT TOP SURFACE, 2 rows of
+DARK FRONT FACE, 2 rows of outline** — you see the top of the rail and its
+front, which is the top-down-with-forward-lean the whole game is drawn in.
+And every piece stands on a baked **soft-alpha ground skirt** (alpha 74 then
+29), the same trick vanilla's rocks use, never an opaque dark band.
+
+**[jar]** Vanilla `ironfence.png` uses nine colours: outline (34,35,35), a
+four-step iron ramp 67/98/130/166, two rust browns and two alpha values. The
+mod's pre-fix sheet used **three**, two of which were within four units of the
+outline tone — 670 of its 851 pixels were literally the outline colour. That is
+what "perspektivisch schrecklich" looks like from the pixel side: no ramp, so
+no top face, so no lean.
+
+**[jar]** `objects/<name>fencegate.png` is 192x64 and its six columns are:
+0 = open horizontal, 1 = closed horizontal, 2 = the vertical gate post **drawn
+twice, at `drawY-14` and `drawY+14`**, 3 = a latch piece drawn at `drawY+14`
+for rotation 3 only, 4 = the closed vertical leaf at `drawY-14`, 5 = the open
+vertical leaf at `(drawX-16, drawY+14)`. Column 2 being drawn twice is the one
+that punishes a wrong guess hardest: ours held an "open horizontal gate", so
+every north-south gate rendered as two of them stacked 28px apart.
+
+## A fence band thinner than 1.6 tiles is not a fence
+
+**[run]** `FenceObject.attachesToObject` looks at the four ORTHOGONAL
+neighbours only. So any fence line thin enough to step diagonally on the tile
+grid is not a line at all — it is a row of unconnected posts.
+
+Rasterising a straight band at every angle from 0 to 90 degrees and measuring
+the largest 4-connected component: at 0.9, 1.0, 1.2 and 1.4 tiles thick the
+band falls apart (its largest piece holds 2–3% of its tiles at the worst
+angle, and the sweep leaves 33–169 lone posts); at **1.6** it is a single
+component at every angle with zero lone posts. That number is now
+`SkyLandscape.FENCE_MIN_THICKNESS`.
+
+**[run]** The same problem in polar form: a ring taken as the annulus
+`|d - r| <= 0.5` is one tile thick and steps diagonally near its 45-degree
+points. Over radii 7, 8, 9, 10, 11, 13 and 20 that rule leaves 60–70% of the
+ring as lone posts and dead ends. The **8-neighbour inner boundary** — inside
+the disc, with at least one of the eight neighbours outside — is a single
+closed loop in which every tile has exactly two orthogonal neighbours, at
+every radius tested. It runs two tiles wide across the diagonals, and that
+second tile is the whole fix (`SkyLandscape.discRing`).
+
+**[run]** Measured over the offline painter dumps for three seeds (hub, two
+designed places, countryside, and a 400x400 overview each), before and after:
+
+| | fence tiles | lone posts | dead ends | part of a run |
+|---|---|---|---|---|
+| before | 4111 | 159 (3.9%) | 1076 (26.2%) | 2876 (70.0%) |
+| after | 5562 | 13 (0.2%) | 332 (6.0%) | 5217 (93.8%) |
+
+The dead ends that remain are the ones a fence is supposed to have: a gate
+wing terminating at its lamp, and a roadside bed's two ends where it opens
+onto the path.
+
+## The grey ground was empty because three separate rules switched it off
+
+**[run]** `SkyTerrainPainter.describeTile` turns any biome's ground grey where
+`isRockPatch` is true. `rollObject` then answers `isRockPatch ? 0 : plant` for
+nearly every plant, the meadow-carpet rule is gated on `!isRockPatch`, and so
+is the aurora-colony rule. Three independent suppressions, nothing to replace
+them. Measured over three seeds and 235,528 natural land tiles:
+
+| biome / ground | land | objects/tile | contents |
+|---|---|---|---|
+| Driftlands / cloudturf | 157863 | 0.384 | grass, reeds, wheat, bells, trees |
+| AuroraShoals / cloudturf | 14481 | 0.347 | prismgrass, blooms, lilies, ferns |
+| Stormveil / stormslate | 28586 | 0.311 | sedge, moss, crystals, pines |
+| Stormveil / skystone | 4871 | 0.099 | rock, moss, crystal |
+| AuroraShoals / skystone | 3247 | 0.044 | **rock only** |
+| Driftlands / skystone | 26480 | 0.032 | **rock only** |
+
+14.7% of all land, four to twelve times emptier than anything else. That is
+the whole of the player's "graue Böden viel leerer ... nur paar einzelne
+Steinblöcke".
+
+**[run]** The replacement is a formation field, not a probability:
+`screeObject` puts lichen beds on a 9-tile lattice with a wobbled boundary and
+a fill roll, exactly the shape `auroraColonyObject` already uses, and picks
+lichen → cragbloom → scree → boulder → lit accent inside a bed, with a small
+stray roll outside so the open plate is never dead flat. Re-measured on the
+same 235k tiles: **0.304 / 0.352 / 0.356**, inside the 0.311–0.384 band the
+vegetated grounds occupy.
+
+**[run]** The first screen-scale render of the new barrens was correct in
+density and still wrong: lichen, cragbloom and scree are all low 32px objects,
+so 40x22 tiles of them read as one flat field of pebbles. The meadow gets its
+relief from trees, and nothing tall grows on bare plate — so the barrens get
+theirs from boulders standing in the beds. This is the third time in this repo
+a density number has been right while the screen was wrong, and the second
+time the fix was variety of HEIGHT rather than count.
+
+**[run]** `painter oracle: tileMismatches=0` still holds after all of the
+above, so the 40x22 renders these numbers were calibrated on are the tiles the
+live server actually writes.

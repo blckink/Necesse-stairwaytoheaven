@@ -31,6 +31,12 @@ import stairwaytoheaven.objects.SkyWallLightObject;
  */
 final class SkyBuildingSet {
 
+    /**
+     * Map colour of the sky-iron fence and its gate: the sprite's own LIGHT
+     * ramp step, matching vanilla ironfence's (130,139,152).
+     */
+    private static final Color MAP_SKYIRON = new Color(134, 144, 162);
+
     private SkyBuildingSet() {
     }
 
@@ -66,10 +72,13 @@ final class SkyBuildingSet {
                 new SimpleFloorTile("prismfloor", new Color(210, 196, 210)), 1.0F, true);
 
         // ===== Fence + gate (vanilla ironfence registration pattern) =====
+        // Map colour is the sprite's own LIGHT step, the way vanilla ironfence
+        // uses (130,139,152). The old (62,66,80) was the sprite's shadow tone,
+        // so a fence run was almost invisible on the world map.
         SkyRegistry.skyironFenceID = ObjectRegistry.registerObject("skyironfence",
-                new FenceObject("skyironfence", new Color(62, 66, 80), 12, 10, -26), 2.0F, true);
-        FenceGateObject.registerGatePair(SkyRegistry.skyironFenceID, "skyironfencegate", "skyironfencegate",
-                new Color(62, 66, 80), 12, 10, 4.0F);
+                new FenceObject("skyironfence", MAP_SKYIRON, 12, 10, -26), 2.0F, true);
+        SkyRegistry.skyironFenceGateID = FenceGateObject.registerGatePair(SkyRegistry.skyironFenceID,
+                "skyironfencegate", "skyironfencegate", MAP_SKYIRON, 12, 10, 4.0F)[0];
 
         // ===== Lights =====
         SkyRegistry.wardenCandelabraID = ObjectRegistry.registerObject("wardencandelabra",
@@ -107,13 +116,21 @@ final class SkyBuildingSet {
                         new Rectangle(4, 40, 24, 12), "objects", "decorations"), 25.0F, true);
         // Stormveil environmental props — small reusable pieces worldgen can
         // compose later; craftable now so builders can place them.
+        //
+        // itemObtainable is TRUE on every craftable prop here, and that is not
+        // cosmetic. GameObject.getLootTable only hands the object's own item
+        // back when its item is obtainable, so a craftable object registered
+        // false can be built and placed and then never picked up again -- the
+        // player pays for it once and loses it the moment they change their
+        // mind. All six of these shipped that way, each with a comment saying
+        // they exist so builders can place them.
         ObjectRegistry.registerObject("stormscreed",
                 new SkyDecoObject("stormscreed", 32, new Color(66, 60, 95),
                         null, "objects", "decorations")
-                        .setTool(ToolType.ALL).setObjectHealth(1), 0.0F, false);
+                        .setTool(ToolType.ALL).setObjectHealth(1), 2.0F, true);
         SkyRegistry.skywatchRubbleID = ObjectRegistry.registerObject("skywatchrubble",
                 new SkyDecoObject("skywatchrubble", 32, new Color(126, 138, 154),
-                        new Rectangle(8, 12, 16, 20), "objects", "decorations"), 0.0F, false);
+                        new Rectangle(8, 12, 16, 20), "objects", "decorations"), 2.0F, true);
         SkyRegistry.chargeCrystalID = ObjectRegistry.registerObject("chargecrystal",
                 new SkyDecoObject("chargecrystal", 32, new Color(122, 108, 210),
                         new Rectangle(10, 20, 12, 12), "objects", "decorations")
@@ -121,7 +138,7 @@ final class SkyBuildingSet {
         ObjectRegistry.registerObject("withershrub",
                 new SkyDecoObject("withershrub", 32, new Color(62, 58, 72),
                         new Rectangle(12, 24, 8, 8), "objects", "decorations")
-                        .setTool(ToolType.ALL).setObjectHealth(1), 0.0F, false);
+                        .setTool(ToolType.ALL).setObjectHealth(1), 2.0F, true);
         // Aurora Shoals accents — the same restrained teal/rose language.
         SkyRegistry.auroraShardsID = ObjectRegistry.registerObject("aurorashards",
                 new SkyDecoObject("aurorashards", 32, new Color(214, 130, 172),
@@ -137,15 +154,15 @@ final class SkyBuildingSet {
         ObjectRegistry.registerObject("skyballoon",
                 new SkyDecoObject("skyballoon", 32, new Color(196, 206, 216),
                         null, "objects", "decorations")
-                        .setTool(ToolType.ALL), 0.0F, false);
+                        .setTool(ToolType.ALL), 2.0F, true);
         ObjectRegistry.registerObject("aeronautwreck",
                 new SkyDecoObject("aeronautwreck", 48, new Color(122, 96, 72),
                         new Rectangle(8, 24, 32, 24), "objects", "decorations")
-                        .setTool(ToolType.AXE), 0.0F, false);
+                        .setTool(ToolType.AXE), 8.0F, true);
         ObjectRegistry.registerObject("skyparcel",
                 new SkyDecoObject("skyparcel", 32, new Color(122, 96, 72),
                         new Rectangle(6, 14, 20, 14), "objects", "decorations")
-                        .setTool(ToolType.ALL).setObjectHealth(1), 0.0F, false);
+                        .setTool(ToolType.ALL).setObjectHealth(1), 2.0F, true);
         // Natural props must survive the shore sweep if worldgen later places
         // them near the Mistsea (same reason SkyObjects calls allowShore).
         for (String propId : new String[]{"stormscreed", "skywatchrubble",
