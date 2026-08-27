@@ -621,3 +621,10 @@ def gen_critter_icons_v04(icon_dir):
     for x, y in ((10, 25), (14, 26), (18, 25)):
         c.put(x, y, S["glow"])
     c.save(f"{icon_dir}/dewsnail.png")
+    # ...and the same drawing as the ITEM icon. Netting a snail now hands the
+    # player a `dewsnail` item (NetToolItem drops the mob's loot table and
+    # nothing else, so an item is the only way a catch can pay), and an item
+    # with no items/<id>.png shows the engine's error texture. The bestiary
+    # icon and the thing in your hand are the same animal, so they are the same
+    # drawing rather than two that drift apart.
+    c.save(f"{icon_dir}/../../items/dewsnail.png")

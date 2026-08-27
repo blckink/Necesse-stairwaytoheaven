@@ -40,7 +40,17 @@ public abstract class SkyCritterMob extends CritterMob {
             new ChanceLootItemList(0.4F, LootItem.between("stormshard", 1, 1)));
     public static final LootTable finchLoot = new LootTable(
             new ChanceLootItemList(0.4F, LootItem.between("windsilk", 1, 1)));
+    /**
+     * The snail is the one critter you catch with a net, and a net catch is
+     * just {@code target.remove(0, 0, attacker, true)} -- the mob's loot table
+     * is the entire reward. A chance-based table therefore reads as the animal
+     * vanishing for nothing, which is what a playtester reported. Vanilla's
+     * netted critters drop themselves with certainty (FireflyMob's table is one
+     * unconditional LootItem), so this one does too, with the shard kept as a
+     * bonus roll on top.
+     */
     public static final LootTable snailLoot = new LootTable(
+            LootItem.between("dewsnail", 1, 1),
             new ChanceLootItemList(0.35F, LootItem.between("prismshard", 1, 1)));
 
     private final int kind; // 0 = lamb, 1 = moth, 2 = beetle, 3 = finch, 4 = snail

@@ -32,6 +32,16 @@ final class SkyItems {
                 new MatItem(500, Item.Rarity.UNCOMMON).setItemCategory("materials", "mobdrops"), 12.0F, true);
         ItemRegistry.registerItem("aurorapetal",
                 new MatItem(500, Item.Rarity.UNCOMMON).setItemCategory("materials", "minerals"), 15.0F, true);
+        // The Dew Snail itself, in hand. NetToolItem.hitMob ends with
+        // target.remove(0, 0, attacker, true) -- it drops the mob's loot table
+        // and nothing else, so whatever that table says IS what catching gives
+        // you. Ours said "35% chance of a prismshard", which meant two catches
+        // in three returned nothing at all and the snail simply vanished.
+        // Vanilla's netted critters drop THEMSELVES, always: FireflyMob's whole
+        // loot table is `new LootTable(new LootItem(itemStringID))`. This is
+        // that item.
+        ItemRegistry.registerItem("dewsnail",
+                new MatItem(50, Item.Rarity.UNCOMMON).setItemCategory("materials", "mobdrops"), 20.0F, true);
 
         // Forage food (v0.2.6): sky berries, eaten raw or composted like
         // vanilla forage crops (sugarbeet pattern).
