@@ -184,6 +184,57 @@ def gen_whisperreeds(path, variants=4):
     sheet.save(path)
 
 
+def _shroom(c, cx, ground, r, tilt=0):
+    """One gloomshroom: r = cap half-width, dome height ~ r, cap overhangs the
+    stem. Shared by the world sheet and the item icon so the thing a player
+    picks up is a portrait of the thing he picked it from - which is how every
+    vanilla plant icon relates to its object."""
+    G = palette.GHOSTFLAME
+    S = palette.NIGHTFELL
+    P = palette.BLACKPEAT
+    stem_h = r + 6
+    cap_y = ground - stem_h            # cap skirt line
+    # peat mound the stem grows out of
+    c.ellipse(cx, ground, r + 1, 2.0, P["base"])
+    c.put(cx - 1, ground - 1, P["light"])
+    # stem: 3px pale column with a subtle lean
+    for i in range(stem_h + 1):
+        sx = cx + (tilt if i > stem_h // 2 else 0)
+        c.put(sx - 2, ground - i, S["hi"])
+        c.put(sx - 1, ground - i, S["light"])
+        c.put(sx, ground - i, S["light"])
+        c.put(sx + 1, ground - i, S["base"])
+        c.put(sx + 2, ground - i, S["base"])
+    # cap: stacked dome rows (quarter-ellipse profile), wavy skirt
+    H = max(4, round(r * 1.05))
+    for j in range(H + 1):
+        u = j / H
+        half = max(1, round((r + 1) * math.sqrt(max(0.0, 1 - (1 - u) ** 2))))
+        y = cap_y - H + j
+        row_off = tilt * round(u * 1.2)
+        for dx in range(-half, half + 1):
+            c.put(cx + row_off + dx, y, S["base"])
+    # cap shading: lit upper-left, pale speckles
+    c.ellipse(cx - r * 0.3 + tilt, cap_y - H + H * 0.34, r * 0.52, H * 0.4, S["light"])
+    c.ellipse(cx - r * 0.42 + tilt, cap_y - H + H * 0.22, r * 0.26, H * 0.2, S["hi"])
+    if r >= 5:
+        # wavy skirt dips + dome details only fit the big cap
+        for k, dx in enumerate(range(-r, r + 1, 3)):
+            c.put(cx + tilt + dx + (k % 2), cap_y + 1, S["base"])
+        c.put(cx + tilt + r - 3, cap_y - H + 2, S["hi"])
+        c.put(cx + tilt - 1, cap_y - 2, S["hi"])
+        # glowing gill dashes under the rim (broken, not a dotted line)
+        for dx in range(-r, r + 1):
+            if (dx + r) % 4 < 2 and abs(dx - tilt) > 1:
+                c.put(cx + tilt + dx, cap_y, G["glow"])
+        c.put(cx + tilt - r + 2, cap_y - H + 1, G["glow"])
+        c.put(cx + tilt + 2, cap_y - H, G["core"])
+    else:
+        c.put(cx + tilt - 1, cap_y, G["glow"])       # small gill glint
+        c.put(cx + tilt + 2, cap_y, G["glow"])
+        c.put(cx + tilt, cap_y - H + 1, G["core"])
+
+
 def gen_gloomshroom(path):
     """64x32: 2 variants of glowing shrooms with vanilla mushroom
     proportions: a BELL-DOME cap (not a disc) with a wavy skirt over a pale
@@ -191,65 +242,18 @@ def gen_gloomshroom(path):
     tiny button, all rooted in a dark peat mound."""
     sheet = Canvas(64, 32)
     G = palette.GHOSTFLAME
-    S = palette.NIGHTFELL
-    P = palette.BLACKPEAT
     for v in range(2):
         c = Canvas(32, 32)
         rng = Rng(0x5A00 + v * 977)
-
-        def shroom(cx, ground, r, tilt=0):
-            """r = cap half-width. Dome height ~ r, cap overhangs the stem."""
-            stem_h = r + 6
-            cap_y = ground - stem_h            # cap skirt line
-            # peat mound the stem grows out of
-            c.ellipse(cx, ground, r + 1, 2.0, P["base"])
-            c.put(cx - 1, ground - 1, P["light"])
-            # stem: 3px pale column with a subtle lean
-            for i in range(stem_h + 1):
-                sx = cx + (tilt if i > stem_h // 2 else 0)
-                c.put(sx - 2, ground - i, S["hi"])
-                c.put(sx - 1, ground - i, S["light"])
-                c.put(sx, ground - i, S["light"])
-                c.put(sx + 1, ground - i, S["base"])
-                c.put(sx + 2, ground - i, S["base"])
-            # cap: stacked dome rows (quarter-ellipse profile), wavy skirt
-            H = max(4, round(r * 1.05))
-            for j in range(H + 1):
-                u = j / H
-                half = max(1, round((r + 1) * math.sqrt(max(0.0, 1 - (1 - u) ** 2))))
-                y = cap_y - H + j
-                row_off = tilt * round(u * 1.2)
-                for dx in range(-half, half + 1):
-                    c.put(cx + row_off + dx, y, S["base"])
-            # cap shading: lit upper-left, pale speckles
-            c.ellipse(cx - r * 0.3 + tilt, cap_y - H + H * 0.34, r * 0.52, H * 0.4, S["light"])
-            c.ellipse(cx - r * 0.42 + tilt, cap_y - H + H * 0.22, r * 0.26, H * 0.2, S["hi"])
-            if r >= 5:
-                # wavy skirt dips + dome details only fit the big cap
-                for k, dx in enumerate(range(-r, r + 1, 3)):
-                    c.put(cx + tilt + dx + (k % 2), cap_y + 1, S["base"])
-                c.put(cx + tilt + r - 3, cap_y - H + 2, S["hi"])
-                c.put(cx + tilt - 1, cap_y - 2, S["hi"])
-                # glowing gill dashes under the rim (broken, not a dotted line)
-                for dx in range(-r, r + 1):
-                    if (dx + r) % 4 < 2 and abs(dx - tilt) > 1:
-                        c.put(cx + tilt + dx, cap_y, G["glow"])
-                c.put(cx + tilt - r + 2, cap_y - H + 1, G["glow"])
-                c.put(cx + tilt + 2, cap_y - H, G["core"])
-            else:
-                c.put(cx + tilt - 1, cap_y, G["glow"])       # small gill glint
-                c.put(cx + tilt + 2, cap_y, G["glow"])
-                c.put(cx + tilt, cap_y - H + 1, G["core"])
-
         big = rng.range(8, 9)
         if v == 0:
-            shroom(10, 29, big)
-            shroom(23, 30, 6, tilt=-1)         # companion leans toward the big one
-            shroom(28, 31, 3, tilt=1)          # button at the edge of the clump
+            _shroom(c, 10, 29, big)
+            _shroom(c, 23, 30, 6, tilt=-1)         # companion leans toward the big one
+            _shroom(c, 28, 31, 3, tilt=1)          # button at the edge of the clump
         else:
-            shroom(21, 29, big)
-            shroom(8, 30, 6, tilt=1)
-            shroom(3, 31, 3, tilt=-1)
+            _shroom(c, 21, 29, big)
+            _shroom(c, 8, 30, 6, tilt=1)
+            _shroom(c, 3, 31, 3, tilt=-1)
         c.outline(palette.OUTLINE)
         # drifting spore motes (after outline so they float)
         c.put(6 + v * 18, 13, with_alpha(G["glow"], 150))
@@ -677,7 +681,28 @@ def gen_shade_icon(path):
 
 # --- item icons ---------------------------------------------------------------
 
+def _veil_finish(c):
+    c.outline(palette.OUTLINE)
+    return c
+
+
 def gen_veil_item_icons(items_dir):
+    """The Veil's 32x32 inventory icons.
+
+    The four object icons here are not decoration: ObjectRegistry gives every
+    registered object an ObjectItem, and GameObject.generateItemTexture (jar
+    1.3.2, GameObject.java:767) loads items/<stringID>.png for it. Whisper
+    Reeds, Gloomshroom and the dead tree are all obtainable, so
+    GameObject.getLootTable (GameObject.java:278) hands the item straight over
+    when the player breaks one - and with no file, GameTexture.fromFile returns
+    GameResources.error and he is holding a red ERR tile. Veil Rock is a
+    RockObject, which resolves items/<rockTexture> (RockObject.java:111), and
+    its rockTexture IS "veilrock". Gated by tools/locale_audit.py.
+
+    Masses are measured against the closest vanilla icon of the same kind
+    (>= 80% of it, per the size law): items/reeds.png 440, objects/mushroom.png
+    424, items/caverock.png 456, items/cactus.png 356.
+    """
     G = palette.GHOSTFLAME
     # veilessence: a curling wisp
     c = Canvas(32, 32)
@@ -706,6 +731,133 @@ def gen_veil_item_icons(items_dir):
     c.put(24, 11, with_alpha(G["glow"], 150))
     c.save(f"{items_dir}/cinderpearl.png")
 
+    # whisperreeds: a cut bundle, built like vanilla items/reeds.png - a DENSE
+    # upright clump, not the airy two-tuft spread of the world sprite. The dark
+    # blade mass goes down first and the lit cores on top of it, because the
+    # outline pass eats 1px diagonals drawn the other way round.
+    c = Canvas(32, 32)
+    W = palette.MURKMOSS
+    pale = palette.BONEASH
+    rng = Rng(0x3EE1)
+    blades = [(5 + k * 2 + rng.range(0, 1), rng.range(15, 23),
+               rng.pick((-3, -2, -1, 1, 2, 3)), rng.range(27, 29))
+              for k in range(11)]
+    for bx, h, lean, base_y in blades:
+        for i in range(h):
+            x = bx + round(lean * ((i / h) ** 2))
+            for dx in (-1, 0, 1):
+                c.put(x + dx, base_y - i, W["deep"])
+    for bx, h, lean, base_y in blades:
+        for i in range(h):
+            t = i / h
+            x = bx + round(lean * (t ** 2))
+            tone = W["base"] if t < 0.42 else (W["light"] if t < 0.72 else W["tuft"])
+            c.put(x, base_y - i, tone)
+            if t < 0.6:
+                c.put(x + 1, base_y - i, W["base"])
+            elif t > 0.8:
+                c.put(x, base_y - i, W["hi"] if (i + bx) % 5 == 0 else tone)
+    for bx, h, lean, base_y in blades[1::3]:            # whisper-fluff tips
+        x = bx + round(lean)
+        c.put(x, base_y - h, pale["light"])
+        c.put(x, base_y - h - 1, pale["hi"])
+        c.put(x + 1, base_y - h, pale["base"])
+    c.ellipse(15, 28, 8, 2.0, W["deep"])                # root mud at the cut
+    c.ellipse(13, 27, 4, 1.4, palette.BLACKPEAT["base"])
+    _veil_finish(c).save(f"{items_dir}/whisperreeds.png")
+
+    # gloomshroom: one grown cap plus a companion, drawn with the world
+    # sprite's own _shroom so the picked item is a portrait of the plant.
+    c = Canvas(32, 32)
+    _shroom(c, 13, 28, 9)
+    _shroom(c, 23, 30, 5, tilt=1)
+    _veil_finish(c)
+    c.put(6, 11, with_alpha(G["glow"], 150))            # spores, after outline
+    c.put(27, 16, with_alpha(G["glow"], 120))
+    c.save(f"{items_dir}/gloomshroom.png")
+
+    # veilrock: a broken chunk on vanilla items/caverock.png's build - one
+    # rounded mass, flat-ish bottom, lit top-left face, two facet lines and
+    # grit speckles.
+    c = Canvas(32, 32)
+    R = palette.VEILROCK
+    rng = Rng(0x7E11)
+    c.blob(16, 18, 11, R["base"], rng, lumps=5)
+    c.ellipse(16, 23, 12, 4.8, R["base"])
+    c.ellipse(13, 15, 7.0, 4.0, R["light"])
+    c.ellipse(11, 13, 3.5, 2.5, R["hi"])
+    for dx in range(0, 14):                             # main crevice, 2px deep
+        c.put(7 + dx, 19 + dx // 3, R["deep"])
+        c.put(7 + dx, 20 + dx // 3, R["deep"])
+        c.put(7 + dx, 18 + dx // 3, R["light"])         # lit lip above it
+    c.line(20, 10, 25, 20, R["deep"])
+    for dy in range(0, 3):                              # chipped upper corner
+        for dx in range(0, 3 - dy):
+            c.put(24 + dx, 11 + dy, (0, 0, 0, 0))
+    for _ in range(13):
+        c.put(rng.range(7, 25), rng.range(11, 26), R["deep"])
+    for _ in range(6):
+        c.put(rng.range(8, 22), rng.range(11, 19), R["hi"])
+    _veil_finish(c).save(f"{items_dir}/veilrock.png")
+
+    # deadtree: a stout crooked trunk with a bare fork, cut from the same
+    # bone-grey ramp as the world tree.
+    c = Canvas(32, 32)
+    D = DEADWOOD
+    def trunk_x(i):
+        return 15 + round(2.2 * (i / 23.0) ** 2)        # leans right as it rises
+
+    def trunk_half(i):
+        return 3 if i < 8 else (2 if i < 17 else 1)
+
+    for i in range(24):                                 # trunk, tapering + lean
+        y = 29 - i
+        x, half = trunk_x(i), trunk_half(i)
+        for dx in range(-half, half + 1):
+            c.put(x + dx, y, D["base"])
+        c.put(x - half, y, D["light"])
+        if half > 1:
+            c.put(x - half + 1, y, D["light"] if y % 3 else D["hi"])
+        c.put(x + half, y, D["deep"])
+    for dx in range(-6, 7):                             # root flare
+        top = 29 - abs(dx) // 3
+        for dy in range(0, max(1, 2 - abs(dx) // 4)):
+            c.put(15 + dx, top + dy, D["base"])
+        c.put(15 + dx, top + max(1, 2 - abs(dx) // 4), D["deep"])
+        if dx < 0:
+            c.put(15 + dx, top, D["light"])
+    # Every arm starts ON the trunk edge at its own height: hard-coded start
+    # columns left one branch floating free of the tree at 1x.
+    for (by, sx, n) in ((23, -1, 8), (18, 1, 7), (13, -1, 7), (10, 1, 5),
+                        (27, -1, 5), (25, 1, 6), (8, -1, 4)):
+        i = 29 - by
+        x, y = trunk_x(i) + sx * trunk_half(i), by
+        for i in range(n):
+            x += sx
+            if i % 2:
+                y -= 1
+            c.put(x, y, D["base"])
+            c.put(x, y - 1, D["light"] if i % 2 else D["base"])
+            c.put(x, y - 2, D["hi"] if i % 3 == 1 else D["light"])
+            if i < n - 2:
+                c.put(x, y + 1, D["deep"])
+        c.put(x + sx, y - 2, D["deep"])                 # twig tip
+    for (kx, ky) in ((15, 26), (16, 22), (15, 18), (17, 14), (16, 11)):
+        c.put(kx, ky, D["deep"])                        # bark cracks
+        c.put(kx - 1, ky - 1, D["hi"])
+    _veil_finish(c).save(f"{items_dir}/deadtree.png")
+
+
+# The Veil's dead wood: the Gloomwillow build in a bone-grey colorway. Named
+# here rather than inlined because the item icon has to be cut from the same
+# ramp as the tree it comes off.
+DEADWOOD = {
+    "deep": (44, 38, 46),
+    "base": (70, 62, 70),
+    "light": (96, 88, 94),
+    "hi": (122, 114, 118),
+}
+
 
 def gen_deadtree(path):
     """96x80: 2 variants of a bone-grey crooked dead tree (gloomwillow build,
@@ -713,12 +865,7 @@ def gen_deadtree(path):
     import gen_furniture
     import palette as _p
     saved = _p.GLOOMWOOD
-    _p.GLOOMWOOD = {
-        "deep": (44, 38, 46),
-        "base": (70, 62, 70),
-        "light": (96, 88, 94),
-        "hi": (122, 114, 118),
-    }
+    _p.GLOOMWOOD = DEADWOOD
     try:
         gen_furniture.gen_gloomwillow(path, variants=2)
     finally:
