@@ -367,3 +367,16 @@ a temp dir reproduces `src/main/resources` byte-for-byte (only `.DS_Store`
 and the hand-maintained `locale/*.lang` differ, which the generator does not
 write). `tools/locale_audit.py` reports 77 IDs named in both locales; 
 `tools/size_audit.py --vanilla vanilla-sprites` reports 0 flags.
+
+## There is exactly one jar, and it is in `build/jar`
+
+**[run]** `./gradlew buildModJar` writes the mod to `build/jar/`. Gradle's stock
+`jar` task used to also emit one into `build/libs/` — 200 files against the mod
+jar's 304, **no `mod.info`**, and none of the packaged dependencies. Necesse
+ignores a jar without `mod.info`, so installing it produced a mod that loaded
+as nothing while looking entirely plausible (the filename differs only subtly:
+`Stairway to Heaven-0.5.0.jar` versus `Stairway_to_Heaven-1.3.2-0.5.0.jar`).
+
+The stock task is now disabled and `assemble` depends on `buildModJar`, so
+`buildModJar`, `assemble` and `build` all produce the same single correct jar
+and `build/libs` stays empty. Verified by running all three.

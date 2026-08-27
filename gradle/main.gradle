@@ -204,6 +204,22 @@ task createModInfoFile(type: JavaExec) {
             "-optionalDependencies", optDeps.blank ? '' : "[$optDeps]"
 }
 
+// Gradle's stock `jar` task would also emit a jar -- into build/libs, named
+// slightly differently, and WITHOUT mod.info or the packaged dependencies.
+// Necesse silently ignores such a file, so anyone who runs `gradlew build`
+// instead of `gradlew buildModJar` walks away with a jar that looks right and
+// does nothing. Disabling it means there is exactly one jar in this project,
+// and it is the mod. Nothing here consumes the stock jar.
+tasks.named('jar') {
+    enabled = false
+}
+
+// ...and make the conventional entry points produce the real thing, so it does
+// not matter which one you reach for.
+tasks.named('assemble') {
+    dependsOn 'buildModJar'
+}
+
 task buildModJar(type: Jar) {
     group = "necesse"
     description = "Generates the mod jar into the build folder"
