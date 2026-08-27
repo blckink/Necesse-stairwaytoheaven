@@ -234,6 +234,36 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         logs.add("settler check: wardensettler="
                 + (wardenSettler == null ? "NOT REGISTERED" : wardenSettler.getClass().getSimpleName())
                 + " mobRegistered=" + (necesse.engine.registries.MobRegistry.getMobID("wardensettler") >= 0));
+
+        // The recruit path itself. PacketShopContainerUpdate.recruitSettler
+        // fails with "notsettler" when container.humanShop.getSettler() is
+        // null, and getSettler() resolves the mob's OWN settlerStringID -- not
+        // the settler registry key we happen to have registered elsewhere. The
+        // sky-side Warden shipped with an unregistered key for two releases,
+        // which is why the mod hand-rolled its own payment and spawned a second
+        // mob at home. Assert the live wiring, not the registration.
+        for (String mobID : new String[]{"skywarden", "wardensettler"}) {
+            necesse.entity.mobs.Mob probe = necesse.engine.registries.MobRegistry.getMob(mobID, level);
+            String settlerName = "NOT A HUMAN";
+            String recruitPrice = "n/a";
+            if (probe instanceof necesse.entity.mobs.friendly.human.HumanMob) {
+                necesse.entity.mobs.friendly.human.HumanMob human =
+                        (necesse.entity.mobs.friendly.human.HumanMob) probe;
+                necesse.level.maps.levelData.settlementData.settler.Settler s = human.getSettler();
+                settlerName = s == null ? "NULL (recruit would fail: notsettler)" : s.getClass().getSimpleName();
+            }
+            if (probe instanceof necesse.entity.mobs.friendly.human.humanShop.HumanShop) {
+                java.util.List<necesse.inventory.InventoryItem> items =
+                        ((necesse.entity.mobs.friendly.human.humanShop.HumanShop) probe).getRecruitItems(null);
+                recruitPrice = items == null ? "NULL (recruit button dead)"
+                        : items.isEmpty() ? "free"
+                        : items.stream().map(i -> i.item.getStringID() + "x" + i.getAmount())
+                                .reduce((a, b) -> a + "+" + b).orElse("free");
+            }
+            logs.add("recruit check: " + mobID + " settler=" + settlerName + " price=" + recruitPrice);
+        }
+        logs.add("name check: skywarden=" + necesse.engine.localization.Localization.translate("mob", "skywardenname", "name", "Test")
+                + " | wardensettler=" + necesse.engine.localization.Localization.translate("mob", "wardensettlername", "name", "Test"));
     }
 
     /** Recomputes what the painter SHOULD have placed and probes a live set/get. */

@@ -1,15 +1,24 @@
 package stairwaytoheaven.mobs;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import necesse.engine.localization.message.GameMessage;
 import necesse.engine.localization.message.LocalMessage;
-import necesse.engine.network.packet.PacketMobChat;
+import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
-import necesse.engine.registries.ItemRegistry;
 import necesse.entity.mobs.PlayerMob;
+import necesse.entity.mobs.ai.behaviourTree.BehaviourTreeAI;
+import necesse.entity.mobs.ai.behaviourTree.trees.HumanAI;
+import necesse.entity.mobs.ai.behaviourTree.util.AIMover;
+import necesse.entity.mobs.friendly.human.HumanMob;
+import necesse.entity.mobs.friendly.human.humanShop.HumanShop;
 import necesse.entity.pickup.ItemPickupEntity;
 import necesse.inventory.InventoryItem;
 import necesse.level.maps.Level;
+import necesse.level.maps.levelData.settlementData.LevelSettler;
+import necesse.level.maps.levelData.settlementData.ServerSettlementData;
 import stairwaytoheaven.SkyRegistry;
 import stairwaytoheaven.quest.SkywatchQuestData;
 
@@ -17,26 +26,34 @@ import stairwaytoheaven.quest.SkywatchQuestData;
  * The Sky Warden — the last keeper of the Skywatch, resident of the Old
  * Warden Spire and the entry point of the whole Skyreach progression.
  *
- * v0.5 DESIGN: the Warden is the first major goal. The old four-stage fetch
- * chain is gone; his flow is now:
- *   stage 0 — first meeting: intro dialogue, "find the spire" journal quest
- *             completes, he opens up about the Skywatch.
- *   stage 1 — recruitment: he offers to leave the sky and join the player's
- *             surface settlement for {@link #RECRUIT_COST} coins (server-
- *             authoritative inventory check, vanilla DeliverItems idiom).
- *             On payment he lights the beacon (the Skywatch wakes up), hands
- *             over his contract (a vanilla mob spawn item) and departs.
- *   stage 2 — he is gone: the player uses the contract at home and builds his
- *             new tower with the unlocked Skywatch building set. The settler
- *             Warden (see {@link WardenSettlerMob}) takes over as the
- *             progression interface.
+ * HOW HE IS RECRUITED (v0.5.2 — this replaces a hand-rolled flow):
+ * he is hired through Necesse's OWN world-NPC recruitment, the same one the
+ * Miner and the Explorer use. The player talks to him, the shop container
+ * opens on its recruit page, the page states the price, and the recruit button
+ * takes the coins and moves him in. Vanilla then teleports him to the
+ * settlement level itself and registers him as a settler in one step, so he
+ * can be given a bed immediately.
  *
- * All interaction is interact-driven and server-authoritative: turn-ins use
- * the vanilla DeliverItemsQuest idiom (count what is in the player's own
- * inventory, then remove on success — never trusting the client). Progress
- * lives in the level's {@link SkywatchQuestData}, shared by all players.
+ * WHAT WAS WRONG BEFORE, and why it is worth writing down. HumanMob's third
+ * constructor argument is the SettlerRegistry key, and this class passed
+ * "skywarden" — a key nothing ever registered. So {@code getSettler()} returned
+ * null, vanilla's recruit path answered "notsettler", and the recruit button
+ * could never work. The old code worked around that instead of fixing it: it
+ * counted coins inside {@code interact()} and hand-spawned a SECOND mob on the
+ * surface. Three player-visible bugs came out of that one workaround —
+ *   · the 100,000 coins were taken by talking, with no dialogue option and no
+ *     way to decline (a later patch added a confirm step, still not a real UI);
+ *   · the Warden "disappeared" and turned up later in the village as a
+ *     stranger who had to be recruited a SECOND time;
+ *   · until that second recruitment he was not a settler, so he could not be
+ *     assigned a bed and the settlement menu did not know where he was.
+ * Passing the registered key and letting vanilla run the transaction removes
+ * all three at once, and there is now exactly one Warden mob in a world.
+ *
+ * Progress lives in the level's {@link SkywatchQuestData}, shared by all
+ * players.
  */
-public class SkyWardenMob extends necesse.entity.mobs.friendly.human.humanShop.HumanShop {
+public class SkyWardenMob extends HumanShop {
 
     /**
      * The recruitment price. Intentional design value: it equals the top
@@ -47,208 +64,177 @@ public class SkyWardenMob extends necesse.entity.mobs.friendly.human.humanShop.H
      */
     public static final int RECRUIT_COST = 100_000;
 
-    /**
-     * Players who have heard the offer while carrying the price and have yet to
-     * confirm. Server-side only and never persisted: a restart simply means the
-     * offer is made again, which is the safe direction to fail in.
-     */
-    private final java.util.Set<Long> awaitingConfirm = new java.util.HashSet<>();
-
     public SkyWardenMob() {
-        // Same constructor shape as vanilla's Elder, (500, 500, "elder"). He is
-        // a HumanMob now, not a bespoke sprite: the body, the collision boxes
-        // and the four-direction animation all come from the human renderer.
-        super(500, 500, "skywarden");
+        // Third argument is the SettlerRegistry key, NOT a free-form type name.
+        // "wardensettler" is the key SkyMobs registers WardenSettler under; any
+        // other string makes getSettler() null and breaks recruitment entirely.
+        super(500, 500, "wardensettler");
         this.canDespawn = false;
-        this.setSpeed(0.0F);
     }
 
     /**
-     * His fixed face, shared with his settled form so recruiting him does not
-     * swap in a different man. See {@link WardenIdentity}.
+     * The Miner's AI, which is vanilla's template for a hireable world NPC: he
+     * mills about his spire and, once recruited, uses the same human brain
+     * every settler does. He used to be pinned with {@code setSpeed(0)}, which
+     * would have left him unable to walk to the bed the player assigns him.
      */
     @Override
-    public void randomizeLook(necesse.gfx.HumanLook look, necesse.gfx.HumanGender gender,
-                              necesse.engine.util.GameRandom random) {
-        this.gender = WardenIdentity.apply(look);
+    public void init() {
+        super.init();
+        this.ai = new BehaviourTreeAI<>(this, new HumanAI<>(320, true, false, 25000),
+                new AIMover(HumanMob.humanPathIterations));
     }
 
     /**
-     * HumanMob.setDefaultArmor delegates to the mob's registered Settler, and
-     * the sky-side Warden deliberately has none — he is not a settler until he
-     * is recruited. Overriding it here is what gets the Skywatch clothes onto
-     * him in the spire.
+     * The price, stated by vanilla's own recruit page. This is the whole
+     * payment mechanism: {@code ShopContainer.canPayForRecruit} checks it and
+     * {@code payForRecruit} takes it, server-side, only when the player presses
+     * recruit. No coins can move by talking.
      */
     @Override
-    public void setDefaultArmor(necesse.gfx.drawOptions.human.HumanDrawOptions drawOptions) {
-        WardenIdentity.dress(drawOptions);
+    public List<InventoryItem> getRecruitItems(ServerClient client) {
+        return Collections.singletonList(new InventoryItem("coin", RECRUIT_COST));
+    }
+
+    /** Open on the recruit page until he has actually moved in. */
+    @Override
+    public boolean startInRecruitForm(ServerClient client) {
+        return !this.isSettler();
     }
 
     /**
-     * No shop window in the sky. HumanShop.interact opens one by default;
-     * returning null suppresses it so his own dialogue is the whole interaction.
+     * His own small talk. Without this override HumanMob falls back to
+     * {@code mobmsg.humantalk1..5} and the last keeper of the Skywatch greets
+     * you with "I often think about the big questions in life" — which is
+     * exactly what a playtester screenshotted.
      */
     @Override
-    public necesse.engine.network.packet.PacketOpenContainer getOpenShopPacket(
-            necesse.engine.network.server.Server server, ServerClient client) {
-        return null;
+    protected ArrayList<GameMessage> getMessages(ServerClient client) {
+        return getLocalMessages("misc", "wardentalk", 6);
     }
 
+    /**
+     * The line printed at the top of the dialogue window. While he is still a
+     * keeper it is his recruitment pitch, so the offer sits directly above the
+     * price and the recruit button instead of in a speech bubble that scrolls
+     * away. Once he has moved in he makes small talk like any settler.
+     */
+    @Override
+    public GameMessage getDialogueIntroMessage(ServerClient client) {
+        return this.isSettler() ? super.getDialogueIntroMessage(client)
+                                : new LocalMessage("misc", "wardenrecruit1");
+    }
+
+    /**
+     * He cannot be killed. He is a one-of-a-kind story NPC with no random
+     * replacement ({@code WardenSettler.getArriveAsRecruitAfterDeathChance} is
+     * 0), and after a 100,000-coin purchase losing him to a stray mob would be
+     * unrecoverable.
+     */
     @Override
     public boolean canTakeDamage() {
         return false;
     }
 
     /**
-     * Mob.canInteract defaults to FALSE — without this override the client
-     * never offers the interact prompt and PacketPlayerMobInteract drops the
-     * request server-side, so interact() would be dead code.
-     */
-    @Override
-    public boolean canInteract(necesse.entity.mobs.Mob mob) {
-        return mob != null && mob.isPlayer;
-    }
-
-    /**
-     * Deliberately does NOT call super.interact: HumanShop's version opens a
-     * shop container and runs settlement happiness and relationship updates,
-     * none of which apply to a keeper who is not a settler yet. What we do want
-     * from the human branch is turnTo — the native "face the player" behaviour
-     * that a FriendlyMob never had, which is why he used to stand facing north
-     * through his own introduction.
+     * First contact: the introduction, the journal hand-over, then vanilla's
+     * own dialogue window. Everything transactional happens in that window —
+     * this method only advances the story and never touches the player's
+     * inventory.
      */
     @Override
     public void interact(PlayerMob player) {
-        if (!this.isAttacking) {
-            this.turnTo(player);
-        }
-        if (!this.isServer() || !player.isServerClient()) {
-            return;
-        }
-        ServerClient client = player.getServerClient();
         Level level = this.getLevel();
-        SkywatchQuestData quest = SkywatchQuestData.get(level);
-
-        necesse.engine.network.server.Server server = level.getServer();
-        switch (quest.stage) {
-            case 0:
-                // First meeting: intro, then he opens up. The "find the spire"
-                // journal quest completes here for everyone.
+        // The story state lives on the Skyreach level. SkywatchQuestData.get
+        // CREATES a blank record for whatever level it is handed, so calling it
+        // on the surface would hand back a fresh stage-0 record and replay the
+        // introduction every time a settled Warden is spoken to.
+        boolean inTheSky = level instanceof stairwaytoheaven.level.SkyLevel;
+        if (inTheSky && this.isServer() && player.isServerClient() && !this.isSettler()) {
+            ServerClient client = player.getServerClient();
+            SkywatchQuestData quest = SkywatchQuestData.get(level);
+            if (quest.stage == 0) {
+                Server server = level.getServer();
+                quest.stage = 1;
+                stairwaytoheaven.quest.SkyQuests.removeAllOfType(
+                        server, stairwaytoheaven.quest.FindSpireQuest.class);
+                stairwaytoheaven.quest.SkyQuests.giveOnce(server, client,
+                        new stairwaytoheaven.quest.RecruitWardenQuest());
                 say(client, "wardenintro1");
                 say(client, "wardenintro2");
-                say(client, "wardenintro3");
                 give(client, "windsilk", 6);
-                quest.stage = 1;
-                stairwaytoheaven.quest.SkyQuests.removeAllOfType(server, stairwaytoheaven.quest.FindSpireQuest.class);
-                sayRecruitmentOffer(client);
-                break;
-            case 1:
-                // Two-step consent. Talking to him used to take 100,000 coins
-                // the instant you stood there carrying them, with no prompt and
-                // no way to decline -- a player holding that much for anything
-                // else was simply charged. He now makes the offer once and only
-                // collects when you come back and confirm.
-                if (!this.awaitingConfirm.remove(client.authentication)) {
-                    sayRecruitmentOffer(client);
-                    long coins = player == null ? 0 : client.playerMob.getInv().main.getAmount(
-                            level, client.playerMob, ItemRegistry.getItem("coin"), "skywatch");
-                    if (coins >= RECRUIT_COST) {
-                        this.awaitingConfirm.add(client.authentication);
-                        say(client, "wardenrecruitconfirm");
-                    } else {
-                        say(client, "wardenrecruitwait");
-                    }
-                    break;
-                }
-                if (tryRecruit(client, level, quest)) {
-                    say(client, "wardenrecruitdone1");
-                    say(client, "wardenrecruitdone2");
-                    // The keeper's Silver Bell changes hands here. It is the
-                    // key the Seance Circle checks for, and since the old cat
-                    // quest that used to award it is gone this is its only
-                    // source — without it the Veil is unreachable.
-                    give(client, "silverbell", 1);
-                    say(client, "wardengivesbell");
-                } else {
-                    say(client, "wardenrecruitwait");
-                }
-                break;
-            default:
-                // Recruited worlds should not still have him here; a stale mob
-                // (e.g. from a hand-edited save) politely says goodbye.
-                say(client, "wardenfarewell");
-                break;
+            }
         }
-    }
+        // Chapter close, wherever he is standing now: both cats home turns the
+        // journal entry in. The cat mechanic itself was already complete --
+        // treat, travel home, state sync -- but nothing ever handed the quest
+        // out or took it back, so it could not be seen or finished.
+        if (this.isServer() && player.isServerClient()) {
+            ServerClient client = player.getServerClient();
+            stairwaytoheaven.quest.SpireCatsQuest cats = stairwaytoheaven.quest.SkyQuests
+                    .findHeld(client, stairwaytoheaven.quest.SpireCatsQuest.class);
+            if (cats != null && cats.blackHome && cats.tabbyHome) {
+                cats.complete(client);
+                cats.remove();
+                give(client, "catbasket", 1);
+                give(client, "flickerlightgarland", 2);
+                say(client, "wardencatsdone");
+            }
+        }
 
-    /** The recruitment pitch: what he offers and what it costs. */
-    private void sayRecruitmentOffer(ServerClient client) {
-        say(client, "wardenrecruit1");
-        say(client, "wardenrecruit2");
+        // HumanShop.interact turns him to face the player, updates happiness
+        // and opens the shop/recruit container.
+        super.interact(player);
     }
 
     /**
-     * Server-authoritative recruitment — the 100,000-coin payment IS the
-     * recruitment transaction, exactly like vanilla's coin hiring of world
-     * NPCs ("most NPCs can be hired with coins ... and become settlers in the
-     * player's settlement" — wiki). There is no item: the server consumes the
-     * coins, then performs the transfer itself:
-     *
-     *   1. consume {@link #RECRUIT_COST} coins from the paying player's own
-     *      inventory (vanilla DeliverItems idiom, never trusting the client),
-     *   2. light the beacon — the Skywatch wakes up,
-     *   3. create the settler Warden (a real {@link WardenSettlerMob}, i.e. a
-     *      HumanShop settler) on the SURFACE level, placed with the Elder's
-     *      own placement recipe (setHome → Waystone.findTeleportLocation →
-     *      entityManager.addMob) at the stairway this player ascended from —
-     *      the verified, persisted spot at the heart of their base,
-     *   4. remove this sky-side warden; the player assigns his bed/home
-     *      through the normal settlement menu afterwards.
+     * The Skywatch wakes up. Vanilla has already changed this mob's level and
+     * moved him into the settlement by the time this runs, so the beacon is
+     * reached through the Skyreach level explicitly rather than through
+     * {@code getLevel()}.
      */
-    private boolean tryRecruit(ServerClient client, Level level, SkywatchQuestData quest) {
-        PlayerMob player = client.playerMob;
-        // The transfer target: this player's bound surface stairway. Everyone
-        // who reached the spire through a stairway has one; without it we
-        // refuse before taking any coins rather than guessing a destination.
-        long[] homeTile = quest.getReturnStairway(client.authentication);
-        if (homeTile == null) {
-            say(client, "wardenrecruitnohome");
-            return false;
+    @Override
+    public void onRecruited(ServerClient client, ServerSettlementData data, LevelSettler settler) {
+        super.onRecruited(client, data, settler);
+        if (client == null) {
+            return;
         }
-        necesse.inventory.item.Item coin = ItemRegistry.getItem("coin");
-        if (player.getInv().main.getAmount(level, player, coin, "skywatch") < RECRUIT_COST) {
-            return false;
+        Server server = client.getServer();
+        Level sky = server.world.levelManager.isLoaded(SkyRegistry.SKYREACH_IDENTIFIER)
+                ? server.world.getLevel(SkyRegistry.SKYREACH_IDENTIFIER)
+                : null;
+        if (sky != null) {
+            SkywatchQuestData quest = SkywatchQuestData.get(sky);
+            quest.stage = 2;
+            quest.recruited = true;
+            quest.recruitedAuth = client.authentication;
+            igniteBeacon(sky, quest);
         }
-        player.getInv().main.removeItems(level, player, coin, RECRUIT_COST, "skywatch");
 
-        quest.stage = 2;
-        quest.recruited = true;
-        quest.recruitedAuth = client.authentication;
-        igniteBeacon(level, quest);
+        stairwaytoheaven.quest.SkyQuests.removeAllOfType(
+                server, stairwaytoheaven.quest.RecruitWardenQuest.class);
+        // The next chapter. SpireCatsQuest, its two lair positions, the treat
+        // item, the coax interaction and the travel-home puff have all shipped
+        // since v0.2 and were fully working -- the quest was simply never given
+        // to anyone, so no player could see it. This is the hand-out.
+        stairwaytoheaven.quest.SkyQuests.giveOnce(server, client,
+                new stairwaytoheaven.quest.SpireCatsQuest());
 
-        // The transfer: spawn the settler on the surface level (always loaded)
-        // at the player's home-side stairway, Elder-preset placement recipe.
-        Level surface = level.getServer().world.getLevel(necesse.engine.util.LevelIdentifier.SURFACE_IDENTIFIER);
-        WardenSettlerMob settler = new WardenSettlerMob();
-        int homeX = (int) homeTile[0];
-        int homeY = (int) homeTile[1] + 1; // just below the stairway pad
-        settler.setHome(new java.awt.Point(homeX, homeY));
-        // findTeleportLocation already returns PIXEL coordinates (it builds
-        // its candidates as tile*32+16 internally) — vanilla call sites pass
-        // the Point straight into addMob. Converting again here placed the
-        // settler at 32x the intended distance, i.e. thousands of tiles out
-        // in the wilderness after a 100,000-coin payment.
-        java.awt.Point spot = necesse.level.maps.levelData.settlementData.Waystone
-                .findTeleportLocation(surface, homeX, homeY, settler);
-        surface.entityManager.addMob(settler, (float) spot.x, (float) spot.y);
-
-        // This sky-side keeper departs; the settler at home takes over.
-        this.remove();
-        return true;
+        // The keeper's Silver Bell changes hands here. It is the key the Seance
+        // Circle checks for, and since the old cat quest that used to award it
+        // is gone this is its only source — without it the Veil is unreachable.
+        give(client, "silverbell", 1);
+        say(client, "wardengivesbell");
+        // Say where he went. Vanilla's own "joined settlement" line is sent by
+        // the recruit packet, but a player who bought him in another dimension
+        // deserves to be told he is already home and waiting for a bed.
+        client.sendChatMessage(new LocalMessage("misc", "wardenmovedin",
+                "settlement", data.networkData.getSettlementName()));
     }
 
     private void igniteBeacon(Level level, SkywatchQuestData quest) {
-        swapObject(level, quest.beaconX, quest.beaconY, SkyRegistry.wardenBeaconOffID, SkyRegistry.wardenBeaconOnID);
+        swapObject(level, quest.beaconX, quest.beaconY,
+                SkyRegistry.wardenBeaconOffID, SkyRegistry.wardenBeaconOnID);
     }
 
     private void swapObject(Level level, int tileX, int tileY, int expectedID, int newID) {
@@ -264,31 +250,44 @@ public class SkyWardenMob extends necesse.entity.mobs.friendly.human.humanShop.H
         }
     }
 
-    private void say(ServerClient client, String miscKey) {
-        say(client, new LocalMessage("misc", miscKey));
+    /**
+     * His fixed face, shared with every form of him so recruiting the hooded
+     * keeper does not produce a different, randomly generated man. See
+     * {@link WardenIdentity}.
+     */
+    @Override
+    public void randomizeLook(necesse.gfx.HumanLook look, necesse.gfx.HumanGender gender,
+                              necesse.engine.util.GameRandom random) {
+        this.gender = WardenIdentity.apply(look);
+    }
+
+    /**
+     * HumanMob.setDefaultArmor delegates to the registered Settler, which
+     * already dresses him — this override keeps the Skywatch clothes on him
+     * before he is a settler at all.
+     */
+    @Override
+    public void setDefaultArmor(necesse.gfx.drawOptions.human.HumanDrawOptions drawOptions) {
+        WardenIdentity.dress(drawOptions);
     }
 
     /** Speech bubble for everyone nearby + chat line for the interacting player. */
-    private void say(ServerClient client, GameMessage message) {
+    protected void say(ServerClient client, String miscKey) {
+        GameMessage message = new LocalMessage("misc", miscKey);
         this.getLevel().getServer().network.sendToClientsWithEntity(
-                new PacketMobChat(this.getUniqueID(), message), this);
+                new necesse.engine.network.packet.PacketMobChat(this.getUniqueID(), message), this);
         client.sendChatMessage(new LocalMessage("misc", "wardenchatformat", "name",
                 new LocalMessage("misc", "wardenname").translate(), "line", message.translate()));
     }
 
-    /** Give items to the delivering player; anything that does not fit drops at their feet. */
-    private void give(ServerClient client, String itemStringID, int amount) {
+    /** Give items to the player; anything that does not fit drops at their feet. */
+    protected void give(ServerClient client, String itemStringID, int amount) {
         PlayerMob player = client.playerMob;
-        Level level = this.getLevel();
+        Level level = player.getLevel();
         InventoryItem item = new InventoryItem(itemStringID, amount);
         boolean added = player.getInv().main.addItem(level, player, item, "skywatchreward", null);
         if (!added && item.getAmount() > 0) {
             level.entityManager.pickups.add(new ItemPickupEntity(level, item, player.x, player.y, 0.0F, 0.0F));
         }
     }
-
-    // NOTE: no addDrawables override any more. The bespoke 64px sheet that used
-    // to be blitted here is gone — the human renderer composes him from body,
-    // head, hair, eyes, facial feature and his armor layers, exactly like the
-    // Elder and exactly like the player.
 }

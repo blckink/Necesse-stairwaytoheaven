@@ -65,6 +65,7 @@ public class StairwayToHeavenMod {
         // chain (see docs/research/quest-api.md). Items must already be
         // registered — the delivery quests reference them by stringID.
         necesse.engine.registries.QuestRegistry.registerQuest("swh_findspire", stairwaytoheaven.quest.FindSpireQuest.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_recruitwarden", stairwaytoheaven.quest.RecruitWardenQuest.class);
         necesse.engine.registries.QuestRegistry.registerQuest("swh_beacon", stairwaytoheaven.quest.BeaconDeliveryQuest.class);
         necesse.engine.registries.QuestRegistry.registerQuest("swh_cats", stairwaytoheaven.quest.SpireCatsQuest.class);
         necesse.engine.registries.QuestRegistry.registerQuest("swh_anchor", stairwaytoheaven.quest.AnchorDeliveryQuest.class);

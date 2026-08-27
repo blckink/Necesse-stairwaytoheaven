@@ -52,6 +52,25 @@ turns him into a `HumanShop` settler on the Surface. **It is never the purchase
 of a spawn item or a spawn egg.** *Why:* a spawn item makes him an object the
 player owns; recruitment makes him a person who moved in.
 
+**The recruitment runs through VANILLA's hiring flow, not our own.** He is a
+`HumanShop` whose `getRecruitItems` returns the coin price; the shop container's
+recruit page states it and `ShopContainer.payForRecruit` takes it, server-side,
+only on the button press. Vanilla then teleports the mob to the settlement's
+level and moves him in as a settler. **There is exactly ONE Warden mob in a
+world** — recruiting him must never spawn a second mob anywhere.
+*Why:* v0.5.0 hand-rolled the payment inside `interact()` and spawned a second
+mob at home. That produced three player-facing bugs from one cause — coins
+taken by talking with no dialogue option, the Warden "disappearing" and turning
+up in the village as a stranger to be recruited again, and no bed assignment
+possible in between. Do NOT reintroduce a bespoke payment path.
+
+**A `HumanMob`'s settler key and a `Settler`'s mob ID are different
+namespaces.** `HumanMob(hp, hp, key)` takes the `SettlerRegistry` key;
+`Settler(id)` takes the `MobRegistry` ID. Getting the first one wrong silently
+disables recruitment (`getSettler()` is null, vanilla answers `notsettler`),
+which is exactly how the hand-rolled path came to exist. `/skyreachstatus`
+asserts the live wiring per mob.
+
 **He is a unique, permanent settler.** Modelled on the Elder: never spawns on
 his own, never moves out, cannot be banished, no random replacement after
 death, and excluded from vanilla's "one of every settler" achievement. *Why:*

@@ -485,3 +485,57 @@ rays rather than gaps, and few large lobes rather than many small ones. The
 rule underneath all three failures is that a 14-segment worm multiplies
 whatever detail one segment carries by fourteen, so segment detail has to be
 judged on the whole chain at 1x, never on one cell zoomed in.
+
+## Hiring an NPC is a vanilla mechanism; do not hand-roll it
+
+**[jar]** `HumanMob`'s third constructor argument is a **SettlerRegistry key**,
+not a free-form type name: `ElderHumanMob` passes `"elder"`, which is the key
+`SettlerRegistry.registerSettler("elder", new ElderSettler())` registered. And
+`Settler`'s own constructor argument is a **MobRegistry ID** — `ElderSettler`
+passes `"elderhuman"`. Two different namespaces, one line apart, easy to swap.
+
+**[run]** Our Sky Warden passed `"skywarden"` as its settler key, and nothing
+ever registered that key. `HumanMob.getSettler()` therefore returned null, and
+`PacketShopContainerUpdate.recruitSettler` refuses with `settlement.notsettler`
+when it is. So vanilla's recruit button could never work for him, for two
+releases. `/skyreachstatus` now asserts this directly per mob rather than
+asserting that *a* settler is registered somewhere.
+
+**[jar]** The vanilla hiring flow, which is what a player expects because every
+world NPC uses it: `HumanShop.interact` opens the shop container;
+`getShopContainerData` puts `getRecruitItems(client)` on its recruit page;
+`ShopContainer.canPayForRecruit`/`payForRecruit` check and take those items
+**server-side, only on the button press**; then `recruitSettler` teleports the
+mob to the settlement's level itself (`changeMobLevel`, guarded by
+`shouldTeleportToLevelOnRecruited`, default `!isDowned()`), calls
+`serverData.moveIn`, and broadcasts `ui.settlementjoined`. One mob, one
+transaction, settler immediately — assignable bed included.
+
+**[game]** Working around that instead of fixing the key produced three
+separate player-visible bugs from one cause: coins taken by *talking* with no
+dialogue option; the Warden "disappearing" and reappearing in the village as a
+stranger who had to be recruited a second time; and no bed assignment possible
+until that second recruitment, because until then he was not a settler at all.
+All three were reported in one playtest message.
+
+**[jar]** `HumanMob.getMessages(client)` defaults to
+`getLocalMessages("humantalk", 5)` in category `mobmsg`. Any HumanMob that does
+not override it makes generic villager small talk — a playtester screenshotted
+the last keeper of the Skywatch saying "I often think about the big questions
+in life". `getDialogueIntroMessage` is the line at the top of the dialogue
+window and is the right place for an offer, because it sits directly above the
+price and the recruit button instead of in a bubble that scrolls away.
+
+**[jar]** `HumanMob.getLocalization()` returns
+`mob.<mobStringID>name` **with a `<name>` argument** once the human has a
+settler name, and plain `mob.<mobStringID>` before that. Vanilla writes these
+as `elderhumanname=<name> the Elder`. A mod that only defines the plain key
+ships a raw `mob.<id>name` string to the player the moment the NPC is named.
+
+**[run]** Registered-but-never-given quests are invisible, not broken.
+`SpireCatsQuest` shipped in v0.2 with its lair positions, treat item, coax
+interaction, travel-home puff and journal sync all working, and
+`QuestRegistry.registerQuest` called — but no code path ever called
+`makeActiveFor`, so no player could ever see it. Registration is not
+hand-out. The same was true of `BeaconDeliveryQuest` and `AnchorDeliveryQuest`,
+which are still dormant.

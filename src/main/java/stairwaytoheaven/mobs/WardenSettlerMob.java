@@ -1,92 +1,40 @@
 package stairwaytoheaven.mobs;
 
-import java.awt.Color;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import necesse.engine.network.server.ServerClient;
-import necesse.engine.util.GameRandom;
-import necesse.entity.mobs.friendly.human.humanShop.HumanShop;
-import necesse.gfx.HumanGender;
-import necesse.gfx.HumanLook;
-import necesse.inventory.container.mob.ContainerQuest;
+import necesse.inventory.InventoryItem;
 
 /**
- * The Warden as a surface settler — the recruited form of {@link SkyWardenMob}.
+ * The Warden's settled form — kept ONLY for save compatibility.
  *
- * Created directly by the recruitment transaction (see
- * {@code SkyWardenMob.tryRecruit}): the server places him on the surface level
- * at the player's bound stairway using the Elder's placement recipe
- * ({@code setHome} → {@code Waystone.findTeleportLocation} →
- * {@code entityManager.addMob}). As a {@link HumanShop} subclass he is a real
- * Necesse settler: housing/bed assignment, room happiness, jobs and the
- * vanilla hire/interact machinery all come from the HumanMob branch — the same
- * bar the Elder sits on. The player then assigns his bed through the normal
- * settlement menu.
+ * Worlds built with v0.5.0/v0.5.1 have one of these standing in or near the
+ * player's settlement. Those builds could not use vanilla's recruitment (see
+ * {@link SkyWardenMob} for why), so they took the 100,000 coins in the sky and
+ * hand-spawned this second mob at home, where it then had to be recruited a
+ * second time. Deleting the class would make those saves fail to load the mob.
  *
- * RENDERING: he uses the vanilla human renderer exclusively — no bespoke
- * sprite overlay (an earlier draft drew a full-body sheet OVER the HumanMob
- * body, double-rendering him). His identity comes from the native channels
- * instead: a pinned Skywatch storm-blue robe + nightfell-dark shoes via
- * {@link #randomizeLook}, on top of an otherwise vanilla-rolled look.
+ * So it stays, as a thin subclass of the real Warden: same face, same clothes,
+ * same dialogue, same settler type, same display name — the player cannot tell
+ * the two apart, which is the point. The one difference is the price: this
+ * world already paid, so moving in is free.
  *
- * API note (verified against the 1.3.2 jar): HumanShop's only constructor is
- * {@code (int maxHealth, int maxHealthBase, String typeID)} — the Elder passes
- * {@code (500, 500, "elder")} and we mirror that with our own string ID.
+ * Newly generated worlds never create one. There, the single {@code skywarden}
+ * mob at the spire is the mob that moves into the settlement.
  */
-public class WardenSettlerMob extends HumanShop {
-
-    public WardenSettlerMob() {
-        super(500, 500, "wardensettler");
-        this.canDespawn = false;
-        // Elder-matching walk speed so settlement jobs/pathing behave like any
-        // other human settler.
-        this.setSpeed(30.0F);
-    }
+public class WardenSettlerMob extends SkyWardenMob {
 
     /**
-     * Vanilla ships the quest-giver hook dormant; the Elder overrides it to
-     * return null and so do we — the Warden's tasks are handed out through his
-     * own dialogue, not the dormant registry.
+     * Free. An EMPTY list is vanilla's idiom for a free recruit (the Trader
+     * uses it after being freed from a trap): it makes the recruit button live
+     * and reads "recruit for free". The inherited {@code null} would leave the
+     * button permanently dead and strand him outside the settlement forever —
+     * which is precisely what a playtester hit.
      */
     @Override
-    public ArrayList<ContainerQuest> getQuests(ServerClient client) {
-        return null;
-    }
-
-    /**
-     * The recruitment fee was already paid, in coin, to his sky-side self —
-     * so moving in costs nothing here. An EMPTY list is the vanilla idiom for
-     * a free recruit (the Trader uses it after being freed from a trap): it
-     * makes the shop's recruit button live and shows "recruit for free",
-     * whereas the inherited {@code null} would leave the button permanently
-     * dead and strand him outside the settlement forever.
-     */
-    @Override
-    public List<necesse.inventory.InventoryItem> getRecruitItems(ServerClient client) {
+    public List<InventoryItem> getRecruitItems(ServerClient client) {
         return Collections.emptyList();
     }
 
-    /**
-     * Open on the recruit page the first time the player talks to him at home:
-     * "build me something with a view" is the next step, and the shop tab would
-     * otherwise bury it.
-     */
-    @Override
-    public boolean startInRecruitForm(ServerClient client) {
-        return super.startInRecruitForm(client) || !this.isSettler();
-    }
-
-    /**
-     * His face, shared with the sky-side Warden through {@link WardenIdentity}.
-     * This used to roll a random face and hair and only pin the clothing
-     * colours, so recruiting the hooded keeper produced a completely different,
-     * randomly generated man standing in the settlement.
-     */
-    @Override
-    public void randomizeLook(HumanLook look, HumanGender gender, GameRandom random) {
-        this.gender = WardenIdentity.apply(look);
-    }
 }
-
