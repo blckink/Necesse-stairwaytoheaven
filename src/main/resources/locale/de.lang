@@ -15,6 +15,7 @@ mistseatile=Nebelmeer
 
 gloomwoodfloortile=Düsterholz-Boden
 marblecheckertile=Schachbrett-Marmor
+skywaytile=Himmelspflaster
 [object]
 nimbuswillow=Nimbusweide
 fulgurpine=Fulgur-Kiefer
@@ -92,6 +93,31 @@ nightfellwall=Nightfell-Wand
 nightfelldoor=Nightfell-Tür
 nightfelldoorlocked=Verschlossene Nightfell-Tür
 nightfellwindow=Nightfell-Fenster
+// Skywatch furniture family (real vanilla furniture base classes)
+skywatchchair=Himmelswacht-Stuhl
+skywatchbench=Himmelswacht-Bank
+skywatchmodulartable=Himmelswacht-Tisch
+skywatchdinnertable=Himmelswacht-Esstisch
+skywatchdesk=Himmelswacht-Schreibtisch
+skywatchdresser=Himmelswacht-Kommode
+skywatchbed=Himmelswacht-Bett
+skywatchcandelabra=Himmelswacht-Kandelaber
+skywatchcarpet=Windseiden-Teppich
+skywatchchalice=Himmelswacht-Kelch
+skywatchcandle=Windseiden-Kerze
+skywatchtome=Himmelswacht-Foliant
+pottedcloudberry=Wolkenbeere im Topf
+// Cloudmarble: white-and-gold cloud masonry of the Skyway Passages
+cloudmarblewall=Wolkenmarmor-Wand
+cloudmarbledoor=Wolkenmarmor-Tür
+cloudmarbledoorlocked=Verschlossene Wolkenmarmor-Tür
+cloudmarblewindow=Wolkenmarmor-Fenster
+cloudmarblefence=Wolkenmarmor-Geländer
+cloudmarblefencegate=Wolkenmarmor-Tor
+[itemcategory]
+// sub-category of objects>furniture holding the Skywatch family
+skywatch=Himmelswacht
+
 [item]
 nimbuswood=Nimbusholz
 charwood=Kohlenholz

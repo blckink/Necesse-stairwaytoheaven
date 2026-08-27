@@ -84,6 +84,7 @@ ROLES = {
     "nimbusfloortile": FLOOR,
     "charfloortile": FLOOR,
     "prismfloortile": FLOOR,
+    "skywaytile": TERRAIN,
 }
 
 # Vanilla base classes we may build on, and the isFloor value each one passes

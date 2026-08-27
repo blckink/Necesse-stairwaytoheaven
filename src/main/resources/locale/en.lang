@@ -15,6 +15,7 @@ mistseatile=Mistsea
 
 gloomwoodfloortile=Gloomwood Floor
 marblecheckertile=Marble Checker Floor
+skywaytile=Skyway Paving
 [object]
 nimbuswillow=Nimbus Willow
 fulgurpine=Fulgur Pine
@@ -92,6 +93,31 @@ nightfellwall=Nightfell Wall
 nightfelldoor=Nightfell Door
 nightfelldoorlocked=Locked Nightfell Door
 nightfellwindow=Nightfell Window
+// Skywatch furniture family (real vanilla furniture base classes)
+skywatchchair=Skywatch Chair
+skywatchbench=Skywatch Bench
+skywatchmodulartable=Skywatch Table
+skywatchdinnertable=Skywatch Dining Table
+skywatchdesk=Skywatch Desk
+skywatchdresser=Skywatch Dresser
+skywatchbed=Skywatch Bed
+skywatchcandelabra=Skywatch Candelabra
+skywatchcarpet=Windsilk Carpet
+skywatchchalice=Skywatch Chalice
+skywatchcandle=Windsilk Candle
+skywatchtome=Skywatch Tome
+pottedcloudberry=Potted Cloudberry
+// Cloudmarble: white-and-gold cloud masonry of the Skyway Passages
+cloudmarblewall=Cloudmarble Wall
+cloudmarbledoor=Cloudmarble Door
+cloudmarbledoorlocked=Locked Cloudmarble Door
+cloudmarblewindow=Cloudmarble Window
+cloudmarblefence=Cloudmarble Railing
+cloudmarblefencegate=Cloudmarble Gate
+[itemcategory]
+// sub-category of objects>furniture holding the Skywatch family
+skywatch=Skywatch
+
 [item]
 nimbuswood=Nimbuswood
 charwood=Charwood

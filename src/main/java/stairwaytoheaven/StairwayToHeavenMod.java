@@ -57,6 +57,8 @@ public class StairwayToHeavenMod {
         registerTiles();
         registerObjects();
         SkyBuildingSet.register();
+        SkyFurnitureSet.register();
+        SkyCloudmarbleSet.register();
         SkyMobs.register();
         SkyItems.register();
         SkyBuildingSet.registerItems();
@@ -109,6 +111,7 @@ public class StairwayToHeavenMod {
         SkyRegistry.cloudturfID = TileRegistry.registerTile("cloudturftile", SkyRegistry.cloudturfTile, 1.0F, true);
         SkyRegistry.skystoneTileID = TileRegistry.registerTile("skystonetile", SkyRegistry.skystoneTile, 1.0F, true);
         SkyRegistry.stormslateID = TileRegistry.registerTile("stormslatetile", SkyRegistry.stormslateTile, 1.0F, true);
+        SkyCloudmarbleSet.registerTiles();
         SkyRegistry.mistseaID = TileRegistry.registerTile("mistseatile", SkyRegistry.mistseaTile, 0.0F, false);
 
         SkyRegistry.murkmossTile = new MurkmossTile();
@@ -143,6 +146,8 @@ public class StairwayToHeavenMod {
     public void postInit() {
         SkyItems.registerRecipes();
         SkyBuildingSet.registerRecipes();
+        SkyFurnitureSet.registerRecipes();
+        SkyCloudmarbleSet.registerRecipes();
         SkyBuildingSet.resolveWorldgenMaterials();
         registerWorldGenerator();
         CommandsManager.registerServerCommand(new SkyreachStatusCommand());
