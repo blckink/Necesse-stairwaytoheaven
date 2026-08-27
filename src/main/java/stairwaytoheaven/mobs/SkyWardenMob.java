@@ -47,6 +47,13 @@ public class SkyWardenMob extends necesse.entity.mobs.friendly.human.humanShop.H
      */
     public static final int RECRUIT_COST = 100_000;
 
+    /**
+     * Players who have heard the offer while carrying the price and have yet to
+     * confirm. Server-side only and never persisted: a restart simply means the
+     * offer is made again, which is the safe direction to fail in.
+     */
+    private final java.util.Set<Long> awaitingConfirm = new java.util.HashSet<>();
+
     public SkyWardenMob() {
         // Same constructor shape as vanilla's Elder, (500, 500, "elder"). He is
         // a HumanMob now, not a bespoke sprite: the body, the collision boxes
@@ -136,6 +143,23 @@ public class SkyWardenMob extends necesse.entity.mobs.friendly.human.humanShop.H
                 sayRecruitmentOffer(client);
                 break;
             case 1:
+                // Two-step consent. Talking to him used to take 100,000 coins
+                // the instant you stood there carrying them, with no prompt and
+                // no way to decline -- a player holding that much for anything
+                // else was simply charged. He now makes the offer once and only
+                // collects when you come back and confirm.
+                if (!this.awaitingConfirm.remove(client.authentication)) {
+                    sayRecruitmentOffer(client);
+                    long coins = player == null ? 0 : client.playerMob.getInv().main.getAmount(
+                            level, client.playerMob, ItemRegistry.getItem("coin"), "skywatch");
+                    if (coins >= RECRUIT_COST) {
+                        this.awaitingConfirm.add(client.authentication);
+                        say(client, "wardenrecruitconfirm");
+                    } else {
+                        say(client, "wardenrecruitwait");
+                    }
+                    break;
+                }
                 if (tryRecruit(client, level, quest)) {
                     say(client, "wardenrecruitdone1");
                     say(client, "wardenrecruitdone2");
@@ -146,7 +170,6 @@ public class SkyWardenMob extends necesse.entity.mobs.friendly.human.humanShop.H
                     give(client, "silverbell", 1);
                     say(client, "wardengivesbell");
                 } else {
-                    sayRecruitmentOffer(client);
                     say(client, "wardenrecruitwait");
                 }
                 break;

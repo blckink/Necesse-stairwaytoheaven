@@ -65,7 +65,18 @@ public class SkywatchGateObjectEntity extends PortalObjectEntity {
             }
         }
 
-        this.teleportClientToAroundDestination(client, level -> {
+        // Do NOT call teleportClientToAroundDestination: it reads this entity's
+        // destinationTileX/Y, which is a dummy here (the gate resolves a
+        // DIFFERENT destination per player). Worse, it reads them inside a
+        // lambda that can run later, once the surface has loaded — so writing
+        // the fields per player would be a multiplayer race, one player's
+        // destination landing another player's jump.
+        //
+        // This is the same call vanilla's method makes, with targetX/targetY
+        // captured in locals instead. The old code computed them correctly and
+        // then teleported to the dummy, which is why the return gate put
+        // everyone back on the surface at their SKY coordinates.
+        this.teleportBoundClient(client, targetX, targetY, level -> {
             if (!isBlockingExit.isComputed()) {
                 GameMessage error = isBlockingExit.get(level);
                 if (error != null) {
@@ -84,6 +95,26 @@ public class SkywatchGateObjectEntity extends PortalObjectEntity {
             client.newStats.ladders_used.increment(1);
             this.runClearMobs(level, targetX, targetY);
             return true;
+        });
+    }
+
+    /**
+     * Vanilla's teleportClientToAroundDestination with the destination passed
+     * in rather than read off the entity, so each player lands on their own
+     * bound stairway.
+     */
+    private void teleportBoundClient(ServerClient client, int targetX, int targetY,
+                                     java.util.function.Predicate<Level> validCheck) {
+        client.changeLevelCheck(this.getDestinationIdentifier(), null, level -> {
+            if (!validCheck.test(level)) {
+                return new necesse.engine.util.TeleportResult(false, null);
+            }
+            java.awt.Point spot = getTeleportDestinationAroundObject(
+                    level, client.playerMob, targetX, targetY, true);
+            if (spot == null) {
+                spot = new java.awt.Point(targetX * 32 + 16, targetY * 32 + 16);
+            }
+            return new necesse.engine.util.TeleportResult(true, spot);
         }, true);
     }
 
