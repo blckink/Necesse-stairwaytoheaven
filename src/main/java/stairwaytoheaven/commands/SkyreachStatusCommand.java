@@ -266,56 +266,78 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                 + " | wardensettler=" + necesse.engine.localization.Localization.translate("mob", "wardensettlername", "name", "Test"));
     }
 
-    /** Recomputes what the painter SHOULD have placed and probes a live set/get. */
+    /**
+     * Compares the world the server actually generated against the pure
+     * decision function, and reports the built landscape it contains.
+     *
+     * {@link stairwaytoheaven.worldgen.SkyTerrainPainter#describeTile} is the
+     * single source of truth for every Skyreach tile, and the offline map
+     * renderer (scripts/sky_map_render.sh) calibrates against the same
+     * function. This block is what keeps those two honest: if the field and
+     * the painted world ever disagree, every calibration render becomes
+     * fiction. Ground tiles are compared strictly — nothing removes a floor
+     * after generation — everywhere outside the spire preset's own footprint,
+     * which legitimately overwrites what the painter wrote.
+     */
     private void diagnoseGeneration(SkyLevel level, CommandLog logs) {
         int seed = level.getWorldGenSeed();
         int r = SCAN_RADIUS_TILES;
         java.awt.Point origin = stairwaytoheaven.worldgen.SkyOrigin.compute(seed);
         Map<Integer, Integer> expected = new HashMap<>();
+        Map<Integer, Integer> actualObjects = new HashMap<>();
+        int tileMismatches = 0;
+        int paved = 0;
+        int chequer = 0;
         for (int x = origin.x - r; x <= origin.x + r; x++) {
             for (int y = origin.y - r; y <= origin.y + r; y++) {
-                // Mirror SkyTerrainPainter.paintRegion exactly (hub force
-                // included), so expected counts stay a true oracle.
-                float biomeValue = stairwaytoheaven.worldgen.SkyNoise.fbm(
-                        seed + stairwaytoheaven.worldgen.SkyTerrainPainter.SALT_BIOME, x, y,
-                        stairwaytoheaven.worldgen.SkyTerrainPainter.BIOME_SCALE, 2);
-                float hubDx = x - origin.x;
-                float hubDy = y - origin.y;
-                float hubDist = (float) Math.sqrt(hubDx * hubDx + hubDy * hubDy);
-                if (hubDist < stairwaytoheaven.worldgen.SkyOrigin.HUB_RADIUS) {
-                    float force = 1.0F - hubDist / stairwaytoheaven.worldgen.SkyOrigin.HUB_RADIUS;
-                    biomeValue = biomeValue + (0.5F - biomeValue) * Math.min(1.0F, force * 1.6F);
+                long desc = stairwaytoheaven.worldgen.SkyTerrainPainter.describeTile(seed, x, y, origin.x, origin.y);
+                int wantTile = stairwaytoheaven.worldgen.SkyTerrainPainter.descTile(desc);
+                int wantObject = stairwaytoheaven.worldgen.SkyTerrainPainter.descObject(desc);
+                if (wantObject != 0) {
+                    expected.merge(wantObject, 1, Integer::sum);
                 }
-                boolean isStormveil = biomeValue < stairwaytoheaven.worldgen.SkyTerrainPainter.STORMVEIL_BELOW;
-                boolean isAurora = biomeValue > stairwaytoheaven.worldgen.SkyTerrainPainter.AURORA_ABOVE;
-                float islandValue = stairwaytoheaven.worldgen.SkyNoise.fbm(seed, x, y,
-                        stairwaytoheaven.worldgen.SkyTerrainPainter.ISLAND_SCALE, 3);
-                if (hubDist < stairwaytoheaven.worldgen.SkyOrigin.HUB_RADIUS) {
-                    float force = 1.0F - hubDist / stairwaytoheaven.worldgen.SkyOrigin.HUB_RADIUS;
-                    islandValue = Math.max(islandValue,
-                            stairwaytoheaven.worldgen.SkyTerrainPainter.ISLAND_THRESHOLD + 0.02F + 0.20F * force);
+                if (wantTile == SkyRegistry.skyroadTileID) {
+                    paved++;
+                } else if (wantTile == SkyRegistry.skyplinthTileID) {
+                    chequer++;
                 }
-                if (islandValue <= stairwaytoheaven.worldgen.SkyTerrainPainter.ISLAND_THRESHOLD
-                        + stairwaytoheaven.worldgen.SkyTerrainPainter.ISLAND_RIM) {
+                // The 15x15 spire preset is stamped on top of the painter's
+                // work, so its footprint (plus its approach path and arrival
+                // pad) is expected to differ.
+                if (Math.abs(x - origin.x) <= 8 && Math.abs(y - origin.y) <= 9) {
                     continue;
                 }
-                // Mirror the spire-grounds plaza suppression (see painter)
-                if (hubDist < stairwaytoheaven.worldgen.SkyTerrainPainter.SPIRE_GROUNDS_RADIUS) {
-                    continue;
+                if (level.getTileID(x, y) != wantTile) {
+                    tileMismatches++;
                 }
-                boolean isRockPatch = stairwaytoheaven.worldgen.SkyNoise.fbm(
-                        seed + stairwaytoheaven.worldgen.SkyTerrainPainter.SALT_ROCK_PATCH, x, y,
-                        stairwaytoheaven.worldgen.SkyTerrainPainter.ROCK_PATCH_SCALE, 2)
-                        > stairwaytoheaven.worldgen.SkyTerrainPainter.ROCK_PATCH_THRESHOLD;
-                int band = stairwaytoheaven.worldgen.SkyOrigin.bandFor(hubDist);
-                int objectID = stairwaytoheaven.worldgen.SkyTerrainPainter.rollObject(seed, x, y, isStormveil, isAurora, isRockPatch, band);
+                int objectID = level.getObjectID(x, y);
                 if (objectID != 0) {
-                    expected.merge(objectID, 1, Integer::sum);
+                    actualObjects.merge(objectID, 1, Integer::sum);
                 }
             }
         }
         logs.add("painter expectation (seed=" + seed + " origin=" + origin.x + "," + origin.y + "):");
         expected.forEach((id, n) -> logs.add("  expected " + necesse.engine.registries.ObjectRegistry.getObject(id).getStringID() + " x" + n));
+        logs.add("painter oracle: tileMismatches=" + tileMismatches + " (scan radius " + r + ", spire footprint excluded)");
+
+        // The built landscape, counted in the world rather than predicted:
+        // this is the assertion that roads, lamps and gates really landed.
+        logs.add("skyroads: paved=" + paved + " chequer=" + chequer
+                + " lamps=" + actualObjects.getOrDefault(SkyRegistry.wardenCandelabraID, 0)
+                + " fences=" + actualObjects.getOrDefault(SkyRegistry.skyironFenceID, 0)
+                + " gatewalls=" + (actualObjects.getOrDefault(SkyRegistry.skystoneBrickWallID, 0)
+                        + actualObjects.getOrDefault(SkyRegistry.nightfellWallID, 0))
+                + " roadtile=" + TileRegistry.getTileStringID(SkyRegistry.skyroadTileID));
+
+        int[] place = stairwaytoheaven.worldgen.SkyLandscape.designedPlaceNear(
+                seed, origin.x, origin.y, origin.x, origin.y, 3);
+        if (place == null) {
+            logs.add("designed place: NONE within 3 lattice cells of the hub");
+        } else {
+            logs.add("designed place: kind=" + place[2] + " radius=" + place[3]
+                    + " at " + place[0] + "," + place[1]
+                    + " (" + bearing(origin.x, origin.y, place[0], place[1]) + ")");
+        }
     }
 
     /** Reports why natural objects would be rejected on sky ground, and the registered IDs. */

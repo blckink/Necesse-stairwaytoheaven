@@ -159,6 +159,39 @@ done
 # The snail must implement NetableMob — the marker the vanilla net checks.
 grep -qF "net dewsnail=NETABLE" "$LOG1" || { echo "FAIL: dewsnail is not netable"; STATUS=1; }
 
+echo "--- verifying the built landscape ---"
+# The whole Skyreach comes out of one pure function
+# (SkyTerrainPainter.describeTile), and the offline map renderer that worldgen
+# is calibrated on calls that same function. If the field and the painted world
+# ever disagree, every calibration render becomes fiction — so the oracle must
+# match the real level exactly, outside the spire preset's own footprint.
+grep -qE "painter oracle: tileMismatches=0 " "$LOG1" \
+    || { echo "FAIL: the generated world does not match SkyTerrainPainter.describeTile"; \
+         grep -E "painter oracle:" "$LOG1" | tail -1; STATUS=1; }
+
+# The Skywatch roads, the designed places and the sky gates, counted in the
+# world rather than predicted. The hub is a forced four-road junction with a
+# railed forecourt, a chequered inlay ring and a lamp ring, so within the scan
+# radius all of these are guaranteed to be non-zero for EVERY seed.
+ROADS="$(grep -oE 'skyroads: paved=[0-9]+ chequer=[0-9]+ lamps=[0-9]+ fences=[0-9]+ gatewalls=[0-9]+' "$LOG1" | tail -1)"
+if [ -z "$ROADS" ]; then
+    echo "FAIL: no skyroads report — the built landscape never ran"; STATUS=1
+else
+    for field in paved chequer lamps fences gatewalls; do
+        value="$(echo "$ROADS" | grep -oE "$field=[0-9]+" | cut -d= -f2)"
+        [ "${value:-0}" -gt 0 ] || { echo "FAIL: built landscape has no $field ($ROADS)"; STATUS=1; }
+    done
+    LAMPS="$(echo "$ROADS" | grep -oE 'lamps=[0-9]+' | cut -d= -f2)"
+    # The forecourt ring alone is six candelabra; fewer means the hub
+    # composition did not stamp.
+    [ "$LAMPS" -ge 6 ] || { echo "FAIL: the Warden's Forecourt lamp ring is missing ($ROADS)"; STATUS=1; }
+fi
+# A raw string ID here would mean the road paves itself with nothing.
+grep -qE "roadtile=snowstonepathtile" "$LOG1" \
+    || { echo "FAIL: the road paving material did not resolve"; STATUS=1; }
+grep -qE "designed place: kind=[0-2] radius=[0-9]+" "$LOG1" \
+    || { echo "FAIL: no designed place within three lattice cells of the hub"; STATUS=1; }
+
 echo "--- verifying persistence across restart ---"
 SPIRE1="$(grep -oE 'spire=-?[0-9]+,-?[0-9]+' "$LOG1" | tail -1)"
 SPIRE2="$(grep -oE 'spire=-?[0-9]+,-?[0-9]+' "$LOG2" | tail -1)"
