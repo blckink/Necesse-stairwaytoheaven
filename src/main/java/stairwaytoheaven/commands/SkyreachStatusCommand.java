@@ -214,16 +214,22 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         if (quest.blackHome || quest.tabbyHome) {
             level.regionManager.ensureTileIsLoaded(quest.basketX, quest.basketY);
         }
-        long wardens = 0, cats = 0;
+        long wardens = 0, cats = 0, lambs = 0;
         for (necesse.entity.mobs.Mob mob : level.entityManager.mobs) {
             String id = mob.getStringID();
             if (id.equals("skywarden")) {
                 wardens++;
             } else if (id.startsWith("spirecat")) {
                 cats++;
+            } else if (id.equals("cloudlamb")) {
+                // Placed at region generation, not by a spawn table -- a sheep
+                // can never satisfy Mob.isValidSpawnLocation. A zero here means
+                // the flocks are gone again.
+                lambs++;
             }
         }
-        logs.add("npc check: wardens=" + wardens + " cats=" + cats + " (spire + lair regions forced loaded)");
+        logs.add("npc check: wardens=" + wardens + " cats=" + cats + " cloudlambs=" + lambs
+                + " (spire + lair regions forced loaded)");
 
         // Settler wiring for the recruited Warden. HumanMob.getSettler() resolves
         // settlerStringID through SettlerRegistry, and LevelSettler's constructor
@@ -262,7 +268,83 @@ public class SkyreachStatusCommand extends ModularChatCommand {
             }
             logs.add("recruit check: " + mobID + " settler=" + settlerName + " price=" + recruitPrice);
         }
-        logs.add("name check: skywarden=" + necesse.engine.localization.Localization.translate("mob", "skywardenname", "name", "Test")
+        // ---- why nothing spawns -----------------------------------------
+        // MobChance.spawnMob calls mob.isValidSpawnLocation and drops the mob
+        // when it answers false, and Mob's own implementation is `return
+        // false`. So a spawn table entry whose class never overrides it is
+        // dead weight: it is drawn, it is rejected, nothing appears. The
+        // player report was "kein einziger Gegner ... nur Critter" and "Schafe
+        // noch nirgends gesehen", which are two different versions of that.
+        // Ask the live objects rather than reading class hierarchies.
+        // Sample WELL AWAY from the spire. The first version of this probe swept
+        // radius 6..30, which the v0.7 landscape pass filled with a lamp-lit
+        // forecourt -- so it was measuring "standing next to a candelabra",
+        // where nothing is supposed to spawn, and reported a working fix as
+        // broken. Static light is printed per tile below so that mistake cannot
+        // be made silently again.
+        java.util.List<java.awt.Point> probeTiles = new java.util.ArrayList<>();
+        for (int r = 60; r <= 160 && probeTiles.size() < 6; r += 20) {
+            for (int a = 0; a < 8 && probeTiles.size() < 6; a++) {
+                int px = quest.spireX + (int) Math.round(Math.cos(a * Math.PI / 4) * r);
+                int py = quest.spireY + (int) Math.round(Math.sin(a * Math.PI / 4) * r);
+                level.regionManager.ensureTileIsLoaded(px, py);
+                if (!level.isSolidTile(px, py) && !level.getTile(px, py).isLiquid) {
+                    probeTiles.add(new java.awt.Point(px, py));
+                }
+            }
+        }
+        // Report the world clock alongside the light. Without it the probe
+        // cannot tell "this level never darkens" apart from "the time command
+        // did not take effect", and those need opposite fixes.
+        necesse.engine.world.WorldEntity we = level.getWorldEntity();
+        // Recompute before measuring. Ambient light is refreshed once per
+        // Level.serverTick, so a probe run in the same tick as a /time change
+        // would report the previous value and look like "this level never
+        // darkens". This is the same call the tick makes.
+        level.lightManager.updateAmbientLight();
+        logs.add(String.format(java.util.Locale.ROOT,
+                "spawn check: dayTime=%.3f worldAmbient=%.1f levelAmbient=%.1f isCave=%s",
+                we.getDayTime(), we.getAmbientLight(),
+                level.lightManager.getAmbientLight(), level.isCave));
+        StringBuilder lightLine = new StringBuilder("spawn check: ambient+static / static-only at ")
+                .append(probeTiles.size()).append(" land tiles =");
+        for (java.awt.Point t : probeTiles) {
+            lightLine.append(' ').append(String.format(java.util.Locale.ROOT, "%.0f/%.0f",
+                    level.lightManager.getAmbientAndStaticLightLevelFloat(t.x, t.y),
+                    level.lightManager.getStaticLight(t.x, t.y).getLevel()));
+        }
+        logs.add(lightLine.toString());
+
+        String[] probeMobs = {"zephyrray", "skystonegolem", "stormwisp", "galehound",
+                "dawnpiercer", "gloomshade", "cloudlamb", "glowmoth", "sparkbeetle",
+                "zephyrfinch", "dewsnail"};
+        // Measure each mob twice: at the level's real light, and again with the
+        // ambient forced to darkness. Two numbers separate the two causes that
+        // both look like "nothing spawns" -- a mob rejected only by the light
+        // threshold accepts in the dark column, and a mob that inherits Mob's
+        // `return false` is 0 in BOTH. Guessing between those from the class
+        // hierarchy alone is what this probe exists to stop.
+        necesse.level.maps.light.GameLight savedOverride = level.lightManager.ambientLightOverride;
+        for (String mobID : probeMobs) {
+            necesse.entity.mobs.Mob probe = necesse.engine.registries.MobRegistry.getMob(mobID, level);
+            if (probe == null) {
+                logs.add("spawn check: " + mobID + " NOT REGISTERED");
+                continue;
+            }
+            boolean overrides = overridesSpawnValidation(probe.getClass());
+            int lit = countAcceptedSpawns(level, mobID, probeTiles);
+            level.lightManager.ambientLightOverride = level.lightManager.newLight(0.0F);
+            level.lightManager.updateAmbientLight();
+            int dark = countAcceptedSpawns(level, mobID, probeTiles);
+            level.lightManager.ambientLightOverride = savedOverride;
+            level.lightManager.updateAmbientLight();
+            logs.add("spawn check: " + mobID + " threshold=" + probe.spawnLightThreshold.value
+                    + " validSpawnLocation=" + (overrides ? "implemented" : "INHERITS Mob's false")
+                    + " accepted lit=" + lit + "/" + probeTiles.size()
+                    + " dark=" + dark + "/" + probeTiles.size());
+        }
+
+                logs.add("name check: skywarden=" + necesse.engine.localization.Localization.translate("mob", "skywardenname", "name", "Test")
                 + " | wardensettler=" + necesse.engine.localization.Localization.translate("mob", "wardensettlername", "name", "Test"));
     }
 
@@ -279,6 +361,44 @@ public class SkyreachStatusCommand extends ModularChatCommand {
      * after generation — everywhere outside the spire preset's own footprint,
      * which legitimately overwrites what the painter wrote.
      */
+    /** How many of the probe tiles this mob would accept as a spawn location. */
+    private static int countAcceptedSpawns(SkyLevel level, String mobID, java.util.List<java.awt.Point> tiles) {
+        int accepted = 0;
+        for (java.awt.Point t : tiles) {
+            necesse.entity.mobs.Mob m = necesse.engine.registries.MobRegistry.getMob(mobID, level);
+            if (m == null) {
+                return 0;
+            }
+            java.awt.Point off = m.getPathMoveOffset();
+            if (m.isValidSpawnLocation(level.getServer(), null, t.x * 32 + off.x, t.y * 32 + off.y)) {
+                accepted++;
+            }
+        }
+        return accepted;
+    }
+
+    /**
+     * Walks up from a mob class to find whoever implements
+     * {@code isValidSpawnLocation}. Mob's own version returns false, so a class
+     * whose chain stops there can never be placed by a spawn table.
+     */
+    private static boolean overridesSpawnValidation(Class<?> type) {
+        for (Class<?> c = type; c != null; c = c.getSuperclass()) {
+            if (c == necesse.entity.mobs.Mob.class) {
+                return false;
+            }
+            try {
+                c.getDeclaredMethod("isValidSpawnLocation",
+                        necesse.engine.network.server.Server.class,
+                        necesse.engine.network.server.ServerClient.class, int.class, int.class);
+                return true;
+            } catch (NoSuchMethodException ignored) {
+                // keep walking
+            }
+        }
+        return false;
+    }
+
     private void diagnoseGeneration(SkyLevel level, CommandLog logs) {
         int seed = level.getWorldGenSeed();
         int r = SCAN_RADIUS_TILES;

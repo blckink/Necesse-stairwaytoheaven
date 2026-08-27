@@ -124,6 +124,15 @@ echo "Restarting server on the same world (persistence pass)..."
 start_server "$WORK_DIR/server2.log"
 echo "skyreachstatus" >&3
 wait_for "SKYREACH_STATUS_DONE" 180
+# Night pass. Hostiles carry spawnLightThreshold 0 and the Skyreach is a
+# NON-cave level, so its ambient light follows world time -- which means the
+# whole hostile roster is unreachable in daylight and the sky reads as empty.
+# Measuring the same probe at midnight is the only way to tell "the mobs are
+# broken" apart from "the player was up there in the afternoon".
+echo "Setting midnight and re-probing spawns..."
+echo "time midnight" >&3
+echo "skyreachstatus" >&3
+wait_for "SKYREACH_STATUS_DONE" 180
 stop_server
 LOG2="$WORK_DIR/server2.log"
 
@@ -221,6 +230,8 @@ if [ "$STATUS" -eq 0 ]; then
     sed -n '/Skyreach OK/,/SKYREACH_STATUS_DONE/p' "$LOG1"
     echo "--- after restart ---"
     grep -E "quest: stage=|npc check:|settler check:|recruit check:|name check:" "$LOG2"
+    echo "--- spawn probe, midnight pass ---"
+    awk '/Setting midnight|time midnight/{n=1} n && /spawn check:/' "$LOG2" | tail -13
     # Only after the logs have been read, and only on success: a failed run's
     # world and logs are the evidence for diagnosing it.
     rm -rf "$WORK_DIR"

@@ -3,6 +3,8 @@ package stairwaytoheaven.level;
 import java.awt.Point;
 
 import necesse.engine.registries.MobRegistry;
+import necesse.engine.util.GameRandom;
+import necesse.entity.mobs.Mob;
 import necesse.engine.util.LevelIdentifier;
 import necesse.engine.world.WorldEntity;
 import necesse.level.maps.BiomeGeneratorStackLevel;
@@ -62,7 +64,68 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
     public void onRegionGenerated(Region region, boolean skipGenerateForced) {
         super.onRegionGenerated(region, skipGenerateForced);
         region.checkGenerationValid();
+        placeCloudLambFlock(region);
     }
+
+    /**
+     * Cloud Lambs are placed HERE, at generation, and not by a spawn table.
+     *
+     * WHY: {@code MobChance.spawnMob} calls {@code mob.isValidSpawnLocation},
+     * and {@code Mob}'s own implementation is {@code return false}. Nothing in
+     * SheepMob -> HusbandryMob -> FriendlyRopableMob -> AttackAnimMob overrides
+     * it, so a sheep can never be placed by a spawn table at all. Our
+     * DriftlandsBiome critter table asked for `cloudlamb` for three releases
+     * and the entry did nothing, which is why the player never saw one.
+     * Measured: {@code /skyreachstatus} reports cloudlamb at
+     * `validSpawnLocation=INHERITS Mob's false accepted lit=0/6 dark=0/6`.
+     *
+     * Vanilla has the same constraint and solves it the same way: sheep, rams,
+     * cows and bulls are placed by the island generator
+     * ({@code ig.spawnMobHerds} in PlainsSurfaceLevel and friends), never by a
+     * spawn table. Livestock is terrain, not weather.
+     *
+     * Deterministic from the level seed and the region coordinates, so the same
+     * world always grows the same flocks, and persistent (canDespawn false) so
+     * a flock the player walked past is still there when they come back.
+     */
+    private void placeCloudLambFlock(Region region) {
+        if (this.isClient()) {
+            return;
+        }
+        // Seed mixes the world seed with the region coordinates, so a flock
+        // belongs to a place rather than to the order regions happen to load.
+        long flockSeed = (this.getWorldGenSeed() * 0x9E3779B97F4A7C15L)
+                ^ ((long) region.regionX * 0x85EBCA77L)
+                ^ ((long) region.regionY * 0xC2B2AE3DL);
+        GameRandom random = new GameRandom(flockSeed);
+        if (!random.getChance(FLOCK_REGION_CHANCE)) {
+            return;
+        }
+        int originX = region.tileXOffset + random.getIntBetween(4, region.tileWidth - 5);
+        int originY = region.tileYOffset + random.getIntBetween(4, region.tileHeight - 5);
+        int wanted = random.getIntBetween(2, 5);
+        int placed = 0;
+        for (int attempt = 0; attempt < 24 && placed < wanted; attempt++) {
+            int tileX = originX + random.getIntBetween(-4, 4);
+            int tileY = originY + random.getIntBetween(-4, 4);
+            if (!this.isTileWithinBounds(tileX, tileY) || this.isSolidTile(tileX, tileY)) {
+                continue;
+            }
+            if (this.getTileID(tileX, tileY) != SkyRegistry.cloudturfID || this.getObjectID(tileX, tileY) != 0) {
+                continue;
+            }
+            Mob lamb = MobRegistry.getMob("cloudlamb", this);
+            if (lamb == null) {
+                return;
+            }
+            lamb.canDespawn = false;
+            this.entityManager.addMob(lamb, tileX * 32 + 16, tileY * 32 + 16);
+            placed++;
+        }
+    }
+
+    /** Roughly one flock every four regions -- meadow livestock, not a herd biome. */
+    private static final float FLOCK_REGION_CHANCE = 0.25F;
 
     @Override
     public boolean canRain() {

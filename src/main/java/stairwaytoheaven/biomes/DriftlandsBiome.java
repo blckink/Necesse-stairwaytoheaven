@@ -19,8 +19,14 @@ public class DriftlandsBiome extends SkyBiome {
             // The cloud sea between the islands is not empty travelling ground
             .add(28, stairwaytoheaven.mobs.MistserpentHead.IN_MISTSEA, "mistserpent");
 
+    // NOTE: no "cloudlamb" here, deliberately. A sheep cannot be placed by a
+    // spawn table at all -- MobChance.spawnMob calls isValidSpawnLocation and
+    // nothing in SheepMob -> HusbandryMob -> FriendlyRopableMob -> AttackAnimMob
+    // overrides Mob's `return false`. This table asked for one for three
+    // releases and silently got nothing. Vanilla has the same constraint and
+    // places its sheep, rams, cows and bulls from the island generator instead;
+    // ours are placed in SkyLevel.placeCloudLambFlock at region generation.
     public static final MobSpawnTable critters = new MobSpawnTable()
-            .addLimited(80, "cloudlamb", 4, 60)
             .addLimited(70, "zephyrfinch", 4, 60);
 
     @Override

@@ -129,4 +129,15 @@ public class StormWispMob extends FlyingHostileMob {
             glow.draw();
         });
     }
+
+    /**
+     * Spawns by day as well as by night; placed light still keeps it away.
+     * See {@link SkySpawnRules} for the measurement behind this.
+     */
+    @Override
+    public boolean isValidSpawnLocation(necesse.engine.network.server.Server server,
+                                        necesse.engine.network.server.ServerClient client,
+                                        int targetX, int targetY) {
+        return SkySpawnRules.daylightSpawn(this, server, client, targetX, targetY);
+    }
 }
