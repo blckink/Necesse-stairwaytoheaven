@@ -217,6 +217,9 @@ wardentalk6=I have watched a great many things fall. Very few of them came back 
 wardenmovedin=<settlement> has a new resident - the Warden is waiting there. Give him a bed and he will stay.
 wardencatsdone=Both of them. Under one roof. That is the tower closed properly - take the basket, they know it.
 wardenanchordone=Metal and stone, and the old island stops wandering. It will be where you left it. That matters, later.
+catmarkerblack=Siggi's lair
+catmarkertabby=Peanut's lair
+catmarkersadded=Two more markers on your world map (M): the Warden knows where his cats sleep.
 
 [quests]
 swhfindspiretitle=The Warden's Call

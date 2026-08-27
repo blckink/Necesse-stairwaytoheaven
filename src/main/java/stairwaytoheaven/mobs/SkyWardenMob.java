@@ -197,6 +197,24 @@ public class SkyWardenMob extends HumanShop {
      */
     private void handleTurnIns(ServerClient client) {
         Server server = client.getServer();
+        // Catch up worlds that were recruited by an older build. Recruitment is
+        // where the cats chapter is handed out, and a world that paid its
+        // 100,000 before that existed would never see the quest or the lair
+        // markers at all -- the cats would just be two animals somewhere in an
+        // endless dimension. Costs nothing in a fresh world: giveOnce is a
+        // no-op once the quest is held, and the markers remember who has had
+        // them.
+        Level sky = server.world.levelManager.isLoaded(SkyRegistry.SKYREACH_IDENTIFIER)
+                ? server.world.getLevel(SkyRegistry.SKYREACH_IDENTIFIER)
+                : null;
+        if (sky != null) {
+            SkywatchQuestData quest = SkywatchQuestData.get(sky);
+            if (quest.recruited && !(quest.blackHome && quest.tabbyHome)) {
+                stairwaytoheaven.quest.SkyQuests.giveOnce(server, client,
+                        new stairwaytoheaven.quest.SpireCatsQuest());
+                stairwaytoheaven.quest.SkyMapMarkers.sendCatLairs(client, quest);
+            }
+        }
         stairwaytoheaven.quest.SpireCatsQuest cats = stairwaytoheaven.quest.SkyQuests
                 .findHeld(client, stairwaytoheaven.quest.SpireCatsQuest.class);
         if (cats != null && cats.blackHome && cats.tabbyHome) {
@@ -219,9 +237,6 @@ public class SkyWardenMob extends HumanShop {
             give(client, "skywatchbanner", 1);
             give(client, "aurorapetal", 5);
             say(client, "wardenanchordone");
-            Level sky = server.world.levelManager.isLoaded(SkyRegistry.SKYREACH_IDENTIFIER)
-                    ? server.world.getLevel(SkyRegistry.SKYREACH_IDENTIFIER)
-                    : null;
             if (sky != null) {
                 SkywatchQuestData.get(sky).anchorDone = true;
             }
@@ -260,6 +275,11 @@ public class SkyWardenMob extends HumanShop {
         // to anyone, so no player could see it. This is the hand-out.
         stairwaytoheaven.quest.SkyQuests.giveOnce(server, client,
                 new stairwaytoheaven.quest.SpireCatsQuest());
+        if (sky != null) {
+            // ...with the lairs on the map. The quest is otherwise "find two
+            // cats" in an endless dimension.
+            stairwaytoheaven.quest.SkyMapMarkers.sendCatLairs(client, SkywatchQuestData.get(sky));
+        }
 
         // The keeper's Silver Bell changes hands here. It is the key the Seance
         // Circle checks for, and since the old cat quest that used to award it

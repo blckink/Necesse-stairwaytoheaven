@@ -644,3 +644,60 @@ for one consumer of a shared sheet, it does not cover the others, and the
 remaining ones are exactly where the next report will come from. Enumerate the
 readers first — the wall body, the window and the doors all read
 `objects/<wall>.png`, at three different cell sizes.
+
+## A spawn table entry is a request, not a guarantee
+
+**[jar]** `MobChance.spawnMob` calls `mob.isValidSpawnLocation(...)` and drops
+the mob when it answers false — and `Mob`'s own implementation is
+`return false`. Every spawn therefore depends on some class in the chain
+overriding it. `HostileMob` and `CritterMob` do; **`SheepMob` does not**, nor
+does anything between it and `Mob`. A sheep can never be placed by a spawn
+table at all, and vanilla knows: it places sheep, rams, cows and bulls from the
+island generator (`ig.spawnMobHerds`), never from a table. Livestock is terrain,
+not weather.
+
+**[run]** Our Driftlands critter table asked for `cloudlamb` for three releases
+and silently got nothing. A table entry that does nothing looks identical to a
+table entry that is merely unlucky, which is why this survived so long.
+
+**[jar]** `HostileMob.isValidSpawnLocation` calls `checkLightThreshold`, which
+compares **ambient + static** light against `spawnLightThreshold` (0 by
+default). On a non-cave level the ambient is
+`worldEntity.getAmbientLightFloat() * 150` — 150 in daylight — so `150 <= 0`
+fails and no hostile can be placed anywhere while the sun is up. Right for a
+vanilla island; wrong for a layer that is only ever surface and that the player
+travels TO.
+
+**[jar]** Vanilla's fix for a mob that belongs to a place rather than to the
+night is `spawnLightThreshold = new ModifierValue<>(..., 0).min(150, MAX)`
+(PhantomMob, AshGolemMob, PirateMob, CryptBatMob, the slimes). It passes for
+ANY light, so it also switches off torch protection. `checkStaticLightThreshold`
+is the same check against `getStaticLight` alone — placed lamps, no daylight —
+which keeps both properties at once.
+
+**[run]** `/skyreachstatus` now measures every mob twice, at the level's real
+light and with the ambient forced dark:
+
+    zephyrray   validSpawnLocation=implemented         accepted lit=4/6 dark=4/6
+    galehound   validSpawnLocation=implemented         accepted lit=0/6 dark=4/6
+    cloudlamb   validSpawnLocation=INHERITS Mob's false accepted lit=0/6 dark=0/6
+    zephyrfinch validSpawnLocation=implemented         accepted lit=6/6 dark=6/6
+
+A mob blocked only by light accepts in the dark column; a mob that inherits
+`Mob`'s false is zero in both. Two numbers, two different bugs, no inference.
+
+**[run]** Two corrections to the probe are worth as much as the probe. It first
+sampled radius 6..30 around the spire — which the landscape pass had filled
+with a lamp-lit forecourt — so it measured "standing next to a candelabra" and
+reported a working fix as broken. And it now prints the world clock and the
+per-tile static light: a probe that cannot show whether its own precondition
+held is worse than no probe, because it is believed.
+
+## Catching a critter pays exactly what its loot table says
+
+**[jar]** `NetToolItem.hitMob` ends with `target.remove(0, 0, attacker, true)`.
+That is the whole catch: the mob is removed and its loot table drops. So a
+chance-based table means the animal frequently vanishes for nothing, which is
+what a net feels like when it is wrong. Vanilla's netted critters drop
+themselves unconditionally — `FireflyMob.getLootTable()` is one bare
+`LootItem`.

@@ -217,6 +217,9 @@ wardentalk6=Ich habe vieles fallen sehen. Nur wenig davon kam wieder herauf.
 wardenmovedin=<settlement> hat einen neuen Bewohner - der Warden wartet dort. Gib ihm ein Bett, dann bleibt er.
 wardencatsdone=Beide. Unter einem Dach. Damit ist der Turm ordentlich geschlossen - nimm den Korb, sie kennen ihn.
 wardenanchordone=Metall und Stein, und die alte Insel hört auf zu wandern. Sie wird da sein, wo du sie verlassen hast. Das zählt, später.
+catmarkerblack=Siggis Lager
+catmarkertabby=Peanuts Lager
+catmarkersadded=Zwei weitere Marker auf deiner Weltkarte (M): Der Warden weiß, wo seine Katzen schlafen.
 
 [quests]
 swhfindspiretitle=Der Ruf des Wardens

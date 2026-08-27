@@ -94,6 +94,15 @@ public class SkywatchQuestData extends LevelData {
      */
     public final java.util.HashSet<Long> spireMarkerAuths = new java.util.HashSet<>();
     public final java.util.HashSet<Long> stairsMarkerAuths = new java.util.HashSet<>();
+    /**
+     * Who has already been shown the two cat lairs. Siggi and Peanut spawn at
+     * fixed lairs a long way from the spire, and until the recruitment handed
+     * out SpireCatsQuest there was nothing in game that pointed at them at all:
+     * "Siggi und Peanut auch noch nirgends gefunden leider". A quest that says
+     * "find two cats" in a world this size needs coordinates, not just a
+     * sentence.
+     */
+    public final java.util.HashSet<Long> catMarkerAuths = new java.util.HashSet<>();
 
     @Override
     public void addSaveData(SaveData save) {
@@ -123,6 +132,7 @@ public class SkywatchQuestData extends LevelData {
         save.addBoolean("finaleShown", this.finaleShown);
         save.addLongArray("spireMarkerAuths", toLongArray(this.spireMarkerAuths));
         save.addLongArray("stairsMarkerAuths", toLongArray(this.stairsMarkerAuths));
+        save.addLongArray("catMarkerAuths", toLongArray(this.catMarkerAuths));
         // v0.5 return-stairway bindings: auths, Xs and Ys as parallel arrays
         long[] auths = new long[this.returnStairs.size()];
         long[] xs = new long[this.returnStairs.size()];
@@ -185,6 +195,7 @@ public class SkywatchQuestData extends LevelData {
         this.finaleShown = save.getBoolean("finaleShown", false, false);
         loadLongSet(save, "spireMarkerAuths", this.spireMarkerAuths);
         loadLongSet(save, "stairsMarkerAuths", this.stairsMarkerAuths);
+        loadLongSet(save, "catMarkerAuths", this.catMarkerAuths);
         // v0.5 return-stairway bindings
         this.returnStairs.clear();
         if (save.hasLoadDataByName("returnAuths")) {
@@ -237,6 +248,7 @@ public class SkywatchQuestData extends LevelData {
         this.finaleShown = false;
         this.spireMarkerAuths.clear();
         this.stairsMarkerAuths.clear();
+        this.catMarkerAuths.clear();
         this.returnStairs.clear();
     }
 

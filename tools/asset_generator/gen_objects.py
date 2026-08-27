@@ -682,6 +682,36 @@ def gen_mapicons(dir_path):
     c.outline(palette.OUTLINE)
     c.save(f"{dir_path}/skystairs.png")
 
+    # Spire cat lair: a cat's head silhouette, read from directly above the
+    # ears down. The two lairs sit a long way from the spire and the quest
+    # names them without saying where -- "Siggi und Peanut auch noch nirgends
+    # gefunden leider" -- so both get a marker, and a marker needs an icon that
+    # is unmistakable at map zoom. Head, ears, eyes, nothing else.
+    c = Canvas(32, 32)
+    fur = (66, 62, 78)
+    fur_hi = (96, 92, 110)
+    inner = (176, 130, 150)
+    c.ellipse(16, 18, 9.5, 8.0, fur)             # head
+    c.ellipse(13, 15, 5.0, 4.5, fur_hi)          # lit cheek
+    for ex in (8, 24):                           # ears
+        for i in range(6):
+            half = 4 - i * 2 // 3
+            for x in range(ex - half, ex + half + 1):
+                c.put(x, 10 - i + 6, fur)
+    for ex in (8, 24):
+        for i in range(3):
+            c.put(ex, 13 - i, inner)
+    for ey in (17, 18):                          # eyes
+        for ex in (12, 13, 19, 20):
+            c.put(ex, ey, palette.AURORA["teal"])
+    c.put(12, 17, palette.AURORA["hi"])
+    c.put(19, 17, palette.AURORA["hi"])
+    for x in range(15, 18):                      # muzzle
+        c.put(x, 22, fur_hi)
+    c.put(16, 21, inner)
+    c.outline(palette.OUTLINE)
+    c.save(f"{dir_path}/skycat.png")
+
 
 # --- v0.4 "The Living Sky" flora ---------------------------------------------
 # GrassObject strips (N * 32 wide, 32 tall, ground-anchored). Flowers and

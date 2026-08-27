@@ -76,6 +76,8 @@ public class StairwayToHeavenMod {
                 new necesse.level.maps.mapData.TextureGameMapIcon("ui/mapicons/skyspire"));
         necesse.engine.registries.MapIconRegistry.registerIcon("skystairs",
                 new necesse.level.maps.mapData.TextureGameMapIcon("ui/mapicons/skystairs"));
+        necesse.engine.registries.MapIconRegistry.registerIcon("skycat",
+                new necesse.level.maps.mapData.TextureGameMapIcon("ui/mapicons/skycat"));
     }
 
     private void registerDimension() {

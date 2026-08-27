@@ -124,3 +124,14 @@ The follow-up to "White floor places huge" above: not one floor, all of them.
 | Area | Observation | Status |
 |---|---|---|
 | Wall windows | "Fenster in unserer dunklen Wand sehen eigentlich cool aus aber sind halt doppelt so hoch wie die Wände die sonst in Game sind... Gleiches Problem hatten wir ja bei der Tür auch." | **FIXED — NOT YET PLAYER CONFIRMED**. The player's diagnosis was exactly right, including that it was the same bug: same sheet, one strip left of the doors. `WallWindowObject`'s edge-on variant draws rows 2..7 at `drawY-64 … +16`; vanilla leaves rows 2-4 empty so the window is 48px, the height of its wall. Ours filled all six rows: 96px against 48px, precisely double. `sheet_format_audit` covers the window strip now, not just the doors — the door fix left that half unguarded, which is why this shipped. |
+
+---
+
+## 2026-08-27 (4) — v0.5.1 · nothing is out there
+
+| Area | Observation | Status |
+|---|---|---|
+| No enemies at all | "kein einziger Gegner irgendwie.. weder Rochen noch Golem.. nur Critter." | **FIXED — NOT YET PLAYER CONFIRMED**. `HostileMob` checks AMBIENT + static light against a threshold of 0, and a non-cave level is at 150 in daylight, so every hostile was rejected everywhere while the sun was up. Five sky hostiles now check placed light only, so the sky is dangerous at noon and a lit base is still safe. The Galehound keeps its dark-only rule, so there is still a night shift. Measured: `accepted lit=4/6 dark=4/6`, with the two refusals being the tiles under candelabra. |
+| Never seen a sheep | "Schafe auch noch nirgends gesehen." | **FIXED — NOT YET PLAYER CONFIRMED**. Not a light problem: nothing in `SheepMob -> HusbandryMob -> FriendlyRopableMob -> AttackAnimMob` overrides `isValidSpawnLocation`, so `Mob`'s `return false` stands and no sheep can ever be table-spawned. Vanilla places its livestock from the island generator for the same reason. Flocks are now placed at region generation, deterministic and persistent: `npc check: ... cloudlambs=9`, unchanged after a restart. |
+| Snails vanish when netted | "Schnecken verschwinden einfach wenn man sie mit Kescher fängt." | **FIXED — NOT YET PLAYER CONFIRMED**. A net catch drops the mob's loot table and nothing else, and the snail's was a 35% chance of a shard. It now drops a Dew Snail item with certainty, the way vanilla's netted critters drop themselves. |
+| Siggi and Peanut unfindable | "Siggi und peanut auch noch nirgends gefunden leider." | **FIXED — NOT YET PLAYER CONFIRMED**. The lairs are fixed at world generation and nothing in game ever pointed at them. Both now get a permanent world-map marker when the cats become an objective, with a new cat map icon. Worlds already recruited by an older build get the quest and the markers the next time they talk to the Warden, since recruitment is where they would otherwise have been handed out. |

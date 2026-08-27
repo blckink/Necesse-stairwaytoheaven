@@ -43,6 +43,25 @@ public final class SkyMapMarkers {
         }
     }
 
+    /**
+     * The two cat lairs, delivered when the cats become an objective. Without
+     * these the quest names two cats and gives the player a whole dimension to
+     * search; the lairs are fixed at world generation, so pointing at them
+     * costs nothing and turns the quest into a journey rather than a sweep.
+     */
+    public static void sendCatLairs(ServerClient client, SkywatchQuestData quest) {
+        if (client == null || !quest.catsSpawned || !quest.catMarkerAuths.add(client.authentication)) {
+            return;
+        }
+        client.sendPacket(new PacketAddMapMarker(MapIconRegistry.getIcon("skycat"),
+                new LocalMessage("misc", "catmarkerblack"),
+                SkyRegistry.SKYREACH_IDENTIFIER, quest.blackLairX, quest.blackLairY));
+        client.sendPacket(new PacketAddMapMarker(MapIconRegistry.getIcon("skycat"),
+                new LocalMessage("misc", "catmarkertabby"),
+                SkyRegistry.SKYREACH_IDENTIFIER, quest.tabbyLairX, quest.tabbyLairY));
+        client.sendChatMessage(new LocalMessage("misc", "catmarkersadded"));
+    }
+
     private static boolean sendSpire(ServerClient client, SkywatchQuestData quest) {
         if (client == null || !quest.spirePlaced || !quest.spireMarkerAuths.add(client.authentication)) {
             return false;
