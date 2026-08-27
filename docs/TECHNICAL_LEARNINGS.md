@@ -701,3 +701,33 @@ chance-based table means the animal frequently vanishes for nothing, which is
 what a net feels like when it is wrong. Vanilla's netted critters drop
 themselves unconditionally — `FireflyMob.getLootTable()` is one bare
 `LootItem`.
+
+## Which way is the wall facing? The engine already decided
+
+**[jar]** `WallWindowObject.getWindowDir(up, right, bot, left)` returns **1**
+when the wall runs north-south (connected walls above and below, none either
+side) and **0** when it runs east-west. Those two draw completely different
+pictures out of the same 32px strip:
+
+| dir | wall runs | cells | drawn at | what you are looking at |
+|---|---|---|---|---|
+| 1 | north-south | rows 0-1 | drawY-16, drawY | the wall's **roof**, from directly above — vanilla is 512/512 opaque, the window is drawn ONTO the cap |
+| 0 | east-west | rows 2..7 | drawY-64 … drawY+16 | the wall's **front face** — vanilla empties the middle of rows 5-6 so the ground shows THROUGH |
+
+**[game]** We shipped one front-facing glazed pane for both, so a window in a
+north-south wall faced the camera instead of lying flat in the roof, and the
+east-west one sat as a pane inside the wall's dark cap band instead of being a
+hole in its face. The player diagnosed it exactly: "das Fenster links am Block
+zeigt weiterhin nach unten".
+
+The rule to carry forward: **in a top-down game a hole is only a hole from the
+side you can see through it.** From overhead a window shows roof. Glass seen
+from above is looking at the sky and reads DARKER than the same glass edge-on —
+at full strength it looks like a sticker on the roof.
+
+**[run]** This is the third bug of the shape "one sheet, several readers, the
+fix covered one of them". The door cells, then the window's height, then the
+window's orientation — each fix left the next reader unguarded, and each time
+the next player report came from exactly there. When a gate is written for one
+consumer of a shared sheet, enumerate the others in the same sitting; the audit
+now asserts both window views and all eight door cells.

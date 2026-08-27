@@ -135,3 +135,20 @@ The follow-up to "White floor places huge" above: not one floor, all of them.
 | Never seen a sheep | "Schafe auch noch nirgends gesehen." | **FIXED — NOT YET PLAYER CONFIRMED**. Not a light problem: nothing in `SheepMob -> HusbandryMob -> FriendlyRopableMob -> AttackAnimMob` overrides `isValidSpawnLocation`, so `Mob`'s `return false` stands and no sheep can ever be table-spawned. Vanilla places its livestock from the island generator for the same reason. Flocks are now placed at region generation, deterministic and persistent: `npc check: ... cloudlambs=9`, unchanged after a restart. |
 | Snails vanish when netted | "Schnecken verschwinden einfach wenn man sie mit Kescher fängt." | **FIXED — NOT YET PLAYER CONFIRMED**. A net catch drops the mob's loot table and nothing else, and the snail's was a 35% chance of a shard. It now drops a Dew Snail item with certainty, the way vanilla's netted critters drop themselves. |
 | Siggi and Peanut unfindable | "Siggi und peanut auch noch nirgends gefunden leider." | **FIXED — NOT YET PLAYER CONFIRMED**. The lairs are fixed at world generation and nothing in game ever pointed at them. Both now get a permanent world-map marker when the cats become an objective, with a new cat map icon. Worlds already recruited by an older build get the quest and the markers the next time they talk to the Warden, since recruitment is where they would otherwise have been handed out. |
+
+---
+
+## 2026-08-27 (5) — v0.5.1 · perspective, and what a place should look like
+
+| Area | Observation | Status |
+|---|---|---|
+| Window perspective | "Ihr habt die Perspektive immer noch nicht verstanden bei assets! ... das Fenster links am Block zeigt weiterhin nach unten. die Fenster an den Seiten nach oben und unten sitzen sozusagen in der dunklen abgeschnittenen Decke der Wand!" | **FIXED — NOT YET PLAYER CONFIRMED**. The two views of the window strip were swapped. `getWindowDir` returns 1 for a north-south wall, which draws the wall's ROOF (opaque, window drawn onto the cap), and 0 for east-west, which draws its FRONT with a see-through opening. We drew one front-facing pane for both. Yesterday's fix corrected only the height of the east-west variant. Both are now built on vanilla's construction and both rules are asserted by the sheet audit. |
+| Roads | "strassen sind gut im skyreach" | KEEP |
+| Red region | "rote skyreach Region ist auch cool" | KEEP |
+| Grey-floor region empty | "die Welt mit grauen Böden viel leerer und hat eigentlich nur paar einzelne Steinblöcke und sonst keine Inhalte im Vergleich zum Rest" | OPEN |
+| Fences | "Zäune sind leider perspektivisch noch schrecklich und z.t. nicht sinnvoll aufgebaut in Levels" | OPEN |
+| Missing icons | "düsterpilz immer noch ERR Thumbnail, flüsterried auch .. das sind echt basics" | OPEN |
+| Cat vanished after coming home | "hab Siggi jetzt gefunden und Snack gegeben aber danach nie wieder gesehen" | OPEN |
+| Warden quests still invisible | "warden gibt weiterhin keine quests die ich finden kann" | OPEN — a fix landed the same day; the player may not have that build. Needs confirming before anything else is changed. |
+| Cloud Lambs have no purpose | "Wolkenschafe konnte ich fangen aber was bringen sie jetzt? und es gibt halt schon normale schafe. was muss in Trog bei wolkenschafen?" | OPEN |
+| **POIs** | Three reference screenshots of vanilla structures: a walled garden courtyard around a fountain, a dark shrine with statues on pedestals around a glowing centrepiece, and a large multi-room crystal complex with storage and machinery. "solche Orte und Häuser mit NPCs, unique Objekten usw" | OPEN — the roads and gardens landed, but the Skyreach still has exactly one building. This is the next large piece: real presets with interiors, unique objects and inhabitants. |
