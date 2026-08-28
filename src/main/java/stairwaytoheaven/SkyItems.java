@@ -13,7 +13,26 @@ import stairwaytoheaven.items.TempestEdgeSwordToolItem;
  * Items and recipes of the Skyreach. Tuning reference: vanilla Tungsten tier
  * (see docs/DESIGN.md §5-§7 and docs/research/game-progression-reference.md).
  */
-final class SkyItems {
+public final class SkyItems {
+    /**
+     * Every item this mod registers, for the live category probe in
+     * {@code SkyreachStatusCommand}. A plain list because the registry
+     * has no "items from this mod" query, and a probe that silently
+     * skips an item is worse than no probe. Kept honest by
+     * {@code tools/item_category_audit.py}, which fails if this list and
+     * the registerItem calls in the source drift apart.
+     */
+    public static final String[] ALL_ITEM_IDS = {
+            "aetheriumbar", "aetheriumore", "aurorafleece", "aurorapetal", "charwood",
+            "cinderpearl", "cloudberry", "cloudcustard", "cloudpufftreat", "cloudwood",
+            "dewsnail", "fulgurite", "galehowl", "glimmerstrides", "nimbusdraught",
+            "nimbusmilk", "nimbuswood", "prismcaller", "prismshard", "prismwood", "seraphwood",
+            "silverbell", "skycurd", "skyreave", "skystone", "skywatchhood", "skywatchwhistle",
+            "skyweave", "stormdisc", "stormdown", "stormglass", "stormshard", "stormsteelbar",
+            "tempestedge", "thunderhead", "thunderplume", "veilessence", "wardenboots",
+            "wardenmantle", "windsilk"
+    };
+
 
     private SkyItems() {
     }

@@ -721,6 +721,38 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         }
         logs.add("arsenal check: recipes=" + arsenalRecipes);
 
+        // Where every mod item ACTUALLY lands, asked of the live registry
+        // rather than read off setItemCategory calls in our source. Two
+        // reasons: vanilla sets a category explicitly on almost nothing (only
+        // materials/* and wiring) and lets the item CLASS decide, so absence in
+        // the source says nothing; and the category tree is what the settlers'
+        // storage filters sort by, so a wrong bin means a chest a settler will
+        // never use for it. The same tree is what Item.getDebugTooltips prints.
+        for (String id : stairwaytoheaven.SkyItems.ALL_ITEM_IDS) {
+            necesse.inventory.item.Item item = necesse.engine.registries.ItemRegistry.getItem(id);
+            if (item == null) {
+                logs.add("item check: " + id + " NOT REGISTERED");
+                continue;
+            }
+            String master = necesse.engine.util.GameUtils.join(
+                    necesse.inventory.item.ItemCategory.masterManager
+                            .getItemsCategory(item).getStringIDTree(false), ".");
+            String crafting = necesse.engine.util.GameUtils.join(
+                    necesse.inventory.item.ItemCategory.craftingManager
+                            .getItemsCategory(item).getStringIDTree(false), ".");
+            StringBuilder globals = new StringBuilder();
+            for (int gid : item.getGlobalIngredients()) {
+                globals.append(globals.length() == 0 ? "" : "+")
+                        .append(necesse.engine.registries.GlobalIngredientRegistry
+                                .getGlobalIngredient(gid).getStringID());
+            }
+            logs.add("item check: " + id
+                    + " class=" + item.getClass().getSimpleName()
+                    + " category=" + master
+                    + " crafting=" + crafting
+                    + " globals=" + (globals.length() == 0 ? "-" : globals.toString()));
+        }
+
         // Tiles that are registered itemObtainable=false but ARE meant to be
         // craftable. The flag reads like "no recipe" and is not one -- vanilla
         // does the same with spidernesttile -- so the only way to know a floor
