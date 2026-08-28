@@ -437,6 +437,55 @@ SERAPHLEAF = {
     "bloom": (252, 248, 234),   # cream blossoms
 }
 
+# --- Cloud Tree --------------------------------------------------------------
+# Sampled out of objects/cloudtree.png, which is the user's own art repacked
+# onto the birch sheet layout and otherwise untouched. Unlike skyseraphtree.png
+# (30 colours, converted through tools/convert_biome_art.py) that sheet is a
+# CONTINUOUS-TONE render: 42,664 distinct colours over 64,439 opaque pixels, so
+# there is no quantized ramp to copy verbatim. Every value below is instead a
+# median-cut cluster centroid of a measured region of row 0 (the plain variant),
+# snapped to a colour that occurs in the sheet - i.e. the sheet's own averages,
+# flattened into the 2-6 step ladder vanilla actually paints with.
+#
+# Measured mix of the crown, row 0: ~54% sky-blue, ~27% white, ~15% gold, and
+# the darkest tones are reserved for the crevices between puffs. The Cloud Tree
+# carries no (34,34,46) outline either - it self-outlines with CLOUDLEAF "deep"
+# on the crown and CLOUDWOOD "deep" on the trunk, so its companions do the same.
+
+CLOUDWOOD = {
+    "deep":  (63, 41, 24),      # strand crevices / trunk + root silhouette
+    "base":  (98, 61, 34),      # shadowed strand body
+    "light": (134, 84, 44),     # strand body
+    "hi":    (159, 109, 65),    # top-left strand rim
+    "glint": (211, 172, 118),   # sun catching a root ridge (rare, 1-2 px)
+    "shade": (72, 50, 32),      # cool crown shadow cast down the trunk
+}
+
+CLOUDLEAF = {
+    # the crown is cumulus, not foliage: white caps over sky-blue bellies
+    "deep":  (101, 137, 170),   # crevice between puffs + crown silhouette
+    "base":  (130, 174, 211),   # shadow-side puff belly
+    "light": (170, 204, 232),   # puff body
+    "hi":    (207, 228, 243),   # lit puff shoulder
+    "top":   (239, 247, 251),   # sunlit puff cap
+    "white": (255, 255, 255),   # hottest cap pixel
+    "frost": (196, 243, 249),   # rows 4-7 shift the crown to this ice cyan
+    "shade": (58, 72, 87),      # deepest slate, under the crown only
+    # the small gold leaf sprigs scattered over the cloud - the tree's signature
+    "edge":  (154, 113, 58),    # sprig stem + sprig's own dark rim
+    "amber": (196, 151, 84),    # shadow-side sprig lobe
+    "gold":  (222, 170, 88),    # sprig lobe body
+    "warm":  (235, 195, 122),   # lit sprig lobe
+    "cream": (246, 229, 182),   # sprig highlight
+    "spark": (252, 248, 234),   # 4-point sparkle core
+}
+
+# Ground shadow baked into cloudtree.png: a teal-blue ellipse, NOT the mod's
+# usual near-black SHADOW. Measured verbatim off row 0 (831 px at this exact
+# value/alpha), so the sapling seats the same way the grown tree does.
+CLOUD_SHADOW = (0, 118, 161)
+CLOUD_SHADOW_ALPHA = 102
+
 CLOUDBELL = {
     "deep":  (74, 96, 158),
     "base":  (112, 138, 204),

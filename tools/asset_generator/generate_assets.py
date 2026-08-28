@@ -236,6 +236,10 @@ def main():
     gen_trees.gen_skyseraphsapling(f"{out}/objects", f"{out}/items")
     gen_trees.gen_seraphwood_item(f"{out}/items/seraphwood.png")
     gen_trees.gen_skyseraphtree_leaves(f"{out}/particles/seraphleaves.png")
+    # Cloud Tree companions (the tree itself is supplied art, see kk-sprites)
+    gen_trees.gen_cloudsapling(f"{out}/objects", f"{out}/items")
+    gen_trees.gen_cloudwood_item(f"{out}/items/cloudwood.png")
+    gen_trees.gen_cloudtree_leaves(f"{out}/particles/cloudleaves.png")
 
     gen_furniture.gen_v2_item_icons(f"{out}/items")
     gen_furniture.gen_set_icons(f"{out}/items")

@@ -1265,3 +1265,439 @@ def gen_skyseraphtree_leaves(path):
         c.put(9 + rng.range(-2, 2), 10 + rng.range(-2, 2), leaf["spark"])
         sheet.paste(c, f * 20, 0)
     sheet.save(path)
+
+
+
+
+# --- Cloud Tree companions ----------------------------------------------------
+# objects/cloudtree.png is the user's OWN art, repacked onto the birch sheet
+# layout (128x1024 = eight 128 px rows; 0-3 plain, 4-7 frost) and otherwise
+# untouched. These companions answer to IT - not to the mod's three generated
+# trees and not to the Seraph build - and the whole point of the pass is that
+# a player can tell a Cloud sapling from a Seraph sapling at a glance.
+#
+# What the sheet actually does, measured on row 0:
+#   crown   CUMULUS, not foliage. Overlapping round puffs, near-white top-left
+#           caps over pale sky-blue bellies, and the only really blue tone is
+#           the crevice where two puffs meet. Mix is ~27% white / ~54% blue,
+#           but the blues cluster at the PALE end - (170,204,232) upward - with
+#           (101,137,170) held back for crevices. Crown box is 108x93: a wide
+#           LOW dome, and it bulges downward as well as up.
+#   accents small gold leaf sprigs (a fleur: centre spike, two up-swept side
+#           lobes, short stem) scattered over the cloud, plus 1 px gold glints.
+#           ~15% of the crown, and they are the species signature.
+#   trunk   warm brown rope strands running together at the top and splaying
+#           into a wide flared root fan with dark seams between the toes - the
+#           trunk measures 29 px across under the crown but 43 px at the roots.
+#   seat    a teal-blue ground ellipse (0,118,161) at alpha 102, NOT the mod's
+#           near-black SHADOW.
+#
+# Deliberate divergence from the parent: the sheet is a continuous-tone render
+# (42,664 distinct colours over 64,439 opaque px), so there is no quantized
+# ramp to copy. These are flat-shaded off the sampled CLOUDLEAF / CLOUDWOOD
+# ladders per docs/assets-style-guide.md; they read a little cleaner than the
+# tree at 4x and sit in the same ramp at 1x.
+#
+# Size law - the Cloud Tree is drawn on the BIRCH sheet, so birch is the
+# analogue: objects/birchsapling 24x26 / 336 px, items/birchlog 24x20 / 288 px,
+# particles/birchleaves densest 20 px frame 16x14 / 160 px.
+
+_CLOUD_UP = ("deep", "base", "light", "hi", "top", "white")
+
+# One gold leaf sprig, (dx, dy, tone) from the stem foot. A fleur: centre
+# spike, two up-swept side lobes, short stem. Light from the top-left, so the
+# left tip is cream and the right one drops to amber. 12 px in a 5x5 box - big
+# enough to read as a LEAF at 1x, small enough that three fit on a crown.
+_CLOUD_SPRIG = (
+    (0, -4, "cream"),
+    (-2, -3, "cream"), (-1, -3, "warm"), (0, -3, "warm"),
+    (1, -3, "gold"), (2, -3, "amber"),
+    (-1, -2, "warm"), (0, -2, "gold"), (1, -2, "gold"),
+    (0, -1, "gold"), (1, -1, "amber"),
+    (0, 0, "edge"),
+)
+
+
+def _cloud_interior(c, x, y):
+    """True only for pixels off the silhouette."""
+    return (c.filled(x, y) and c.filled(x - 1, y) and c.filled(x + 1, y)
+            and c.filled(x, y - 1) and c.filled(x, y + 1))
+
+
+def _cloud_puff(c, cx, cy, r, ramp):
+    """One cumulus puff the way the sheet paints them.
+
+    The tone FLOOR is the whole game here. The first pass built the body out
+    of "light" (170,204,232) with a "base" belly and the crown came out a
+    blue-grey rain cloud; measured, the sheet's puffs are near-white with the
+    blue confined to bellies and crevices. So the body starts at "hi", the
+    belly steps down one, and only the last sliver reaches "base".
+
+    The crevice ring is drawn LOW and thin (cy + 0.8, +0.35 px) rather than as
+    a full outset ring: a full ring around every puff cut deep notches between
+    neighbours and the crown silhouette came out as a five-petal flower
+    instead of a cloud."""
+    c.ellipse(cx, cy + 0.8, r + 0.35, r * 0.92 + 0.35, ramp["deep"])
+    c.ellipse(cx, cy, r, r * 0.92, ramp["hi"])
+    c.ellipse(cx + r * 0.26, cy + r * 0.44, r * 0.76, r * 0.56, ramp["light"])
+    c.ellipse(cx + r * 0.40, cy + r * 0.62, r * 0.52, r * 0.34, ramp["base"])
+    c.ellipse(cx - r * 0.20, cy - r * 0.24, r * 0.72, r * 0.62, ramp["top"])
+    c.ellipse(cx - r * 0.36, cy - r * 0.44, r * 0.46, r * 0.36, ramp["white"])
+
+
+def _cloud_crown(c, puffs, ramp, rng, light_spread=0.44):
+    """Puff dome + one canopy-scale light field, the same trick the Seraph
+    crown uses: without it every puff keeps its own private highlight and the
+    dome reads as a bag of marbles. Crevices are remembered before the field
+    runs and stamped back as 1 px arcs afterwards, because the field promotes
+    whatever it finds on the lit side and would otherwise dissolve them.
+
+    Puffs are drawn TOP FIRST so the lower ones sit in front, which is how a
+    cumulus stacks toward the viewer."""
+    for (cx, cy, r) in sorted(puffs, key=lambda p: p[1] - p[0] * 0.15):
+        _cloud_puff(c, cx, cy, r, ramp)
+    pts = [(x, y) for x in range(c.width) for y in range(c.height)
+           if c.filled(x, y)]
+    if not pts:
+        return
+    creases = [(x, y) for (x, y) in pts if c.get(x, y)[:3] == ramp["deep"]
+               and _cloud_interior(c, x, y)]
+    mx = sum(p[0] for p in pts) / len(pts)
+    my = sum(p[1] for p in pts) / len(pts)
+    radius = max(max(abs(p[0] - mx) for p in pts),
+                 max(abs(p[1] - my) for p in pts), 1.0)
+    up = {ramp[a]: ramp[b] for a, b in zip(_CLOUD_UP, _CLOUD_UP[1:])}
+    down = {ramp[b]: ramp[a] for a, b in zip(_CLOUD_UP, _CLOUD_UP[1:])}
+    for (x, y) in pts:
+        d = ((x - mx) * 0.55 + (y - my) * 1.0) / radius
+        d += (rng.float() - 0.5) * 0.22
+        cur = c.get(x, y)[:3]
+        if d < -light_spread and cur in up:
+            c.put(x, y, up[cur])
+        elif d > light_spread * 1.5 and cur in down and rng.chance(0.7):
+            # Demote sparingly and late. Vanilla shades a cloud by holding the
+            # lit half bright, not by darkening the shaded half twice.
+            c.put(x, y, down[cur])
+    crease_set = set(creases)
+    for (x, y) in creases:
+        n = sum(1 for (a, b) in ((x - 1, y), (x + 1, y), (x, y - 1),
+                                 (x, y + 1), (x - 1, y - 1), (x + 1, y + 1))
+                if (a, b) in crease_set)
+        if n > 2:                       # merged rings would band the dome
+            continue
+        d = ((x - mx) * 0.55 + (y - my) * 1.0) / radius
+        # on the lit side a crevice is a soft blue fold, not a hard crack
+        c.put(x, y, ramp["light"] if d < -light_spread else ramp["deep"])
+
+
+def _cloud_valleys(c, puffs, ramp):
+    """Blue fold arcs along each puff's lower boundary.
+
+    The sheet's crown is a NETWORK of pale-blue valleys between white caps.
+    Overlapping the puffs enough to kill the flower-petal silhouette also
+    buried almost every crevice, and the dome came back as one smooth white
+    mass - a snowball, not a cloud tree. So the valleys are drawn explicitly
+    afterwards, interior-only so the silhouette is untouched: two steps down
+    on the shaded lower-right arc, one step on the lower-left where the light
+    still reaches."""
+    for (cx, cy, r) in puffs:
+        for deg in range(8, 186, 3):
+            rad = math.radians(deg)
+            x = round(cx + r * math.cos(rad))
+            y = round(cy + r * 0.92 * math.sin(rad))
+            if not _cloud_interior(c, x, y):
+                continue
+            shaded = deg < 104
+            c.put(x, y, ramp["base"] if shaded else ramp["light"])
+            if shaded and _cloud_interior(c, x, y + 1):
+                c.put(x, y + 1, ramp["deep"])   # the fold's own dark bottom
+
+
+def _cloud_sprig(c, x, y, ramp, flip=False):
+    """Stamp one gold leaf sprig, painting only where the crown already is so
+    it never grows outside the silhouette. Called BEFORE the outline pass: the
+    sprigs are interior detail, and letting the rim redraw over their outermost
+    pixels is what keeps the silhouette unbroken."""
+    for (dx, dy, tone) in _CLOUD_SPRIG:
+        px_ = x - dx if flip else x + dx
+        py = y + dy
+        if c.filled(px_, py):
+            c.put(px_, py, ramp[tone])
+
+
+def _cloud_glint(c, x, y, ramp):
+    """The sheet's 1-2 px gold speck between sprigs."""
+    if not c.filled(x, y):
+        return
+    c.put(x, y, ramp["spark"])
+    if c.filled(x + 1, y + 1):
+        c.put(x + 1, y + 1, ramp["gold"])
+
+
+def _cloud_ground_rim(c, ramp, y_from):
+    """Drop the lower silhouette a step darker than the blue rim. Light comes
+    from the top-left, and a uniformly (101,137,170) rim let the bottom of the
+    crown melt into a pale tile (Cloudturf, Mistsea) at 1x."""
+    for x in range(c.width):
+        for y in range(y_from, c.height):
+            if c.get(x, y)[:3] != ramp["deep"]:
+                continue
+            if not c.filled(x, y + 1) or not c.filled(x + 1, y):
+                c.put(x, y, ramp["shade"])
+
+
+def _cloud_strands(c, ramp, rng, cx, top_y, base_y, w=5):
+    """The trunk proper: TWO rope strands with a hard seam between them.
+
+    The sheet's trunk is unmistakably braided rope - four or five strands with
+    dark crevices running the whole height. A wandering 1 px seam (first pass)
+    disappeared at 1x and the trunk read as a plain brown post, so the seam is
+    now a fixed full-height column with the near rope's lit edge beside it."""
+    x0 = cx - w // 2
+    #      lit rim    rope A       seam        rope B      shaded rim
+    lane = (ramp["hi"], ramp["light"], ramp["shade"],
+            ramp["light"], ramp["deep"])
+    for y in range(top_y, base_y + 1):
+        for dx in range(w):
+            c.put(x0 + dx, y, lane[dx * len(lane) // w])
+        c.put(x0 + w - 1, y, ramp["deep"])            # shaded right edge
+        if y % 3 == 0:                                # rope twist highlight
+            c.put(x0 + 3, y, ramp["hi"])
+        if y % 4 == 2:                                # the seam bites deeper
+            c.put(x0 + 2, y, ramp["deep"])
+        if y % 5 == 2:                                # ridge catching the sun
+            c.put(x0, y, ramp["glint"])
+        if y % 4 == 1:                                # bark notch
+            c.put(x0 + rng.range(1, max(1, w - 2)), y, ramp["base"])
+
+
+# Root fan profile: (dx from trunk centre, y the toe's shoulder starts).
+# Read straight off the sheet's proportions - the outer toes start lowest and
+# reach furthest, so the foot FLARES instead of stepping. Toes are separated
+# by dark seams; without them the fan merged into one brown triangle and the
+# sapling read as a bush growing out of a mound. The seams are "shade", not
+# "deep": a full-height black hairline per toe punched the foot into a row of
+# separate posts instead of one splayed root mass.
+_CLOUD_ROOTS = ((3, 25), (4, 25), (5, 26), (6, 27), (7, 28))
+_CLOUD_ROOT_SEAMS = (4, 6)
+
+
+def _cloud_root_fan(c, ramp, cx, base_y):
+    """Root buttresses splaying out of the trunk foot. Chunky on purpose: on
+    the sheet the roots reach ~1.5x the trunk's own width to either side and
+    they are the trunk's most recognisable feature at any scale. Each toe gets
+    a lit shoulder at its top so the fan reads as rounded fingers curling down
+    to the ground, not as a flat skirt."""
+    for side in (-1, 1):
+        lit = side < 0                                # light from the top-left
+        for (dx, top) in _CLOUD_ROOTS:
+            x = cx + side * dx
+            for y in range(top, base_y + 1):
+                if dx in _CLOUD_ROOT_SEAMS and y > top:
+                    tone = ramp["shade"]              # crevice between toes
+                elif y == top:
+                    tone = ramp["hi"] if lit else ramp["light"]
+                elif y >= base_y:
+                    tone = ramp["deep"]
+                elif y >= base_y - 1:
+                    tone = ramp["base"]
+                else:
+                    tone = ramp["light"] if lit else ramp["base"]
+                c.put(x, y, tone)
+            if dx not in _CLOUD_ROOT_SEAMS and dx < 7:
+                c.put(x, top + 1, ramp["glint"] if lit else ramp["hi"])
+
+
+def _cloud_canopy_shadow(c, wood, leaf):
+    """The sheet's trunk is visibly cooler and darker for the first rows under
+    the crown. Runs after the crown is pasted: any wood pixel whose neighbour
+    above is crown gets the cool shade tone."""
+    crown_tones = {leaf[k] for k in _CLOUD_UP}
+    wood_lit = {wood["hi"], wood["light"], wood["glint"], wood["base"]}
+    hits = [(x, y) for x in range(c.width) for y in range(1, c.height)
+            if c.get(x, y)[:3] in wood_lit
+            and c.get(x, y - 1)[:3] in crown_tones]
+    for (x, y) in hits:
+        c.put(x, y, wood["shade"])
+        if c.get(x, y + 1)[:3] in wood_lit:
+            c.put(x, y + 1, wood["base"])
+
+
+def _cloudsapling_body():
+    """The sapling WITHOUT its ground shadow. Vanilla ships sapling item icons
+    as the object sprite minus the shadow ellipse (verified: birchsapling's
+    object and item files are the same 24x26 / 336 px silhouette, and
+    oaksapling's object bbox ends 2 px below its icon), so both files come
+    from here.
+
+    Proportions are the tree's, not a 1:4 scale-down - a sapling is a YOUNG
+    tree, so the 108x93 crown comes down to a ~23x18 dome while the trunk and
+    roots keep more of their share. The result is WIDE and LOW where
+    skyseraphsapling is 21 narrow and 28 tall: the two species do not read as
+    the same shape in two colours, which was the brief."""
+    body = Canvas(32, 32)
+    rng = Rng(0xC10D)
+    leaf = palette.CLOUDLEAF
+    wood = palette.CLOUDWOOD
+    turf = palette.CLOUDTURF
+
+    _cloud_strands(body, wood, rng, cx=16, top_y=16, base_y=29, w=5)
+    _cloud_root_fan(body, wood, cx=16, base_y=29)
+    for x in range(6, 27):                            # foot line seats the tree
+        if body.filled(x, 29) and not body.filled(x, 30):
+            body.put(x, 29, wood["deep"])
+
+    # crown on its own canvas so the trunk's browns never enter the light field
+    crown = Canvas(32, 32)
+    # Six puffs, heavily overlapped: one big core, a cap, two shoulders and two
+    # BELLY puffs. The belly pair is the cloud tell - a canopy tapers in at the
+    # bottom, a cloud bulges out - and the overlap is what keeps the union a
+    # dome; spaced further apart the same six read as flower petals.
+    puffs = [(16.0, 11.8, 6.7), (15.4, 8.0, 5.3),
+             (10.4, 12.4, 5.6), (21.6, 12.4, 5.6),
+             (12.6, 16.2, 4.8), (19.6, 16.4, 4.8)]
+    _cloud_crown(crown, puffs, leaf, rng)
+    _seraph_smooth(crown, rounds=3)          # shape-only pass, tone-agnostic
+    _cloud_valleys(crown, puffs, leaf)
+    # gold sprigs: two on the lit half, one tucked on the shaded right, which
+    # is how the sheet spaces them - never a ring, never symmetric
+    _cloud_sprig(crown, 11, 13, leaf)
+    _cloud_sprig(crown, 19, 9, leaf, flip=True)
+    _cloud_sprig(crown, 22, 18, leaf)
+    _cloud_glint(crown, 15, 6, leaf)
+    _cloud_glint(crown, 8, 15, leaf)
+    crown.outline(leaf["deep"])
+    _cloud_ground_rim(crown, leaf, y_from=15)
+    body.paste(crown, 0, 0)
+    _cloud_canopy_shadow(body, wood, leaf)
+
+    # one gold sprig already shed, caught on the root fan
+    _cloud_sprig(body, 21, 26, leaf)
+
+    # Soil clump over the root foot, kept LOW and thin: the first pass used a
+    # 6x2 ellipse and it swallowed the whole root fan, which is the one part
+    # of this trunk a player can recognise. Two Cloudturf tufts keep the link
+    # to cloudturftile, the only tile this sapling plants on.
+    body.ellipse(16, 29.6, 8.0, 1.3, wood["base"])
+    body.ellipse(14, 29.2, 5.0, 0.9, wood["light"])
+    for x in range(4, 29):
+        if body.filled(x, 30) and not body.filled(x, 31):
+            body.put(x, 30, wood["deep"])
+    body.put(9, 29, turf["deep"])
+    body.put(23, 29, turf["tuft"])
+    return body
+
+
+def gen_cloudsapling(objects_dir, items_dir):
+    """32x32 Cloud sapling: the Cloud Tree young. Writes the object sprite
+    (with the parent sheet's teal ground ellipse) and the inventory icon
+    (without), vanilla-style."""
+    body = _cloudsapling_body()
+    cell = Canvas(32, 32)
+    cell.ellipse(16, 30, 9.0, 2.1,
+                 with_alpha(palette.CLOUD_SHADOW, palette.CLOUD_SHADOW_ALPHA))
+    cell.paste(body, 0, 0)
+    cell.save(f"{objects_dir}/cloudsapling.png")
+    body.save(f"{items_dir}/cloudsapling.png")
+
+
+def gen_cloudwood_item(path):
+    """32x32 cloudwood log. Vanilla items/birchlog build (chunky cylinder
+    lying lower-left to upper-right, big ringed end cap facing the viewer) in
+    the Cloud Tree's rope-bark browns - with pale cloud-white heartwood and
+    sky-blue growth rings on the cut face, so the log carries the crown's
+    colour the way seraphwood carries the Seraph crown's gold.
+
+    Tone floor again: filling the cylinder with "light" (134,84,44) made a
+    chocolate bar. The sheet's trunk is mostly (159,109,65)/(134,84,44) with
+    the darks kept for the crevices between ropes, so the body starts at "hi"."""
+    c = Canvas(32, 32)
+    wood = palette.CLOUDWOOD
+    leaf = palette.CLOUDLEAF
+    x0, y0, x1, y1 = 10, 21, 23, 12
+    steps = 14
+    axis = [(x0 + (x1 - x0) * i / steps, y0 + (y1 - y0) * i / steps)
+            for i in range(steps + 1)]
+    for (cx, cy) in axis:                            # rounded bark cylinder
+        c.ellipse(cx, cy, 5.0, 5.2, wood["hi"])
+    for (cx, cy) in axis[1:]:                        # sunlit top-left band
+        c.ellipse(cx - 0.7, cy - 2.6, 3.4, 1.8, wood["glint"])
+    for (cx, cy) in axis[1:]:                        # shaded belly
+        c.ellipse(cx + 0.7, cy + 2.5, 3.4, 1.9, wood["light"])
+    for (cx, cy) in axis[1:]:
+        c.ellipse(cx + 1.0, cy + 3.6, 2.9, 1.1, wood["base"])
+    c.ellipse(x1 + 0.5, y1 - 0.5, 1.8, 4.0, wood["deep"])   # far cut end
+    # Rope grooves run ALONG the cylinder, parallel to its axis - this trunk is
+    # a bundle of strands seen side-on. Drawn as hairlines offset perpendicular
+    # to the axis, but BROKEN into segments: the first pass scattered short
+    # dark dashes across the bark and they read as dirt, the second ran them
+    # unbroken end to end and the log read as a rolled newspaper.
+    for (off, tone, gap) in ((-1.7, wood["light"], 5), (0.9, wood["base"], 4),
+                             (2.7, wood["deep"], 6)):
+        pts = [(round(cx + off * 0.55), round(cy + off))
+               for (cx, cy) in axis[2:-1]]
+        for i in range(len(pts) - 1):
+            if i % gap == gap - 1:                   # knot in the strand
+                continue
+            c.line(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1], tone)
+    # near end cap: cloud-white heartwood in concentric sky-blue growth rings,
+    # so the cut face reads as WOOD carrying the crown's colour rather than as
+    # an ice cube stuck on the end of a stick
+    c.ellipse(x0 - 2, y0 + 0.5, 4.0, 5.2, wood["deep"])
+    c.ellipse(x0 - 2, y0 + 0.5, 3.3, 4.5, leaf["deep"])
+    c.ellipse(x0 - 2, y0 + 0.5, 2.9, 4.0, leaf["hi"])
+    c.ellipse(x0 - 2, y0 + 0.4, 2.4, 3.3, leaf["base"])
+    c.ellipse(x0 - 2, y0 + 0.4, 2.0, 2.7, leaf["top"])
+    c.ellipse(x0 - 2, y0 + 0.3, 1.3, 1.8, leaf["light"])
+    c.ellipse(x0 - 2.2, y0, 0.9, 1.2, leaf["white"])
+    c.put(x0 - 4, y0 - 1, leaf["hi"])                # cap rim glint
+    c.put(x0 - 1, y0 + 3, leaf["deep"])              # ring tick
+    c.outline(wood["deep"])
+    _sunlit_rim(c, wood["glint"], wood["hi"], y_max=15, outline=wood["deep"])
+    _cloud_glint(c, 18, 15, leaf)                    # gold caught in the grain
+    c.put(21, 12, leaf["gold"])
+    c.save(path)
+
+
+def gen_cloudtree_leaves(path):
+    """100x20 particle strip, five 20 px frames: a scrap of the cloud crown -
+    puff plus gold sprig - shed when the Cloud Tree is felled.
+
+    Vanilla measurement, not eyeballing: particles/birchleaves.png is COMPACT
+    rounded clumps, densest 20 px frame 16x14 / 160 opaque px, and vanilla
+    holds that mass roughly constant across the strip, tumbling only the
+    orientation. What falls off THIS tree is cloud, so each frame is a three-
+    puff clump built exactly like the crown's puffs (deep ring, near-white
+    top-left cap, pale blue belly) with a gold sprig riding it: a piece of the
+    canopy, visibly, and unmistakably not the Seraph's gold leaf clump."""
+    sheet = Canvas(100, 20)
+    leaf = palette.CLOUDLEAF
+    angles = (-0.62, -0.24, 0.16, 0.55, 0.95)
+    # local (u, v) layout of the clump, back puff first
+    lobes = ((-3.2, 1.1, 3.9, 3.5), (3.4, 1.3, 3.6, 3.2), (0.2, -1.6, 4.2, 3.6))
+    for f in range(5):
+        c = Canvas(20, 20)
+        rng = Rng(0xC10F + f * 617)
+        ca, sa = math.cos(angles[f]), math.sin(angles[f])
+        for (u, v, ru, rv) in lobes:
+            _rot_lobe(c, 9, 10, ca, sa, u, v, ru + 0.6, rv + 0.6, leaf["deep"])
+            _rot_lobe(c, 9, 10, ca, sa, u, v, ru, rv, leaf["hi"])
+            _rot_lobe(c, 9, 10, ca, sa, u + 0.6, v + 1.1,
+                      ru * 0.70, rv * 0.48, leaf["light"])
+            _rot_lobe(c, 9, 10, ca, sa, u - 0.7, v - 1.2,
+                      ru * 0.62, rv * 0.46, leaf["top"])
+            _rot_lobe(c, 9, 10, ca, sa, u - 1.0, v - 1.8,
+                      ru * 0.36, rv * 0.26, leaf["white"])
+        _seraph_smooth(c, rounds=1)          # shape-only pass, tone-agnostic
+        # the gold sprig the clump carries, tumbling with it
+        _cloud_sprig(c, 9 + (1 if f % 2 else -1), 12 + (f % 3) - 1, leaf,
+                     flip=f in (1, 4))
+        if f in (0, 3):
+            _cloud_glint(c, 6 if f == 0 else 12, 8, leaf)
+        c.outline(leaf["deep"])
+        _cloud_ground_rim(c, leaf, y_from=10)
+        gx, gy = 9 + rng.range(-2, 2), 8 + rng.range(-1, 2)
+        if _cloud_interior(c, gx, gy):
+            c.put(gx, gy, leaf["white"])
+        sheet.paste(c, f * 20, 0)
+    sheet.save(path)
