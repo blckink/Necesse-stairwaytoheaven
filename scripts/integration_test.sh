@@ -168,7 +168,7 @@ STATUS=0
 LOG="$LOG1"
 grep -qE "Skyreach OK: class=SkyLevel" "$LOG1" || { echo "FAIL: SkyLevel was not instantiated"; STATUS=1; }
 grep -qE "tile (cloudturftile|mistseatile)" "$LOG1" || { echo "FAIL: sky terrain did not generate"; STATUS=1; }
-grep -qE "biome (driftlands|stormveil|aurorashoals)" "$LOG1" || { echo "FAIL: sky biomes did not paint"; STATUS=1; }
+grep -qE "biome (driftlands|stormveil|aurorashoals|skyway)" "$LOG1" || { echo "FAIL: sky biomes did not paint"; STATUS=1; }
 grep -qE "spirePlaced=true" "$LOG1" || { echo "FAIL: Warden's Spire was not stamped"; STATUS=1; }
 grep -qE "beaconObject=wardenbeaconoff" "$LOG1" || { echo "FAIL: spire beacon object missing"; STATUS=1; }
 grep -qE "wardenFloor=marblecheckertile" "$LOG1" || { echo "FAIL: spire interior floor missing"; STATUS=1; }
@@ -276,6 +276,28 @@ grep -qE "roadtile=snowstonepathtile" "$LOG1" \
     || { echo "FAIL: the road paving material did not resolve"; STATUS=1; }
 grep -qE "designed place: kind=[0-2] radius=[0-9]+" "$LOG1" \
     || { echo "FAIL: no designed place within three lattice cells of the hub"; STATUS=1; }
+
+echo "--- verifying the Skyway Passages generate ---"
+# Every piece of this biome was registered and reachable long before anything
+# generated it, so "the tile exists" and "the statue is craftable" prove
+# nothing. These are counts taken from the world the server actually painted.
+grep -qE "skyway: ground=skywaytile " "$LOG1" \
+    || { echo "FAIL: the Skyway ground tile did not resolve"; \
+         grep -E "skyway:" "$LOG1" | tail -1; STATUS=1; }
+SKYWAY="$(grep -oE 'skyway: ground=[a-z]+ tiles=[0-9]+ seraphtrees=[0-9]+ seraphstatues=[0-9]+ rails=[0-9]+ railgates=[0-9]+' "$LOG1" | tail -1)"
+if [ -z "$SKYWAY" ]; then
+    echo "FAIL: no skyway report — the Skyway Passages never ran"; STATUS=1
+else
+    # The scan is a fixed radius around the hub, and the hub is pulled into the
+    # Driftlands band by construction, so a given seed may legitimately have no
+    # Skyway within it. Ground and trees are asserted together: paving with no
+    # Seraph on it would mean the biome generated its floor and nothing else.
+    SKYWAY_TILES="$(echo "$SKYWAY" | grep -oE 'tiles=[0-9]+' | cut -d= -f2)"
+    SKYWAY_TREES="$(echo "$SKYWAY" | grep -oE 'seraphtrees=[0-9]+' | cut -d= -f2)"
+    if [ "${SKYWAY_TILES:-0}" -gt 0 ] && [ "${SKYWAY_TREES:-0}" -eq 0 ]; then
+        echo "FAIL: Skyway ground generated but no Sky Seraph grew on it ($SKYWAY)"; STATUS=1
+    fi
+fi
 
 echo "--- verifying persistence across restart ---"
 SPIRE1="$(grep -oE 'spire=-?[0-9]+,-?[0-9]+' "$LOG1" | tail -1)"

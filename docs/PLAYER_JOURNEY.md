@@ -62,6 +62,38 @@ Siggi lairs in Stormveil, Peanut in the Aurora Shoals. Both are coaxed home
 with a `cloudpufftreat`. Their home is the real `catbasket` object at the
 spire. Neither cat can be permanently killed.
 
+## 3b. The Skyway Passages
+
+The fourth Skyreach sub-biome, and the only one that was **built** rather than
+grown. `SkyTerrainPainter.biomeClassOf` cuts it out of the biome field's
+`0.40 .. 0.47` band — directly above Stormveil, so the two cold grounds border
+each other and the Sky Seraph's frost form (`SkyTreeObject`, keyed on
+`stormslatetile` and `skywaytile`) reads as one region rather than two
+coincidences. Measured over eight seeds it holds **14.6% of the sky's land**,
+next to Stormveil's 18.6% and Aurora's 13.1%.
+
+What the player finds there:
+
+- **Skyway paving** (`skywaytile`) as the ground, with the same skystone
+  barrens surfacing through it that every other sky ground has.
+- **Sky Seraphs** growing wild, in their frost form, at 1 per 85 Skyway land
+  tiles — between the Fulgurpine (72) and the Prismabirch (116).
+- **Cloudmarble balustrades** running the length of any road whose two ends
+  both stand in the passages (`SkyLandscape.PROP_RAIL`), with a **Cloudmarble
+  fence gate** wherever a carriageway breaks one, and **Cloudmarble piers**
+  where a passage crosses a gate.
+- **Seraph statues** at the junctions — the centre of a Skyway garden court,
+  where four spokes meet — and at roughly every fifth roadside waypoint along
+  a causeway, which is one statue per ~70 tiles walked.
+- Its own spawn table (`SkywayBiome`): Skystone Golems as the masonry's
+  guardians, Galehounds hunting the corridors, Zephyr Rays straying in.
+
+Density, measured over eight seeds and 2,197,075 natural land tiles: **0.371
+objects per tile**, against Driftlands 0.358, AuroraShoals 0.322 and Stormveil
+0.307. A paved biome has no obvious wild growth to fill it, and the first cut
+measured 0.297 — tying the emptiest ground in the world — before the scatter
+band was widened.
+
 ## 4. The Veil
 
 Craft a **Séance Circle** (`6 stormshard + 4 windsilk + 2 aurorapetal`, Tungsten
@@ -86,18 +118,8 @@ tile mismatches.
 Everything below is registered, craftable, named and iconned — and **never
 appears in a generated world**, because no worldgen rule places it:
 
-- **Skyway Passages** — the biome itself does not exist. `skywaytile` is a
-  registered terrain tile with its splat, but there is no biome class, no
-  `SkyTerrainPainter` rule and no spawn table, so the passages are not
-  generated anywhere.
-- **Sky Seraph tree** — tree, sapling, Seraphwood and leaf particles all work,
-  but nothing plants one. Only a player-placed sapling grows into it.
-- **Seraph statue** and the **Cloudmarble** wall/door/window/railing/gate —
-  craftable only; no structure or preset uses them.
-- **Skywatch furniture** — the same. The Warden's Spire preset still furnishes
-  itself from the old decoration objects, so the inhabited-POI request is not
-  done.
+- **Skywatch furniture** — the Warden's Spire preset still furnishes itself
+  from the old decoration objects, so the inhabited-POI request is not done.
 
-Adding the biome means changing `SkyTerrainPainter`, the integration test's
-painter oracle and `scripts/sky_map_render.py` together — all three mirror the
-same classification, and they have to stay in step.
+Everything else that used to be on this list is now generated; see
+*The Skyway Passages* above.

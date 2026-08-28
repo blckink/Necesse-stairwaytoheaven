@@ -630,6 +630,34 @@ speed, so a road built from it pays the player to follow it. And a warp applied
 to the QUERY POINT rather than to the segments bends a whole network together:
 junctions stay joined while the roads between them curve.
 
+**[run]** The oracle only guards the *tiles*. It compares
+`describeTile`'s ground against the live world and nothing else, so a renderer
+can pass `tileMismatches=0` while drawing every OBJECT wrong — which is what it
+was doing. `TreeObject.addDrawables` hard-codes `spriteRes = 128`, so a tree
+sheet is a grid of 128x128 cells and exactly one cell is drawn, at
+`(drawX - 48, drawY - 96)`. `scripts/sky_map_render.py` was treating the sheet
+as a single tall sprite — correct for a 32px flower, and for a 128x512 tree
+column it stacks all four variants in a pile above the tile. Every calibration
+render since the tree pass showed **four times** as many canopies as the world
+contains: one 40x22 screen with 8 Nimbus Willows in it rendered 32. The two
+statues were wrong the same way (`StatueObject` draws one sprite of
+`width / spriteCount`, and both sky statues register `spriteCount = 1`, so the
+variant width is the whole sheet, not 32px).
+
+The lesson is the shape of the gate, not the arithmetic: an oracle that checks
+one of the two things a renderer draws will let the other rot indefinitely, and
+it will rot in the direction that flatters the world.
+
+**[run]** `FenceObject` attaches to its four ORTHOGONAL neighbours only, and
+`FENCE_MIN_THICKNESS = 1.6` tiles is the rule derived from that. It holds for a
+new fence band too, measured rather than assumed: the Cloudmarble balustrade
+introduced for the Skyway Passages, laid at exactly 1.6 tiles from
+`ROAD_HALF_WIDTH + 0.3`, comes out at **0.29% lone posts and mean degree 2.26**
+over six seeds and 7,129 fence tiles — indistinguishable from the established
+Skywatch railing's 0.20% / 2.21 over 27,968. Any new railing should be measured
+this way before it is believed; a diagonal band that rasterises into loose
+posts looks perfectly fine in the source.
+
 ## One sheet, three readers, three chances to get the height wrong
 
 **[game]** The wall sheet's window strip shipped the same bug as its door
@@ -1010,3 +1038,57 @@ motif without moving to the half-column reading first.
 Same lesson as the door cells and the window rows before it: one sheet, several
 readers, and the reader you did not check is where the next report comes from.
 `tools/sheet_format_audit.py` now covers all three wall sheets (42 cells).
+
+## A preset does not place multi-tile furniture; it writes both halves (v0.8)
+
+`Preset.applyToLevel` writes object IDs with
+`level.objectLayer.setObject(layer, x, y, id)` — the raw layer setter. It does
+**not** call `MultiTile.placeObject`, so writing only the master of a bench,
+bed or dinner table leaves half an object in the world: the master with no
+counter, which draws as one end of the piece and behaves as a broken multi-tile.
+
+Vanilla's own furniture presets prove the intended idiom — both halves,
+explicitly, with the **same rotation**:
+
+```java
+// BenchPreset:       objects = [oakbench, oakbench2],           rotations = [1, 1]
+// BedDresserPreset:  objects = [oakbed2, oakbed, oakdresser],   rotations = [3, 3, 2]
+// DinnerTablePreset: objects = [.., oakdinnertable, ..,
+//                               .., oakdinnertable2, ..],       rotations = [1,2,3, 1,2,3]
+```
+
+The counter always sits in the direction the rotation points — `0` up, `1`
+right, `2` down, `3` left — because `BenchObject.getMultiTile` builds a
+`SideMultiTile(0, 1, 1, 2, rotation, true, counterID, getID())` and the rotation
+rotates that 1x2 column. So "never place the `<id>2` half" is true of the
+*registry* (the helpers register it, it has no recipe and no item icon) and
+false of *worldgen*: a preset must write it.
+
+Rotation for the other furniture is the direction the piece FACES, which is why
+vanilla's presets require a wall on the side the rotation points away from:
+a dresser under a north wall is rotation 2 (facing down), a chair at a table is
+rotated toward the table (`ChairObject.facesTable` checks exactly that tile),
+and `DeskObject extends TableObject`, so a chair turned to a desk counts as
+facing a table.
+
+Wall decor is the **opposite** convention and a different layer.
+`PaintingObject` and `WallTorchObject` live on `ObjectLayerRegistry.WALL_DECOR`,
+their own tile must NOT be a wall, and the rotation names where the wall is:
+`0` = wall below, `1` = wall left, `2` = wall above, `3` = wall right. Writing a
+banner onto the base layer of a wall tile — which the old spire preset did —
+replaces the wall with the banner and opens a hole in the building.
+
+## The spire preset and the forecourt share a boundary that is one tile wide (v0.8)
+
+`SkyLandscape` builds the Warden's Forecourt around the same origin the spire
+preset is stamped on: `HUB_PROP_MIN = 10.5` reserves everything inside that
+radius for the preset, the lamp ring sits at radius 11, and the railing
+(`discRing`, radius 13) at 13. Measured, the six forecourt lamps land at
+`(+-10, +-5/6)` and `(0, +-11)`, and the only railing tiles inside a
+`|dx|,|dy| <= 9` box are the four diagonal links at `(+-9, +-9)`.
+
+So a 21x21 preset can write local 1..19 and keep every forecourt lamp, but it
+must leave those four corners alone or the railing loses its diagonal links and
+reads as four gaps. `WardenSpirePreset.WRITTEN_RADIUS` is that box, and
+`SkyreachStatusCommand`'s painter-oracle exclusion is derived from it rather
+than hand-copied, so the two cannot drift apart.

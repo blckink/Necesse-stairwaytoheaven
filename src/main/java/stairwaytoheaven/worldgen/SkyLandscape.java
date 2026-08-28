@@ -117,6 +117,26 @@ public final class SkyLandscape {
     public static final int PROP_INSTRUMENT = 11;
     // PROP_GATE = 12, declared with the fence above.
 
+    // ------------------------------------------------------------------
+    // The Skyway Passages (v0.8).
+    //
+    // A road whose two ends both stand in the Skyway is not a road, it is a
+    // PASSAGE: a causeway with a balustrade down both sides, buttressed where
+    // it passes a gate, and marked at intervals by a Sky Seraph on a plinth.
+    // These four codes are what makes it one, and they resolve to Cloudmarble
+    // unconditionally rather than per tile — a passage that runs on past the
+    // biome border keeps its own material instead of changing halfway.
+    // ------------------------------------------------------------------
+
+    /** Cloudmarble balustrade running the length of a passage. */
+    public static final int PROP_RAIL = 13;
+    /** The balustrade's gate, standing where a carriageway breaks it. */
+    public static final int PROP_RAIL_GATE = 14;
+    /** Cloudmarble block: the pier of a passage gate. */
+    public static final int PROP_BUTTRESS = 15;
+    /** A Sky Seraph on the verge, marking a stage along the passage. */
+    public static final int PROP_MONUMENT = 16;
+
     public static int surfaceOf(int packed) {
         return packed & 0xFF;
     }
@@ -152,6 +172,19 @@ public final class SkyLandscape {
 
     /** Half width of the paved carriageway: 1.4 gives a 3-tile road. */
     public static final float ROAD_HALF_WIDTH = 1.4F;
+
+    /**
+     * Outer edge of the passage balustrade, measured from the road centre.
+     *
+     * It starts where {@link #isVergeTile} starts and is exactly
+     * {@link #FENCE_MIN_THICKNESS} deep, which is not a round number chosen
+     * for looks: a fence attaches to its four ORTHOGONAL neighbours only, and
+     * a band thinner than 1.6 tiles rasterises into a diagonal staircase of
+     * unconnected posts on any road that is not axis-aligned. A balustrade
+     * that is a row of loose posts is not a balustrade.
+     */
+    public static final float RAIL_OUTER =
+            ROAD_HALF_WIDTH + 0.3F + SkyLandscape.FENCE_MIN_THICKNESS;
 
     /** Spacing of roadside furniture points along an edge, in tiles. */
     public static final float WAYPOINT_SPACING = 14.0F;
@@ -353,7 +386,13 @@ public final class SkyLandscape {
         // is what made the rings read as broken fences rather than as places
         // with a way in; a fence gate is a door, so the road stays walkable.
         if (surface == SURFACE_ROAD) {
-            prop = prop == PROP_FENCE ? PROP_GATE : PROP_NONE;
+            if (prop == PROP_FENCE) {
+                prop = PROP_GATE;
+            } else if (prop == PROP_RAIL) {
+                prop = PROP_RAIL_GATE;               // the same rule, in Cloudmarble
+            } else {
+                prop = PROP_NONE;
+            }
         }
         // Never build inside the spire preset's reach.
         if (hubDist < HUB_PROP_MIN && prop != PROP_CLEAR) {
@@ -518,7 +557,14 @@ public final class SkyLandscape {
         return SkyNoise.hash(seed + SALT_ROAD_LINK + dir, cx, cy) < ROAD_LINK_CHANCE;
     }
 
-    /** Sub-biome of a world position, with the same hub pull the painter applies. */
+    /**
+     * Sub-biome of a world position, with the same hub pull the painter
+     * applies. The banding itself is deliberately NOT duplicated here: it is
+     * {@link SkyTerrainPainter#biomeClassOf}, so a new sub-biome cannot be
+     * added to the painter and silently forgotten by the road network — which
+     * would leave the gates that mark a biome crossing standing at the wrong
+     * borders.
+     */
     private static int biomeClassAt(int seed, float x, float y, int originX, int originY) {
         float b = SkyNoise.fbm(seed + SkyTerrainPainter.SALT_BIOME, x, y, SkyTerrainPainter.BIOME_SCALE, 2);
         float dx = x - originX;
@@ -528,10 +574,7 @@ public final class SkyLandscape {
             float force = 1.0F - d / SkyOrigin.HUB_RADIUS;
             b = b + (0.5F - b) * Math.min(1.0F, force * 1.6F);
         }
-        if (b < SkyTerrainPainter.STORMVEIL_BELOW) {
-            return 0;
-        }
-        return b > SkyTerrainPainter.AURORA_ABOVE ? 2 : 1;
+        return SkyTerrainPainter.biomeClassOf(b);
     }
 
     private static float clamp01(float v) {
@@ -577,6 +620,14 @@ public final class SkyLandscape {
         // Signed side, so roadside pockets can pick one bank of the road.
         float side = (ex * (wy - ay) - ey * (wx - ax)) >= 0.0F ? 1.0F : -1.0F;
 
+        // A PASSAGE is an edge whose BOTH ends stand in the Skyway. Deciding
+        // it from the two node biomes rather than per tile is what keeps one
+        // causeway a single object: it carries the same balustrade from end to
+        // end, including across the stretch where the ground underneath it
+        // happens to be something else.
+        boolean passage = abiome == SkyTerrainPainter.BIOME_SKYWAY
+                && bbiome == SkyTerrainPainter.BIOME_SKYWAY;
+
         // --- gates: at the approach to a designed place, and where the road
         // --- crosses from one sub-biome into another.
         int gate = gateAt(s, len, ar, br, abiome != bbiome);
@@ -590,10 +641,10 @@ public final class SkyLandscape {
                 return pack(SURFACE_ROAD, PROP_NONE);            // the opening
             }
             if (perp <= ROAD_HALF_WIDTH + 1.6F) {
-                return pack(SURFACE_APRON, PROP_PILLAR);
+                return pack(SURFACE_APRON, passage ? PROP_BUTTRESS : PROP_PILLAR);
             }
             if (perp <= ROAD_HALF_WIDTH + 4.8F) {
-                return pack(SURFACE_APRON, PROP_FENCE);          // the wing
+                return pack(SURFACE_APRON, passage ? PROP_RAIL : PROP_FENCE);   // the wing
             }
             if (perp <= ROAD_HALF_WIDTH + 5.5F) {
                 // 0.7 tiles: one ring deep. A 1.2-wide band caught two rings
@@ -611,18 +662,19 @@ public final class SkyLandscape {
         // --- roadside furniture at evenly spaced waypoints ---
         // Kept well clear of both ends: a designed place has its own lamps and
         // railings, and roadside furniture crowding into it was the first
-        // calibration render's worst failure.
+        // calibration render's worst failure. The balustrade observes the same
+        // clearance, so it stops short of a court instead of running into it.
         if (s < Math.max(ar, 4.0F) + 8.0F || s > len - (Math.max(br, 4.0F) + 8.0F)) {
             return 0;
         }
         int steps = Math.round(len / WAYPOINT_SPACING);
         if (steps < 2) {
-            return 0;
+            return rail(passage, perp);
         }
         float step = len / steps;
         int k = Math.round(s / step);
         if (k <= 0 || k >= steps) {
-            return 0;                                 // the ends belong to the nodes
+            return rail(passage, perp);                // the ends belong to the nodes
         }
         float along = s - k * step;
         float kind = SkyNoise.hash(seed + SALT_WAYPOINT + dir * 3L, cx * 131 + k, cy);
@@ -633,20 +685,28 @@ public final class SkyLandscape {
             if (Math.abs(along) <= 0.6F && isVergeTile(perp)) {
                 return pack(SURFACE_APRON, PROP_LAMP);
             }
-            return 0;
+            return rail(passage, perp);
         }
         if (kind < WAYPOINT_MILESTONE) {
             // A waystone: a lamp and a heap of Skywatch rubble on one bank.
+            //
+            // On a passage the lamp becomes a SERAPH instead: the milestones
+            // are 14 tiles apart and one waypoint in five is a milestone, so
+            // this is one statue roughly every 70 tiles of causeway — a stage
+            // you walk between, not a colonnade. Statues stand on ONE bank
+            // (the milestone already picks a side), which is what keeps a
+            // 3-tile-wide sprite from meeting its opposite number across a
+            // 3-tile road.
             if (side != pickSide) {
-                return 0;
+                return rail(passage, perp);
             }
             if (Math.abs(along) <= 0.6F && isVergeTile(perp)) {
-                return pack(SURFACE_APRON, PROP_LAMP);
+                return pack(SURFACE_APRON, passage ? PROP_MONUMENT : PROP_LAMP);
             }
             if (Math.abs(along) <= 1.6F && perp > ROAD_HALF_WIDTH + 1.5F && perp <= ROAD_HALF_WIDTH + 2.6F) {
                 return pack(SURFACE_APRON, PROP_RUBBLE);
             }
-            return 0;
+            return rail(passage, perp);
         }
         // A tended bed beside the road, fenced on three sides and open to the
         // path. Every border band is at least FENCE_MIN_THICKNESS wide: the
@@ -654,13 +714,13 @@ public final class SkyLandscape {
         // slanted road rasterises into a diagonal staircase, and a diagonal
         // staircase of fence tiles is a row of unconnected posts.
         if (side != pickSide || Math.abs(along) > 3.8F) {
-            return 0;
+            return rail(passage, perp);
         }
         if (perp <= ROAD_HALF_WIDTH + 0.6F) {
             return 0;
         }
         if (perp > ROAD_HALF_WIDTH + 5.6F) {
-            return 0;
+            return rail(passage, perp);
         }
         if (perp <= ROAD_HALF_WIDTH + 1.5F) {
             return pack(SURFACE_APRON, PROP_CLEAR);              // the verge
@@ -676,6 +736,25 @@ public final class SkyLandscape {
             return pack(SURFACE_GARDEN, PROP_GRASS);
         }
         return pack(SURFACE_GARDEN, PROP_CLEAR);
+    }
+
+    /**
+     * The passage balustrade at this perpendicular distance, or 0.
+     *
+     * Returned as the FALLBACK of every waypoint branch rather than as a
+     * separate pass, so anything the roadside already puts on the verge — a
+     * lamp pair, a waystone, the open mouth of a tended bed — wins the tile
+     * and the balustrade simply stops on either side of it. That is what turns
+     * a continuous railing into a railing with gaps you can step through,
+     * which is what a causeway actually needs.
+     */
+    private static int rail(boolean passage, float perp) {
+        if (!passage) {
+            return 0;
+        }
+        return perp > ROAD_HALF_WIDTH + 0.3F && perp <= RAIL_OUTER
+                ? pack(SURFACE_APRON, PROP_RAIL)
+                : 0;
     }
 
     /**

@@ -119,6 +119,17 @@ Ordered by the player's own priority. Full detail in `docs/PLAYTEST_LOG.md`.
   the cats' home, placed once per world including in existing saves; a coaxed
   cat is at it after a save/load round trip and stays within ~7 tiles of it
   (asserted every integration-test run).
+- The Warden's Spire is a furnished 21x21 hall (`worldgen/WardenSpirePreset`),
+  rebuilt to the layout the user supplied
+  (`docs/references/presets/warden-tower-layout.script`): a double cloudmarble
+  wall ring with a circulation corridor between them, eight doors on the axes,
+  an octagonal beacon chamber left deliberately open, and four furnished corner
+  rooms — refectory, council table, the Warden's quarters and an archive — off
+  the corridor. Everything in it is on a vanilla furniture base class, so the
+  tables count as tables, the chairs are sittable and turned to them, the bed
+  is assignable to a settler and the table decorations stand on the tables.
+  The player now arrives on the railed pad outside the grand door
+  (`SkyOrigin.ARRIVAL_OFFSET_Y = 9`) rather than inside the building.
 - The Warden's quest chain is a pure function of the world record
   (`SkyWardenMob.chapterFor`); eight reachable save states are enumerated and
   asserted to be owed a chapter (`chain check: ... no-dead-ends`). The
@@ -149,6 +160,16 @@ Ordered by the player's own priority. Full detail in `docs/PLAYTEST_LOG.md`.
   three new objects - Skystone Lichen, Cragbloom, Sky Scree - plus boulders
   and one lit biome accent. 0.032/0.044/0.099 objects per tile -> 0.304/0.352/
   0.356, against 0.311-0.384 on the vegetated grounds.
+- The **Skyway Passages** are a real generated biome (`biomes/SkywayBiome`,
+  `SkyTerrainPainter.BIOME_SKYWAY`), cut out of the biome field's 0.40-0.47
+  band so it borders Stormveil. It carries `skywaytile` as its ground, grows
+  the Sky Seraph wild in its frost form at 1 per 85 land tiles, and builds its
+  roads out of Cloudmarble: balustrades the length of every passage, fence
+  gates where a carriageway breaks one, piers at the gates and Seraph statues
+  at the junctions and along the causeways. 14.6% of the sky's land at 0.371
+  objects/tile, the densest ground in the world by a small margin (Driftlands
+  0.358, Aurora 0.322, Stormveil 0.307), measured over eight seeds and
+  2,197,075 natural land tiles.
 
 **P2**
 - Tree canopy volume addressed by the v0.6 pass — awaiting player judgement

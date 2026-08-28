@@ -12,6 +12,7 @@ import necesse.engine.network.server.ServerClient;
 import necesse.engine.registries.BiomeRegistry;
 import necesse.engine.registries.TileRegistry;
 import necesse.level.maps.Level;
+import stairwaytoheaven.SkyCloudmarbleSet;
 import stairwaytoheaven.SkyRegistry;
 import stairwaytoheaven.level.SkyLevel;
 
@@ -32,8 +33,11 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                 // path headlessly -- and therefore the only way for
                 // scripts/integration_test.sh to assert that a cat brought home
                 // is still at its basket after a save/load round trip.
+                // "dump" prints the stamped spire tile by tile (SPIREMAP lines)
+                // so scripts can composite the real interior with real sprites:
+                // the only way to actually LOOK at what the preset built.
                 new necesse.engine.commands.CmdParameter("mode",
-                        new necesse.engine.commands.parameterHandlers.StringParameterHandler("", "cats"), true));
+                        new necesse.engine.commands.parameterHandlers.StringParameterHandler("", "cats", "dump"), true));
     }
 
     @Override
@@ -67,6 +71,10 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         // The spire is stamped at the canonical origin (idempotent); the
         // terrain painter guarantees solid Driftlands hub land around it.
         ((SkyLevel) level).ensureWardenSpire();
+
+        if (mode.equals("dump")) {
+            dumpSpire(level, origin, logs);
+        }
 
         Map<String, Integer> tileCounts = new HashMap<>();
         Map<String, Integer> biomeCounts = new HashMap<>();
@@ -606,6 +614,43 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         return false;
     }
 
+    /**
+     * Prints the stamped spire, one line per tile, as
+     * {@code SPIREMAP <lx> <ly> <tile> <base>:<rot> <tileLayer> <wallDecor> <tableDecor>}
+     * in preset-local coordinates. The offline compositor in
+     * scripts reads this back and draws the real sprites at 1x, which is the
+     * only way to judge an interior: an ASCII plan that looks fine can still
+     * read as a maze in game.
+     */
+    private void dumpSpire(Level level, java.awt.Point origin, CommandLog logs) {
+        int size = stairwaytoheaven.worldgen.WardenSpirePreset.SIZE;
+        int half = size / 2;
+        int pad = 3;
+        logs.add("SPIREMAP_BEGIN size=" + size + " pad=" + pad
+                + " origin=" + origin.x + "," + origin.y);
+        for (int ly = -pad; ly < size + pad; ly++) {
+            for (int lx = -pad; lx < size + pad; lx++) {
+                int x = origin.x - half + lx;
+                int y = origin.y - half + ly;
+                level.regionManager.ensureTileIsLoaded(x, y);
+                StringBuilder line = new StringBuilder("SPIREMAP ");
+                line.append(lx).append(' ').append(ly).append(' ')
+                        .append(TileRegistry.getTileStringID(level.getTileID(x, y)));
+                for (int layer : new int[]{0,
+                        necesse.engine.registries.ObjectLayerRegistry.TILE_LAYER,
+                        necesse.engine.registries.ObjectLayerRegistry.WALL_DECOR,
+                        necesse.engine.registries.ObjectLayerRegistry.FENCE_AND_TABLE_DECOR}) {
+                    line.append(' ')
+                            .append(level.getObject(layer, x, y).getStringID())
+                            .append(':')
+                            .append(level.getObjectRotation(layer, x, y));
+                }
+                logs.add(line.toString());
+            }
+        }
+        logs.add("SPIREMAP_END");
+    }
+
     private void diagnoseGeneration(SkyLevel level, CommandLog logs) {
         int seed = level.getWorldGenSeed();
         int r = SCAN_RADIUS_TILES;
@@ -615,6 +660,7 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         int tileMismatches = 0;
         int paved = 0;
         int chequer = 0;
+        int skywayGround = 0;
         for (int x = origin.x - r; x <= origin.x + r; x++) {
             for (int y = origin.y - r; y <= origin.y + r; y++) {
                 long desc = stairwaytoheaven.worldgen.SkyTerrainPainter.describeTile(seed, x, y, origin.x, origin.y);
@@ -627,11 +673,17 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                     paved++;
                 } else if (wantTile == SkyRegistry.skyplinthTileID) {
                     chequer++;
+                } else if (wantTile == SkyCloudmarbleSet.skywayTileID) {
+                    skywayGround++;
                 }
-                // The 15x15 spire preset is stamped on top of the painter's
-                // work, so its footprint (plus its approach path and arrival
-                // pad) is expected to differ.
-                if (Math.abs(x - origin.x) <= 8 && Math.abs(y - origin.y) <= 9) {
+                // The spire preset is stamped on top of the painter's work,
+                // so everything it writes is expected to differ. The box comes
+                // from the preset itself rather than a hand-copied number, so
+                // the two cannot drift apart when the hall changes size — and
+                // it deliberately stops one tile short of the plot edge, which
+                // is where the forecourt's lamp ring and railing live.
+                int spireBox = stairwaytoheaven.worldgen.WardenSpirePreset.WRITTEN_RADIUS;
+                if (Math.abs(x - origin.x) <= spireBox && Math.abs(y - origin.y) <= spireBox) {
                     continue;
                 }
                 if (level.getTileID(x, y) != wantTile) {
@@ -649,12 +701,31 @@ public class SkyreachStatusCommand extends ModularChatCommand {
 
         // The built landscape, counted in the world rather than predicted:
         // this is the assertion that roads, lamps and gates really landed.
+        //
+        // Railings and gate piers are counted across BOTH material families.
+        // The Skyway Passages build theirs out of Cloudmarble, so a count that
+        // only knew about Skywatch iron would read as a drop in railings the
+        // moment the hub happened to sit next to the passages — a false alarm
+        // about a thing that got richer, not poorer.
         logs.add("skyroads: paved=" + paved + " chequer=" + chequer
                 + " lamps=" + actualObjects.getOrDefault(SkyRegistry.wardenCandelabraID, 0)
-                + " fences=" + actualObjects.getOrDefault(SkyRegistry.skyironFenceID, 0)
+                + " fences=" + (actualObjects.getOrDefault(SkyRegistry.skyironFenceID, 0)
+                        + actualObjects.getOrDefault(SkyCloudmarbleSet.cloudmarbleFenceID, 0))
                 + " gatewalls=" + (actualObjects.getOrDefault(SkyRegistry.skystoneBrickWallID, 0)
-                        + actualObjects.getOrDefault(SkyRegistry.nightfellWallID, 0))
+                        + actualObjects.getOrDefault(SkyRegistry.nightfellWallID, 0)
+                        + actualObjects.getOrDefault(SkyCloudmarbleSet.cloudmarbleWallID, 0))
                 + " roadtile=" + TileRegistry.getTileStringID(SkyRegistry.skyroadTileID));
+
+        // The Skyway Passages, counted the same way. Everything this biome is
+        // made of is registered and reachable, so the only thing that can go
+        // wrong is that nothing generates it — which is exactly what a count
+        // of zero here says, and what a source reading cannot.
+        logs.add("skyway: ground=" + TileRegistry.getTileStringID(SkyCloudmarbleSet.skywayTileID)
+                + " tiles=" + skywayGround
+                + " seraphtrees=" + actualObjects.getOrDefault(SkyRegistry.skySeraphTreeID, 0)
+                + " seraphstatues=" + actualObjects.getOrDefault(SkyCloudmarbleSet.seraphStatueID, 0)
+                + " rails=" + actualObjects.getOrDefault(SkyCloudmarbleSet.cloudmarbleFenceID, 0)
+                + " railgates=" + actualObjects.getOrDefault(SkyCloudmarbleSet.cloudmarbleFenceGateID, 0));
 
         int[] place = stairwaytoheaven.worldgen.SkyLandscape.designedPlaceNear(
                 seed, origin.x, origin.y, origin.x, origin.y, 3);

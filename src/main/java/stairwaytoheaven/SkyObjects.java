@@ -96,9 +96,14 @@ final class SkyObjects {
                         "skyseraphsapling", new Color(224, 118, 10), 32, 60, 120, "seraphleaves",
                         "stormslatetile", "skywaytile"),
                 0.0F, false, false, true);
+        // The Seraph's own ground is the Skyway paving it generates on, and
+        // Cloudturf so a player can carry one home to the Driftlands. Without
+        // skywaytile here the biome's own tree could not be replanted in its
+        // own biome: TreeSaplingObject refuses to place on anything outside
+        // this list.
         SkyRegistry.skySeraphSaplingID = ObjectRegistry.registerObject("skyseraphsapling",
                 new necesse.level.gameObject.TreeSaplingObject("skyseraphsapling", new Color(224, 118, 10),
-                        "skyseraphtree", 1800, 2700, true, "cloudturftile"),
+                        "skyseraphtree", 1800, 2700, true, "skywaytile", "cloudturftile"),
                 5.0F, true);
         SkyRegistry.nimbusSaplingID = ObjectRegistry.registerObject("nimbussapling",
                 new necesse.level.gameObject.TreeSaplingObject("nimbussapling", new Color(198, 210, 214),
@@ -148,8 +153,8 @@ final class SkyObjects {
                 new RockOreObject(skystoneRock, "oremask", "prismshardore", new Color(186, 156, 214), "prismshard", SKY_CATEGORY),
                 -1.0F, true);
 
-        allowShore("nimbuswillow", "fulgurpine", "prismabirch",
-                "nimbussapling", "fulgursapling", "prismasapling",
+        allowShore("nimbuswillow", "fulgurpine", "prismabirch", "skyseraphtree",
+                "nimbussapling", "fulgursapling", "prismasapling", "skyseraphsapling",
                 "cloudbell", "skytulip", "thunderbloom", "glowfern", "auroralily", "staticmoss",
                 "tallcloudgrass", "stormsedge", "prismgrass",
                 "fulguriterock", "prismshardrock");

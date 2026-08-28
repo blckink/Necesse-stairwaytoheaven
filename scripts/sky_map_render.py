@@ -43,6 +43,8 @@ TERRAIN = {
     "stormslate": ("mod", "stormslate_splat.png", "splat"),
     "mistsea": ("mod", "mistsea_shallow_splat.png", "splat"),
     "skyplinth": ("mod", "marblechecker.png", "checker"),
+    # the Skyway Passages' own ground (SkyCloudmarbleSet.skywayTileID)
+    "skywayTile": ("mod", "skyway_splat.png", "splat"),
     # vanilla snowstonepath.png: EdgedTiledTexture, body cells live at x >= 64
     "skyroad": ("game", "snowstonepath.png", "edged"),
 }
@@ -64,10 +66,12 @@ OBJECTS = {
     "tallcloudgrass": ("mod", "tallcloudgrass.png", 32),
     "stormsedge": ("mod", "stormsedge.png", 32),
     "prismgrass": ("mod", "prismgrass.png", 32),
-    # trees
-    "nimbuswillow": ("mod", "nimbuswillow.png", 128),
-    "fulgurpine": ("mod", "fulgurpine.png", 128),
-    "prismabirch": ("mod", "prismabirch.png", 128),
+    # trees -- see the "tree" branch of object_sprite for why these are not
+    # plain variant-width sprites
+    "nimbuswillow": ("mod", "nimbuswillow.png", "tree"),
+    "fulgurpine": ("mod", "fulgurpine.png", "tree"),
+    "prismabirch": ("mod", "prismabirch.png", "tree"),
+    "skySeraphTree": ("mod", "skyseraphtree.png", "tree"),
     # geology
     "skystoneRock": ("mod", "skystonerock.png", "rock"),
     "aetheriumRock": ("mod", "skystonerock.png", "rock"),
@@ -86,14 +90,29 @@ OBJECTS = {
     "skyironFenceGate": ("mod", "skyironfencegate.png", "gate"),
     "skystoneBrickWall": ("mod", "skystonebrickwall.png", "wall"),
     "nightfellWall": ("mod", "nightfellwall.png", "wall"),
-    "gloomRavenStatue": ("mod", "statues/gloomraven.png", 32),
+    # StatueObject draws ONE sprite of texture_width/spriteCount; both sky
+    # statues are registered with spriteCount 1, so the variant width is the
+    # whole sheet and the generic bottom-anchor rule lands them correctly.
+    "gloomRavenStatue": ("mod", "statues/gloomraven.png", 64),
+    "seraphStatue": ("mod", "statues/seraph.png", 96),
     "skywatchRubble": ("mod", "skywatchrubble.png", 32),
     "chargeCrystal": ("mod", "chargecrystal.png", 32),
     "auroraShards": ("mod", "aurorashards.png", 32),
     "starfall": ("mod", "starfall.png", 32),
     "skywatchTelescope": ("mod", "skywatchtelescope.png", 32),
     "skywatchAstrolabe": ("mod", "skywatchastrolabe.png", 32),
+    # the Skyway Passages' masonry
+    "cloudmarbleFence": ("mod", "cloudmarblefence.png", "fence"),
+    "cloudmarbleFenceGate": ("mod", "cloudmarblefencegate.png", "gate"),
+    "cloudmarbleWall": ("mod", "cloudmarblewall.png", "wall"),
 }
+
+# Trees whose sheet is a single column split in half: plain variants on top,
+# frost variants below, chosen by the ground the tree stands on. This mirrors
+# stairwaytoheaven.objects.SkyTreeObject -- vanilla's snow column is gated on
+# TileRegistry.snowID, which the Skyreach does not have.
+FROST_TREES = {"skySeraphTree"}
+FROST_GROUND = {"stormslate", "skywayTile"}
 
 _cache = {}
 
@@ -140,10 +159,11 @@ def terrain_sprite(name, x, y):
 # and rocks. Needed because a lone post and a connected railing are completely
 # different amounts of visual mass, and the railing is the one being judged.
 FENCE_LINKS = {"skyironFence", "skyironFenceGate", "skystoneBrickWall", "nightfellWall",
+               "cloudmarbleFence", "cloudmarbleFenceGate", "cloudmarbleWall",
                "skystoneRock", "aetheriumRock", "fulguriteRock", "prismshardRock"}
 
 
-def object_sprite(name, x, y, neighbours=None):
+def object_sprite(name, x, y, neighbours=None, ground=None):
     spec = OBJECTS.get(name)
     if spec is None or spec[0] is None:
         return None
@@ -189,6 +209,23 @@ def object_sprite(name, x, y, neighbours=None):
     if mode == "wall":
         # Wall sheets are connection atlases; cell (0,1) is a plain body block.
         return img.crop((0, TILE, TILE, TILE * 2)), 0
+    if mode == "tree":
+        # TreeObject.addDrawables: spriteRes is a hard-coded 128, so a tree
+        # sheet is a GRID of 128x128 cells and one cell is drawn, at
+        # (drawX - 48, drawY - 96). Treating the sheet as one tall sprite --
+        # which the generic branch below would do, since a tree column is
+        # exactly one variant wide -- stacks all four variants of every tree in
+        # a pile above its tile. That is what this render used to do, and it
+        # made a screen of 8 trees look like a screen of 32.
+        rows = max(1, img.height // 128)
+        if name in FROST_TREES:
+            half = max(1, rows // 2)
+            v = hash2(x, y, 3) % half
+            if ground in FROST_GROUND:
+                v += half
+        else:
+            v = hash2(x, y, 3) % rows
+        return img.crop((0, v * 128, 128, (v + 1) * 128)), 128 - TILE
     width = mode
     variants = max(1, img.width // width)
     v = hash2(x, y, 3) % variants
@@ -225,7 +262,8 @@ def render(dump_path, out_path, scale=1):
     for ry, row in enumerate(rows):
         for rx, cell in enumerate(row):
             got = object_sprite(cell[1], x0 + rx, y0 + ry,
-                                (obj(rx, ry - 1), obj(rx, ry + 1), obj(rx - 1, ry), obj(rx + 1, ry)))
+                                (obj(rx, ry - 1), obj(rx, ry + 1), obj(rx - 1, ry), obj(rx + 1, ry)),
+                                cell[0])
             if got is None:
                 continue
             sprite, overhang = got
@@ -239,20 +277,28 @@ def render(dump_path, out_path, scale=1):
     return rows, meta
 
 
+# SkyTerrainPainter.BIOME_* -- a dump stores the CLASS, not a registry ID.
+BIOME_NAMES = ["Stormveil", "Driftlands", "AuroraShoals", "Skyway"]
+
+
 def stats(rows):
     tiles = Counter()
     objects = Counter()
+    biomes = Counter()
     built = 0
     for row in rows:
         for cell in row:
             tiles[cell[0]] += 1
             if cell[1] != "-":
                 objects[cell[1]] += 1
+            if cell[0] != "mistsea":
+                b = int(cell[2])
+                biomes[BIOME_NAMES[b] if b < len(BIOME_NAMES) else "biome%d" % b] += 1
             if cell[3] == "B":
                 built += 1
     total = sum(tiles.values())
     land = total - tiles.get("mistsea", 0)
-    return tiles, objects, built, total, land
+    return tiles, objects, built, total, land, biomes
 
 
 def main():
@@ -260,7 +306,7 @@ def main():
     out = sys.argv[2]
     scale = int(sys.argv[3]) if len(sys.argv) > 3 else 1
     rows, meta = render(dump, out, scale)
-    tiles, objects, built, total, land = stats(rows)
+    tiles, objects, built, total, land, biomes = stats(rows)
     print("%s  %sx%s tiles at %s,%s" % (os.path.basename(out), meta["w"], meta["h"], meta["x0"], meta["y0"]))
     print("  land %d/%d (%.0f%%)   built %d (%.1f%% of land)"
           % (land, total, 100.0 * land / max(1, total), built, 100.0 * built / max(1, land)))
@@ -268,6 +314,8 @@ def main():
     inlay = tiles.get("skyplinth", 0)
     print("  paved %d (%.1f%% of land)  chequered accent %d (%.1f%%)"
           % (road, 100.0 * road / max(1, land), inlay, 100.0 * inlay / max(1, land)))
+    mix = ", ".join("%s %.0f%%" % (k, 100.0 * v / max(1, land)) for k, v in biomes.most_common())
+    print("  sub-biomes: %s" % (mix or "none"))
     top = ", ".join("%s x%d" % kv for kv in objects.most_common(10))
     print("  objects: %s" % (top or "none"))
 

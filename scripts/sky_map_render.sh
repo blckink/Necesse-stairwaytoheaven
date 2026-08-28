@@ -49,6 +49,13 @@ for SEED in $SEEDS; do
     java -cp "$CP:$OUT" SkyMapDump "$SEED" 260 -180 40 22 "$OUT/place2-$SEED.txt" station
     python3 "$REPO_DIR/scripts/sky_map_render.py" "$OUT/place2-$SEED.txt" "$OUT/screen-place2-$SEED.png"
 
+    # One screen inside the Skyway Passages, framed on a real causeway. The
+    # passages are ~14% of the land, so a fixed offset would show them only by
+    # luck; `skyway` mode searches for them the way `station` searches for a
+    # designed place.
+    java -cp "$CP:$OUT" SkyMapDump "$SEED" 0 0 40 22 "$OUT/skyway-$SEED.txt" skyway
+    python3 "$REPO_DIR/scripts/sky_map_render.py" "$OUT/skyway-$SEED.txt" "$OUT/screen-skyway-$SEED.png"
+
     # Topology only: does the network connect, and are the gaps sane?
     java -cp "$CP:$OUT" SkyMapDump "$SEED" -200 -200 400 400 "$OUT/wide-$SEED.txt" origin
     python3 "$REPO_DIR/scripts/sky_map_render.py" "$OUT/wide-$SEED.txt" "$OUT/wide-$SEED.png"
