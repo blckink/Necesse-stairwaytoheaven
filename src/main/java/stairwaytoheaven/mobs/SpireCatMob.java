@@ -149,6 +149,14 @@ public abstract class SpireCatMob extends CritterMob {
         } else {
             quest.tabbyHome = true;
         }
+        // ...and in the world record, which no level unload can drop. See
+        // SkywatchWorldData: the level copy went missing across a restart on
+        // some world seeds, and this is the write that cannot.
+        stairwaytoheaven.quest.SkywatchWorldData world =
+                stairwaytoheaven.quest.SkywatchWorldData.get(level.getServer());
+        if (world != null) {
+            world.markCatHome(this.isBlackCat);
+        }
         // Push the new state into every player's journal copy (auto-syncs)
         if (level.getServer() != null) {
             stairwaytoheaven.quest.SkyQuests.syncCatQuests(level.getServer(), quest);

@@ -288,11 +288,51 @@ public class SkywatchQuestData extends LevelData {
     /** Fetches the quest data of a level, creating and attaching it if absent. */
     public static SkywatchQuestData get(Level level) {
         LevelData data = level.getLevelData(KEY);
+        SkywatchQuestData quest;
         if (data instanceof SkywatchQuestData) {
-            return (SkywatchQuestData) data;
+            quest = (SkywatchQuestData) data;
+        } else {
+            quest = new SkywatchQuestData();
+            level.addLevelData(KEY, quest);
         }
-        SkywatchQuestData created = new SkywatchQuestData();
-        level.addLevelData(KEY, created);
-        return created;
+        reconcileWithWorld(level, quest);
+        return quest;
+    }
+
+    /**
+     * Fold the world-scoped copy of the cat flags back in.
+     *
+     * These two booleans are progression, not geometry, so
+     * {@link SkywatchWorldData} keeps its own copy and it is the one that
+     * cannot be lost to a level unload. If the world record says a cat was
+     * coaxed home and this level record disagrees, the level record is the one
+     * that is stale -- a coax can never be undone -- so it is repaired here,
+     * on the read path, where every caller benefits without knowing about it.
+     *
+     * Server-side only; {@code level.getServer()} is null on a client, and the
+     * client's copy arrives by packet anyway.
+     */
+    private static void reconcileWithWorld(Level level, SkywatchQuestData quest) {
+        if (level == null || !level.isServer()) {
+            return;
+        }
+        SkywatchWorldData world = SkywatchWorldData.get(level.getServer());
+        if (world == null) {
+            return;
+        }
+        if (world.blackHome) {
+            quest.blackHome = true;
+        }
+        if (world.tabbyHome) {
+            quest.tabbyHome = true;
+        }
+        // ...and the other way, so a world that upgraded from a build without
+        // the world record picks it up from the level's own history.
+        if (quest.blackHome) {
+            world.blackHome = true;
+        }
+        if (quest.tabbyHome) {
+            world.tabbyHome = true;
+        }
     }
 }
