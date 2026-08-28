@@ -135,6 +135,25 @@ echo "Running veilstatus..."
 echo "veilstatus" >&3
 wait_for "VEIL_STATUS_DONE" 180
 
+# Surface pass. The Surface POIs are placed by vanilla's own world-preset
+# machinery, which means "the preset compiles" and "the preset lands in a world"
+# are two completely different claims. `stamp` measures both: it reads the queue
+# the world preset system built for whole 1024x1024 preset regions, then
+# force-generates a couple of the queued sites and counts the structures in the
+# world that came out of them.
+echo "Running skysurfacestatus stamp (surface POIs)..."
+echo "skysurfacestatus stamp" >&3
+wait_for "SKYSURFACE_STATUS_DONE" 240
+# ...and start a Skyfall, leaving it RUNNING with shards on the ground, so the
+# world is saved mid-event. Phase 2 then has to restore it and clean up after
+# it, which is the only way to prove the event cannot leave anything behind.
+echo "Running skysurfacestatus seed (start a Skyfall and leave it running)..."
+echo "skysurfacestatus seed" >&3
+for _ in $(seq 1 120); do
+    [ "$(grep -c SKYSURFACE_STATUS_DONE "$LOG")" -ge 2 ] && break
+    sleep 2
+done
+
 stop_server
 LOG1="$WORK_DIR/server.log"
 
@@ -159,6 +178,11 @@ echo "Setting midnight and re-probing spawns..."
 echo "time midnight" >&3
 echo "skyreachstatus" >&3
 wait_for "SKYREACH_STATUS_DONE" 180
+# The Skyfall that was still running when the world was written: it has to come
+# back knowing which tiles it wrote, and clearing them has to leave nothing.
+echo "Finishing the restored Skyfall..."
+echo "skysurfacestatus event" >&3
+wait_for "SKYSURFACE_STATUS_DONE" 240
 stop_server
 LOG2="$WORK_DIR/server2.log"
 
@@ -394,6 +418,138 @@ else
     fi
 fi
 
+echo "--- verifying the Surface points of interest ---"
+# The three POIs are placed by vanilla's own world-preset system, so nothing
+# here is asserted from source: the census reads the queue that system actually
+# built for whole 1024x1024 preset regions, and the stamp lines count real
+# objects in a world that was really generated.
+#
+# A preset names its pieces by string ID, and both ObjectRegistry.getObjectID
+# and TileRegistry.getTileID answer -1 for a name they do not know, which
+# Preset.setObject reads as "leave this cell alone". So one typo silently
+# deletes part of a structure without failing anything. That is what
+# unresolved=0 is guarding.
+grep -qE "surface materials: named=[0-9]+ unresolved=0( |$)" "$LOG1" \
+    || { echo "FAIL: a Surface POI names an object or tile that does not resolve"; \
+         grep -E "surface materials:" "$LOG1" | tail -1; STATUS=1; }
+grep -qE "surface loot: items=[0-9]+ unresolved=0( |$)" "$LOG1" \
+    || { echo "FAIL: a Surface loot table names an item that does not exist"; \
+         grep -E "surface loot:" "$LOG1" | tail -1; STATUS=1; }
+# Clutter, not masonry: the shard must break with anything, like vanilla's own
+# small ground debris (docs/IMPLEMENTATION_RULES.md rule 4).
+grep -qF "surface tool skyfallshard=ALL/1" "$LOG1" \
+    || { echo "FAIL: the Fallen Skyshard does not have clutter tool behaviour"; \
+         grep -E "surface tool" "$LOG1" | tail -1; STATUS=1; }
+
+CENSUS="$(grep -oE 'poi census: presetregions=[0-9]+ tilespan=[0-9]+x[0-9]+ CraterGeneration=[0-9]+ CampGeneration=[0-9]+ ShrineGeneration=[0-9]+ total=[0-9]+ perpresetregion=[0-9.]+' "$LOG1" | tail -1)"
+if [ -z "$CENSUS" ]; then
+    echo "FAIL: no poi census — the Surface POI world preset never ran"; STATUS=1
+else
+    for field in CraterGeneration CampGeneration ShrineGeneration; do
+        value="$(echo "$CENSUS" | grep -oE "$field=[0-9]+" | cut -d= -f2)"
+        [ "${value:-0}" -gt 0 ] || { echo "FAIL: no $field queued anywhere ($CENSUS)"; STATUS=1; }
+    done
+    # Rarity has to be a measured band, not a comment. Vanilla's own surface
+    # list queues roughly 150-250 structures per preset region; ours is one
+    # order of magnitude below that on purpose, and a change either way should
+    # be deliberate rather than discovered in a playtest.
+    PER="$(echo "$CENSUS" | grep -oE 'perpresetregion=[0-9.]+' | cut -d= -f2 | cut -d. -f1)"
+    [ "${PER:-0}" -ge 5 ] || { echo "FAIL: Surface POIs are so rare they may as well not exist ($CENSUS)"; STATUS=1; }
+    [ "${PER:-0}" -le 40 ] || { echo "FAIL: Surface POIs are no longer rare ($CENSUS)"; STATUS=1; }
+fi
+
+# Queued is an intention. These lines are the structure standing in the world.
+for pair in CraterGeneration:aetheriumrock CampGeneration:aeronautwreck ShrineGeneration:seraphstatue; do
+    kind="${pair%%:*}"
+    signature="${pair##*:}"
+    LINE="$(grep -oE "poi stamp: $kind queued=[0-9]+ generated=[0-9]+ placedcounter=[0-9]+ ${signature}objects=[0-9]+" "$LOG1" | tail -1)"
+    if [ -z "$LINE" ]; then
+        echo "FAIL: $kind was never stamped into the world"; STATUS=1; continue
+    fi
+    gen="$(echo "$LINE" | grep -oE 'generated=[0-9]+' | cut -d= -f2)"
+    counter="$(echo "$LINE" | grep -oE 'placedcounter=[0-9]+' | cut -d= -f2)"
+    found="$(echo "$LINE" | grep -oE "${signature}objects=[0-9]+" | cut -d= -f2)"
+    [ "${gen:-0}" -ge 1 ] || { echo "FAIL: no $kind site could be generated ($LINE)"; STATUS=1; }
+    [ "${counter:-0}" -eq "${gen:-0}" ] || { echo "FAIL: $kind generated $gen site(s) but stamped $counter ($LINE)"; STATUS=1; }
+    [ "${found:-0}" -ge "${gen:-0}" ] || { echo "FAIL: $kind stamped but wrote no $signature ($LINE)"; STATUS=1; }
+done
+
+# A preset writes object IDs with the raw layer setter and never runs
+# MultiTile.placeObject, so every half of a multi-tile piece has to be written
+# by hand -- and Region.checkTilesGenerationValid DELETES a piece whose other
+# halves are missing. These are the two multi-tile pieces the POIs use.
+CRATER="$(grep -E "poi contents: CraterGeneration" "$LOG1" | tail -1)"
+CAMP="$(grep -E "poi contents: CampGeneration" "$LOG1" | tail -1)"
+SHRINE="$(grep -E "poi contents: ShrineGeneration" "$LOG1" | tail -1)"
+for piece in stormcrystalx stormcrystalrx deadwoodchestx; do
+    echo "$CRATER" | grep -qF "$piece" \
+        || { echo "FAIL: the fallen sky fragment is missing $piece ($CRATER)"; STATUS=1; }
+done
+for piece in bigtentx bigtent2x bigtent3x bigtent4x aeronautwreckx skyballoonx skyparcelx oakchestx; do
+    echo "$CAMP" | grep -qF "$piece" \
+        || { echo "FAIL: the aeronaut camp is missing $piece ($CAMP)"; STATUS=1; }
+done
+for piece in cloudmarblewallx seraphstatuex wardencandelabrax; do
+    echo "$SHRINE" | grep -qF "$piece" \
+        || { echo "FAIL: the skyward shrine is missing $piece ($SHRINE)"; STATUS=1; }
+done
+# Loot has to land in the container, not just next to it: Preset.addInventory
+# reaches the chest's ObjectEntity at stamp time and silently gives up if it is
+# not there.
+CHEST_ITEMS="$(echo "$CRATER" | grep -oE 'chestitems=[0-9]+' | cut -d= -f2)"
+[ "${CHEST_ITEMS:-0}" -ge 2 ] \
+    || { echo "FAIL: the crater's strongbox is empty ($CRATER)"; STATUS=1; }
+# The signs are the only part of a preset that is not object IDs: the text is
+# handed over by an addCustomApply hook at stamp time, and it must arrive
+# translated rather than as a raw misc.<key>.
+for pair in "aeronaut camp:$CAMP" "skyward shrine:$SHRINE"; do
+    label="${pair%%:*}"
+    line="${pair#*:}"
+    echo "$line" | grep -q 'sign="' \
+        || { echo "FAIL: the $label's sign carries no text ($line)"; STATUS=1; }
+    echo "$line" | grep -q 'sign="misc\.' \
+        && { echo "FAIL: the $label's sign shows a raw locale key ($line)"; STATUS=1; }
+done
+
+echo "--- verifying the Skyfall world event ---"
+# Phase 1 left a shower RUNNING with shards on the ground, so the world was
+# written mid-event.
+SEED="$(grep -oE 'skyfall seed: remainingms=[0-9]+ placed=[0-9]+ live=[0-9]+ inworld=[0-9]+' "$LOG1" | tail -1)"
+if [ -z "$SEED" ]; then
+    echo "FAIL: the Skyfall never started"; STATUS=1
+else
+    seeded="$(echo "$SEED" | grep -oE ' placed=[0-9]+' | cut -d= -f2)"
+    live="$(echo "$SEED" | grep -oE ' live=[0-9]+' | cut -d= -f2)"
+    inworld="$(echo "$SEED" | grep -oE ' inworld=[0-9]+' | cut -d= -f2)"
+    [ "${seeded:-0}" -gt 0 ] || { echo "FAIL: the Skyfall placed no shards ($SEED)"; STATUS=1; }
+    [ "${live:-0}" -eq "${inworld:-0}" ] \
+        || { echo "FAIL: the Skyfall's shard list disagrees with the world ($SEED)"; STATUS=1; }
+fi
+# ...and phase 2 has to restore that event, still knowing which tiles it wrote,
+# and leave nothing behind when it ends. This is the whole "time-limited and
+# self-cleaning" claim, checked across a save/load round trip rather than
+# within one session.
+RUN="$(grep -oE 'skyfall run: restored=(true|false) remainingms=[0-9]+ placed=[0-9]+ live=[0-9]+ inworld=[0-9]+' "$LOG2" | tail -1)"
+CLEAN="$(grep -oE 'skyfall clean: cleared=[0-9]+ leftbehind=[0-9]+ over=(true|false)' "$LOG2" | tail -1)"
+if [ -z "$RUN" ] || [ -z "$CLEAN" ]; then
+    echo "FAIL: the restarted server never finished the Skyfall"; STATUS=1
+else
+    echo "$RUN" | grep -q "restored=true" \
+        || { echo "FAIL: the running Skyfall did not survive a restart ($RUN)"; STATUS=1; }
+    restored_live="$(echo "$RUN" | grep -oE ' live=[0-9]+' | cut -d= -f2)"
+    [ "${restored_live:-0}" -gt 0 ] \
+        || { echo "FAIL: the restored Skyfall forgot the shards it placed ($RUN)"; STATUS=1; }
+    left="$(echo "$CLEAN" | grep -oE 'leftbehind=[0-9]+' | cut -d= -f2)"
+    [ "${left:-1}" -eq 0 ] \
+        || { echo "FAIL: the Skyfall left shards in the world forever ($CLEAN)"; STATUS=1; }
+    echo "$CLEAN" | grep -q "over=true" \
+        || { echo "FAIL: the Skyfall never ended ($CLEAN)"; STATUS=1; }
+fi
+# The schedule is a WorldData, so it has to be there and have picked a night.
+grep -qE "skyfall schedule: day=[0-9]+ night=(true|false) nextday=[0-9]+" "$LOG1" \
+    || { echo "FAIL: the Skyfall schedule never initialised"; \
+         grep -E "skyfall schedule:" "$LOG1" | tail -1; STATUS=1; }
+
 echo "--- verifying persistence across restart ---"
 SPIRE1="$(grep -oE 'spire=-?[0-9]+,-?[0-9]+' "$LOG1" | tail -1)"
 SPIRE2="$(grep -oE 'spire=-?[0-9]+,-?[0-9]+' "$LOG2" | tail -1)"
@@ -446,6 +602,10 @@ if [ "$STATUS" -eq 0 ]; then
     grep -E "quest: stage=|npc check:|settler check:|recruit check:|name check:|cat home check:|husbandry check:" "$LOG2"
     echo "--- spawn probe, midnight pass ---"
     awk '/Setting midnight|time midnight/{n=1} n && /spawn check:/' "$LOG2" | tail -20
+    awk '/Setting midnight|time midnight/{n=1} n && /spawn check:/' "$LOG2" | tail -13
+    echo "--- surface POIs and the Skyfall ---"
+    grep -E "surface registry:|surface materials:|surface loot:|poi census:|poi stamp:|poi contents:|skyfall seed:|skyfall schedule:" "$LOG1"
+    grep -E "skyfall run:|skyfall clean:" "$LOG2"
     # Only after the logs have been read, and only on success: a failed run's
     # world and logs are the evidence for diagnosing it. INTEGRATION_KEEP=1
     # keeps a successful run's world too, for probing output the summary above

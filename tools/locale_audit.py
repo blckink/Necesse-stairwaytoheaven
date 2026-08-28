@@ -173,6 +173,34 @@ MULTI_OBJECT_HELD_SUFFIXES = {
     "registerCrystalCluster": (0, ("",)),
 }
 
+# --------------------------------------------------------------------------
+# where an object's WORLD sprite comes from
+#
+# Everything above is about the ITEM icon. The sprite the player sees standing
+# on the ground is a separate file, loaded by the object's own loadTextures(),
+# and it fails exactly the same way: GameTexture.fromFile swallows the
+# FileNotFoundException and hands back GameResources.error, so a mistyped name
+# puts a red ERR tile in the WORLD rather than in the inventory. Nothing here
+# checked that until now, because every object we had happened to name its
+# sheet after its own string ID - so items/<id>.png existing implied
+# objects/<id>.png existing, and the check for one silently stood in for the
+# other.
+#
+# SkyDecoObject breaks that coincidence by design: it takes the texture NAME as
+# constructor argument 0 (SkyDecoObject.java, `GameTexture.fromFile("objects/" +
+# textureName)`), which is deliberately allowed to differ from the registered
+# ID - stairwaytoheaven.surface.SkyfallShardObject registers "skyfallshard" and
+# draws objects/starfall.png on purpose. From that moment the two names can
+# drift, and eighteen registrations go through this one class.
+#
+# So: map the CLASS to the sheet its loadTextures() reads, as (resource
+# directory, index of the constructor argument that names it). Only listed
+# classes are checked - and a listed class whose argument is NOT a literal is
+# reported rather than skipped, for the same reason the item-icon table does it.
+OBJECT_TEXTURE_BY_CLASS = {
+    "SkyDecoObject": ("objects", 0),
+}
+
 
 # --------------------------------------------------------------------------
 # reading the tree
@@ -680,6 +708,53 @@ def texture_load_sites():
             else:
                 literals.append((match.group(1), spot))
     return literals, dynamic
+def check_world_textures():
+    """The sheet each registered object DRAWS ITSELF from must exist.
+
+    Walks every registerObject call, resolves the class it constructs and the
+    constructor argument that names its world sheet (OBJECT_TEXTURE_BY_CLASS),
+    and checks the file. Returns (problems, checked).
+    """
+    supers = class_supers()
+    problems = 0
+    checked = 0
+    for path in source_files():
+        text = open(path, encoding="utf-8").read()
+        for offset, args in call_sites(text, "registerObject"):
+            if len(args) < 2:
+                continue
+            class_name, ctor = construction(args[1], text)
+            if class_name is None:
+                continue
+            name, target, rule, seen = class_name, None, None, set()
+            while name and name not in seen:
+                seen.add(name)
+                if name in OBJECT_TEXTURE_BY_CLASS:
+                    target, rule = name, OBJECT_TEXTURE_BY_CLASS[name]
+                    break
+                name = supers.get(name)
+            if rule is None:
+                continue
+            directory, index = rule
+            spot = where(path, text, offset)
+            texture = texture_argument(class_name, ctor, target, index, supers)
+            if texture is None:
+                print("!! the object registered at %s (%s) names its world sheet with "
+                      "something this audit cannot follow to a file -- make it a "
+                      "literal, or teach OBJECT_TEXTURE_BY_CLASS about the class"
+                      % (spot, class_name))
+                problems += 1
+                continue
+            checked += 1
+            wanted = "%s/%s.png" % (directory, texture)
+            if os.path.exists(os.path.join(RESOURCES, *wanted.split("/"))):
+                continue
+            print("!! the object registered at %s (%s) draws %s in the world, which "
+                  "does not exist -- GameTexture.fromFile hands back the engine's ERR "
+                  "tile and the player sees it standing on the ground"
+                  % (spot, class_name, wanted))
+            problems += 1
+    return problems, checked
 
 
 def check_registration_wrappers():
@@ -831,7 +906,15 @@ def main(vanilla_dump=None):
               "checked here; pass --vanilla /path/to/sprite/dump to verify it"
               % path)
 
-    # 7. And nothing may register an ID behind this audit's back.
+    # 7. The sheet an object draws ITSELF from must exist too. Checks 5 and 6
+    #    are both about the item icon; a missing world sheet is the same bug on
+    #    the other side of the same registration, and it stayed invisible only
+    #    as long as every object's sheet happened to be named after its own ID.
+    #    See OBJECT_TEXTURE_BY_CLASS.
+    world_problems, world_sheets = check_world_textures()
+    problems += world_problems
+
+    # 8. And nothing may register an ID behind this audit's back.
     problems += check_registration_wrappers()
 
     # 8. Every texture our source names by a literal path has to exist -- in
@@ -874,14 +957,18 @@ def main(vanilla_dump=None):
     if problems:
         print("\n%d localization problem(s) across %d registered IDs." % (problems, total))
         return 1
+    # One summary covering both texture checks. Two streams grew this audit at
+    # the same time -- one added the literal-texture-path check, the other the
+    # per-object world-sheet check -- and each wrote its own closing line.
     print("OK: %d registered IDs (%d of them human settlers needing mob.<id>name) "
           "and %d literal keys named in en.lang and de.lang, locales in sync, "
           "%d holdable ID(s) with a real icon file (%d of them recoloured from "
           "vanilla art, %s), %d literal texture path(s) resolved (%d of them to "
-          "the game's own resources), %d runtime-built key(s) noted above."
+          "the game's own resources), %d object(s) with a real world sheet, "
+          "%d runtime-built key(s) noted above."
           % (total, len(humans), len(literals), icons, borrowed,
              "checked against the dump" if vanilla_dump else "dump absent, unchecked",
-             textures, borrowed_files, len(dynamic)))
+             textures, borrowed_files, world_sheets, len(dynamic)))
     return 0
 
 
