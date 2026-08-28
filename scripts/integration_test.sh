@@ -289,7 +289,7 @@ echo "--- verifying the Skyway Passages generate ---"
 grep -qE "skyway: ground=skywaytile " "$LOG1" \
     || { echo "FAIL: the Skyway ground tile did not resolve"; \
          grep -E "skyway:" "$LOG1" | tail -1; STATUS=1; }
-SKYWAY="$(grep -oE 'skyway: ground=[a-z]+ tiles=[0-9]+ seraphtrees=[0-9]+ seraphstatues=[0-9]+ rails=[0-9]+ railgates=[0-9]+' "$LOG1" | tail -1)"
+SKYWAY="$(grep -oE 'skyway: ground=[a-z]+ tiles=[0-9]+ seraphtrees=[0-9]+ cloudtrees=[0-9]+ trees=[0-9]+ seraphstatues=[0-9]+ rails=[0-9]+ railgates=[0-9]+' "$LOG1" | tail -1)"
 if [ -z "$SKYWAY" ]; then
     echo "FAIL: no skyway report — the Skyway Passages never ran"; STATUS=1
 else
@@ -297,10 +297,15 @@ else
     # Driftlands band by construction, so a given seed may legitimately have no
     # Skyway within it. Ground and trees are asserted together: paving with no
     # Seraph on it would mean the biome generated its floor and nothing else.
-    SKYWAY_TILES="$(echo "$SKYWAY" | grep -oE 'tiles=[0-9]+' | cut -d= -f2)"
-    SKYWAY_TREES="$(echo "$SKYWAY" | grep -oE 'seraphtrees=[0-9]+' | cut -d= -f2)"
-    if [ "${SKYWAY_TILES:-0}" -gt 0 ] && [ "${SKYWAY_TREES:-0}" -eq 0 ]; then
-        echo "FAIL: Skyway ground generated but no Sky Seraph grew on it ($SKYWAY)"; STATUS=1
+    # Both species share the passages' tree band, so count them together.
+    # The band is 0.022 and roughly 27% of tiles are claimed before it rolls,
+    # so expected trees is about tiles * 0.016: below ~200 tiles of ground a
+    # count of zero is ordinary sampling, not a broken biome. At 200 tiles the
+    # expectation is about 3, so zero there does mean nothing is growing.
+    SKYWAY_TILES="$(echo "$SKYWAY" | grep -oE ' tiles=[0-9]+' | cut -d= -f2)"
+    SKYWAY_TREES="$(echo "$SKYWAY" | grep -oE ' trees=[0-9]+' | cut -d= -f2)"
+    if [ "${SKYWAY_TILES:-0}" -ge 200 ] && [ "${SKYWAY_TREES:-0}" -eq 0 ]; then
+        echo "FAIL: ${SKYWAY_TILES} tiles of Skyway paving and not one tree on it ($SKYWAY)"; STATUS=1
     fi
 fi
 

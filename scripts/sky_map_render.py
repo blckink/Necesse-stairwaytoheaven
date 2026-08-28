@@ -72,6 +72,7 @@ OBJECTS = {
     "fulgurpine": ("mod", "fulgurpine.png", "tree"),
     "prismabirch": ("mod", "prismabirch.png", "tree"),
     "skySeraphTree": ("mod", "skyseraphtree.png", "tree"),
+    "cloudTree": ("mod", "cloudtree.png", "tree"),
     # geology
     "skystoneRock": ("mod", "skystonerock.png", "rock"),
     "aetheriumRock": ("mod", "skystonerock.png", "rock"),
@@ -111,7 +112,7 @@ OBJECTS = {
 # frost variants below, chosen by the ground the tree stands on. This mirrors
 # stairwaytoheaven.objects.SkyTreeObject -- vanilla's snow column is gated on
 # TileRegistry.snowID, which the Skyreach does not have.
-FROST_TREES = {"skySeraphTree"}
+FROST_TREES = {"skySeraphTree", "cloudTree"}
 FROST_GROUND = {"stormslate", "skywayTile"}
 
 _cache = {}

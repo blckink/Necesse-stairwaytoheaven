@@ -254,7 +254,7 @@ def main():
                  "objects/skyseraphtree.png", "items/skyseraphtree.png",
                  "objects/statues/seraph.png", "items/seraphstatue.png",
                  "objects/cloudtree.png", "items/cloudtree.png",
-                 "objects/nimbuswillow.png")
+                 "objects/nimbuswillow.png", "objects/cloudmarblewall.png")
     clash = [rel for rel in converted if os.path.exists(f"{out}/{rel}")]
     if clash:
         raise SystemExit(

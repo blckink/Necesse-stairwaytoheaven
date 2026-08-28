@@ -1471,48 +1471,53 @@ def _cloud_strands(c, ramp, rng, cx, top_y, base_y, w=5):
             c.put(x0 + rng.range(1, max(1, w - 2)), y, ramp["base"])
 
 
-# Root fan profile: (dx from trunk centre, y the toe's shoulder starts).
-# Read straight off the sheet's proportions - the outer toes start lowest and
-# reach furthest, so the foot FLARES instead of stepping. Toes are separated
-# by dark seams; without them the fan merged into one brown triangle and the
-# sapling read as a bush growing out of a mound. The seams are "shade", not
-# "deep": a full-height black hairline per toe punched the foot into a row of
-# separate posts instead of one splayed root mass.
-_CLOUD_ROOTS = ((3, 25), (4, 25), (5, 26), (6, 27), (7, 28))
-_CLOUD_ROOT_SEAMS = (4, 6)
+# Root foot silhouette, (y, dx_left, dx_right) from the trunk centre. Authored
+# as an explicit profile rather than generated, because three procedural passes
+# all failed at this size: 1 px columns read as a wire whisk, stacked ellipse
+# "tubes" aliased into a checkerboard at r=2, and full-height black seams
+# punched the foot into a row of separate posts.
+# Proportion check against the sheet: its trunk is 29 px under the crown and
+# 43 px at the roots (+48%), and the fan spans 40% of the crown's width. Here
+# that is a 5 px trunk in a 13 px foot under a 23 px crown.
+_CLOUD_FOOT = ((25, -3, 3), (26, -4, 4), (27, -4, 4), (28, -5, 5),
+               (29, -6, 6))
+# The crevice between the inner and outer toe on each side: it runs down and
+# out, so the fan reads as two thick fingers per side instead of one flare.
+_CLOUD_FOOT_CREVICE = ((25, 2), (26, 3), (27, 3), (28, 4), (29, 5))
 
 
-def _cloud_root_fan(c, ramp, cx, base_y):
-    """Root buttresses splaying out of the trunk foot. Chunky on purpose: on
-    the sheet the roots reach ~1.5x the trunk's own width to either side and
-    they are the trunk's most recognisable feature at any scale. Each toe gets
-    a lit shoulder at its top so the fan reads as rounded fingers curling down
-    to the ground, not as a flat skirt."""
+def _cloud_root_fan(c, ramp, cx):
+    """Root buttresses splaying out of the trunk foot - the trunk's most
+    recognisable feature at any scale, and the thing that most separates this
+    silhouette from the Seraph sapling's plain braided stem."""
+    for (y, dxl, dxr) in _CLOUD_FOOT:
+        for x in range(cx + dxl, cx + dxr + 1):
+            d = x - cx
+            if d == dxl:
+                tone = ramp["hi"]                     # lit outer rim, top-left
+            elif d == dxr:
+                tone = ramp["deep"]                   # shaded outer rim
+            elif d < 0:
+                tone = ramp["light"]
+            else:
+                tone = ramp["base"]
+            c.put(x, y, tone)
     for side in (-1, 1):
-        lit = side < 0                                # light from the top-left
-        for (dx, top) in _CLOUD_ROOTS:
-            x = cx + side * dx
-            for y in range(top, base_y + 1):
-                if dx in _CLOUD_ROOT_SEAMS and y > top:
-                    tone = ramp["shade"]              # crevice between toes
-                elif y == top:
-                    tone = ramp["hi"] if lit else ramp["light"]
-                elif y >= base_y:
-                    tone = ramp["deep"]
-                elif y >= base_y - 1:
-                    tone = ramp["base"]
-                else:
-                    tone = ramp["light"] if lit else ramp["base"]
-                c.put(x, y, tone)
-            if dx not in _CLOUD_ROOT_SEAMS and dx < 7:
-                c.put(x, top + 1, ramp["glint"] if lit else ramp["hi"])
+        for (y, dx) in _CLOUD_FOOT_CREVICE:           # split each side in two
+            c.put(cx + side * dx, y, ramp["shade"] if y % 2 else ramp["deep"])
+            if side < 0:                              # lit shoulder of the toe
+                c.put(cx + side * dx - 1, y, ramp["glint"] if y == 26
+                      else ramp["hi"])
 
 
 def _cloud_canopy_shadow(c, wood, leaf):
     """The sheet's trunk is visibly cooler and darker for the first rows under
     the crown. Runs after the crown is pasted: any wood pixel whose neighbour
     above is crown gets the cool shade tone."""
-    crown_tones = {leaf[k] for k in _CLOUD_UP}
+    # "shade" belongs in this set: it is what _cloud_ground_rim leaves along the
+    # crown's bottom edge, and without it the pass found no crown above the
+    # trunk at all and the canopy shadow silently never ran.
+    crown_tones = {leaf[k] for k in _CLOUD_UP} | {leaf["shade"]}
     wood_lit = {wood["hi"], wood["light"], wood["glint"], wood["base"]}
     hits = [(x, y) for x in range(c.width) for y in range(1, c.height)
             if c.get(x, y)[:3] in wood_lit
@@ -1541,11 +1546,16 @@ def _cloudsapling_body():
     wood = palette.CLOUDWOOD
     turf = palette.CLOUDTURF
 
-    _cloud_strands(body, wood, rng, cx=16, top_y=16, base_y=29, w=5)
-    _cloud_root_fan(body, wood, cx=16, base_y=29)
-    for x in range(6, 27):                            # foot line seats the tree
-        if body.filled(x, 29) and not body.filled(x, 30):
-            body.put(x, 29, wood["deep"])
+    # Soil clump FIRST, so the root fan sits on top of it instead of being
+    # paved over. The first pass drew it last and the 8x1.3 ellipse flattened
+    # rows 29-30 into a two-tone skirt, erasing the one part of this trunk a
+    # player can recognise. Vanilla saplings sit in DARK earth, so it uses the
+    # bottom of the wood ramp, not a pale pad.
+    body.ellipse(16, 29.3, 7.2, 1.6, wood["shade"])
+    body.ellipse(15, 28.9, 5.2, 1.0, wood["base"])
+
+    _cloud_strands(body, wood, rng, cx=16, top_y=16, base_y=26, w=5)
+    _cloud_root_fan(body, wood, cx=16)
 
     # crown on its own canvas so the trunk's browns never enter the light field
     crown = Canvas(32, 32)
@@ -1553,19 +1563,27 @@ def _cloudsapling_body():
     # BELLY puffs. The belly pair is the cloud tell - a canopy tapers in at the
     # bottom, a cloud bulges out - and the overlap is what keeps the union a
     # dome; spaced further apart the same six read as flower petals.
+    # The belly pair is deliberately asymmetric: matched radii at matched
+    # heights gave the crown a ruler-straight 13 px bottom edge, and vanilla
+    # canopies never end in a straight line.
     puffs = [(16.0, 11.8, 6.7), (15.4, 8.0, 5.3),
              (10.4, 12.4, 5.6), (21.6, 12.4, 5.6),
-             (12.6, 16.2, 4.8), (19.6, 16.4, 4.8)]
+             (12.4, 16.7, 4.9), (19.9, 15.7, 4.5)]
     _cloud_crown(crown, puffs, leaf, rng)
     _seraph_smooth(crown, rounds=3)          # shape-only pass, tone-agnostic
     _cloud_valleys(crown, puffs, leaf)
     # gold sprigs: two on the lit half, one tucked on the shaded right, which
     # is how the sheet spaces them - never a ring, never symmetric
+    # Four sprigs and three glints, not three and two: measured, gold is ~15%
+    # of the sheet's crown - roughly one sprig per puff - and against the tree
+    # in the 1x mock the first pass read visibly under-golded.
     _cloud_sprig(crown, 11, 13, leaf)
     _cloud_sprig(crown, 19, 9, leaf, flip=True)
     _cloud_sprig(crown, 22, 18, leaf)
+    _cloud_sprig(crown, 15, 19, leaf)
     _cloud_glint(crown, 15, 6, leaf)
     _cloud_glint(crown, 8, 15, leaf)
+    _cloud_glint(crown, 19, 14, leaf)
     crown.outline(leaf["deep"])
     _cloud_ground_rim(crown, leaf, y_from=15)
     body.paste(crown, 0, 0)
@@ -1574,15 +1592,15 @@ def _cloudsapling_body():
     # one gold sprig already shed, caught on the root fan
     _cloud_sprig(body, 21, 26, leaf)
 
-    # Soil clump over the root foot, kept LOW and thin: the first pass used a
-    # 6x2 ellipse and it swallowed the whole root fan, which is the one part
-    # of this trunk a player can recognise. Two Cloudturf tufts keep the link
-    # to cloudturftile, the only tile this sapling plants on.
-    body.ellipse(16, 29.6, 8.0, 1.3, wood["base"])
-    body.ellipse(14, 29.2, 5.0, 0.9, wood["light"])
+    # Ground line: darken whatever each column actually ends on. Setting a
+    # fixed row instead laid a flat dark bar across the foot and cut the roots
+    # off from the soil they stand in.
     for x in range(4, 29):
-        if body.filled(x, 30) and not body.filled(x, 31):
-            body.put(x, 30, wood["deep"])
+        for y in range(31, 25, -1):
+            if body.filled(x, y):
+                if y >= 28:
+                    body.put(x, y, wood["deep"])
+                break
     body.put(9, 29, turf["deep"])
     body.put(23, 29, turf["tuft"])
     return body
@@ -1621,11 +1639,11 @@ def gen_cloudwood_item(path):
     for (cx, cy) in axis:                            # rounded bark cylinder
         c.ellipse(cx, cy, 5.0, 5.2, wood["hi"])
     for (cx, cy) in axis[1:]:                        # sunlit top-left band
-        c.ellipse(cx - 0.7, cy - 2.6, 3.4, 1.8, wood["glint"])
+        c.ellipse(cx - 0.7, cy - 2.3, 3.6, 2.2, wood["glint"])
     for (cx, cy) in axis[1:]:                        # shaded belly
-        c.ellipse(cx + 0.7, cy + 2.5, 3.4, 1.9, wood["light"])
+        c.ellipse(cx + 0.8, cy + 2.8, 3.4, 1.7, wood["light"])
     for (cx, cy) in axis[1:]:
-        c.ellipse(cx + 1.0, cy + 3.6, 2.9, 1.1, wood["base"])
+        c.ellipse(cx + 1.1, cy + 3.8, 2.9, 1.0, wood["base"])
     c.ellipse(x1 + 0.5, y1 - 0.5, 1.8, 4.0, wood["deep"])   # far cut end
     # Rope grooves run ALONG the cylinder, parallel to its axis - this trunk is
     # a bundle of strands seen side-on. Drawn as hairlines offset perpendicular
@@ -1644,13 +1662,13 @@ def gen_cloudwood_item(path):
     # so the cut face reads as WOOD carrying the crown's colour rather than as
     # an ice cube stuck on the end of a stick
     c.ellipse(x0 - 2, y0 + 0.5, 4.0, 5.2, wood["deep"])
-    c.ellipse(x0 - 2, y0 + 0.5, 3.3, 4.5, leaf["deep"])
-    c.ellipse(x0 - 2, y0 + 0.5, 2.9, 4.0, leaf["hi"])
-    c.ellipse(x0 - 2, y0 + 0.4, 2.4, 3.3, leaf["base"])
-    c.ellipse(x0 - 2, y0 + 0.4, 2.0, 2.7, leaf["top"])
-    c.ellipse(x0 - 2, y0 + 0.3, 1.3, 1.8, leaf["light"])
-    c.ellipse(x0 - 2.2, y0, 0.9, 1.2, leaf["white"])
-    c.put(x0 - 4, y0 - 1, leaf["hi"])                # cap rim glint
+    c.ellipse(x0 - 2, y0 + 0.5, 3.4, 4.6, wood["light"])   # sapwood collar
+    c.ellipse(x0 - 2, y0 + 0.5, 2.9, 4.0, leaf["deep"])
+    c.ellipse(x0 - 2, y0 + 0.4, 2.4, 3.4, leaf["hi"])
+    c.ellipse(x0 - 2, y0 + 0.4, 1.9, 2.7, leaf["base"])
+    c.ellipse(x0 - 2, y0 + 0.3, 1.4, 2.0, leaf["top"])
+    c.ellipse(x0 - 2.2, y0, 0.8, 1.1, leaf["white"])
+    c.put(x0 - 4, y0 - 1, wood["glint"])             # cap rim glint
     c.put(x0 - 1, y0 + 3, leaf["deep"])              # ring tick
     c.outline(wood["deep"])
     _sunlit_rim(c, wood["glint"], wood["hi"], y_max=15, outline=wood["deep"])
@@ -1673,8 +1691,10 @@ def gen_cloudtree_leaves(path):
     sheet = Canvas(100, 20)
     leaf = palette.CLOUDLEAF
     angles = (-0.62, -0.24, 0.16, 0.55, 0.95)
-    # local (u, v) layout of the clump, back puff first
-    lobes = ((-3.2, 1.1, 3.9, 3.5), (3.4, 1.3, 3.6, 3.2), (0.2, -1.6, 4.2, 3.6))
+    # Local (u, v) layout of the clump, back puff first. Radii were pushed 15%
+    # on the second pass: the first sat at 125 opaque px against birchleaves'
+    # 160 and read as a wisp of steam rather than a piece of canopy.
+    lobes = ((-3.3, 1.2, 4.4, 4.0), (3.6, 1.4, 4.1, 3.7), (0.2, -1.7, 4.7, 4.1))
     for f in range(5):
         c = Canvas(20, 20)
         rng = Rng(0xC10F + f * 617)
@@ -1688,7 +1708,9 @@ def gen_cloudtree_leaves(path):
                       ru * 0.62, rv * 0.46, leaf["top"])
             _rot_lobe(c, 9, 10, ca, sa, u - 1.0, v - 1.8,
                       ru * 0.36, rv * 0.26, leaf["white"])
-        _seraph_smooth(c, rounds=1)          # shape-only pass, tone-agnostic
+        # Two rounds, not one: _rot_lobe's rotation aliasing left 1 px spurs on
+        # the tumbled frames and the outline pass turned each into a spike.
+        _seraph_smooth(c, rounds=2)          # shape-only pass, tone-agnostic
         # the gold sprig the clump carries, tumbling with it
         _cloud_sprig(c, 9 + (1 if f % 2 else -1), 12 + (f % 3) - 1, leaf,
                      flip=f in (1, 4))
@@ -1699,5 +1721,12 @@ def gen_cloudtree_leaves(path):
         gx, gy = 9 + rng.range(-2, 2), 8 + rng.range(-1, 2)
         if _cloud_interior(c, gx, gy):
             c.put(gx, gy, leaf["white"])
+        # One ice-cyan tick low in the clump. This single strip is shed by the
+        # plain tree (sheet rows 0-3) AND the frost tree (rows 4-7), and
+        # (196,243,249) is the tone rows 4-7 push the whole crown to - so the
+        # scrap carries a touch of it instead of siding with one variant.
+        fx, fy = 9 + rng.range(-3, 1), 12 + rng.range(-1, 1)
+        if _cloud_interior(c, fx, fy):
+            c.put(fx, fy, leaf["frost"])
         sheet.paste(c, f * 20, 0)
     sheet.save(path)

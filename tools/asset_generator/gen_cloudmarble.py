@@ -1640,7 +1640,10 @@ def gen_skyway_icon(path):
 # ---------------------------------------------------------------------------
 
 def generate(objects_dir, items_dir, tiles_dir):
-    gen_cloudmarble_wall(os.path.join(objects_dir, "cloudmarblewall.png"))
+    # objects/cloudmarblewall.png is NOT written here: it is supplied art, kept
+    # in src/main/resources/kk-sprites/ and copied in as-is. gen_cloudmarble_wall
+    # stays below for reference, but calling it would overwrite the supplied
+    # sheet on the next full run. The fence, gate and item icons are still ours.
     gen_cloudmarble_fence(os.path.join(objects_dir, "cloudmarblefence.png"))
     gen_cloudmarble_fencegate(os.path.join(objects_dir, "cloudmarblefencegate.png"))
     # tiles/skyway.png and tiles/skyway_splat.png are NOT written here.

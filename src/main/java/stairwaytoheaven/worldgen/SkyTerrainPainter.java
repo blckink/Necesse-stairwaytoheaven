@@ -467,7 +467,12 @@ public final class SkyTerrainPainter {
                 return isSkyway ? SkyCloudmarbleSet.seraphStatueID : SkyRegistry.gloomRavenStatueID;
             case SkyLandscape.PROP_TREE:
                 if (isSkyway) {
-                    return SkyRegistry.skySeraphTreeID;
+                    // Alternate along a planted run so an avenue reads as two
+                    // species rather than one repeated silhouette. Position
+                    // parity, not a roll, so it stays stable and mirrored.
+                    return ((tileX + tileY) & 1) == 0
+                            ? SkyRegistry.skySeraphTreeID
+                            : SkyRegistry.cloudTreeID;
                 }
                 return isStormveil ? SkyRegistry.fulgurpineID
                         : (isAurora ? SkyRegistry.prismabirchID : SkyRegistry.nimbuswillowID);
@@ -877,7 +882,12 @@ public final class SkyTerrainPainter {
             // produces a comparable ground. First cut ran 0.142 and measured
             // 0.297, tying the emptiest ground in the world; see the header
             // table for where it landed in the end.
-            if (roll < 0.022F) return isRockPatch ? 0 : SkyRegistry.skySeraphTreeID;
+            // Two species share the passages' tree band rather than widening
+            // it: the Seraph on the open verges, the Cloud Tree among the rest
+            // of the cloud material. Splitting 0.022 in half keeps the measured
+            // 0.371 objects/tile exactly where it was calibrated.
+            if (roll < 0.011F) return isRockPatch ? 0 : SkyRegistry.skySeraphTreeID;
+            if (roll < 0.022F) return isRockPatch ? 0 : SkyRegistry.cloudTreeID;
             if (roll < 0.085F) return SkyRegistry.skylichenID;      // in the joints
             if (roll < 0.130F) return isRockPatch ? 0 : SkyRegistry.cloudbellID;
             if (roll < 0.165F) return isRockPatch ? 0 : SkyRegistry.skytulipID;

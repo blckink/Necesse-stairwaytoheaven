@@ -748,6 +748,9 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         logs.add("skyway: ground=" + TileRegistry.getTileStringID(SkyCloudmarbleSet.skywayTileID)
                 + " tiles=" + skywayGround
                 + " seraphtrees=" + actualObjects.getOrDefault(SkyRegistry.skySeraphTreeID, 0)
+                + " cloudtrees=" + actualObjects.getOrDefault(SkyRegistry.cloudTreeID, 0)
+                + " trees=" + (actualObjects.getOrDefault(SkyRegistry.skySeraphTreeID, 0)
+                        + actualObjects.getOrDefault(SkyRegistry.cloudTreeID, 0))
                 + " seraphstatues=" + actualObjects.getOrDefault(SkyCloudmarbleSet.seraphStatueID, 0)
                 + " rails=" + actualObjects.getOrDefault(SkyCloudmarbleSet.cloudmarbleFenceID, 0)
                 + " railgates=" + actualObjects.getOrDefault(SkyCloudmarbleSet.cloudmarbleFenceGateID, 0));
