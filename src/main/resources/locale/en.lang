@@ -294,3 +294,29 @@ swhanchorreward=Skywatch Banner + 5x Aurora Petal
 swhrecruitwardentitle=The Last Keeper
 swhrecruitwardendesc=The Sky Warden would leave the Skywatch behind, for a price no small settlement could pay.
 swhrecruitwardenobj=Hire the Sky Warden into your settlement (<cost> coins)
+
+// ===========================================================================
+// content/arsenal - the Sky Arsenal: five craftable weapons and the four
+// enemies that feed their recipes (plus the Watch Mote the whistle summons).
+// ===========================================================================
+
+[item]
+skyreave=Skyreave
+thunderhead=Thunderhead
+prismcaller=Prismcaller
+skywatchwhistle=Skywatch Whistle
+stormdisc=Stormdisc
+
+[itemtooltip]
+skyreavetip=Sweeps a full circle. The Skywatch cut hail with these.
+thunderheadtip=Drawn all the way, or not worth drawing at all.
+prismcallertip=The shard still remembers every dawn it stood through.
+skywatchwhistletip=One note, and a piece of the old machinery answers.
+stormdisctip=It comes back. It always came back.
+
+[mob]
+rimesentry=Rime Sentry
+auroraflake=Aurora Flake
+fenwraith=Fen Wraith
+cindercantor=Cinder Cantor
+watchmote=Watch Mote

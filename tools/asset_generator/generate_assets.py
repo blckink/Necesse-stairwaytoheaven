@@ -35,6 +35,7 @@ import gen_furniture  # noqa: E402
 import gen_trees  # noqa: E402
 import gen_skyfurniture  # noqa: E402
 import gen_cloudmarble  # noqa: E402
+import gen_arsenal  # noqa: E402
 
 
 def main():
@@ -44,7 +45,8 @@ def main():
     args = parser.parse_args()
     out = args.out
 
-    for sub in ("tiles", "objects", "objects/statues", "items", "mobs", "mobs/icons", "player/weapons", "locale", "ui/mapicons", "particles"):
+    for sub in ("tiles", "objects", "objects/statues", "items", "mobs", "mobs/icons", "player/weapons",
+                "projectiles", "locale", "ui/mapicons", "particles"):
         os.makedirs(os.path.join(out, sub), exist_ok=True)
 
     # Terrain + liquid: modern _splat atlases (the 1.3.2 renderer's primary
@@ -243,6 +245,11 @@ def main():
 
     gen_furniture.gen_v2_item_icons(f"{out}/items")
     gen_furniture.gen_set_icons(f"{out}/items")
+
+    # Sky Arsenal (content/arsenal): five craftable weapons, their
+    # projectile sprites, and the bestiary icons for the five mobs the
+    # stream adds. See tools/asset_generator/gen_arsenal.py.
+    gen_arsenal.generate(out)
 
     # Mod preview
     gen_misc.gen_preview(f"{out}/preview.png")

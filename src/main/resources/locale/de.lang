@@ -294,3 +294,29 @@ swhanchorreward=Skywatch-Banner + 5x Aurorablatt
 swhrecruitwardentitle=Der letzte Hüter
 swhrecruitwardendesc=Der Himmelswächter würde die Himmelswacht hinter sich lassen - für einen Preis, den keine kleine Siedlung zahlen kann.
 swhrecruitwardenobj=Heuere den Himmelswächter für deine Siedlung an (<cost> Münzen)
+
+// ===========================================================================
+// content/arsenal - das Himmelsarsenal: fuenf herstellbare Waffen und die vier
+// Gegner, die ihre Rezepte speisen (plus der Wachtfunke der Pfeife).
+// ===========================================================================
+
+[item]
+skyreave=Himmelsreißer
+thunderhead=Donnerhaupt
+prismcaller=Prismenrufer
+skywatchwhistle=Himmelswacht-Pfeife
+stormdisc=Sturmscheibe
+
+[itemtooltip]
+skyreavetip=Fegt einen ganzen Kreis. Damit schnitt die Himmelswacht den Hagel.
+thunderheadtip=Ganz durchgezogen - oder gar nicht erst gespannt.
+prismcallertip=Der Splitter erinnert sich an jede Dämmerung, die er durchstand.
+skywatchwhistletip=Ein Ton, und ein Stück der alten Maschinerie antwortet.
+stormdisctip=Sie kommt zurück. Sie kam immer zurück.
+
+[mob]
+rimesentry=Raureif-Wächter
+auroraflake=Auroraflocke
+fenwraith=Moorgeist
+cindercantor=Aschekantor
+watchmote=Wachtfunke

@@ -158,6 +158,53 @@ PAIRS = [
      "items/birchlog.png", None, "log item icon"),
     ("particles/cloudleaves.png", ("auto", 20, 20),
      "particles/birchleaves.png", ("auto", 20, 20), "leaf particle (densest 20px frame)"),
+    # content/arsenal: the craftable weapon tier. A weapon icon answers to the
+    # vanilla weapon of the SAME CLASS at the same tier, because vanilla draws
+    # a glaive, a greatbow, a staff, a summon focus and a boomerang at very
+    # different masses inside the same 32px cell (440 / 328 / 352 / 400 / 464).
+    # These are the same items each weapon's class comment calibrates its
+    # damage against, so one table row covers art and balance alike.
+    ("items/skyreave.png", None,
+     "items/quartzglaive.png", None, "glaive item icon"),
+    ("items/thunderhead.png", None,
+     "items/tungstengreatbow.png", None, "greatbow item icon"),
+    ("items/prismcaller.png", None,
+     "items/quartzstaff.png", None, "magic staff item icon"),
+    ("items/skywatchwhistle.png", None,
+     "items/batcage.png", None, "summon focus item icon"),
+    ("items/stormdisc.png", None,
+     "items/tungstenboomerang.png", None, "boomerang item icon"),
+    # Mid-attack sprites: vanilla pairs a fixed canvas size with the item's
+    # attackXOffset/attackYOffset pivot, so ours use the same canvases.
+    ("player/weapons/skyreave.png", None,
+     "player/weapons/quartzglaive.png", None, "glaive attack sprite"),
+    ("player/weapons/thunderhead.png", None,
+     "player/weapons/tungstengreatbow.png", None, "greatbow attack sprite"),
+    ("player/weapons/prismcaller.png", None,
+     "player/weapons/quartzstaff.png", None, "staff attack sprite"),
+    # Projectiles. The prism bolt reuses vanilla's shared bolt_shadow, so only
+    # the bolt itself is ours; the storm disc ships its own shadow.
+    ("projectiles/prismbolt.png", None,
+     "projectiles/quartzbolt.png", None, "magic bolt projectile"),
+    ("projectiles/stormdisc.png", None,
+     "projectiles/frostboomerang.png", None, "boomerang projectile"),
+    ("projectiles/stormdisc_shadow.png", None,
+     "projectiles/frostboomerang_shadow.png", None, "boomerang projectile shadow"),
+    # Bestiary icons for the four new enemies and the Watch Mote. Their BODIES
+    # are vanilla textures loaded at runtime (MobRegistry.Textures), but
+    # MobRegistry.loadIcon is hard-wired to mobs/icons/<our stringID> with no
+    # setter, so the icon is the one piece that has to be ours. Each answers to
+    # the vanilla icon of the mob whose sheet it wears.
+    ("mobs/icons/rimesentry.png", None,
+     "mobs/icons/frostsentry.png", None, "bestiary icon"),
+    ("mobs/icons/auroraflake.png", None,
+     "mobs/icons/cryoflake.png", None, "bestiary icon"),
+    ("mobs/icons/fenwraith.png", None,
+     "mobs/icons/spiritghoul.png", None, "bestiary icon"),
+    ("mobs/icons/cindercantor.png", None,
+     "mobs/icons/ancientskeletonmage.png", None, "bestiary icon"),
+    ("mobs/icons/watchmote.png", None,
+     "mobs/icons/playercryoflake.png", None, "bestiary icon"),
 ]
 
 THRESHOLD = 0.75

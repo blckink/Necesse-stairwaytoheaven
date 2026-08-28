@@ -15,6 +15,10 @@ public class AuroraShoalsBiome extends SkyBiome {
             .addLimited(40, "zephyrray", 2, 80)
             // v0.4: glass-cannon dive bird — the fast counterpart to the golem
             .addLimited(40, "dawnpiercer", 2, 80)
+            // --- content/arsenal ---
+            // Flying artillery over the mist banks: the shoals had nothing
+            // that shoots back at range. Same weight as the Dawnpiercer.
+            .addLimited(40, "auroraflake", 2, 80)
             // The cloud sea between the islands is not empty travelling ground
             .add(28, stairwaytoheaven.mobs.MistserpentHead.IN_MISTSEA, "mistserpent");
 

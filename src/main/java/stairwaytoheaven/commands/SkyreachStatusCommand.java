@@ -555,9 +555,17 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         }
         logs.add(lightLine.toString());
 
-        String[] probeMobs = {"zephyrray", "skystonegolem", "stormwisp", "galehound",
+        // The roster this command has always probed, plus whatever the arsenal
+        // stream registered. SkyArsenal owns its own list so a new enemy
+        // cannot ship without its accepted-lit/dark counts being measured, and
+        // this command never has to learn the names.
+        String[] coreProbeMobs = {"zephyrray", "skystonegolem", "stormwisp", "galehound",
                 "dawnpiercer", "gloomshade", "cloudlamb", "glowmoth", "sparkbeetle",
                 "zephyrfinch", "dewsnail"};
+        String[] arsenalProbeMobs = stairwaytoheaven.arsenal.SkyArsenal.PROBE_MOB_IDS;
+        String[] probeMobs = new String[coreProbeMobs.length + arsenalProbeMobs.length];
+        System.arraycopy(coreProbeMobs, 0, probeMobs, 0, coreProbeMobs.length);
+        System.arraycopy(arsenalProbeMobs, 0, probeMobs, coreProbeMobs.length, arsenalProbeMobs.length);
         // Measure each mob twice: at the level's real light, and again with the
         // ambient forced to darkness. Two numbers separate the two causes that
         // both look like "nothing spawns" -- a mob rejected only by the light
@@ -586,6 +594,27 @@ public class SkyreachStatusCommand extends ModularChatCommand {
 
                 logs.add("name check: skywarden=" + necesse.engine.localization.Localization.translate("mob", "skywardenname", "name", "Test")
                 + " | wardensettler=" + necesse.engine.localization.Localization.translate("mob", "wardensettlername", "name", "Test"));
+
+        // The arsenal stream's weapons. An item that fails to register at all
+        // still compiles and still has a locale entry, so the only honest
+        // check is asking the live ItemRegistry for it and asking the live
+        // recipe list whether it can be made. Both numbers are asserted by
+        // scripts/integration_test.sh.
+        int arsenalRecipes = 0;
+        for (String weapon : new String[]{"skyreave", "thunderhead", "prismcaller",
+                "skywatchwhistle", "stormdisc"}) {
+            necesse.inventory.item.Item item = necesse.engine.registries.ItemRegistry.getItem(weapon);
+            if (item == null) {
+                logs.add("arsenal check: " + weapon + " NOT REGISTERED");
+                continue;
+            }
+            int recipes = necesse.inventory.recipe.Recipes.getRecipesFromResult(item.getID()).size();
+            arsenalRecipes += recipes;
+            logs.add("arsenal check: " + weapon + " id=" + item.getID()
+                    + " name=" + necesse.engine.registries.ItemRegistry.getDisplayName(item.getID())
+                    + " recipes=" + recipes);
+        }
+        logs.add("arsenal check: recipes=" + arsenalRecipes);
     }
 
     /**
