@@ -181,6 +181,22 @@ Ordered by the player's own priority. Full detail in `docs/PLAYTEST_LOG.md`.
   the new gate: it ports `WallObject.addWallDrawOptions` and composes real
   scenes, so "does it tile" is a picture, not an inference. Verified against
   vanilla `stonewall` through the same port. **Not yet seen in game.**
+- **Beetlefreak wall, second pass** (`art/beetlewall2`). The player found two
+  more faults that every gate called clean, both compositional rather than
+  geometric. (1) The doors read as hatches: the door cells' bounding boxes were
+  byte-identical to `stonewall`'s, but a cream bead band ran across each leaf
+  and the edge-on cells (5, 9 — the doors in every left and right wall) put a
+  lantern-topped stub of masonry above the tile edge and a 3px sliver of leaf
+  below it, where vanilla runs ONE leaf the full 58px and puts all the ornament
+  on the crown above row 96. (2) The side-wall window still showed a
+  front-facing pane: rows 0-1 are `getWindowDir == 1`, a north-south wall seen
+  from ABOVE, and vanilla draws a slot cut along the wall's top that you look
+  down into. Both are now redrawn to vanilla's own grammar (decoded in
+  `docs/TECHNICAL_LEARNINGS.md`). `tools/wall_render_preview.py` now renders
+  every scene for our sheet AND for vanilla `stonewall` and `woodwall` directly
+  beneath it — a scene showing only our own sheet cannot reveal "shorter than
+  vanilla" or "wrong view", which is why both faults survived. **Not yet seen
+  in game.**
 - Fence and fence gate rebuilt against the engine's own column contract
   (`FenceObject` / `FenceGateObject`, cell-by-cell against vanilla
   `ironfence`/`ironfencegate`). The old sheets were drawn to an invented
