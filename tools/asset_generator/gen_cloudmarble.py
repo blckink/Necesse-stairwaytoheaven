@@ -1643,8 +1643,13 @@ def generate(objects_dir, items_dir, tiles_dir):
     gen_cloudmarble_wall(os.path.join(objects_dir, "cloudmarblewall.png"))
     gen_cloudmarble_fence(os.path.join(objects_dir, "cloudmarblefence.png"))
     gen_cloudmarble_fencegate(os.path.join(objects_dir, "cloudmarblefencegate.png"))
-    gen_skyway_tile(os.path.join(tiles_dir, "skyway.png"))
-    gen_skyway_splat(os.path.join(tiles_dir, "skyway_splat.png"))
+    # tiles/skyway.png and tiles/skyway_splat.png are NOT written here.
+    # The shipped Skyway ground is converted from the supplied reference art by
+    # tools/convert_biome_art.py; two producers writing the same two files meant
+    # whichever ran last won. The drawn versions stay available as
+    # gen_skyway_tile / gen_skyway_splat below, but the pipeline no longer calls
+    # them. If you want the drawn ground back, drop the conversion instead of
+    # calling both.
     gen_wall_icon(os.path.join(items_dir, "cloudmarblewall.png"))
     gen_door_icon(os.path.join(items_dir, "cloudmarbledoor.png"))
     gen_window_icon(os.path.join(items_dir, "cloudmarblewindow.png"))

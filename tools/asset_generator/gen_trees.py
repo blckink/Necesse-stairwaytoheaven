@@ -844,3 +844,424 @@ def gen_saplings(dir_path):
     body.put(16, 25, _BARK_DASH)
     cell.paste(body, 0, 0)
     cell.save(f"{dir_path}/prismasapling.png")
+
+
+# --- Skyseraph Tree companions ------------------------------------------------
+# objects/skyseraphtree.png is CONVERTED reference art (tools/convert_biome_art
+# .py), not generated, so these four follow ITS construction language rather
+# than the mod's three generated trees:
+#   crown   a cauliflower of small round lobes - each lobe gets a deep crevice
+#           ring, an amber/gold top-left cap and a shadowed belly, so the
+#           silhouette scallops and the interior stays dense
+#   accents 4-point gold sparkles, cream blossoms, one gold halo arc
+#   trunk   two braided strands crossing once, flaring into root buttresses
+#   rim     the sheet carries NO (34,34,46) outline; it self-outlines with its
+#           own darkest tones, and so do these (checked on the QA contact
+#           sheets against both Cloudturf and Stormslate)
+# Size law - measured vanilla analogues: objects/oaksapling 22x26 / 324 px,
+# items/oaklog 24x20 / 288 px, particles/oakleaves 80-96 opaque px per frame.
+
+_SERAPH_UP = ("deep", "base", "light", "amber", "hi", "warm", "gold", "spark")
+
+
+def _seraph_lobe(c, cx, cy, r, ramp):
+    """One crown lobe, built the way the tree sheet builds them: deep crevice
+    ring, body, shadowed belly toward the lower right, warm then gold cap
+    toward the upper left.
+
+    The tone floor matters. Measured on the sheet, the tree's crown is mostly
+    (251,162,9)/(252,182,14)/(252,204,32) with (199,97,8) held back for the
+    shadow side and (153,50,1) for crevices; building the lobe body out of
+    (224,118,10) made the companions read a full step browner than the parent.
+    """
+    c.ellipse(cx, cy + 0.3, r + 0.5, r * 0.92 + 0.5, ramp["deep"])
+    c.ellipse(cx, cy, r, r * 0.92, ramp["hi"])
+    c.ellipse(cx + r * 0.32, cy + r * 0.38, r * 0.70, r * 0.58, ramp["amber"])
+    c.ellipse(cx + r * 0.46, cy + r * 0.52, r * 0.48, r * 0.38, ramp["light"])
+    c.ellipse(cx - r * 0.26, cy - r * 0.32, r * 0.62, r * 0.52, ramp["hi"])
+    c.ellipse(cx - r * 0.38, cy - r * 0.46, r * 0.40, r * 0.32, ramp["warm"])
+
+
+def _seraph_crown(c, lobes, ramp, rng, light_spread=0.46):
+    """Lobe cauliflower + one canopy-scale light field. Without the field each
+    lobe keeps its own highlight and the crown reads as stacked balloons; the
+    field promotes the upper-left half a step and demotes the lower-right,
+    with a jittered boundary so the transition dithers instead of banding."""
+    for (cx, cy, r) in sorted(lobes, key=lambda l: -(l[0] * 0.45 + l[1])):
+        _seraph_lobe(c, cx, cy, r, ramp)
+    pts = [(x, y) for x in range(c.width) for y in range(c.height)
+           if c.filled(x, y)]
+    # Remember the crevices between lobes BEFORE the light field runs. The
+    # field promotes whatever it finds on the lit side, which quietly dissolved
+    # every crevice on the top-left half and turned the cauliflower back into
+    # one mottled ball; they get stamped back in afterwards.
+    creases = [(x, y) for (x, y) in pts if c.get(x, y)[:3] == ramp["deep"]
+               and c.filled(x - 1, y) and c.filled(x + 1, y)
+               and c.filled(x, y - 1) and c.filled(x, y + 1)]
+    if not pts:
+        return
+    mx = sum(p[0] for p in pts) / len(pts)
+    my = sum(p[1] for p in pts) / len(pts)
+    radius = max(max(abs(p[0] - mx) for p in pts),
+                 max(abs(p[1] - my) for p in pts), 1.0)
+    up = {ramp[a]: ramp[b] for a, b in zip(_SERAPH_UP, _SERAPH_UP[1:])}
+    down = {ramp[b]: ramp[a] for a, b in zip(_SERAPH_UP, _SERAPH_UP[1:])}
+    for (x, y) in pts:
+        d = ((x - mx) * 0.58 + (y - my) * 1.0) / radius
+        d += (rng.float() - 0.5) * 0.20
+        cur = c.get(x, y)[:3]
+        if d < -light_spread and cur in up and up[cur] != ramp["spark"]:
+            cur = up[cur]
+            c.put(x, y, cur)
+            # A second promotion in the hottest zone: the parent tree's crown
+            # core is bright yellow-gold with the oranges pushed out to the
+            # rim, and a single step left the companions reading all-orange.
+            # ...but it stops at gold. On the sheet (254,251,70) is 1.5% of
+            # the crown - single-pixel glints - and letting the field promote
+            # into it painted a white-hot blob across the top-left lobes.
+            if (d < -light_spread * 2.1 and cur in up
+                    and up[cur] != ramp["spark"]):
+                c.put(x, y, up[cur])
+        elif d > light_spread and cur in down and rng.chance(0.85):
+            c.put(x, y, down[cur])
+    # Thin the restored creases to 1 px arcs. Where two lobes sit close their
+    # rings merge, and stamping the merged blob back in laid dark BANDS across
+    # the crown; the tree's crevices are thin curves, so a crease pixel with
+    # more than two crease neighbours is dropped.
+    crease_set = set(creases)
+    for (x, y) in creases:
+        n = sum(1 for (a, b) in ((x - 1, y), (x + 1, y), (x, y - 1),
+                                 (x, y + 1), (x - 1, y - 1), (x + 1, y + 1))
+                if (a, b) in crease_set)
+        if n > 2:
+            continue
+        d = ((x - mx) * 0.58 + (y - my) * 1.0) / radius
+        # on the lit side the crease is a warm shadow, not a black crack
+        c.put(x, y, ramp["edge"] if d < -light_spread else ramp["deep"])
+
+
+def _seraph_smooth(c, rounds=2):
+    """Round the lobe union: drop 1 px spikes, fill 1 px notches. A raw union
+    of ellipses leaves cusps where two lobes meet and the outline pass turns
+    every cusp into a spike - the tree's crown silhouette is bumpy but never
+    spiky. Filled pixels borrow a neighbour's tone so no new colour appears."""
+    for _ in range(rounds):
+        drop, fill = [], []
+        for x in range(c.width):
+            for y in range(c.height):
+                n = sum(1 for (a, b) in ((x - 1, y), (x + 1, y),
+                                         (x, y - 1), (x, y + 1))
+                        if c.filled(a, b))
+                if c.filled(x, y) and n <= 1:
+                    drop.append((x, y))
+                elif not c.filled(x, y) and n >= 3:
+                    fill.append((x, y))
+        for (x, y) in drop:
+            c.put(x, y, (0, 0, 0, 0))
+        for (x, y) in fill:
+            for (a, b) in ((x, y + 1), (x - 1, y), (x + 1, y), (x, y - 1)):
+                if c.filled(a, b):
+                    c.put(x, y, c.get(a, b))
+                    break
+
+
+def _seraph_crevices(c, ramp, rng, count, y_lo, y_hi):
+    """Sparse 1-2 px crevice dots between lobes (the tree sheet's darkest
+    speckles) - interior only, so the silhouette stays clean."""
+    placed = 0
+    guard = 0
+    while placed < count and guard < 400:
+        guard += 1
+        x = rng.range(2, c.width - 3)
+        y = rng.range(y_lo, y_hi)
+        if not (c.filled(x, y) and c.filled(x, y + 2) and c.filled(x + 2, y)
+                and c.filled(x - 2, y) and c.filled(x, y - 2)):
+            continue
+        if c.get(x, y)[:3] not in (ramp["amber"], ramp["hi"], ramp["light"]):
+            continue
+        c.put(x, y, ramp["deep"])
+        if rng.chance(0.45):
+            c.put(x + 1, y + 1, ramp["deep"])
+        placed += 1
+
+
+def _seraph_sparkle(c, x, y, ramp, arm=1):
+    """The tree's 4-point gold star: hot core, gold arms."""
+    c.put(x, y, ramp["spark"])
+    for i in range(1, arm + 1):
+        for (dx, dy) in ((0, -i), (0, i), (-i, 0), (i, 0)):
+            if c.filled(x + dx, y + dy):
+                c.put(x + dx, y + dy, ramp["gold"])
+
+
+def _seraph_blossom(c, x, y, ramp):
+    """The tree's cream 4-petal blossom with a gold eye."""
+    for (dx, dy) in ((0, -1), (0, 1), (-1, 0), (1, 0)):
+        if c.filled(x + dx, y + dy):
+            c.put(x + dx, y + dy, ramp["bloom"])
+    c.put(x, y, ramp["gold"])
+
+
+def _seraph_halo(c, cx, cy, rx, ry, ramp, deg_from, deg_to, step=5):
+    """The gold halo ring arc floating in the crown - drawn only where the
+    crown is already filled, so it never breaks the silhouette."""
+    for deg in range(deg_from, deg_to, step):
+        rad = math.radians(deg)
+        x = round(cx + rx * math.cos(rad))
+        y = round(cy + ry * math.sin(rad))
+        if not c.filled(x, y):
+            continue
+        c.put(x, y, ramp["gold"])
+        nx = round(cx + rx * math.cos(rad + 0.09))
+        ny = round(cy + ry * math.sin(rad + 0.09))
+        if c.filled(nx, ny):
+            c.put(nx, ny, ramp["gold"])
+        if c.filled(x, y + 1) and (x + y) % 2 == 0:
+            c.put(x, y + 1, ramp["edge"])       # the ring's own drop shadow
+
+
+def _seraph_braid(c, ramp, rng, cx, base_y, top_y, spread, w_base, w_top,
+                  twists=1.0, taper=0.62):
+    """Two strands winding around each other - the tree's braided trunk at
+    companion scale. Back strand first, front strand over it with a deep seam
+    down its shaded flank so the braid reads at 1x.
+
+    `twists` moves the crossing point: the strands meet at t = 0.5/twists, and
+    at the crossing the trunk pinches to a single strand's width. On the
+    sapling that pinch has to land UNDER the crown, otherwise the visible
+    stretch of trunk necks in and the sapling reads as a lollipop."""
+    H = max(base_y - top_y, 1)
+    strands = ([], [])
+    for y in range(base_y, top_y - 1, -1):
+        t = (base_y - y) / H
+        off = spread * (1.0 - taper * t) * math.cos(math.pi * t * twists)
+        w = max(w_top, round(w_base - (w_base - w_top) * t))
+        strands[0].append((cx - off, y, w))
+        strands[1].append((cx + off, y, w))
+    for si, strand in enumerate(strands):
+        front = si == 1
+        for (fx, y, w) in strand:
+            x0 = round(fx) - w // 2
+            for dx in range(w):
+                if dx == 0:
+                    tone = ramp["glint"] if front else ramp["hi"]
+                elif dx >= w - 1:
+                    tone = ramp["deep"]
+                elif dx == w - 2 and w > 3:
+                    tone = ramp["base"]
+                else:
+                    tone = ramp["hi"] if front else ramp["light"]
+                c.put(x0 + dx, y, tone)
+            if front and y % 5 == 1:                 # braid ridge catching sun
+                c.put(x0 + 1, y, ramp["glint"])
+            if y % 4 == 2 and w > 2:                 # bark notch
+                c.put(x0 + rng.range(1, w - 1), y, ramp["deep"])
+
+
+def _seraph_roots(c, ramp, rng, cx, base_y, reach):
+    """Root buttresses flaring out of the trunk foot, as on the tree sheet."""
+    for side in (-1, 1):
+        for i in range(reach):
+            x = cx + side * (2 + i)
+            y = base_y - (reach - i) // 2
+            c.put(x, y, ramp["light"] if side < 0 else ramp["base"])
+            for yy in range(y + 1, base_y + 1):
+                c.put(x, yy, ramp["base"] if yy < base_y else ramp["deep"])
+            if i >= reach - 2:
+                for yy in range(y, base_y + 1):
+                    c.put(x, yy, ramp["deep"])
+        c.put(cx + side * 2, base_y - reach // 2 - 1,
+              ramp["glint"] if side < 0 else ramp["deep"])
+
+
+def _skyseraphsapling_body():
+    """The sapling WITHOUT its ground shadow. Vanilla ships sapling item icons
+    as the object sprite minus the shadow ellipse (verified: oaksapling object
+    bbox ends at y=30, its item icon at y=28), so both files come from here."""
+    body = Canvas(32, 32)
+    rng = Rng(0x5EA9F)
+    leaf = palette.SERAPHLEAF
+    wood = palette.SERAPHWOOD
+    turf = palette.CLOUDTURF
+
+    # Braided stub trunk. The two strands stay close so the foot reads as ONE
+    # chunky column with a seam (vanilla oaksapling's trunk is a solid ~6 px
+    # block) - splaying them wider turned the sapling into a pair of legs.
+    _seraph_braid(body, wood, rng, cx=16, base_y=29, top_y=13, spread=1.3,
+                  w_base=4, w_top=3, twists=0.55, taper=0.30)
+    _seraph_roots(body, wood, rng, cx=16, base_y=29, reach=3)
+    for x in range(10, 23):                          # foot line seats the tree
+        if body.filled(x, 29):
+            body.put(x, 29, wood["deep"])
+
+    # crown: a small cauliflower of lobes on its own canvas so the trunk's
+    # tones never leak into the light field
+    # Six lobes, not eight: at 22 px across, eight lobes' crevice rings ate
+    # each other and the crown went back to mottle. The tree's own top edge is
+    # deep (153,50,1) with the gold sitting 1-2 px INSIDE it on the lit lobe
+    # caps, so there is deliberately no _sunlit_rim pass here - a continuous
+    # bright rim read as a rim-light, which vanilla never does.
+    crown = Canvas(32, 32)
+    # six silhouette lobes + two interior ones that add crevice arcs across
+    # the middle without changing the outline
+    # Sized off the vanilla analogue, not by eye: objects/oaksapling.png is
+    # 24 px wide x 26 tall inside its 32 cell, and the first pass came out
+    # 19x28 - narrower AND taller, which is what made the crown look small on
+    # a long stem.
+    _seraph_crown(crown, [(16, 11.5, 6.0), (16, 7.5, 4.4), (10.5, 10.5, 4.6),
+                          (21.5, 10.5, 4.6), (11.5, 15.5, 4.4),
+                          (20.5, 15.5, 4.4)], leaf, rng)
+    _seraph_smooth(crown)
+    _seraph_crevices(crown, leaf, rng, count=4, y_lo=8, y_hi=19)
+    # A short arc, not a closed ring: the tree carries the halo as a crescent
+    # across one part of the crown. A full ring at this scale read as a wreath
+    # and swallowed the foliage under it.
+    _seraph_halo(crown, 16.0, 12.5, 6.6, 5.8, leaf, -96, 6, step=4)
+    crown.outline(leaf["deep"])
+    for (gx, gy) in ((13, 5), (10, 9), (17, 4), (8, 12)):   # lit lobe caps
+        if crown.filled(gx, gy):
+            crown.put(gx, gy, leaf["gold"])
+    _seraph_sparkle(crown, 12, 8, leaf)
+    _seraph_sparkle(crown, 21, 16, leaf)
+    _seraph_blossom(crown, 14, 14, leaf)
+    crown.put(18, 6, leaf["spark"])
+    body.paste(crown, 0, 0)
+
+    # a couple of gold leaves already dropping past the trunk, as on the sheet
+    for (gx, gy) in ((10, 21), (23, 20)):
+        body.put(gx, gy, leaf["gold"])
+        body.put(gx, gy + 1, leaf["edge"])
+
+    # Soil clump over the root foot. Vanilla saplings sit in DARK earth (oak's
+    # is (58,35,21)/(76,42,4)), not on a pale pad - the first pass used the
+    # Cloudturf greens the sibling saplings use and the mound read as a
+    # separate object floating under the tree. Two turf tufts keep the link to
+    # cloudturftile, which is the only tile this sapling plants on.
+    body.ellipse(16, 28.6, 5.2, 1.9, wood["base"])
+    body.ellipse(15, 28.0, 3.8, 1.2, wood["light"])
+    for x in range(10, 23):                          # soil sits on a dark rim
+        if body.filled(x, 30) and not body.filled(x, 31):
+            body.put(x, 30, wood["deep"])
+    body.put(12, 28, wood["deep"])
+    body.put(19, 29, wood["deep"])
+    body.put(11, 29, turf["deep"])
+    body.put(21, 29, turf["tuft"])
+    body.put(17, 27, wood["hi"])
+    return body
+
+
+def gen_skyseraphsapling(objects_dir, items_dir):
+    """32x32 Skyseraph sapling: the tree young. Writes the object sprite (with
+    ground shadow) and the inventory icon (without), vanilla-style."""
+    body = _skyseraphsapling_body()
+    cell = Canvas(32, 32)
+    cell.ellipse(16, 30, 8.5, 2.0, with_alpha(SHADOW, 110))
+    cell.paste(body, 0, 0)
+    cell.save(f"{objects_dir}/skyseraphsapling.png")
+    body.save(f"{items_dir}/skyseraphsapling.png")
+
+
+def gen_seraphwood_item(path):
+    """32x32 seraphwood log. Vanilla items/oaklog build (chunky cylinder lying
+    lower-left to upper-right, big ringed end cap facing the viewer) in the
+    tree's braided-bark ramp, with the gold heartwood the crown is made of
+    showing on the cut face."""
+    c = Canvas(32, 32)
+    rng = Rng(0x5E9D)
+    wood = palette.SERAPHWOOD
+    leaf = palette.SERAPHLEAF
+    x0, y0, x1, y1 = 10, 21, 23, 12
+    steps = 14
+    axis = [(x0 + (x1 - x0) * i / steps, y0 + (y1 - y0) * i / steps)
+            for i in range(steps + 1)]
+    # Tone ladder runs light -> base -> deep down the cylinder. Filling the
+    # body with "base" instead read as a dark stick: the tree's own trunk is
+    # mostly (149,68,14)/(166,91,27) with the darks reserved for crevices.
+    for (cx, cy) in axis:                            # rounded bark cylinder
+        c.ellipse(cx, cy, 5.0, 5.2, wood["light"])
+    for (cx, cy) in axis[1:]:                        # sunlit top-left band
+        c.ellipse(cx - 0.6, cy - 2.4, 3.4, 1.9, wood["hi"])
+    for (cx, cy) in axis[2:]:
+        c.ellipse(cx - 0.9, cy - 3.3, 2.4, 1.0, wood["glint"])
+    for (cx, cy) in axis[1:]:                        # shaded belly
+        c.ellipse(cx + 0.7, cy + 2.6, 3.2, 1.8, wood["base"])
+    for (cx, cy) in axis[1:]:
+        c.ellipse(cx + 1.0, cy + 3.6, 2.8, 1.0, wood["deep"])
+    c.ellipse(x1 + 0.5, y1 - 0.5, 1.8, 4.0, wood["deep"])   # far cut end
+    for i in (3, 6, 9, 12):                          # braid grooves in the bark
+        gx, gy = int(axis[i][0]), int(axis[i][1])
+        c.put(gx, gy - 1, wood["deep"])
+        c.put(gx + 1, gy, wood["deep"])
+        c.put(gx + 1, gy - 2, wood["glint"])
+    # near end cap: gold heartwood with growth rings
+    c.ellipse(x0 - 2, y0 + 0.5, 4.0, 5.2, wood["deep"])
+    c.ellipse(x0 - 2, y0 + 0.5, 3.0, 4.2, leaf["deep"])
+    c.ellipse(x0 - 2, y0 + 0.5, 2.4, 3.4, leaf["hi"])
+    c.ellipse(x0 - 2, y0 + 0.5, 1.6, 2.4, leaf["gold"])
+    c.ellipse(x0 - 2, y0, 0.9, 1.4, leaf["spark"])
+    c.put(x0 - 3, y0 + 3, leaf["edge"])              # growth-ring ticks
+    c.put(x0 - 1, y0 - 2, leaf["edge"])
+    c.put(x0 - 4, y0 - 1, leaf["bloom"])             # cap rim glint
+    c.outline(wood["deep"])
+    _sunlit_rim(c, wood["glint"], wood["hi"], y_max=15, outline=wood["deep"])
+    _seraph_sparkle(c, 19, 15, leaf, arm=1)          # gold in the grain
+    c.put(23, 12, leaf["gold"])
+    c.save(path)
+
+
+def _rot_lobe(c, ox, oy, ca, sa, u, v, ru, rv, tone):
+    """An ellipse placed in a rotated local frame. Lets a whole leaf clump be
+    authored once and tumbled per frame instead of being re-laid by hand."""
+    for i in range(int(-ru) - 1, int(ru) + 2):
+        for j in range(int(-rv) - 1, int(rv) + 2):
+            if (i / ru) ** 2 + (j / rv) ** 2 > 1.0:
+                continue
+            uu, vv = u + i, v + j
+            c.put(round(ox + uu * ca - vv * sa),
+                  round(oy + uu * sa + vv * ca), tone)
+
+
+def gen_skyseraphtree_leaves(path):
+    """100x20 particle strip, five 20 px frames: a tumbling clump of golden
+    seraph leaves shed when the tree is felled.
+
+    Built to the vanilla measurements, not by eye. particles/oakleaves.png and
+    dryadleaves.png are COMPACT rounded clumps of 80-116 opaque px per 20 px
+    frame with the individual leaves showing as dark separations INSIDE the
+    mass; and vanilla holds that mass constant across the strip, tumbling only
+    the orientation (oakleaves runs 96/80/88/84). Two earlier passes here got
+    both wrong - one shed mass per frame and read as a shower of sparks, the
+    next fanned three blades outward and read as an asterisk.
+
+    The leaf lobes use the same build as the tree's crown lobes: deep ring,
+    fill, lit streak - so a falling clump is visibly a piece of that canopy.
+    """
+    sheet = Canvas(100, 20)
+    leaf = palette.SERAPHLEAF
+    angles = (-0.55, -0.18, 0.20, 0.58, 0.92)
+    # local (u, v) layout of the clump, back lobe first
+    lobes = ((-3.4, 0.9, 3.0, 2.7, "light"),
+             (3.4, 1.1, 2.8, 2.5, "amber"),
+             (0.1, -1.1, 3.4, 2.8, "hi"))
+    for f in range(5):
+        c = Canvas(20, 20)
+        rng = Rng(0x5E97 + f * 617)
+        ca, sa = math.cos(angles[f]), math.sin(angles[f])
+        for (u, v, ru, rv, tone) in lobes:
+            _rot_lobe(c, 9, 10, ca, sa, u, v, ru + 0.7, rv + 0.7, leaf["deep"])
+            _rot_lobe(c, 9, 10, ca, sa, u, v, ru, rv, leaf[tone])
+            # lit streak up the leaf's own axis, one step above its fill
+            up = {"light": "amber", "amber": "hi", "hi": "warm"}[tone]
+            _rot_lobe(c, 9, 10, ca, sa, u - 0.4, v - 0.9,
+                      ru * 0.62, rv * 0.42, leaf[up])
+        # midrib of the front leaf, and the gold the crown is full of
+        _rot_lobe(c, 9, 10, ca, sa, 0.1, -1.4, 2.4, 0.6, leaf["gold"])
+        _seraph_smooth(c, rounds=1)
+        c.outline(leaf["deep"])
+        if f in (1, 3):                              # the tree's accents
+            _seraph_sparkle(c, 9 + (2 if f == 1 else -2), 10, leaf, arm=1)
+        if f == 2:
+            _seraph_blossom(c, 9, 10, leaf)
+        c.put(9 + rng.range(-2, 2), 10 + rng.range(-2, 2), leaf["spark"])
+        sheet.paste(c, f * 20, 0)
+    sheet.save(path)

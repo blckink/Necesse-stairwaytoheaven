@@ -430,6 +430,7 @@ SERAPHLEAF = {
     "light": (224, 118, 10),    # lobe body
     "hi":    (251, 162, 9),     # lit lobe cap
     "amber": (248, 138, 13),    # step between light and hi
+    "warm":  (252, 182, 14),    # lobe cap just under the gold
     "edge":  (209, 73, 3),      # warm shadow-side rim
     "gold":  (252, 204, 32),    # halo ring, sparkles, lobe crowns
     "spark": (254, 251, 70),    # hottest gold hit

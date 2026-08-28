@@ -225,14 +225,32 @@ def main():
 
     # Skywatch furniture family, on the vanilla furniture base classes
     gen_skyfurniture.generate(f"{out}/objects", f"{out}/items")
-    # Cloudmarble: white-and-gold masonry plus the Skyway Passages ground
+    # Cloudmarble masonry. The Skyway ground it used to draw now comes from
+    # tools/convert_biome_art.py instead — see the note in gen_cloudmarble.
     gen_cloudmarble.generate(f"{out}/objects", f"{out}/items", f"{out}/tiles")
+    # Sky Seraph tree companions (the tree itself is converted reference art)
+    gen_trees.gen_skyseraphsapling(f"{out}/objects", f"{out}/items")
+    gen_trees.gen_seraphwood_item(f"{out}/items/seraphwood.png")
+    gen_trees.gen_skyseraphtree_leaves(f"{out}/particles/seraphleaves.png")
 
     gen_furniture.gen_v2_item_icons(f"{out}/items")
     gen_furniture.gen_set_icons(f"{out}/items")
 
     # Mod preview
     gen_misc.gen_preview(f"{out}/preview.png")
+
+    # Files owned by tools/convert_biome_art.py, which converts the supplied
+    # reference art. Two producers writing the same path meant whichever ran
+    # last won, silently; this fails loudly instead.
+    converted = ("tiles/skyway.png", "tiles/skyway_splat.png",
+                 "objects/skyseraphtree.png", "items/skyseraphtree.png",
+                 "objects/statues/seraph.png", "items/seraphstatue.png")
+    clash = [rel for rel in converted if os.path.exists(f"{out}/{rel}")]
+    if clash:
+        raise SystemExit(
+            "generate_assets wrote files owned by tools/convert_biome_art.py: "
+            + ", ".join(clash)
+            + "\nOne producer per file. Drop it here, or drop the conversion.")
 
     print(f"Assets written to {out}")
 
