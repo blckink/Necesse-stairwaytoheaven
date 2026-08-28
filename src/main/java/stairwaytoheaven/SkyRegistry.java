@@ -124,6 +124,8 @@ public final class SkyRegistry {
     // Trees + saplings
     public static int nimbuswillowID, fulgurpineID, prismabirchID;
     public static int nimbusSaplingID, fulgurSaplingID, prismaSaplingID;
+    /** v0.8 Sky Seraph tree: single-column sheet with a frost half. */
+    public static int skySeraphTreeID, skySeraphSaplingID;
 
     // Plants
     public static int cloudbellID, skytulipID, staticmossID;

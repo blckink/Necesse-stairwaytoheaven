@@ -88,6 +88,18 @@ final class SkyObjects {
                 new necesse.level.gameObject.TreeObject("prismabirch", "prismwood", "prismasapling",
                         new Color(210, 196, 210), 32, 60, 120, "prismaleaves"),
                 0.0F, false, false, true);
+        // v0.8 Sky Seraph: the one tree whose sheet is a single column with a
+        // frost half, because TreeObject's snow column is gated on vanilla's
+        // snowID and would never draw here. See SkyTreeObject.
+        SkyRegistry.skySeraphTreeID = ObjectRegistry.registerObject("skyseraphtree",
+                new stairwaytoheaven.objects.SkyTreeObject("skyseraphtree", "seraphwood",
+                        "skyseraphsapling", new Color(224, 118, 10), 32, 60, 120, "seraphleaves",
+                        "stormslatetile", "skywaytile"),
+                0.0F, false, false, true);
+        SkyRegistry.skySeraphSaplingID = ObjectRegistry.registerObject("skyseraphsapling",
+                new necesse.level.gameObject.TreeSaplingObject("skyseraphsapling", new Color(224, 118, 10),
+                        "skyseraphtree", 1800, 2700, true, "cloudturftile"),
+                5.0F, true);
         SkyRegistry.nimbusSaplingID = ObjectRegistry.registerObject("nimbussapling",
                 new necesse.level.gameObject.TreeSaplingObject("nimbussapling", new Color(198, 210, 214),
                         "nimbuswillow", 1800, 2700, true, "cloudturftile"),

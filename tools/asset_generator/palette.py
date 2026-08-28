@@ -406,6 +406,36 @@ PRISMLEAF = {
     "rose":  (238, 160, 190),
 }
 
+# --- Skyseraph Tree ----------------------------------------------------------
+# NOT invented: both ramps are sampled straight out of the shipped
+# objects/skyseraphtree.png (row 0), which was converted from the user's own
+# reference art. Every value below appears verbatim in that sheet, so the
+# sapling / log / leaf companions sit in exactly the parent tree's ramp.
+# The tree carries no (34,34,46) outline — it self-outlines with SERAPHLEAF
+# "deep" on the crown and SERAPHWOOD "deep" on the trunk, so its companions
+# do the same.
+
+SERAPHWOOD = {
+    "deep":  (58, 27, 14),      # braid crevices / silhouette
+    "base":  (96, 52, 28),      # shadowed strand body
+    "light": (149, 68, 14),     # lit strand body
+    "hi":    (166, 91, 27),     # top-left strand rim
+    "glint": (219, 135, 28),    # sun catching a braid ridge
+    "shade": (135, 28, 9),      # red-brown canopy shadow cast on the wood
+}
+
+SERAPHLEAF = {
+    "deep":  (153, 50, 1),      # lobe crevices + crown silhouette
+    "base":  (199, 97, 8),      # shadow-side lobe body
+    "light": (224, 118, 10),    # lobe body
+    "hi":    (251, 162, 9),     # lit lobe cap
+    "amber": (248, 138, 13),    # step between light and hi
+    "edge":  (209, 73, 3),      # warm shadow-side rim
+    "gold":  (252, 204, 32),    # halo ring, sparkles, lobe crowns
+    "spark": (254, 251, 70),    # hottest gold hit
+    "bloom": (252, 248, 234),   # cream blossoms
+}
+
 CLOUDBELL = {
     "deep":  (74, 96, 158),
     "base":  (112, 138, 204),

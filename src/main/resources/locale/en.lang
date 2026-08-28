@@ -115,11 +115,14 @@ cloudmarblewindow=Cloudmarble Window
 cloudmarblefence=Cloudmarble Railing
 cloudmarblefencegate=Cloudmarble Gate
 seraphstatue=Seraph Statue
+skyseraphtree=Sky Seraph
+skyseraphsapling=Sky Seraph Sapling
 [itemcategory]
 // sub-category of objects>furniture holding the Skywatch family
 skywatch=Skywatch
 
 [item]
+seraphwood=Seraphwood
 nimbuswood=Nimbuswood
 charwood=Charwood
 prismwood=Prismwood
