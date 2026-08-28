@@ -14,6 +14,7 @@ import necesse.entity.mobs.ai.behaviourTree.trees.HumanAI;
 import necesse.entity.mobs.ai.behaviourTree.util.AIMover;
 import necesse.entity.mobs.friendly.human.HumanMob;
 import necesse.entity.mobs.friendly.human.humanShop.HumanShop;
+import necesse.entity.mobs.friendly.human.humanShop.SellingShopItem;
 import necesse.entity.pickup.ItemPickupEntity;
 import necesse.inventory.InventoryItem;
 import necesse.level.maps.Level;
@@ -64,12 +65,26 @@ public class SkyWardenMob extends HumanShop {
      */
     public static final int RECRUIT_COST = 100_000;
 
+    /** What a replacement Silver Bell costs at the Warden, in coins. */
+    public static final int SPARE_BELL_PRICE = 5000;
+
     public SkyWardenMob() {
         // Third argument is the SettlerRegistry key, NOT a free-form type name.
         // "wardensettler" is the key SkyMobs registers WardenSettler under; any
         // other string makes getSettler() null and breaks recruitment entirely.
         super(500, 500, "wardensettler");
         this.canDespawn = false;
+        // The Silver Bell is the Veil's only key, and onRecruited hands exactly
+        // one of them to whoever paid the recruitment. In multiplayer that left
+        // every other player locked out of a whole dimension with no way in,
+        // because the bell is deliberately not craftable. So the keeper keeps
+        // spares: a real vanilla shop line, reachable only once he is a settler
+        // (before that his container opens on the recruit page instead).
+        //
+        // Stocked and restocking rather than unlimited, so it reads as a keeper
+        // handing out the spares he has rather than a vending machine.
+        this.shop.addSellingItem("silverbell", new SellingShopItem(2, 1))
+                .setStaticPrice(SPARE_BELL_PRICE, SPARE_BELL_PRICE);
     }
 
     /**
