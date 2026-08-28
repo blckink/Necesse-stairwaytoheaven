@@ -49,6 +49,12 @@ final class SkyBuildingSet {
                 "nightfell", "nightfellwall", 2.0F, new Color(52, 48, 66), -1.0F, -1.0F);
         SkyRegistry.nightfellWallID = nightfellWall[0];
 
+        // Beetlefreak masonry: the Veil's loud, wrong-coloured building set,
+        // from supplied art. Same one-sheet-three-readers deal as the others.
+        int[] beetleWall = WallObject.registerWallObjects(
+                "beetle", "beetlewall", 2.0F, new Color(88, 42, 120), -1.0F, -1.0F);
+        SkyRegistry.beetleWallID = beetleWall[0];
+
         // ===== Floors =====
         // Checkerboard: the pattern is locked to world coordinates so it runs
         // continuously across separately built rooms, which is why this floor
@@ -227,6 +233,12 @@ final class SkyBuildingSet {
                 Recipes.ingredientsFromScript("{{skystone, 2}}")));
         Recipes.registerModRecipe(new Recipe("nightfellwall", 4, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{skystone, 2}, {stormshard, 1}}")));
+        Recipes.registerModRecipe(new Recipe("beetlewall", 4, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{veilrock, 4}, {cinderpearl, 1}}")));
+        Recipes.registerModRecipe(new Recipe("beetledoor", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{veilrock, 6}, {cinderpearl, 2}}")));
+        Recipes.registerModRecipe(new Recipe("beetlewindow", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{veilrock, 4}, {veilessence, 1}}")));
         Recipes.registerModRecipe(new Recipe("nightfelldoor", 1, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{skystone, 2}, {stormshard, 1}}")));
         Recipes.registerModRecipe(new Recipe("nightfellwindow", 1, RecipeTechRegistry.WORKSTATION,

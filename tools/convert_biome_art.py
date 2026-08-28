@@ -26,6 +26,7 @@ from px import Canvas  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REFS = os.path.join(ROOT, "docs/references")
+REFS_KK = os.path.join(ROOT, "src/main/resources/kk-sprites")
 OBJECTS = os.path.join(ROOT, "src/main/resources/objects")
 ITEMS = os.path.join(ROOT, "src/main/resources/items")
 
@@ -238,6 +239,90 @@ def repack_kk_tree(src_name, out_name):
     return path, sheet
 
 
+# Highest row vanilla ever starts each door cell on, measured over all 28
+# vanilla 352x128 wall sheets. Mirrors tools/sheet_format_audit.DOOR_CELLS.
+DOOR_CEILING = {3: 72, 4: 50, 5: 50, 6: 48, 7: 64, 8: 68, 9: 52, 10: 72}
+
+
+def fit_door_cells(src_name, out_name):
+    """Squash only the door cells whose art would draw off the top of the wall.
+
+    WallDoorObject draws each 32x128 cell at drawY - 96, so sheet row 96 is the
+    tile's top edge and anything far above it hangs in the air over the wall.
+    A cell already inside vanilla's range is left byte-identical; one that is
+    over gets its content scaled vertically, anchored at the bottom row, so the
+    top lands exactly on the ceiling. Nearest-neighbour, so it stays pixel art.
+
+    Faint glow above the window rows is cleared rather than scaled: it is not
+    drawn content, and scaling it would drag the whole cell down for nothing.
+    """
+    src = Image.open(os.path.join(REFS_KK, src_name)).convert("RGBA")
+    px = src.load()
+
+    # window insert rows 2-4 must be empty; anything there is glow bleed
+    cleared = 0
+    for row in (2, 3, 4):
+        for x in range(64, 96):
+            for y in range(row * 16, row * 16 + 16):
+                if px[x, y][3] > 0:
+                    px[x, y] = (0, 0, 0, 0)
+                    cleared += 1
+
+    report = []
+    for cell, ceiling in DOOR_CEILING.items():
+        x0 = cell * 32
+        ys = [y for x in range(x0, x0 + 32) for y in range(128) if px[x, y][3] > 0]
+        if not ys:
+            continue
+        top, bot = min(ys), max(ys)
+        if top >= ceiling:
+            report.append((cell, top, top, 1.0))
+            continue
+        strip = src.crop((x0, top, x0 + 32, bot + 1))
+        new_h = bot + 1 - ceiling
+        squashed = strip.resize((32, new_h), Image.NEAREST)
+        src.paste((0, 0, 0, 0), (x0, 0, x0 + 32, 128))
+        src.paste(squashed, (x0, ceiling), squashed)
+        report.append((cell, top, ceiling, new_h / strip.height))
+
+    path = os.path.join(OBJECTS, out_name)
+    src.save(path)
+    return path, cleared, report
+
+
+def beetle_item_icons():
+    """Wall, door and window icons cut from the supplied sheet itself.
+
+    Vanilla's wall icons are a 20x28 chunk of the material in a 32x32 slot
+    (stonewall 560 opaque px, stonedoor 456, stonewindow 536), so these take
+    the same crops out of the sheet the wall actually draws from rather than
+    inventing a second drawing of the same material.
+    """
+    src = Image.open(os.path.join(OBJECTS, "beetlewall.png")).convert("RGBA")
+    out = {}
+
+    def slot(strip, name, box=(6, 2, 26, 30)):
+        w, h = box[2] - box[0], box[3] - box[1]
+        icon = Image.new("RGBA", (32, 32))
+        fitted = strip.resize((w, h), Image.NEAREST)
+        icon.paste(fitted, (box[0], box[1]), fitted)
+        path = os.path.join(ITEMS, name)
+        icon.save(path)
+        out[name] = sum(1 for q in icon.get_flattened_data() if q[3] > 0)
+        return path
+
+    # wall: the body's front face, two tiles of course-work
+    slot(src.crop((0, 48, 32, 128)), "beetlewall.png")
+    # door: cell 7, the other closed head-on leaf. Cell 3 would be the obvious
+    # pick but it is the one cell the fit had to squash hardest (0.53x), so it
+    # carries the least mass; cell 7 needed only 0.93x and still reads as a
+    # closed door with its skull crown.
+    slot(src.crop((224, 86, 256, 128)), "beetledoor.png", (6, 6, 26, 30))
+    # window: the front rows of the window insert, where the opening is
+    slot(src.crop((64, 80, 96, 128)), "beetlewindow.png")
+    return out
+
+
 def main():
     path, sheet = build_skyseraph_tree()
     opaque = sum(1 for p in sheet.get_flattened_data() if p[3] > 0)
@@ -247,6 +332,15 @@ def main():
           f"opaque {sum(1 for p in icon.get_flattened_data() if p[3] > 0)}")
     splat = build_skyway_ground()
     print(f"{splat}  {Image.open(splat).size}")
+
+    wall, cleared, rep = fit_door_cells("beetlewall.png", "beetlewall.png")
+    icons = beetle_item_icons()
+    print(f"{wall}  cleared {cleared} glow px from window rows 2-4")
+    for cell, was, now, factor in rep:
+        print(f"    cell {cell:2d}: y{was} -> y{now}"
+              + ("  (unchanged)" if factor == 1.0 else f"  squashed to {factor:.2f}x"))
+    for name, opaque in icons.items():
+        print(f"    items/{name}  32x32  opaque {opaque}")
 
     path, sheet = repack_kk_tree("birchtree-new-cloudtree.png", "cloudtree.png")
     print(f"{path}  {sheet.size}  "

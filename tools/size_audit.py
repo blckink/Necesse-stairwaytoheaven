@@ -133,6 +133,10 @@ PAIRS = [
     ("items/cloudmarblewindow.png", None, "items/stonewindow.png", None, "window item icon"),
     ("items/cloudmarblefence.png", None, "items/stonefence.png", None, "fence item icon"),
     ("items/cloudmarblefencegate.png", None, "items/stonefencegate.png", None, "gate item icon"),
+    # Beetlefreak: supplied wall art, icons cut from the sheet it draws from.
+    ("items/beetlewall.png", None, "items/stonewall.png", None, "wall item icon"),
+    ("items/beetledoor.png", None, "items/stonedoor.png", None, "door item icon"),
+    ("items/beetlewindow.png", None, "items/stonewindow.png", None, "window item icon"),
     # v0.9 Sky Seraph tree companions. The tree itself is converted reference
     # art with no vanilla analogue; its companions answer to oak, the vanilla
     # round-crown broadleaf. Vanilla names the log item oaklog, not oakwood.

@@ -94,6 +94,10 @@ nightfellwall=Nightfell-Wand
 nightfelldoor=Nightfell-Tür
 nightfelldoorlocked=Verschlossene Nightfell-Tür
 nightfellwindow=Nightfell-Fenster
+beetlewall=Käferwahn-Wand
+beetledoor=Käferwahn-Tür
+beetledoorlocked=Verschlossene Käferwahn-Tür
+beetlewindow=Käferwahn-Fenster
 // Skywatch furniture family (real vanilla furniture base classes)
 skywatchchair=Himmelswacht-Stuhl
 skywatchbench=Himmelswacht-Bank

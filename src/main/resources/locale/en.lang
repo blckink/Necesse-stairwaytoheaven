@@ -94,6 +94,10 @@ nightfellwall=Nightfell Wall
 nightfelldoor=Nightfell Door
 nightfelldoorlocked=Locked Nightfell Door
 nightfellwindow=Nightfell Window
+beetlewall=Beetlefreak Wall
+beetledoor=Beetlefreak Door
+beetledoorlocked=Locked Beetlefreak Door
+beetlewindow=Beetlefreak Window
 // Skywatch furniture family (real vanilla furniture base classes)
 skywatchchair=Skywatch Chair
 skywatchbench=Skywatch Bench

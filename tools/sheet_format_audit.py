@@ -37,19 +37,32 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RES = os.path.join(REPO, "src", "main", "resources")
 
 WALL_SHEETS = ("objects/skystonebrickwall.png", "objects/nightfellwall.png",
-               "objects/cloudmarblewall.png")
+               "objects/cloudmarblewall.png", "objects/beetlewall.png")
 
-# 32-cell index -> (top row, bottom row). Cells 0-2 are the 16px auto-tile blob
-# and the window insert, which do use the full height.
+# 32-cell index -> (highest top row vanilla ever uses, bottom row).
+#
+# These were originally one sheet's exact values, which was wrong twice over: it
+# rejected art that sits comfortably inside what vanilla itself does, and it
+# implied a precision the format does not have. Measured across ALL 28 vanilla
+# 352x128 wall sheets, each cell's top varies by 20-30px — cell 3 runs 72..94,
+# cell 6 runs 48..72 — because a closed door head-on is taller than a leaf seen
+# edge-on and every material draws its crown differently.
+#
+# So the rule is a ceiling, not an equality: content may start no higher than
+# the tallest vanilla art in that cell. Anything above that row is drawn off
+# the top of the wall it stands in.
+#
+# Cells 0-2 are the 16px auto-tile blob and the window insert, which do use the
+# full height.
 DOOR_CELLS = {
-    3: (88, 127),   # rot 0 closed, head-on
-    4: (68, 127),   # rot 0 open, leaf edge-on
-    5: (70, 127),   # rot 1 closed, edge-on
-    6: (68, 127),   # rot 1 open, leaf head-on (swung north)
-    7: (88, 127),   # rot 2 closed, head-on
-    8: (68, 127),   # rot 2 open, leaf edge-on
-    9: (70, 127),   # rot 3 closed, edge-on
-    10: (90, 127),  # rot 3 open, leaf head-on (swung south)
+    3: (72, 127),   # rot 0 closed, head-on          (vanilla 72..94)
+    4: (50, 127),   # rot 0 open, leaf edge-on       (vanilla 50..76)
+    5: (50, 127),   # rot 1 closed, edge-on          (vanilla 50..76)
+    6: (48, 127),   # rot 1 open, leaf head-on       (vanilla 48..72)
+    7: (64, 127),   # rot 2 closed, head-on          (vanilla 64..94)
+    8: (68, 127),   # rot 2 open, leaf edge-on       (vanilla 68..76)
+    9: (52, 127),   # rot 3 closed, edge-on          (vanilla 52..76)
+    10: (72, 127),  # rot 3 open, leaf head-on       (vanilla 72..94)
 }
 
 
@@ -123,12 +136,16 @@ def main():
             top, bot = cell_extent(px, 128, cell * 32, cell * 32 + 32)
             checked += 1
             if top is None:
-                problems.append(f"{rel} cell {cell}: empty, expected y{want_top}..{want_bot}")
-            elif (top, bot) != (want_top, want_bot):
-                over = want_top - top
-                extra = f" ({over}px too tall)" if over > 0 else ""
+                problems.append(f"{rel} cell {cell}: empty, expected art ending at y{want_bot}")
+            elif top < want_top:
                 problems.append(
-                    f"{rel} cell {cell}: y{top}..{bot}, expected y{want_top}..{want_bot}{extra}")
+                    f"{rel} cell {cell}: starts at y{top}, {want_top - top}px above the "
+                    f"tallest vanilla art in this cell (y{want_top}) -- that much would "
+                    f"draw off the top of the wall")
+            elif bot != want_bot:
+                problems.append(
+                    f"{rel} cell {cell}: ends at y{bot}, expected y{want_bot} -- the door "
+                    f"must sit on the bottom of its cell")
 
     for p in problems:
         print(f"FIX  {p}")
