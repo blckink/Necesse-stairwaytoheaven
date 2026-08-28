@@ -36,7 +36,8 @@ from PIL import Image
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RES = os.path.join(REPO, "src", "main", "resources")
 
-WALL_SHEETS = ("objects/skystonebrickwall.png", "objects/nightfellwall.png")
+WALL_SHEETS = ("objects/skystonebrickwall.png", "objects/nightfellwall.png",
+               "objects/cloudmarblewall.png")
 
 # 32-cell index -> (top row, bottom row). Cells 0-2 are the 16px auto-tile blob
 # and the window insert, which do use the full height.

@@ -123,6 +123,16 @@ PAIRS = [
     # single-figure statue is the blacksmith at 96x160.
     ("objects/statues/seraph.png", None,
      "objects/statues/blacksmithstatue.png", None, "tall single-figure statue"),
+    # v0.8 Cloudmarble. Stone fence and gate are the analogues, not the iron
+    # ones: this is masonry, and iron rails are far thinner per cell.
+    ("objects/cloudmarblefence.png", (0, 0, 32, 64),
+     "objects/stonefence.png", (0, 0, 32, 64), "fence post cell (col 0)"),
+    ("objects/cloudmarblefencegate.png", (32, 0, 64, 64),
+     "objects/stonefencegate.png", (32, 0, 64, 64), "fence gate closed cell (col 1)"),
+    ("items/cloudmarblewall.png", None, "items/stonewall.png", None, "wall item icon"),
+    ("items/cloudmarblewindow.png", None, "items/stonewindow.png", None, "window item icon"),
+    ("items/cloudmarblefence.png", None, "items/stonefence.png", None, "fence item icon"),
+    ("items/cloudmarblefencegate.png", None, "items/stonefencegate.png", None, "gate item icon"),
 ]
 
 THRESHOLD = 0.75

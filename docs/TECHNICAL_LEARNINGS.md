@@ -977,3 +977,36 @@ time the fix was variety of HEIGHT rather than count.
 **[run]** `painter oracle: tileMismatches=0` still holds after all of the
 above, so the 40x22 renders these numbers were calibrated on are the tiles the
 live server actually writes.
+
+## Wall body columns are tile halves, not variants (v0.8)
+
+`WallObject.addWallDrawOptions` draws the left half of a wall tile at `drawX`
+from **columns 0 and 2**, and the right half at `drawX + 16` from **columns 1
+and 3**:
+
+```java
+// left half, at drawX
+sprite(0,3) sprite(0,4)      // no wall to the left
+sprite(2,3) sprite(2,4) sprite(2,5)   // wall to the left
+// right half, at drawX + 16
+sprite(1,3) sprite(1,4)      // no wall to the right
+sprite(3,3) sprite(3,4) sprite(3,6)   // wall to the right
+```
+
+So a column pair is *(left half, right half)* of the same connection state, not
+two interchangeable variants of a whole tile.
+
+This matters for what a wall can depict. `gen_walls.py` paints the four columns
+as interchangeable variants, which forces any motif to repeat with a **16 px
+period** — fine for masonry courses, impossible for anything that spans a tile.
+`gen_cloudmarble.py` treats them as halves instead, which is what lets its
+arcade carry **one arch per 32 px tile** with the pilaster straddling the tile
+boundary (x29–31 of the left half against x0–2 of the right).
+
+`skystonebrickwall` and `nightfellwall` are not broken by this — their designs
+are course-based and read correctly — but they cannot grow a tile-spanning
+motif without moving to the half-column reading first.
+
+Same lesson as the door cells and the window rows before it: one sheet, several
+readers, and the reader you did not check is where the next report comes from.
+`tools/sheet_format_audit.py` now covers all three wall sheets (42 cells).

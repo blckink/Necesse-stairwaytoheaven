@@ -192,19 +192,29 @@ def _stone_tone(s, floor_ramp=False):
     darker than the mortar around it and the wall reads grey. Vanilla can
     afford an even split because its stone is mid-grey on dark mortar; ours
     cannot."""
+    if floor_ramp:
+        # Terrain runs on a NARROWER ramp than an object of the same material.
+        # Calibrated, not eyeballed: mean per-pixel luma spread over the four
+        # full-variant cells is 4.1 for vanilla snow (the closest analogue, mean
+        # luma 237), 8.4 for dirt and 9.5 for this mod's own cloudturf. The
+        # first cut of this ground measured 13.4 at mean luma 216 -- as much
+        # local contrast as ash, on a near-white material, which is what "the
+        # floor reads noisy at 1x" is in numbers.
+        if s < -0.55:
+            return CLOUDMARBLE["hi"]
+        return CLOUDMARBLE["light"] if s < 0.30 else CLOUDMARBLE["base"]
     if s < -0.30:
         return CLOUDMARBLE["hi"]
     if s < 0.16:
         return CLOUDMARBLE["light"]
-    if floor_ramp:                      # ground never reaches the bottom step
-        return CLOUDMARBLE["base"]
     if s < 0.58:
         return CLOUDMARBLE["base"]
     return CLOUDMARBLE["deep"]
 
 
 def cobble(target, cx, cy, rx, ry, rng, gold=True, glyph=False, shadow=True,
-           n=2.0, shade=None, floor_ramp=False, glyph_tone=None):
+           n=2.0, shade=None, floor_ramp=False, glyph_tone=None,
+           gold_pair=None):
     """One rounded cloud stone: four-step body, a 1px GOLD rim on the lit edge
     only (never a full outline -- that is what carries 'gold' at 1x), a 1px
     shaded rim on the far side, a thin mortar joint under it, and optionally the
@@ -231,6 +241,7 @@ def cobble(target, cx, cy, rx, ry, rng, gold=True, glyph=False, shadow=True,
     y0, y1 = int(math.floor(cy - ry - 1)), int(math.ceil(cy + ry + 1))
     scale = min(rx, ry)
     shade = STONE_SHADE if shade is None else shade
+    g_lit, g_mid = gold_pair or (SKYGOLD["light"], SKYGOLD["base"])
     for y in range(y0, y1 + 1):
         for x in range(x0, x1 + 1):
             dx, dy = (x - cx) / rx, (y - cy) / ry
@@ -240,8 +251,8 @@ def cobble(target, cx, cy, rx, ry, rng, gold=True, glyph=False, shadow=True,
             if u <= 1.0:
                 inset = (1.0 - u ** (1.0 / n)) * scale    # px in from the edge
                 if inset < 1.15:
-                    tone = (SKYGOLD["light"] if gold and s < -0.34
-                            else SKYGOLD["base"] if gold and s < -0.08
+                    tone = (g_lit if gold and s < -0.34
+                            else g_mid if gold and s < -0.08
                             else shade)
                 else:
                     tone = _stone_tone(s, floor_ramp)
@@ -260,7 +271,7 @@ def cobble(target, cx, cy, rx, ry, rng, gold=True, glyph=False, shadow=True,
 # The Skyway floor
 # ---------------------------------------------------------------------------
 
-def _cloudfield(t, salt, density=0.09):
+def _cloudfield(t, salt, density=0.06):
     """The pale blue cloud bed the cobbles are set into: mortar with soft wisps,
     position-locked so every cell of a splat block is identical and the sheet
     tiles seamlessly in both directions."""
@@ -293,7 +304,7 @@ def _cloudfield(t, salt, density=0.09):
 # yellow arc, and one per stone over a whole biome reads as speckle rather than
 # as the set's accent. Measured against vanilla's ground sheets, an accent motif
 # lands about once every one or two tiles (cloudturf's flowers do exactly this).
-_SKYWAY_STONES = ((2, (7, 9), (5, 7), 0.36), (3, (4, 6), (3, 5), 0.0))
+_SKYWAY_STONES = ((2, (7, 9), (5, 7), 0.36), (2, (4, 6), (3, 5), 0.0))
 _FLOOR_GLYPH = mix(CLOUDGLYPH, CLOUDMARBLE["light"], 0.45)
 
 
@@ -319,7 +330,12 @@ def _skyway_tile(variant):
         # one step below the body, and the body ramp stopped before its darkest
         # step. See cobble()'s note and tools/... vanilla ground comparison.
         cobble(t, cx, cy, rx, ry, rng, gold=gold, glyph=rx >= 4.5, n=n,
-               shadow=False, shade=CLOUDMARBLE["deep"], floor_ramp=True,
+               shadow=False, shade=mix(CLOUDMARBLE["deep"], CLOUDMORTAR, 0.35),
+               floor_ramp=True,
+               # the ground's gold sits one ramp step brighter than the wall's:
+               # at this material's luma the darker pair is the single biggest
+               # contributor to the 1x noise measurement
+               gold_pair=(SKYGOLD["hi"], SKYGOLD["light"]),
                glyph_tone=_FLOOR_GLYPH)
     return t
 
@@ -969,6 +985,18 @@ def _door_leaf_panel(target, lx0, lx1, ly0, ly1):
     gold_star(target, int(acx), mid, max(3, w // 3), max(5, w // 2 - 1))
 
 
+def _leaf_frame(target, fx0, fx1, fy0, fy1):
+    """The gold frame the v2 leaf carries. A swung-open leaf drawn as bare
+    boarding does not match the closed one it turns into, and the pair reads as
+    two different objects when a player opens the door."""
+    for x in range(fx0, fx1 + 1):
+        target.put(x, fy0, SKYGOLD["light"])
+        target.put(x, fy1, SKYGOLD["deep"])
+    for y in range(fy0, fy1 + 1):
+        target.put(fx0, y, SKYGOLD["light"])
+        target.put(fx1, y, SKYGOLD["deep"])
+
+
 def _build_doors(c, salt):
     def fill(bands, tone):
         for y0, y1, bx0, bx1 in bands:
@@ -1005,16 +1033,35 @@ def _build_doors(c, salt):
             # wall beside it, exactly as vanilla builds a door.
             arch = [(88, 89, x0 + 5, x0 + 26), (90, 91, x0 + 3, x0 + 28),
                     (92, 93, x0 + 1, x0 + 30), (94, 127, x0, x0 + 31)]
-            fill(arch, lambda x, y: _door_masonry(x, y))
-            # ONE gold line following the chamfer. A rim on every step reads as
-            # three stacked slabs -- a staircase over the door, not an arch.
-            for (ay, _, ax0, ax1) in arch[:3]:
-                for x in range(ax0, ax1 + 1):
-                    c.put(x, ay, SKYGOLD["light"] if x < (ax0 + ax1) // 2
+            fill([(94, 127, x0, x0 + 31)], lambda x, y: _door_masonry(x, y))
+            # The three chamfer courses above the tile are ONE arch head, so
+            # they get one continuous stone and one gold line following the
+            # outer step -- masonry joints and a gold rim per course instead
+            # read as three slabs stacked over the door, a staircase not an arch.
+            for (ay0, ay1, ax0, ax1) in arch[:3]:
+                for y in range(ay0, ay1 + 1):
+                    for x in range(ax0, ax1 + 1):
+                        s_ = (x - (x0 + 16)) / 16.0 + (y - 96) / 16.0
+                        c.put(x, y, CLOUDMARBLE["hi"] if s_ < -0.55 else
+                              CLOUDMARBLE["light"] if s_ < -0.1
+                              else CLOUDMARBLE["base"])
+            # One gold line around the SILHOUETTE of the whole head. Outlining
+            # each chamfer course separately draws three nested rectangles,
+            # which is a staircase over the door however the stone is shaded;
+            # only the union's exposed edge reads as an arch.
+            head = set()
+            for (ay0, ay1, ax0, ax1) in arch[:3]:
+                for y in range(ay0, ay1 + 1):
+                    for x in range(ax0, ax1 + 1):
+                        head.add((x, y))
+            solid = head | {(x, y) for y in range(94, 128)
+                            for x in range(x0, x0 + 32)}
+            for (x, y) in sorted(head):
+                if any((x + dx, y + dy) not in solid
+                       for dx, dy in ((0, -1), (-1, 0), (1, 0))):
+                    c.put(x, y, SKYGOLD["light"] if x < x0 + 16
                           else SKYGOLD["base"])
-            for (ay, _, ax0, ax1) in arch[:3]:
-                c.put(ax0, ay + 1, SKYGOLD["light"])
-                c.put(ax1, ay + 1, SKYGOLD["base"])
+            gold_star(c, x0 + 16, 93, 3, 4)                # keystone
             _door_leaf_panel(c, x0 + 8, x0 + 23, TILE_TOP + 1, 126)
             c.put(x0 + 21, 110, SKYGOLD["hi"])            # handle
             c.put(x0 + 21, 111, SKYGOLD["light"])
@@ -1054,6 +1101,7 @@ def _build_doors(c, salt):
             rim_arch(leaf, CLOUDMARBLE["hi"])
             gold_band(78, x0 + 22, x0 + 31)
             gold_band(100, x0 + 22, x0 + 31)
+            _leaf_frame(c, x0 + 23, x0 + 30, 82, 98)
             gold_star(c, x0 + 27, 89, 3, 5)
             for y in range(70, 116):                      # free edge of the leaf
                 c.put(x0 + 22, y, SKYGOLD["deep"])
@@ -1074,6 +1122,7 @@ def _build_doors(c, salt):
                 fill([(body_top, 103, x0, x0 + 31)], lambda x, y: _leaf_px(x, y, True))
                 gold_band(80, x0, x0 + 31)
                 gold_band(95, x0, x0 + 31)
+                _leaf_frame(c, x0 + 3, x0 + 28, body_top + 2, 101)
                 gold_star(c, x0 + 16, 88, 4, 6)
                 floor_line(103, x0, x0 + 31)
                 fill([(104, 126, x0 + 16, x0 + 31)], lambda x, y: _cap_pixel(x, y))
@@ -1082,6 +1131,7 @@ def _build_doors(c, salt):
                 fill([(body_top, 126, x0, x0 + 31)], lambda x, y: _leaf_px(x, y, True))
                 gold_band(102, x0, x0 + 31)
                 gold_band(118, x0, x0 + 31)
+                _leaf_frame(c, x0 + 3, x0 + 28, body_top + 2, 124)
                 gold_star(c, x0 + 16, 110, 4, 6)
                 fill([(120, 126, x0, x0 + 15)], lambda x, y: _cap_pixel(x, y))
                 floor_line(127, x0, x0 + 31)
@@ -1304,16 +1354,21 @@ def gen_cloudmarble_fence(path):
     sheet.save(path)
 
 
-def _gate_post(c, x0, keys, top=24):
-    """A gate pier. `keys` sets the width (4 + 2*len px): the two piers of a
-    horizontal gate are 8px so the pair plus the leaf fills the 32px cell
-    exactly, while the standalone vertical post is 12px, matching vanilla
-    ironfencegate's own column 2 (bbox x10..21)."""
+def _gate_post(c, x0, keys, top=20):
+    """A gate pier: the same fluted-column-with-a-gold-capital as a fence post,
+    at gate width, and standing at the SAME head height. `keys` sets the width
+    (4 + 2*len px): the two piers of a horizontal gate are 8px so the pair plus
+    the leaf fills the 32px cell exactly, while the standalone vertical post is
+    12px, matching vanilla ironfencegate's own column 2 (bbox x10..21).
+
+    A gate whose head stops 6px below the posts on either side reads as a dip
+    in the fence line rather than as a gate in it."""
     w = 4 + 2 * len(keys[0])
     _blk(c, x0 + 2, top, w - 4, 2, OUT)
+    _row(c, x0, top + 2, "G" * len(keys[0]))               # gold capital
     for i, band in enumerate(keys):
-        _row(c, x0, top + 2 + i * 2, band)
-    foot = top + 2 + len(keys) * 2
+        _row(c, x0, top + 4 + i * 2, band)
+    foot = top + 4 + len(keys) * 2
     _blk(c, x0 + 2, foot, w - 4, 2, OUT)
     _skirt(c, x0, foot, 2, 2, 74)
     _skirt(c, x0 + w - 2, foot, 2, 2, 74)
@@ -1321,9 +1376,9 @@ def _gate_post(c, x0, keys, top=24):
     _skirt(c, x0, foot + 2, w, 2, 29)
 
 
-_PIER_2 = ["lH", "Gg", "lb", "ld", "Gg", "lb", "lb", "ld", "Gg", "lb", "ld", "dd"]
-_PIER_4 = ["lHbd", "GGgk", "lHbd", "lHbd", "GGgk", "lHbd",
-           "lHbd", "lHbd", "GGgk", "lHbd", "lHbd", "lbdd"]
+_PIER_2 = ["gk", "Hb", "Hb", "Hb", "Hb", "Hb", "Hb", "Hb", "Hb",
+           "Hb", "Hb", "Hb", "Gg", "kk"]
+_PIER_4 = ["ggkk"] + ["Hdbd"] * 11 + ["GGgk", "kkgk"]
 
 
 def _gate_leaf(c, x0, x1, crown_x0, crown_x1):
@@ -1331,32 +1386,33 @@ def _gate_leaf(c, x0, x1, crown_x0, crown_x1):
     this set that is gold-DOMINANT: a gold-filled panel with tracery and a large
     four-point star, framed by a crown above and a kick rail below. That is what
     distinguishes a gate from the plain cloud rail beside it at a glance, which
-    is the whole job of a gate sprite in a fence run."""
+    is the whole job of a gate sprite in a fence run. Its crown sits level with
+    the piers' capitals, not below them."""
     w = x1 - x0
-    c.rect(crown_x0, 24, crown_x1 - crown_x0, 2, OUT)      # crown
-    c.rect(crown_x0, 26, crown_x1 - crown_x0, 2, SKYGOLD["hi"])
-    c.rect(x0, 28, w, 2, OUT)
-    c.rect(x0, 30, w, 2, SKYGOLD["light"])                 # LIT TOP SURFACE
-    c.rect(x0, 32, w, 2, SKYGOLD["deep"])                  # DARK FRONT FACE
-    c.rect(x0, 34, w, 2, OUT)
+    c.rect(crown_x0, 20, crown_x1 - crown_x0, 2, OUT)      # crown
+    c.rect(crown_x0, 22, crown_x1 - crown_x0, 2, SKYGOLD["hi"])
+    c.rect(x0, 24, w, 2, OUT)
+    c.rect(x0, 26, w, 2, SKYGOLD["light"])                 # LIT TOP SURFACE
+    c.rect(x0, 28, w, 2, SKYGOLD["deep"])                  # DARK FRONT FACE
+    c.rect(x0, 30, w, 2, OUT)
     for x in range(x0, x1):                                # the gold field
-        for y in range(36, 48):
+        for y in range(32, 46):
             c.put(x, y, SKYGOLD["deep"] if (x + y) % 2 else
                   mix(SKYGOLD["deep"], SKYGOLD["base"], 0.4))
-    for x in range(x0, x1):                                # tracery
-        if (x - x0) % 4 == 1:
-            for y in range(37, 47):
+        if (x - x0) % 4 == 1:                              # tracery
+            for y in range(33, 45):
                 c.put(x, y, SKYGOLD["base"])
-    for y in (37, 46):
+    for y in (33, 44):
         c.rect(x0 + 1, y, w - 2, 1, SKYGOLD["light"])
-    gold_star(c, (x0 + x1) // 2, 42, 4, 6)
+    gold_star(c, (x0 + x1) // 2, 39, 4, 6)
     for dx in (-1, 1):                                     # sparkles beside it
-        c.put((x0 + x1) // 2 + dx * (w // 2 - 2), 40, SKYGOLD["hi"])
-        c.put((x0 + x1) // 2 + dx * (w // 2 - 2), 44, SKYGOLD["light"])
-    c.rect(x0, 48, w, 2, SKYGOLD["light"])                 # kick rail, lit top
-    c.rect(x0, 50, w, 2, SKYGOLD["deep"])
-    c.rect(x0, 52, w, 2, OUT)
-    _skirt(c, x0, 54, w, 2, 74)
+        c.put((x0 + x1) // 2 + dx * (w // 2 - 2), 36, SKYGOLD["hi"])
+        c.put((x0 + x1) // 2 + dx * (w // 2 - 2), 42, SKYGOLD["light"])
+    c.rect(x0, 46, w, 2, SKYGOLD["light"])                 # kick rail, lit top
+    c.rect(x0, 48, w, 2, SKYGOLD["deep"])
+    c.rect(x0, 50, w, 2, OUT)
+    _skirt(c, x0, 52, w, 2, 74)
+    _skirt(c, x0, 54, w, 2, 29)
 
 
 def gen_cloudmarble_fencegate(path):
@@ -1382,9 +1438,9 @@ def gen_cloudmarble_fencegate(path):
     c = Canvas(32, 64)
     _gate_post(c, 0, _PIER_2)
     _gate_post(c, 24, _PIER_2)
-    c.rect(8, 14, 2, 2, OUT)
-    for i, k in enumerate("GHlHlbdbldbGgk"):
-        y = 16 + i * 2
+    c.rect(8, 12, 2, 2, OUT)
+    for i, k in enumerate("GgHlHlbdbldbGgk"):
+        y = 14 + i * 2
         c.rect(6, y, 2, 2, OUT)
         _blk(c, 8, y, 2, 2, _CM_KEYS[k])
         c.rect(10, y, 2, 2, OUT)
@@ -1470,37 +1526,29 @@ def gen_wall_icon(path):
     c = Canvas(32, 32)
     cap = _cap_t()
     face = _face_t()
-    for y in range(9):
+    for y in range(8):                                     # cap + gold cornice
         for x in range(20):
             c.put(6 + x, 2 + y, cap.get(6 + x, y))
-    for y in range(19):
+    for y in range(20):                                    # masonry + the arch
         for x in range(20):
-            p = face.get(6 + x, 13 + y)
+            p = face.get(6 + x, 6 + y)
             if p[3]:
-                c.put(6 + x, 11 + y, p)
+                c.put(6 + x, 10 + y, p)
     _icon_frame(c, 6, 2, 20, 28)
     c.save(path)
 
 
 def gen_door_icon(path):
-    """items/cloudmarbledoor.png — the leaf with its star, in its arch."""
+    """items/cloudmarbledoor.png -- the leaf itself, drawn by the same routine
+    that paints it on the sheet, so the icon and the placed object are the same
+    object."""
     c = Canvas(32, 32)
     for y in range(6, 30):
         for x in range(6, 26):
-            c.put(x, y, _leaf_px(x, y, True))
-    for y in range(6, 30):
-        for x in (6, 7, 24, 25):
-            c.put(x, y, _door_masonry(x, y + 84))
-    for x in range(6, 26):
-        c.put(x, 6, SKYGOLD["light"])
-        c.put(x, 7, SKYGOLD["base"])
-        c.put(x, 8, SKYGOLD["deep"])
-    star4(c, 16, 19, 5, 8, SKYGOLD["base"], SKYGOLD["hi"])
-    for x in range(6, 26):
-        c.put(x, 13, SKYGOLD["base"]); c.put(x, 14, SKYGOLD["deep"])
-        c.put(x, 26, SKYGOLD["base"]); c.put(x, 27, SKYGOLD["deep"])
-    c.put(22, 19, SKYGOLD["hi"])
-    c.put(22, 20, SKYGOLD["light"])
+            c.put(x, y, CLOUDMARBLE["base"])
+    _door_leaf_panel(c, 6, 25, 6, 29)
+    c.put(22, 17, SKYGOLD["hi"])                           # handle
+    c.put(22, 18, SKYGOLD["light"])
     _icon_frame(c, 6, 6, 20, 24)
     c.save(path)
 
@@ -1543,14 +1591,20 @@ def gen_fence_icon(path):
     """items/cloudmarblefence.png — one post with a run leaving on each side,
     which is how vanilla draws items/stonefence.png (632 opaque px)."""
     c = Canvas(32, 64)
-    _balustrade(c, 2, 8)                     # runs overlap the
-    _balustrade(c, 22, 8)                    # post, as in world
+    # Engine order: FenceObject draws the post first and the runs over it, so
+    # the runs cover the post's own outline columns and the three pieces read as
+    # one fence. An icon that paints the post last shows a black seam either
+    # side of it and reads as three loose parts.
+    _post_cell(c)
+    _balustrade(c, 2, 8)
+    _balustrade(c, 22, 8)
     for y in range(28, 52):                                # cap the free ends
         c.put(2, y, OUT)
         c.put(29, y, OUT)
-    _post_cell(c)
     icon = Canvas(32, 32)
-    icon.img.alpha_composite(c.img.crop((0, 20, 32, 52)), (0, 0))
+    # crop so the post's head lands on the icon's own top inset, the way
+    # vanilla's items/stonefence.png crops its post
+    icon.img.alpha_composite(c.img.crop((0, 16, 32, 48)), (0, 0))
     icon.px = icon.img.load()
     icon.save(path)
 
@@ -1562,7 +1616,7 @@ def gen_fencegate_icon(path):
     _gate_post(c, 24, _PIER_2)
     _gate_leaf(c, 8, 24, 12, 20)
     icon = Canvas(32, 32)
-    icon.img.alpha_composite(c.img.crop((0, 22, 32, 54)), (0, 0))
+    icon.img.alpha_composite(c.img.crop((0, 18, 32, 50)), (0, 0))
     icon.px = icon.img.load()
     icon.save(path)
 

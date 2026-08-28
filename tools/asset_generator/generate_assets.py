@@ -34,6 +34,7 @@ import gen_props  # noqa: E402
 import gen_furniture  # noqa: E402
 import gen_trees  # noqa: E402
 import gen_skyfurniture  # noqa: E402
+import gen_cloudmarble  # noqa: E402
 
 
 def main():
@@ -224,6 +225,8 @@ def main():
 
     # Skywatch furniture family, on the vanilla furniture base classes
     gen_skyfurniture.generate(f"{out}/objects", f"{out}/items")
+    # Cloudmarble: white-and-gold masonry plus the Skyway Passages ground
+    gen_cloudmarble.generate(f"{out}/objects", f"{out}/items", f"{out}/tiles")
 
     gen_furniture.gen_v2_item_icons(f"{out}/items")
     gen_furniture.gen_set_icons(f"{out}/items")
