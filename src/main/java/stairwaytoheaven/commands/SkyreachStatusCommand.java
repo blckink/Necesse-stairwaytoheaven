@@ -746,11 +746,26 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                         .append(necesse.engine.registries.GlobalIngredientRegistry
                                 .getGlobalIngredient(gid).getStringID());
             }
+            // Why the line under an item's name is or is not there.
+            // Item.getCraftingMatTooltips builds it from two sources only: the
+            // craftingMatTip of every Tech that uses this item as an
+            // ingredient, and the craftingMatTip of its global ingredients.
+            // RecipeTechRegistry.registerTech(stringID, itemStringID) passes
+            // LocalMessage("itemtooltip","craftingmat") by default, so an item
+            // used by ANY standard tech should carry that line -- and an item
+            // used by none carries nothing at all, which is the bug to find.
+            StringBuilder tips = new StringBuilder();
+            for (necesse.inventory.recipe.Tech tech
+                    : necesse.inventory.recipe.Recipes.getCraftingMatTechs(item.getID())) {
+                tips.append(tips.length() == 0 ? "" : "+").append(tech.getStringID())
+                        .append(tech.craftingMatTip == null ? "(NOTIP)" : "");
+            }
             logs.add("item check: " + id
                     + " class=" + item.getClass().getSimpleName()
                     + " category=" + master
                     + " crafting=" + crafting
-                    + " globals=" + (globals.length() == 0 ? "-" : globals.toString()));
+                    + " globals=" + (globals.length() == 0 ? "-" : globals.toString())
+                    + " usedby=" + (tips.length() == 0 ? "** NOTHING **" : tips.toString()));
         }
 
         // Tiles that are registered itemObtainable=false but ARE meant to be
