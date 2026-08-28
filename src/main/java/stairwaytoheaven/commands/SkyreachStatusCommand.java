@@ -750,7 +750,7 @@ public class SkyreachStatusCommand extends ModularChatCommand {
             // Item.getCraftingMatTooltips builds it from two sources only: the
             // craftingMatTip of every Tech that uses this item as an
             // ingredient, and the craftingMatTip of its global ingredients.
-            // RecipeTechRegistry.registerTech(stringID, itemStringID) passes
+            // The two-argument tech registrar in RecipeTechRegistry passes
             // LocalMessage("itemtooltip","craftingmat") by default, so an item
             // used by ANY standard tech should carry that line -- and an item
             // used by none carries nothing at all, which is the bug to find.
