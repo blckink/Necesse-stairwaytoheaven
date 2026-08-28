@@ -59,6 +59,79 @@ public class CloudLambMob extends SheepMob {
     public static GameTexture texture;
     public static GameTexture shearedTexture;
 
+    /**
+     * Which sex this individual is.
+     *
+     * Without it the flock could not breed at all. Vanilla drives breeding from
+     * the MALE: {@code HusbandryMob.canImpregnateMob} is {@code return false},
+     * and every vanilla male hard-tests a vanilla string
+     * ({@code RamMob} -> {@code "sheep"}), so no vanilla ram will ever accept a
+     * Cloudlamb and a Cloudlamb had no way to accept one either. It also had no
+     * sex of its own -- {@code SheepMob.getGender} answers for a vanilla sheep --
+     * so {@code canBirth}/{@code canImpregnate} and the husbandry zone's job
+     * tick had nothing to pair up.
+     *
+     * The three v1.0 sky animals hit exactly this and solved it in
+     * {@link stairwaytoheaven.livestock.SkyBreed}; the Cloudlamb shipped first
+     * and was left behind. Same fix, same helper: roll a sex on the server,
+     * persist it, send it in the spawn packet, and accept our own kind.
+     */
+    protected int sex = stairwaytoheaven.livestock.SkyBreed.UNSET;
+
+    @Override
+    public void init() {
+        super.init();
+        this.sex = stairwaytoheaven.livestock.SkyBreed.rollIfUnset(this.sex, this);
+    }
+
+    @Override
+    public void addSaveData(necesse.engine.save.SaveData save) {
+        super.addSaveData(save);
+        save.addInt("skySex", this.sex);
+    }
+
+    @Override
+    public void applyLoadData(necesse.engine.save.LoadData save) {
+        super.applyLoadData(save);
+        this.sex = save.getInt("skySex", this.sex, false);
+    }
+
+    @Override
+    public void setupSpawnPacket(necesse.engine.network.PacketWriter writer) {
+        super.setupSpawnPacket(writer);
+        writer.putNextByteUnsigned(this.sex);
+    }
+
+    @Override
+    public void applySpawnPacket(necesse.engine.network.PacketReader reader) {
+        super.applySpawnPacket(reader);
+        this.sex = reader.getNextByteUnsigned();
+    }
+
+    @Override
+    public necesse.gfx.HumanGender getGender() {
+        return stairwaytoheaven.livestock.SkyBreed.gender(this.sex);
+    }
+
+    @Override
+    public boolean canImpregnateMob(necesse.entity.mobs.friendly.HusbandryMob other) {
+        return other.getStringID().equals(this.getStringID());
+    }
+
+    /**
+     * A husbandry animal inherits {@code Mob.isValidSpawnLocation}, which is
+     * {@code return false} -- vanilla places its livestock through island
+     * generators, never through a spawn table. So the Cloudlamb's entry in the
+     * Driftlands table could never place one: the flock existed only where
+     * worldgen had already put it.
+     */
+    @Override
+    public boolean isValidSpawnLocation(necesse.engine.network.server.Server server,
+                                        necesse.engine.network.server.ServerClient client,
+                                        int targetX, int targetY) {
+        return stairwaytoheaven.livestock.SkyBreed.validPastureSpawn(this, client, targetX, targetY);
+    }
+
     /** What a sheared fleece is worth, and what one drops when killed. */
     public static final String FLEECE_ITEM = "windsilk";
     public static final LootTable cloudLambLoot = new LootTable(
