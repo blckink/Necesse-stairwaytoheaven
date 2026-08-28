@@ -441,7 +441,12 @@ grep -qF "surface tool skyfallshard=ALL/1" "$LOG1" \
     || { echo "FAIL: the Fallen Skyshard does not have clutter tool behaviour"; \
          grep -E "surface tool" "$LOG1" | tail -1; STATUS=1; }
 
-CENSUS="$(grep -oE 'poi census: presetregions=[0-9]+ tilespan=[0-9]+x[0-9]+ CraterGeneration=[0-9]+ CampGeneration=[0-9]+ ShrineGeneration=[0-9]+ total=[0-9]+ perpresetregion=[0-9.]+' "$LOG1" | tail -1)"
+# blockedbyspawn=N sits between tilespan and the per-kind counts: the census
+# now runs vanilla's own near-spawn guard itself (see SkySurfaceStatusCommand)
+# and reports how many queued POIs that guard drops. A pattern pinned to the
+# old field order silently reports "the world preset never ran", which is the
+# opposite of what happened -- so it is matched here rather than tolerated.
+CENSUS="$(grep -oE 'poi census: presetregions=[0-9]+ tilespan=[0-9]+x[0-9]+ blockedbyspawn=[0-9]+ CraterGeneration=[0-9]+ CampGeneration=[0-9]+ ShrineGeneration=[0-9]+ total=[0-9]+ perpresetregion=[0-9.]+' "$LOG1" | tail -1)"
 if [ -z "$CENSUS" ]; then
     echo "FAIL: no poi census — the Surface POI world preset never ran"; STATUS=1
 else
