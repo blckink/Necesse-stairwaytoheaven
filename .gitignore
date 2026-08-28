@@ -32,3 +32,6 @@ __pycache__/
 
 ### Vanilla sprite dump (never committed; local QA reference only) ###
 vanilla-sprites/
+
+# Agent worktrees: separate checkouts of this repo, never content of it.
+.claude/worktrees/
