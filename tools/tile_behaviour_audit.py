@@ -85,6 +85,7 @@ ROLES = {
     "charfloortile": FLOOR,
     "prismfloortile": FLOOR,
     "skywaytile": TERRAIN,
+    "beetlefreaktile": TERRAIN,
 }
 
 # Vanilla base classes we may build on, and the isFloor value each one passes
@@ -223,7 +224,13 @@ def read_tile_class(name, sources):
                 is_floor = True
             elif first == "false":
                 is_floor = False
-            textures = re.findall(r'"([^"]*)"', args)
+            strings = re.findall(r'"([^"]*)"', args)
+            # TerrainSplatterTile(isFloor, terrainTextureName, alphaMaskName):
+            # the SECOND string is the alpha mask, not another texture. Vanilla
+            # uses it for the wide stencil (SpiderNestTile), and treating it as
+            # a texture name makes the audit hunt for a sheet that will never
+            # exist.
+            textures = strings[:1] if len(strings) > 1 else strings
         priority = None
         pr = re.search(r"getTerrainPriority\s*\(\s*\)\s*\{\s*return\s+(-?\d+)\s*;", text, re.S)
         if pr:

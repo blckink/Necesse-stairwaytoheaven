@@ -5,6 +5,7 @@ import stairwaytoheaven.biomes.AshenReachBiome;
 import stairwaytoheaven.biomes.AuroraShoalsBiome;
 import stairwaytoheaven.biomes.DriftlandsBiome;
 import stairwaytoheaven.biomes.GloomfenBiome;
+import stairwaytoheaven.biomes.SkywayBiome;
 import stairwaytoheaven.biomes.StormveilBiome;
 import stairwaytoheaven.objects.SkySideStairwayObject;
 import stairwaytoheaven.objects.SkywardStairwayObject;
@@ -42,6 +43,8 @@ public final class SkyRegistry {
     public static DriftlandsBiome driftlands;
     public static StormveilBiome stormveil;
     public static AuroraShoalsBiome auroraShoals;
+    /** v0.8 Skyway Passages: the built biome, paved in Skyway and Cloudmarble. */
+    public static SkywayBiome skyway;
 
     // ===== Tiles =====
 
@@ -105,6 +108,8 @@ public final class SkyRegistry {
     public static int blackpeatID;
     public static int ashsandID;
     public static int murkwaterID;
+    /** Veil: the Beetlefreak ground, on vanilla's spidernest tile setup. */
+    public static int beetlefreakID;
 
     public static VeilRiftObject veilRiftDown;
     public static VeilSideRiftObject veilRiftUp;

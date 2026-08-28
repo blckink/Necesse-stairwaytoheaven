@@ -14,6 +14,7 @@ import necesse.engine.world.WorldGenerator;
 import necesse.level.maps.Level;
 import stairwaytoheaven.biomes.AuroraShoalsBiome;
 import stairwaytoheaven.biomes.DriftlandsBiome;
+import stairwaytoheaven.biomes.SkywayBiome;
 import stairwaytoheaven.biomes.StormveilBiome;
 import stairwaytoheaven.biomes.GloomfenBiome;
 import stairwaytoheaven.biomes.AshenReachBiome;
@@ -96,6 +97,7 @@ public class StairwayToHeavenMod {
         SkyRegistry.driftlands = BiomeRegistry.registerBiome("driftlands", new DriftlandsBiome(), false);
         SkyRegistry.stormveil = BiomeRegistry.registerBiome("stormveil", new StormveilBiome(), false);
         SkyRegistry.auroraShoals = BiomeRegistry.registerBiome("aurorashoals", new AuroraShoalsBiome(), false);
+        SkyRegistry.skyway = BiomeRegistry.registerBiome("skyway", new SkywayBiome(), false);
         SkyRegistry.gloomfen = BiomeRegistry.registerBiome("gloomfen", new GloomfenBiome(), false);
         SkyRegistry.ashenReach = BiomeRegistry.registerBiome("ashenreach", new AshenReachBiome(), false);
     }
@@ -119,6 +121,12 @@ public class StairwayToHeavenMod {
         SkyRegistry.blackpeatID = TileRegistry.registerTile("blackpeattile", new BlackpeatTile(), 1.0F, true);
         SkyRegistry.ashsandID = TileRegistry.registerTile("ashsandtile", new AshsandTile(), 1.0F, true);
         SkyRegistry.murkwaterID = TileRegistry.registerTile("murkwatertile", new MurkwaterTile(), 0.0F, false);
+        // The Veil's maddest ground. Registered exactly the way vanilla
+        // registers spidernesttile, the tile its artwork was drawn on:
+        // brokerValue 0 and not obtainable, so it is placed by worldgen and
+        // by presets rather than carried in an inventory.
+        SkyRegistry.beetlefreakID = TileRegistry.registerTile("beetlefreaktile",
+                new stairwaytoheaven.tiles.BeetlefreakTile(), 0.0F, false, false, true);
     }
 
     private void registerObjects() {
