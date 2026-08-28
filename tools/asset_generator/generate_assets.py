@@ -36,6 +36,7 @@ import gen_trees  # noqa: E402
 import gen_skyfurniture  # noqa: E402
 import gen_cloudmarble  # noqa: E402
 import gen_arsenal  # noqa: E402
+import gen_professions  # noqa: E402
 
 
 def main():
@@ -234,6 +235,10 @@ def main():
     # Cloudmarble masonry. The Skyway ground it used to draw now comes from
     # tools/convert_biome_art.py instead — see the note in gen_cloudmarble.
     gen_cloudmarble.generate(f"{out}/objects", f"{out}/items", f"{out}/tiles")
+    # Skywatch professions: the three settlement workstations, the four spire
+    # furniture pieces on their vanilla base classes, and the materials the
+    # stations make.
+    gen_professions.generate(f"{out}/objects", f"{out}/items")
     # Sky Seraph tree companions (the tree itself is converted reference art)
     gen_trees.gen_skyseraphsapling(f"{out}/objects", f"{out}/items")
     gen_trees.gen_seraphwood_item(f"{out}/items/seraphwood.png")

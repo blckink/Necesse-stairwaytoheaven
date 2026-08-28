@@ -321,3 +321,33 @@ auroraflake=Auroraflocke
 fenwraith=Moorgeist
 cindercantor=Aschekantor
 watchmote=Wachtfunke
+// ---------------------------------------------------------------------------
+// Skywatch-Berufe (content/professions): die drei Siedlungs-Werkstationen, die
+// Materialien, die sie herstellen, und die vier Turm-Möbelstücke.
+// Ein wiederholter [Abschnitt] SETZT den Abschnitt fort, statt ihn zu ersetzen
+// (Translation.java:135 behält die vorhandene TranslationCategory, wenn der
+// Name schon bekannt ist), dieser Block hängt also oben an.
+// ---------------------------------------------------------------------------
+[object]
+windsilkloom=Windseiden-Webstuhl
+aetherforge=Ätherschmiede
+stormglasskiln=Sturmglas-Ofen
+skywatchbookshelf=Himmelswacht-Bücherregal
+skywatchcabinet=Himmelswacht-Schrank
+skywatchclock=Himmelswacht-Uhr
+skywatchdisplay=Himmelswacht-Vitrine
+
+[item]
+skyweave=Himmelsgewebe
+stormsteelbar=Sturmstahlbarren
+stormglass=Sturmglas
+
+[tech]
+windsilkloom=Windseiden-Webstuhl
+aetherforge=Ätherschmiede
+stormglasskiln=Sturmglas-Ofen
+
+[itemtooltip]
+windsilkloomtip=Spinnt Windweizen und webt Windseide. Weise einen Siedler zu, und der Stoff kommt von selbst
+aetherforgetip=Verbrennt Holz und läutert Ätheriumerz mit doppelter Ausbeute einer gewöhnlichen Schmiede - und nur hier entsteht Sturmstahl
+stormglasskilntip=Brennt Fulgurit und Himmelsstein zu Sturmglas. Braucht keinen Brennstoff - im Fulgurit steckt noch der Blitz

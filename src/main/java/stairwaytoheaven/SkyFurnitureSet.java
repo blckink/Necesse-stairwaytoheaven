@@ -10,10 +10,14 @@ import necesse.inventory.recipe.Recipes;
 import necesse.level.gameObject.ModularCarpetObject;
 import necesse.level.gameObject.PotTableDecorationObject;
 import necesse.level.gameObject.TableDecorationObject;
+import necesse.level.gameObject.container.BookshelfObject;
+import necesse.level.gameObject.container.CabinetObject;
+import necesse.level.gameObject.container.DisplayStandObject;
 import necesse.level.gameObject.furniture.BedObject;
 import necesse.level.gameObject.furniture.BenchObject;
 import necesse.level.gameObject.furniture.CandelabraObject;
 import necesse.level.gameObject.furniture.ChairObject;
+import necesse.level.gameObject.furniture.ClockObject;
 import necesse.level.gameObject.furniture.DeskObject;
 import necesse.level.gameObject.furniture.DinnerTableObject;
 import necesse.level.gameObject.furniture.DresserObject;
@@ -60,6 +64,10 @@ public final class SkyFurnitureSet {
     public static int skywatchCandleID;
     public static int skywatchTomeID;
     public static int pottedCloudberryID;
+    public static int skywatchBookshelfID;
+    public static int skywatchCabinetID;
+    public static int skywatchClockID;
+    public static int skywatchDisplayID;
 
     private SkyFurnitureSet() {
     }
@@ -93,6 +101,29 @@ public final class SkyFurnitureSet {
                 new DeskObject("skywatchdesk", MAP_SKYWATCH, CATEGORY), 10.0F, true);
         skywatchDresserID = ObjectRegistry.registerObject("skywatchdresser",
                 new DresserObject("skywatchdresser", MAP_SKYWATCH, CATEGORY), 10.0F, true);
+        // The spire plan's archive wall. BookshelfObject and CabinetObject are
+        // both FurnitureObjects that carry an InventoryObjectEntity (10 and 20
+        // slots), so these are real storage a settler's hauling job can fill,
+        // not decoration shaped like storage. Their first constructor argument
+        // is the TEXTURE name, which we keep equal to the string ID so the
+        // engine's items/<id>.png icon convention still lines up.
+        skywatchBookshelfID = ObjectRegistry.registerObject("skywatchbookshelf",
+                new BookshelfObject("skywatchbookshelf", MAP_SKYWATCH, CATEGORY), 10.0F, true);
+        skywatchCabinetID = ObjectRegistry.registerObject("skywatchcabinet",
+                new CabinetObject("skywatchcabinet", MAP_SKYWATCH, CATEGORY), 10.0F, true);
+
+        // --- Reading the sky ------------------------------------------------
+        // ClockObject is furnitureType "clock" and shows the world time on
+        // hover; the Skywatch's is an astronomical dial rather than a
+        // pendulum case.
+        skywatchClockID = ObjectRegistry.registerObject("skywatchclock",
+                new ClockObject("skywatchclock", MAP_SKYWATCH, CATEGORY), 10.0F, true);
+        // DisplayStandObject is furnitureType "table" and holds ONE item in a
+        // DisplayStandObjectEntity, drawn on top of the stand. Its third
+        // argument is the height in pixels the held item floats at; vanilla's
+        // oakdisplay uses 20 and ours is the same pedestal height.
+        skywatchDisplayID = ObjectRegistry.registerObject("skywatchdisplay",
+                new DisplayStandObject("skywatchdisplay", MAP_SKYWATCH, 20, CATEGORY), 20.0F, true);
 
         // --- Sleeping ------------------------------------------------------
         // A real BedObject, so a settler can actually be assigned to it.
@@ -159,5 +190,20 @@ public final class SkyFurnitureSet {
                 Recipes.ingredientsFromScript("{{windsilk, 2}, {skystone, 2}}")));
         Recipes.registerModRecipe(new Recipe("pottedcloudberry", 1, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{skystone, 3}, {cloudberry, 2}}")));
+
+        // The four spire pieces. These are the first Skywatch furniture that
+        // spends what the professions produce: the shelved and lined pieces
+        // take Skyweave off the Windsilk Loom, and the two glazed ones take
+        // Stormglass out of the Stormglass Kiln. Both are still WORKSTATION
+        // recipes, so the player builds the station, runs it (or lets a
+        // settler run it), and then builds the furniture.
+        Recipes.registerModRecipe(new Recipe("skywatchbookshelf", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{skystone, 8}, {cloudwood, 6}, {skyweave, 2}}")));
+        Recipes.registerModRecipe(new Recipe("skywatchcabinet", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{skystone, 8}, {cloudwood, 6}, {skyweave, 2}}")));
+        Recipes.registerModRecipe(new Recipe("skywatchclock", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{skystone, 6}, {ironbar, 2}, {stormglass, 2}}")));
+        Recipes.registerModRecipe(new Recipe("skywatchdisplay", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{skystone, 6}, {stormglass, 3}}")));
     }
 }

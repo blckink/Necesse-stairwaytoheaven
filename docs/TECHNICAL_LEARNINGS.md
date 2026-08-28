@@ -1275,3 +1275,118 @@ greatbow (so the line lands next to vanilla's own charge explanation), or the
 three-arg `MatItem(stackSize, rarity, tooltipKey)` constructor for a material.
 `tools/locale_audit.py` scans for the literal `Localization.translate(...)`
 call sites, so a wired tooltip is checked and an unwired key is merely unused.
+## A settler "profession" is a WORKSTATION, not a work zone (v0.9)
+
+**[jar]** Necesse has two unrelated mechanisms behind "put a settler to work",
+and only one of them is a zone.
+
+`SettlementWorkZoneRegistry.registerCore` registers exactly three zones —
+`forestry`, `husbandry`, `fertilize`. A `SettlementWorkZone` is a painted
+AREA (`engine/util/Zoning`); it exists so a settler knows *where* to go
+chopping, shearing or fertilizing.
+
+A workstation is a single object. `SettlementStorageManager.assignWorkstation`
+(`SettlementStorageManager.java:196`) builds a `SettlementWorkstation` for a
+tile and keeps it only if `SettlementWorkstation.isTileValid()`, which is
+`getWorkstationObject() != null`, which is `new SettlementWorkstationLevelObject(...)`
+succeeding — and that constructor throws unless
+`object instanceof SettlementWorkstationObject`. **That single `instanceof` is
+the whole gate.** The settlement UI applies the same test client-side
+(`SettlementAssignWorkForm.java:642`, "settlementcannotworkstation").
+
+`ServerSettlementData.tickJobs` (`:786`) then publishes
+`new UseWorkstationLevelJob(workstation, …)` for every assigned station every
+tick, and `LevelJobRegistry.registerCore` (`:95`) files that job under the job
+type **`"crafting"`** — the vanilla settler work priority. So a new station
+needs **no new zone and no new job type**: implement the interface, and the
+existing crafting priority already picks it up.
+
+`UseWorkstationLevelJob.getJobSequence` branches on
+`isProcessingWorkstation()`: a NON-processing station (a
+`CraftingStationObject`) makes the settler fetch ingredients from settlement
+storage, walk over and craft in place; a processing one makes them drop the
+ingredients into the station's input inventory and haul the output away later.
+Both are genuinely unattended.
+
+**[run]** `/skyreachstatus` now measures both halves per station, and
+`scripts/integration_test.sh` asserts them:
+
+```
+workstation windsilkloom  settlementWorkstation=true processing=false recipes=2 makes=skyweavex1+windsilkx1
+workstation aetherforge   settlementWorkstation=true processing=true  recipes=2 makes=aetheriumbarx1+stormsteelbarx1
+workstation stormglasskiln settlementWorkstation=true processing=true recipes=1 makes=stormglassx2
+```
+
+The second half matters as much as the first: a station whose `Tech` carries no
+recipes is assignable in the UI and has nothing to do, and nothing in game says
+why.
+
+## A mod `Tech` needs a `[tech]` locale key nothing in the source writes
+
+**[jar]** `RecipeTechRegistry.registerTech(stringID, itemStringID)` — the
+two-argument overload — fills in the display name itself as
+`new LocalMessage("tech", stringID)` (`RecipeTechRegistry.java:99`). The
+crafting menu prints that through `tech.madein` ("Made in: <tech>") on every
+recipe the station owns, so an unnamed tech reads `tech.aetherforge` on all of
+them. Nothing in the mod's source contains the string `"tech"`, which is
+exactly the blind spot `tools/locale_audit.py` exists to close; it now walks
+`registerTech` call sites and requires the key in both locales.
+
+The second argument is `Tech.itemStringID`, the item the tech is *named after*.
+Ours is each station's own object item, which `ObjectRegistry.onRegister`
+creates automatically from the object's string ID.
+
+## A repeated `[section]` header in a `.lang` file RESUMES that section
+
+**[jar]** `Translation.java:135`: when a `[name]` line names a category that is
+already in `this.categories`, the parser sets `currentCategory` to the existing
+one instead of creating a new one. So a locale block appended at the end of the
+file may re-declare `[object]`, `[item]`, `[tech]` and so on, and its keys join
+the sections above rather than replacing them. This is what makes per-stream
+append-only locale blocks safe for parallel work.
+
+## Vanilla furniture puts each ROTATION at a different row band
+
+**[jar]** `BookshelfObject`/`CabinetObject` draw at
+`pos(drawX, drawY - height + 64)`, `ClockObject` and `CraftingStationObject` at
+`drawY - height + 32`, `DisplayStandObject` and the processing stations at
+`drawY - (height - 32)`. Within one 128px sheet vanilla then shifts the art
+per column, and the shift is not decoration:
+
+| sheet | back (col 0) | side (1/3) | front (col 2) |
+|---|---|---|---|
+| `oakbookshelf` | rows 36..99 | 18..99, 12px wide | 16..77 |
+| `oakcabinet` | 34..95 | 20..95, 16px wide | 12..73 |
+| `oakclock` | 20..61 | 18..57, 12px wide | 6..47 |
+| `oakdisplay` | 0..31 (all four columns identical) | | |
+
+A case whose back is against the north wall stands higher on screen than the
+same case turned around, and the side views are a narrow slab hugging the wall
+edge — which is also what the class's own `getCollision` says (rot 1 is
+`(x*32, y*32, 12, 32)` for a bookshelf, `16` for a cabinet). Drawing all four
+columns bottom-aligned makes the piece jump a tile when the player rotates it.
+`tools/sheet_format_audit.py` now holds our four pieces to those exact bands.
+
+## `CheesePressObject`'s sprite index is a vanilla bug you must not copy
+
+**[jar]** It reads `rotation % texture.getWidth() / 32`, which Java groups as
+`(rotation % width) / 32` — 0 for every rotation 0..3 whatever the sheet is.
+Harmless on `cheesepress.png`, which is 32px wide and has one column; silently
+pins a four-column sheet to column 0. Every other station
+(`ProcessingForgeObject`, `AlchemyTableObject`) writes `rotation % 4`, and so
+does `StormglassKilnObject`.
+
+## The forge's fire is a separate 32px animation row, and it fills the mouth
+
+**[jar]** `ProcessingForgeObject.addDrawables` draws the body as
+`sprite(rotation % 4, 0, 32, height - 32)` at `drawY - 32` and the fire as
+`sprite(frame, (height - 32) / 32, 32)` at `drawY`, only when the fuel is
+running and only at rotation 2 — the one rotation whose mouth faces the camera.
+`forge.png` is therefore 128x96: four 32x64 body columns plus four 32x32 fire
+frames on row 2, and the fire frames land over body rows 36..47.
+
+**Measured:** each vanilla fire frame carries 184 opaque px filling rows 4..15
+across x 8..23 — 96% of that rectangle. The fire is not a few tongues on a
+transparent hearth, it is the whole mouth full of light with the opening's dark
+rim drawn into the frame. Drawing thin flames on transparency there produces a
+frame at a third of vanilla's mass that reads as a spark, not a furnace.

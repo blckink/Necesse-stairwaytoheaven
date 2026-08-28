@@ -230,6 +230,20 @@ def registered_ids(text):
     # from the item's own name, and one nothing else in the mod writes to.
     found["itemtooltip"] = set(re.findall(
         r'new\s+MatItem\s*\(\s*\d+\s*,\s*(?:Item\.)?Rarity\.[A-Z_]+\s*,\s*"([^"]+)"', text))
+
+    # RecipeTechRegistry.registerTech(stringID, itemStringID) - the two-argument
+    # overload - builds the tech's display name inside the ENGINE as
+    # new LocalMessage("tech", stringID) (RecipeTechRegistry.java:99). Nothing
+    # in our source writes that key, and the crafting menu prints it into
+    # "Made in: <tech>" on every recipe the station owns, so an unnamed tech
+    # reads "tech.aetherforge" on every one of its recipes. The three- and
+    # four-argument overloads pass their own GameMessage, which check 3 already
+    # covers when it is a literal LocalMessage.
+    found["tech"] = set()
+    for _offset, args in call_sites(text, "registerTech"):
+        name = literal(args[0]) if args else None
+        if name is not None and len(args) <= 2:
+            found["tech"].add(name)
     return found
 
 
@@ -578,8 +592,8 @@ def check_registration_wrappers():
     fence gate got through - a new wrapper must be added to LOCAL_REGISTRARS
     (or MULTI_OBJECT_REGISTRARS) before this passes again.
     """
-    call = re.compile(r'\b(registerObject|registerTile|registerItem|registerMob|registerBiome)'
-                      r'\(\s*([^,()]+)\s*,', re.S)
+    call = re.compile(r'\b(registerObject|registerTile|registerItem|registerMob|registerBiome'
+                      r'|registerTech)\(\s*([^,()]+)\s*,', re.S)
     method = re.compile(r'^[ \t]+(?:[\w<>\[\]]+\s+)+(\w+)\s*\([^;]*$', re.M)
     count = 0
     for path in source_files():

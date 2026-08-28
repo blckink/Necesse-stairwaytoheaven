@@ -321,3 +321,33 @@ auroraflake=Aurora Flake
 fenwraith=Fen Wraith
 cindercantor=Cinder Cantor
 watchmote=Watch Mote
+// ---------------------------------------------------------------------------
+// Skywatch professions (content/professions): the three settlement
+// workstations, the materials they make, and the four spire furniture pieces.
+// Repeating a [section] header RESUMES that section rather than replacing it
+// (Translation.java:135 keeps the existing TranslationCategory when the name is
+// already known), so this block appends to the sections above.
+// ---------------------------------------------------------------------------
+[object]
+windsilkloom=Windsilk Loom
+aetherforge=Aether Forge
+stormglasskiln=Stormglass Kiln
+skywatchbookshelf=Skywatch Bookshelf
+skywatchcabinet=Skywatch Cabinet
+skywatchclock=Skywatch Clock
+skywatchdisplay=Skywatch Display Stand
+
+[item]
+skyweave=Skyweave
+stormsteelbar=Stormsteel Bar
+stormglass=Stormglass
+
+[tech]
+windsilkloom=Windsilk Loom
+aetherforge=Aether Forge
+stormglasskiln=Stormglass Kiln
+
+[itemtooltip]
+windsilkloomtip=Spins windwheat and weaves windsilk. Assign a settler and the cloth keeps coming
+aetherforgetip=Burns logs to refine aetherium ore at twice a common forge's yield, and it is the only place stormsteel is made
+stormglasskilntip=Fires fulgurite and skystone into stormglass. Needs no fuel - the fulgurite still holds its lightning

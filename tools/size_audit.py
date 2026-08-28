@@ -205,6 +205,55 @@ PAIRS = [
      "mobs/icons/ancientskeletonmage.png", None, "bestiary icon"),
     ("mobs/icons/watchmote.png", None,
      "mobs/icons/playercryoflake.png", None, "bestiary icon"),
+    # Skywatch professions. The four spire furniture pieces answer to the oak
+    # family, which is the vanilla set the engine draws with exactly the same
+    # code; the front column (rotation 2) and one side column (rotation 1) are
+    # measured, because they are the two silhouettes the piece actually has.
+    ("objects/skywatchbookshelf.png", (64, 0, 32, 128),
+     "objects/oakbookshelf.png", (64, 0, 32, 128), "bookshelf (front rotation column)"),
+    ("objects/skywatchbookshelf.png", (32, 0, 32, 128),
+     "objects/oakbookshelf.png", (32, 0, 32, 128), "bookshelf (side rotation column)"),
+    ("objects/skywatchcabinet.png", (64, 0, 32, 128),
+     "objects/oakcabinet.png", (64, 0, 32, 128), "cabinet (front rotation column)"),
+    ("objects/skywatchcabinet.png", (32, 0, 32, 128),
+     "objects/oakcabinet.png", (32, 0, 32, 128), "cabinet (side rotation column)"),
+    ("objects/skywatchclock.png", (64, 0, 32, 64),
+     "objects/oakclock.png", (64, 0, 32, 64), "clock (front rotation column)"),
+    ("objects/skywatchclock.png", (32, 0, 32, 64),
+     "objects/oakclock.png", (32, 0, 32, 64), "clock (side rotation column)"),
+    ("objects/skywatchdisplay.png", (0, 0, 32, 32),
+     "objects/oakdisplay.png", (0, 0, 32, 32), "display stand (one rotation cell)"),
+    # The three workstations. The loom is a CraftingStationObject like the
+    # alchemy table; the forge and the kiln are processing stations two tiles
+    # tall, and vanilla's own two-tile station is the forge. The forge's fire
+    # strip is a separate 32px animation row and is measured against vanilla's.
+    ("objects/windsilkloom.png", (64, 0, 32, 64),
+     "objects/alchemytable.png", (64, 0, 32, 64), "loom (front rotation column)"),
+    ("objects/windsilkloom.png", (32, 0, 32, 64),
+     "objects/alchemytable.png", (32, 0, 32, 64), "loom (side rotation column)"),
+    ("objects/aetherforge.png", (64, 0, 32, 64),
+     "objects/forge.png", (64, 0, 32, 64), "forge body (front rotation column)"),
+    # The fire cell is addressed explicitly, not with "auto": the densest 32px
+    # cell of this sheet is a body column, so an auto scan would compare the
+    # forge's masonry against vanilla's flame and call it four times too big.
+    ("objects/aetherforge.png", (0, 64, 32, 32),
+     "objects/forge.png", (0, 64, 32, 32), "forge fire frame (animation row)"),
+    ("objects/stormglasskiln.png", (64, 0, 32, 64),
+     "objects/forge.png", (64, 0, 32, 64), "kiln (front rotation column)"),
+    ("objects/stormglasskiln_on.png", (64, 0, 32, 64),
+     "objects/forge.png", (64, 0, 32, 64), "kiln lit (front rotation column)"),
+    # Icons. A workstation icon answers to a workstation icon, a bar to a bar,
+    # a bolt of cloth to vanilla's silk and a pane to vanilla's glass.
+    ("items/windsilkloom.png", None, "items/alchemytable.png", None, "station item icon"),
+    ("items/aetherforge.png", None, "items/forge.png", None, "station item icon"),
+    ("items/stormglasskiln.png", None, "items/cheesepress.png", None, "station item icon"),
+    ("items/skywatchbookshelf.png", None, "items/oakbookshelf.png", None, "furniture item icon"),
+    ("items/skywatchcabinet.png", None, "items/oakcabinet.png", None, "furniture item icon"),
+    ("items/skywatchclock.png", None, "items/oakclock.png", None, "furniture item icon"),
+    ("items/skywatchdisplay.png", None, "items/oakdisplay.png", None, "furniture item icon"),
+    ("items/skyweave.png", None, "items/silk.png", None, "cloth item icon"),
+    ("items/stormsteelbar.png", None, "items/ironbar.png", None, "metal bar item icon"),
+    ("items/stormglass.png", None, "items/glass.png", None, "glass item icon"),
 ]
 
 THRESHOLD = 0.75
