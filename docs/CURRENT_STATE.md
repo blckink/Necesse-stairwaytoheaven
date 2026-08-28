@@ -279,3 +279,37 @@ the kiln's lit sheet; `size_audit` carries 23 new rows;
 `scripts/integration_test.sh` asserts, per station, that it is a
 `SettlementWorkstationObject`, whether it is a processing inventory, and what
 its Tech actually makes. Nothing here has been seen in the real client.
+## The sky livestock layer (`content/livestock`, IMPLEMENTED — not player-confirmed)
+
+Three farmable animals on their real vanilla archetypes, in
+`src/main/java/stairwaytoheaven/livestock/` behind one registration class
+(`SkyLivestock.register` / `registerItems` / `loadTextures`):
+
+| animal | base | biome | product | taken with |
+|---|---|---|---|---|
+| Nimbus Yak | `CowMob` | Driftlands | Nimbus Milk | bucket |
+| Thunderquill Fowl | `ChickenMob` | Stormveil | Storm Down (+ vanilla eggs) | shears |
+| Glimmergoat | `SheepMob` | Aurora Shoals | Aurora Fleece | shears |
+
+Nine recipes hang off the three products: Skycurd (cheese press), Cloudberry
+Custard (cooking pot), Nimbus Draught (alchemy); Thunderplume Cowl (tungsten
+anvil), windsilk (inventory), net (workstation); Glimmerstride Boots (tungsten
+anvil), Skywatch Carpet (carpenter), Cloud Puff Treats (inventory).
+
+**Zero new PNGs.** Every sheet and icon is a vanilla texture recoloured at load
+time (`livestock/SkyPelt`), including both sexes, the young and the
+sheared/plucked states; `tools/locale_audit.py` grew a check that resolves
+every literal texture path against our resources or the vanilla dump.
+
+Measured every integration-test run (`/skyreachstatus`): each animal's product,
+offspring, display name at every age, mate, feed and — the thing the Cloud Lamb
+still fails — `validSpawnLocation=implemented`.
+
+**Two things this exposed rather than fixed:** the Cloud Lamb reports
+`mate=NONE` and cannot actually breed (no male of its species exists, and
+vanilla's ram only accepts the string `"sheep"`), and it still inherits `Mob`'s
+`return false` so its Driftlands table entry is inert. Both are one small
+override away; see `docs/TECHNICAL_LEARNINGS.md`.
+
+Nothing here has been seen in a real client: the recolours, the armour on a
+player body and the plucked-bird sprite are all server-invisible.

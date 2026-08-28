@@ -351,3 +351,27 @@ stormglasskiln=Stormglass Kiln
 windsilkloomtip=Spins windwheat and weaves windsilk. Assign a settler and the cloth keeps coming
 aetherforgetip=Burns logs to refine aetherium ore at twice a common forge's yield, and it is the only place stormsteel is made
 stormglasskilntip=Fires fulgurite and skystone into stormglass. Needs no fuel - the fulgurite still holds its lightning
+// ===== content/livestock: the Skyreach livestock layer =====
+// Repeating a section header re-opens the existing category rather than
+// replacing it (jar 1.3.2, Translation.java:136-137), so this block can live
+// at the end of the file without disturbing anything above it.
+
+[mob]
+nimbusyak=Nimbus Yak
+thunderquill=Thunderquill Fowl
+glimmergoat=Glimmergoat
+
+[item]
+nimbusmilk=Nimbus Milk
+stormdown=Storm Down
+aurorafleece=Aurora Fleece
+skycurd=Skycurd
+cloudcustard=Cloudberry Custard
+nimbusdraught=Nimbus Draught
+thunderplume=Thunderplume Cowl
+glimmerstrides=Glimmerstride Boots
+
+[misc]
+nimbusyaktip=Milk her with a bucket for Nimbus Milk. Eats cloudberries or wheat - by hand or from a feeding trough.
+thunderquilltip=Shear for Storm Down, and she lays eggs like any hen. Eats cloudberries or wheat - by hand or from a feeding trough.
+glimmergoattip=Shear for Aurora Fleece. Eats cloudberries or wheat - by hand or from a feeding trough.

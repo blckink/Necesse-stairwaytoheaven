@@ -27,7 +27,12 @@ public class StormveilBiome extends SkyBiome {
             .add(28, stairwaytoheaven.mobs.MistserpentHead.IN_MISTSEA, "mistserpent");
 
     public static final MobSpawnTable critters = new MobSpawnTable()
-            .addLimited(100, "sparkbeetle", 4, 60);
+            .addLimited(100, "sparkbeetle", 4, 60)
+            // The Thunderquill Fowl belongs to the storm ground: its down is
+            // what the crystal fields charge. Table-spawnable because the mob
+            // implements isValidSpawnLocation (livestock/SkyBreed); permanent
+            // once placed, so the cap is what the flock settles at.
+            .addLimited(40, stairwaytoheaven.livestock.SkyLivestock.THUNDERQUILL, 5, 80);
 
     @Override
     public MobSpawnTable getMobSpawnTable(Level level) {

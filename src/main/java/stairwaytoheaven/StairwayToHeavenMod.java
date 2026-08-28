@@ -65,6 +65,7 @@ public class StairwayToHeavenMod {
         stairwaytoheaven.arsenal.SkyArsenal.register();
         stairwaytoheaven.arsenal.SkyArsenal.registerItems();
         stairwaytoheaven.settlement.SkyProfessions.register();
+        stairwaytoheaven.livestock.SkyLivestock.register();
         SkyBuildingSet.registerItems();
         stairwaytoheaven.settlement.SkyProfessions.registerItems();
         LevelDataRegistry.registerLevelData(SkywatchQuestData.KEY, SkywatchQuestData.class);
@@ -170,10 +171,12 @@ public class StairwayToHeavenMod {
     public void initResources() {
         SkyMobs.loadTextures();
         stairwaytoheaven.arsenal.SkyArsenal.loadTextures();
+        stairwaytoheaven.livestock.SkyLivestock.loadTextures();
     }
 
     public void postInit() {
         SkyItems.registerRecipes();
+        stairwaytoheaven.livestock.SkyLivestock.registerItems();
         SkyBuildingSet.registerRecipes();
         SkyFurnitureSet.registerRecipes();
         stairwaytoheaven.settlement.SkyProfessions.registerRecipes();

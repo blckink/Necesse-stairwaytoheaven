@@ -351,3 +351,27 @@ stormglasskiln=Sturmglas-Ofen
 windsilkloomtip=Spinnt Windweizen und webt Windseide. Weise einen Siedler zu, und der Stoff kommt von selbst
 aetherforgetip=Verbrennt Holz und läutert Ätheriumerz mit doppelter Ausbeute einer gewöhnlichen Schmiede - und nur hier entsteht Sturmstahl
 stormglasskilntip=Brennt Fulgurit und Himmelsstein zu Sturmglas. Braucht keinen Brennstoff - im Fulgurit steckt noch der Blitz
+// ===== content/livestock: die Nutztiere der Himmelsweite =====
+// Ein wiederholter Abschnittskopf öffnet die vorhandene Kategorie erneut,
+// statt sie zu ersetzen (jar 1.3.2, Translation.java:136-137). Dieser Block
+// darf deshalb am Dateiende stehen.
+
+[mob]
+nimbusyak=Nimbusyak
+thunderquill=Donnerkielhuhn
+glimmergoat=Schimmerziege
+
+[item]
+nimbusmilk=Nimbusmilch
+stormdown=Sturmflaum
+aurorafleece=Auroravlies
+skycurd=Himmelsquark
+cloudcustard=Wolkenbeeren-Creme
+nimbusdraught=Nimbustrunk
+thunderplume=Donnerfederkapuze
+glimmerstrides=Schimmerschritt-Stiefel
+
+[misc]
+nimbusyaktip=Mit einem Eimer melken - gibt Nimbusmilch. Frisst Wolkenbeeren oder Weizen - aus der Hand oder aus dem Futtertrog.
+thunderquilltip=Schere sie für Sturmflaum, und sie legt Eier wie jede Henne. Frisst Wolkenbeeren oder Weizen - aus der Hand oder aus dem Futtertrog.
+glimmergoattip=Schere sie für Auroravlies. Frisst Wolkenbeeren oder Weizen - aus der Hand oder aus dem Futtertrog.
