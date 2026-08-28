@@ -1125,3 +1125,65 @@ colours fall below the eye's resolution at game zoom. Leave supplied art alone.
 The general rule this is a case of: a metric that separates our art from
 vanilla is a *hypothesis* about how it will look, not a finding. Render both at
 1× before acting on it.
+
+## A window may only sit mid-run in a straight wall (verified in-game)
+
+`WallWindowObject.isValid` (WallWindowObject.java:131) returns false whenever
+`getWindowDir` returns -1, and `getWindowDir` (line 75) only accepts a window
+whose connected walls form exactly ONE opposite pair:
+
+```java
+if (connectedWallUp && connectedWallBot)  return (!left && !right) ? 1 : -1;
+else if (!connectedWallLeft || !connectedWallRight) return -1;
+else                                      return (!up && !bot)   ? 0 : -1;
+```
+
+So a window tucked into a corner — wall above AND wall to one side — scores -1
+and is deleted the moment the level validates it. Nothing logs, nothing throws;
+the house simply has fewer windows than the preset drew.
+
+The first Crooked House shipped 1 of its 3 windows for exactly this reason: two
+of them sat at the inside of a stepped wall. The per-house survey in
+`veilstatus` is what caught it (`walls=48/48 windows=1/3` on all three houses at
+once — a consistent fraction, which is what distinguishes a systematic rule from
+a placement accident).
+
+**Rule:** every window tile needs wall above and below with open sides, or wall
+left and right with open ends. Corners take a plain wall.
+
+## A mod biome painted per-tile cannot use the world-preset ticket system
+
+`GenerationPresetsWorldPreset` weights each entry by
+`LevelPresetsRegion.biomeIDWeights`, and those weights are sampled from
+`worldEntity.getGeneratorStack().getLazyBiomeID(...)`
+(LevelPresetsRegion.java:62-116) — the **vanilla** biome generator.
+
+Our sky and Veil biomes are written straight into the region's biome layer by
+`SkyTerrainPainter` / `VeilTerrainPainter` and never pass through that
+generator. A `SimpleGenerationPreset` scoped to one of them therefore scores a
+biome weight of 0, gets clamped to a single ticket against the entry's
+thousands, and effectively never places.
+
+Extend `WorldPreset` directly instead, the way vanilla's own biome-independent
+structures do (`SpiderNestsWorldPreset`, `VampireCryptWorldPreset`): implement
+`shouldAddToRegion` on the level identifier alone, and do the site test with the
+mod's own noise functions. `CrookedHouseWorldPreset` is the worked example.
+
+Corollary: `presetsRegion.hasAnyOfBiome(ourBiome)` always answers false, so it
+must not appear in `shouldAddToRegion`.
+
+## Worldgen rarity constants are measured, not chosen
+
+`VeilTerrainPainter.HOLLOW_THRESHOLD` was first set to 0.615 "so the Hollows
+stay rare". It painted **23.9% of walkable ground** — a quarter of the layer.
+
+The cheap way to get this right: the painters are pure functions of the world
+seed, so a throwaway `main` with the mod jar on the classpath can sweep a
+threshold over millions of tiles in seconds, with no server involved. That sweep
+gave 0.660 -> 18.0%, 0.700 -> 11.8%, 0.740 -> 6.9%, **0.780 -> 3.6%**, 0.820 ->
+1.6%, and the shipped value came from it. The in-game survey then confirmed
+3.69%.
+
+The same sweep sets structure placement: a 15x13 footprint whose four corners
+and centre all land inside a Hollow fits on 0.129% of tiles, so the number of
+placement ATTEMPTS is the real rate dial, not the points-per-region figure.

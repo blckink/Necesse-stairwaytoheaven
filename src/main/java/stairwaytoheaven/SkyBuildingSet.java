@@ -54,6 +54,11 @@ final class SkyBuildingSet {
         int[] beetleWall = WallObject.registerWallObjects(
                 "beetle", "beetlewall", 2.0F, new Color(88, 42, 120), -1.0F, -1.0F);
         SkyRegistry.beetleWallID = beetleWall[0];
+        // registerWallObjects returns {wall, doorClosed, doorOpen, window}
+        // (WallObject.java:481). The Crooked House preset needs all four.
+        SkyRegistry.beetleDoorClosedID = beetleWall[1];
+        SkyRegistry.beetleDoorOpenID = beetleWall[2];
+        SkyRegistry.beetleWindowID = beetleWall[3];
 
         // ===== Floors =====
         // Checkerboard: the pattern is locked to world coordinates so it runs

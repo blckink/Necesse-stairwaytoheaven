@@ -71,6 +71,12 @@ public class StairwayToHeavenMod {
         necesse.engine.registries.WorldDataRegistry.registerWorldData(
                 stairwaytoheaven.quest.SkywatchWorldData.KEY,
                 stairwaytoheaven.quest.SkywatchWorldData.class);
+        // The Crooked House, scattered through the Beetlefreak Hollows by
+        // vanilla's own world-preset machinery. VeilLevel.generateRegion
+        // already brackets its painting with startPresetGenerationInRegion /
+        // runPresetGenerationInRegion, so registering here is all that is left.
+        necesse.engine.registries.WorldPresetRegistry.registerPreset("swh_crookedhouse",
+                new stairwaytoheaven.worldgen.CrookedHouseWorldPreset());
         // HUD quest layer: real journal/sidebar quests mirroring the Warden
         // chain (see docs/research/quest-api.md). Items must already be
         // registered — the delivery quests reference them by stringID.
@@ -107,6 +113,8 @@ public class StairwayToHeavenMod {
         SkyRegistry.skyway = BiomeRegistry.registerBiome("skyway", new SkywayBiome(), false);
         SkyRegistry.gloomfen = BiomeRegistry.registerBiome("gloomfen", new GloomfenBiome(), false);
         SkyRegistry.ashenReach = BiomeRegistry.registerBiome("ashenreach", new AshenReachBiome(), false);
+        SkyRegistry.beetlefreakHollow = BiomeRegistry.registerBiome("beetlefreakhollow",
+                new stairwaytoheaven.biomes.BeetlefreakHollowBiome(), false);
     }
 
     private void registerTiles() {
@@ -132,8 +140,9 @@ public class StairwayToHeavenMod {
         // registers spidernesttile, the tile its artwork was drawn on:
         // brokerValue 0 and not obtainable, so it is placed by worldgen and
         // by presets rather than carried in an inventory.
+        SkyRegistry.beetlefreakTile = new stairwaytoheaven.tiles.BeetlefreakTile();
         SkyRegistry.beetlefreakID = TileRegistry.registerTile("beetlefreaktile",
-                new stairwaytoheaven.tiles.BeetlefreakTile(), 0.0F, false, false, true);
+                SkyRegistry.beetlefreakTile, 0.0F, false, false, true);
     }
 
     private void registerObjects() {

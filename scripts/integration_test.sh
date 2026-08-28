@@ -362,7 +362,13 @@ if [ "$STATUS" -eq 0 ]; then
     echo "--- spawn probe, midnight pass ---"
     awk '/Setting midnight|time midnight/{n=1} n && /spawn check:/' "$LOG2" | tail -13
     # Only after the logs have been read, and only on success: a failed run's
-    # world and logs are the evidence for diagnosing it.
-    rm -rf "$WORK_DIR"
+    # world and logs are the evidence for diagnosing it. INTEGRATION_KEEP=1
+    # keeps a successful run's world too, for probing output the summary above
+    # does not print.
+    if [ -z "${INTEGRATION_KEEP:-}" ]; then
+        rm -rf "$WORK_DIR"
+    else
+        echo "kept work dir: $WORK_DIR"
+    fi
 fi
 exit "$STATUS"

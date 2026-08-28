@@ -34,7 +34,19 @@ public class VeilLevel extends BiomeGeneratorStackLevel {
         if (this.seed != 0) {
             return this.seed;
         }
-        String worldSeed = this.getWorldEntity() != null ? this.getWorldEntity().worldSeed : null;
+        return worldGenSeed(this.getWorldEntity() != null ? this.getWorldEntity().worldSeed : null);
+    }
+
+    /**
+     * The Veil's terrain seed, derived from the world seed alone.
+     *
+     * Static and level-free on purpose: the Crooked House placement test runs
+     * inside the world-preset system, which is handed a {@code WorldEntity} but
+     * never a {@code Level}. It has to be able to ask
+     * {@code VeilTerrainPainter.isHollow(...)} the same question the painter
+     * will answer later, and get the same answer, without a level in hand.
+     */
+    public static int worldGenSeed(String worldSeed) {
         int derived = (worldSeed != null ? worldSeed.hashCode() : 0) ^ 0x7E11B310;
         return derived != 0 ? derived : 1;
     }

@@ -110,6 +110,10 @@ public final class SkyRegistry {
     public static int nightfellWallID;
     /** Veil: the Beetlefreak wall set, from supplied art. */
     public static int beetleWallID;
+    /** Closed and open halves of the Beetlefreak door, and its window. */
+    public static int beetleDoorClosedID;
+    public static int beetleDoorOpenID;
+    public static int beetleWindowID;
     public static int marbleCheckerID;
     public static int gloomwoodFloorID;
     public static int skyironFenceID;
@@ -133,6 +137,8 @@ public final class SkyRegistry {
 
     public static GloomfenBiome gloomfen;
     public static AshenReachBiome ashenReach;
+    /** The Veil's rare wrong place, cut out of the other two. */
+    public static stairwaytoheaven.biomes.BeetlefreakHollowBiome beetlefreakHollow;
 
     public static MurkmossTile murkmossTile;
     public static int murkmossID;
@@ -141,6 +147,8 @@ public final class SkyRegistry {
     public static int murkwaterID;
     /** Veil: the Beetlefreak ground, on vanilla's spidernest tile setup. */
     public static int beetlefreakID;
+    /** The same tile as an instance, for biome under-liquid reclamation. */
+    public static stairwaytoheaven.tiles.BeetlefreakTile beetlefreakTile;
 
     public static VeilRiftObject veilRiftDown;
     public static VeilSideRiftObject veilRiftUp;
