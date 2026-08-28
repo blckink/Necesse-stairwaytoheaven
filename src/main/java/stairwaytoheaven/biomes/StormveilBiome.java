@@ -16,6 +16,13 @@ public class StormveilBiome extends SkyBiome {
             // rarest biome, so many players never met one — they patrol the
             // Stormveil crystal fields too now
             .addLimited(25, "skystonegolem", 2, 96)
+            // --- content/arsenal ---
+            // Skywatch frost machinery, still firing. Immobile, so it is
+            // capped tight and weighted below the wandering hostiles: a
+            // stationary shooter you cannot walk away from stacks badly.
+            .addLimited(30, "rimesentry", 2, 96)
+            // Strays in from the Aurora Shoals, the way the Zephyr Ray does.
+            .addLimited(20, "auroraflake", 2, 80)
             // The cloud sea between the islands is not empty travelling ground
             .add(28, stairwaytoheaven.mobs.MistserpentHead.IN_MISTSEA, "mistserpent");
 

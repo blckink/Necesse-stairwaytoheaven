@@ -91,6 +91,29 @@ game yet.
 - **Sky oddity seeds** (registered + craftable, deliberately NOT in worldgen):
   `skyballoon`, `aeronautwreck`, `skyparcel`.
 
+## Sky Arsenal (content/arsenal) — IMPLEMENTED, awaiting player confirmation
+
+The mod shipped two weapons for four releases (`tempestedge`, `galehowl`).
+`stairwaytoheaven/arsenal/` adds five more, one per play style, all crafted at
+the Tungsten Workstation out of mod materials, and four enemies that drop what
+they are made of.
+
+- **Skyreave** (glaive, sweeps a circle) · **Thunderhead** (greatbow, charge
+  scaled) · **Prismcaller** (staff + `prismbolt` projectile) · **Skywatch
+  Whistle** (summons the Watch Mote) · **Stormdisc** (returning thrown ring,
+  three at a time). Each is calibrated against the vanilla weapon of the SAME
+  class at the deep-cave tier — quartz glaive, tungsten greatbow, quartz staff,
+  cryo staff, tungsten boomerang — named in its class comment.
+- **Rime Sentry** (Stormveil + Skyway) · **Aurora Flake** (Aurora Shoals +
+  Stormveil) · **Fen Wraith** (Gloomfen + Ashen Reach) · **Cinder Cantor**
+  (Ashen Reach + Gloomfen). Each subclasses the vanilla mob whose behaviour it
+  wants and wears that mob's own sheet from `MobRegistry.Textures` — no new mob
+  art, only a bestiary icon each. All four use `SkySpawnRules.daylightSpawn`
+  and the integration test now asserts their accepted lit/dark counts.
+- Gates: `./gradlew build`, all five audits and `scripts/integration_test.sh`
+  pass; the generator still reproduces every earlier PNG byte-identically.
+- **Nobody has swung any of it in the real client.**
+
 ## Known issues — open
 
 Ordered by the player's own priority. Full detail in `docs/PLAYTEST_LOG.md`.

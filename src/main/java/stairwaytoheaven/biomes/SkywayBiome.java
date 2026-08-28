@@ -24,6 +24,10 @@ public class SkywayBiome extends SkyBiome {
             // the reason to keep walking rather than to stop and look.
             .addLimited(45, "galehound", 3, 80)
             .addLimited(35, "zephyrray", 2, 80)
+            // --- content/arsenal ---
+            // The causeways are what the sentries were set to watch, so this
+            // is their densest ground - still capped at 3, still immobile.
+            .addLimited(45, "rimesentry", 3, 96)
             // The cloud sea between the islands is not empty travelling ground
             .add(28, stairwaytoheaven.mobs.MistserpentHead.IN_MISTSEA, "mistserpent");
 

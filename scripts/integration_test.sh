@@ -199,6 +199,31 @@ done
 # The snail must implement NetableMob — the marker the vanilla net checks.
 grep -qF "net dewsnail=NETABLE" "$LOG1" || { echo "FAIL: dewsnail is not netable"; STATUS=1; }
 
+echo "--- verifying the arsenal stream's enemies can actually be placed ---"
+# Two failure modes this catches, and they look identical from a log:
+#  1. the class inherits Mob's `isValidSpawnLocation` (which returns false), so
+#     nothing a spawn table asks for is ever placed -- the probe prints
+#     "INHERITS Mob's false" and both columns read 0;
+#  2. the class implements it but still measures AMBIENT light, so it accepts
+#     at midnight and rejects at noon -- lit=0, dark>0.
+# Every arsenal enemy uses SkySpawnRules, so it must be `implemented` AND
+# accept in DAYLIGHT (LOG1 is the daytime pass; LOG2 is midnight).
+for arsenal_mob in rimesentry auroraflake fenwraith cindercantor; do
+    grep -qE "spawn check: $arsenal_mob .*validSpawnLocation=implemented" "$LOG1" \
+        || { echo "FAIL: $arsenal_mob does not implement isValidSpawnLocation"; STATUS=1; }
+    grep -qE "spawn check: $arsenal_mob .*accepted lit=[1-9][0-9]*/" "$LOG1" \
+        || { echo "FAIL: $arsenal_mob accepts no daylight spawn tile"; STATUS=1; }
+    grep -qE "spawn check: $arsenal_mob .*dark=[1-9][0-9]*/" "$LOG2" \
+        || { echo "FAIL: $arsenal_mob accepts no dark spawn tile"; STATUS=1; }
+done
+# ...and the five weapons must be real registered items with a name, not IDs.
+for arsenal_item in skyreave thunderhead prismcaller skywatchwhistle stormdisc; do
+    grep -qE "arsenal check: $arsenal_item id=[0-9]+ name=[^ ]" "$LOG1" \
+        || { echo "FAIL: arsenal item $arsenal_item did not register with a display name"; STATUS=1; }
+done
+grep -qE "arsenal check: recipes=5" "$LOG1" \
+    || { echo "FAIL: the five arsenal recipes are not all registered"; STATUS=1; }
+
 echo "--- verifying the Cloud Lamb is a coherent husbandry animal ---"
 # Three player questions, three measured values: what shearing yields, what the
 # offspring is (vanilla SheepMob breeds a 50% chance of a plain `ram`), and what
@@ -360,7 +385,7 @@ if [ "$STATUS" -eq 0 ]; then
     echo "--- after restart ---"
     grep -E "quest: stage=|npc check:|settler check:|recruit check:|name check:|cat home check:|husbandry check:" "$LOG2"
     echo "--- spawn probe, midnight pass ---"
-    awk '/Setting midnight|time midnight/{n=1} n && /spawn check:/' "$LOG2" | tail -13
+    awk '/Setting midnight|time midnight/{n=1} n && /spawn check:/' "$LOG2" | tail -20
     # Only after the logs have been read, and only on success: a failed run's
     # world and logs are the evidence for diagnosing it. INTEGRATION_KEEP=1
     # keeps a successful run's world too, for probing output the summary above

@@ -10,7 +10,13 @@ import necesse.level.maps.biomes.MobSpawnTable;
 public class GloomfenBiome extends VeilBiome {
 
     public static final MobSpawnTable mobs = new MobSpawnTable()
-            .addLimited(100, "gloomshade", 4, 80);
+            .addLimited(100, "gloomshade", 4, 80)
+            // --- content/arsenal ---
+            // The fen's own dead: slow, armoured, and they leave burning
+            // pools behind them, so the marsh stops being safe to stand in.
+            .addLimited(55, "fenwraith", 3, 80)
+            // A cantor strays out of the ash to sing over the water.
+            .addLimited(20, "cindercantor", 2, 96);
 
     @Override
     public MobSpawnTable getMobSpawnTable(Level level) {

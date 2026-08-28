@@ -62,6 +62,8 @@ public class StairwayToHeavenMod {
         SkyCloudmarbleSet.register();
         SkyMobs.register();
         SkyItems.register();
+        stairwaytoheaven.arsenal.SkyArsenal.register();
+        stairwaytoheaven.arsenal.SkyArsenal.registerItems();
         SkyBuildingSet.registerItems();
         LevelDataRegistry.registerLevelData(SkywatchQuestData.KEY, SkywatchQuestData.class);
         // World-scoped truth of "this world already has a Warden". Lives in
@@ -165,6 +167,7 @@ public class StairwayToHeavenMod {
 
     public void initResources() {
         SkyMobs.loadTextures();
+        stairwaytoheaven.arsenal.SkyArsenal.loadTextures();
     }
 
     public void postInit() {
@@ -172,6 +175,7 @@ public class StairwayToHeavenMod {
         SkyBuildingSet.registerRecipes();
         SkyFurnitureSet.registerRecipes();
         SkyCloudmarbleSet.registerRecipes();
+        stairwaytoheaven.arsenal.SkyArsenal.registerRecipes();
         SkyBuildingSet.resolveWorldgenMaterials();
         registerWorldGenerator();
         CommandsManager.registerServerCommand(new SkyreachStatusCommand());

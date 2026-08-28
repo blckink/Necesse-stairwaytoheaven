@@ -1187,3 +1187,91 @@ gave 0.660 -> 18.0%, 0.700 -> 11.8%, 0.740 -> 6.9%, **0.780 -> 3.6%**, 0.820 ->
 The same sweep sets structure placement: a 15x13 footprint whose four corners
 and centre all land inside a Hollow fits on 0.129% of tiles, so the number of
 placement ATTEMPTS is the real rate dial, not the points-per-region figure.
+## A mod mob can wear a vanilla body sheet without shipping any art (content/arsenal)
+
+**VERIFIED [jar] + [run].** `ResourceFolder` merges every mod's resources into
+the SAME path-keyed map the base game's resources live in
+(`ResourceFolder.java:102`, `this.files.put(pathStripped, ...)`), and
+`GameTexture.fromFile` resolves through `ResourceEncoder.getResourceBytes(path)`
+against that one map. Two consequences, both load bearing:
+
+1. `GameTexture.fromFile("mobs/ancientvulture")` from a mod resolves the game's
+   own sprite. There is no separate mod namespace.
+2. A mod PNG at a vanilla path **overrides** the vanilla one (the loader counts
+   these as `overrides` and logs them). So a derived/recoloured copy must never
+   reuse the source's path.
+
+But for a mob the simpler route is better still. `MobRegistry.Textures` is a
+compiled vanilla class of ~800 `public static` fields, filled once by
+`GameResources.loadTextures()`. A mod mob that **subclasses a vanilla mob and
+does not override `addDrawables`** therefore renders from those fields with no
+mod texture, no `loadTextures()` entry and no PNG at all. That is how the four
+arsenal enemies (`FrostSentryMob`, `CryoFlakeMob`, `SpiritGhoulMob`,
+`AncientSkeletonMageMob` subclasses) ship without a single new mob sheet.
+
+**The one piece that cannot be inherited is the bestiary icon.**
+`MobRegistry.MobRegistryElement.loadIcon()` is hard-wired to
+`mobs/icons/<this stringID>` and `MobRegistryElement` is `protected static`
+with no setter, so a mod cannot point it at the vanilla icon. Every registered
+mob needs its own `mobs/icons/<id>.png` or it draws `GameResources.error` in
+the kill list (`fromFile` falls back to the error texture rather than throwing,
+which is why this fails silently).
+
+## A vanilla mob's damage may be unreachable from a subclass (content/arsenal)
+
+**VERIFIED [jar].** Whether a vanilla mob can be re-tuned by subclassing
+depends entirely on where its numbers live, and the two shapes look identical
+from the outside:
+
+- `CryoFlakeMob`, `SpiritGhoulMob`, `AncientSkeletonMageMob` build their damage
+  **inside `init()`** — either as a local (`new GameDamage(52.0F)`) or through a
+  static the AI closes over. Overriding just `getLootTable()` is safe; changing
+  the damage means re-declaring the whole behaviour tree.
+- `FrostSentryMob` and `SwampShooterMob` keep it in a `public static GameDamage`
+  field that the anonymous AI in `init()` reads. Writing to it from a subclass
+  would change **every instance of the vanilla mob in the world**, so the only
+  correct move is to rebuild the same AI shape against your own constant. That
+  is what `RimeSentryMob.init()` does.
+
+HP is the easy half: `setMaxHealth(n); setHealthHidden(getMaxHealth());` inside
+`init()` after `super.init()` is vanilla's own idiom (`CryoFlakeMob.init` uses
+it for its incursion bump).
+
+## Projectiles: the registry, not the class, owns the sprite (content/arsenal)
+
+**VERIFIED [jar] + [run].** `Projectile.init` assigns `this.texture` and
+`this.shadowTexture` from `ProjectileRegistry.Textures` **by the projectile's
+own registered ID**, so subclassing a vanilla projectile class and registering
+it under a new stringID gives vanilla's behaviour with your own art and no
+texture code:
+
+```
+ProjectileRegistry.registerProjectile("prismbolt", PrismBoltProjectile.class,
+                                      "prismbolt", "bolt_shadow");
+```
+
+Paths are relative to `projectiles/`, and a null path leaves the field null.
+Vanilla itself reuses one shadow across many bolts (`quartzbolt` ships
+`quartzbolt` + the shared `bolt_shadow`), so a mod bolt needs one 18x18 sprite
+and nothing else. `ProjectileRegistry` closes with the rest of the registry
+list right after the mods' `init()` loop, so registration must happen there —
+and before any item that names the projectile by stringID is constructed.
+
+## A repeated `[section]` header in a .lang file resumes the section
+
+**VERIFIED [jar].** `Translation`'s parser (line 136) does
+`if (categories.containsKey(newCategoryName)) currentCategory = categories.get(...)`
+— a second `[item]` block later in the file **appends** to the first rather
+than replacing it. That is what makes it safe for a work stream to add its keys
+as one contiguous block at the end of `en.lang`/`de.lang` instead of editing
+five places in the middle of a file another agent may be holding.
+
+## An `[itemtooltip]` key nobody calls is dead text
+
+**VERIFIED [jar].** Nothing in the engine reads `itemtooltip.<id>tip` by
+convention. A description only appears if the item class asks for it —
+`getPreEnchantmentTooltips` for most weapons, `addExtraBowTooltips` for a
+greatbow (so the line lands next to vanilla's own charge explanation), or the
+three-arg `MatItem(stackSize, rarity, tooltipKey)` constructor for a material.
+`tools/locale_audit.py` scans for the literal `Localization.translate(...)`
+call sites, so a wired tooltip is checked and an unwired key is merely unused.
