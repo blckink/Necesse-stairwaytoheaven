@@ -90,3 +90,16 @@ unrelated work, so it can be pulled and tested on its own.
 The message explains **why**, and states what was verified and how. "Fixed the
 crash" is not a record; the root cause, the reason vanilla does not hit it, and
 the evidence are. Future agents read these before they read the code.
+
+## Running the worldbuilding loop
+
+The six phases above are how *a* task runs. `docs/WORLDBUILDING_LOOP.md` is how
+a **chapter of new world** runs: a design brief, then a POI dossier, then four
+art specialists in parallel, then one integrator who wires it up, gates it,
+commits it and reports. The seven roles have agent definitions in
+`.claude/agents/`, and each one carries its own formats, budget and acceptance
+criterion so it does not have to go looking.
+
+Everything on this page still applies inside that loop — one owner per file, the
+gates matched to the change, workers do not commit. What the loop adds is the
+sequencing between the roles and a hard cap on how long art batches may run.

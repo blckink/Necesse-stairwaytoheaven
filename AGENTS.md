@@ -16,7 +16,10 @@ modifying anything in this repository.
 6. the domain doc for what you are touching — `docs/ART_DIRECTION.md`,
    `docs/PLAYTEST_LOG.md`, `docs/ARCHITECTURE.md`, `docs/DESIGN.md`,
    `docs/research/`
-7. recent git history (`git log --oneline -20` and the diff of anything your
+7. `docs/WORLDBUILDING_LOOP.md` if you are expanding the world rather than
+   fixing something — what already exists, the texture law on one page, and the
+   seven-role loop the `.claude/agents/` definitions implement
+8. recent git history (`git log --oneline -20` and the diff of anything your
    task touches)
 
 ## Rules
