@@ -198,3 +198,24 @@ the port: windows in the left/right walls and in the top/bottom walls as
 separate scenes, closed and open doors in all four rotations, a solid block, an
 L corner and free-standing runs. Both faults are unmistakable with the vanilla
 strip underneath and invisible without it.
+
+---
+
+## 2026-08-28 (3) — "lässt sich nicht ausrichten"
+
+> "die durch Claude hinzugefügten skyreach Türen und Tore etc lassen sich alle
+> nicht ausrichten wie sonst im Game … eigentlich je nach Richtung in die man
+> schaut sind Sachen oft am unteren oder oberen Ende des Blocks platziert am
+> Rand statt einfach immer an selber Position."
+
+Asked which of the two failure shapes it was, the player picked **"dreht sich
+gar nicht"** — nothing changes when they turn it — and **"weiß ich nicht
+genau"** for which object, having seen it once rather than swept the set. So
+the response is a sweep plus a gate, not a single-object patch.
+
+| Area | Observation | Status |
+|---|---|---|
+| Skywatch Banner shows one picture on every wall | The reported shape, found by measurement. | **FIXED — NOT YET PLAYER CONFIRMED.** `gen_banner_painting` pasted ONE 32x32 cell into all four `PaintingObject` rotation rows, so a banner on a north wall, a south wall and both side walls drew byte-identical art. Now four real views: face-on for the wall above (the old art, unchanged), a foreshortened over-the-cap view for the wall below, and mirrored edge-on slabs for the two side walls. The engine's own `+8px` / `-32px` nudges are left to the engine — see `docs/TECHNICAL_LEARNINGS.md`. The item icon now crops row 2, the face-on view, instead of row 0. |
+| Everything else the engine reads per rotation | Swept, since the player could not name the object. | **NOT REPRODUCED.** All eight door cells of all four wall sheets, both fence gates' six columns, both fences' five columns, both wall lights' state x orientation grid, both streetlamps' on/off rows, the candelabra's lit/unlit pair and every four-column furniture and station sheet hold distinct art. 123 comparisons, one failure, and it was the banner. Doors and gates in particular are vanilla `WallDoorObject`/`FenceGateObject` on distinct cells, so if turning one still does nothing in game the cause is not the sheet and the next step is a screenshot of the piece mid-placement. |
+| The gate that was missing | `sheet_format_audit.py` was green on the banner and always would have been. | **ADDED.** `tools/rotation_variety_audit.py` fails when a cell the engine reads separately holds a picture it already read somewhere else; `tools/rotation_preview.py` draws every cell where the engine puts it, over a tile grid, with the wall the rotation names beside it, into `build/qa/rotations/`. Both are in the AGENTS.md gate list. Verified: the audit reports all six banner row pairs against the pre-fix sheet. |
+| The 1x2 furniture (bench, bed, dinner table) | Not swept, on purpose. | **OPEN — needs the decompile.** Their sheet size is recorded, the engine read that splits it is not, and their generators paste 64px blocks across two 32px columns. `skywatchdinnertable` has two identical columns under a 4-column reading, which is a hypothesis about a frame nobody has read. Read `DinnerTableObject`/`BenchObject`/`BedObject`, then decide. |

@@ -1968,3 +1968,86 @@ registration hiding an ID behind a variable — a red gate on `master` with
 nothing wrong. The audit now blanks comment bodies (and, for the brace-depth
 scanner, string contents) before matching, preserving every offset so findings
 still name the right line.
+
+## Right cell, right size, same picture: the rotation-variety bug (v0.9)
+
+**[game]** Reported from a session: *"die durch Claude hinzugefügten Skyreach
+Türen und Tore etc lassen sich alle nicht ausrichten wie sonst im Game …
+eigentlich je nach Richtung in die man schaut sind Sachen oft am unteren oder
+oberen Ende des Blocks platziert am Rand statt einfach immer an selber
+Position."* Asked to narrow it down, the player picked **"dreht sich gar
+nicht"** — placing it looks the same whichever way they face.
+
+**[sprites]** Measured across every mod sheet the engine addresses per
+rotation, exactly one is a duplicate set: `objects/skywatchbanner.png`. Its
+four 32x32 `PaintingObject` rows are **byte-identical to each other**, because
+`gen_banner_painting` built one cell and pasted it four times:
+
+```python
+sheet = Canvas(32, 128)
+cell = banner_cell()
+for row in range(4):
+    sheet.paste(cell, 0, row * 32)     # one banner, four walls
+```
+
+So the engine dutifully read row 0 on a south wall, row 2 on a north wall and
+rows 1/3 on the side walls, and all four held the same face-on banner. Nothing
+about it is a geometry fault: the sheet is 32x128, the rows are 32px, every
+extent is where it belongs. `sheet_format_audit.py` was green on it, and always
+would have been — **it guards which cell, what size, what extent, and is blind
+to a cell holding the wrong picture, including the picture next door's.**
+
+**[jar]** What the four rows have to be, and why the art must not bake the
+offset in. For wall decor the rotation names WHERE THE WALL IS, not where the
+piece faces (`PaintingObject.attachesToObject`; the same convention
+`WardenSpirePreset.WALL_BELOW/LEFT/ABOVE/RIGHT` already places banners with),
+and the engine supplies the vertical nudge itself:
+
+| row | rotation | wall | engine offset | what the camera sees |
+|---|---|---|---|---|
+| 0 | 0 | below | `+8px` | the far side of that wall — rod and cloth foreshortened over its cap |
+| 1 | 1 | left | none | edge-on slab against the tile's left edge |
+| 2 | 2 | above | `-32px` | the face-on view, landing on the wall tile |
+| 3 | 3 | right | none | mirror of row 1, against the right edge |
+
+That `-32px` is why the face-on cell may use its whole 32px height, and the
+`+8px` is why row 0's art has to stay inside cell rows 0..23 — drawing it low
+*and* letting the engine push it down puts it a third of a tile into the wall.
+The same trap as the door cells, one class over.
+
+**[run]** `tools/rotation_variety_audit.py` is the gate for the class, not for
+this one sheet: for every family where the repository has an actual engine read
+— `PaintingObject` rows, `WallTorchObject`'s state x orientation grid,
+`StreetlampObject`'s two 32x96 state rows, `LampObject`'s lit/unlit pair, the
+eight wall-sheet door cells, the six fence-gate columns, the five fence columns
+and the four rotation columns of everything `sheet_format_audit` already knows
+— it asserts that cells the engine reads apart hold different pictures. Mirror
+pairs are reported and allowed: vanilla's own left/right views are mirrors.
+Verified against the pre-fix sheet, where it reports all six banner row pairs;
+green on the fix. It reuses `sheet_format_audit`'s two sheet tables rather than
+copying them, so a piece added there cannot silently miss this check.
+
+**[run]** `tools/rotation_preview.py` is the picture, on the same principle as
+`wall_render_preview.py`: it draws every cell **where the engine puts it**, over
+a tile grid, with the object's own tile at the centre of a 3x3 stage and a grey
+block on the wall the rotation names — so "is this the right view" and "does it
+land on that wall" are both judgeable by eye. Where no anchor is recorded (the
+wall lights, the streetlamps) the strip says so instead of implying one.
+
+**Deliberately not covered by either tool:** the 1x2 multi-tile furniture
+(bench, bed, dinner table). `docs/research/furniture-formats.md` records their
+sheet size but not the engine read that splits it, and their generators paste
+64px-wide blocks across two 32px columns — so "column 2 equals column 3" cannot
+be judged without the decompiled draw call. `skywatchdinnertable` does have two
+byte-identical 32px columns under a 4-column reading; that is a **hypothesis
+about a frame we have not read**, not a finding. Read `DinnerTableObject`, then
+add it.
+
+**[unverified]** One record disagrees with two others and the disagreement is
+recorded rather than silently resolved. `docs/research/structures-furniture.md`
+§3.7 writes the side rows as "1=east, 3=west"; `WardenSpirePreset` and the wall
+decor section above both say `1` = wall **left**, `3` = wall right, and the
+preset cites `PaintingObject.attachesToObject`. The banner's side rows are drawn
+to the preset's convention because it names the method it came from. If a
+screenshot ever shows the edge-on banner hugging the wrong edge, that is this
+line, and swapping the two `paste` calls in `gen_banner_painting` is the fix.

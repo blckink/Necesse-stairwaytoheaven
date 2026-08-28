@@ -403,7 +403,9 @@ def gen_set_icons(dir_path):
     mini_from(f"{obj}/catbasket.png", (0, 6, 32, 30), "catbasket.png")
     mini_from(f"{obj}/mistglasslantern.png", (0, 0, 32, 32), "mistglasslantern.png")
     mini_from(f"{obj}/flickerlightgarland.png", (0, 0, 32, 32), "flickerlightgarland.png")
-    mini_from(f"{obj}/skywatchbanner.png", (0, 0, 32, 32), "skywatchbanner.png")
+    # The banner's FACE-ON view is row 2 (wall above), not row 0 -- row 0 is
+    # the foreshortened over-the-cap view and reads as a smear in an icon.
+    mini_from(f"{obj}/skywatchbanner.png", (0, 64, 32, 96), "skywatchbanner.png")
     mini_from(f"{base}/objects/statues/gloomraven.png", (8, 34, 56, 92), "gloomravenstatue.png")
     # walls: crop a front-face piece; doors: rotation-0 closed leaf
     for wall in ("skystonebrickwall", "nightfellwall"):
@@ -978,14 +980,35 @@ def gen_gloomraven_statue(path):
 
 
 def gen_banner_painting(path):
-    """32x128 PaintingObject sheet: 4 rotation rows of one 32x32 banner —
-    iron rod, bordered night cloth with fold shading, crescent-and-star
-    emblem, swallowtail bottom with fringe (vanilla banner detail bar)."""
-    def banner_cell():
+    """32x128 PaintingObject sheet: FOUR DIFFERENT rotation rows of 32x32.
+
+    ``PaintingObject`` reads the row straight off the object's rotation, and
+    for wall decor the rotation names WHERE THE WALL IS, not where the piece
+    faces (``PaintingObject.attachesToObject``; the same convention
+    ``WardenSpirePreset.WALL_BELOW/LEFT/ABOVE/RIGHT`` places banners with):
+
+        row 0  wall BELOW   drawn at +8px   -> seen from behind, over the cap
+        row 1  wall LEFT    no offset       -> edge-on slab against the left
+        row 2  wall ABOVE   drawn at -32px  -> the face-on view, on the wall
+        row 3  wall RIGHT   no offset       -> edge-on slab against the right
+
+    The engine supplies the vertical nudge, so the art must NOT bake it in: the
+    +8px on row 0 is why its cell is drawn in rows 0..23 and not at the bottom,
+    and the -32px on row 2 is why the face-on view may use the whole cell -- it
+    lands on the wall tile above.
+
+    This shipped with one cell pasted into all four rows, which is exactly
+    "laesst sich nicht ausrichten": every wall showed the same picture and
+    turning the banner changed nothing. `tools/rotation_variety_audit.py`
+    fails if any of the four rows is ever a duplicate again.
+    """
+    cloth = palette.NIGHTFELL
+    trim = palette.STAIRLIGHT
+    iron = palette.IRONWORK
+
+    def face_on():
+        """Wall above: the banner hangs on the wall's front face, seen flat."""
         c = Canvas(32, 32)
-        cloth = palette.NIGHTFELL
-        trim = palette.STAIRLIGHT
-        iron = palette.IRONWORK
         # mounting rod with end caps and rings
         c.rect(2, 1, 28, 3, iron["base"])
         c.rect(2, 1, 28, 1, iron["light"])
@@ -1030,10 +1053,81 @@ def gen_banner_painting(path):
         c.put(18, 19, trim["base"])                # small companion star
         c.outline(palette.OUTLINE)
         return c
+
+    def over_the_cap():
+        """Wall below: the banner is on the far side of that wall, so what the
+        camera gets is the rod running east-west and the cloth foreshortened
+        over the wall's top cap -- the same read the wall's own roof-view
+        window uses. Kept inside rows 0..23 because the engine adds +8px."""
+        c = Canvas(32, 32)
+        # rod, seen from almost straight above: one lit row, one shaded
+        c.rect(2, 3, 28, 2, iron["base"])
+        c.rect(2, 3, 28, 1, iron["light"])
+        c.put(1, 4, iron["base"])
+        c.put(30, 4, iron["base"])
+        # cloth compressed to a third of its height and in the wall's shade
+        for y in range(5, 19):
+            for x in range(5, 28):
+                tone = cloth["deep"]
+                if y == 5:
+                    tone = cloth["base"]           # lit crest under the rod
+                elif x in (5, 27):
+                    tone = trim["deep"]            # border, dulled
+                elif x in (11, 21):
+                    tone = cloth["base"]           # the two fold ridges
+                c.put(x, y, tone)
+        # the swallowtail seen end-on: a short notched hem, tails clipped
+        for i in range(3):
+            for x in range(5, 14 - i):
+                c.put(x, 19 + i, cloth["deep"])
+            for x in range(19 + i, 28):
+                c.put(x, 19 + i, cloth["deep"])
+        for x in range(13, 20):
+            c.put(x, 18, cloth["deep"])
+        for (fx, fy) in ((8, 21), (10, 20), (22, 20), (24, 21)):
+            c.put(fx, fy, trim["deep"])
+        c.outline(palette.OUTLINE)
+        return c
+
+    def edge_on_left():
+        """Wall left: the banner hangs on a north-south wall, so it is seen
+        nearly edge-on -- a narrow slab hugging the tile's left edge, with the
+        rod poking out toward the camera and no emblem (it faces away)."""
+        c = Canvas(32, 32)
+        c.rect(1, 2, 3, 2, iron["light"])          # rod end, foreshortened
+        c.rect(4, 1, 8, 3, iron["base"])
+        c.rect(4, 1, 8, 1, iron["light"])
+        c.put(11, 4, iron["deep"])
+        for y in range(4, 26):
+            for x in range(2, 13):
+                tone = cloth["base"]
+                if x == 2 or y == 4:
+                    tone = trim["base"]            # the lit near edge
+                elif x >= 11:
+                    tone = cloth["deep"]           # the sheet turning away
+                elif x in (5, 8):
+                    tone = cloth["light"]          # fold ridges, compressed
+                c.put(x, y, tone)
+        for i in range(5):                         # swallowtail, edge-on
+            for x in range(2, 8 - i // 2):
+                c.put(x, 26 + i, cloth["base"] if x > 2 else trim["base"])
+            for x in range(9 + i // 2, 13):
+                c.put(x, 26 + i, cloth["deep"])
+        for x in range(7, 10):
+            c.put(x, 25, cloth["deep"])
+        for (fx, fy) in ((4, 29), (6, 28), (10, 28)):
+            c.put(fx, fy, trim["base"])
+        c.put(3, 10, trim["hi"])                   # a sliver of the emblem
+        c.put(3, 11, trim["hi"])
+        c.put(4, 12, trim["base"])
+        c.outline(palette.OUTLINE)
+        return c
+
     sheet = Canvas(32, 128)
-    cell = banner_cell()
-    for row in range(4):
-        sheet.paste(cell, 0, row * 32)
+    sheet.paste(over_the_cap(), 0, 0)              # rot 0, wall below
+    sheet.paste(edge_on_left(), 0, 32)             # rot 1, wall left
+    sheet.paste(face_on(), 0, 64)                  # rot 2, wall above
+    sheet.paste(edge_on_left().mirrored(), 0, 96)  # rot 3, wall right
     sheet.save(path)
 
 
