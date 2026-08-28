@@ -294,3 +294,20 @@ swhanchorreward=Skywatch-Banner + 5x Aurorablatt
 swhrecruitwardentitle=Der letzte Hüter
 swhrecruitwardendesc=Der Himmelswächter würde die Himmelswacht hinter sich lassen - für einen Preis, den keine kleine Siedlung zahlen kann.
 swhrecruitwardenobj=Heuere den Himmelswächter für deine Siedlung an (<cost> Münzen)
+
+// ===== Oberflächen-Fundorte & Weltereignisse (content/worldevents) =====
+// Drei seltene Fundorte, die stairwaytoheaven.surface.SkySurfacePresets über
+// die normale Oberfläche verteilt, plus das Sternenfall-Weltereignis.
+
+[object]
+skyfallshard=Gefallene Himmelsscherbe
+
+[misc]
+// Das Schild an der verfallenen Schwelle. Die Hälfte ist verwittert.
+swhshrinesign=...und die Treppe steht, wo der Himmel am dünnsten ist,\nund der Hüter zählt, was herunterkommt.\n\n- der Rest ist verwittert -
+// Die Notiz im Lager des gestrandeten Luftschiffers.
+swhaeronautsign=Ballon runter. Fracht größtenteils heil.\nGehe nach Osten. Wer das hier findet: Die Kisten gehören dir.\nVorsicht bei denen, die noch warm sind.
+// Ansagen zum Sternenfall. Der Farbcode entspricht den Ereigniszeilen des
+// Grundspiels (raidapproaching und bossapproaching sind beide §b).
+swhskyfallstart=§bDer Himmel bricht auf - Scherben fallen.
+swhskyfallend=§aDer Sternenfall ist vorüber.

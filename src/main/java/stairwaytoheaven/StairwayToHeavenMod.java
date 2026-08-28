@@ -63,6 +63,8 @@ public class StairwayToHeavenMod {
         SkyMobs.register();
         SkyItems.register();
         SkyBuildingSet.registerItems();
+        stairwaytoheaven.surface.SkySurface.register();
+        stairwaytoheaven.surface.SkySurface.registerItems();
         LevelDataRegistry.registerLevelData(SkywatchQuestData.KEY, SkywatchQuestData.class);
         // World-scoped truth of "this world already has a Warden". Lives in
         // the world entity rather than the Skyreach level, so a generation

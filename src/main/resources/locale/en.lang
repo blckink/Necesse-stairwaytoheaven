@@ -294,3 +294,20 @@ swhanchorreward=Skywatch Banner + 5x Aurora Petal
 swhrecruitwardentitle=The Last Keeper
 swhrecruitwardendesc=The Sky Warden would leave the Skywatch behind, for a price no small settlement could pay.
 swhrecruitwardenobj=Hire the Sky Warden into your settlement (<cost> coins)
+
+// ===== Surface points of interest & world events (content/worldevents) =====
+// Three rare POIs scattered across the vanilla Surface by
+// stairwaytoheaven.surface.SkySurfacePresets, plus the Skyfall world event.
+
+[object]
+skyfallshard=Fallen Skyshard
+
+[misc]
+// The derelict shrine's sign. Half of it has weathered away.
+swhshrinesign=...and the stair shall stand where the sky is thinnest,\nand the keeper shall count what comes down.\n\n- the rest has weathered away -
+// The note left at the stranded aeronaut's camp.
+swhaeronautsign=Balloon down. Cargo mostly intact.\nWalking east. If you find this, the crates are yours.\nMind the ones that are still warm.
+// Skyfall announcements. The colour code matches vanilla's own event lines
+// (raidapproaching and bossapproaching are both §b).
+swhskyfallstart=§bThe sky is coming apart - shards are falling.
+swhskyfallend=§aThe skyfall has passed.

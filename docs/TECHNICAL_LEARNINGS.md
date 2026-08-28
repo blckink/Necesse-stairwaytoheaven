@@ -1125,3 +1125,172 @@ colours fall below the eye's resolution at game zoom. Leave supplied art alone.
 The general rule this is a case of: a metric that separates our art from
 vanilla is a *hypothesis* about how it will look, not a finding. Render both at
 1× before acting on it.
+
+## Surface structures are placed by the WorldPreset system, not by a level hook
+
+**[jar]** `SurfaceLevel.generateRegion` (necesse/level/maps/SurfaceLevel.java:23)
+brackets every region it generates with
+`worldEntity.startPresetGenerationInRegion(region, this.seed)` and
+`runPresetGenerationInRegion(...)`. Those resolve to `WorldPresetsRegion` →
+`LevelPresetsRegion`, whose queue is filled once per **1024x1024 preset region**
+(`WorldPresetsRegion.tileWidth = 1024`, `PRESET_REGION_REGION_SIZE = 64`) by
+`WorldPresetRegistry.initRegion`, which walks every registered `WorldPreset` and
+calls `addToRegion` on the ones whose `shouldAddToRegion` accepts the level.
+
+`PresetGeneration` (necesse/level/maps/generationModules/PresetGeneration.java)
+is a **different, finite-level** mechanism and is NOT how the streamed surface
+gets its structures. It is easy to find first and wrong to copy.
+
+Vanilla's own surface structures are one registry entry:
+`registerPreset("surfacepresets", new SurfacePresetsWorldPreset())`, a
+`GenerationPresetsWorldPreset` holding a ticket-weighted list of
+`SimpleGenerationPreset`s at `presetsPerRegion = 0.05F`. A mod adds structures by
+registering its **own** `GenerationPresetsWorldPreset` in `init()` — never by
+touching vanilla's list or the level class.
+
+**[run]** Measured against the real thing: our own list at
+`presetsPerRegion = 0.0035F` queues **14.25 structures per 1024x1024 preset
+region** while vanilla queues **~220** into the same regions (878 over four).
+So the density knob behaves linearly and vanilla's own number is the yardstick
+to be rare against.
+
+### Two guards make a world preset unable to overwrite anything
+
+**[jar]** `LevelPresetsRegion.startGenerateRegion` sets
+`hasAlreadyGeneratedRegion` on any queued preset one of whose occupied regions is
+already generated, and `runGenerateRegion` then skips it entirely. A player can
+only build in a region that has generated, so a structure placed this way can
+never land on a build. `SimpleGenerationPreset` additionally checks and claims
+the `"villages"`, `"minibiomes"` and `"loot"` occupied-space boards, and
+`PlaceableWorldPreset` gives every SURFACE preset
+`removeIfWithinSpawnRegionRange = SpawnTileFinder.CLEAR_SPAWN_REGION_RANGE`.
+
+**[jar]** Registration order matters and is free: `WorldPresetRegistry`
+`onRegistryClose` sorts by `-priority`, every vanilla preset uses the default
+priority 0, and vanilla's `registerCore()` runs before any mod's `init()`. So a
+mod preset is evaluated last and sees every vanilla structure already on the
+boards.
+
+### When a `GenerationPreset` is actually constructed
+
+**[run]** `GenerationPresetsWorldPreset.onRegistryClosed()` calls
+`addCorePresets()`, and `addPreset` immediately calls
+`SimpleGenerationPreset.init()`, which calls `getPreset(...)` — so the `Preset`
+subclass runs its constructor **at registry close**, between `ModEntry.init()`
+and `ModEntry.postInit()`. Anything the preset names must therefore be resolved
+during `init()`. In this repo that rules out `SkyRegistry.skyroadTileID` and
+`skyplinthTileID`, which `SkyBuildingSet.resolveWorldgenMaterials()` assigns in
+`postInit()` and which would still be 0 (= `emptytile` / `air`).
+
+**[jar]** That failure is silent in both directions: `ObjectRegistry.getObjectID`
+and `TileRegistry.getTileID` answer **−1** for an unknown name
+(`GameRegistry.getElementID`), `Preset.setObject(x, y, −1)` means *leave this
+cell alone*, and **0** means *air*, which clears the cell. One typo therefore
+deletes part of a structure without throwing, warning, or failing the build.
+`stairwaytoheaven.surface.SurfaceMaterials` routes every lookup through one
+recorder so `/skysurfacestatus` can report `unresolved=0`, and the integration
+test fails the day it is not.
+
+### Queued is not stamped — measure both
+
+**[run]** `LevelPresetsRegion.getLevelRegions(identifier, 0)` and
+`getDebugData()` let a probe read the whole queue for a 1024x1024 preset region
+**without generating a single tile** (4 preset regions in 1–300 ms), and
+`PresetDebugData.getDebugName()` carries
+`preset.getStringID() + ":" + index + "@hash\n" + debugName`, where
+`SimpleGenerationPreset.addToRegion` has already set `debugName` to the
+generation preset's class simple name. Passing `customSeed = 0` is correct for
+the Surface: `BiomeGeneratorStackLevel.seed` is 0 there, and a non-zero custom
+seed would make `initRegion` use the SAME random for every preset region.
+
+That measures the decision. It does not prove anything was written, so
+`/skysurfacestatus stamp` then filters the queue for sites none of whose regions
+are generated yet, calls `WorldPreset.ensureRegionsAreGenerated` on one, and
+counts the structure's signature object in the world. Measured: 2 sites per POI
+kind generated, 2 stamps counted, and 4 `aetheriumrock` / 2 `aeronautwreck` /
+2 `seraphstatue` standing in them.
+
+### `bigtent` is vanilla's 2x2 multi-tile, and a preset must write all four
+
+**[jar]** `BigTentObject.registerTent` registers the four parts at multi
+coordinates (0,0), (1,0), (0,1), (1,1) — `bigtent`, `bigtent2`, `bigtent3`,
+`bigtent4` — laid out as two rows of two. Since `Preset.applyToLevel` never runs
+`MultiTile.placeObject`, all four have to be written, exactly as vanilla's
+`TravellersCampsitePreset` does. Verified by counting them in a stamped camp:
+`bigtentx1,bigtent2x1,bigtent3x1,bigtent4x1`. The same rule caught the Storm
+Crystal pair (`stormcrystal` + `stormcrystalr` on the tile to its right).
+
+### Chest loot and sign text come from `addCustomApply`, at stamp time
+
+**[jar]** `Preset.addInventory(lootTable, random, x, y)` is an `addCustomApply`
+that reaches `level.entityManager.getObjectEntity(x, y)`; the entity exists
+because `ObjectRegionLayer.setObjectByRegion` calls `level.replaceObjectEntity`
+on every base-layer change. A sign is the same pattern with
+`SignObjectEntity.setMessage(GameMessage)` — a `LocalMessage`, so each reader
+gets their own language (vanilla: `AbandonedCampPreset`).
+**[run]** Both observed in stamped POIs: `chestitems=3` and the sign's real
+English text rather than `misc.<key>`.
+
+## `WorldEvent` is the world-scoped event system, and its load order matters
+
+**[jar]** `necesse/engine/world/worldEvent/`. `WorldEntity.serverTick` ticks
+every live event and drops it as soon as `isOver()`; `addWorldEvent` runs
+`init()` and sends a `PacketWorldEvent` to every client; `shouldSave` puts it in
+the world file through `WorldEventSave`. Vanilla registers exactly one
+(`"ascendedflash"`, a pure client visual that calls `over()` on the server
+immediately). `WorldEventRegistry.registerEvent(stringID, class)` registers by
+**class** — the registry instantiates reflectively, so a public no-argument
+constructor is mandatory — and throws outright for a client-side-only mod.
+
+**[jar]** Ordering, and it is not the obvious one: both `applyLoadData` (save)
+and `applySpawnPacket` (network) run **before** `init()`, and
+`WorldEntity.applyLoadData` restores `EVENTS` **before** `WORLDDATA`. So an
+event cannot introduce itself to a `WorldData` scheduler from `init()` — the
+scheduler is not loaded yet and would be replaced a moment later. Doing it on
+the event's first `serverTick()` works, because the events list is ticked before
+the world data list in the same `WorldEntity.serverTick`.
+
+**[jar]** `WorldEntity.time` IS saved and restored (`save.addLong("time", ...)`),
+so a deadline expressed as `getTime() + duration` survives a restart.
+
+**[run]** A recurring schedule wants a `WorldData`: `WorldEntity.serverTick`
+ticks every one of them, right beside the events. But `WorldData` is created
+lazily on first access, so it only starts ticking once something asks for it —
+`GameEvents.addListener(ServerStartEvent.class, ...)` is the hook that
+guarantees it exists on every world, and it fires from
+`Server.markWorldInitialized`, i.e. after `world.init()` has loaded the world
+entity. `WorldData.tick()` runs on the client too; guard with `isServer()`.
+
+**[run]** Proven end to end by `scripts/integration_test.sh`: phase 1 starts a
+Skyfall and leaves it running with 12 shards on the ground, the server is
+stopped mid-event, and phase 2 reports
+`skyfall run: restored=true ... live=12 inworld=12` followed by
+`skyfall clean: cleared=12 leftbehind=0 over=true`. The shard list has to be
+saved with the event for that to work; the cleanup calls
+`regionManager.ensureTileIsLoaded` per tile so a shard whose region has streamed
+out is still removed, and it only clears a tile whose object is still ours, so a
+shard the player mined or built over is left alone.
+
+**[jar]** Announcements:
+`server.network.sendToClientsAtEntireLevel(new PacketChatMessage(new
+LocalMessage(...)), LevelIdentifier.SURFACE_IDENTIFIER)` is vanilla's own idiom
+(`IncursionLevelEvent:522`), and vanilla's event lines carry colour codes in the
+locale value (`raidapproaching`, `bossapproaching` are both `§b`).
+
+## An object's WORLD sheet is a separate file from its item icon
+
+**[jar]** `GameObject.loadTextures()` reads whatever the class says; only the
+ITEM icon defaults to `items/<stringID>.png`. `SkyDecoObject` takes its texture
+NAME as constructor argument 0
+(`GameTexture.fromFile("objects/" + textureName)`), which is allowed to differ
+from the registered ID — `SkyfallShardObject` registers `skyfallshard` and draws
+`objects/starfall.png` on purpose. A missing world sheet fails exactly like a
+missing icon: `GameTexture.fromFile` swallows the exception and returns
+`GameResources.error`, so the player sees an ERR tile **standing on the ground**.
+
+`tools/locale_audit.py` only checked item icons, and got away with it purely
+because every object so far happened to name its sheet after its own ID. Check 7
+(`OBJECT_TEXTURE_BY_CLASS` / `check_world_textures`) closes that: 20 objects now
+have their world sheet verified, and a listed class whose texture argument is
+not a literal is reported rather than skipped. Negative-tested by pointing the
+shard at a nonexistent sheet — the audit fails, naming the file it wanted.
