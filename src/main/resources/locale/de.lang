@@ -118,12 +118,15 @@ cloudmarblefencegate=Wolkenmarmor-Tor
 seraphstatue=Seraphstatue
 skyseraphtree=Himmelsseraph
 skyseraphsapling=Himmelsseraph-Setzling
+cloudtree=Wolkenbaum
+cloudsapling=Wolkenbaum-Setzling
 [itemcategory]
 // sub-category of objects>furniture holding the Skywatch family
 skywatch=Himmelswacht
 
 [item]
 seraphwood=Seraphholz
+cloudwood=Wolkenholz
 nimbuswood=Nimbusholz
 charwood=Kohlenholz
 prismwood=Prismenholz

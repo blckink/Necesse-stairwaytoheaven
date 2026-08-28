@@ -101,6 +101,18 @@ final class SkyObjects {
         // skywaytile here the biome's own tree could not be replanted in its
         // own biome: TreeSaplingObject refuses to place on anything outside
         // this list.
+        // v0.9 Cloud Tree: the Driftlands' own tree, from supplied art on the
+        // vanilla birch sheet. Same single-column-with-a-frost-half layout as
+        // the Seraph, for the same reason (see SkyTreeObject).
+        SkyRegistry.cloudTreeID = ObjectRegistry.registerObject("cloudtree",
+                new stairwaytoheaven.objects.SkyTreeObject("cloudtree", "cloudwood",
+                        "cloudsapling", new Color(214, 228, 240), 42, 70, 110, "cloudleaves",
+                        "stormslatetile", "skywaytile"),
+                0.0F, false, false, true);
+        SkyRegistry.cloudSaplingID = ObjectRegistry.registerObject("cloudsapling",
+                new necesse.level.gameObject.TreeSaplingObject("cloudsapling", new Color(214, 228, 240),
+                        "cloudtree", 1800, 2700, true, "cloudturftile"),
+                5.0F, true);
         SkyRegistry.skySeraphSaplingID = ObjectRegistry.registerObject("skyseraphsapling",
                 new necesse.level.gameObject.TreeSaplingObject("skyseraphsapling", new Color(224, 118, 10),
                         "skyseraphtree", 1800, 2700, true, "skywaytile", "cloudturftile"),

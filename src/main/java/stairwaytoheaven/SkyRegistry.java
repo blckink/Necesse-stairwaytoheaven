@@ -131,6 +131,8 @@ public final class SkyRegistry {
     public static int nimbusSaplingID, fulgurSaplingID, prismaSaplingID;
     /** v0.8 Sky Seraph tree: single-column sheet with a frost half. */
     public static int skySeraphTreeID, skySeraphSaplingID;
+    /** v0.9 Cloud Tree: the Driftlands' tree, supplied art on the birch sheet. */
+    public static int cloudTreeID, cloudSaplingID;
 
     // Plants
     public static int cloudbellID, skytulipID, staticmossID;

@@ -213,6 +213,31 @@ def build_skyway_ground():
     return os.path.join(tiles, "skyway_splat.png")
 
 
+def repack_kk_tree(src_name, out_name):
+    """Repack a supplied 2-column vanilla tree sheet into our frost layout.
+
+    The supplied sheets follow vanilla exactly: column 0 plain, column 1
+    snow-covered, four variants down. We cannot use that column, because
+    TreeObject reaches for it only when the tile is vanilla's snowID, and
+    spriteX has no override point - on Skyreach ground the second column would
+    never draw. getTreeSpriteY *is* overridable, so the cold forms move into
+    the lower half of a single-column sheet and SkyTreeObject picks the half
+    from the ground. Nothing about the artwork changes; only its arrangement.
+    """
+    src = Image.open(os.path.join(ROOT, "src/main/resources/kk-sprites", src_name)).convert("RGBA")
+    w, h = src.size
+    rows = h // 128
+    sheet = Image.new("RGBA", (128, 128 * rows * 2))
+    for row in range(rows):
+        plain = src.crop((0, row * 128, 128, row * 128 + 128))
+        frost = src.crop((128, row * 128, 256, row * 128 + 128))
+        sheet.paste(plain, (0, row * 128))
+        sheet.paste(frost, (0, (row + rows) * 128))
+    path = os.path.join(OBJECTS, out_name)
+    sheet.save(path)
+    return path, sheet
+
+
 def main():
     path, sheet = build_skyseraph_tree()
     opaque = sum(1 for p in sheet.get_flattened_data() if p[3] > 0)
@@ -222,6 +247,13 @@ def main():
           f"opaque {sum(1 for p in icon.get_flattened_data() if p[3] > 0)}")
     splat = build_skyway_ground()
     print(f"{splat}  {Image.open(splat).size}")
+
+    path, sheet = repack_kk_tree("birchtree-new-cloudtree.png", "cloudtree.png")
+    print(f"{path}  {sheet.size}  "
+          f"opaque {sum(1 for p in sheet.get_flattened_data() if p[3] > 0)}")
+    icon = icon_from(sheet.crop((0, 0, 128, 128)), os.path.join(ITEMS, "cloudtree.png"))
+    print(f"{os.path.join(ITEMS, 'cloudtree.png')}  32x32  "
+          f"opaque {sum(1 for p in icon.get_flattened_data() if p[3] > 0)}")
 
 
 if __name__ == "__main__":

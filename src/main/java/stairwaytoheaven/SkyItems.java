@@ -93,6 +93,8 @@ final class SkyItems {
         // registered here — their GrassObject registration already creates an
         // item of the same stringID (the windwheat pattern), and that auto-item
         // is what the plants drop.
+        ItemRegistry.registerItem("cloudwood",
+                new MatItem(500, "anylog").setItemCategory("materials", "logs"), 2.0F, true);
         ItemRegistry.registerItem("seraphwood",
                 new MatItem(500, "anylog").setItemCategory("materials", "logs"), 2.0F, true);
         ItemRegistry.registerItem("nimbuswood",
