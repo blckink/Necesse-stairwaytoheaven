@@ -89,9 +89,11 @@ Front apron, only when nothing is below, at `drawY + 26`:
 | no | yes | (4,2) then (5,3) |
 | no | no | (4,2)+(5,2) |
 
-Note cells (4,1) and (5,1) do double duty (top quadrant with an up-neighbour,
-*and* bottom quadrant with a down-neighbour), and the (4..5, 2..3) block doubles
-as the apron. Draw them so they read both ways: a plain table-top edge.
+Only cells **(4,1)** and **(5,1)** are genuinely double-duty — top quadrant of
+a tile with an up-neighbour *and* bottom quadrant of a tile with a
+down-neighbour — so draw them vertically uniform. The (4..5, 2..3) block is
+used **only** by the apron branch and is never a table-top quadrant, so it is
+free to be pure apron.
 
 Top-left of the whole draw is at `drawY - 14`, so the table body sits 14 px above
 its tile and the apron hangs to `drawY + 26`.

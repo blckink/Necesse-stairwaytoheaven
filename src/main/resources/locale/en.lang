@@ -114,6 +114,7 @@ cloudmarbledoorlocked=Locked Cloudmarble Door
 cloudmarblewindow=Cloudmarble Window
 cloudmarblefence=Cloudmarble Railing
 cloudmarblefencegate=Cloudmarble Gate
+seraphstatue=Seraph Statue
 [itemcategory]
 // sub-category of objects>furniture holding the Skywatch family
 skywatch=Skywatch

@@ -61,10 +61,10 @@ SKYGOLD = {                      # rims, cornices, arches and four-point stars
 # material as the body ramp is tuned. The cap has to be clearly darker than the
 # face or a top-down wall reads as one flat slab with no thickness.
 CAP = {
-    "deep":  mix(CLOUDMARBLE["deep"], palette.OUTLINE, 0.34),   # (134,147,163)
-    "base":  mix(CLOUDMARBLE["deep"], palette.OUTLINE, 0.20),   # (155,171,188)
-    "light": mix(CLOUDMARBLE["base"], palette.OUTLINE, 0.13),   # (190,203,211)
-    "hi":    mix(CLOUDMARBLE["light"], palette.OUTLINE, 0.08),  # (217,224,227)
+    "deep":  mix(CLOUDMARBLE["deep"], palette.OUTLINE, 0.28),
+    "base":  mix(CLOUDMARBLE["deep"], palette.OUTLINE, 0.15),
+    "light": mix(CLOUDMARBLE["base"], palette.OUTLINE, 0.08),
+    "hi":    mix(CLOUDMARBLE["light"], palette.OUTLINE, 0.03),
 }
 MORTAR_DEEP = mix(CLOUDMORTAR, palette.OUTLINE, 0.22)
 # The shaded rim of a cobble. CLOUDMARBLE["deep"] is LIGHTER than the mortar it
@@ -182,48 +182,77 @@ def swirl(target, cx, cy, radius, color, turns=1.35, phase=0.0, steps=None):
                    int(round(cy + r * math.sin(ang))), color)
 
 
-def _stone_tone(d2, s):
-    """Ramp step for one pixel of a cobble. `d2` is the squared ellipse radius
-    (1.0 = the rim), `s` the position along the top-left -> bottom-right light
-    axis. Four flat steps, light from the top-left, no gradient."""
-    if d2 > 0.78:                       # rim band
-        return None                     # caller decides: gold or shade
-    if s < -0.42:
+def _stone_tone(s, floor_ramp=False):
+    """Ramp step for the BODY of a cobble. `s` is the position along the
+    top-left -> bottom-right light axis. Four flat steps, light from the
+    top-left, no gradient.
+
+    Weighted BRIGHT on purpose. This is a white material laid on a pale blue
+    bed, so a stone whose lower half sits on the bottom two ramp steps is
+    darker than the mortar around it and the wall reads grey. Vanilla can
+    afford an even split because its stone is mid-grey on dark mortar; ours
+    cannot."""
+    if s < -0.30:
         return CLOUDMARBLE["hi"]
-    if s < 0.02:
+    if s < 0.16:
         return CLOUDMARBLE["light"]
-    if s < 0.44:
+    if floor_ramp:                      # ground never reaches the bottom step
+        return CLOUDMARBLE["base"]
+    if s < 0.58:
         return CLOUDMARBLE["base"]
     return CLOUDMARBLE["deep"]
 
 
-def cobble(target, cx, cy, rx, ry, rng, gold=True, glyph=False, shadow=True):
+def cobble(target, cx, cy, rx, ry, rng, gold=True, glyph=False, shadow=True,
+           n=2.0, shade=None, floor_ramp=False, glyph_tone=None):
     """One rounded cloud stone: four-step body, a 1px GOLD rim on the lit edge
-    only (never a full outline — that is what carries 'gold' at 1x), a shaded
-    rim on the far side, a mortar drop-shadow under it, and optionally the blue
-    swirl curled inside. Reference: skyway-floor-reference.png."""
+    only (never a full outline -- that is what carries 'gold' at 1x), a 1px
+    shaded rim on the far side, a thin mortar joint under it, and optionally the
+    blue swirl curled inside.
+
+    `n` is the superellipse exponent: 2 is a true ellipse (the floor's irregular
+    cobbles), 4 a rounded rectangle (the wall's coursed blocks). Ellipses do NOT
+    tessellate -- four of them leave a diamond of mortar at every corner -- so a
+    coursed wall built from ellipses reads as blue mortar with white centres
+    rather than as white masonry with blue joints.
+
+    `shade`/`floor_ramp` drop the contrast for GROUND use. A wall is an object
+    and carries object contrast; terrain does not. Measured against vanilla's
+    own ground sheets (dirt, snow, ash) at 1x, a terrain tile is a nearly flat
+    field with a few percent of micro-detail -- snow is the closest analogue to
+    this material and is essentially white-on-white with faint pale swirls. The
+    same cobble drawn at wall contrast tiles into visual static.
+
+    The rim is measured in PIXELS from the edge, not as a fraction of the
+    radius. A fraction-based band is 2-3px thick on a big stone, and a wall of
+    big stones then reads as grey mortar with white centres instead of white
+    stone with blue joints -- which is what the first pass did."""
     x0, x1 = int(math.floor(cx - rx - 1)), int(math.ceil(cx + rx + 1))
     y0, y1 = int(math.floor(cy - ry - 1)), int(math.ceil(cy + ry + 1))
+    scale = min(rx, ry)
+    shade = STONE_SHADE if shade is None else shade
     for y in range(y0, y1 + 1):
         for x in range(x0, x1 + 1):
             dx, dy = (x - cx) / rx, (y - cy) / ry
+            u = abs(dx) ** n + abs(dy) ** n
             d2 = dx * dx + dy * dy
             s = (dx + dy) * 0.5
-            if d2 <= 1.0:
-                tone = _stone_tone(d2, s)
-                if tone is None:
-                    tone = (SKYGOLD["light"] if gold and s < -0.30
-                            else SKYGOLD["base"] if gold and s < -0.02
-                            else STONE_SHADE)
+            if u <= 1.0:
+                inset = (1.0 - u ** (1.0 / n)) * scale    # px in from the edge
+                if inset < 1.15:
+                    tone = (SKYGOLD["light"] if gold and s < -0.34
+                            else SKYGOLD["base"] if gold and s < -0.08
+                            else shade)
+                else:
+                    tone = _stone_tone(s, floor_ramp)
                 target.put(x, y, tone)
-            elif shadow and d2 <= 1.5 and s > 0.30:
+            elif shadow and u <= 1.30 and s > 0.42:
                 target.put(x, y, MORTAR_DEEP)
-    # one bright catchlight, the vanilla "one more micro-detail" beat
     target.put(int(round(cx - rx * 0.42)), int(round(cy - ry * 0.48)),
-               CLOUDMARBLE["hi"])
+               CLOUDMARBLE["hi"])                          # one catchlight
     if glyph and rx >= 4 and ry >= 3:
         swirl(target, cx + rng.range(-1, 1), cy + rng.range(-1, 1),
-              min(rx, ry) - 1.2, CLOUDGLYPH,
+              min(rx, ry) - 1.0, glyph_tone or CLOUDGLYPH,
               turns=1.25, phase=rng.float() * 6.28)
 
 
@@ -231,7 +260,7 @@ def cobble(target, cx, cy, rx, ry, rng, gold=True, glyph=False, shadow=True):
 # The Skyway floor
 # ---------------------------------------------------------------------------
 
-def _cloudfield(t, salt, density=0.16):
+def _cloudfield(t, salt, density=0.09):
     """The pale blue cloud bed the cobbles are set into: mortar with soft wisps,
     position-locked so every cell of a splat block is identical and the sheet
     tiles seamlessly in both directions."""
@@ -253,26 +282,45 @@ def _cloudfield(t, salt, density=0.16):
             t.put(wx + i, wy + (i // 4) + 1, CLOUDMORTAR)
 
 
+# Stone sizes for one 32px tile of Skyway paving, as (count, rx range, ry range).
+# Read off skyway-floor-reference.png: the bed carries a FEW large slabs, some
+# medium stones and a couple of pebbles, with the pale blue cloud showing
+# between them as channels. Nine same-sized cobbles per tile instead reads as
+# foam at 1x -- uniform bubbles with a gold speck on each -- which is what the
+# first two passes did.
+# (count, rx range, ry range, gold-rim chance). Gold is deliberately confined to
+# the big slabs and rare even there: at 1x a gold rim on a 6px stone is a 3px
+# yellow arc, and one per stone over a whole biome reads as speckle rather than
+# as the set's accent. Measured against vanilla's ground sheets, an accent motif
+# lands about once every one or two tiles (cloudturf's flowers do exactly this).
+_SKYWAY_STONES = ((2, (7, 9), (5, 7), 0.36), (3, (4, 6), (3, 5), 0.0))
+_FLOOR_GLYPH = mix(CLOUDGLYPH, CLOUDMARBLE["light"], 0.45)
+
+
 def _skyway_tile(variant):
-    """One 32x32 Skyway ground look: cloud bed + a jittered field of cobbles,
-    the larger ones carrying a swirl. Wraps in x and y."""
+    """One 32x32 Skyway ground look: cloud bed + slabs, stones and pebbles, the
+    larger ones carrying the blue swirl. Wraps in x and y."""
     t = Wrap(32, 32, wrap_y=True)
     salt = 0x5CA9_0000 + variant * 0x2711
     _cloudfield(t, salt)
     rng = Rng(salt ^ 0x51A7)
     stones = []
-    for gy in range(4):
-        for gx in range(4):
-            if rng.chance(0.16):                 # leave a mortar gap
-                continue
-            cx = gx * 8 + 4 + rng.range(-2, 2)
-            cy = gy * 8 + 4 + rng.range(-2, 2)
-            rx = rng.range(3, 6) + rng.float() * 0.6
-            ry = rng.range(3, 5) + rng.float() * 0.6
-            stones.append((cx, cy, rx, ry, rng.chance(0.42)))
-    stones.sort(key=lambda s: s[1])              # lower stones overlap upper
-    for cx, cy, rx, ry, glyph in stones:
-        cobble(t, cx, cy, rx, ry, rng, gold=True, glyph=glyph and rx >= 4.5)
+    for count, (rx0, rx1), (ry0, ry1), gold_p in _SKYWAY_STONES:
+        for _ in range(count):
+            stones.append((
+                rng.range(0, 31), rng.range(0, 31),
+                rng.range(rx0, rx1) + rng.float() * 0.7,
+                rng.range(ry0, ry1) + rng.float() * 0.7,
+                rng.chance(gold_p),
+                2.2 + rng.float() * 1.2))            # ellipse .. rounded slab
+    stones.sort(key=lambda v: -v[2])                 # big slabs first, under
+    for cx, cy, rx, ry, gold, n in stones:
+        # Ground contrast, not object contrast: no drop shadow, a far rim only
+        # one step below the body, and the body ramp stopped before its darkest
+        # step. See cobble()'s note and tools/... vanilla ground comparison.
+        cobble(t, cx, cy, rx, ry, rng, gold=gold, glyph=rx >= 4.5, n=n,
+               shadow=False, shade=CLOUDMARBLE["deep"], floor_ramp=True,
+               glyph_tone=_FLOOR_GLYPH)
     return t
 
 
@@ -286,11 +334,11 @@ def _skyway_features(block, x0, y0, salt, k, variant):
     if (variant + k) % 5 == 0:
         sx, sy = rng.range(9, 22), rng.range(9, 22)
         gold_star(w, sx, sy, 3, 5)
-    if (variant * 3 + k) % 4 == 0:               # a stray gold flake
+    if (variant * 3 + k) % 7 == 0:               # a stray gold flake
         w.put(rng.range(3, 28), rng.range(3, 28), SKYGOLD["light"])
         w.put(rng.range(3, 28), rng.range(3, 28), SKYGOLD["base"])
     if k % 2 == 1:                               # one extra loose curl
-        swirl(w, rng.range(8, 24), rng.range(8, 24), 3.2, GLYPH_DEEP,
+        swirl(w, rng.range(8, 24), rng.range(8, 24), 3.2, CLOUDGLYPH,
               turns=1.1, phase=rng.float() * 6.28)
     for y in range(32):
         for x in range(32):
@@ -299,7 +347,7 @@ def _skyway_features(block, x0, y0, salt, k, variant):
                 block.put(x0 + x, y0 + y, p)
 
 
-def gen_skyway_splat(path, variants=4, salt=0x5CA9):
+def gen_skyway_splat(path, variants=6, salt=0x5CA9):
     """tiles/skyway_splat.png — the 21-cell auto-tile atlas.
 
     The cell map and the blend masks come straight from gen_splats (verified in
@@ -398,38 +446,35 @@ CAP_HALF = {
 
 
 def _cap_field(w, h, salt=0x5CA9C0):
-    """The wall seen from directly above: cool cloud stone. Soft mottled banks
-    over a calm base, with only a few percent of speckle on top.
+    """The wall seen from directly above: cool cloud stone, and CALM.
 
     Vanilla's own cap is 93% one flat tone with roughly 6% of a second
-    (measured on stonewall.png); a cap dithered across four ramp steps at 20%
-    density reads as television static at 1x, which is what the first pass did.
-    The character has to come from a few large soft shapes, not from noise."""
+    (measured on stonewall.png). Two earlier passes failed here in opposite
+    directions: four ramp steps dithered at 20% read as television static, and
+    then wide 2:1 soft banks read as diagonal corrugation once the tile
+    repeated across a whole wall. What survives both is vanilla's own recipe --
+    a flat base, a few percent of speckle, and a SMALL number of readable
+    micro-details. Here those details are the set's own blue swirl and a couple
+    of pale block hints, so the cap still says 'cloud' rather than 'slate'."""
     t = Wrap(w, h)
     t.rect(0, 0, w, h, CAP["base"])
     rng = Rng(salt)
-    for _ in range(5):                                  # soft light banks
+    # Two details only, both a single ramp step above the base. Anything with
+    # its own dark edge turns into a stamped motif once the 32px tile repeats
+    # along a whole wall, which is what the corrugation pass looked like.
+    for _ in range(2):                                  # pale block hints
         bx, by = rng.range(0, w - 1), rng.range(0, h - 1)
-        br = rng.range(4, 7)
-        for y in range(by - br, by + br + 1):
-            for x in range(bx - br * 2, bx + br * 2 + 1):
-                dx, dy = (x - bx) / (br * 2.0), (y - by) / br
-                if dx * dx + dy * dy <= 1.0:
-                    t.put(x, y, CAP["light"])
-    for _ in range(4):                                  # shallow hollows
-        bx, by = rng.range(0, w - 1), rng.range(0, h - 1)
-        br = rng.range(3, 5)
-        for y in range(by - br, by + br + 1):
-            for x in range(bx - br * 2, bx + br * 2 + 1):
-                dx, dy = (x - bx) / (br * 2.0), (y - by) / br
-                if dx * dx + dy * dy <= 1.0:
-                    t.put(x, y, CAP["deep"])
+        for y in range(by, by + rng.range(2, 3)):
+            for x in range(bx, bx + rng.range(5, 8)):
+                t.put(x, y, CAP["light"])
+    swirl(t, rng.range(0, w - 1), rng.range(3, h - 4), 2.8,
+          CAP["light"], turns=1.15, phase=rng.float() * 6.28)
     for y in range(h):                                  # sparse speckle only
         for x in range(w):
             r = Rng((x * 7349 + y * 12611) ^ salt).float()
-            if r < 0.030:
+            if r < 0.028:
                 t.put(x, y, CAP["hi"])
-            elif r < 0.065:
+            elif r < 0.060:
                 t.put(x, y, CAP["deep"])
     return t
 
@@ -495,15 +540,13 @@ def _masonry(w, h, salt=0x5CA9_F1, y_phase=0):
             t.put(x, y, MORTAR_DEEP if r < 0.14 else CLOUDMORTAR)
     course = 0
     cy = 5 - y_phase
-    while cy < h + 5:
-        x = -4 + (course % 3) * 5
-        while x < w + 4:
-            rx = rng.range(4, 7) + rng.float() * 0.5
-            t_ry = 3.4
-            t_cy = cy + rng.range(-1, 1)
-            glyph = rx >= 5.5 and rng.chance(0.55)
-            cobble(t, x + rx, t_cy, rx, t_ry, rng, gold=True, glyph=glyph)
-            x += 2 * rx + 1
+    while cy < h + 6:
+        x = -6 + (course % 3) * 6
+        while x < w + 6:
+            rx = rng.range(5, 9) + rng.float() * 0.5
+            cobble(t, x + rx, cy + rng.range(-1, 1), rx, 3.7, rng,
+                   gold=True, glyph=rx >= 6.5 and rng.chance(0.7), n=3.4)
+            x += 2 * rx + 0.5
         course += 1
         cy += 7
     return t
@@ -527,10 +570,10 @@ def _face_tile():
         t.put(x, 0, CLOUDMARBLE["hi"])
         t.put(x, 1, SKYGOLD["deep"])                       # thin string course
 
-    cx, spring, R = 15.5, 26.0, 12.0
+    cx, spring, R = 15.5, 29.0, 11.5
     # cloud puffs standing inside the arch, painted before the gold so the
     # mouldings sit in front of them
-    for px_, py_, pr in ((10, 26, 6.4), (21, 26, 6.0), (16, 24, 5.6)):
+    for px_, py_, pr in ((10, 29, 6.6), (21, 29, 6.2), (16, 27, 5.8)):
         for y in range(int(py_ - pr) - 1, 30):
             for x in range(int(px_ - pr) - 1, int(px_ + pr) + 2):
                 dx, dy = (x - px_) / pr, (y - py_) / (pr * 0.95)
@@ -540,15 +583,17 @@ def _face_tile():
                 sh = (dx + dy) * 0.5
                 t.put(x, y, CLOUDMARBLE["hi"] if sh < -0.45 else
                       CLOUDMARBLE["light"] if sh < 0.1 else CLOUDMARBLE["base"])
-    for y in range(12, 28):                                # the arch band
+    for sx_, sy_ in ((10, 26), (21, 26)):          # the puffs carry the curl too
+        swirl(t, sx_, sy_, 3.0, CLOUDGLYPH, turns=1.2, phase=1.1)
+    for y in range(16, 31):                                # the arch band
         for x in range(-3, 35):
             if y > spring:
                 continue
             d = math.hypot(x - cx, y - spring)
             if R - 2.0 <= d < R:
                 lit = (x - cx) + (y - spring) < 0
-                t.put(x, y, SKYGOLD["hi"] if (d >= R - 1 and lit)
-                      else SKYGOLD["light"] if d >= R - 1 else SKYGOLD["base"])
+                t.put(x, y, SKYGOLD["light"] if (d >= R - 1 and lit)
+                      else SKYGOLD["base"] if d >= R - 1 else SKYGOLD["deep"])
             elif R - 4.0 <= d < R - 2.0:                   # pale archivolt
                 t.put(x, y, CLOUDMARBLE["hi"] if (x - cx) < 0
                       else CLOUDMARBLE["light"])
@@ -560,14 +605,14 @@ def _face_tile():
     PIER = ((29, SKYGOLD["light"]), (30, CLOUDMARBLE["hi"]),
             (31, CLOUDMARBLE["light"]), (0, CLOUDMARBLE["base"]),
             (1, CLOUDMARBLE["deep"]), (2, SKYGOLD["deep"]))
-    for y in range(13, 30):
+    for y in range(17, 30):
         for x, tone in PIER:
             t.put(x, y, tone)
-    for y in (13, 14):                                     # capital
+    for y in (17, 18):                                     # capital
         t.put(28, y, SKYGOLD["light"])
         t.put(3, y, SKYGOLD["deep"])
-    gold_lozenge(t, 0, 28, 2, 3)                           # pendant at the join
-    gold_star(t, 16, 13, 4, 6)                             # star on the apex
+    gold_lozenge(t, 0, 23, 2, 4)                           # pendant on the pier
+    gold_star(t, 16, 17, 3, 5)                             # star on the apex
 
     for x in range(32):                                    # foot
         t.put(x, 30, mix(CLOUDMARBLE["deep"], OUT, 0.30))
@@ -737,8 +782,8 @@ def _build_window(c, salt):
     # The skylight lies FLAT in the roof, so it runs along the wall: tall and
     # narrow in the cell, not wide. Its glass is looking straight up at the sky
     # and is therefore darker than the cap, never a bright pane stuck on top.
-    roof_glass = mix(CLOUDGLYPH, CAP["deep"], 0.55)
-    roof_glass_hi = mix(CLOUDGLYPH, CAP["deep"], 0.30)
+    roof_glass = mix(CLOUDGLYPH, palette.OUTLINE, 0.42)
+    roof_glass_hi = mix(CLOUDGLYPH, palette.OUTLINE, 0.26)
     for y in range(4, 28):
         for x in range(6, 26):
             t.put(x, y, SKYGOLD["deep"])
@@ -961,7 +1006,15 @@ def _build_doors(c, salt):
             arch = [(88, 89, x0 + 5, x0 + 26), (90, 91, x0 + 3, x0 + 28),
                     (92, 93, x0 + 1, x0 + 30), (94, 127, x0, x0 + 31)]
             fill(arch, lambda x, y: _door_masonry(x, y))
-            rim_arch(arch[:3])
+            # ONE gold line following the chamfer. A rim on every step reads as
+            # three stacked slabs -- a staircase over the door, not an arch.
+            for (ay, _, ax0, ax1) in arch[:3]:
+                for x in range(ax0, ax1 + 1):
+                    c.put(x, ay, SKYGOLD["light"] if x < (ax0 + ax1) // 2
+                          else SKYGOLD["base"])
+            for (ay, _, ax0, ax1) in arch[:3]:
+                c.put(ax0, ay + 1, SKYGOLD["light"])
+                c.put(ax1, ay + 1, SKYGOLD["base"])
             _door_leaf_panel(c, x0 + 8, x0 + 23, TILE_TOP + 1, 126)
             c.put(x0 + 21, 110, SKYGOLD["hi"])            # handle
             c.put(x0 + 21, 111, SKYGOLD["light"])
@@ -1112,41 +1165,41 @@ def _skirt(c, x, y, w, h, alpha):
 # The v2 references settle what a railing post is: a FLUTED white column with a
 # gold cap band, a gold lozenge at mid-height and a gold band at the foot. The
 # flutes are what stop a 12px shaft reading as a blank pill at 1x.
-_FLUTE = "Hblbld"      # hi / base / light / base / light / deep -> 3 flutes
+_FLUTE = "Hdlbld"      # hi / DEEP groove / light / base / light / deep
 
 
 # The post's cylinder cross-section, lit from the top-left: bright on the left,
 # falling to deep on the right. Gold collars interrupt it, which is the
 # reference's pillar.
-_POST_BANDS = [
-    _FLUTE,      # y26
-    "GGgggk",    # y28  gold cap band
-    "kkgggk",    # y30  its shaded underside
-    _FLUTE,      # y32  <- the tile's top edge
-    _FLUTE,      # y34
-    _FLUTE,      # y36
-    _FLUTE,      # y38
-    _FLUTE,      # y40  (gold lozenge painted over y38..46)
-    _FLUTE,      # y42
-    _FLUTE,      # y44
-    _FLUTE,      # y46
-    _FLUTE,      # y48
-    "GGgggk",    # y50  gold foot band
-]
+# The fluted shaft, y26..y49 -- the capital and the head sit above it.
+_POST_BANDS = [_FLUTE] * 12 + ["GGgggk"]   # y26..y48 flutes, y50 gold foot band
 
 
-def _post_cell(c, x0=8, top=22):
-    """A cloudmarble pillar: domed cap, gold collars, two gold chevrons in the
-    lower shaft, a gold foot ring and the soft ground skirt. Solid x8..23,
-    y22..53, matching vanilla objects/stonefence.png's post cell."""
-    _blk(c, x0 + 4, top, 8, 2, OUT)                       # domed cap
+def _post_cell(c, x0=8, top=18):
+    """A cloudmarble pillar: domed head, an overhanging gold CAPITAL, a fluted
+    shaft with the reference's gold lozenge at mid-height, a gold foot band and
+    the soft ground skirt.
+
+    The capital is not decoration. FenceObject draws the runs (cols 3/4) AFTER
+    the post, and a run is a solid 10x24 block that covers the post's own
+    outline columns -- so a post whose head stops level with the rail merges
+    into it and a fence line reads as one long kerb with no posts in it. The
+    capital has to sit clear ABOVE the rail's top row (y28) to read."""
+    _blk(c, x0 + 4, top, 8, 2, OUT)                       # domed head
     _blk(c, x0 + 2, top + 2, 2, 2, OUT)
     _blk(c, x0 + 12, top + 2, 2, 2, OUT)
     _blk(c, x0 + 4, top + 2, 8, 2, CLOUDMARBLE["hi"])
+    # capital: 20px wide, overhanging the 16px shaft on both sides
+    _blk(c, x0 - 2, top + 4, 2, 2, OUT)
+    _blk(c, x0 + 16, top + 4, 2, 2, OUT)
+    _row(c, x0, top + 4, "GGgggk")
+    _blk(c, x0 - 2, top + 6, 2, 2, OUT)
+    _blk(c, x0 + 16, top + 6, 2, 2, OUT)
+    _row(c, x0, top + 6, "kkgggk")
     for i, band in enumerate(_POST_BANDS):
-        _row(c, x0, top + 4 + i * 2, band)
-    gold_lozenge(c, x0 + 8, 42, 4, 6)
-    foot = top + 4 + len(_POST_BANDS) * 2                 # y52
+        _row(c, x0, top + 8 + i * 2, band)
+    gold_lozenge(c, x0 + 8, 40, 4, 6)
+    foot = top + 8 + len(_POST_BANDS) * 2                 # y52
     _blk(c, x0 + 2, foot, 12, 2, OUT)
     _skirt(c, x0, foot, 2, 2, 74)
     _skirt(c, x0 + 14, foot, 2, 2, 74)
@@ -1154,8 +1207,8 @@ def _post_cell(c, x0=8, top=22):
     _skirt(c, x0, foot + 2, 2, 2, 29)
     _skirt(c, x0 + 14, foot + 2, 2, 2, 29)
     _skirt(c, x0 + 2, foot + 4, 12, 2, 29)
-    _skirt(c, x0 - 2, top + 24, 2, 10, 29)
-    _skirt(c, x0 + 16, top + 24, 2, 10, 29)
+    _skirt(c, x0 - 2, top + 28, 2, 10, 29)
+    _skirt(c, x0 + 16, top + 28, 2, 10, 29)
 
 
 # The v2 reference's low run is not an open balustrade: it is a chunky rounded

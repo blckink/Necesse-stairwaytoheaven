@@ -208,12 +208,12 @@ def _flame(c, cx, bottom, height, rng, seed_shift=0):
     top = bottom - height
     for y in range(top, bottom + 1):                     # dark teardrop mass
         t = (y - top) / max(1, height)
-        w = 1 + int(round(2.4 * (t ** 0.7)))
+        w = 1 + int(round(2.6 * (t ** 0.6)))
         for dx in range(-w, w + 1):
             c.put(cx + dx, y, mix(GLOW, OUT, 0.62))
     for y in range(top, bottom):                         # bright body
         t = (y - top) / max(1, height)
-        w = int(round(1.9 * (t ** 0.7)))
+        w = int(round(2.0 * (t ** 0.6)))
         for dx in range(-w, w + 1):
             c.put(cx + dx, y, GLOW)
     for y in range(top + 1, bottom):                     # hot core
@@ -937,8 +937,11 @@ def gen_bed(path, mask_path):
     block_mask(0, 64, 9, 24)                             # rot 1: pillow left
 
     def strip_mask(x0, start):
+        """Opaque from `start` down, with a two-step rounded shoulder so the
+        sleeper's head and shoulders emerge from the bedding rather than out
+        of a hard horizontal cut."""
         for y in range(start, 96):
-            inset = max(0, start + 4 - y) * 4
+            inset = (10, 6, 3, 1)[y - start] if y - start < 4 else 0
             for x in range(inset, 32 - inset):
                 m.put(x0 + x, 32 + y, white)
 
@@ -1120,6 +1123,11 @@ def gen_carpet_mask(path):
 # =======================================================================
 # 10-13. Table decorations - 32x32, bottom-anchored
 # =======================================================================
+#
+# These are drawn ON a decoration holder at DecorDrawOffset(0, -18, 20), never
+# on the floor, so unlike every other piece here they carry NO ground shadow -
+# vanilla's goldchalice and decorativepot1 have none either, and one added
+# makes the object look like it is hovering in front of the table.
 
 
 def gen_chalice(path):
@@ -1128,7 +1136,6 @@ def gen_chalice(path):
     tapered from the rim and read as a martini glass."""
     rng = Rng(0xC4A11C)
     c = Canvas(32, 32)
-    _ground_shadow(c, 16, 29, 8, 2)
     c.ellipse(16, 28, 7, 3, IRON["deep"])                # foot
     c.ellipse(16, 27, 6, 2, IRON["base"])
     c.ellipse(15, 26, 5, 1, IRON["light"])
@@ -1140,33 +1147,34 @@ def gen_chalice(path):
     c.rect(15, 21, 2, 1, PATINA_HI)
     # bowl: near-vertical sides with a rounded bottom, dark silhouette first
     # so the outline pass cannot eat the rim
-    PROFILE = ((6, 0), (7, 0), (8, 0), (9, 0), (10, 0), (11, 0), (12, 0),
-               (13, 1), (14, 1), (15, 2), (16, 3), (17, 5), (18, 6))
+    PROFILE = ((5, 0), (6, 0), (7, 0), (8, 0), (9, 0), (10, 0), (11, 0),
+               (12, 1), (13, 1), (14, 2), (15, 3), (16, 4), (17, 5))
     for dy, inset in PROFILE:
-        c.rect(7 + inset, dy, 18 - 2 * inset, 1, IRON["deep"])
+        c.rect(9 + inset, dy, 14 - 2 * inset, 1, IRON["deep"])
     for dy, inset in PROFILE:
-        if 18 - 2 * inset > 2:
-            c.rect(8 + inset, dy, 16 - 2 * inset, 1, STONE["base"])
-    c.rect(8, 7, 16, 2, STONE["hi"])
+        if 14 - 2 * inset > 2:
+            c.rect(10 + inset, dy, 12 - 2 * inset, 1, STONE["base"])
+    c.rect(10, 6, 12, 2, STONE["hi"])
     for dy, inset in PROFILE:
-        if 18 - 2 * inset > 3 and dy > 8:
-            c.put(8 + inset, dy, STONE["light"])
-            c.put(23 - inset, dy, STONE["deep"])
-    _grain(c, 9, 10, 14, 6, rng, density=16)
-    _iron_rail(c, 7, 6, 18, 2)                           # iron rim
-    c.rect(8, 6, 16, 1, IRON["light"])
+        if 14 - 2 * inset > 3 and dy > 7:
+            c.put(10 + inset, dy, STONE["light"])
+            c.put(21 - inset, dy, STONE["deep"])
+    _grain(c, 11, 9, 10, 6, rng, density=14)
+    _iron_rail(c, 9, 5, 14, 2)                           # iron rim
+    c.rect(10, 5, 12, 1, IRON["light"])
     c.outline(OUT)
-    c.rect(9, 9, 14, 4, with_alpha(GLOW, 150))           # the drink, glowing
-    c.rect(10, 9, 12, 1, with_alpha(GLOW_HI, 200))
-    c.put(11, 10, GLOW_HI)
-    c.put(19, 11, with_alpha(GLOW_HI, 170))
+    drink = mix(GLOW, PATINA, 0.45)                      # the drink, glowing
+    c.rect(11, 8, 10, 4, drink)
+    c.rect(11, 8, 10, 1, GLOW)
+    c.rect(12, 9, 8, 1, mix(GLOW, GLOW_HI, 0.6))
+    c.put(13, 10, GLOW_HI)
+    c.put(18, 11, GLOW)
     c.save(path)
 
 
 def gen_candle(path):
     rng = Rng(0xCA9D1E)
     c = Canvas(32, 32)
-    _ground_shadow(c, 16, 29, 8, 2)
     c.ellipse(16, 28, 8, 3, IRON["deep"])                # dish
     c.ellipse(16, 27, 7, 2, IRON["base"])
     c.ellipse(15, 26, 6, 1, IRON["light"])
@@ -1184,14 +1192,13 @@ def gen_candle(path):
     c.rect(10, 24, 13, 1, PATINA)
     c.outline(OUT)
     c.rect(16, 9, 1, 2, IRON["deep"])                    # wick
-    _flame(c, 16, 9, 8, rng)
+    _flame(c, 16, 9, 7, rng)
     c.save(path)
 
 
 def gen_tome(path):
     rng = Rng(0x70BE01)
     c = Canvas(32, 32)
-    _ground_shadow(c, 16, 29, 12, 2)
     _slab(c, 3, 23, 26, 6, rng)                          # stone lectern block
     c.rect(3, 23, 26, 1, STONE["hi"])
     c.rect(3, 27, 26, 1, PATINA)
@@ -1220,7 +1227,6 @@ def gen_tome(path):
 def gen_pottedcloudberry(path):
     rng = Rng(0xB077E5)
     c = Canvas(32, 32)
-    _ground_shadow(c, 16, 29, 10, 2)
     c.ellipse(16, 11, 11, 8, BERRY["leaf_deep"])         # bush
     c.ellipse(15, 10, 10, 7, BERRY["leaf"])
     c.ellipse(14, 8, 7, 4, BERRY["leaf_light"])
@@ -1313,14 +1319,14 @@ def _icon_dinnertable(path):
     rng = Rng(0x1C0004)
     c = Canvas(32, 32)
     _under_mass(c, 3, 20, 26, 11, (3, 24), leg_w=5)
-    _slab(c, 0, 4, 32, 14, rng)
-    c.rect(0, 4, 32, 2, STONE["hi"])
-    c.rect(0, 8, 32, 1, PATINA)
-    c.rect(0, 15, 32, 1, PATINA)
-    c.rect(4, 5, 1, 13, PATINA)
-    c.rect(27, 5, 1, 13, PATINA)
-    c.rect(0, 18, 32, 2, STONE["hi"])
-    c.rect(0, 20, 32, 2, STONE["deep"])
+    _slab(c, 1, 4, 30, 14, rng)
+    c.rect(1, 4, 30, 2, STONE["hi"])
+    c.rect(1, 8, 30, 1, PATINA)
+    c.rect(1, 15, 30, 1, PATINA)
+    c.rect(5, 5, 1, 13, PATINA)
+    c.rect(26, 5, 1, 13, PATINA)
+    c.rect(1, 18, 30, 2, STONE["hi"])
+    c.rect(1, 20, 30, 2, STONE["deep"])
     _grain(c, 6, 10, 20, 5, rng, density=20)
     c.outline(OUT)
     _crescent(c, 15, 12, PATINA_HI, star_color=GLOW)
@@ -1338,9 +1344,9 @@ def _icon_desk(path):
         c.rect(4, dy + 3, 24, 1, STONE["deep"])
         _iron_rail(c, 11, dy + 1, 10, 2)
         c.put(12, dy + 1, PATINA_HI)
-    _slab(c, 0, 8, 32, 5, rng)
-    c.rect(0, 8, 32, 2, STONE["hi"])
-    c.rect(0, 11, 32, 1, PATINA)
+    _slab(c, 1, 8, 30, 5, rng)
+    c.rect(1, 8, 30, 2, STONE["hi"])
+    c.rect(1, 11, 30, 1, PATINA)
     _slab(c, 3, 0, 26, 8, rng)
     _panel(c, 6, 2, 20, 5, rng)
     _iron_rail(c, 3, 6, 26, 2)

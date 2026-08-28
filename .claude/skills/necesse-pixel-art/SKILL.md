@@ -9,6 +9,30 @@ You are producing sprites for Necesse 1.3.2. The bar is: a player cannot tell mo
 sprites from vanilla ones. Everything below was verified against the game's own
 assets and decompiled renderers — follow it, don't improvise formats.
 
+## Reference art from the user: convert before you redraw
+
+When the user supplies a reference render, **test whether it converts before
+spending a session redrawing it**. `tools/convert_reference.py` does the test
+and the conversion.
+
+The question is not "is this already a clean upscale" — it almost never is.
+The question is "was this *made from* pixel art", because then the block
+structure survives resampling even though the exact pixel boundaries do not.
+The tell is the **change-energy period on each axis**: a real grid gives the
+same block size horizontally and vertically. Under ~10% disagreement between
+the two axes, conversion works; at 15-25% there is no coherent grid and you
+redraw.
+
+Point-sampling a smoothed render is what makes naive downscaling mushy, so the
+converter takes the **modal colour of each source block** instead, keys the
+painted background to hard 0/255 alpha, and quantizes to a small palette.
+
+    python3 tools/convert_reference.py in.png out.png --native 96x192 --sheet qa.png
+
+Then look at the contact sheet AND a 1x in-context mock before accepting it.
+A converted sprite still has to pass `size_audit.py` against its vanilla
+analogue like anything else.
+
 ## Ground truth, in priority order
 
 1. **A vanilla sprite dump**, if present on this machine (check

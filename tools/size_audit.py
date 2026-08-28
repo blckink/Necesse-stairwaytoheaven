@@ -90,6 +90,39 @@ PAIRS = [
      "objects/ironfence.png", (0, 0, 32, 64), "fence post cell (col 0)"),
     ("objects/skyironfencegate.png", (32, 0, 64, 64),
      "objects/ironfencegate.png", (32, 0, 64, 64), "fence gate closed cell (col 1)"),
+    # v0.8 Skywatch furniture. A stone chair answers to a stone throne, not to
+    # oakchair; the 128x128 pieces compare region-for-region because their
+    # sheets are four VIEWS (two 64x64 blocks + two 32x96 strips), not columns.
+    ("objects/skywatchchair.png", (64, 0, 32, 64),
+     "objects/dungeonchair.png", (64, 0, 32, 64), "chair (front rotation column)"),
+    ("objects/skywatchbench.png", (0, 64, 64, 64),
+     "objects/oakbench.png", (0, 64, 64, 64), "bench (front 64x64 block)"),
+    ("objects/skywatchbench.png", (64, 32, 32, 96),
+     "objects/oakbench.png", (64, 32, 32, 96), "bench (side 32x96 strip)"),
+    ("objects/skywatchmodulartable.png", None,
+     "objects/oakmodulartable.png", None, "modular table (whole 96x64 atlas)"),
+    ("objects/skywatchdinnertable.png", (0, 0, 64, 64),
+     "objects/oakdinnertable.png", (0, 0, 64, 64), "dinner table (horizontal block)"),
+    ("objects/skywatchdinnertable.png", (64, 32, 32, 96),
+     "objects/oakdinnertable.png", (64, 32, 32, 96), "dinner table (vertical strip)"),
+    ("objects/skywatchdesk.png", (64, 0, 32, 64),
+     "objects/oakdesk.png", (64, 0, 32, 64), "desk (front rotation column)"),
+    ("objects/skywatchdresser.png", (64, 0, 32, 64),
+     "objects/oakdresser.png", (64, 0, 32, 64), "dresser (front rotation column)"),
+    ("objects/skywatchbed.png", (0, 0, 64, 64),
+     "objects/oakbed.png", (0, 0, 64, 64), "bed (horizontal block)"),
+    ("objects/skywatchbed.png", (64, 32, 32, 96),
+     "objects/oakbed.png", (64, 32, 32, 96), "bed (vertical strip)"),
+    ("objects/skywatchcandelabra.png", (64, 0, 32, 64),
+     "objects/oakcandelabra.png", (64, 0, 32, 64), "candelabra (front rotation column)"),
+    ("objects/skywatchchalice.png", None,
+     "objects/goldchalice.png", None, "table decoration (cup)"),
+    ("objects/pottedcloudberry.png", None,
+     "objects/decorativepot1.png", None, "table decoration (potted plant)"),
+    # v0.8 Seraph statue, converted from reference art. Vanilla's own tall
+    # single-figure statue is the blacksmith at 96x160.
+    ("objects/statues/seraph.png", None,
+     "objects/statues/blacksmithstatue.png", None, "tall single-figure statue"),
 ]
 
 THRESHOLD = 0.75

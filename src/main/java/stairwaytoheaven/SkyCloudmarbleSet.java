@@ -9,6 +9,7 @@ import necesse.inventory.recipe.Recipe;
 import necesse.inventory.recipe.Recipes;
 import necesse.level.gameObject.FenceGateObject;
 import necesse.level.gameObject.FenceObject;
+import necesse.level.gameObject.StatueObject;
 import necesse.level.gameObject.WallObject;
 import stairwaytoheaven.tiles.SkywayTile;
 
@@ -38,6 +39,7 @@ public final class SkyCloudmarbleSet {
     public static int cloudmarbleFenceID;
     public static int cloudmarbleFenceGateID;
     public static int skywayTileID;
+    public static int seraphStatueID;
 
     private SkyCloudmarbleSet() {
     }
@@ -56,6 +58,12 @@ public final class SkyCloudmarbleSet {
                 new FenceObject("cloudmarblefence", MAP_SKYGOLD, 12, 10, -26), 2.0F, true);
         cloudmarbleFenceGateID = FenceGateObject.registerGatePair(cloudmarbleFenceID,
                 "cloudmarblefencegate", "cloudmarblefencegate", MAP_SKYGOLD, 12, 10, 4.0F)[0];
+
+        // The Seraph: a 96x192 statue, so statueXOffset is 32 to centre its
+        // three-tile width on the one tile it actually occupies. Verdigris and
+        // gold, matching SKYIRON's patina rather than the pale masonry.
+        seraphStatueID = ObjectRegistry.registerObject("seraphstatue",
+                new StatueObject("seraph", 32, 1), 40.0F, true);
     }
 
     /**
@@ -79,5 +87,7 @@ public final class SkyCloudmarbleSet {
                 Recipes.ingredientsFromScript("{{skystone, 2}, {goldbar, 1}}")));
         Recipes.registerModRecipe(new Recipe("cloudmarblefencegate", 1, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{skystone, 4}, {goldbar, 1}}")));
+        Recipes.registerModRecipe(new Recipe("seraphstatue", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{skystone, 20}, {goldbar, 4}, {aetheriumbar, 2}}")));
     }
 }

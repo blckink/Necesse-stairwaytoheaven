@@ -125,7 +125,7 @@ public final class SkyFurnitureSet {
         skywatchTomeID = ObjectRegistry.registerObject("skywatchtome",
                 new TableDecorationObject("skywatchtome", new Color(92, 104, 150), 18, 10), 20.0F, true);
         pottedCloudberryID = ObjectRegistry.registerObject("pottedcloudberry",
-                new PotTableDecorationObject("pottedcloudberry", new Color(196, 138, 176), 14, 12,
+                new PotTableDecorationObject("pottedcloudberry", new Color(232, 186, 120), 14, 12,
                         "pottedflower", true), 20.0F, true);
     }
 
