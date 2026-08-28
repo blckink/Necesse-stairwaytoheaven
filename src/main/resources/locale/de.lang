@@ -152,9 +152,7 @@ nimbussapling=Nimbus-Setzling
 fulgursapling=Fulgur-Setzling
 prismasapling=Prismen-Setzling
 veilessence=Schleier-Essenz
-veilessencetip=Das, woraus ein Schemen besteht. Kalt in der Hand, kälter im Verlust.
 cinderpearl=Glutperle
-cinderpearltip=Eine Glut, die vergessen hat zu erlöschen. Brennt grün.
 seancecircletip=Zeichne den Kreis, läute das Silberglöckchen - und klopfe an.
 ghostlanterntip=Ihre Flamme erinnert sich, wer sie zuerst entzündet hat.
 windwheat=Windweizen
@@ -391,3 +389,62 @@ swhaeronautsign=Ballon runter. Fracht größtenteils heil.\nGehe nach Osten. Wer
 // Grundspiels (raidapproaching und bossapproaching sind beide §b).
 swhskyfallstart=§bDer Himmel bricht auf - Scherben fallen.
 swhskyfallend=§aDer Sternenfall ist vorüber.
+
+// ===== Gegenstands-Feinschliff (content/itempolish) =====
+// Eine Zeile je Material, die sagt, WAS es ist und WOHER es kommt - die Engine
+// sagt beides nicht: Item.getBaseTooltips ist Name + Debug +
+// getCraftingMatTooltips, und Letzteres liefert nur den allgemeinen Satz
+// "Handwerksmaterial", den ein Tech mitbringt. stairwaytoheaven.items.SkyMatItem
+// liest diese Zeilen über itemtooltip.<stringID>tip; jede Zeile hier ist aktiv,
+// und tools/locale_audit.py schlägt fehl, wenn eine fehlt.
+// Jede beginnt mit der ART - Mineral, Erz, Holz, Stoff, Nahrung - also genau
+// mit dem, wonach gefragt wurde.
+
+[item]
+stormsteelhelmet=Sturmstahl-Helm
+stormsteelchestplate=Sturmstahl-Harnisch
+stormsteelboots=Sturmstahl-Beinschienen
+stormsteelvambrace=Sturmstahl-Armschiene
+auroralocket=Auroramedaillon
+zephyrharness=Zephyr-Gurtzeug
+
+[itemtooltip]
+// -- Mineralien, Erze und Barren --
+skystonetip=Mineral - der helle Stein, aus dem jede Himmelsinsel besteht. Aus Himmelssteinfelsen geschlagen.
+aetheriumoretip=Erz - türkises Metall in den Adern der Himmelsweite. In der Esse zu Aetheriumbarren schmelzen.
+aetheriumbartip=Metallbarren - geschmolzenes Aetheriumerz. Das Alltagsmetall der Himmelsweite.
+stormshardtip=Mineral - ein Splitter aus einem Sturmkristall im Sturmschleier, der noch immer summt.
+stormsteelbartip=Metallbarren - Aetherium, in der Aetheresse in Sturmsplitter abgeschreckt. Das härteste Metall hier oben.
+stormglasstip=Mineral - Fulgurit, im Sturmglasofen über Himmelssteinfluss zu einer klaren Bernsteinscheibe neu gebrannt.
+fulguritetip=Mineral - Sand, den ein Blitzschlag im Boden des Sturmschleiers zu Glas verschmolzen hat.
+prismshardtip=Mineral - Kernholz einer Prismenbirke, zu Kristall geworden. Aus den Aurora-Untiefen gebrochen.
+cinderpearltip=Mineral - eine Glut, die vergessen hat zu erlöschen, aufgelesen in der Aschenweite. Brennt grün.
+// -- Fasern, Stoff und Pflanzliches --
+windsilktip=Faser - aus geerntetem Windweizen gesponnen oder einem Wolkenschaf abgeschoren.
+skyweavetip=Stoff - ein Ballen Windseide, von einem Siedler am Windseiden-Webstuhl gewebt.
+aurorapetaltip=Blütenblatt - von den Aurorablüten der Untiefen gepflückt und noch immer schwach leuchtend.
+// -- Holz --
+cloudwoodtip=Holz - von einem Wolkenbaum in den Driftlanden. Leicht genug zum Schweben, wenn man es lässt.
+seraphwoodtip=Holz - von einem Himmelsseraph an den Himmelspfaden. Hell, gerade und kalt.
+nimbuswoodtip=Holz - von einer Nimbusweide in den Driftlanden. Feucht, grau und schwer entzündlich.
+charwoodtip=Holz - von einer Fulgurkiefer im Sturmschleier, von altem Blitzschlag durchgekohlt.
+prismwoodtip=Holz - von einer Prismenbirke in den Aurora-Untiefen. Die Maserung wirft noch immer Farbe.
+// -- Kreaturenbeute und Hoferzeugnisse --
+veilessencetip=Kreaturenbeute - das, woraus ein Düsterschemen besteht. Kalt in der Hand, kälter im Verlust.
+dewsnailtip=Kleintier - eine Tauschnecke, lebend mit dem Netz gefangen. Auf ihrem Haus sitzt ein Tropfen Himmelstau.
+stormdowntip=Hoferzeugnis - Federflaum, einem Donnerkielhuhn abgeschoren. Lässt sich zu Windseide spinnen.
+aurorafleecetip=Hoferzeugnis - Vlies, einer Schimmerziege abgeschoren. Warm und im Dunkeln schwach leuchtend.
+nimbusmilktip=Nahrung - einem Nimbusyak mit dem Eimer abgemolken. Trinken oder zu Himmelsquark pressen.
+skycurdtip=Nahrung - Nimbusmilch, in der Käsepresse gepresst. Hält weit länger als die Milch selbst.
+cloudcustardtip=Nahrung - Nimbusmilch und Wolkenbeeren im Kochtopf. Macht danach flink auf den Beinen.
+nimbusdraughttip=Trank - Nimbusmilch mit einem Aurorablatt gebraut. Macht die Haut fest gegen einen tiefen Sturz.
+// -- Verschiedenes --
+cloudpufftreattip=Tierleckerli - aus Windseide und Blütenblättern gerollt. Siggi und Peanut folgen dir dafür überallhin.
+silverbelltip=Questschlüssel - das Glöckchen des Hüters. Läute es am Seancekreis, um den Weg hinab in den Schleier zu öffnen.
+// -- Das Sturmstahl-Set und die drei Accessoires --
+stormsteelhelmettip=Kopfrüstung - Sturmstahlplatte mit Sturmglas-Visier. Am Wolframamboss geschmiedet.
+stormsteelchestplatetip=Brustrüstung - ein Sturmstahl-Harnisch mit Sturmlinse auf der Brust. Am Wolframamboss geschmiedet.
+stormsteelbootstip=Fußrüstung - Sturmstahl-Beinschienen über Himmelsgewebe-Futter. Am Wolframamboss geschmiedet.
+stormsteelvambracetip=Accessoire - eine geschiente Sturmstahl-Armschiene, über Himmelsgewebe geschnürt.
+auroralockettip=Accessoire - ein Aurorablatt unter Sturmglas an einer Schnur aus Auroravlies.
+zephyrharnesstip=Accessoire - ein Windseiden-Flugband mit Sturmflaum, in Sturmstahl verschnallt.

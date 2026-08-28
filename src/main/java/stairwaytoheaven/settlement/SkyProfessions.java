@@ -4,10 +4,10 @@ import necesse.engine.registries.ItemRegistry;
 import necesse.engine.registries.ObjectRegistry;
 import necesse.engine.registries.RecipeTechRegistry;
 import necesse.inventory.item.Item;
-import necesse.inventory.item.matItem.MatItem;
 import necesse.inventory.recipe.Recipe;
 import necesse.inventory.recipe.Recipes;
 import necesse.inventory.recipe.Tech;
+import stairwaytoheaven.items.SkyMatItem;
 
 /**
  * Skywatch professions: the three settlement workstations a settler runs on
@@ -99,16 +99,24 @@ public final class SkyProfessions {
      */
     public static void registerItems() {
         // Woven on the Windsilk Loom. A bolt of cloth, so it stacks like one.
+        //
+        // It is NOT a mob drop. Vanilla's three cloths — `wool`, `silk`,
+        // `clothscraps` (ItemRegistry.java:868, :924, :871) — sit in
+        // materials/mobdrops because a sheep, a spider and a zombie drop them;
+        // Skyweave comes off a loom and nothing in the game drops it. Vanilla's
+        // own crafted intermediates that belong to no material family (`glass`,
+        // `glassbottle`, :927-928) sit in bare `materials`, which is where this
+        // belongs too.
         ItemRegistry.registerItem("skyweave",
-                new MatItem(500, Item.Rarity.UNCOMMON).setItemCategory("materials", "mobdrops"),
+                new SkyMatItem(500, Item.Rarity.UNCOMMON).setItemCategory("materials"),
                 20.0F, true);
         // The Aether Forge's own tier: aetherium quenched in storm shard.
         ItemRegistry.registerItem("stormsteelbar",
-                new MatItem(250, Item.Rarity.RARE).setItemCategory("materials", "bars"),
+                new SkyMatItem(250, Item.Rarity.RARE).setItemCategory("materials", "bars"),
                 45.0F, true);
         // Fired in the Stormglass Kiln out of lightning-fused sand.
         ItemRegistry.registerItem("stormglass",
-                new MatItem(500, Item.Rarity.UNCOMMON).setItemCategory("materials", "minerals"),
+                new SkyMatItem(500, Item.Rarity.UNCOMMON).setItemCategory("materials", "minerals"),
                 16.0F, true);
     }
 

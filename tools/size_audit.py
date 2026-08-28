@@ -254,6 +254,33 @@ PAIRS = [
     ("items/skyweave.png", None, "items/silk.png", None, "cloth item icon"),
     ("items/stormsteelbar.png", None, "items/ironbar.png", None, "metal bar item icon"),
     ("items/stormglass.png", None, "items/glass.png", None, "glass item icon"),
+    # Skyreach gear (content/itempolish). The Stormsteel set is calibrated
+    # against vanilla's TUNGSTEN set in every dimension the game measures --
+    # armour value, enchant cost, rarity -- so it answers to tungsten here too,
+    # sheet for sheet and icon for icon. The accessories answer to the vanilla
+    # trinket each one's buff was calibrated against.
+    ("player/armor/stormsteelhelmet.png", None,
+     "player/armor/tungstenhelmet.png", None, "helmet armor sheet"),
+    ("player/armor/stormsteelchest.png", None,
+     "player/armor/tungstenchest.png", None, "chest armor sheet"),
+    ("player/armor/stormsteelboots.png", None,
+     "player/armor/tungstenboots.png", None, "boots armor sheet"),
+    ("player/armor/stormsteelarms_left.png", None,
+     "player/armor/tungstenarms_left.png", None, "chest arms sheet (left)"),
+    ("player/armor/stormsteelarms_right.png", None,
+     "player/armor/tungstenarms_right.png", None, "chest arms sheet (right)"),
+    ("items/stormsteelhelmet.png", None,
+     "items/tungstenhelmet.png", None, "helmet item icon"),
+    ("items/stormsteelchestplate.png", None,
+     "items/tungstenchestplate.png", None, "chestplate item icon"),
+    ("items/stormsteelboots.png", None,
+     "items/tungstenboots.png", None, "boots item icon"),
+    ("items/stormsteelvambrace.png", None,
+     "items/vambrace.png", None, "trinket item icon"),
+    ("items/auroralocket.png", None,
+     "items/frozenheart.png", None, "trinket item icon"),
+    ("items/zephyrharness.png", None,
+     "items/airvessel.png", None, "trinket item icon"),
 ]
 
 THRESHOLD = 0.75
