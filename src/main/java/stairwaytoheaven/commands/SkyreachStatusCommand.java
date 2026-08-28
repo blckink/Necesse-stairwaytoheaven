@@ -305,6 +305,17 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                 .append(" object=").append(basketObject)
                 .append(" homeFlags black=").append(quest.blackHome)
                 .append(" tabby=").append(quest.tabbyHome);
+        // The world-scoped mirror, printed beside the level copy. Without both
+        // numbers a failing restart cannot be told apart: world=true with
+        // level=false is a reconcile that did not run, world=false is a write
+        // or a save that did not happen. Guessing between those two is what
+        // this line exists to stop.
+        stairwaytoheaven.quest.SkywatchWorldData world =
+                stairwaytoheaven.quest.SkywatchWorldData.get(level.getServer());
+        line.append(" worldFlags ")
+                .append(world == null ? "MISSING"
+                        : "black=" + world.blackHome + " tabby=" + world.tabbyHome)
+                .append(" levelIsServer=").append(level.isServer());
         for (necesse.entity.mobs.Mob mob : level.entityManager.mobs) {
             if (!(mob instanceof stairwaytoheaven.mobs.SpireCatMob)) {
                 continue;
