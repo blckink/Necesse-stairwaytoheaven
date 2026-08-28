@@ -1092,3 +1092,36 @@ must leave those four corners alone or the railing loses its diagonal links and
 reads as four gaps. `WardenSpirePreset.WRITTEN_RADIUS` is that box, and
 `SkyreachStatusCommand`'s painter-oracle exclusion is derived from it rather
 than hand-copied, so the two cannot drift apart.
+
+## Supplied art carries 1000x vanilla's colour count, and that is fine (v0.9)
+
+Measured over the sheets supplied for this mod against their vanilla templates:
+
+| sheet | opaque px | colours | px per colour |
+|---|---|---|---|
+| supplied `cloudtree` | 77,182 | 46,556 | **1.7** |
+| supplied `nimbuswillow` | 33,322 | 29,534 | **1.1** |
+| supplied `cloudmarblewall` | 18,476 | 10,728 | **1.7** |
+| converted `skyseraphtree` | 36,099 | 30 | 1203 |
+| vanilla `birchtree` | 76,256 | 23 | 3316 |
+| vanilla `willowtree` | 73,480 | 28 | 2624 |
+| vanilla `stonewall` | 18,928 | 19 | 996 |
+
+Roughly a colour per pixel and a half, against vanilla's one per thousand. The
+obvious conclusion — quantize them to a vanilla-tight ramp, the way
+`convert_reference.quantize_opaque` does for converted art — **is wrong, and
+was tested rather than assumed.**
+
+Quantizing `cloudtree` to 30 colours does two things. At 4× it hardens the
+crown's soft rim into what reads as a stray dark outline, and it collapses the
+baked teal ground shadow from a gradient into a flat blob that reads as a
+puddle. At **1×, which is the size players see, the quantized and the original
+are all but indistinguishable** apart from that worse shadow.
+
+So the colour count is not a defect to fix here. It costs a little file size
+and nothing else, because the engine draws the sheet as-is and the extra
+colours fall below the eye's resolution at game zoom. Leave supplied art alone.
+
+The general rule this is a case of: a metric that separates our art from
+vanilla is a *hypothesis* about how it will look, not a finding. Render both at
+1× before acting on it.

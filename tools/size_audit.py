@@ -144,6 +144,16 @@ PAIRS = [
      "items/oaklog.png", None, "log item icon"),
     ("particles/seraphleaves.png", ("auto", 20, 20),
      "particles/oakleaves.png", ("auto", 20, 20), "leaf particle (densest 20px frame)"),
+    # Cloud Tree companions. The Cloud Tree is supplied art drawn on the BIRCH
+    # sheet, so birch is the analogue, not oak. Vanilla names the log birchlog.
+    ("objects/cloudsapling.png", None,
+     "objects/birchsapling.png", None, "sapling"),
+    ("items/cloudsapling.png", None,
+     "items/birchsapling.png", None, "sapling item icon"),
+    ("items/cloudwood.png", None,
+     "items/birchlog.png", None, "log item icon"),
+    ("particles/cloudleaves.png", ("auto", 20, 20),
+     "particles/birchleaves.png", ("auto", 20, 20), "leaf particle (densest 20px frame)"),
 ]
 
 THRESHOLD = 0.75
