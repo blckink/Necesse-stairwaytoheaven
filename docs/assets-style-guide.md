@@ -96,10 +96,33 @@ python3 tools/asset_generator/generate_assets.py   # regenerates src/main/resour
 |---|---|---|
 | Terrain/floor splat | `tiles/<name>_splat.png` | 224×(96·variants); cells (3..6,0) = full variants, 17 marching-square blend cells (see research/splat-format.md §5.3) |
 | Liquid splat | `tiles/<name>_splat.png` | 224·8 frames × 96; hard 8-frame loop |
-| Wall set | `objects/<name>.png` | 352×128: 4×8@16px autotile blob + 2×8 window insert + 8×(32×128) door frames |
+| Wall set | `objects/<name>.png` | 352×128: 4×8@16px autotile blob + 2×8 window insert + 8×(32×128) door frames. **The blob's columns are tile HALVES, and which column is which half changes by row** — see below |
 | Fence / gate | `objects/<name>.png` | 160×64 (5 cols) / 192×64 (6 cols) |
 | Streetlamp | `objects/<id>.png` | 32×192: two 32×96 rows (on above, off below) |
 | Wall light | `objects/<id>.png` | 64×128: 2 cols on/off × 4 attach-orientation rows |
 | Statue | `objects/statues/<name>.png` | frameWidth × spriteCount columns (gloomraven: 64×96, 1 pose) |
 | Painting/banner | `objects/<texturePath>.png` | 32×128: 4 rotation rows of 32×32 |
 | Legacy checker floor | `tiles/<name>.png` | 64×64 world-locked 2×2 grid — deliberately NO `_splat` |
+
+### Wall body block: the layout, and how to check it
+
+A wall tile is drawn as two 16px halves (left at `drawX`, right at `drawX+16`)
+over three 16px bands (`drawY-16`, `drawY`, `drawY+16`), so tiles overlap
+vertically by 16px. Painting one picture across columns 0-3 does not work.
+
+| rows | col 0 | col 1 | col 2 | col 3 |
+|---|---|---|---|---|
+| 0, 3, 4 | left / closed | right / open | left / open | right / closed |
+| 1, 2    | left / closed | left / open  | right / open | right / closed |
+
+Vertically, a run of N tiles reads: row 0 (top cap, 16px) → (row 2, row 1)
+repeated N-1 times (the roof, 32px per tile) → rows 3, 4 (the front face). So a
+wall shows its ROOF for every tile but the last, and its FACE only on the last.
+The roof must be calm — vanilla's is 93% one flat tone — and the face carries
+the material.
+
+Never ship a wall on the sheet audit alone. `python3 tools/wall_render_preview.py`
+composes real scenes with the engine's own cell selection and writes 4× contact
+sheets plus a 1× in-context mock into `build/qa/`. Run it with
+`--vanilla stonewall` so you can see the port is honest before you trust it on
+your own sheet.

@@ -333,14 +333,19 @@ def main():
     splat = build_skyway_ground()
     print(f"{splat}  {Image.open(splat).size}")
 
-    wall, cleared, rep = fit_door_cells("beetlewall.png", "beetlewall.png")
-    icons = beetle_item_icons()
-    print(f"{wall}  cleared {cleared} glow px from window rows 2-4")
-    for cell, was, now, factor in rep:
-        print(f"    cell {cell:2d}: y{was} -> y{now}"
-              + ("  (unchanged)" if factor == 1.0 else f"  squashed to {factor:.2f}x"))
-    for name, opaque in icons.items():
-        print(f"    items/{name}  32x32  opaque {opaque}")
+    # objects/beetlewall.png is NOT produced here any more.
+    #
+    # fit_door_cells could squash the supplied sheet's door cells back inside
+    # the extents the engine draws them at, and that made the sheet pass
+    # tools/sheet_format_audit.py — but the audit only guards GEOMETRY. The
+    # supplied art is one continuous illustration painted across the 4x8 body
+    # block, and that block is an auto-tile blob whose columns are tile HALVES
+    # with a column-to-half mapping that changes between row groups. No repack
+    # of those pixels can tile; the sheet had to be redrawn on the real layout,
+    # which tools/asset_generator/gen_beetlewall.py now does. The supplied file
+    # stays in kk-sprites/ as the source of record for the set's identity, and
+    # fit_door_cells / beetle_item_icons stay below because the next supplied
+    # sheet may well need them.
 
     path, sheet = repack_kk_tree("birchtree-new-cloudtree.png", "cloudtree.png")
     print(f"{path}  {sheet.size}  "

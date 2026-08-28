@@ -166,6 +166,21 @@ Ordered by the player's own priority. Full detail in `docs/PLAYTEST_LOG.md`.
 - v0.6 sprint (list above): rock variants + shadows, Storm Shards, tree
   volume, Cloudberry, Warden visuals, Spire hero kit, Stormveil/Aurora props,
   oddity seeds.
+- **Beetlefreak wall rebuilt** (`art/beetlewall`). "Die Wandtexturen sind
+  komplett für'n Arsch von der Beetle wall, da stimmt kein Rand, Fenster oder
+  sonst was von Layout" — the supplied sheet was one continuous illustration
+  painted across the 4x8 auto-tile block, so no cell met its neighbour; its
+  eight door cells held lamp posts and partial arches rather than door frames;
+  and the window's two views were swapped (a front-facing pane sat in the rows
+  the engine draws as the wall's roof). `sheet_format_audit.py` passed on all
+  of it, because that audit guards cell geometry, not whether the art tiles.
+  `tools/asset_generator/gen_beetlewall.py` redraws the sheet on the layout the
+  renderer actually reads, keeping the supplied art's identity (violet stone,
+  swirls, cream-and-black bead trim, brass lanterns with green flame, the arch,
+  magenta glass, the skull over the door). `tools/wall_render_preview.py` is
+  the new gate: it ports `WallObject.addWallDrawOptions` and composes real
+  scenes, so "does it tile" is a picture, not an inference. Verified against
+  vanilla `stonewall` through the same port. **Not yet seen in game.**
 - Fence and fence gate rebuilt against the engine's own column contract
   (`FenceObject` / `FenceGateObject`, cell-by-cell against vanilla
   `ironfence`/`ironfencegate`). The old sheets were drawn to an invented

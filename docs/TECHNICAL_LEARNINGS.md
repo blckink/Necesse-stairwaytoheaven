@@ -1039,6 +1039,80 @@ Same lesson as the door cells and the window rows before it: one sheet, several
 readers, and the reader you did not check is where the next report comes from.
 `tools/sheet_format_audit.py` now covers all three wall sheets (42 cells).
 
+**Incomplete — see the next section.** The mapping above is right for rows 0, 3
+and 4 and WRONG for rows 1 and 2, where columns 1 and 2 swap sides.
+
+## …and in rows 1 and 2, columns 1 and 2 swap sides (Beetlefreak wall)
+
+Read off `WallObject.addWallDrawOptions` cell by cell rather than from the
+row-3/4 sample above, the column-to-half map is not constant down the sheet:
+
+| rows | col 0 | col 1 | col 2 | col 3 |
+|---|---|---|---|---|
+| 0, 3, 4 | left / closed | **right** / open | **left** / open | right / closed |
+| 1, 2    | left / closed | **left** / open  | **right** / open | right / closed |
+
+`if (left) { if (botLeft) { sprite(1,2)@drawX … sprite(1,1)@drawX } }` puts
+column 1 on the LEFT, while `if (right) sprite(1,3)@drawX+16` puts the same
+column on the right one row group down. The fully-surrounded fast path agrees:
+it reads `section(16,32,…)` — cell column 1 — at `drawX`.
+
+The vertical grammar is equally load-bearing. A tile is drawn as three 16px
+bands at `drawY-16`, `drawY` and `drawY+16`, so consecutive tiles OVERLAP by
+16px, and a run of N tiles reads top to bottom as
+
+    row 0                     the free top cap, 16px (only when nothing is above)
+    (row 2, row 1) × (N-1)    the repeating ROOF, 32px per tile
+    row 3, row 4              the front FACE, 32px (the bottom tile only)
+
+so a wall shows its roof for every tile but the last. Rows 2 and 1 are always
+the upper and lower half of the same tile, which is what lets the roof carry a
+32×32 field instead of one 16px strip stamped twice.
+
+Six cells are **unreachable**: (2,5) (3,5) (2,6) (3,6) (2,7) (3,7). The public
+overload passes the same `boolean[]` as `adj`, `sameWall` AND `isWall`, so every
+`isWall[n] && !sameWall[n]` branch — and `botWall = isWall[6]` inside the
+`!bot` branch — is dead. Vanilla fills them anyway; nothing draws them.
+
+**This is what "die Wandtexturen sind komplett für'n Arsch" was.** The supplied
+`beetlewall.png` was one continuous illustration painted across the 4×8 block —
+swirls, striped bands and an arch running straight over the 16px cell edges. The
+occupancy pattern matched vanilla exactly and `sheet_format_audit.py` passed,
+because that audit guards GEOMETRY (which cell, what size, what extent) and
+cannot see whether the art inside a cell joins its neighbour. The door cells
+were also generic art rather than eight door frames, and the window's two views
+were swapped: the front-facing pane sat in rows 0-1, which the engine draws as
+the wall's ROOF seen from above.
+
+## Prove a wall tiles by composing it, not by auditing its cells
+
+`tools/wall_render_preview.py` is a line-by-line port of
+`WallObject.addWallDrawOptions` (both overloads),
+`WallWindowObject.addWallDrawOptions` and the two `WallDoorObject` draw paths.
+It runs the engine's own cell selection over synthetic levels — a solid block,
+an L, a T, a free-standing tile, doors in both orientations, windows in both —
+and writes 4× contact sheets on a dark and a light backdrop plus a 1× in-context
+mock on Stormslate and Cloudturf.
+
+Run it against a vanilla sheet first (`--vanilla stonewall`): if the port is
+right, vanilla renders correctly, and only then does a failure on our sheet mean
+our art. That check is the whole value — it turns "the walls look wrong" into a
+picture of exactly which cells do not meet.
+
+A sheet-format audit and a composed render answer different questions. Passing
+the audit is necessary and **not** sufficient.
+
+## `generate_assets.py`'s one-producer guard tested existence, not authorship
+
+The guard at the end of `main()` listed the files `tools/convert_biome_art.py`
+owns and failed if any of them EXISTED after the run. Every one of them exists
+in a normal checkout, so `python3 tools/asset_generator/generate_assets.py` —
+the workflow `CONTRIBUTING.md` and `docs/assets-style-guide.md` both document —
+always failed, and the generator could only be run into an empty directory.
+It now stamps `(st_mtime_ns, st_size)` for each guarded path BEFORE generating
+and compares after, so it fails on a file this run actually wrote or created,
+and passes on one it left alone.
+
 ## A preset does not place multi-tile furniture; it writes both halves (v0.8)
 
 `Preset.applyToLevel` writes object IDs with
@@ -1125,6 +1199,14 @@ colours fall below the eye's resolution at game zoom. Leave supplied art alone.
 The general rule this is a case of: a metric that separates our art from
 vanilla is a *hypothesis* about how it will look, not a finding. Render both at
 1× before acting on it.
+
+`beetlewall` is not a counter-example to this. Its supplied sheet carried 15,299
+colours and now ships at 36, but nothing was quantized: the sheet had to be
+REDRAWN because its layout could not tile (see "in rows 1 and 2, columns 1 and
+2 swap sides"), and a redraw is native pixel art whose colour count falls out of
+its ramps. "Leave supplied art alone" still stands wherever the supplied
+geometry is usable — `cloudmarblewall`, `cloudtree`, `nimbuswillow` are all
+still shipped exactly as supplied.
 
 ## A window may only sit mid-run in a straight wall (verified in-game)
 

@@ -35,8 +35,37 @@ import gen_furniture  # noqa: E402
 import gen_trees  # noqa: E402
 import gen_skyfurniture  # noqa: E402
 import gen_cloudmarble  # noqa: E402
+import gen_beetlewall  # noqa: E402
 import gen_arsenal  # noqa: E402
 import gen_professions  # noqa: E402
+
+
+# Files owned by tools/convert_biome_art.py, which converts the supplied
+# reference art. Two producers writing the same path meant whichever ran last
+# won, silently; the guard at the end of main() fails loudly instead.
+CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
+             "objects/skyseraphtree.png", "items/skyseraphtree.png",
+             "objects/statues/seraph.png", "items/seraphstatue.png",
+             "objects/cloudtree.png", "items/cloudtree.png",
+             "objects/nimbuswillow.png", "objects/cloudmarblewall.png")
+
+
+def _stamp(out, rel):
+    """(mtime_ns, size) of a converted file, or None when it is not there.
+
+    The guard used to ask whether the file EXISTS after the run, which is true
+    of every one of them in a normal checkout — so `generate_assets.py` run the
+    documented way, against src/main/resources, always failed and could only
+    ever be run into an empty directory. What it has to ask is whether THIS RUN
+    wrote it, so the stamp is taken before anything is generated and compared
+    after. A converted file that appeared, or whose bytes were replaced, still
+    fails exactly as loudly as before.
+    """
+    try:
+        st = os.stat(os.path.join(out, rel))
+    except OSError:
+        return None
+    return (st.st_mtime_ns, st.st_size)
 
 
 def main():
@@ -45,6 +74,8 @@ def main():
     parser.add_argument("--out", default=os.path.join(repo_root, "src", "main", "resources"))
     args = parser.parse_args()
     out = args.out
+
+    before = {rel: _stamp(out, rel) for rel in CONVERTED}
 
     for sub in ("tiles", "objects", "objects/statues", "items", "mobs", "mobs/icons", "player/weapons",
                 "projectiles", "locale", "ui/mapicons", "particles"):
@@ -235,6 +266,12 @@ def main():
     # Cloudmarble masonry. The Skyway ground it used to draw now comes from
     # tools/convert_biome_art.py instead — see the note in gen_cloudmarble.
     gen_cloudmarble.generate(f"{out}/objects", f"{out}/items", f"{out}/tiles")
+    # Beetlefreak masonry. The supplied sheet in kk-sprites/ is a continuous
+    # illustration, not an auto-tile blob, so it could not tile however it was
+    # repacked; tools/convert_biome_art.py no longer produces this wall and
+    # gen_beetlewall redraws it on the layout the engine actually reads. See
+    # tools/wall_render_preview.py for the composed proof.
+    gen_beetlewall.generate(f"{out}/objects", f"{out}/items")
     # Skywatch professions: the three settlement workstations, the four spire
     # furniture pieces on their vanilla base classes, and the materials the
     # stations make.
@@ -259,15 +296,8 @@ def main():
     # Mod preview
     gen_misc.gen_preview(f"{out}/preview.png")
 
-    # Files owned by tools/convert_biome_art.py, which converts the supplied
-    # reference art. Two producers writing the same path meant whichever ran
-    # last won, silently; this fails loudly instead.
-    converted = ("tiles/skyway.png", "tiles/skyway_splat.png",
-                 "objects/skyseraphtree.png", "items/skyseraphtree.png",
-                 "objects/statues/seraph.png", "items/seraphstatue.png",
-                 "objects/cloudtree.png", "items/cloudtree.png",
-                 "objects/nimbuswillow.png", "objects/cloudmarblewall.png")
-    clash = [rel for rel in converted if os.path.exists(f"{out}/{rel}")]
+    clash = [rel for rel in CONVERTED
+             if _stamp(out, rel) != before.get(rel)]
     if clash:
         raise SystemExit(
             "generate_assets wrote files owned by tools/convert_biome_art.py: "
