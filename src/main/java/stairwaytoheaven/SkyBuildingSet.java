@@ -259,6 +259,23 @@ final class SkyBuildingSet {
                 Recipes.ingredientsFromScript("{{charwood, 2}}")));
         Recipes.registerModRecipe(new Recipe("prismfloortile", 6, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{prismwood, 2}}")));
+        // The Beetlefreak ground, exactly the way vanilla sells its own
+        // spider nest floor.
+        //
+        // It is registered itemObtainable=false, which looks like "this cannot
+        // be crafted" and is not: vanilla registers spidernesttile the same way
+        // (TileRegistry.java:253) and still sells it at
+        //
+        //   Recipe("spidernesttile", 5, TUNGSTEN_LANDSCAPING,
+        //          "{{anystone, 5}, {cavespidergland, 2}}")   (Recipes.java:2611)
+        //
+        // The flag marks the item as not obtainable by ordinary means (mining
+        // the tile drops nothing); a recipe is a separate door and it stays
+        // open. So: same tech, same yield, same shape of ingredients -- common
+        // stone plus the drop of the thing that lives on it. Ours lives in the
+        // Veil, so its creatures' essence is the second half.
+        Recipes.registerModRecipe(new Recipe("beetlefreaktile", 5, RecipeTechRegistry.TUNGSTEN_LANDSCAPING,
+                Recipes.ingredientsFromScript("{{anystone, 5}, {veilessence, 2}}")));
         Recipes.registerModRecipe(new Recipe("skyironfence", 4, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{ironbar, 1}, {skystone, 1}}")));
         Recipes.registerModRecipe(new Recipe("skyironfencegate", 1, RecipeTechRegistry.WORKSTATION,

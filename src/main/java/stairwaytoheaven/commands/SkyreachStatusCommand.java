@@ -720,6 +720,33 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                     + " recipes=" + recipes);
         }
         logs.add("arsenal check: recipes=" + arsenalRecipes);
+
+        // Tiles that are registered itemObtainable=false but ARE meant to be
+        // craftable. The flag reads like "no recipe" and is not one -- vanilla
+        // does the same with spidernesttile -- so the only way to know a floor
+        // is actually buildable is to ask the live recipe list which tech it
+        // sits on and what it costs.
+        for (String tile : new String[]{"beetlefreaktile"}) {
+            necesse.inventory.item.Item item = necesse.engine.registries.ItemRegistry.getItem(tile);
+            if (item == null) {
+                logs.add("floor check: " + tile + " NOT REGISTERED");
+                continue;
+            }
+            StringBuilder made = new StringBuilder();
+            for (necesse.inventory.recipe.Recipe recipe
+                    : necesse.inventory.recipe.Recipes.getRecipesFromResult(item.getID())) {
+                made.append(made.length() == 0 ? "" : " | ")
+                        .append(recipe.tech.getStringID()).append(':');
+                for (necesse.inventory.recipe.Ingredient ingredient : recipe.ingredients) {
+                    made.append(' ').append(ingredient.ingredientStringID)
+                            .append('x').append(ingredient.getIngredientAmount());
+                }
+                made.append(" -> x").append(recipe.resultAmount);
+            }
+            logs.add("floor check: " + tile
+                    + " name=" + necesse.engine.registries.ItemRegistry.getDisplayName(item.getID())
+                    + " recipes=" + (made.length() == 0 ? "NONE" : made.toString()));
+        }
     }
 
     /**
