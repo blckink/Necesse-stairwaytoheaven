@@ -33,8 +33,14 @@ actually asks for, including everything our registration calls create without
 our source ever writing the string down. Each check below exists because of one
 such path.
 
-Usage: python3 tools/locale_audit.py   (exit 1 on any finding)
+Usage: python3 tools/locale_audit.py [--vanilla /path/to/sprite/dump]
+       (exit 1 on any finding)
+
+The vanilla dump is optional and is never committed; it is only read to verify
+the icons that are recoloured out of vanilla art at load time (see
+ITEM_CLASS_VANILLA_ICON). Without it those are reported as unchecked.
 """
+import argparse
 import os
 import re
 import sys
@@ -298,13 +304,71 @@ def recipe_outputs(text):
 # --------------------------------------------------------------------------
 # what the player can end up holding, and what draws it
 
-# Item classes that load their own texture instead of items/<stringID>.png.
-# None of ours use one yet; they are named so that the first mod cosmetic or
-# bucket does not get reported as a missing file.
+# Item classes that load their own texture instead of items/<stringID>.png and
+# whose source this audit cannot follow at all. None of ours use one; they are
+# named so that the first mod cosmetic or bucket does not get reported as a
+# missing file.
 ITEM_CLASS_DRAWS_ITSELF = {
     "BucketItem", "WigArmorItem", "ShoesArmorItem", "ShirtArmorItem",
     "LogicGateItem", "CustomObjectItem",
 }
+
+# --------------------------------------------------------------------------
+# items whose icon is a recoloured VANILLA texture
+#
+# Item.loadItemTextures is `itemTexture = GameTexture.fromFile("items/" +
+# getStringID())` (Item.java:562) and it is protected, so an item may point it
+# anywhere - vanilla's own FoodConsumableItem crops a crop sheet instead, and
+# BucketItem reads tiles/bucket. stairwaytoheaven.livestock builds its icons at
+# load time out of vanilla art (see livestock/SkyPelt.java), so there is no
+# items/<id>.png to find and never will be.
+#
+# Listing those classes in ITEM_CLASS_DRAWS_ITSELF would have SKIPPED them, and
+# a skip is how every hole this audit has ever had started: an item pointing at
+# a vanilla path that does not exist draws the same ERR tile as an item
+# pointing at a mod path that does not exist. So the class is mapped to the
+# vanilla file it actually reads instead:
+#
+#   ("arg", n)   the vanilla icon NAME is constructor argument n
+#   ("fixed", s) the class always reads items/<s>.png
+#
+# Those paths are checked against the vanilla sprite dump when one is present
+# (--vanilla, same default as tools/size_audit.py). The dump is deliberately
+# not committed, so on a machine without it they are reported as unchecked
+# rather than silently passing.
+ITEM_CLASS_VANILLA_ICON = {
+    "LivestockFood": ("arg", 0),
+    "LivestockProduce": ("arg", 0),
+    "ThunderplumeCowl": ("fixed", "clothhat"),
+    "GlimmerstrideBoots": ("fixed", "clothboots"),
+}
+
+# Marker prefix on a wanted-icon path that lives in the vanilla resource file
+# rather than in src/main/resources.
+VANILLA = "vanilla:"
+
+# Recipe outputs that are VANILLA items. A mod recipe may produce one - the
+# game names it, draws it and ships its icon - so it needs neither an entry in
+# our locales nor a PNG of ours. Each entry has to be justified here, because
+# an unlisted ID is far more likely to be a typo than a deliberate vanilla
+# output, and a typo'd output is exactly what the rest of this audit is for.
+VANILLA_RECIPE_OUTPUTS = {
+    # net: vanilla's critter net, ItemRegistry + items/net.png. Ours is an
+    # alternative recipe from Storm Down at a plain workstation, because the
+    # Skyreach has a netable critter (the Dew Snail) and no sheep.
+    "net",
+}
+
+
+def vanilla_icon_paths(class_name, ctor_args):
+    """The vanilla items/<name>.png an ITEM_CLASS_VANILLA_ICON class reads."""
+    kind, value = ITEM_CLASS_VANILLA_ICON[class_name]
+    if kind == "fixed":
+        return [VANILLA + "items/%s.png" % value]
+    name = literal(ctor_args[value]) if value < len(ctor_args) else None
+    if name is None:
+        return UNRESOLVED
+    return [VANILLA + "items/%s.png" % name]
 
 
 def call_sites(text, name):
@@ -509,8 +573,12 @@ def held_content(recipes):
                     if not (obtainable or creative or string_id in recipes):
                         continue
                     if kind == "item":
-                        wanted = ([] if class_name not in ITEM_CLASS_DRAWS_ITSELF
-                                  else None)
+                        if class_name in ITEM_CLASS_VANILLA_ICON:
+                            wanted = vanilla_icon_paths(class_name, ctor)
+                        elif class_name in ITEM_CLASS_DRAWS_ITSELF:
+                            wanted = None
+                        else:
+                            wanted = []
                     else:
                         wanted = icon_paths(class_name, ctor, supers)
                     rows.append((spot, kind, string_id, wanted, class_name))
@@ -536,7 +604,7 @@ def held_content(recipes):
     # with the engine default. This is how the wall windows are covered: they
     # are registered unobtainable and are still sold in the crafting menu.
     covered = {row[2] for row in rows}
-    for output in sorted(recipes - covered):
+    for output in sorted(recipes - covered - VANILLA_RECIPE_OUTPUTS):
         rows.append(("recipe", "object", output, [], "Recipe"))
 
     best = {}
@@ -566,6 +634,37 @@ def local_message_refs():
                 literals.append((match.group(1), match.group(2), spot))
             else:
                 dynamic.append(("%s.<%s>" % (match.group(1), match.group(3)), spot))
+    return literals, dynamic
+
+
+# Every way our source names a texture file by a literal path. GameTexture
+# .fromFile swallows a miss and hands back GameResources.error (the red ERR
+# tile), so a mistyped path is invisible until a player sees it - and since the
+# livestock layer draws itself entirely out of VANILLA paths, a typo there
+# would not even leave a missing file behind to notice.
+TEXTURE_LOADERS = (
+    r'GameTexture\s*\.\s*fromFile(?:Raw)?(?:Outside)?',
+    r'SkyPelt\s*\.\s*tint(?:Final)?',
+)
+
+
+def texture_load_sites():
+    """(resource path, file:line) for every texture loaded by a literal path.
+
+    A path that ends in "/" is the constant half of a concatenation
+    ("objects/" + name) and names no file on its own; those are returned
+    separately so they are reported rather than silently dropped.
+    """
+    literals, dynamic = [], []
+    pattern = re.compile(r'(?:' + "|".join(TEXTURE_LOADERS) + r')\s*\(\s*"([^"]*)"')
+    for path in source_files():
+        text = open(path, encoding="utf-8").read()
+        for match in pattern.finditer(text):
+            spot = where(path, text, match.start())
+            if match.group(1).endswith("/") or not match.group(1):
+                dynamic.append((match.group(1), spot))
+            else:
+                literals.append((match.group(1), spot))
     return literals, dynamic
 
 
@@ -600,7 +699,7 @@ def check_registration_wrappers():
 
 # --------------------------------------------------------------------------
 
-def main():
+def main(vanilla_dump=None):
     text = source_text()
     ids = registered_ids(text)
     humans = human_mob_ids(text, class_supers())
@@ -661,7 +760,7 @@ def main():
     named = {section: set(langs["en"].get(section, {})) & set(langs["de"].get(section, {}))
              for section in ("object", "tile", "item")}
     recipes = recipe_outputs(text)
-    for output in sorted(recipes):
+    for output in sorted(recipes - VANILLA_RECIPE_OUTPUTS):
         if not any(output in keys for keys in named.values()):
             print("!! craftable %s has no [object]/[tile]/[item] name in both "
                   "locales -- the crafting menu would show the raw ID" % output)
@@ -673,6 +772,8 @@ def main():
     #    inventory. So the question this asks is not "is it craftable" but
     #    "can the player end up holding it" - see held_content.
     icons = 0
+    borrowed = 0
+    unchecked = []
     for spot, kind, string_id, wanted, class_name in held_content(recipes):
         if wanted is None:
             continue  # drawn from vanilla art, or from another audited row
@@ -685,6 +786,25 @@ def main():
             continue
         icons += 1
         wanted = wanted or ["items/%s.png" % string_id]
+        # An icon recoloured out of vanilla art at load time (see
+        # ITEM_CLASS_VANILLA_ICON): the file has to exist in the GAME's
+        # resources, not in ours. GameTexture.fromFile swallows the miss and
+        # returns the ERR texture either way, so this is the same failure -
+        # it just lives one repository over.
+        if all(path.startswith(VANILLA) for path in wanted):
+            borrowed += 1
+            paths = [path[len(VANILLA):] for path in wanted]
+            if vanilla_dump is None:
+                unchecked.extend(paths)
+                continue
+            if any(os.path.exists(os.path.join(vanilla_dump, *p.split("/"))) for p in paths):
+                continue
+            print("!! %s %s (%s, registered at %s) recolours %s at load time, "
+                  "and that file is not in the vanilla sprite dump -- the "
+                  "inventory would draw the engine's ERR texture"
+                  % (kind, string_id, class_name, spot, " or ".join(paths)))
+            problems += 1
+            continue
         if any(os.path.exists(os.path.join(RESOURCES, *path.split("/")))
                for path in wanted):
             continue
@@ -692,9 +812,42 @@ def main():
               "it and the inventory would draw the engine's ERR texture"
               % (kind, string_id, class_name, spot, " or ".join(wanted)))
         problems += 1
+    for path in sorted(set(unchecked)):
+        print("-- note: %s is borrowed from the vanilla resources and cannot be "
+              "checked here; pass --vanilla /path/to/sprite/dump to verify it"
+              % path)
 
     # 7. And nothing may register an ID behind this audit's back.
     problems += check_registration_wrappers()
+
+    # 8. Every texture our source names by a literal path has to exist -- in
+    #    OUR resources, or in the game's. There is one flat resource map keyed
+    #    by path (ResourceEncoder.java:75-86) with the mod's files merged into
+    #    it, so "mobs/cloudlamb" and "mobs/cow" are looked up exactly alike;
+    #    which repository a path belongs to is a fact about where to check, not
+    #    about how it fails. Both fail as the red ERR tile.
+    texture_literals, texture_dynamic = texture_load_sites()
+    textures, borrowed_files, unchecked_files = 0, 0, []
+    for resource, spot in sorted(set(texture_literals)):
+        textures += 1
+        if os.path.exists(os.path.join(RESOURCES, *(resource + ".png").split("/"))):
+            continue
+        borrowed_files += 1
+        if vanilla_dump is None:
+            unchecked_files.append(resource)
+            continue
+        if os.path.exists(os.path.join(vanilla_dump, *(resource + ".png").split("/"))):
+            continue
+        print("!! %s loads %s.png, which is in neither src/main/resources nor "
+              "the vanilla sprite dump -- the engine would draw its ERR texture"
+              % (spot, resource))
+        problems += 1
+    for resource, spot in sorted(set(texture_dynamic)):
+        print("-- note: the texture path at %s is built at runtime from \"%s\"; "
+              "this audit cannot check it" % (spot, resource))
+    for resource in sorted(set(unchecked_files)):
+        print("-- note: %s.png is not ours, so it must be the game's; pass "
+              "--vanilla /path/to/sprite/dump to verify it" % resource)
 
     # Keys assembled at runtime cannot be resolved from source. They are named
     # here rather than skipped in silence, because an unlisted gap is exactly
@@ -709,10 +862,20 @@ def main():
         return 1
     print("OK: %d registered IDs (%d of them human settlers needing mob.<id>name) "
           "and %d literal keys named in en.lang and de.lang, locales in sync, "
-          "%d holdable ID(s) with a real icon file, %d runtime-built key(s) "
-          "noted above." % (total, len(humans), len(literals), icons, len(dynamic)))
+          "%d holdable ID(s) with a real icon file (%d of them recoloured from "
+          "vanilla art, %s), %d literal texture path(s) resolved (%d of them to "
+          "the game's own resources), %d runtime-built key(s) noted above."
+          % (total, len(humans), len(literals), icons, borrowed,
+             "checked against the dump" if vanilla_dump else "dump absent, unchecked",
+             textures, borrowed_files, len(dynamic)))
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--vanilla", default="/home/user/necesse-game/sprites",
+                        help="vanilla sprite dump, used to verify icons that are "
+                             "recoloured from vanilla art at load time")
+    arguments = parser.parse_args()
+    dump = arguments.vanilla if os.path.isdir(arguments.vanilla or "") else None
+    sys.exit(main(dump))

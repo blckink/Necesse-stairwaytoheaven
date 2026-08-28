@@ -1125,3 +1125,143 @@ colours fall below the eye's resolution at game zoom. Leave supplied art alone.
 The general rule this is a case of: a metric that separates our art from
 vanilla is a *hypothesis* about how it will look, not a finding. Render both at
 1× before acting on it.
+
+
+## A modded farm animal has no mate, so it cannot breed (v1.0 livestock)
+
+**[jar]** Breeding is driven by the MALE.
+`HusbandryImpregnateWandererAI.HusbandryImpregnateAINode.tickNode` only looks
+for a partner when `mob.canImpregnate()` — `isGrown() && getGender() == MALE &&
+tameness >= 1` — and then requires `mob.canImpregnateMob(other)` on top of
+`other.canBirth()` (FEMALE). `HusbandryMob.canImpregnateMob` returns **false**,
+so the male half is always an override, and every vanilla one is a hard string
+test against a VANILLA id:
+
+    RamMob      -> other.getStringID().equals("sheep")
+    BullMob     -> other.getStringID().equals("cow")
+    RoosterMob  -> other.getStringID().equals("chicken")
+    BoarMob     -> other.getStringID().equals("pig")
+
+No modded animal can satisfy any of them, and `SheepMob`/`CowMob` are
+FEMALE-gendered, so a mod species registered as a single mob is female-only and
+**breeds nothing at all**, however correct the rest of it is.
+
+**[run]** The Cloud Lamb is in exactly that state today:
+`husbandry check: cloudlamb ... child=cloudlamb name=Cloudlamb mate=NONE`. Its
+`getRandomChildMobStringID` override is correct and unreachable — nothing can
+impregnate it. `docs/CURRENT_STATE.md` describing the lamb as "breeds true" is
+a claim about one override, not about the loop.
+
+**[jar]** `getGender()` is asked of the INSTANCE everywhere it is read —
+`HusbandryMob.canBirth`/`canImpregnate` and `SettlementHusbandryZone.tickJobs`,
+which sorts a zone's animals into males/females/neutrals for the slaughter
+ratio. Nothing treats gender as a property of the mob TYPE. So one registered
+mob can carry both sexes: roll it on the server in `init()` behind an
+"is it still unset" guard (the idiom `ChickenMob.init` uses for its first egg
+timer, and it is order-independent against `applyLoadData`), save it, and send
+it in the spawn packet so the client picks the right sheet.
+`stairwaytoheaven.livestock.SkyBreed` is that, and `canImpregnateMob` becomes
+`other.getStringID().equals(getStringID())`.
+
+**[run]** Measured on all three new animals:
+`husbandry check: nimbusyak ... mate=nimbusyak`, `thunderquill ...
+mate=thunderquill`, `glimmergoat ... mate=glimmergoat`.
+
+## Livestock CAN be table-spawned — the mob just has to say so
+
+**[jar]** `MobChance.spawnMob` drops a mob whose `isValidSpawnLocation` answers
+false and `Mob`'s own implementation is `return false`; nothing in the
+husbandry chain overrides it. That is the whole reason vanilla places sheep,
+cows and chickens from the island generator. It is **not** a rule that
+livestock cannot be table-spawned: implementing the method is enough, and
+`CritterMob`'s entire implementation is one line —
+`new MobSpawnLocation(this, x, y).checkMobSpawnLocation().validAndApply()`.
+`Mob.checkSpawnLocation` already means "not in liquid, not on a solid tile, not
+indoors on a floor, not colliding".
+
+**[jar]** Nothing sets `canDespawn` for a husbandry mob: the field is a plain
+`boolean` defaulting to Java's false, and only `HostileMob` and `CritterMob`
+set it true. So a table-spawned farm animal is permanent and saves into its
+region for free — which is what makes a biome table an acceptable substitute
+for an island generator here, and it is why the local cap belongs in the check
+(`checkMaxMobsAround(6, 14, HusbandryMob::isInstance)`) as well as in
+`addLimited`.
+
+**[run]** `spawn check: nimbusyak threshold=0 validSpawnLocation=implemented
+accepted lit=5/6 dark=5/6`, the same for thunderquill and glimmergoat, against
+`cloudlamb ... INHERITS Mob's false accepted lit=0/6 dark=0/6` in the same log.
+
+## Vanilla resources are reachable from a mod, and that is enough art for a reskin
+
+**[jar]** `GameTexture.fromFile` formats the extension, looks the path up in
+`GameTexture.loadedTextures` and on a miss reads it through
+`ResourceEncoder.getResourceBytes(path)` — ONE flat `resources.files` map keyed
+by path (ResourceEncoder.java:75-86) with mod resources merged into it. So
+`mobs/cow`, `player/armor/clothhat` and `items/milk` resolve from mod code
+exactly as `mobs/cloudlamb` does.
+
+**[jar]** Every hook needed to point an item or a mob at one of those is
+open: `Item.loadItemTextures` is protected (Item.java:562),
+`ArmorItem.loadArmorTexture` is protected and `armorTexture`,
+`frontArmorTexture`, `backArmorTexture` are public (ArmorItem.java:84-86), and
+mob sheets are our own static fields anyway. Vanilla does the same thing to
+itself: `FoodConsumableItem.loadItemTextures` crops a crop sheet, and
+`FoodConsumableItem.loadTextures` composites the buff icon out of the item icon
+pixel by pixel at load time.
+
+**[jar]** Two mechanics of that pixel work are easy to get wrong.
+`GameTexture.fromFile(path, true)` (forceNotFinalize) is how vanilla asks for a
+READABLE texture; `makeFinal()` uploads to the GPU and drops the buffer, after
+which any read costs a `glGetTexImage` round trip through `restoreFinal()`. And
+a texture handed to something that reads it again — a `FoodConsumableItem`'s
+item icon — must be left un-finalized, because that class finalizes it itself.
+
+**[run]** The whole v1.0 livestock layer ships **zero new PNGs**: three animals
+(both sexes, young, sheared/plucked states), eight item icons and two armour
+sheets, all recoloured from vanilla at load time by
+`stairwaytoheaven.livestock.SkyPelt` (hue and saturation replaced, VALUE kept,
+which preserves vanilla's shading and silhouette). `tools/locale_audit.py` was
+extended rather than exempted: `ITEM_CLASS_VANILLA_ICON` maps each such class
+to the vanilla file it reads, a new check 8 resolves EVERY literal texture path
+in our source against `src/main/resources` or the vanilla dump, and both were
+proven to fail on a deliberately mistyped path.
+
+## Chicken egg-laying is hardcoded to vanilla, in three separate places
+
+**[jar]** `ChickenMob.ChickenLayEggAINode.tickNode` builds its
+`ProcessObjectHandler` inline and its `process()` is
+`new InventoryItem("egg")`. `EggNestObject.getLayEggHandler` does the same.
+And `EggFoodConsumableItem.getHatchMobStringID` returns `"rooster"` or
+`"chicken"`. There is no hook anywhere in that path, so a mod bird laying eggs
+lays VANILLA eggs, and — worse — `ChickenMob.onImpregnated` does not give
+birth, it sets `nextEggIsFertilized` and lets the nest hatch the egg, which
+means **a modded fowl bred through the vanilla path produces vanilla
+chickens**.
+
+The way out is not to reimplement the AI node. `canShear`/`onShear` are open
+hooks on `HusbandryMob` itself, not on `SheepMob`, and
+`ShearsItem.canMobInteract` is `mob instanceof HusbandryMob && canShear(item)`
+— so the bird's own product is taken with shears, on the same
+20-to-30-in-game-minute regrow timer vanilla's fleece uses, and the inherited
+vanilla egg is kept as a bonus. Breeding is fixed by overriding
+`onImpregnated` to give birth live, which is what `HusbandryMob.onImpregnated`
+does for every other animal in the game.
+
+**[run]** `husbandry check: thunderquill shear=stormdownx2 milk=NO
+child=thunderquill name=Thunderquill Fowl mate=thunderquill`.
+
+## The integration test is seed-flaky in two known places
+
+**[run]** `scripts/integration_test.sh` creates a NEW world with a random seed
+on every run. Two assertions are sensitive to it and were both seen failing on
+otherwise-good builds while the same build passed on the next run:
+
+  * the Skyway tree count, whose own comment already admits it is probabilistic
+    (`203 tiles of Skyway paving and not one tree on it` — with about three
+    expected, zero is ordinary sampling);
+  * the cats' home flags after a restart, on a seed where the coax and the
+    `stop` fall about two seconds apart.
+
+Neither is caused by the change under test when it also passes cleanly on the
+next seed. Re-run before believing a single red run, and say which run the
+result came from.

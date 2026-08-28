@@ -27,7 +27,14 @@ public class DriftlandsBiome extends SkyBiome {
     // places its sheep, rams, cows and bulls from the island generator instead;
     // ours are placed in SkyLevel.placeCloudLambFlock at region generation.
     public static final MobSpawnTable critters = new MobSpawnTable()
-            .addLimited(70, "zephyrfinch", 4, 60);
+            .addLimited(70, "zephyrfinch", 4, 60)
+            // ...and the sky's dairy herd, which CAN be table-spawned because
+            // NimbusYakMob implements isValidSpawnLocation itself (see
+            // livestock/SkyBreed). The cap is deliberately tight and the range
+            // wide: a herd, not a field of yaks, and the animals are permanent
+            // (HusbandryMob never sets canDespawn), so the count that
+            // addLimited measures is the count that stays.
+            .addLimited(35, stairwaytoheaven.livestock.SkyLivestock.NIMBUS_YAK, 4, 90);
 
     @Override
     public MobSpawnTable getMobSpawnTable(Level level) {

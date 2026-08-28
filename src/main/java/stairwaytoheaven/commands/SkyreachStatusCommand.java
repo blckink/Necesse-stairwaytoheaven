@@ -345,48 +345,79 @@ public class SkyreachStatusCommand extends ModularChatCommand {
     }
 
     /**
-     * The Cloud Lamb as a husbandry animal, measured rather than asserted.
+     * Every farm animal in the sky, measured rather than asserted.
      *
-     * The player's three questions were "was bringen sie jetzt?", "es gibt halt
-     * schon normale schafe" and "was muss in Trog bei wolkenschafen?". All three
-     * are answered by values the engine reads off the mob and the item, so all
-     * three are printed here: what shearing yields, what the trough accepts
-     * (FeedingTroughObjectEntity's filter is `instanceof GrainItem` and nothing
-     * else), and what a lamb's offspring is - vanilla SheepMob breeds a 50%
-     * chance of a plain `ram`.
+     * The player's three questions about the Cloud Lamb were "was bringen sie
+     * jetzt?", "es gibt halt schon normale schafe" and "was muss in Trog bei
+     * wolkenschafen?". All three are answered by values the engine reads off
+     * the mob and the item, so all three are printed here: what shearing or
+     * milking yields, what the trough accepts (FeedingTroughObjectEntity's
+     * filter is `instanceof GrainItem` and nothing else), and what the
+     * offspring is - vanilla SheepMob breeds a 50% chance of a plain `ram`,
+     * CowMob a 50% chance of a plain `bull`.
+     *
+     * The v1.0 livestock adds a fourth value, `mate`: breeding needs a MALE of
+     * the same species that answers true to canImpregnateMob, and every vanilla
+     * male tests the partner's string ID against a vanilla one (RamMob accepts
+     * only "sheep"). A species with no male of its own can never breed at all,
+     * however correct the rest of it is, so the pairing is measured too.
      */
     private void diagnoseHusbandry(SkyLevel level, CommandLog logs) {
-        necesse.entity.mobs.Mob probe = necesse.engine.registries.MobRegistry.getMob("cloudlamb", level);
-        if (!(probe instanceof necesse.entity.mobs.friendly.HusbandryMob)) {
-            logs.add("husbandry check: cloudlamb is NOT a HusbandryMob");
-            return;
-        }
-        necesse.entity.mobs.friendly.HusbandryMob lamb =
-                (necesse.entity.mobs.friendly.HusbandryMob) probe;
-        java.util.ArrayList<necesse.inventory.InventoryItem> products = new java.util.ArrayList<>();
-        necesse.inventory.InventoryItem shears = new necesse.inventory.InventoryItem("shears");
-        String shorn = "CANNOT SHEAR";
-        if (lamb.canShear(shears)) {
-            lamb.onShear(shears, products);
-            StringBuilder sb = new StringBuilder();
-            for (necesse.inventory.InventoryItem product : products) {
-                sb.append(sb.length() == 0 ? "" : "+").append(product.item.getStringID())
-                        .append('x').append(product.getAmount());
+        for (String mobID : new String[]{"cloudlamb", "nimbusyak", "thunderquill", "glimmergoat"}) {
+            necesse.entity.mobs.Mob probe = necesse.engine.registries.MobRegistry.getMob(mobID, level);
+            if (!(probe instanceof necesse.entity.mobs.friendly.HusbandryMob)) {
+                logs.add("husbandry check: " + mobID + " is NOT a HusbandryMob");
+                continue;
             }
-            shorn = sb.length() == 0 ? "NOTHING" : sb.toString();
+            necesse.entity.mobs.friendly.HusbandryMob animal =
+                    (necesse.entity.mobs.friendly.HusbandryMob) probe;
+            String shorn = harvest(animal, new necesse.inventory.InventoryItem("shears"), true);
+            String milked = harvest(animal, new necesse.inventory.InventoryItem("bucket"), false);
+            StringBuilder feed = new StringBuilder();
+            for (String feedID : new String[]{"cloudberry", "wheat", "skystone"}) {
+                necesse.inventory.item.Item item = necesse.engine.registries.ItemRegistry.getItem(feedID);
+                boolean handFeed = item != null && animal.canFeed(new necesse.inventory.InventoryItem(feedID));
+                // Exactly the predicate FeedingTroughObjectEntity.isValidFeed uses.
+                boolean trough = item instanceof necesse.inventory.item.placeableItem.consumableItem.food.GrainItem;
+                feed.append(' ').append(feedID).append("=hand:").append(handFeed).append("/trough:").append(trough);
+            }
+            // A second instance of the same species, standing in for the male
+            // half of a breeding pair.
+            necesse.entity.mobs.Mob partner = necesse.engine.registries.MobRegistry.getMob(mobID, level);
+            boolean pairs = partner instanceof necesse.entity.mobs.friendly.HusbandryMob
+                    && ((necesse.entity.mobs.friendly.HusbandryMob) partner).canImpregnateMob(animal);
+            logs.add("husbandry check: " + mobID + " shear=" + shorn
+                    + " milk=" + milked
+                    + " child=" + animal.getRandomChildMobStringID(animal)
+                    + " name=" + animal.getLocalization().translate()
+                    + " mate=" + (pairs ? mobID : "NONE")
+                    + " feed:" + feed);
         }
-        StringBuilder feed = new StringBuilder();
-        for (String feedID : new String[]{"cloudberry", "wheat", "skystone"}) {
-            necesse.inventory.item.Item item = necesse.engine.registries.ItemRegistry.getItem(feedID);
-            boolean handFeed = item != null && lamb.canFeed(new necesse.inventory.InventoryItem(feedID));
-            // Exactly the predicate FeedingTroughObjectEntity.isValidFeed uses.
-            boolean trough = item instanceof necesse.inventory.item.placeableItem.consumableItem.food.GrainItem;
-            feed.append(' ').append(feedID).append("=hand:").append(handFeed).append("/trough:").append(trough);
+    }
+
+    /**
+     * What one shearing or one milking actually puts on the ground, as the
+     * item IDs and amounts the engine would drop - both tools hand the mob an
+     * empty products list and drop whatever comes back (ShearsItem
+     * .onMobInteract / BucketItem.onMobInteract).
+     */
+    private static String harvest(necesse.entity.mobs.friendly.HusbandryMob animal,
+                                  necesse.inventory.InventoryItem tool, boolean shear) {
+        if (shear ? !animal.canShear(tool) : !animal.canMilk(tool)) {
+            return "NO";
         }
-        logs.add("husbandry check: cloudlamb shear=" + shorn
-                + " child=" + lamb.getRandomChildMobStringID(lamb)
-                + " name=" + lamb.getLocalization().translate()
-                + " feed:" + feed);
+        java.util.ArrayList<necesse.inventory.InventoryItem> products = new java.util.ArrayList<>();
+        if (shear) {
+            animal.onShear(tool, products);
+        } else {
+            animal.onMilk(tool, products);
+        }
+        StringBuilder out = new StringBuilder();
+        for (necesse.inventory.InventoryItem product : products) {
+            out.append(out.length() == 0 ? "" : "+").append(product.item.getStringID())
+                    .append('x').append(product.getAmount());
+        }
+        return out.length() == 0 ? "NOTHING" : out.toString();
     }
 
     /**
@@ -557,7 +588,13 @@ public class SkyreachStatusCommand extends ModularChatCommand {
 
         String[] probeMobs = {"zephyrray", "skystonegolem", "stormwisp", "galehound",
                 "dawnpiercer", "gloomshade", "cloudlamb", "glowmoth", "sparkbeetle",
-                "zephyrfinch", "dewsnail"};
+                "zephyrfinch", "dewsnail",
+                // v1.0 livestock. These three are the counter-example to the
+                // Cloud Lamb's row: a HusbandryMob inherits Mob's `return
+                // false` and can never be table-spawned, so each of them
+                // implements isValidSpawnLocation itself and the two columns
+                // below are the proof that it took.
+                "nimbusyak", "thunderquill", "glimmergoat"};
         // Measure each mob twice: at the level's real light, and again with the
         // ambient forced to darkness. Two numbers separate the two causes that
         // both look like "nothing spawns" -- a mob rejected only by the light
