@@ -1102,6 +1102,73 @@ picture of exactly which cells do not meet.
 A sheet-format audit and a composed render answer different questions. Passing
 the audit is necessary and **not** sufficient.
 
+## …and a composed render of OUR sheet alone is still not sufficient
+
+Two more faults on `beetlewall` survived both gates and were caught by the
+player, not by us. Both are questions the tool could not ask, because it only
+ever drew our own sheet: "is this door as tall as a door" and "is this the view
+a side wall is supposed to show" are judgements against vanilla, and nobody can
+hold vanilla in their head across a session.
+
+**[sprites]** Fault 1, the doors. The eight door cells' bounding boxes were
+byte-identical to `stonewall`'s (tops 88/68/70/68/88/68/70/90, cell 5 spanning
+x14-31 and cell 9 x0-17), which is exactly why `sheet_format_audit.py` was
+green. The fault was compositional. Decoded cell by cell off `stonewall` and
+`woodwall`, vanilla's rule is:
+
+* **One leaf, running the full height of the cell.** `woodwall`'s edge-on leaf
+  (cell 5, x18-27) is unbroken from y70 to its threshold at y124;
+  `stonewall`'s from y70 to y123. Only the bottom 32px — the part inside the
+  tile — gains a reveal either side of it.
+* **The crown is the part above row 96, and it carries all the ornament.**
+  `stonewall` puts an 8px arch cap there, `woodwall` a 12px pediment. Nothing
+  cream, bright or horizontal crosses the leaf itself.
+* **The leaf reads one ramp step lighter above row 96 than below it** — the
+  part above is the door's top catching the sky, the part below stands in the
+  doorway's shade. `stonewall` does it literally: the same leaf is
+  (115,130,151) above row 96 and (60,65,74) below.
+
+Ours had, in cell 5, a stub of wall masonry with a lantern on it above the tile
+edge, a full-width cream bead band at row 96, and a 3px sliver of leaf lost in a
+slab of roof pixels below — three unrelated things stacked, the door being the
+smallest. In the head-on cells a 16px leaf sat between 8px jambs, and a bead
+rail ran across it at 60% height. That is what "die Türen wirken viel zu kurz"
+was: not the silhouette, the banding.
+
+**[sprites]** Fault 2, the side-wall window. `WallWindowObject.getWindowDir`
+returns 1 for a north-south wall — the LEFT and RIGHT walls of a room — and
+then only cells (4,0) (5,0) (4,1) (5,1) are drawn, over the band
+drawY-16..drawY+16. In a vertical run that band is unbroken ROOF, so the
+picture is the wall's top surface with a hole looked down into. `stonewall`,
+`brickwall`, `granitewall`, `icewall`, `dungeonwall` and `woodwall` all draw
+the identical grammar: wall top down both sides, an opening 10-12px wide
+running ALONG the wall for almost the full 32px of the cell, a dark reveal on
+its near faces, a lit lip on the far one, glass at the bottom of the cut, and
+**no horizontal terminator at either end** — the opening simply runs until the
+roof resumes. Vanilla's top-down glass is also brighter than the roof around
+it, not darker.
+
+Ours was a brass-framed pane with a two-by-two lattice standing upright in the
+middle of the cell, so an east-west-facing wall showed a window facing south
+out of its flat top. The player: "Fenster an der Seite zeigen nie in Richtung
+Süden … das wäre ja mitten in der Wand, nach oben ausgerichtet." Note that the
+previous pass already knew the cell was the roof and tried to fix it by making
+the pane dark; darkening a front-facing pane does not make it lie down. Only
+the slot shape does.
+
+`sheet_format_audit.py` asserts window rows 0-1 are 512/512 opaque, which both
+the wrong art and the right art satisfy — the sheet has no hole in it either
+way; the PICTURE is the hole.
+
+**The fix to the process:** `tools/wall_render_preview.py` now renders every
+scene for our sheet AND for vanilla `stonewall` and `woodwall` directly
+beneath, same scene, same scale, same backdrop, and its scene set is chosen to
+reach every branch of the port — windows in the left/right walls (getWindowDir
+1) and in the top/bottom walls (getWindowDir 0) as separate scenes, closed and
+open doors in all four rotations, plus a solid block, an L corner and
+free-standing runs. Both faults are obvious the moment `stonewall` is drawn one
+strip down; neither is visible without it.
+
 ## `generate_assets.py`'s one-producer guard tested existence, not authorship
 
 The guard at the end of `main()` listed the files `tools/convert_biome_art.py`

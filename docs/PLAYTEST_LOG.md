@@ -173,3 +173,28 @@ cannot see the point of it.
 | Area | Observation | Status |
 |---|---|---|
 | Beetlefreak wall | "die Wandtexturen sind komplett für'n arsch von der Beetle wall, da stimmt kein Rand, Fenster oder sonst was von Layout" | **FIXED — NOT YET PLAYER CONFIRMED**. The player is describing three separate faults and all three were real. (1) The 4x8 body block was one continuous illustration — swirls, striped bands and an arch running straight across the 16px cell edges — but the engine reads that block as an auto-tile blob whose columns are tile HALVES, and the column-to-half mapping is not even constant down the sheet: in rows 1 and 2 columns 1 and 2 swap sides against rows 0, 3 and 4. No cell could meet its neighbour, which is exactly "kein Rand stimmt". (2) The eight 32x128 door cells held lamp posts and partial arches instead of eight door frames, and cells 5 and 9 were full-width where vanilla draws a narrow slab against one jamb. (3) The window's two views were swapped again: a front-facing pane with magenta glass sat in rows 0-1, which `getWindowDir == 1` draws as the wall's ROOF seen from above, while the east-west front carried a hanging banner with no opening in it. `tools/sheet_format_audit.py` passed on the whole thing, because it guards cell geometry — which cell, what size, what extent — and cannot see whether the art inside a cell joins. The sheet is now redrawn by `tools/asset_generator/gen_beetlewall.py` on the layout the renderer actually reads, keeping the supplied art's identity (violet stone with swirls, cream-and-black bead trim, brass lanterns with a green flame, the arch, magenta glass, the skull over the door), and `tools/wall_render_preview.py` composes real scenes — solid block, L, T, free-standing tile, doors and windows in both orientations — so that "does it tile" is now a picture. The port was checked against vanilla `stonewall` first. |
+
+---
+
+## 2026-08-28 (2) — Beetlefreak wall, two faults the gates called clean
+
+Both reported after the rebuild above shipped. Neither is a geometry fault —
+the sheet's bounding boxes were byte-identical to vanilla `stonewall`'s — so
+`sheet_format_audit.py` was green on both, and `wall_render_preview.py` drew
+them without complaint because it only ever composed our own sheet.
+
+| Area | Observation | Status |
+|---|---|---|
+| Beetlefreak doors | "die Türen wirken viel zu kurz" | **FIXED — NOT YET PLAYER CONFIRMED**. The silhouettes were vanilla's exactly; the composition inside them was not. Vanilla runs ONE door leaf the full height of its cell and puts every piece of ornament on the CROWN above sheet row 96 (row 96 = the tile's top edge, because `WallDoorObject` draws at `.pos(drawX, drawY - 96)`): `woodwall`'s edge-on leaf is unbroken from y70 to its threshold at y124 under a 12px pediment, `stonewall`'s from y70 to y123 under an 8px arch cap. Ours banded every leaf with a cream bead rail across its middle, and in the edge-on cells 5 and 9 — the doors in every left and right wall — put a lantern-topped stub of wall masonry above the tile edge, a full-width cream band at row 96, and a 3px sliver of leaf in a slab of roof pixels below. Three unrelated things stacked, the door the smallest of them. Now: one leaf per cell running the whole height, a brass frame around it, one green boss, the skull and the bead on the crown, and the leaf a ramp step lighter above row 96 than below (which is what `stonewall` does — the same leaf is (115,130,151) above the tile edge and (60,65,74) below). The head-on leaf also went from 16px wide between 8px jambs to 22px, against `stonewall`'s 20px opening and `woodwall`'s full-width leaf. |
+| Beetlefreak side-wall window | "Fenster an der Seite zeigen nie in Richtung Süden ... das wäre ja mitten in der Wand, nach oben ausgerichtet" — and confirmed a front-style window IS right on the top and bottom walls | **FIXED — NOT YET PLAYER CONFIRMED**. Rows 0-1 of cols 4-5 are `getWindowDir == 1`: a NORTH-SOUTH wall, i.e. the left and right walls of a room, drawn over the band drawY-16..drawY+16, which in a vertical run is unbroken roof. Every vanilla wall draws that as the wall's TOP SURFACE with a slot cut ALONG it that you look down into — 10-12px wide, running almost the full 32px of the cell, dark reveal on the near faces, lit lip on the far one, glass at the bottom of the cut, and no horizontal terminator at either end. Ours had a brass-framed pane with a two-by-two lattice standing upright in the middle of the cell. The previous pass already knew the cell was the roof and tried to fix it by darkening the pane; darkening a front-facing pane does not make it lie down, only the slot shape does. Rows 5-7 (the east-west case) keep the front-facing arched pane, which the player confirmed is correct there. |
+
+**The gate changed too, and that is the point.** A scene rendered from our sheet
+alone cannot answer "is this shorter than vanilla" or "is this the wrong view";
+both are judgements against vanilla and nobody holds vanilla in their head
+across a session. `tools/wall_render_preview.py` now draws every scene for our
+sheet AND for vanilla `stonewall` and `woodwall` directly beneath it, same
+scene, same scale, same backdrop, with scenes chosen to reach every branch of
+the port: windows in the left/right walls and in the top/bottom walls as
+separate scenes, closed and open doors in all four rotations, a solid block, an
+L corner and free-standing runs. Both faults are unmistakable with the vanilla
+strip underneath and invisible without it.

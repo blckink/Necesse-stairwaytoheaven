@@ -568,12 +568,15 @@ def _build_body(c):
 # EAST-WEST one, and the two draw completely different pictures out of the same
 # 32px strip:
 #
-#   dir 1, north-south : rows 0-1 at drawY-16 and drawY. You are looking down
-#          at the wall's ROOF. Vanilla is 512/512 opaque here and there is no
-#          hole; a skylight lies FLAT in the roof and its glass is looking at
-#          the sky, so it reads DARKER than the same glass seen edge-on. The
-#          supplied art had a front-facing pane here — a window on a roof,
-#          standing up out of it.
+#   dir 1, north-south : rows 0-1 at drawY-16 and drawY. This is the LEFT or
+#          RIGHT wall of a room and you are looking down at its TOP. Vanilla is
+#          512/512 opaque here — the sheet has no hole in it — but the PICTURE
+#          is a hole: a slot cut along the wall, dark reveals on its near
+#          faces, a lit lip on the far one, glass at the bottom of the cut.
+#          Both earlier passes drew a front-facing pane here instead, once as
+#          the supplied art and once as a "flat skylight" that was still a
+#          brass frame with glazing bars. Darkening a front-facing pane does
+#          not make it lie down; only the slot shape does.
 #   dir 0, east-west   : rows 2..7 at drawY-64, -48, -32, -16, 0 and +16.
 #          Now it is the wall's FRONT and the opening is a real hole. Rows 2-4
 #          reach two tiles above the tile and vanilla leaves them EMPTY; row 5
@@ -587,45 +590,92 @@ def _build_body(c):
 def _build_window(c):
     X = 64
 
-    # --- dir 1: the roof, with a skylight lying flat in it -----------------
+    # --- dir 1: the wall's TOP, with a slot cut down through it ------------
+    #
+    # These two cells are the LEFT and RIGHT walls of a room. They are drawn at
+    # drawY-16 and drawY, which is the band showing the tile above's lower half
+    # and this tile's upper half — in a north-south run that band is unbroken
+    # ROOF for its whole length. So the picture is the wall seen from directly
+    # above with a hole in it, and the player is looking DOWN into the hole.
+    #
+    # Every vanilla wall draws it the same way and the grammar is not subtle:
+    # wall top down both sides, an opening running ALONG the wall (tall and
+    # narrow in the cell, never a wide pane across it), a dark reveal on the
+    # near faces of the cut, a lit lip on the far one, and the glass at the
+    # bottom of the cut. Measured off stonewall, brickwall and granitewall
+    # cols 4-5 rows 0-1: the opening is 10-12px wide, centred, and runs almost
+    # the full 32px of the cell.
+    #
+    # What was here instead was a brass-framed pane with a two-by-two lattice —
+    # a window standing UP out of the roof, facing south. That is the fault the
+    # player named: "Fenster an der Seite zeigen nie in Richtung Süden ... das
+    # wäre ja mitten in der Wand, nach oben ausgerichtet." Being dark did not
+    # save it; what makes a cut read as a cut is its SHAPE and its reveals, and
+    # vanilla's own top-down glass is brighter than the roof around it, not
+    # darker.
     t = Wrap(32, 32)
     for y in range(32):
         for x in range(32):
-            t.put(x, y, _roof_pixel(x, y))
+            # The cell spans [drawY-16, drawY+16). The half above drawY is the
+            # roof field's LOWER band, so the whole cell is that field shifted
+            # 16 rows; sampling it unshifted put a visible jump in the stone
+            # exactly where the window meets the roof above it.
+            t.put(x, y, _roof_pixel(x, y + 16))
     for y in range(32):                                  # the roof's own ends
         t.put(0, y, RIM_W[0])
         t.put(1, y, RIM_W[1])
         t.put(30, y, RIM_E[0])
         t.put(31, y, RIM_E[1])
-    # It runs ALONG the wall, so it is tall and narrow in the cell, not wide;
-    # and its glass is looking straight UP at the sky, so it reads barely above
-    # the roof around it. A bright pane here is precisely the bug the player
-    # reported once already — "the window still faces downwards" — because a lit
-    # pane on a roof can only be read as a window standing up out of it.
-    roof_glass = (52, 32, 72)
-    roof_glass_hi = (70, 44, 94)
-    for y in range(4, 28):
-        for x in range(7, 25):
-            t.put(x, y, BRASS["deep"])
-    for y in range(6, 26):
-        for x in range(9, 23):
-            t.put(x, y, roof_glass_hi if (x + y) % 7 == 0 else roof_glass)
-    for x in range(7, 25):                               # frame: lit head
-        t.put(x, 4, BRASS["base"])
-        t.put(x, 5, BRASS["deep"])
-        t.put(x, 26, BRASS["deep"])
-        t.put(x, 27, BEAD_DARK)
-    for y in range(4, 28):
-        t.put(7, y, BRASS["base"])
-        t.put(8, y, BRASS["deep"])
-        t.put(23, y, BRASS["deep"])
-        t.put(24, y, BEAD_DARK)
-    for x in range(9, 23):                               # glazing bars
+
+    SX0, SX1 = 10, 21                                    # the cut, 12px wide
+    SY0, SY1 = 2, 29                                     # and 28px long
+    for y in range(SY0, SY1 + 1):                        # sink the whole cut
+        for x in range(SX0, SX1 + 1):
+            t.put(x, y, BEAD_DARK)
+    # Reveals. Light comes over the top-left, so it falls on the FAR inside
+    # faces — bottom and right — and leaves the near ones in shadow. Getting
+    # this backwards is what turns a hole into a lid.
+    for x in range(SX0, SX1 + 1):
+        t.put(x, SY0, BEAD_DARK)                         # near lip, shaded
+        t.put(x, SY0 + 1, CAP["deep"])
+        t.put(x, SY1 - 1, STONE["base"])                 # far lip, lit
+        t.put(x, SY1, STONE["light"])
+    for y in range(SY0, SY1 + 1):
+        t.put(SX0, y, BEAD_DARK)                         # near (west) reveal
+        t.put(SX0 + 1, y, CAP["base"])
+        t.put(SX1 - 1, y, CAP["hi"])
+        t.put(SX1, y, STONE["light"])                    # far (east) reveal, lit
+    # The identity goes on the RIM of the hole and nowhere else: one bone stud
+    # at each corner of the cut. No band across the cell in either direction —
+    # a cream band here tiles into a stripe running the whole wall, which is
+    # the same mistake as banding a door leaf, and vanilla's top-down windows
+    # carry no horizontal terminator at all. The opening just runs until the
+    # roof resumes.
+    for sx in (SX0 + 1, SX1 - 1):
+        for sy in (SY0 + 1, SY1 - 1):
+            t.put(sx, sy, BONE["light"])
+    # The glass, at the bottom of the cut. It is BRIGHTER than the roof around
+    # it, which is what every vanilla wall does here — stonewall's top-down
+    # glass is (130,139,152) against a (34,35,35) roof, brickwall's is pale
+    # cyan against red brick. Brightness was never what made the old cell read
+    # as a standing window; the frame and the glazing bars were. Sheen bands
+    # run north-south, because so does the opening and everything in it.
+    gcore = mix(GLASS["deep"], GLASS["base"], 0.55)
+    for y in range(SY0 + 2, SY1 - 1):
+        for x in range(SX0 + 2, SX1 - 1):
+            edge = x in (SX0 + 2, SX0 + 3, SX1 - 2, SX1 - 3)
+            if y <= SY0 + 4:                             # the near lip's shadow
+                tone = GLASS["deep"]
+            elif y >= SY1 - 4:                           # light pooling far side
+                tone = GLASS["light"] if edge else GLASS["base"]
+            else:
+                tone = GLASS["light"] if edge else gcore
+            if (x * 7 + y * 5) % 17 == 0:
+                tone = GLASS["hi"]
+            t.put(x, y, tone)
+    for x in range(SX0 + 2, SX1 - 1):                    # one saddle bar
         t.put(x, 15, BRASS["base"])
         t.put(x, 16, BRASS["deep"])
-    for y in range(6, 26):
-        t.put(15, y, BRASS["base"])
-        t.put(16, y, BRASS["deep"])
     t.blit_to(c, X, 0)
 
     # --- rows 2-4 stay empty ----------------------------------------------
@@ -704,6 +754,25 @@ def _build_window(c):
 # Cells 5 and 9 are NOT full-width: vanilla draws the closed edge-on door as a
 # narrow slab against one jamb (stonewall's cell 5 spans x14..32, cell 9
 # x0..18). The supplied art put a full-width lamp post in both.
+#
+# WHAT GOES INSIDE THAT SILHOUETTE is a separate question, and matching the
+# silhouette exactly is what let the second fault through every gate: the
+# bounding boxes were byte-identical to stonewall's and the doors still read as
+# hatches. Decoded cell by cell off stonewall and woodwall, the composition
+# rule is:
+#
+#   * ONE leaf, running the FULL height of the cell. woodwall's edge-on leaf
+#     is unbroken from y70 to its threshold at y124; stonewall's is unbroken
+#     from y70 to y123. Ours had a stub of wall with a lantern on it above the
+#     tile edge and a 3px sliver of leaf below — two objects, and neither of
+#     them a door.
+#   * the CROWN carries the ornament, and the crown is the part ABOVE row 96.
+#     Nothing cream, nothing bright and nothing horizontal crosses the leaf
+#     itself; the leaf gets its frame, its boards and one boss.
+#   * the leaf reads a step LIGHTER above the tile edge than below it, because
+#     the part above is the door's top catching the sky and the part below is
+#     standing in the doorway's shade. stonewall does this literally: the same
+#     leaf is (115,130,151) above row 96 and (60,65,74) below it.
 # ---------------------------------------------------------------------------
 
 def _jamb_px(x, y):
@@ -713,15 +782,34 @@ def _jamb_px(x, y):
     return _brick_px(x % 32, y - TILE_TOP)
 
 
-def _leaf_px(x, y, vertical):
-    """The door leaf: violet planking, the boards running along the leaf's long
-    axis, so a head-on leaf gets vertical seams and an edge-on one horizontal.
-    The bone on a leaf is its FRAME and its boss, painted over this — a bone
-    grain in the fill turns the door into a portcullis."""
+SEAM = mix(STONE["deep"], OUT, 0.45)
+
+
+def _leaf_px(x, y, vertical, shaded=False):
+    """The door leaf: violet planking. `vertical` puts the seams on the screen
+    axis the leaf is LONG on, which every door cell now is — a tall leaf with
+    seams across it is a ladder, not a door. The bone on a leaf is its FRAME
+    and its boss, painted over this; a bone grain in the fill turns the door
+    into a portcullis.
+
+    `shaded` is the same boarding one ramp step down, for the part of a leaf
+    standing inside the doorway rather than above the wall. Vanilla shades the
+    two halves of an edge-on leaf exactly this way (stonewall's is (115,130,151)
+    above row 96 and (60,65,74) below). Shifting the ramp instead of mixing a
+    second one keeps the sheet inside its palette: vanilla wall sheets carry
+    19-34 distinct colours in total."""
     n = x if vertical else y
     m = n % 6
+    if shaded:
+        if m == 0:
+            return OUT
+        if m == 1:
+            return STONE["base"]
+        if m == 5:
+            return SEAM
+        return STONE["deep"]
     if m == 0:
-        return mix(STONE["deep"], OUT, 0.45)             # board seam
+        return SEAM                                      # board seam
     if m == 1:
         return STONE["light"]
     if m == 5:
@@ -754,19 +842,52 @@ def _boss(target, cx, cy, r=3):
                        FLAME["base"] if u < 0.85 else FLAME["deep"])
 
 
-def _leaf_panel(target, lx0, lx1, ly0, ly1):
-    """A closed leaf: brass frame, violet boards, a bead rail across it and the
-    green boss at its heart."""
+def _leaf_panel(target, lx0, lx1, ly0, ly1, gem_at=0.45, gem_r=3):
+    """ONE door leaf, whatever its aspect: boards running the leaf's long axis,
+    a brass frame around the whole of it, and a single small green boss.
+
+    The rule this encodes is the one the previous pass broke. NOTHING crosses a
+    leaf horizontally. A cream bead rail run across a 30px leaf cuts it into
+    two 14px halves and the door stops reading as a door — a header with a
+    hatch under it, which is exactly what the player saw ("die Türen wirken
+    viel zu kurz"). Vanilla stonewall and woodwall both keep the leaf one
+    unbroken field from the crown to the threshold and spend all their trim on
+    the frame and the crown above the tile edge. So does this now: the bead and
+    the skull live on the crown, the leaf gets the frame, the boards and one
+    boss."""
     for y in range(ly0, ly1 + 1):
         for x in range(lx0, lx1 + 1):
-            target.put(x, y, _leaf_px(x, y, True))
-    mid = ly0 + int((ly1 - ly0) * 0.60)
+            target.put(x, y, _leaf_px(x, y, (ly1 - ly0) >= (lx1 - lx0)))
     _leaf_frame(target, lx0, lx1, ly0, ly1)
-    for y in (ly0 + 1, ly1 - 1):
-        for x in range(lx0 + 1, lx1):
-            target.put(x, y, mix(STONE["deep"], OUT, 0.3))
-    bead_run(target, lx0 + 1, lx1, mid, h=2, phase=lx0 % 4)
-    _boss(target, (lx0 + lx1) // 2, ly0 + int((ly1 - ly0) * 0.30), 3)
+    _boss(target, (lx0 + lx1) // 2, ly0 + int((ly1 - ly0) * gem_at), gem_r)
+
+
+def _crown_bead(target, bands, body):
+    """The bead moulding round a door's CROWN, run along the silhouette of the
+    whole head rather than along each chamfer course.
+
+    Rimming every course separately draws a stack of parallel cream lines — a
+    venetian blind hung over the door, which is what the open leaves wore. The
+    head is one shape and gets one outline; `body` is the mass under it, so the
+    rim stops where the head meets the leaf instead of drawing a line across
+    it."""
+    head = {(x, y) for (ay0, ay1, ax0, ax1) in bands
+            for y in range(ay0, ay1 + 1) for x in range(ax0, ax1 + 1)}
+    by0, by1, bx0, bx1 = body
+    solid = head | {(x, y) for y in range(by0, by1 + 1)
+                    for x in range(bx0, bx1 + 1)}
+    for (x, y) in sorted(head):
+        if any((x + dx, y + dy) not in solid
+               for dx, dy in ((0, -1), (-1, 0), (1, 0))):
+            target.put(x, y, BONE["hi"] if (x + y) % 4 < 2 else BEAD_DARK)
+
+
+def _leaf_handle(target, x, y):
+    """A two-pixel brass pull. Small on purpose: it is the only thing besides
+    the boss allowed to interrupt the leaf."""
+    target.put(x, y, BRASS["hi"])
+    target.put(x, y + 1, BRASS["light"])
+    target.put(x, y + 2, BRASS["deep"])
 
 
 def _build_doors(c):
@@ -776,10 +897,8 @@ def _build_doors(c):
                 for x in range(bx0, bx1 + 1):
                     c.put(x, y, tone(x, y))
 
-    def top_rim(bands, tone):
-        for y0, _, bx0, bx1 in bands:
-            for x in range(bx0, bx1 + 1):
-                c.put(x, y0, tone)
+    # (a per-band top rim used to live here; every crown now goes through
+    # _crown_bead, which rims the head's SILHOUETTE instead of each course)
 
     def floor_line(y, x0, x1):
         for x in range(x0, x1 + 1):
@@ -795,7 +914,8 @@ def _build_doors(c):
             # Closed, head-on: the doorway. A chamfered violet arch head over a
             # planked leaf, skull on the keystone. 40px tall, i.e. 8px above its
             # tile — deliberately shorter than the wall beside it, as vanilla
-            # builds a door.
+            # builds a door. The 8px above row 96 is the CROWN and everything
+            # decorative lives there; the 32 below it is one leaf.
             arch = [(88, 89, x0 + 5, x0 + 26), (90, 91, x0 + 3, x0 + 28),
                     (92, 93, x0 + 1, x0 + 30), (94, 127, x0, x0 + 31)]
             fill([(94, 127, x0, x0 + 31)], _jamb_px)
@@ -808,67 +928,93 @@ def _build_doors(c):
                         s_ = (x - (x0 + 16)) / 16.0 + (y - 96) / 16.0
                         c.put(x, y, STONE["hi"] if s_ < -0.55 else
                               STONE["light"] if s_ < -0.1 else STONE["base"])
-            head = set()
-            for (ay0, ay1, ax0, ax1) in arch[:3]:
-                for y in range(ay0, ay1 + 1):
-                    for x in range(ax0, ax1 + 1):
-                        head.add((x, y))
-            solid = head | {(x, y) for y in range(94, 128)
-                            for x in range(x0, x0 + 32)}
             # One bead line around the SILHOUETTE of the whole head; outlining
             # each course separately draws nested rectangles, a staircase.
-            for (x, y) in sorted(head):
-                if any((x + dx, y + dy) not in solid
-                       for dx, dy in ((0, -1), (-1, 0), (1, 0))):
-                    c.put(x, y, BONE["hi"] if (x + y) % 4 < 2 else BEAD_DARK)
+            _crown_bead(c, arch[:3], (94, 127, x0, x0 + 31))
             skull(c, x0 + 16, 91)                         # crowning the arch
-            _leaf_panel(c, x0 + 8, x0 + 23, TILE_TOP + 1, 126)
-            c.put(x0 + 21, 112, BRASS["hi"])              # handle
-            c.put(x0 + 21, 113, BRASS["light"])
-            for y in range(TILE_TOP + 1, 127):            # reveal beside the leaf
-                c.put(x0 + 7, y, BRASS["deep"])
-                c.put(x0 + 24, y, BRASS["deep"])
+            # 22px of leaf in the 32px tile. stonewall's opening is 20px and
+            # woodwall's leaf is the full 32; the 16px leaf that was here, set
+            # between 8px jambs and two brass reveals, left an opening barely
+            # half the tile wide and read as a hatch let into the wall rather
+            # than a doorway through it.
+            _leaf_panel(c, x0 + 5, x0 + 26, TILE_TOP, 125, gem_at=0.40)
+            _leaf_handle(c, x0 + 24, 111)
+            for y in range(TILE_TOP, 126):                # reveal beside the leaf
+                c.put(x0 + 4, y, BRASS["light"])
+                c.put(x0 + 27, y, BRASS["deep"])
+            for x in range(x0, x0 + 32):                  # threshold
+                c.put(x, 126, mix(STONE["deep"], OUT, 0.35))
             floor_line(127, x0, x0 + 31)
 
         elif not is_open:
-            # Closed, edge-on: only the wall's narrow side is visible, the leaf
-            # lying inside the tile footprint. 58px tall, one jamb only.
+            # Closed, edge-on: the door standing in a NORTH-SOUTH wall, seen
+            # from its side, and the cell the player meets on every left and
+            # right wall of every room. 58px of it, and vanilla spends all 58
+            # on ONE leaf: woodwall's planked leaf runs unbroken from y70 to a
+            # threshold at y124, stonewall's from y70 to y123, and only the
+            # bottom 32px — the part inside the tile — gains a reveal either
+            # side of it.
+            #
+            # What was here was a stub of wall masonry with a brass lantern
+            # burning on it above the tile edge, then a full-width cream bead
+            # band at row 96, then a slab of ROOF pixels with a 3px sliver of
+            # leaf in it. Three unrelated things stacked, the door being the
+            # smallest, which is precisely "die Türen wirken viel zu kurz".
             mirror = rot == 3
-            strip = [(70, 71, 20, 25), (72, 95, 18, 27)]
-            foot = (96, 127, 14, 31)
-            if mirror:
-                strip = [(y0, y1, 31 - b, 31 - a) for y0, y1, a, b in strip]
-                foot = (96, 127, 0, 17)
-            strip = [(y0, y1, x0 + a, x0 + b) for y0, y1, a, b in strip]
-            fill(strip, _jamb_px)
-            top_rim(strip, BONE["light"])
-            fy0, fy1, fa, fb = foot
-            fill([(fy0, fy1 - 1, x0 + fa, x0 + fb)],
-                 lambda x, y: _roof_pixel(x, y))
-            bead_run(c, x0 + fa, x0 + fb + 1, fy0, h=1, phase=fa % 4)
-            leaf_x = x0 + (fa + 4 if mirror else fb - 6)
-            for y in range(fy0 + 4, fy1):
-                for x in range(leaf_x, leaf_x + 3):
-                    c.put(x, y, _leaf_px(x, y, True))
-            _boss(c, leaf_x + 1, 112, 1)
-            # The lamp goes ON the door post. The first pass anchored it to the
-            # foot's outer edge, which is 4px clear of the 10px-wide post above
-            # it: a green flame burning in mid-air beside the door.
-            lantern(c, x0 + (31 - 22 if mirror else 22), 73, stem=2)
-            floor_line(fy1, x0 + fa, x0 + fb)
+
+            def mx(a, b):                                # cell-local, mirrored
+                return (x0 + (31 - b), x0 + (31 - a)) if mirror else (x0 + a,
+                                                                      x0 + b)
+
+            lx0, lx1 = mx(18, 27)                        # the leaf, all 58px
+            cx0, cx1 = mx(20, 25)                        # its crown cap
+            fx0, fx1 = mx(14, 31)                        # the tile's own block
+            # The reveal: the doorway cut into the wall, dark, with its top
+            # edge catching the light the way stonewall's does.
+            for y in range(TILE_TOP, 124):
+                for x in range(fx0, fx1 + 1):
+                    c.put(x, y, CAP["deep"])
+            for x in range(fx0, fx1 + 1):
+                c.put(x, TILE_TOP, STONE["light"])
+                c.put(x, TILE_TOP + 1, STONE["base"])
+            # The leaf. One field, top to bottom; a step lighter above the tile
+            # edge (its top, catching the sky) than below it (in the doorway's
+            # shade), which is the only thing vanilla changes down its length.
+            for y in range(70, 124):
+                for x in range(lx0, lx1 + 1):
+                    c.put(x, y, _leaf_px(x, y, True, shaded=y >= TILE_TOP))
+            for y in range(70, 72):                      # the cap's own width
+                for x in range(lx0, lx1 + 1):
+                    if not (cx0 <= x <= cx1):
+                        c.put(x, y, (0, 0, 0, 0))
+            _leaf_frame(c, lx0, lx1, 72, 123)
+            for x in range(cx0, cx1 + 1):                # crown: the bone cap
+                c.put(x, 70, BONE["hi"])
+                c.put(x, 71, BONE["base"])
+            _boss(c, (lx0 + lx1) // 2, 110, 2)           # the one green accent
+            _leaf_handle(c, lx1 - 2 if mirror else lx0 + 2, 116)
+            for x in range(fx0, fx1 + 1):                # threshold
+                c.put(x, 124, BONE["deep"])
+                c.put(x, 125, STONE["deep"])
+                c.put(x, 126, SEAM)
+            floor_line(127, fx0, fx1)
 
         elif not head_on:
             # Open, edge-on: the leaf has swung a quarter turn and stands
-            # against the jamb as a narrow slab, threshold below it.
+            # against the jamb as a narrow slab, threshold below it. Vanilla
+            # draws it as one tall post the whole height of the cell —
+            # stonewall's runs x14..22 from y68 down past the tile edge, with
+            # the wall stub beneath. Ours framed a panel across the middle
+            # third of the slab and ran two cream bead bands across it, so the
+            # 48px leaf read as a 16px placard on a pole.
             leaf = [(68, 69, x0 + 24, x0 + 29), (70, 115, x0 + 22, x0 + 31)]
-            fill(leaf, lambda x, y: _leaf_px(x, y, False))
-            top_rim(leaf, BONE["light"])
-            bead_run(c, x0 + 22, x0 + 32, 78, h=2, phase=2)
-            bead_run(c, x0 + 22, x0 + 32, 100, h=2, phase=2)
-            _leaf_frame(c, x0 + 23, x0 + 30, 82, 98)
-            _boss(c, x0 + 27, 90, 2)
-            for y in range(70, 116):                      # free edge of the leaf
-                c.put(x0 + 22, y, BRASS["deep"])
+            fill(leaf, lambda x, y: _leaf_px(x, y, True, shaded=y >= TILE_TOP))
+            _leaf_frame(c, x0 + 22, x0 + 31, 70, 115)
+            for x in range(x0 + 24, x0 + 30):            # crown: the bone cap
+                c.put(x, 68, BONE["hi"])
+                c.put(x, 69, BONE["base"])
+            _boss(c, x0 + 27, 96, 2)
+            _leaf_handle(c, x0 + 25, 106)
             fill([(116, 126, x0, x0 + 31)], lambda x, y: _roof_pixel(x, y))
             floor_line(127, x0, x0 + 31)
 
@@ -881,14 +1027,18 @@ def _build_doors(c):
                     (top + 4, top + 5, x0 + 1, x0 + 30)]
             body_top = top + 6
             fill(arch, lambda x, y: _leaf_px(x, y, True))
-            top_rim(arch, BONE["light"])
+            _crown_bead(c, arch, (body_top, 126 if rot == 3 else 103,
+                                  x0, x0 + 31))
+            # Same rule as the closed leaf: the arch cap is the crown and takes
+            # the bone, the body is ONE field with a frame round the whole of
+            # it and a single boss. The two cream bead bands that used to run
+            # across it cut a 36px leaf into three stripes.
             if rot == 1:
                 fill([(body_top, 103, x0, x0 + 31)],
                      lambda x, y: _leaf_px(x, y, True))
-                bead_run(c, x0, x0 + 32, 80, h=2, phase=0)
-                bead_run(c, x0, x0 + 32, 95, h=2, phase=0)
-                _leaf_frame(c, x0 + 3, x0 + 28, body_top + 2, 101)
+                _leaf_frame(c, x0 + 1, x0 + 30, body_top, 102)
                 _boss(c, x0 + 16, 88, 3)
+                _leaf_handle(c, x0 + 27, 94)
                 floor_line(103, x0, x0 + 31)
                 fill([(104, 126, x0 + 16, x0 + 31)],
                      lambda x, y: _roof_pixel(x, y))
@@ -896,10 +1046,9 @@ def _build_doors(c):
             else:
                 fill([(body_top, 126, x0, x0 + 31)],
                      lambda x, y: _leaf_px(x, y, True))
-                bead_run(c, x0, x0 + 32, 102, h=2, phase=0)
-                bead_run(c, x0, x0 + 32, 118, h=2, phase=0)
-                _leaf_frame(c, x0 + 3, x0 + 28, body_top + 2, 124)
+                _leaf_frame(c, x0 + 1, x0 + 30, body_top, 125)
                 _boss(c, x0 + 16, 110, 3)
+                _leaf_handle(c, x0 + 27, 116)
                 fill([(120, 126, x0, x0 + 15)],
                      lambda x, y: _roof_pixel(x, y))
                 floor_line(127, x0, x0 + 31)
