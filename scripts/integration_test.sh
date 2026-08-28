@@ -171,6 +171,11 @@ grep -qE "tile (cloudturftile|mistseatile)" "$LOG1" || { echo "FAIL: sky terrain
 grep -qE "biome (driftlands|stormveil|aurorashoals|skyway)" "$LOG1" || { echo "FAIL: sky biomes did not paint"; STATUS=1; }
 grep -qE "spirePlaced=true" "$LOG1" || { echo "FAIL: Warden's Spire was not stamped"; STATUS=1; }
 grep -qE "beaconObject=wardenbeaconoff" "$LOG1" || { echo "FAIL: spire beacon object missing"; STATUS=1; }
+# The way in. The Spire's doors sit on the axes through its origin, and the
+# forecourt lamp ring once stood a candelabra on the south one, so a player
+# arriving walked into a lamp instead of through the grand door.
+grep -qE "entrance check: door=[a-z]*door .*isDoor=true" "$LOG1" || { echo "FAIL: no door in the middle of the spire's south wall"; STATUS=1; }
+grep -qE "entrance check: .* clear=true" "$LOG1" || { echo "FAIL: something is standing in the spire's entrance approach"; STATUS=1; }
 grep -qE "wardenFloor=marblecheckertile" "$LOG1" || { echo "FAIL: spire interior floor missing"; STATUS=1; }
 grep -qE "npc check: wardens=1 cats=2" "$LOG1" || { echo "FAIL: Warden/cat NPCs not spawned exactly once"; STATUS=1; }
 grep -qE "settler check: wardensettler=WardenSettler" "$LOG1" || { echo "FAIL: the recruited Warden is not a registered settler"; STATUS=1; }

@@ -211,6 +211,13 @@ public final class SkyLandscape {
     /** Radius of the ring of candelabra standing on the forecourt. */
     public static final float HUB_LAMP_RADIUS = 11.0F;
     public static final int HUB_LAMP_COUNT = 6;
+    /**
+     * How far to either side of a door axis nothing from the forecourt
+     * furniture may stand. The Spire's four doors are on the axes through
+     * the origin, and a streetlamp is 86px of opaque sprite: one standing
+     * even a tile off the line still reads as blocking the entrance.
+     */
+    public static final int DOOR_AXIS_CLEARANCE = 1;
     /** No built object may stand closer than this — the spire preset owns it. */
     public static final float HUB_PROP_MIN = 10.5F;
 
@@ -929,13 +936,31 @@ public final class SkyLandscape {
         return pack(SURFACE_GARDEN, PROP_CLEAR);
     }
 
-    /** One of the candelabra standing in a ring on the Warden's Forecourt. */
+    /**
+     * One of the candelabra standing in a ring on the Warden's Forecourt.
+     *
+     * <p>The phase is a quarter step, not a half step, and that is the whole
+     * point of it. With six lamps at a half step the ring lands on angles
+     * 30/90/150/210/270/330 degrees, and 90 and 270 are exactly the south and
+     * north axes — so a lamp stood on the tile directly in front of the
+     * Spire's grand door, on the line the player walks in on. A quarter step
+     * gives (11,3) (3,11) (-8,8) (-11,-3) (-3,-11) (8,-8): all six survive and
+     * none is on an axis.
+     *
+     * <p>The axis guard below is not redundant with that. It is what keeps the
+     * approaches clear if the count, the radius or the phase is ever changed
+     * again, which is how the lamp got in front of the door in the first
+     * place. All four of the Spire's doors sit on an axis through the origin.
+     */
     private static boolean isHubLamp(int tileX, int tileY, int originX, int originY) {
         for (int k = 0; k < HUB_LAMP_COUNT; k++) {
-            double angle = k * (2.0 * Math.PI / HUB_LAMP_COUNT) + Math.PI / HUB_LAMP_COUNT;
-            int lx = originX + (int) Math.round(Math.cos(angle) * HUB_LAMP_RADIUS);
-            int ly = originY + (int) Math.round(Math.sin(angle) * HUB_LAMP_RADIUS);
-            if (tileX == lx && tileY == ly) {
+            double angle = k * (2.0 * Math.PI / HUB_LAMP_COUNT) + Math.PI / (2 * HUB_LAMP_COUNT);
+            int dx = (int) Math.round(Math.cos(angle) * HUB_LAMP_RADIUS);
+            int dy = (int) Math.round(Math.sin(angle) * HUB_LAMP_RADIUS);
+            if (Math.abs(dx) <= DOOR_AXIS_CLEARANCE || Math.abs(dy) <= DOOR_AXIS_CLEARANCE) {
+                continue;   // would stand on a door approach
+            }
+            if (tileX == originX + dx && tileY == originY + dy) {
                 return true;
             }
         }

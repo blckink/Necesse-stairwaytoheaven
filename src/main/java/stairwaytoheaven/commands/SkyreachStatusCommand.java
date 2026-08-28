@@ -417,6 +417,31 @@ public class SkyreachStatusCommand extends ModularChatCommand {
             String beaconObj = level.getObject(quest.beaconX, quest.beaconY).getStringID();
             String spireFloor = TileRegistry.getTileStringID(level.getTileID(quest.spireX, quest.spireY));
             logs.add("spire check: beaconObject=" + beaconObj + " wardenFloor=" + spireFloor);
+
+            // The grand door and the tiles a player walks in over. The Spire's
+            // four doors sit on the axes through the origin, and the forecourt
+            // lamp ring once put a candelabra on the south one -- so the way in
+            // is asserted here rather than assumed. originY is the beacon row;
+            // the south wall is +7 from it, and the approach runs out to the
+            // arrival pad and past it to the lamp ring's radius.
+            int ox = quest.beaconX;
+            int oy = quest.beaconY;
+            StringBuilder approach = new StringBuilder();
+            String doorObj = "?";
+            for (int dy = 7; dy <= 11; dy++) {
+                level.regionManager.ensureTileIsLoaded(ox, oy + dy);
+                String id = level.getObject(ox, oy + dy).getStringID();
+                if (dy == 7) {
+                    doorObj = id;
+                } else {
+                    approach.append(dy == 8 ? "" : " ").append(id);
+                }
+            }
+            boolean doorIsDoor = doorObj.contains("door");
+            boolean approachClear = approach.toString().replace("air", "").trim().isEmpty();
+            logs.add("entrance check: door=" + doorObj + " isDoor=" + doorIsDoor
+                    + " approach=[" + approach + "]"
+                    + " clear=" + approachClear);
         }
         // Force the regions the NPCs are anchored to into memory before
         // counting. Without this the count measures which regions happen to be
