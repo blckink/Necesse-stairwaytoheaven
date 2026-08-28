@@ -69,6 +69,8 @@ public class SkySurfaceStatusCommand extends ModularChatCommand {
     private static final int EVENT_SEED_SHARDS = 12;
     /** Half-width of the box around spawn the shard counts scan. */
     private static final int SHARD_SCAN = 24;
+    /** How far from spawn {@code basket} mode looks for a tile to stand a basket on. */
+    private static final int BASKET_SEARCH_RADIUS = 24;
     /**
      * Duration {@code seed} mode gives its shower. Deliberately far longer than
      * {@link SkyfallWorldEvent#DURATION_MS}: the point of that mode is to leave
@@ -86,8 +88,11 @@ public class SkySurfaceStatusCommand extends ModularChatCommand {
                 // force-generates queued POIs and counts them in the world;
                 // "seed" starts a Skyfall and LEAVES it running (so a restart
                 // has something to restore); "event" finishes whatever is
-                // running and checks the world is clean again.
-                new CmdParameter("mode", new StringParameterHandler("", "stamp", "seed", "event"), true),
+                // running and checks the world is clean again; "basket" places
+                // a Cat Basket on the Surface through the real placement path,
+                // which is the only way to observe the cats actually moving in.
+                new CmdParameter("mode",
+                        new StringParameterHandler("", "stamp", "seed", "event", "basket"), true),
                 new CmdParameter("regions", new IntParameterHandler(DEFAULT_CENSUS_SIDE), true));
     }
 
@@ -125,6 +130,13 @@ public class SkySurfaceStatusCommand extends ModularChatCommand {
         }
         if (mode.equals("event")) {
             runEvent(server, level, world, logs);
+        }
+        if (mode.equals("basket")) {
+            // Deliberately OUTSIDE the level monitor above, like seed/event:
+            // placing the basket moves the cats, which touches the Skyreach's
+            // regions and entity lists too, and taking a second level's locks
+            // underneath this one's is how a lock-order deadlock gets built.
+            placeCatBasket(server, level, world, logs);
         }
         reportSchedule(server, level, logs);
         logs.add("SKYSURFACE_STATUS_DONE");
@@ -474,6 +486,154 @@ public class SkySurfaceStatusCommand extends ModularChatCommand {
         event.over();
         logs.add("skyfall clean: cleared=" + cleared + " leftbehind=" + countShards(level)
                 + " over=" + event.isOver());
+    }
+
+    // -----------------------------------------------------------------------
+    // 4. the cats' home
+
+    /**
+     * Puts a Cat Basket down on the SURFACE, through the same path a player's
+     * own placement takes, and reports what happened to the cats.
+     *
+     * <p>This exists because the whole player report is that placing a basket
+     * did nothing: <em>"ich habe beide gerade platziert und die sind weg oder
+     * irgendwo anders dann erschienen wo ich es nicht weiss"</em>. A feature
+     * that compiles and never moves a cat is exactly the failure that shipped,
+     * so the integration test has to drive a real placement and then look at
+     * where the cats ended up. {@code ObjectItem.onPlaceObject} is the call
+     * {@code ObjectItem.onPlace} makes on the server for a player's placement
+     * (ObjectItem.java:321/401) -- going through it rather than writing the
+     * object layer directly is the point: the hook under test is
+     * {@code GameObject.placeObject}, and only this path reaches it.
+     */
+    private void placeCatBasket(Server server, Level level, WorldEntity world, CommandLog logs) {
+        GameObject basket = ObjectRegistry.getObject(stairwaytoheaven.SkyRegistry.catBasketID);
+        if (basket == null) {
+            logs.add("cat basket place: FAIL (catbasket is not registered)");
+            return;
+        }
+        Point spawn = world.defaultSpawnTile == null ? new Point(0, 0) : world.defaultSpawnTile;
+        Point first = freeTile(level, basket, spawn, null, null);
+        if (first == null) {
+            logs.add("cat basket place: FAIL (no free surface tile within "
+                    + BASKET_SEARCH_RADIUS + " of spawn " + spawn.x + "," + spawn.y + ")");
+            return;
+        }
+        place(server, level, basket, first);
+        report(server, level, "first", first, logs);
+
+        // The second basket. The rule the player has to be able to hold in
+        // their head is "the newest one wins", and the only way to know it
+        // holds is to place two.
+        Point second = freeTile(level, basket, spawn, first, null);
+        if (second != null) {
+            place(server, level, basket, second);
+            report(server, level, "second", second, logs);
+
+            // Breaking the OLD basket must not evict anybody: a basket that is
+            // not the recorded home has nothing to clear.
+            destroy(server, level, first);
+            report(server, level, "brokeold", first, logs);
+
+            // Breaking the ACTIVE one must, and the cats go back to the spire
+            // basket -- across the dimension boundary, the other way.
+            destroy(server, level, second);
+            report(server, level, "brokeactive", second, logs);
+        }
+
+        // ...and one more, so the world is left with the cats living in a
+        // basket on the Surface. That is the state the restart pass checks.
+        Point last = freeTile(level, basket, spawn, first, second);
+        if (last != null) {
+            place(server, level, basket, last);
+            report(server, level, "final", last, logs);
+        }
+    }
+
+    /**
+     * The first tile out from spawn the basket itself says it can stand on.
+     * Asking the object beats guessing: "occupied", "liquid" and the shore rules
+     * are all its own.
+     */
+    private Point freeTile(Level level, GameObject basket, Point spawn, Point skipA, Point skipB) {
+        synchronized (level) {
+            for (int radius = 2; radius <= BASKET_SEARCH_RADIUS; radius++) {
+                for (int dx = -radius; dx <= radius; dx++) {
+                    for (int dy = -radius; dy <= radius; dy++) {
+                        if (Math.max(Math.abs(dx), Math.abs(dy)) != radius) {
+                            continue;
+                        }
+                        int x = spawn.x + dx;
+                        int y = spawn.y + dy;
+                        if (skipA != null && skipA.x == x && skipA.y == y) {
+                            continue;
+                        }
+                        if (skipB != null && skipB.x == x && skipB.y == y) {
+                            continue;
+                        }
+                        level.regionManager.ensureTileIsLoaded(x, y);
+                        if (basket.canPlace(level, 0, x, y, 0, true, false) == null) {
+                            return new Point(x, y);
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Placed OUTSIDE the level monitor, like {@code seed}/{@code event}:
+     * {@code CatHome.claim} moves the cats, which reaches into another level's
+     * regions and entity lists, and taking a second level's locks underneath
+     * this one's is how a lock-order deadlock gets built.
+     */
+    private void place(Server server, Level level, GameObject basket, Point site) {
+        basket.getObjectItem().onPlaceObject(basket, level, 0, site.x, site.y, 0, null, null);
+        server.network.sendToClientsWithTile(
+                new necesse.engine.network.packet.PacketChangeObject(level, 0, site.x, site.y, basket.getID()),
+                level, site.x, site.y);
+    }
+
+    /**
+     * The real break path: {@code destroyObjectOverride} runs the object's full
+     * damage-to-destruction flow, and {@code DamagedObjectEntity.destroyObject}
+     * (jar 1.3.2, DamagedObjectEntity.java:227) is what calls
+     * {@code GameObject.onDestroyed} -- the hook under test.
+     */
+    private void destroy(Server server, Level level, Point site) {
+        level.entityManager.destroyObjectOverride(0, site.x, site.y);
+        server.network.sendToClientsWithTile(
+                new necesse.engine.network.packet.PacketChangeObject(level, 0, site.x, site.y,
+                        level.getObjectID(site.x, site.y)),
+                level, site.x, site.y);
+    }
+
+    /** What stands on the tile, what the world record says, and where the cats are. */
+    private void report(Server server, Level level, String step, Point site, CommandLog logs) {
+        stairwaytoheaven.quest.CatHome.Spot home = stairwaytoheaven.quest.CatHome.placed(server);
+        StringBuilder line = new StringBuilder("cat basket place: step=").append(step)
+                .append(" at=").append(level.getIdentifier()).append(':')
+                .append(site.x).append(',').append(site.y)
+                .append(" object=").append(level.getObject(site.x, site.y).getStringID())
+                .append(" recordedHome=").append(home == null ? "NONE" : home.toString());
+        // Where the cats ended up. Both candidate levels are looked at, because
+        // "the cat is not on this level" and "the cat is gone" are different
+        // facts and only one of them is a bug.
+        for (necesse.engine.util.LevelIdentifier id : new necesse.engine.util.LevelIdentifier[]{
+                LevelIdentifier.SURFACE_IDENTIFIER, stairwaytoheaven.SkyRegistry.SKYREACH_IDENTIFIER}) {
+            Level catLevel = id.equals(level.getIdentifier()) ? level : server.world.getLevel(id);
+            int count = 0;
+            if (catLevel != null) {
+                for (necesse.entity.mobs.Mob mob : catLevel.entityManager.mobs) {
+                    if (mob instanceof stairwaytoheaven.mobs.SpireCatMob) {
+                        count++;
+                    }
+                }
+            }
+            line.append(' ').append(id).append("cats=").append(count);
+        }
+        logs.add(line.toString());
     }
 
     /** How many Fallen Skyshards are standing in the scanned box around spawn. */

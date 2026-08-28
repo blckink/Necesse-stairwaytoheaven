@@ -270,17 +270,32 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         level.regionManager.ensureTileIsLoaded(quest.tabbyLairX, quest.tabbyLairY);
         quest.blackHome = true;
         quest.tabbyHome = true;
+        // ...and in the world record, exactly as SpireCatMob.interact does it.
+        // The cats now read THAT for "have I been coaxed", because a cat living
+        // on the Surface is nowhere near the Skyreach's level data.
+        stairwaytoheaven.quest.SkywatchWorldData world =
+                stairwaytoheaven.quest.SkywatchWorldData.get(level.getServer());
+        if (world != null) {
+            world.markCatHome(true);
+            world.markCatHome(false);
+        }
         int sent = 0;
+        java.util.List<stairwaytoheaven.mobs.SpireCatMob> cats = new java.util.ArrayList<>();
         for (necesse.entity.mobs.Mob mob : level.entityManager.mobs) {
             if (mob instanceof stairwaytoheaven.mobs.SpireCatMob) {
-                ((stairwaytoheaven.mobs.SpireCatMob) mob).sendHome(level, quest);
-                sent++;
+                cats.add((stairwaytoheaven.mobs.SpireCatMob) mob);
             }
+        }
+        for (stairwaytoheaven.mobs.SpireCatMob cat : cats) {
+            cat.sendHome(level);
+            sent++;
         }
         if (level.getServer() != null) {
             stairwaytoheaven.quest.SkyQuests.syncCatQuests(level.getServer(), quest);
         }
-        logs.add("cat coax: sent " + sent + " cat(s) home to " + quest.basketX + "," + quest.basketY);
+        stairwaytoheaven.quest.CatHome.Spot home = stairwaytoheaven.quest.CatHome.placed(level.getServer());
+        logs.add("cat coax: sent " + sent + " cat(s) home to "
+                + (home != null ? home.toString() : quest.basketX + "," + quest.basketY));
     }
 
     /**
@@ -291,6 +306,14 @@ public class SkyreachStatusCommand extends ModularChatCommand {
      * basket (WardenSpirePreset reserved the tile and placed nothing on it),
      * the cat has to BE there, and its homesick tether has to point at the
      * basket rather than at the lair it came from.
+     *
+     * <p>There are now TWO homes a cat can have -- the spire's basket, and a
+     * basket the player put down anywhere in the world -- so the line prints
+     * both: {@code basket=} is the spire tile, {@code home=} is the one actually
+     * in effect, with its LEVEL IDENTIFIER, and every per-cat number is measured
+     * against {@code home=}. A failure that only printed one of them could not
+     * say which of the two was in effect, which is the whole question when a cat
+     * is not where it should be.
      */
     private void diagnoseCats(SkyLevel level, CommandLog logs) {
         stairwaytoheaven.quest.SkywatchQuestData quest = stairwaytoheaven.quest.SkywatchQuestData.get(level);
@@ -316,42 +339,83 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                 .append(world == null ? "MISSING"
                         : "black=" + world.blackHome + " tabby=" + world.tabbyHome)
                 .append(" levelIsServer=").append(level.isServer());
-        for (necesse.entity.mobs.Mob mob : level.entityManager.mobs) {
-            if (!(mob instanceof stairwaytoheaven.mobs.SpireCatMob)) {
-                continue;
+
+        // The home actually in effect, and the level it is on. A player-placed
+        // basket wins; without one this is the spire's own tile.
+        stairwaytoheaven.quest.CatHome.Spot placed =
+                stairwaytoheaven.quest.CatHome.placed(level.getServer());
+        boolean playerPlaced = placed != null;
+        necesse.engine.util.LevelIdentifier homeLevel = playerPlaced
+                ? placed.level : SkyRegistry.SKYREACH_IDENTIFIER;
+        int homeX = playerPlaced ? placed.tileX : quest.basketX;
+        int homeY = playerPlaced ? placed.tileY : quest.basketY;
+        Level homeLevelObj = level;
+        if (!homeLevel.equals(level.getIdentifier())) {
+            homeLevelObj = level.getServer().world.getLevel(homeLevel);
+        }
+        String homeObject = "LEVEL_NOT_AVAILABLE";
+        if (homeLevelObj != null) {
+            homeLevelObj.regionManager.ensureTileIsLoaded(homeX, homeY);
+            homeObject = homeLevelObj.getObject(homeX, homeY).getStringID();
+        }
+        line.append(" home=").append(homeLevel).append(':').append(homeX).append(',').append(homeY)
+                .append(" homeObject=").append(homeObject)
+                .append(" homeSource=").append(playerPlaced ? "placed" : "spire");
+
+        // Look for the cats on the Skyreach AND on the level home is on: a cat
+        // that moved into a Surface basket is not in the sky level's mob list at
+        // all, and counting only that list is how "a cat is missing" gets
+        // reported for a cat that is exactly where it was told to go.
+        java.util.List<Level> search = new java.util.ArrayList<>();
+        search.add(level);
+        if (homeLevelObj != null && homeLevelObj != level) {
+            search.add(homeLevelObj);
+        }
+        for (Level searchLevel : search) {
+            boolean onHomeLevel = homeLevel.equals(searchLevel.getIdentifier());
+            for (necesse.entity.mobs.Mob mob : searchLevel.entityManager.mobs) {
+                if (!(mob instanceof stairwaytoheaven.mobs.SpireCatMob)) {
+                    continue;
+                }
+                stairwaytoheaven.mobs.SpireCatMob cat = (stairwaytoheaven.mobs.SpireCatMob) mob;
+                java.awt.Point tether = cat.getAiHomeTile();
+                int dx = cat.getTileX() - homeX;
+                int dy = cat.getTileY() - homeY;
+                int dist = (int) Math.round(Math.sqrt((double) dx * dx + (double) dy * dy));
+                // Two different claims, and the strict one is the TETHER.
+                // HomesickCritterAI only pulls a critter back once it is more
+                // than 96px (3 tiles) from home, and the wanderer keeps moving
+                // while it does, so a snapshot legitimately catches a cat
+                // several tiles out and walking back -- an exact position is not
+                // a property the AI has. What must be exact is where the tether
+                // points: that is what init() rebuilds on load, and pointing it
+                // at the old lair is the way "brought home" would silently stop
+                // meaning anything.
+                // SPIRE_RADIUS is the tower's own interior, so AT_BASKET reads
+                // as "a player who walks in finds this cat".
+                final int spireRadius = 8;
+                boolean tetherOk = tether != null && tether.x == homeX && tether.y == homeY;
+                String state;
+                if (!cat.isCoaxedHome()) {
+                    state = " STILL_WILD";
+                } else if (!onHomeLevel) {
+                    // The one failure a tile-only probe cannot see: right tile,
+                    // wrong dimension.
+                    state = " WRONG_LEVEL";
+                } else if (!tetherOk) {
+                    state = " WRONG_TETHER";
+                } else if (dist > spireRadius) {
+                    state = " AWAY_FROM_BASKET";
+                } else {
+                    state = " AT_BASKET";
+                }
+                line.append(" | ").append(cat.getStringID())
+                        .append(" on=").append(searchLevel.getIdentifier())
+                        .append(" at=").append(cat.getTileX()).append(',').append(cat.getTileY())
+                        .append(" d=").append(dist)
+                        .append(" tether=").append(tether == null ? "none" : tether.x + "," + tether.y)
+                        .append(state);
             }
-            stairwaytoheaven.mobs.SpireCatMob cat = (stairwaytoheaven.mobs.SpireCatMob) mob;
-            java.awt.Point tether = cat.getAiHomeTile();
-            int dx = cat.getTileX() - quest.basketX;
-            int dy = cat.getTileY() - quest.basketY;
-            int dist = (int) Math.round(Math.sqrt((double) dx * dx + (double) dy * dy));
-            // Two different claims, and the strict one is the TETHER.
-            // HomesickCritterAI only pulls a critter back once it is more than
-            // 96px (3 tiles) from home, and the wanderer keeps moving while it
-            // does, so a snapshot legitimately catches a cat several tiles out
-            // and walking back -- an exact position is not a property the AI
-            // has. What must be exact is where the tether points: that is what
-            // init() rebuilds on load, and pointing it at the old lair is the
-            // way "brought home" would silently stop meaning anything.
-            // SPIRE_RADIUS is the tower's own interior, so AT_BASKET reads as
-            // "a player who walks into the spire finds this cat".
-            final int spireRadius = 8;
-            boolean tetherOk = tether != null && tether.x == quest.basketX && tether.y == quest.basketY;
-            String state;
-            if (!cat.isHomeFlag(quest)) {
-                state = " STILL_WILD";
-            } else if (!tetherOk) {
-                state = " WRONG_TETHER";
-            } else if (dist > spireRadius) {
-                state = " AWAY_FROM_BASKET";
-            } else {
-                state = " AT_BASKET";
-            }
-            line.append(" | ").append(cat.getStringID())
-                    .append(" at=").append(cat.getTileX()).append(',').append(cat.getTileY())
-                    .append(" d=").append(dist)
-                    .append(" tether=").append(tether == null ? "none" : tether.x + "," + tether.y)
-                    .append(state);
         }
         logs.add(line.toString());
     }
@@ -553,7 +617,29 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         if (quest.blackHome || quest.tabbyHome) {
             level.regionManager.ensureTileIsLoaded(quest.basketX, quest.basketY);
         }
+        // ...and the cats' home is no longer always in this level. A basket the
+        // player put down on the Surface moves them off the Skyreach entirely,
+        // so counting only this level's mob list would report a missing cat for
+        // a cat that is exactly where the player sent it. The invariant being
+        // guarded here is "Siggi and Peanut are never permanently lost", and
+        // that is a claim about the WORLD, not about one level.
+        stairwaytoheaven.quest.CatHome.Spot placedHome =
+                stairwaytoheaven.quest.CatHome.placed(level.getServer());
+        Level catHomeLevel = null;
+        if (placedHome != null && !placedHome.isOn(level)) {
+            catHomeLevel = level.getServer().world.getLevel(placedHome.level);
+            if (catHomeLevel != null) {
+                catHomeLevel.regionManager.ensureTileIsLoaded(placedHome.tileX, placedHome.tileY);
+            }
+        }
         long wardens = 0, cats = 0, lambs = 0;
+        if (catHomeLevel != null) {
+            for (necesse.entity.mobs.Mob mob : catHomeLevel.entityManager.mobs) {
+                if (mob.getStringID().startsWith("spirecat")) {
+                    cats++;
+                }
+            }
+        }
         for (necesse.entity.mobs.Mob mob : level.entityManager.mobs) {
             String id = mob.getStringID();
             if (id.equals("skywarden")) {

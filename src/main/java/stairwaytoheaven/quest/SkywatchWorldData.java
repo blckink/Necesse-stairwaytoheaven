@@ -60,6 +60,28 @@ public class SkywatchWorldData extends WorldData {
     public boolean blackHome = false;
     public boolean tabbyHome = false;
 
+    /**
+     * The cats' HOME: the tile a player-placed Cat Basket stands on, and the
+     * level it stands on.
+     *
+     * This lives here rather than in {@link SkywatchQuestData} for the same
+     * reason this class exists at all. Quest data is {@code LevelData} on the
+     * Skyreach: it dies with a generation bump and is not readable while that
+     * level is unloaded. A home on the SURFACE cannot be stored in the sky
+     * level's data at all -- it is not a fact about the Skyreach.
+     *
+     * {@code catHomeLevel} is a {@link necesse.engine.util.LevelIdentifier}'s
+     * {@code stringID}, which matches {@code [a-z0-9-+]{1,50}}
+     * (LevelIdentifier.java:13), so it survives a plain string round trip.
+     * Empty means "no player-placed home" and the cats fall back to the spire
+     * basket. The tile is meaningless without the level, which is why the two
+     * are always written, read and cleared together.
+     */
+    public boolean catHomeSet = false;
+    public int catHomeX = 0;
+    public int catHomeY = 0;
+    public String catHomeLevel = "";
+
     @Override
     public void addSaveData(SaveData save) {
         super.addSaveData(save);
@@ -67,6 +89,10 @@ public class SkywatchWorldData extends WorldData {
         save.addLong("wardenAuth", this.wardenAuth);
         save.addBoolean("blackHome", this.blackHome);
         save.addBoolean("tabbyHome", this.tabbyHome);
+        save.addBoolean("catHomeSet", this.catHomeSet);
+        save.addInt("catHomeX", this.catHomeX);
+        save.addInt("catHomeY", this.catHomeY);
+        save.addSafeString("catHomeLevel", this.catHomeLevel == null ? "" : this.catHomeLevel);
     }
 
     @Override
@@ -76,6 +102,17 @@ public class SkywatchWorldData extends WorldData {
         this.wardenAuth = save.getLong("wardenAuth", this.wardenAuth, false);
         this.blackHome = save.getBoolean("blackHome", this.blackHome, false);
         this.tabbyHome = save.getBoolean("tabbyHome", this.tabbyHome, false);
+        this.catHomeSet = save.getBoolean("catHomeSet", this.catHomeSet, false);
+        this.catHomeX = save.getInt("catHomeX", this.catHomeX, false);
+        this.catHomeY = save.getInt("catHomeY", this.catHomeY, false);
+        this.catHomeLevel = save.getSafeString("catHomeLevel", this.catHomeLevel, false);
+        // A tile without a level names no place, and sending a cat to one is
+        // exactly the failure this pair of fields exists to prevent. A save
+        // written before this field existed lands here.
+        if (this.catHomeLevel == null || this.catHomeLevel.isEmpty()) {
+            this.catHomeSet = false;
+            this.catHomeLevel = "";
+        }
     }
 
     /**
@@ -110,6 +147,52 @@ public class SkywatchWorldData extends WorldData {
         SkywatchWorldData created = new SkywatchWorldData();
         worldEntity.addWorldData(KEY, created);
         return created;
+    }
+
+    /**
+     * Records a player-placed Cat Basket as the cats' home. The NEWEST basket
+     * always wins -- placing a second one anywhere moves them -- because that
+     * is the only rule a player can hold in their head while decorating.
+     */
+    public void setCatHome(String levelStringID, int tileX, int tileY) {
+        this.catHomeSet = true;
+        this.catHomeLevel = levelStringID;
+        this.catHomeX = tileX;
+        this.catHomeY = tileY;
+    }
+
+    /** True when the recorded home is exactly this tile on this level. */
+    public boolean isCatHome(String levelStringID, int tileX, int tileY) {
+        return this.catHomeSet && this.catHomeX == tileX && this.catHomeY == tileY
+                && this.catHomeLevel != null && this.catHomeLevel.equals(levelStringID);
+    }
+
+    /**
+     * Forgets the recorded home, but ONLY when it is the tile given: a basket
+     * broken somewhere else must never evict the cats from the one they live
+     * in.
+     *
+     * @return true when a record was actually cleared.
+     */
+    public boolean clearCatHome(String levelStringID, int tileX, int tileY) {
+        if (!this.isCatHome(levelStringID, tileX, tileY)) {
+            return false;
+        }
+        this.catHomeSet = false;
+        this.catHomeLevel = "";
+        this.catHomeX = 0;
+        this.catHomeY = 0;
+        return true;
+    }
+
+    /** True once EITHER cat has been coaxed home with a Cloudpuff Treat. */
+    public boolean anyCatCoaxed() {
+        return this.blackHome || this.tabbyHome;
+    }
+
+    /** Has this cat been coaxed home? Progression, not position. */
+    public boolean isCatCoaxed(boolean isBlackCat) {
+        return isBlackCat ? this.blackHome : this.tabbyHome;
     }
 
     /** Records a cat as living at the spire. Never un-records one. */

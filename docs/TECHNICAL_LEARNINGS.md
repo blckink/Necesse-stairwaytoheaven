@@ -1689,6 +1689,16 @@ next seed. Re-run before believing a single red run, and say which run the
 result came from. On 2026-08-28 the run counts were: `content/itempolish` red
 once (skyfall + cats), then green twice; `master` red once (cats) on the run in
 between.
+
+**UPDATE 2026-08-28 (feature/catbasket): the second and third of these were not
+seed flakiness at all.** The cats' home flags and the Skyfall's `restored` flag
+are both world-scoped state written by the same world save, which is why they
+went red together and green together — the run had lost vanilla's stop-save
+race and come back at the previous autosave. Root cause, log signature and the
+fix are under "A dedicated server's `stop` can save NOTHING" at the end of this
+file; the test now saves explicitly and waits before stopping. The Skyway tree
+count remains genuinely probabilistic.
+
 ## Surface structures are placed by the WorldPreset system, not by a level hook
 
 **[jar]** `SurfaceLevel.generateRegion` (necesse/level/maps/SurfaceLevel.java:23)
@@ -1968,3 +1978,110 @@ registration hiding an ID behind a variable — a red gate on `master` with
 nothing wrong. The audit now blanks comment bodies (and, for the brace-depth
 scanner, string contents) before matching, preserving every offset so findings
 still name the right line.
+
+## The cats' home has to be WorldData, and a mob crosses a level with `TeleportEvent`
+
+**[jar]** `furnitureType` is *only* a bucket key. `SettlementRoom.calculateStats`
+(SettlementRoom.java:114-115) counts an object toward a room at all only when it
+is `instanceof RoomFurniture`, and files it under `getFurnitureType()`;
+`getFurnitureScore()` is `sum(count^0.44)` over those buckets, fed to
+`SettlerThoughtRegistry.getRoomQualityThought`. Nothing in the 1.3.2 jar calls
+`getFurnitureTypes(String)` with a particular name, and **"petbed" does not
+appear in vanilla at all** — so the Cat Basket's `furnitureType = "petbed"`
+names its own bucket and is worth exactly one distinct piece of furniture to a
+room. Keeping it is right; the thing that actually has to stay is
+`extends FurnitureObject`, because that is what implements `RoomFurniture`.
+
+**[jar]** `GameObject.placeObject(level, layerID, x, y, rotation, byPlayer)` is
+the single funnel every placement goes through — `ObjectItem.onPlaceObject`
+(ObjectItem.java:401) calls it for a player's own placement, and so do the
+settler build path and worldgen. `Level.setObject` does NOT go through it, which
+is why `SkyLevel.setQuestObject` healing the spire's basket onto old worlds
+cannot claim a home the player never chose. The mirror is
+`GameObject.onDestroyed`, reached from `LevelObject.destroy`,
+`DamagedObjectEntity.destroyObject` (DamagedObjectEntity.java:227) and
+`PacketTileDestroyed`. Both run on the client too — guard with `level.isServer()`.
+
+**[jar]** `setPos` cannot move a mob to another level; it moves it inside the
+level it is filed under. The cross-level mechanism is
+`necesse.entity.levelEvent.TeleportEvent(Mob target, int delay,
+LevelIdentifier targetLevel, float sicknessTime,
+Function<LevelIdentifier,Level> destinationGenerator,
+Function<Level,TeleportResult> destinationCheck)`, added with
+`level.entityManager.events.add(event)` — `SettlersWorldData.returnToSettlement`
+(SettlersWorldData.java:161) is the worked example on a mob.
+
+  * The position in a `TeleportResult` is in **PIXELS**. `performTeleport` feeds
+    it to `setPos` / `changeMobLevel`, and `EntityManager.changeMobLevel` passes
+    it to `addMob(mob, (float) x, (float) y)`. Tiles here would land the mob 32x
+    closer to the origin.
+  * `destinationGenerator` may be `null`: `World.getLevel(identifier, null)`
+    still loads or generates (World.java:273-299).
+  * `delay = 0` makes the whole move **synchronous inside `events.add`** —
+    `LevelEventsManager.addHidden` calls `event.init()` directly, and `init()`
+    with no delay calls `performTeleport()` there and then.
+
+**[jar]** A mob that changes level does NOT get `init()` again.
+`EntityList.addHidden` (EntityList.java:205-209) calls `init()` only for an
+entity that was never initialised and **`onLevelChanged()`** for one that was.
+Anything rebuilt in `init()` — for `SpireCatMob`, the `HomesickCritterAI` home
+tether — has to be rebuilt in `onLevelChanged()` too, or the mob arrives in its
+new home still tethered to the tile it left, on a level that tile is not on.
+
+**[jar]** `HomesickCritterAI.homeTile` is a tile on the mob's OWN level; the
+node walks the critter toward it. A tile belonging to another dimension is a
+place it can walk toward forever, so the tether must only ever be set when the
+home is on the same level — travelling is the teleport's job, not the
+pathfinder's.
+
+**[jar]** `SkywatchQuestData.get(level)` **creates** the level data when it is
+missing. Calling it on the Surface for a cat that moved there would silently
+mint a record with basket and lair at 0,0 — and a cat tethered to 0,0 is the
+same bug class as a cat teleported into the void. Read the sky's quest data only
+when the level IS the Skyreach, and keep everything about a cat that can live
+anywhere (the coaxed flags, the home tile, the home's level identifier) in
+`SkywatchWorldData`, which is `WorldData` and survives a level unload or a
+generation bump. `LevelIdentifier.stringID` matches `[a-z0-9-+]{1,50}`
+(LevelIdentifier.java:13), so it round-trips through `addSafeString` unharmed.
+
+## A dedicated server's `stop` can save NOTHING, and that was the "flaky" test
+
+**[jar]** `Server.stop` (Server.java:986-1011) sets `stopCalled = true` **first**,
+prints "Starting world save", and only then builds the `ServerSaveHandler`.
+`Server.tick` (Server.java:296-303) runs, on the server thread,
+
+```java
+this.tickSaveHandler(this.stopCalled);
+if (this.stopCalled) { if (this.saveHandler == null) { this.privateStop(); } }
+```
+
+so if constructing the handler takes longer than one tick, the server thread
+observes `stopCalled` with `saveHandler` still null and stops outright.
+`privateStop` disposes every level and the world; the handler the other thread
+finishes building is then never ticked. **The world file is left at the last
+autosave and everything after it is gone.**
+
+**[run]** The log signature is exact: `Starting world save` and
+`Stopped server ... SERVER_STOPPED` in the same second, with **no** "Completed
+world save before stopping server" line, and no exception anywhere. A healthy
+stop-save on the same machine takes 16-18 seconds.
+
+**[run]** Construction is not free — `RegionManager.getSaveHandler`
+(RegionManager.java:271-275) takes each level's `entityManager.lock` and
+`RegionFilesManager.getSaveHandler` (RegionFilesManager.java:218-236) calls
+`getWorldRegion(rx, ry, true)` for **every loaded region** — so the more regions
+a run has loaded, the more reliably it loses the race. Measured: the cat-basket
+build, which force-loads the basket and lair regions on two levels, lost it
+**twice out of two**; the identical jar with only the basket placement removed
+from the test saved for 18 seconds and passed. So this is a vanilla race that a
+region-heavy run makes near-certain, not a mod bug — but the data loss is real.
+
+**[run]** `scripts/integration_test.sh` now issues the `save` console command
+and waits for "Completed world save" before it ever sends `stop`.
+`SaveServerCommand` calls `startFullSave` **without** `stopCalled` set, so
+nothing can stop underneath it. This is almost certainly what the section above
+("The integration test is seed-flaky in two known places") was really seeing:
+the cats' home flags AND the Skyfall's `restored=false` are both world-scoped
+state, both are written by the same save, and both come back stale together —
+which is precisely what losing the stop-save looks like. Both were red on the
+same runs and green together once the explicit save went in.

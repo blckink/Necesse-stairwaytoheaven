@@ -198,3 +198,33 @@ the port: windows in the left/right walls and in the top/bottom walls as
 separate scenes, closed and open doors in all four rotations, a solid block, an
 L corner and free-standing runs. Both faults are unmistakable with the vanilla
 strip underneath and invisible without it.
+
+---
+
+## 2026-08-28 (3) — Cat Baskets placed in town, and nothing happened
+
+| Area | Observation | Status |
+|---|---|---|
+| Cat Basket / where the cats live | "Katzenbetten sollen in normalem Haus platziert werden können etc in der Stadt damit die Katzen dort wohnen. ich habe beide gerade platziert und die sind weg oder irgendwo anders dann erschienen wo ich es nicht weiss 🥺" | **FIXED — NOT YET PLAYER CONFIRMED**. The player was right twice over. The Cat Basket was a bare `FurnitureObject` with `furnitureType = "petbed"` and nothing else: no object entity, no placement hook, no line of code anywhere connecting it to Siggi and Peanut. Placing one was decoration. The cats' home was `SkywatchQuestData.basketX/basketY` — the basket tile inside the Warden's Spire, in the **Skyreach** — and `sendHome` moved them there with `setPos`, which cannot cross a dimension even if the record had said to. So the cats were never lost: they were exactly where the mod had always sent them, one dimension up, and nothing in the game said so. Now a placed basket IS the home, wherever it stands, the coaxed cats travel to it (`TeleportEvent`, the vanilla cross-level mechanism), the newest basket wins, breaking the active one sends them back to the spire, and every one of those says so in chat in both languages. The record lives in `SkywatchWorldData` (a `WorldData`), because a home standing in a Surface town is not a fact about the Skyreach and must survive that level being unloaded or regenerated. |
+
+Measured end to end by `scripts/integration_test.sh`, which now places real
+baskets through the player's own placement path and watches the cats move:
+
+```
+cat basket place: step=first  at=surface:-10,1062 object=catbasket recordedHome=surface:-10,1062 surfacecats=2 skyreach2cats=0
+cat basket place: step=second at=surface:-10,1063 object=catbasket recordedHome=surface:-10,1063 surfacecats=2 skyreach2cats=0
+cat basket place: step=brokeold    at=surface:-10,1062 object=air recordedHome=surface:-10,1063 surfacecats=2 skyreach2cats=0
+cat basket place: step=brokeactive at=surface:-10,1063 object=air recordedHome=NONE              surfacecats=0 skyreach2cats=2
+cat basket place: step=final  at=surface:-10,1064 object=catbasket recordedHome=surface:-10,1064 surfacecats=2 skyreach2cats=0
+```
+
+and after a full server restart, both cats are still living in it:
+
+```
+cat home check: basket=-196,-314 object=catbasket homeFlags black=true tabby=true worldFlags black=true tabby=true
+  home=surface:-10,1064 homeObject=catbasket homeSource=placed
+  | spirecattabby on=surface at=-10,1064 d=0 tether=-10,1064 AT_BASKET
+  | spirecatblack on=surface at=-10,1064 d=0 tether=-10,1064 AT_BASKET
+```
+
+**Nobody has placed one in a real client yet.**

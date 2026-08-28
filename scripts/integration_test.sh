@@ -90,7 +90,47 @@ start_server() { # log_file
     sleep 3
 }
 
+# Write the world through the `save` console command and WAIT for it, before
+# ever sending `stop`.
+#
+# Vanilla's stop path loses a race that this test exists to be sure about.
+# Server.stop (jar 1.3.2, Server.java:986-1011) sets stopCalled = true FIRST,
+# prints "Starting world save", and only then builds the ServerSaveHandler --
+# while Server.tick (Server.java:296-303) does
+#     tickSaveHandler(stopCalled); if (stopCalled && saveHandler == null) privateStop();
+# on the server thread. If constructing the handler takes longer than one tick,
+# the server thread sees stopCalled with saveHandler still null and stops
+# outright: the log shows "Starting world save" and then "Stopped server" in
+# the same second, with no "Completed world save before stopping server", and
+# the world file is left at the last AUTOSAVE. Everything after it is gone.
+#
+# Construction is not free -- RegionManager.getSaveHandler takes each level's
+# entityManager lock and calls RegionFilesManager.getWorldRegion(.., true) for
+# every loaded region -- so the more regions a run has loaded, the more reliably
+# it loses. Observed exactly that: a run that had force-loaded the cats' basket
+# regions on two levels lost it twice out of two, and the same build without
+# that placement saved for 18 seconds and passed. `save` (SaveServerCommand)
+# calls startFullSave WITHOUT stopCalled set, so nothing can stop underneath it,
+# and it prints "Completed world save" when the write is really on disk.
+#
+# This is almost certainly the "known flaky persistence assertions" this test
+# has had: the flakiness is the race, not the assertions.
+save_world() {
+    local before waited=0
+    before="$(grep -c "Completed world save" "$LOG" 2>/dev/null || true)"
+    before="${before:-0}"
+    echo "Saving world (and waiting for it to land on disk)..."
+    echo "save" >&3
+    while [ "$(grep -c "Completed world save" "$LOG" 2>/dev/null || true)" -le "$before" ]; do
+        sleep 1
+        waited=$((waited + 1))
+        kill -0 "$SERVER_PID" 2>/dev/null || fail "server exited while saving the world"
+        [ "$waited" -ge 180 ] && fail "timeout waiting for the world save to complete"
+    done
+}
+
 stop_server() {
+    save_world
     echo "Stopping server..."
     echo "stop" >&3
     for _ in $(seq 1 30); do
@@ -151,6 +191,26 @@ echo "Running skysurfacestatus seed (start a Skyfall and leave it running)..."
 echo "skysurfacestatus seed" >&3
 for _ in $(seq 1 120); do
     [ "$(grep -c SKYSURFACE_STATUS_DONE "$LOG")" -ge 2 ] && break
+    sleep 2
+done
+
+# The cats' home, moved to the SURFACE. This is the player's own report --
+# "Katzenbetten sollen in normalem Haus platziert werden koennen etc in der
+# Stadt damit die Katzen dort wohnen ... ich habe beide gerade platziert und
+# die sind weg" -- so the only assertion worth anything is that a cat actually
+# MOVES. `basket` mode places a Cat Basket near the surface spawn through the
+# same ObjectItem.onPlaceObject path a player's placement takes.
+echo "Running skysurfacestatus basket (place a cat basket on the surface)..."
+echo "skysurfacestatus basket" >&3
+for _ in $(seq 1 120); do
+    [ "$(grep -c SKYSURFACE_STATUS_DONE "$LOG")" -ge 3 ] && break
+    sleep 2
+done
+# ...and re-probe, so the cat report is taken AFTER the move rather than before.
+echo "Running skyreachstatus (cats should now live on the surface)..."
+echo "skyreachstatus" >&3
+for _ in $(seq 1 90); do
+    [ "$(grep -c SKYREACH_STATUS_DONE "$LOG")" -ge 4 ] && break
     sleep 2
 done
 
@@ -357,6 +417,70 @@ COAXED="$(grep -E "cat home check:" "$LOG1" | tail -1)"
     || { echo "FAIL: a coaxed cat is not at its basket ($COAXED)"; STATUS=1; }
 echo "$COAXED" | grep -q "AWAY_FROM_BASKET" \
     && { echo "FAIL: a cat is flagged home but is not at the basket ($COAXED)"; STATUS=1; }
+
+echo "--- verifying a player-placed cat basket becomes the cats' home ---"
+# The whole player report. A Cat Basket shipped for four releases as plain
+# decoration: placing one did nothing at all, because the cats' home was
+# hard-wired to the basket tile inside the Warden's Spire, in the Skyreach.
+# "The feature compiles" proves nothing here -- only a cat that MOVED does.
+FIRST="$(grep -E "cat basket place: step=first " "$LOG1" | tail -1)"
+SECOND="$(grep -E "cat basket place: step=second " "$LOG1" | tail -1)"
+BROKEOLD="$(grep -E "cat basket place: step=brokeold " "$LOG1" | tail -1)"
+BROKEACTIVE="$(grep -E "cat basket place: step=brokeactive " "$LOG1" | tail -1)"
+PLACE="$(grep -E "cat basket place: step=final " "$LOG1" | tail -1)"
+# Rule 1: the first basket takes both cats off the Skyreach and onto the surface.
+if [ -z "$FIRST" ]; then
+    echo "FAIL: the first cat basket was never placed"; STATUS=1
+else
+    echo "$FIRST" | grep -q "surfacecats=2 skyreach2cats=0" \
+        || { echo "FAIL: placing a basket did not bring both cats to the surface ($FIRST)"; STATUS=1; }
+fi
+# Rule 2 (the newest basket wins) and rule 3 (a basket that is NOT the recorded
+# home may never evict anybody), then the release path: breaking the ACTIVE
+# basket must send the cats back to the spire, across the dimension boundary the
+# other way.
+if [ -n "$SECOND" ]; then
+    SECOND_AT="$(echo "$SECOND" | grep -oE ' at=surface:-?[0-9]+,-?[0-9]+' | sed 's/ at=//')"
+    echo "$SECOND" | grep -qF "recordedHome=$SECOND_AT" \
+        || { echo "FAIL: the newest basket did not win ($SECOND)"; STATUS=1; }
+    echo "$BROKEOLD" | grep -qF "recordedHome=$SECOND_AT" \
+        || { echo "FAIL: breaking a spare basket evicted the cats ($BROKEOLD)"; STATUS=1; }
+    echo "$BROKEOLD" | grep -q "surfacecats=2" \
+        || { echo "FAIL: breaking a spare basket moved the cats ($BROKEOLD)"; STATUS=1; }
+    echo "$BROKEACTIVE" | grep -qF "recordedHome=NONE" \
+        || { echo "FAIL: breaking the active basket did not clear the home ($BROKEACTIVE)"; STATUS=1; }
+    echo "$BROKEACTIVE" | grep -q "surfacecats=0 skyreach2cats=2" \
+        || { echo "FAIL: breaking the active basket did not send the cats back to the spire ($BROKEACTIVE)"; STATUS=1; }
+fi
+if [ -z "$PLACE" ]; then
+    echo "FAIL: the cat basket was never placed on the surface"; STATUS=1
+else
+    echo "$PLACE" | grep -q "object=catbasket" \
+        || { echo "FAIL: no cat basket stands on the surface tile it was placed on ($PLACE)"; STATUS=1; }
+    BASKET_AT="$(echo "$PLACE" | grep -oE ' at=surface:-?[0-9]+,-?[0-9]+' | head -1 | sed 's/ at=//')"
+    BASKET_HOME="$(echo "$PLACE" | grep -oE 'recordedHome=[a-z0-9+-]+:-?[0-9]+,-?[0-9]+' | sed 's/recordedHome=//')"
+    [ -n "$BASKET_AT" ] \
+        || { echo "FAIL: the basket was not placed on the surface ($PLACE)"; STATUS=1; }
+    # Tile AND level: a home record that remembers only the tile is the bug.
+    [ "$BASKET_AT" = "$BASKET_HOME" ] \
+        || { echo "FAIL: placing a basket did not record it as the cats' home ($PLACE)"; STATUS=1; }
+    # ...and the cats are actually standing on the surface now.
+    HOME1="$(grep -E "cat home check:" "$LOG1" | tail -1)"
+    echo "$HOME1" | grep -qF "home=$BASKET_HOME" \
+        || { echo "FAIL: the cat probe does not report the placed basket as home ($HOME1)"; STATUS=1; }
+    echo "$HOME1" | grep -qF "homeSource=placed" \
+        || { echo "FAIL: the spire basket is still in effect after one was placed ($HOME1)"; STATUS=1; }
+    echo "$HOME1" | grep -qF "homeObject=catbasket" \
+        || { echo "FAIL: the recorded home tile carries no basket ($HOME1)"; STATUS=1; }
+    [ "$(echo "$HOME1" | grep -o "on=surface" | wc -l)" -eq 2 ] \
+        || { echo "FAIL: both cats should have moved to the surface basket ($HOME1)"; STATUS=1; }
+    [ "$(echo "$HOME1" | grep -o AT_BASKET | wc -l)" -eq 2 ] \
+        || { echo "FAIL: both cats should be at the surface basket ($HOME1)"; STATUS=1; }
+    echo "$HOME1" | grep -q "WRONG_LEVEL" \
+        && { echo "FAIL: a cat is on the wrong level for its home ($HOME1)"; STATUS=1; }
+    echo "$HOME1" | grep -q "WRONG_TETHER" \
+        && { echo "FAIL: a cat's tether does not point at the placed basket ($HOME1)"; STATUS=1; }
+fi
 
 echo "--- verifying the built landscape ---"
 # The whole Skyreach comes out of one pure function
@@ -589,6 +713,31 @@ else
         && { echo "FAIL: a cat's homesick tether does not point at the basket ($HOME2)"; STATUS=1; }
     echo "$HOME2" | grep -q "AWAY_FROM_BASKET" \
         && { echo "FAIL: a cat wandered out of the spire ($HOME2)"; STATUS=1; }
+    # ...and the home is still the SURFACE basket, on the surface, after the
+    # world has been written to disk and read back. This is the half a level
+    # record could never carry: SkywatchQuestData is LevelData on the Skyreach,
+    # so a home standing in a town on the Surface has to live in the world
+    # record or it cannot survive at all.
+    echo "$HOME2" | grep -qF "homeSource=placed" \
+        || { echo "FAIL: the placed cat basket did not survive the restart ($HOME2)"; STATUS=1; }
+    echo "$HOME2" | grep -qF "homeObject=catbasket" \
+        || { echo "FAIL: the recorded home tile lost its basket across a restart ($HOME2)"; STATUS=1; }
+    [ "$(echo "$HOME2" | grep -o "on=surface" | wc -l)" -eq 2 ] \
+        || { echo "FAIL: both cats should still live on the surface after a restart ($HOME2)"; STATUS=1; }
+    echo "$HOME2" | grep -q "WRONG_LEVEL" \
+        && { echo "FAIL: a cat came back on the wrong level ($HOME2)"; STATUS=1; }
+    # The tether has to be rebuilt around the SURFACE basket by init() on load.
+    # A cat that comes back tethered to the spire tile it left would drift away
+    # from the basket the moment the AI ran, which is what the 25s wander pass
+    # above is for.
+    HOME_TILE2="$(echo "$HOME2" | grep -oE ' home=[a-z0-9+-]+:-?[0-9]+,-?[0-9]+' | sed 's/ home=[a-z0-9+-]*://')"
+    [ -n "$HOME_TILE2" ] \
+        && [ "$(echo "$HOME2" | grep -o "tether=$HOME_TILE2" | wc -l)" -eq 2 ] \
+        || { echo "FAIL: a cat's tether does not point at the placed basket after a restart ($HOME2)"; STATUS=1; }
+    HOME_PLACE1="$(grep -E "cat home check:" "$LOG1" | tail -1 | grep -oE ' home=[a-z0-9+-]+:-?[0-9]+,-?[0-9]+')"
+    HOME_PLACE2="$(echo "$HOME2" | grep -oE ' home=[a-z0-9+-]+:-?[0-9]+,-?[0-9]+')"
+    [ "$HOME_PLACE1" = "$HOME_PLACE2" ] \
+        || { echo "FAIL: the cats' home moved across a restart ($HOME_PLACE1 ->$HOME_PLACE2)"; STATUS=1; }
 fi
 
 for L in "$LOG1" "$LOG2"; do
@@ -611,6 +760,8 @@ if [ "$STATUS" -eq 0 ]; then
     echo "--- surface POIs and the Skyfall ---"
     grep -E "surface registry:|surface materials:|surface loot:|poi census:|poi stamp:|poi contents:|skyfall seed:|skyfall schedule:" "$LOG1"
     grep -E "skyfall run:|skyfall clean:" "$LOG2"
+    echo "--- the cats moving into a player-placed basket ---"
+    grep -E "cat coax:|cat basket place:|cat home check:" "$LOG1"
     # Only after the logs have been read, and only on success: a failed run's
     # world and logs are the evidence for diagnosing it. INTEGRATION_KEEP=1
     # keeps a successful run's world too, for probing output the summary above

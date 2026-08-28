@@ -85,11 +85,46 @@ public abstract class SpireCatMob extends CritterMob {
     @Override
     public void init() {
         super.init();
+        this.rebuildHomeTether();
+    }
+
+    /**
+     * A cat that changed level keeps its AI, so {@link #init()} is NOT run
+     * again: {@code EntityList.addHidden} (jar 1.3.2, EntityList.java:205-209)
+     * calls {@code init()} only for an entity that was never initialised and
+     * {@code onLevelChanged()} for one that was. That is the hook a cross-level
+     * travel arrives through, and without rebuilding here the cat would land in
+     * its new home carrying a tether to the tile it left.
+     */
+    @Override
+    public void onLevelChanged() {
+        super.onLevelChanged();
+        this.rebuildHomeTether();
+    }
+
+    /**
+     * Points the homesick AI at wherever home currently is.
+     *
+     * <p>Only ever at a tile on the cat's OWN level: {@code HomesickCritterAI}
+     * walks the critter toward {@code homeTile}, and a tile belonging to another
+     * dimension is a place it can walk toward forever. Getting the cat to a home
+     * on another level is {@link #sendHome} 's job, not the pathfinder's; when
+     * the home is elsewhere the tether is left at the cat's own position (the
+     * {@code HomesickCritterAI} default) so it simply wanders in place until it
+     * is moved.
+     */
+    private void rebuildHomeTether() {
         HomesickCritterAI<SpireCatMob> ai = new HomesickCritterAI<>(this);
         Level level = this.getLevel();
         if (level != null && level.isServer()) {
-            SkywatchQuestData quest = SkywatchQuestData.get(level);
-            ai.homeTile = new Point(this.homeX(quest), this.homeY(quest));
+            // mayLoadSkyreach = false: this runs inside mob load and level
+            // change, and pulling a whole dimension into memory from there is
+            // not something a tether is worth.
+            stairwaytoheaven.quest.CatHome.Spot home = stairwaytoheaven.quest.CatHome
+                    .resolve(level.getServer(), level, this.isBlackCat, false);
+            if (home != null && home.isOn(level)) {
+                ai.homeTile = new Point(home.tileX, home.tileY);
+            }
             this.aiHomeTile = new Point(ai.homeTile);
         }
         this.ai = new BehaviourTreeAI<>(this, ai);
@@ -100,22 +135,22 @@ public abstract class SpireCatMob extends CritterMob {
         return this.aiHomeTile;
     }
 
-    private boolean isHome(SkywatchQuestData quest) {
-        return this.isBlackCat ? quest.blackHome : quest.tabbyHome;
-    }
-
-    private int homeX(SkywatchQuestData quest) {
-        if (this.isHome(quest)) {
-            return quest.basketX;
+    /**
+     * Has this cat been coaxed home with a Cloudpuff Treat?
+     *
+     * <p>Read from the WORLD record, not from the Skyreach's level data: a cat
+     * living in a Surface town is nowhere near that level, and asking
+     * {@code SkywatchQuestData.get} for it there would attach an empty copy to
+     * the wrong level.
+     */
+    public boolean isCoaxedHome() {
+        Level level = this.getLevel();
+        if (level == null || !level.isServer()) {
+            return false;
         }
-        return this.isBlackCat ? quest.blackLairX : quest.tabbyLairX;
-    }
-
-    private int homeY(SkywatchQuestData quest) {
-        if (this.isHome(quest)) {
-            return quest.basketY;
-        }
-        return this.isBlackCat ? quest.blackLairY : quest.tabbyLairY;
+        stairwaytoheaven.quest.SkywatchWorldData world =
+                stairwaytoheaven.quest.SkywatchWorldData.get(level.getServer());
+        return world != null && world.isCatCoaxed(this.isBlackCat);
     }
 
     @Override
@@ -126,17 +161,31 @@ public abstract class SpireCatMob extends CritterMob {
         }
         ServerClient client = player.getServerClient();
         Level level = this.getLevel();
-        SkywatchQuestData quest = SkywatchQuestData.get(level);
 
-        if (this.isHome(quest)) {
+        if (this.isCoaxedHome()) {
             // He lives here now. Saying so matters: the whole reason a player
             // reported "Siggi gefunden und Snack gegeben aber danach nie wieder
             // gesehen" is that being brought home said nothing about WHERE home
             // is, and nothing at the spire showed that a cat lives there.
             this.bubble("wardencatpurr");
-            client.sendChatMessage(new LocalMessage("misc", "wardencatathome"));
+            stairwaytoheaven.quest.CatHome.Spot home = stairwaytoheaven.quest.CatHome
+                    .placed(level.getServer());
+            client.sendChatMessage(home == null
+                    ? new LocalMessage("misc", "wardencatathome")
+                    : new LocalMessage("misc", "wardencatathomebasket",
+                            "x", String.valueOf(home.tileX), "y", String.valueOf(home.tileY)));
             return;
         }
+        // A cat that has NOT been coaxed is still wild, and a wild cat is always
+        // in its Skyreach lair -- nothing moves one off that level before the
+        // treat. So this is the one place the sky's own level data is the right
+        // thing to read, and reading it anywhere else would attach an empty
+        // copy to a level it does not describe.
+        if (!stairwaytoheaven.SkyRegistry.SKYREACH_IDENTIFIER.equals(level.getIdentifier())) {
+            this.bubble("wardencatfound1");
+            return;
+        }
+        SkywatchQuestData quest = SkywatchQuestData.get(level);
         int treats = player.getInv().main.getAmount(level, player, ItemRegistry.getItem("cloudpufftreat"), "skywatch");
         if (treats <= 0) {
             this.bubble("wardencatfound1");
@@ -164,14 +213,27 @@ public abstract class SpireCatMob extends CritterMob {
         // Name the destination and put it back on the map. "vanishes homeward"
         // is not an address, and the spire marker may never have been delivered
         // (or may have been deleted); onLocator is idempotent per player.
-        client.sendChatMessage(new LocalMessage("misc", "wardencattreat",
-                "dir", new LocalMessage("misc", SkywatchQuestData.directionKey(
-                        this.getTileX(), this.getTileY(), quest.spireX, quest.spireY)).translate(),
-                "dist", String.valueOf(tileDistance(this.getTileX(), this.getTileY(),
-                        quest.spireX, quest.spireY))));
+        stairwaytoheaven.quest.CatHome.Spot home = stairwaytoheaven.quest.CatHome
+                .placed(level.getServer());
+        if (home != null) {
+            // A basket is down somewhere: that, not the spire, is where this cat
+            // is about to go, and telling the player the spire would send them
+            // to the wrong dimension to look. The level name goes in as a
+            // GameMessage, not a translated String -- a String would be resolved
+            // HERE, in the server's language, for every player.
+            client.sendChatMessage(new LocalMessage("misc", "wardencattreatbasket",
+                    "x", String.valueOf(home.tileX), "y", String.valueOf(home.tileY))
+                    .addReplacement("level", home.level.getDisplayName()));
+        } else {
+            client.sendChatMessage(new LocalMessage("misc", "wardencattreat",
+                    "dir", new LocalMessage("misc", SkywatchQuestData.directionKey(
+                            this.getTileX(), this.getTileY(), quest.spireX, quest.spireY)).translate(),
+                    "dist", String.valueOf(tileDistance(this.getTileX(), this.getTileY(),
+                            quest.spireX, quest.spireY))));
+        }
         stairwaytoheaven.quest.SkyMapMarkers.onLocator(client, quest);
         this.bubble("wardencatfound1");
-        this.sendHome(level, quest);
+        this.sendHome(level);
     }
 
     private static int tileDistance(int fromX, int fromY, int toX, int toY) {
@@ -181,35 +243,90 @@ public abstract class SpireCatMob extends CritterMob {
     }
 
     /**
-     * Vanishes in a puff of cloud and reappears at the spire basket spot.
+     * Vanishes in a puff of cloud and reappears at home -- the basket the player
+     * put down if there is one, the spire's basket otherwise, on whatever level
+     * that is.
      *
      * Public because {@code /skyreachstatus cats} drives it: "the cat is at the
      * basket after a save/load" is only worth anything as an observed fact, and
      * the only way to observe it headlessly is to actually send them home.
      */
-    public void sendHome(Level level, SkywatchQuestData quest) {
-        if (!quest.spirePlaced) {
-            return;  // no basket tile exists yet; teleporting to 0,0 would lose them
+    public void sendHome(Level level) {
+        if (level == null || !level.isServer()) {
+            return;
         }
-        this.spawnCloudPuff();
-        level.regionManager.ensureTileIsLoaded(quest.basketX, quest.basketY);
-        this.setPos(quest.basketX * 32 + 16, quest.basketY * 32 + 16, true);
-        // Re-file the mob under its NEW region immediately instead of waiting
-        // for the next EntityList tick. Region.onUnloaded (jar 1.3.2,
-        // Region.java:407-417) walks getSaveToRegion and calls
-        // limitWithinRegionBounds + remove on every mob still listed there, so
-        // a lair region that unloads inside that one-tick window would clamp
-        // the cat back into the lair it just left.
-        if (level.entityManager.mobs.getRegionList() != null) {
-            level.entityManager.mobs.getRegionList().updateRegion(this);
+        stairwaytoheaven.quest.CatHome.Spot home = stairwaytoheaven.quest.CatHome
+                .resolve(level.getServer(), level, this.isBlackCat, true);
+        if (home == null) {
+            // No home is known yet (no basket, no stamped spire). Standing still
+            // beats teleporting to 0,0, which is what the old spirePlaced guard
+            // was protecting against.
+            return;
         }
-        this.init();  // rebuild the AI so its home tether points at the basket
-        this.spawnCloudPuff();
+        if (home.isOn(level)) {
+            this.spawnCloudPuff();
+            level.regionManager.ensureTileIsLoaded(home.tileX, home.tileY);
+            this.setPos(home.tileX * 32 + 16, home.tileY * 32 + 16, true);
+            // Re-file the mob under its NEW region immediately instead of
+            // waiting for the next EntityList tick. Region.onUnloaded (jar
+            // 1.3.2, Region.java:407-417) walks getSaveToRegion and calls
+            // limitWithinRegionBounds + remove on every mob still listed there,
+            // so a lair region that unloads inside that one-tick window would
+            // clamp the cat back into the lair it just left.
+            if (level.entityManager.mobs.getRegionList() != null) {
+                level.entityManager.mobs.getRegionList().updateRegion(this);
+            }
+            this.init();  // rebuild the AI so its home tether points at the basket
+            this.spawnCloudPuff();
+            return;
+        }
+        this.travelToLevel(level, home);
     }
 
-    /** True once this cat has been coaxed home (world state, not position). */
-    public boolean isHomeFlag(SkywatchQuestData quest) {
-        return this.isHome(quest);
+    /**
+     * Cross-level travel, through vanilla's own mechanism.
+     *
+     * <p>{@code setPos} cannot cross a dimension -- it moves a mob inside the
+     * level it is filed under. {@code TeleportEvent} is what vanilla uses for a
+     * mob that has to end up somewhere else entirely
+     * ({@code SettlersWorldData.returnToSettlement} calls it on a settler in
+     * exactly this shape), and it does the whole job: it resolves or GENERATES
+     * the destination level ({@code World.getLevel}), asks the check for a
+     * position, and hands the mob to {@code EntityManager.changeMobLevel}, which
+     * re-files it and calls {@code onLevelChanged()} -- where the tether is
+     * rebuilt around the new home.
+     *
+     * <p>The position in a {@code TeleportResult} is in PIXELS, not tiles:
+     * {@code TeleportEvent.performTeleport} feeds it straight to
+     * {@code setPos}/{@code changeMobLevel}, and {@code changeMobLevel} passes
+     * it to {@code addMob(mob, (float) x, (float) y)}. Passing tiles here would
+     * drop the cat 32x closer to the origin than the basket -- the same mistake
+     * that once put a settler thousands of tiles into the wilderness.
+     *
+     * <p>Delay 0 means the move happens synchronously inside
+     * {@code events.add} ({@code LevelEventsManager.addHidden} calls
+     * {@code event.init()} directly), so by the time this returns the cat is
+     * already there. Sickness time 0: teleport sickness is a player debuff and
+     * a cat did not choose to travel.
+     */
+    private void travelToLevel(Level level, stairwaytoheaven.quest.CatHome.Spot home) {
+        this.spawnCloudPuff();
+        final int tileX = home.tileX;
+        final int tileY = home.tileY;
+        final necesse.engine.util.LevelIdentifier target = home.level;
+        necesse.entity.levelEvent.TeleportEvent teleport = new necesse.entity.levelEvent.TeleportEvent(
+                this, 0, target, 0.0F, null,
+                destination -> {
+                    if (destination == null) {
+                        return new necesse.engine.util.TeleportResult(false, null);
+                    }
+                    destination.regionManager.ensureTileIsLoaded(tileX, tileY);
+                    return new necesse.engine.util.TeleportResult(true, target,
+                            tileX * 32 + 16, tileY * 32 + 16);
+                });
+        // No second puff here: TeleportEvent sends its own visual to every
+        // client that can see the mob, at both ends.
+        level.entityManager.events.add(teleport);
     }
 
     private void spawnCloudPuff() {

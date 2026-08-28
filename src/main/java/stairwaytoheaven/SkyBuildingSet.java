@@ -17,7 +17,6 @@ import necesse.level.gameObject.PaintingObject;
 import necesse.level.gameObject.StatueObject;
 import necesse.level.gameObject.StreetlampObject;
 import necesse.level.gameObject.WallObject;
-import necesse.level.gameObject.furniture.FurnitureObject;
 import necesse.level.gameTile.SimpleFloorTile;
 import stairwaytoheaven.items.SkyMatItem;
 import stairwaytoheaven.objects.SkyDecoObject;
@@ -181,9 +180,10 @@ final class SkyBuildingSet {
             ObjectRegistry.getObject(ObjectRegistry.getObjectID(propId)).canPlaceOnShore = true;
         }
 
-        FurnitureObject catBasket = new FurnitureObject();
-        catBasket.furnitureType = "petbed";
-        SkyRegistry.catBasketID = ObjectRegistry.registerObject("catbasket", catBasket, 50.0F, true);
+        // A real object, not decoration: placing one makes that tile the cats'
+        // home, on whatever level it stands. See CatBasketObject / CatHome.
+        SkyRegistry.catBasketID = ObjectRegistry.registerObject("catbasket",
+                new stairwaytoheaven.objects.CatBasketObject(), 50.0F, true);
 
         PaintingObject banner = new PaintingObject(Item.Rarity.RARE);
         banner.texturePath = "skywatchbanner";

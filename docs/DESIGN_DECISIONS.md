@@ -93,6 +93,17 @@ behaviour. Their existing progression state (`blackHome` / `tabbyHome`) is kept.
 *Why:* it completes the story of bringing them home. It is not urgent enough to
 justify risky architecture in a build the player is about to test.
 
+**The PLAYER decides where that is, by placing a Cat Basket** (2026-08-28,
+`feature/catbasket`, from the report in `docs/PLAYTEST_LOG.md`). A placed basket
+is the cats' home on whatever level it stands, the newest one wins, and breaking
+the active one returns them to the spire. *Why:* the player asked for the cats
+to live in their town, and a home the mod picks is a home the player cannot
+find. The record is a `WorldData` (`SkywatchWorldData`), tile **plus** level
+identifier — a home in a Surface town is not a fact about the Skyreach and must
+not live in that level's data. **Only a cat that has been coaxed home with a
+Cloudpuff Treat ever moves**: a basket must never skip the quest step, or
+finding Siggi and Peanut stops being worth anything.
+
 ## Scope
 
 **The Veil exists but is not the current priority.** Do not expand it; do not

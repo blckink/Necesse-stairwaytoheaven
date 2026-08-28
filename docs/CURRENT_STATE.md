@@ -189,6 +189,19 @@ Ordered by the player's own priority. Full detail in `docs/PLAYTEST_LOG.md`.
   the cats' home, placed once per world including in existing saves; a coaxed
   cat is at it after a save/load round trip and stays within ~7 tiles of it
   (asserted every integration-test run).
+- **A placed Cat Basket IS the cats' home, on whatever level it stands**
+  (`feature/catbasket`). "ich habe beide gerade platziert und die sind weg oder
+  irgendwo anders dann erschienen wo ich es nicht weiss" — the basket was a bare
+  `FurnitureObject` with no connection to the cats at all, and their home was
+  hard-wired to the spire tile in the Skyreach. Now `objects/CatBasketObject`
+  claims the tile on `placeObject` and releases it on `onDestroyed`,
+  `quest/CatHome` records it in `SkywatchWorldData` (tile **and**
+  `LevelIdentifier`, because a home in a Surface town is not a fact about the
+  Skyreach), and `SpireCatMob` travels to it with vanilla's `TeleportEvent` when
+  it is on another level. Newest basket wins; breaking the active one sends them
+  back to the spire; only cats that have actually been coaxed home move; every
+  case says so in chat in both locales. Measured every integration-test run,
+  including across a restart.
 - The Warden's Spire is a furnished 21x21 hall (`worldgen/WardenSpirePreset`),
   rebuilt to the layout the user supplied
   (`docs/references/presets/warden-tower-layout.script`): a double cloudmarble
@@ -286,13 +299,15 @@ Ordered by the player's own priority. Full detail in `docs/PLAYTEST_LOG.md`.
 **Deferred**
 - Warden's shop is empty. The building set is fully craftable at a workstation,
   so nothing is missing — but the recruited Warden currently does nothing.
-- Cat home / cat bed furniture and settled cat behaviour (post-playtest).
 - `swh_beacon` (BeaconDeliveryQuest) is registered and never handed out — the
   beacon is lit by recruitment now, so the delivery chapter has no place in the
   chain. Either give it a place or retire it.
-- Cat behaviour once home is "sleep near the basket in the spire". The cats do
-  not yet live with the recruited Warden on the Surface (design decision:
-  their long-term home is with him once cat furniture exists).
+- Cat behaviour once home is still only "wander near the basket". Where that
+  basket is is now the player's choice (see the Cat Basket entry above), but the
+  cats do nothing charming or useful there yet, and nothing ties them to the
+  recruited Warden specifically.
+- The Cat Basket is a quest reward with no recipe, so a player has exactly one.
+  If moving house is meant to be easy, it wants a craft.
 - `ROADMAP.md` still describes the pre-v0.5 direction.
 - Wiring the new Stormveil/Aurora prop families into `SkyTerrainPainter`
   (registered + craftable now; worldgen composition is a later, tuned pass).

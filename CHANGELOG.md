@@ -3,6 +3,54 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [Unreleased] — Cat Basket: the cats live where you put their basket — 2026-08-28
+
+Player report: *"Katzenbetten sollen in normalem Haus platziert werden können
+etc in der Stadt damit die Katzen dort wohnen. ich habe beide gerade platziert
+und die sind weg oder irgendwo anders dann erschienen wo ich es nicht weiss"*.
+
+### Fixed
+- **Placing a Cat Basket now makes that tile the cats' home**, on whatever level
+  it stands. It was a bare `FurnitureObject` with no object entity, no placement
+  hook and no connection to Siggi and Peanut at all — placing one was pure
+  decoration, and the cats' home stayed hard-wired to the basket tile inside the
+  Warden's Spire, in the Skyreach. The cats were never lost; nothing in the game
+  ever said where they had gone.
+
+### Added
+- `objects/CatBasketObject` — a real object that claims its tile on
+  `placeObject` and releases it on `onDestroyed`, still a `FurnitureObject` with
+  `furnitureType = "petbed"` so it keeps counting toward a settlement room's
+  furniture score.
+- `quest/CatHome` — the server-side home record and every consequence of
+  changing it. The newest basket wins; breaking the active one sends the cats
+  back to the spire; breaking a spare one changes nothing; only cats that have
+  actually been coaxed home with a Cloudpuff Treat ever move, so a wild cat
+  stays wild and the quest step keeps its point.
+- The home lives in `SkywatchWorldData` as a tile **plus** a `LevelIdentifier`.
+  `SkywatchQuestData` is `LevelData` on the Skyreach and cannot hold a home that
+  stands in a Surface town.
+- `SpireCatMob` travels across dimensions with vanilla's `TeleportEvent` and
+  rebuilds its homesick tether in `onLevelChanged()` — a mob that changes level
+  never gets `init()` again.
+- Five chat lines in both locales, so placing a basket always answers what
+  happened: they moved in, they moved here from the older basket, they are still
+  out there and want a treat first, or the basket is gone and they went back to
+  the spire.
+
+### Changed
+- `/skyreachstatus`'s cat probe prints the home actually in effect with its
+  level identifier (`home=surface:-10,1064 homeSource=placed`), measures every
+  cat against it, and looks for the cats on the home level as well as the
+  Skyreach. The NPC census counts them across both levels too.
+- `skysurfacestatus basket` places real baskets on the Surface through the
+  player's own placement path, and `scripts/integration_test.sh` asserts the
+  cats actually move — and are still living there after a restart.
+- `scripts/integration_test.sh` saves the world explicitly and waits for it
+  before sending `stop`. Vanilla's stop path can silently write nothing (see
+  `docs/TECHNICAL_LEARNINGS.md`), which is what the test's "flaky persistence
+  assertions" have really been.
+
 ## [Unreleased] — v0.6 visual production sprint — 2026-08-25
 
 The large visual assets finally match the mini vegetation, critters and
