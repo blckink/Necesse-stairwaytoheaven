@@ -1,0 +1,1 @@
+new assets manually created
