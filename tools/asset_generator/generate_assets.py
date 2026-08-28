@@ -105,7 +105,11 @@ def main():
 
     # ===== v0.4 "The Living Sky": per-biome fill =====
     # Trees (vanilla TreeObject 128px cells) + leaf particles + saplings
-    gen_trees.gen_nimbuswillow(f"{out}/objects/nimbuswillow.png")
+    # objects/nimbuswillow.png is NOT generated: it is supplied art, kept in
+    # src/main/resources/kk-sprites/ and copied in as-is. gen_nimbuswillow
+    # stays available in gen_trees for reference, but calling it here would
+    # overwrite the supplied sheet on the next run. Its sapling, leaves and log
+    # icon are still ours and are still generated below.
     gen_trees.gen_fulgurpine(f"{out}/objects/fulgurpine.png")
     gen_trees.gen_prismabirch(f"{out}/objects/prismabirch.png")
     gen_trees.gen_nimbuswillow_leaves(f"{out}/particles/nimbusleaves.png")
@@ -244,7 +248,9 @@ def main():
     # last won, silently; this fails loudly instead.
     converted = ("tiles/skyway.png", "tiles/skyway_splat.png",
                  "objects/skyseraphtree.png", "items/skyseraphtree.png",
-                 "objects/statues/seraph.png", "items/seraphstatue.png")
+                 "objects/statues/seraph.png", "items/seraphstatue.png",
+                 "objects/cloudtree.png", "items/cloudtree.png",
+                 "objects/nimbuswillow.png")
     clash = [rel for rel in converted if os.path.exists(f"{out}/{rel}")]
     if clash:
         raise SystemExit(

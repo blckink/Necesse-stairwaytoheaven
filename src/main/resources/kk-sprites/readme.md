@@ -16,3 +16,11 @@ repack is reproducible from this folder.
 | supplied | becomes | why it is repacked |
 |---|---|---|
 | `birchtree-new-cloudtree.png` 256×512 | `objects/cloudtree.png` 128×1024 | vanilla puts the snow form in column 1, and `TreeObject` reaches that column only on vanilla's `snowID`, which the Skyreach has none of. `getTreeSpriteY` is overridable, so the cold forms move to the lower half of a single column and `SkyTreeObject` picks the half from the ground. |
+| `nimbuswillow.png` 128×512 | `objects/nimbuswillow.png` | **replacement**, copied in as-is — same 128×512 single column of four variants the generator produced, so no repack is needed. |
+
+A file with no `-new-` in its name replaces a sheet we already ship. When that
+happens the generator must stop producing it, or the next full run silently
+overwrites the supplied art: `generate_assets.py` drops the call and lists the
+path in its `converted` guard, which fails loudly if anything writes it again.
+The piece's companions (sapling, leaves, log icon) stay generated — only the
+supplied sheet changes hands.
