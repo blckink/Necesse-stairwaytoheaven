@@ -48,11 +48,23 @@ CLASSES = {
     "ModularCarpetObject":    ((64, 64),   ["mask"], []),
     "TableDecorationObject":  ((32, 32),   [],       []),
     "PotTableDecorationObject": ((32, 32), [],       []),
+    # The spire pieces. BookshelfObject and CabinetObject live in
+    # gameObject/container, not gameObject/furniture, but both are
+    # FurnitureObjects with a furnitureType ("bookshelf"/"cabinet") and an
+    # InventoryObjectEntity behind them, so they are furniture AND storage.
+    # Sizes measured on oakbookshelf/oakcabinet/oakclock/oakdisplay.
+    "BookshelfObject":        ((128, 128), [],       []),
+    "CabinetObject":          ((128, 128), [],       []),
+    "ClockObject":            ((128, 64),  [],       []),
+    "DisplayStandObject":     ((128, 32),  [],       []),
 }
 
 # Roles we require to exist at all. A "furniture set" without a sittable chair
-# or a decoration-holding table is not a furniture set.
-REQUIRED_CLASSES = {"ChairObject", "ModularTableObject", "BenchObject", "BedObject"}
+# or a decoration-holding table is not a furniture set - and, since the spire
+# plan asks for them by name, without the four storage/reading pieces either.
+REQUIRED_CLASSES = {"ChairObject", "ModularTableObject", "BenchObject", "BedObject",
+                    "BookshelfObject", "CabinetObject", "ClockObject",
+                    "DisplayStandObject"}
 
 # Base classes that are NOT furniture, however table-shaped the sprite is.
 # Registering one of these from SkyFurnitureSet is the exact mistake this

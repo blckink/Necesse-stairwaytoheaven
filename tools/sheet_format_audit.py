@@ -25,6 +25,39 @@ Checks:
   EMPTY, so the window ends up 48px, exactly as tall as its wall. Filling those
   rows renders a window 96px tall against a 48px wall.
 
+  Rotation sheets. Every furniture piece and workstation whose renderer reads
+  sprite(rotation % 4, 0, 32, height) is four 32px columns at a FIXED vertical
+  anchor, and the anchor is not the same for every class:
+
+      BookshelfObject / CabinetObject   pos(drawX, drawY - height + 64)
+      ClockObject / CraftingStationObject
+                                        pos(drawX, drawY - height + 32)
+      DisplayStandObject / processing stations
+                                        pos(drawX, drawY - (height - 32))
+
+  Two consequences a mass check cannot see. First, a column left EMPTY is a
+  rotation that renders nothing - the player turns the piece and it vanishes.
+  Second, vanilla's own bookshelf, cabinet and clock deliberately place each
+  rotation at a DIFFERENT row band inside the cell, because a case standing
+  against the north wall is drawn higher on screen than the same case turned
+  around; drawing all four columns bottom-aligned makes the piece jump a tile
+  when it is rotated. The bands below are vanilla's, measured column by column
+  off oakbookshelf / oakcabinet / oakclock / oakdisplay.
+
+  The Aether Forge's fire strip. ProcessingForgeObject draws the body as
+  sprite(rotation % 4, 0, 32, height - 32) at drawY - 32 and the fire as
+  sprite(frame, (height - 32) / 32, 32) at drawY. So the last 32px row of the
+  sheet is four animation frames, they must all be non-empty and actually
+  differ, and their content has to land inside the mouth the body cut - which
+  is rows 4..15 of the fire cell, i.e. body rows 36..47. Fire drawn outside
+  that band burns on the masonry.
+
+  The kiln's lit sheet. The cheese-press pattern loads objects/<id>_on through
+  GameTexture.fromFileRaw and falls back to the cold sheet on
+  FileNotFoundException, so a missing or wrongly-sized _on fails silently: the
+  station simply never looks lit. It must exist, match the base sheet's size,
+  and differ from it.
+
 Usage:  python3 tools/sheet_format_audit.py
 Exit code 1 if anything is out of format.
 """
@@ -73,10 +106,177 @@ WINDOW_MUST_BE_EMPTY = (2, 3, 4)
 WINDOW_STRIP_X = (64, 96)
 
 
-def cell_extent(px, height, x0, x1):
-    rows = [y for y in range(height)
+# Rotation sheets: file -> (size, {column: (first row, last row)}, vanilla ref).
+#
+# The row bands are the vanilla analogue's own, exact. They are an equality,
+# not a ceiling, because the whole point is that the piece occupies the same
+# screen space as the vanilla piece the engine draws with the same code: a
+# bookshelf whose front column starts eight rows lower is eight pixels shorter
+# than every other bookshelf in the game, and nothing else would report it.
+# Columns are the engine's dir() order - 0 up (back), 1 right, 2 down (front),
+# 3 left.
+ROTATION_SHEETS = {
+    "objects/skywatchbookshelf.png": (
+        (128, 128), {0: (36, 99), 1: (18, 99), 2: (16, 77), 3: (18, 99)}, "oakbookshelf"),
+    "objects/skywatchcabinet.png": (
+        (128, 128), {0: (34, 95), 1: (20, 95), 2: (12, 73), 3: (20, 95)}, "oakcabinet"),
+    "objects/skywatchclock.png": (
+        (128, 64), {0: (20, 61), 1: (18, 57), 2: (6, 47), 3: (18, 57)}, "oakclock"),
+    "objects/skywatchdisplay.png": (
+        (128, 32), {0: (0, 31), 1: (0, 31), 2: (0, 31), 3: (0, 31)}, "oakdisplay"),
+}
+
+# Workstation sheets. These are not held to a vanilla piece's exact band - they
+# are our own designs - but every rotation must exist, must sit ON the bottom
+# of the tile rather than floating, and must not run off the top of its cell.
+# `bottom` is the last row the body may use; `top` the first.
+STATION_SHEETS = {
+    # (size, body height, first row allowed, last row allowed)
+    "objects/windsilkloom.png": ((128, 64), 64, 4, 60),
+    "objects/aetherforge.png": ((128, 96), 64, 4, 60),
+    "objects/stormglasskiln.png": ((128, 64), 64, 4, 60),
+    "objects/stormglasskiln_on.png": ((128, 64), 64, 4, 60),
+}
+
+# The forge's fire strip: file -> (rows the fire may occupy inside its 32px
+# cell). Vanilla's forge uses 4..15; ours cuts its mouth at body rows 36..47,
+# which is the same band once the two anchors are lined up.
+FIRE_STRIP = {"objects/aetherforge.png": (4, 15)}
+
+# Optional lit sheets loaded through GameTexture.fromFileRaw.
+LIT_PAIRS = (("objects/stormglasskiln.png", "objects/stormglasskiln_on.png"),)
+
+
+def cell_extent(px, height, x0, x1, y0=0):
+    rows = [y for y in range(y0, height)
             if any(px[x, y][3] > 0 for x in range(x0, x1))]
     return (min(rows), max(rows)) if rows else (None, None)
+
+
+def check_rotation_sheets(problems):
+    """Four columns, each at the exact row band its vanilla analogue uses."""
+    checked = 0
+    for rel, (size, bands, ref) in sorted(ROTATION_SHEETS.items()):
+        path = os.path.join(RES, rel)
+        if not os.path.exists(path):
+            problems.append(f"{rel}: missing")
+            continue
+        im = Image.open(path).convert("RGBA")
+        if im.size != size:
+            problems.append(f"{rel}: {im.size}, expected {size} -- the renderer "
+                            f"reads sprite(rotation % 4, 0, 32, height)")
+            continue
+        px = im.load()
+        for col, (want_top, want_bot) in sorted(bands.items()):
+            checked += 1
+            top, bot = cell_extent(px, im.height, col * 32, col * 32 + 32)
+            if top is None:
+                problems.append(
+                    f"{rel} column {col}: empty -- rotation {col} would render "
+                    f"nothing at all")
+            elif (top, bot) != (want_top, want_bot):
+                problems.append(
+                    f"{rel} column {col}: rows {top}..{bot}, {ref} uses "
+                    f"{want_top}..{want_bot} -- the engine anchors both with the "
+                    f"same code, so a different band is a different height on "
+                    f"screen")
+    return checked
+
+
+def check_station_sheets(problems):
+    """Every rotation drawn, nothing running off the cell."""
+    checked = 0
+    for rel, (size, body_h, want_top, want_bot) in sorted(STATION_SHEETS.items()):
+        path = os.path.join(RES, rel)
+        if not os.path.exists(path):
+            problems.append(f"{rel}: missing")
+            continue
+        im = Image.open(path).convert("RGBA")
+        if im.size != size:
+            problems.append(f"{rel}: {im.size}, expected {size}")
+            continue
+        px = im.load()
+        for col in range(4):
+            checked += 1
+            top, bot = cell_extent(px, body_h, col * 32, col * 32 + 32)
+            if top is None:
+                problems.append(
+                    f"{rel} column {col}: empty -- rotation {col} would render "
+                    f"nothing at all")
+            elif top < want_top:
+                problems.append(
+                    f"{rel} column {col}: starts at row {top}, above row "
+                    f"{want_top} -- that much runs off the top of the cell")
+            elif bot > want_bot:
+                problems.append(
+                    f"{rel} column {col}: ends at row {bot}, below row "
+                    f"{want_bot} -- the station would hang over the tile below")
+    return checked
+
+
+def check_fire_strips(problems):
+    """Four animation frames, all drawn, all different, all inside the mouth."""
+    checked = 0
+    for rel, (want_top, want_bot) in sorted(FIRE_STRIP.items()):
+        path = os.path.join(RES, rel)
+        if not os.path.exists(path):
+            problems.append(f"{rel}: missing")
+            continue
+        im = Image.open(path).convert("RGBA")
+        strip_y = im.height - 32
+        px = im.load()
+        frames = []
+        for f in range(4):
+            checked += 1
+            top, bot = cell_extent(px, im.height, f * 32, f * 32 + 32, strip_y)
+            if top is None:
+                problems.append(
+                    f"{rel} fire frame {f}: empty -- the forge would flicker "
+                    f"to nothing every fourth frame")
+                frames.append(None)
+                continue
+            top -= strip_y
+            bot -= strip_y
+            if top < want_top or bot > want_bot:
+                problems.append(
+                    f"{rel} fire frame {f}: rows {top}..{bot} of its cell, "
+                    f"expected inside {want_top}..{want_bot} -- the fire is "
+                    f"drawn at drawY while the body is at drawY - 32, so "
+                    f"anything outside that band burns on the masonry")
+            frames.append(bytes(bytearray(
+                b for y in range(strip_y, im.height)
+                for x in range(f * 32, f * 32 + 32) for b in px[x, y])))
+        for a in range(4):
+            for b in range(a + 1, 4):
+                checked += 1
+                if frames[a] is not None and frames[a] == frames[b]:
+                    problems.append(
+                        f"{rel} fire frames {a} and {b} are identical -- the "
+                        f"animation would visibly stall")
+    return checked
+
+
+def check_lit_pairs(problems):
+    """The optional _on sheet exists, matches, and actually looks different."""
+    checked = 0
+    for cold_rel, lit_rel in LIT_PAIRS:
+        checked += 1
+        cold_path = os.path.join(RES, cold_rel)
+        lit_path = os.path.join(RES, lit_rel)
+        if not os.path.exists(lit_path):
+            problems.append(
+                f"{lit_rel}: missing -- fromFileRaw would fall back to "
+                f"{cold_rel} and the station would never look lit")
+            continue
+        cold = Image.open(cold_path).convert("RGBA")
+        lit = Image.open(lit_path).convert("RGBA")
+        if cold.size != lit.size:
+            problems.append(f"{lit_rel}: {lit.size}, must match {cold_rel} {cold.size}")
+        elif cold.tobytes() == lit.tobytes():
+            problems.append(
+                f"{lit_rel}: identical to {cold_rel} -- a lit sheet that looks "
+                f"exactly like the cold one is not a lit sheet")
+    return checked
 
 
 def main():
@@ -147,12 +347,19 @@ def main():
                     f"{rel} cell {cell}: ends at y{bot}, expected y{want_bot} -- the door "
                     f"must sit on the bottom of its cell")
 
+    rotations = check_rotation_sheets(problems)
+    stations = check_station_sheets(problems)
+    fires = check_fire_strips(problems)
+    lits = check_lit_pairs(problems)
+
     for p in problems:
         print(f"FIX  {p}")
     if problems:
         print(f"\n{len(problems)} sheet cell(s) out of format.")
         return 1
-    print(f"OK: {checked} wall-sheet door and window cells sit at the extents "
+    print(f"OK: {checked} wall-sheet door and window cells, {rotations} furniture "
+          f"rotation columns, {stations} workstation rotation columns, {fires} "
+          f"fire-strip checks and {lits} lit-sheet pair(s) sit at the extents "
           f"the engine draws them at.")
     return 0
 

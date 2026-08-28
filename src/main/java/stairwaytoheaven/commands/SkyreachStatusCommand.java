@@ -118,6 +118,7 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         diagnoseHusbandry((SkyLevel) level, logs);
         diagnoseToolAudit(logs);
         diagnoseNetAudit(logs);
+        diagnoseWorkstations(logs);
         locateFromPlayer((SkyLevel) level, serverClient, logs);
         logs.add("SKYREACH_STATUS_DONE");
     }
@@ -399,6 +400,62 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                 new stairwaytoheaven.mobs.SkyCritterMob.DewSnail()}) {
             logs.add("net " + mob.getStringID() + "="
                     + (mob instanceof necesse.entity.mobs.misc.NetableMob ? "NETABLE" : "not netable"));
+        }
+    }
+
+    /**
+     * The three Skywatch workstations, measured rather than asserted.
+     *
+     * A settler can only be put on a station if two separate things are true at
+     * once, and neither is visible from the source of the object alone.
+     * `SettlementStorageManager.assignWorkstation` accepts a tile only when its
+     * object passes `instanceof SettlementWorkstationObject`, and the station is
+     * only worth assigning if its Tech actually carries recipes — a recipe
+     * registered against the wrong Tech, or after the mod recipe registry
+     * closed, leaves a station that is assignable and has nothing to do. Both
+     * are silent failures in game, so both are printed here.
+     */
+    private void diagnoseWorkstations(CommandLog logs) {
+        String[][] stations = {
+                {"windsilkloom", "windsilkloom"},
+                {"aetherforge", "aetherforge"},
+                {"stormglasskiln", "stormglasskiln"},
+        };
+        for (String[] station : stations) {
+            necesse.level.gameObject.GameObject object =
+                    necesse.engine.registries.ObjectRegistry.getObject(
+                            necesse.engine.registries.ObjectRegistry.getObjectID(station[0]));
+            if (object == null) {
+                logs.add("workstation " + station[0] + "=MISSING");
+                continue;
+            }
+            boolean isStation = object instanceof necesse.level.maps.levelData
+                    .settlementData.SettlementWorkstationObject;
+            boolean processing = isStation && ((necesse.level.maps.levelData
+                    .settlementData.SettlementWorkstationObject) object)
+                    .isProcessingInventory(null, 0, 0);
+            int recipes = 0;
+            StringBuilder results = new StringBuilder();
+            try {
+                necesse.inventory.recipe.Tech tech =
+                        necesse.engine.registries.RecipeTechRegistry.getTech(station[1]);
+                for (necesse.inventory.recipe.Recipe recipe
+                        : necesse.inventory.recipe.Recipes.getRecipes(tech)) {
+                    recipes++;
+                    if (results.length() > 0) {
+                        results.append('+');
+                    }
+                    results.append(recipe.resultItem.item.getStringID())
+                            .append('x').append(recipe.resultAmount);
+                }
+            } catch (java.util.NoSuchElementException e) {
+                results.append("TECH_MISSING");
+            }
+            logs.add("workstation " + station[0]
+                    + " settlementWorkstation=" + isStation
+                    + " processing=" + processing
+                    + " recipes=" + recipes
+                    + " makes=" + (results.length() == 0 ? "NOTHING" : results));
         }
     }
 

@@ -199,6 +199,31 @@ done
 # The snail must implement NetableMob — the marker the vanilla net checks.
 grep -qF "net dewsnail=NETABLE" "$LOG1" || { echo "FAIL: dewsnail is not netable"; STATUS=1; }
 
+echo "--- verifying the Skywatch workstations a settler can be put on ---"
+# A profession in Necesse is a workstation object plus recipes on its Tech.
+# `SettlementStorageManager.assignWorkstation` gates on
+# `instanceof SettlementWorkstationObject`, and a station whose Tech carries no
+# recipes is assignable and has nothing to do — both fail silently in game.
+# The expected products are named so a recipe that lands on the wrong Tech
+# (or after the mod recipe registry closed) fails here instead of shipping.
+for expected in \
+    "workstation windsilkloom settlementWorkstation=true processing=false recipes=2" \
+    "workstation aetherforge settlementWorkstation=true processing=true recipes=2" \
+    "workstation stormglasskiln settlementWorkstation=true processing=true recipes=1"; do
+    grep -qF "$expected" "$LOG1" || { echo "FAIL: workstation audit expected $expected"; \
+        grep -E "^.*workstation " "$LOG1" | tail -3; STATUS=1; }
+done
+grep -qE "workstation windsilkloom .* makes=.*skyweavex1" "$LOG1" \
+    || { echo "FAIL: the Windsilk Loom does not weave skyweave"; STATUS=1; }
+grep -qE "workstation aetherforge .* makes=.*stormsteelbarx1" "$LOG1" \
+    || { echo "FAIL: the Aether Forge does not make stormsteel"; STATUS=1; }
+grep -qE "workstation stormglasskiln .* makes=.*stormglassx2" "$LOG1" \
+    || { echo "FAIL: the Stormglass Kiln does not fire stormglass"; STATUS=1; }
+grep -qF "makes=NOTHING" "$LOG1" \
+    && { echo "FAIL: a workstation has no recipes on its tech at all"; STATUS=1; }
+grep -qF "TECH_MISSING" "$LOG1" \
+    && { echo "FAIL: a workstation's recipe tech was never registered"; STATUS=1; }
+
 echo "--- verifying the Cloud Lamb is a coherent husbandry animal ---"
 # Three player questions, three measured values: what shearing yields, what the
 # offspring is (vanilla SheepMob breeds a 50% chance of a plain `ram`), and what
