@@ -22,6 +22,7 @@ import necesse.level.maps.levelData.settlementData.LevelSettler;
 import necesse.level.maps.levelData.settlementData.ServerSettlementData;
 import stairwaytoheaven.SkyRegistry;
 import stairwaytoheaven.quest.SkywatchQuestData;
+import stairwaytoheaven.quest.SkywatchWorldData;
 
 /**
  * The Sky Warden — the last keeper of the Skywatch, resident of the Old
@@ -64,6 +65,12 @@ public class SkyWardenMob extends HumanShop {
      * against the wiki economy (Elder's priciest stock item is ~6,000).
      */
     public static final int RECRUIT_COST = 30_000;
+
+    /**
+     * One-shot guard for {@link #serverTick()}: the world record is stamped the
+     * first tick this mob knows it is a settler, not on every tick.
+     */
+    private boolean stampedWorldRecord = false;
 
     /** What a replacement Silver Bell costs at the Warden, in coins. */
     public static final int SPARE_BELL_PRICE = 5000;
@@ -114,7 +121,60 @@ public class SkyWardenMob extends HumanShop {
     /** Open on the recruit page until he has actually moved in. */
     @Override
     public boolean startInRecruitForm(ServerClient client) {
-        return !this.isSettler();
+        return !this.isSettler() && !worldHasWarden(client.getServer());
+    }
+
+    /**
+     * One Warden per world, and vanilla enforces it for us.
+     *
+     * {@code PacketShopContainerUpdate} calls this both to build the settlement
+     * dropdown and again server-side before {@code payForRecruit} runs, so
+     * returning false here means the fee can never be taken -- not merely that
+     * the button is hidden. Without it a world that bumped its generation
+     * (fresh Skyreach, fresh {@link SkywatchQuestData}) would stamp a new spire
+     * with a new keeper standing in it, and the player who already paid 30,000
+     * for the Warden now sitting in their settlement could be charged again for
+     * a duplicate.
+     */
+    @Override
+    public boolean isValidRecruitment(necesse.level.maps.levelData.settlementData.CachedSettlementData settlement,
+                                      ServerClient client) {
+        if (!super.isValidRecruitment(settlement, client)) {
+            return false;
+        }
+        return this.isSettler() || !worldHasWarden(client == null ? null : client.getServer());
+    }
+
+    /**
+     * The settler stamps the world record himself.
+     *
+     * The record has to be true BEFORE the player first climbs into a freshly
+     * generated Skyreach, otherwise the spire is stamped with a second keeper
+     * (and {@code isValidRecruitment} above only prevents the second payment,
+     * not the confusing second Warden). Dialogue is too late for that: the
+     * surface Warden may never be talked to first. He is on the surface level,
+     * which is loaded whenever the player is on it, so his own tick is the
+     * earliest reliable moment -- and it costs one boolean read per tick after
+     * the first.
+     */
+    @Override
+    public void serverTick() {
+        super.serverTick();
+        if (this.stampedWorldRecord || !this.isSettler()) {
+            return;
+        }
+        Level level = this.getLevel();
+        Server server = level == null ? null : level.getServer();
+        SkywatchWorldData world = SkywatchWorldData.get(server);
+        if (world != null) {
+            world.markRecruited(0L);
+            this.stampedWorldRecord = true;
+        }
+    }
+
+    /** Whether this world already recruited a Sky Warden. Null-safe. */
+    private static boolean worldHasWarden(Server server) {
+        return server != null && SkywatchWorldData.hasWarden(server);
     }
 
     /**
@@ -293,6 +353,13 @@ public class SkyWardenMob extends HumanShop {
         // whose bookkeeping did not survive an unloaded Skyreach (or by the
         // v0.5.0 hand-spawned second mob, which never touched this record at
         // all). Without this the chain dead-ends on a false `recruited`.
+        if (this.isSettler()) {
+            SkywatchWorldData world = SkywatchWorldData.get(server);
+            if (world != null) {
+                world.markRecruited(client.authentication);
+                this.stampedWorldRecord = true;
+            }
+        }
         if (this.isSettler() && !quest.recruited) {
             quest.recruited = true;
             quest.stage = Math.max(quest.stage, 2);
@@ -371,6 +438,13 @@ public class SkyWardenMob extends HumanShop {
             return;
         }
         Server server = client.getServer();
+        // World-scoped first: this is the record that survives a generation
+        // bump, and everything below it lives in the Skyreach level file.
+        SkywatchWorldData world = SkywatchWorldData.get(server);
+        if (world != null) {
+            world.markRecruited(client.authentication);
+            this.stampedWorldRecord = true;
+        }
         // Force-loaded, not "only if it happens to be loaded". The legacy
         // WardenSettlerMob is recruited FOR FREE ON THE SURFACE, and by then
         // the Skyreach has usually been unloaded again (Server.java:365-375) --

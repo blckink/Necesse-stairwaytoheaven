@@ -371,6 +371,24 @@ public class WardenSpirePreset extends Preset {
                 quest.basketY = levelY + (BASKET_Y - WARDEN_Y);
                 quest.spirePlaced = true;
 
+                // Does this world already have its Warden? It can: bumping
+                // SkyRegistry.WORLD_GENERATION starts a FRESH Skyreach, so this
+                // quest data is blank even though the player recruited (and
+                // paid for) a Warden who is right now standing in their
+                // settlement. SkywatchWorldData is the record that survives
+                // that, and if it says yes the spire is stamped ALREADY AWAKE:
+                // lit beacon, no keeper. A second keeper would be a duplicate
+                // of a settler the player already owns.
+                stairwaytoheaven.quest.SkywatchWorldData world =
+                        stairwaytoheaven.quest.SkywatchWorldData.get(level.getServer());
+                if (world != null && world.wardenRecruited) {
+                    quest.recruited = true;
+                    quest.recruitedAuth = world.wardenAuth;
+                    quest.stage = Math.max(quest.stage, 2);
+                    level.setObject(quest.beaconX, quest.beaconY, SkyRegistry.wardenBeaconOnID);
+                    return null;
+                }
+
                 SkyWardenMob warden = (SkyWardenMob) MobRegistry.getMob("skywarden", level);
                 level.entityManager.addMob(warden, levelX * 32 + 16, levelY * 32 + 16);
             }

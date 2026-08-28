@@ -64,6 +64,13 @@ public class StairwayToHeavenMod {
         SkyItems.register();
         SkyBuildingSet.registerItems();
         LevelDataRegistry.registerLevelData(SkywatchQuestData.KEY, SkywatchQuestData.class);
+        // World-scoped truth of "this world already has a Warden". Lives in
+        // the world entity rather than the Skyreach level, so a generation
+        // bump (which starts a fresh level) cannot make the world forget the
+        // Warden the player already paid for. See SkywatchWorldData.
+        necesse.engine.registries.WorldDataRegistry.registerWorldData(
+                stairwaytoheaven.quest.SkywatchWorldData.KEY,
+                stairwaytoheaven.quest.SkywatchWorldData.class);
         // HUD quest layer: real journal/sidebar quests mirroring the Warden
         // chain (see docs/research/quest-api.md). Items must already be
         // registered — the delivery quests reference them by stringID.
