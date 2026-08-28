@@ -179,9 +179,22 @@ public class SkySurfaceStatusCommand extends ModularChatCommand {
             byKind.put(gen.getClass().getSimpleName(), new ArrayList<>());
         }
         int vanillaQueued = 0;
+        int blockedBySpawn = 0;
         int startRegionX = level.regionManager.getRegionCoordByTile(0);
         int startRegionY = level.regionManager.getRegionCoordByTile(0);
         long started = System.currentTimeMillis();
+
+        // Vanilla drops a queued SURFACE preset that sits near the world spawn
+        // (WorldEntity.removePresetsNearbySpawn:279-303, via
+        // markPresetsToNotGenerate). The queue still LISTS it -- PresetDebugData
+        // exposes no "blocked" flag -- so a census that counts it and a stamp
+        // pass that then finds nothing placed disagree by exactly one, which is
+        // what "generated=2 placedcounter=1" was. Not a bug in the preset: the
+        // guard is what keeps structures off the player's starting area.
+        // So run vanilla's own test here and leave those out of the census.
+        Point spawn = world.defaultSpawnTile;
+        int spawnRegionX = spawn == null ? 0 : level.regionManager.getRegionCoordByTile(spawn.x);
+        int spawnRegionY = spawn == null ? 0 : level.regionManager.getRegionCoordByTile(spawn.y);
 
         for (int rx = 0; rx < side; rx++) {
             for (int ry = 0; ry < side; ry++) {
@@ -201,6 +214,10 @@ public class SkySurfaceStatusCommand extends ModularChatCommand {
                     if (list == null) {
                         continue;
                     }
+                    if (spawn != null && isBlockedBySpawn(data, spawn, spawnRegionX, spawnRegionY)) {
+                        blockedBySpawn++;
+                        continue;
+                    }
                     for (Rectangle rect : data.getOccupiedTileRectangles()) {
                         list.add(rect);
                     }
@@ -210,7 +227,8 @@ public class SkySurfaceStatusCommand extends ModularChatCommand {
 
         int regions = side * side;
         StringBuilder line = new StringBuilder("poi census: presetregions=" + regions
-                + " tilespan=" + (side * PRESET_REGION_TILES) + "x" + (side * PRESET_REGION_TILES));
+                + " tilespan=" + (side * PRESET_REGION_TILES) + "x" + (side * PRESET_REGION_TILES)
+                + " blockedbyspawn=" + blockedBySpawn);
         int total = 0;
         for (Map.Entry<String, List<Rectangle>> entry : byKind.entrySet()) {
             line.append(' ').append(entry.getKey()).append('=').append(entry.getValue().size());
@@ -334,6 +352,35 @@ public class SkySurfaceStatusCommand extends ModularChatCommand {
             }
         }
         return items;
+    }
+
+    /**
+     * Vanilla's own near-spawn test, replicated exactly.
+     *
+     * {@code WorldEntity.removePresetsNearbySpawn} rejects a preset whose
+     * occupied tile rectangle CONTAINS the spawn tile, or whose occupied
+     * region is within {@code SpawnTileFinder.CLEAR_SPAWN_REGION_RANGE} (7)
+     * regions of the spawn region. Copied rather than called because the
+     * predicate is passed to markPresetsToNotGenerate and never exposed, and
+     * because a loosened assertion would have hidden a real placement failure
+     * just as well as this false one.
+     */
+    private boolean isBlockedBySpawn(LevelPresetsRegion.PresetDebugData data, Point spawn,
+                                     int spawnRegionX, int spawnRegionY) {
+        for (Rectangle rect : data.getOccupiedTileRectangles()) {
+            if (rect.contains(spawn)) {
+                return true;
+            }
+        }
+        for (Point region : data.getOccupiedRegions()) {
+            if (necesse.engine.util.GameMath.squareDistance(
+                    (float) region.x, (float) region.y,
+                    (float) spawnRegionX, (float) spawnRegionY)
+                    <= (float) necesse.engine.world.SpawnTileFinder.CLEAR_SPAWN_REGION_RANGE) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean anyRegionGenerated(Level level, Rectangle rect) {
