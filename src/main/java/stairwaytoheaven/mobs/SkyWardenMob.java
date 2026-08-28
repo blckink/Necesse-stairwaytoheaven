@@ -63,7 +63,7 @@ public class SkyWardenMob extends HumanShop {
      * lump sum — the single largest NPC purchase in the mod, benchmarked
      * against the wiki economy (Elder's priciest stock item is ~6,000).
      */
-    public static final int RECRUIT_COST = 100_000;
+    public static final int RECRUIT_COST = 30_000;
 
     /** What a replacement Silver Bell costs at the Warden, in coins. */
     public static final int SPARE_BELL_PRICE = 5000;

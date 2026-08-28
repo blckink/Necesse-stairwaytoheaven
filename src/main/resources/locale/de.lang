@@ -210,6 +210,10 @@ aurorashoals=Aurorabänke
 skyway=Himmelspfade
 
 [level]
+// One entry per world generation (SkyRegistry.WORLD_GENERATION).
+// The old keys stay so a save still on the previous generation keeps its name.
+skyreach2=Die Himmelsweite
+veil2=Der Schleier
 veil=Der Schleier
 skyreach=Die Himmelsweite
 

@@ -210,6 +210,10 @@ aurorashoals=Aurora Shoals
 skyway=Skyway Passages
 
 [level]
+// One entry per world generation (SkyRegistry.WORLD_GENERATION).
+// The old keys stay so a save still on the previous generation keeps its name.
+skyreach2=The Skyreach
+veil2=The Veil
 veil=The Veil
 skyreach=The Skyreach
 

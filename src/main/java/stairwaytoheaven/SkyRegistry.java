@@ -36,7 +36,35 @@ public final class SkyRegistry {
     public static final int SKY_DIMENSION = 1;
 
     /** Level identifier of the Skyreach dimension (compare: "surface", "cave", "deepcave"). */
-    public static final LevelIdentifier SKYREACH_IDENTIFIER = new LevelIdentifier("skyreach");
+    /**
+     * WORLD GENERATION 2.
+     *
+     * <p>Both dimension identifiers carry a generation number, and bumping it
+     * is how a worldgen change reaches a save that has already explored the
+     * old terrain. Regions are written per level identifier, so a new
+     * identifier is simply a level nobody has generated yet: the player's
+     * stairway leads into a freshly built Skyreach, and the old one stays on
+     * disk untouched rather than being deleted. Roll the number back and the
+     * previous world is exactly where it was.
+     *
+     * <p>What a bump costs, and it is not nothing: everything built or
+     * recorded up there is left behind with the old level — the Warden and his
+     * settlement, the beacon, the cats, player-built structures, and each
+     * player's bound return stairway. Inventories and the surface are
+     * untouched. Bump it only when the generated world has changed enough that
+     * seeing the old one would be worse.
+     *
+     * <p>The identifiers stay string LITERALS on purpose. tools/locale_audit.py
+     * finds level names by matching the LevelIdentifier constructor call with a
+     * quoted argument, so building them by concatenation would leave that gate
+     * quietly checking nothing. (Spelling that pattern out in a comment makes
+     * the audit match the comment, which is how this sentence got reworded.)
+     * Each generation therefore also needs its own {@code [level]} entry in
+     * both locales — the audit fails until it is there.
+     */
+    public static final int WORLD_GENERATION = 2;
+
+    public static final LevelIdentifier SKYREACH_IDENTIFIER = new LevelIdentifier("skyreach2");
 
     // ===== Biomes =====
 
@@ -98,7 +126,8 @@ public final class SkyRegistry {
 
     /** One-world dimension index of the Veil: below the deep caves. */
     public static final int VEIL_DIMENSION = -3;
-    public static final LevelIdentifier VEIL_IDENTIFIER = new LevelIdentifier("veil");
+    /** Generation-stamped like the Skyreach — see {@link #WORLD_GENERATION}. */
+    public static final LevelIdentifier VEIL_IDENTIFIER = new LevelIdentifier("veil2");
 
     public static GloomfenBiome gloomfen;
     public static AshenReachBiome ashenReach;
