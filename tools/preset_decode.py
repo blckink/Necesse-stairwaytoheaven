@@ -24,9 +24,33 @@ from collections import Counter
 
 
 def decode(code):
+    """Base64 (URL-safe or standard) then zlib.
+
+    Tolerant on purpose: a code pasted through a chat client can lose its
+    trailing bytes, and zlib.decompress then raises on the checksum even
+    though the whole script has already been recovered. A decompressobj
+    returns what it got, which is what we actually want.
+    """
     code = "".join(code.split())
-    raw = base64.b64decode(code.replace("-", "+").replace("_", "/"))
-    return zlib.decompress(raw).decode("utf-8", "replace")
+    code = code.replace("-", "+").replace("_", "/")
+    raw = base64.b64decode(code + "=" * (-len(code) % 4))
+    # Raw-deflate with the 2-byte zlib header skipped: no adler32 is verified,
+    # so a code that lost bytes in transit still yields everything up to the
+    # damage instead of raising and giving us nothing.
+    for obj, data in ((zlib.decompressobj(), raw),
+                      (zlib.decompressobj(-15), raw[2:])):
+        try:
+            text = obj.decompress(data)
+            try:
+                text += obj.flush()
+            except zlib.error:
+                pass
+            if text:
+                return text.decode("utf-8", "replace")
+        except zlib.error:
+            continue
+    raise SystemExit("could not decompress - the code looks damaged; "
+                     "re-copy it and make sure nothing was cut off")
 
 
 def palette(script, key):
