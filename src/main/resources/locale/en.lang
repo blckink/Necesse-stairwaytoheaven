@@ -152,9 +152,7 @@ nimbussapling=Nimbus Sapling
 fulgursapling=Fulgur Sapling
 prismasapling=Prisma Sapling
 veilessence=Veil Essence
-veilessencetip=What a shade is made of. Cold to hold, colder to lose.
 cinderpearl=Cinder Pearl
-cinderpearltip=An ember that forgot to go out. Burns green.
 seancecircletip=Draw the circle, ring the Silver Bell, and knock.
 ghostlanterntip=Its flame remembers whoever lit it first.
 windwheat=Windwheat
@@ -391,3 +389,62 @@ swhaeronautsign=Balloon down. Cargo mostly intact.\nWalking east. If you find th
 // (raidapproaching and bossapproaching are both §b).
 swhskyfallstart=§bThe sky is coming apart - shards are falling.
 swhskyfallend=§aThe skyfall has passed.
+
+// ===== Item polish (content/itempolish) =====
+// One line per material saying WHAT IT IS and WHERE IT COMES FROM, because
+// nothing in the engine says either: Item.getBaseTooltips is name + debug +
+// getCraftingMatTooltips, and the last one only ever yields the generic
+// "crafting material" sentence a Tech carries. stairwaytoheaven.items.SkyMatItem
+// reads these through itemtooltip.<stringID>tip; every line here is live, and
+// tools/locale_audit.py fails if a described item class loses its line.
+// Each one opens with the KIND — mineral, ore, log, cloth, food — which is
+// exactly what the player asked for.
+
+[item]
+stormsteelhelmet=Stormsteel Helm
+stormsteelchestplate=Stormsteel Cuirass
+stormsteelboots=Stormsteel Greaves
+stormsteelvambrace=Stormsteel Vambrace
+auroralocket=Aurora Locket
+zephyrharness=Zephyr Harness
+
+[itemtooltip]
+// -- minerals, ores and bars --
+skystonetip=Mineral - the pale stone every sky island is built out of. Mined from skystone outcrops.
+aetheriumoretip=Ore - teal metal veined through Skyreach rock. Smelt it at a forge into Aetherium Bars.
+aetheriumbartip=Metal bar - Aetherium ore smelted down. The Skyreach's everyday working metal.
+stormshardtip=Mineral - a splinter struck off a storm crystal in the Stormveil, and still humming.
+stormsteelbartip=Metal bar - Aetherium quenched in storm shard at an Aether Forge. The strongest metal up here.
+stormglasstip=Mineral - fulgurite refired over skystone flux in a Stormglass Kiln, into a clear amber pane.
+fulguritetip=Mineral - sand fused to glass where the lightning went into the Stormveil ground.
+prismshardtip=Mineral - Prismabirch heartwood gone to crystal, prised out of the Aurora Shoals.
+cinderpearltip=Mineral - an ember that forgot to go out, picked off the Ashen Reach. Burns green.
+// -- fibres, cloth and flora --
+windsilktip=Fibre - spun out of harvested Windwheat, or sheared off a Cloud Lamb.
+skyweavetip=Cloth - a bolt of Windsilk woven on a Windsilk Loom by one of your settlers.
+aurorapetaltip=Flower petal - picked off the aurora blooms of the Shoals, and still faintly lit.
+// -- logs --
+cloudwoodtip=Log - cut from a Cloud Tree in the Driftlands. Light enough to float, if you let it.
+seraphwoodtip=Log - cut from a Sky Seraph along the Skyway Passages. Pale, straight and cold.
+nimbuswoodtip=Log - cut from a Nimbus Willow in the Driftlands. Damp, grey and slow to burn.
+charwoodtip=Log - cut from a Fulgur Pine in the Stormveil, charred through by old lightning.
+prismwoodtip=Log - cut from a Prismabirch in the Aurora Shoals. The grain still throws colour.
+// -- mob drops and livestock produce --
+veilessencetip=Mob drop - what a Gloom Shade is made of. Cold to hold, colder to lose.
+dewsnailtip=Critter - a Dew Snail, taken alive with a net. It carries a bead of sky dew on its shell.
+stormdowntip=Livestock produce - feather down sheared off a Thunderquill Fowl. Spins into Windsilk.
+aurorafleecetip=Livestock produce - fleece sheared off a Glimmergoat. Warm, and faintly lit in the dark.
+nimbusmilktip=Food - drawn from a Nimbus Yak with a bucket. Drink it, or press it into Skycurd.
+skycurdtip=Food - Nimbus Milk pressed in a cheese press. Keeps far longer than the milk did.
+cloudcustardtip=Food - Nimbus Milk and cloudberries cooked in a pot. Quick on the feet afterwards.
+nimbusdraughttip=Potion - Nimbus Milk brewed with an Aurora Petal. Thickens the skin against a long fall.
+// -- odds and ends --
+cloudpufftreattip=Pet treat - rolled from windsilk and petals. Siggi and Peanut will follow you for one.
+silverbelltip=Quest key - the Warden's own bell. Ring it at a Seance Circle to open the way down into the Veil.
+// -- the Stormsteel set and the three accessories --
+stormsteelhelmettip=Head armour - Stormsteel plate with a stormglass visor. Beaten out at a Tungsten Anvil.
+stormsteelchestplatetip=Chest armour - a Stormsteel cuirass with a storm-lens boss. Beaten out at a Tungsten Anvil.
+stormsteelbootstip=Foot armour - Stormsteel greaves over a skyweave lining. Beaten out at a Tungsten Anvil.
+stormsteelvambracetip=Accessory - a banded Stormsteel forearm guard, laced over skyweave.
+auroralockettip=Accessory - an Aurora Petal sealed under stormglass on an aurora-fleece cord.
+zephyrharnesstip=Accessory - a windsilk flight band strapped with storm down, buckled in Stormsteel.

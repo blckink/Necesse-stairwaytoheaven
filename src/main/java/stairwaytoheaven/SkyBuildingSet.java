@@ -8,7 +8,6 @@ import necesse.engine.registries.ObjectRegistry;
 import necesse.engine.registries.RecipeTechRegistry;
 import necesse.engine.registries.TileRegistry;
 import necesse.inventory.item.Item;
-import necesse.inventory.item.matItem.MatItem;
 import necesse.inventory.item.toolItem.ToolType;
 import necesse.inventory.recipe.Recipe;
 import necesse.inventory.recipe.Recipes;
@@ -20,6 +19,7 @@ import necesse.level.gameObject.StreetlampObject;
 import necesse.level.gameObject.WallObject;
 import necesse.level.gameObject.furniture.FurnitureObject;
 import necesse.level.gameTile.SimpleFloorTile;
+import stairwaytoheaven.items.SkyMatItem;
 import stairwaytoheaven.objects.SkyDecoObject;
 import stairwaytoheaven.objects.SkyWallLightObject;
 
@@ -219,10 +219,22 @@ final class SkyBuildingSet {
     }
 
     static void registerItems() {
+        // A CRAFTED treat, not a mob drop: it is made out of windsilk, petals
+        // and fleece and it is never dropped by anything. Vanilla has no pet
+        // treat to copy, and its own crafted intermediates that belong to no
+        // material family — `glass`, `glassbottle` (ItemRegistry.java:927-928)
+        // — sit in bare `materials`, so this does too. The tooltipKey argument
+        // is gone because SkyMatItem now resolves itemtooltip.cloudpufftreattip
+        // from the item's own string ID; passing it as well printed it twice.
         ItemRegistry.registerItem("cloudpufftreat",
-                new MatItem(50, Item.Rarity.UNCOMMON, "cloudpufftreattip").setItemCategory("materials", "mobdrops"), 5.0F, true);
+                new SkyMatItem(50, Item.Rarity.UNCOMMON).setItemCategory("materials"), 5.0F, true);
+        // A QUEST KEY, not a mineral: the Warden hands it over, the Seance
+        // Circle checks for it, and it is never smelted or built with. Vanilla
+        // keeps that kind of thing in misc/questitems — the category is created
+        // by the engine (ItemCategory.java:286, sort key Z-E-A) and
+        // QuestItem.java:29 files all 32 vanilla quest items into it.
         ItemRegistry.registerItem("silverbell",
-                new MatItem(10, Item.Rarity.EPIC, "silverbelltip").setItemCategory("materials", "minerals"), 250.0F, true);
+                new SkyMatItem(10, Item.Rarity.EPIC).setItemCategory("misc", "questitems"), 250.0F, true);
     }
 
     /** Recipes for the craftable half of the set (postInit). */

@@ -212,8 +212,71 @@ def source_files():
                 yield os.path.join(root, name)
 
 
+def strip_comments(text, blank_strings=False):
+    """Blank out //-comments and /* */ comments, preserving every offset.
+
+    The scanners below match registration calls with a regex, and a regex does
+    not know what a comment is. `SkyreachStatusCommand` explains in prose why
+    an item carries a crafting-material line and writes the words
+    "RecipeTechRegistry.registerTech(stringID, itemStringID)" in a comment to
+    do it -- and check_registration_wrappers then reported a real, correct,
+    documented probe as a registration hiding an ID behind a variable. An audit
+    that reads comments as code cries wolf, and an audit that cries wolf gets
+    ignored. Comment BODIES are replaced with spaces rather than removed so
+    every offset, and therefore every file:line in a finding, stays exact.
+    """
+    out = list(text)
+    i, n = 0, len(text)
+    in_line = in_block = in_string = in_char = False
+    while i < n:
+        c = text[i]
+        nxt = text[i + 1] if i + 1 < n else ""
+        if in_line:
+            if c == "\n":
+                in_line = False
+            else:
+                out[i] = " "
+        elif in_block:
+            if c == "*" and nxt == "/":
+                out[i] = out[i + 1] = " "
+                in_block = False
+                i += 2
+                continue
+            if c != "\n":
+                out[i] = " "
+        elif in_string:
+            if c == "\\":
+                if blank_strings:
+                    out[i] = out[i + 1] = " "
+                i += 2
+                continue
+            if c == '"':
+                in_string = False
+            elif blank_strings:
+                out[i] = " "
+        elif in_char:
+            if c == "\\":
+                i += 2
+                continue
+            if c == "'":
+                in_char = False
+        elif c == '"':
+            in_string = True
+        elif c == "'":
+            in_char = True
+        elif c == "/" and nxt == "/":
+            in_line = True
+            out[i] = " "
+        elif c == "/" and nxt == "*":
+            in_block = True
+            out[i] = " "
+        i += 1
+    return "".join(out)
+
+
 def source_text():
-    return "\n".join(open(path, encoding="utf-8").read() for path in source_files())
+    return "\n".join(strip_comments(open(path, encoding="utf-8").read())
+                     for path in source_files())
 
 
 def where(path, text, offset):
@@ -757,6 +820,149 @@ def check_world_textures():
     return problems, checked
 
 
+def class_index():
+    """({qualified class name: parent simple name}, {simple name: qualified}).
+
+    "Qualified" here means Outer.Inner for a nested class. This exists beside
+    class_supers() because that one answers a different question and answers it
+    by treating the first class in the file that HAS an `extends` clause as the
+    outer class — which is wrong for a holder class that extends nothing, and
+    produced "LivestockFood.LivestockProduce" for a class nested in
+    SkyLivestockItems. Here the nesting comes from brace depth, so it is right.
+
+    The simple-name map only carries names that are unambiguous across the mod.
+    Two different classes in this repository are called `Boots`.
+    """
+    parents = {}
+    decl = re.compile(r'\bclass\s+(\w+)(?:<[^>]*>)?(?:\s+extends\s+([\w.]+))?|[{}]')
+    for path in source_files():
+        text = strip_comments(open(path, encoding="utf-8").read(), blank_strings=True)
+        stack, depth, pending = [], 0, None
+        for match in decl.finditer(text):
+            tok = match.group(0)
+            if tok.startswith("class"):
+                parent = match.group(2)
+                pending = (match.group(1), parent.rsplit(".", 1)[-1] if parent else None)
+            elif tok == "{":
+                depth += 1
+                if pending:
+                    stack.append((pending[0], depth))
+                    parents[".".join(n for n, _d in stack)] = pending[1]
+                    pending = None
+            elif tok == "}":
+                if stack and stack[-1][1] == depth:
+                    stack.pop()
+                depth -= 1
+    by_simple = {}
+    for qualified in parents:
+        by_simple.setdefault(qualified.rsplit(".", 1)[-1], []).append(qualified)
+    unique = {name: found[0] for name, found in by_simple.items() if len(found) == 1}
+    return parents, unique
+
+
+def described_item_classes():
+    """Item classes whose tooltip prints itemtooltip.<stringID>tip, qualified.
+
+    Found by looking for the ItemDescription call itself and taking the
+    INNERMOST class it sits in, then closing over subclasses - never from a
+    hand-kept list. A hand-kept list is how every other blind spot in this file
+    started: it silently stops covering the class somebody adds tomorrow, and
+    silently keeps demanding a line for one that no longer prints it.
+
+    Names are qualified because simple names collide: this mod has two
+    different `Boots`, one described and one not, and matching on the simple
+    name demanded a description line for the Warden's cosmetic boots.
+
+    Braces inside string literals would wreck the depth count
+    (`ingredientsFromScript("{{skystone, 2}}")` is real code here), so the scan
+    runs over text with both comments AND string contents blanked.
+    """
+    parents, unique = class_index()
+    described = set()
+    token = re.compile(r'\bclass\s+(\w+)|[{}]|ItemDescription\.')
+    for path in source_files():
+        text = strip_comments(open(path, encoding="utf-8").read(), blank_strings=True)
+        if "ItemDescription." not in text:
+            continue
+        stack, depth, pending = [], 0, None
+        for match in token.finditer(text):
+            tok = match.group(0)
+            if tok.startswith("class"):
+                pending = match.group(1)
+            elif tok == "{":
+                depth += 1
+                if pending:
+                    stack.append((pending, depth))
+                    pending = None
+            elif tok == "}":
+                if stack and stack[-1][1] == depth:
+                    stack.pop()
+                depth -= 1
+            elif stack:
+                described.add(".".join(name for name, _d in stack))
+
+    changed = True
+    while changed:
+        changed = False
+        for qualified, parent in parents.items():
+            if qualified in described or parent is None:
+                continue
+            if unique.get(parent, parent) in described:
+                described.add(qualified)
+                changed = True
+    return described, unique
+
+
+def described_class_of(expression, unique):
+    """"new stairwaytoheaven.items.StormsteelArmor.Boots()" -> "StormsteelArmor.Boots";
+    "new SkyMatItem(500)" -> whatever SkyMatItem is qualified as."""
+    match = re.match(r'new\s+([\w.]+)\s*\(', expression.strip())
+    if match is None:
+        return None
+    name = class_ref(match.group(1))
+    return name if "." in name else unique.get(name, name)
+
+
+def check_material_descriptions(langs):
+    """Every item that SHOWS a description line must HAVE one, in both locales.
+
+    This is the gate behind the content/itempolish pass. The player's complaint
+    was that an Aurora Petal never says whether it is food, a mineral or an ore;
+    the fix is one locale line per material, and a fix that is not gated rots.
+    Localization.translate does not fail on a missing key - it returns the
+    literal string "itemtooltip.aurorapetaltip" - so a material that loses its
+    line does not go quiet, it prints its own key at the player.
+    stairwaytoheaven.items.ItemDescription suppresses that at runtime, which
+    means the ONLY thing that can notice the gap is this check.
+    """
+    described, unique = described_item_classes()
+    problems = 0
+    seen = set()
+    for path in source_files():
+        text = strip_comments(open(path, encoding="utf-8").read())
+        for offset, args in call_sites(text, "registerItem"):
+            if len(args) < 2:
+                continue
+            string_id = literal(args[0])
+            if string_id is None or string_id in seen:
+                continue
+            class_name = described_class_of(args[1], unique)
+            if class_name is None or class_name not in described:
+                continue
+            seen.add(string_id)
+            key = string_id + "tip"
+            for lang, entries in sorted(langs.items()):
+                if key not in entries.get("itemtooltip", {}):
+                    print("!! [itemtooltip] %s is a %s, so its tooltip prints "
+                          "itemtooltip.%s -- that key is missing from %s.lang "
+                          "and the player would read \"itemtooltip.%s\" under "
+                          "the item's name (registered at %s)"
+                          % (string_id, class_name, key, lang, key,
+                             where(path, text, offset)))
+                    problems += 1
+    return problems, len(seen), len(described)
+
+
 def check_registration_wrappers():
     """Fail loudly when a registry call hides an ID behind a variable.
 
@@ -771,7 +977,7 @@ def check_registration_wrappers():
     method = re.compile(r'^[ \t]+(?:[\w<>\[\]]+\s+)+(\w+)\s*\([^;]*$', re.M)
     count = 0
     for path in source_files():
-        text = open(path, encoding="utf-8").read()
+        text = strip_comments(open(path, encoding="utf-8").read())
         for match in call.finditer(text):
             if match.group(2).strip().startswith('"'):
                 continue
@@ -917,6 +1123,11 @@ def main(vanilla_dump=None):
     # 8. And nothing may register an ID behind this audit's back.
     problems += check_registration_wrappers()
 
+    # 8b. Every item whose class prints a description line must have one.
+    described_problems, described_items, described_classes = \
+        check_material_descriptions(langs)
+    problems += described_problems
+
     # 8. Every texture our source names by a literal path has to exist -- in
     #    OUR resources, or in the game's. There is one flat resource map keyed
     #    by path (ResourceEncoder.java:75-86) with the mod's files merged into
@@ -965,10 +1176,12 @@ def main(vanilla_dump=None):
           "%d holdable ID(s) with a real icon file (%d of them recoloured from "
           "vanilla art, %s), %d literal texture path(s) resolved (%d of them to "
           "the game's own resources), %d object(s) with a real world sheet, "
-          "%d runtime-built key(s) noted above."
+          "%d item(s) across %d described class(es) with a description line in "
+          "both locales, %d runtime-built key(s) noted above."
           % (total, len(humans), len(literals), icons, borrowed,
              "checked against the dump" if vanilla_dump else "dump absent, unchecked",
-             textures, borrowed_files, world_sheets, len(dynamic)))
+             textures, borrowed_files, world_sheets,
+             described_items, described_classes, len(dynamic)))
     return 0
 
 

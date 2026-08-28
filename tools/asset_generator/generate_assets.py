@@ -38,6 +38,7 @@ import gen_cloudmarble  # noqa: E402
 import gen_beetlewall  # noqa: E402
 import gen_arsenal  # noqa: E402
 import gen_professions  # noqa: E402
+import gen_skygear  # noqa: E402
 
 
 # Files owned by tools/convert_biome_art.py, which converts the supplied
@@ -287,6 +288,13 @@ def main():
 
     gen_furniture.gen_v2_item_icons(f"{out}/items")
     gen_furniture.gen_set_icons(f"{out}/items")
+
+    # Skyreach gear (content/itempolish): the Stormsteel plate set on real
+    # player/armor sheets, plus the three accessory icons. Draws on gen_armor's
+    # measured human anatomy and on gen_professions' stormsteel ramp, so the
+    # armour cannot drift away from either the body or the bar it is forged
+    # from. See tools/asset_generator/gen_skygear.py.
+    gen_skygear.generate(out)
 
     # Sky Arsenal (content/arsenal): five craftable weapons, their
     # projectile sprites, and the bestiary icons for the five mobs the

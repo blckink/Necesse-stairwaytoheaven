@@ -114,6 +114,53 @@ they are made of.
   pass; the generator still reproduces every earlier PNG byte-identically.
 - **Nobody has swung any of it in the real client.**
 
+## Item polish (content/itempolish) — IMPLEMENTED, not player-confirmed
+
+The player's report: "Aurorablatt usw steht nicht unter itemname in Inventar
+etc was es ist.. also Nahrung, Mineral, erz usw.. und es muss in richtige
+Kategorie einsortiert sein ... und wir brauchen sinnvolle Sachen die man daraus
+herstellen kann wie Accessoires, Rüstungen".
+
+**Every material now says what it is.** `stairwaytoheaven/items/SkyMatItem`
+appends one line from `itemtooltip.<stringID>tip`, each opening with the KIND —
+Mineral, Ore, Metal bar, Log, Cloth, Food, Mob drop, Quest key. 33 items across
+7 item classes carry one in both locales, and `tools/locale_audit.py` fails if
+one of them loses it (it finds the described classes by looking for the
+`ItemDescription` call, not from a hand-kept list).
+
+**Four items were in the wrong bin, and the bin is what the chest sort reads**
+(`Item.compareTo` → `Inventory.sortItems`; settlement storage does not read
+categories at all — see TECHNICAL_LEARNINGS): `aurorapetal`
+minerals → **materials/flowers** (where vanilla files every picked flower),
+`skyweave` mobdrops → **materials** (it comes off a loom, not off a mob),
+`cloudpufftreat` mobdrops → **materials** (it is crafted), `silverbell`
+minerals → **misc/questitems** (vanilla's own bin for a quest key).
+
+**Stormsteel is no longer a dead end.** It was the Aether Forge's headline
+product and nothing in the game consumed it. Four consumers now: the
+**Stormsteel set** — helm 25 / cuirass 26 / greaves 16 armour at enchant cost
+1300, `Item.Rarity.UNCOMMON`, calibrated against vanilla's tungsten set
+(24/25/15, 1300, UNCOMMON) and deliberately under glacial (24/24/16, 1450), at
+the Tungsten Anvil beside tungsten's own armour — and the **Stormsteel
+Vambrace**. A `SimpleSetBonusBuff` gives the set +15 max resilience and +5%
+movement speed, under `GlacialHelmetBonusBuff`'s +20 / +20%.
+
+**Three accessories**, real `TrinketItem`s on `SimpleTrinketBuff`s with no
+tooltip key, so the ENGINE prints the numbers: Stormsteel Vambrace
+(resilience gain +50% = vanilla `vambrace`, plus max resilience +25 = half of
+`chainshirt`), Aurora Locket (+30 max health = 60% of `frozenheart`, +0.5
+combat regen = `regenpendant`), Zephyr Harness (+10% speed = `trackerboot`,
++30% stamina = 60% of `zephyrcharm`). All three at the Tungsten Workstation,
+where vanilla puts `manica`, `lifependant` and `bonehilt`.
+
+The Dew Snail, the mod's other dead end, now makes Cloudpuff Treats.
+
+Art: `tools/asset_generator/gen_skygear.py` — five `player/armor` sheets and
+six 32px icons, drawn on `gen_armor`'s measured human anatomy and
+`gen_professions`' stormsteel ramp, QA'd on 6x contact sheets against the
+vanilla piece each answers to AND composited onto a real player body.
+**Nobody has worn any of it in the real client.**
+
 ## Known issues — open
 
 Ordered by the player's own priority. Full detail in `docs/PLAYTEST_LOG.md`.

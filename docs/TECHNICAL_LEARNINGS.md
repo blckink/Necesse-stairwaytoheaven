@@ -1675,9 +1675,20 @@ otherwise-good builds while the same build passed on the next run:
   * the cats' home flags after a restart, on a seed where the coax and the
     `stop` fall about two seconds apart.
 
+**[run] A third, added 2026-08-28 (content/itempolish):** `skyfall run:
+restored=false remainingms=120000` after the restart, i.e. the Skyfall started
+a NEW shower on the restarted server instead of resuming the one the world was
+saved mid-way through. Observed once, then passed twice in a row on the same
+build with `restored=true remainingms=890065`; the same commit's parent
+(`0d1761c`) failed its own run on the cats instead. The shard list itself
+survived in the failing run (`placed=12 live=12 inworld=12`), so what wobbles
+is the restore flag, not the data.
+
 Neither is caused by the change under test when it also passes cleanly on the
 next seed. Re-run before believing a single red run, and say which run the
-result came from.
+result came from. On 2026-08-28 the run counts were: `content/itempolish` red
+once (skyfall + cats), then green twice; `master` red once (cats) on the run in
+between.
 ## Surface structures are placed by the WorldPreset system, not by a level hook
 
 **[jar]** `SurfaceLevel.generateRegion` (necesse/level/maps/SurfaceLevel.java:23)
@@ -1846,3 +1857,114 @@ because every object so far happened to name its sheet after its own ID. Check 7
 have their world sheet verified, and a listed class whose texture argument is
 not a literal is reported rather than skipped. Negative-tested by pointing the
 shard at a nonexistent sheet — the audit fails, naming the file it wanted.
+
+## `Localization.translate` never reports a miss, and `translationExists` lies
+
+**[jar]** `Localization.getTranslation` (`engine/localization/Localization.java`)
+falls through to `new DebugTranslationElement(category, key)` when neither the
+current language nor English has the key, and `DebugTranslationElement`'s
+translation is literally `category + "." + key`. So a missing entry is not
+absent — it is the raw key, printed at the player, exactly like the three
+display-name bugs `tools/locale_audit.py` already exists to catch.
+
+The obvious guard is **not usable**: `Language.translationExists` reaches
+`Translation.exists` (`fileLanguage/Translation.java:216`), which is
+
+```java
+TranslationCategory cat = this.categories.get(category);
+return cat != null ? cat.exists(key) : true;
+```
+
+— it answers **true** when the whole category is missing, because it exists for
+translation-coverage tooling rather than for lookups. The reliable test is to
+call the three-argument `translate(category, key, debug=false)` and compare the
+result against `category + "." + key`; that is what
+`stairwaytoheaven.items.ItemDescription` does, and `debug=false` also keeps a
+deliberately description-less item from printing
+"Translation of … is not found." into the log every ten seconds.
+
+## Only a MatItem has a per-item description hook; armour and trinkets are final
+
+**[jar]** `Item.getBaseTooltips` (`inventory/item/Item.java:189`) is exactly
+three blocks — display name, debug block, `getCraftingMatTooltips` — and the
+last one only ever yields the generic "used as crafting material" sentence
+carried by the `Tech`s that consume the item and by its global ingredients. An
+item nothing consumes says nothing; an item something consumes says only that
+it is a material. Neither tells the player whether he is holding an ore, a
+petal, a bolt of cloth or a bar.
+
+- `MatItem.getTooltips` is overridable and already appends
+  `Localization.translate("itemtooltip", tooltipKey)` when a tooltip key was
+  passed to its three-argument constructor.
+- `ArmorItem.getTooltips` is **`final`** (`ArmorItem.java:212`). The way in is
+  `getPreEnchantmentTooltips`, which is where vanilla itself puts the
+  "Head slot" / "Chest slot" lines.
+- `TrinketItem.getTooltips` is **`final`** too (`TrinketItem.java:113`), same
+  way in.
+- `FoodConsumableItem.getTooltips` is ordinary and can simply be overridden.
+
+Vanilla's naming convention for the line is `[itemtooltip] <stringID>tip`
+(`surgicalmasktip`, `voidshardtip`, `glassbottletip`, ~80 others).
+
+## The item category tree is what the SORT button reads, not the settlers
+
+**[jar]** `Item.compareTo` (`Item.java:1014`) compares
+`ItemCategory.masterManager.getItemsCategory(this)` first and only falls back to
+the display name inside one category, and `Inventory.sortItems`
+(`Inventory.java:1217`) is what every chest's sort button and
+`OEInventoryContainer` call. So the category tree literally decides where an
+item lands when a chest is sorted.
+
+`SettlementStorageManager` contains **no** reference to `ItemCategory` at all —
+a settler hauling to storage does not sort by category. "So the settlers file
+it properly" is therefore half true: the category is what makes the chest sort
+right, not what makes the settler choose a chest.
+
+**The `materials` leaves vanilla creates** (`ItemCategory.java:213-222`) are
+`ore`, `minerals`, `bars`, `stone`, `logs`, `specialfish`, `flowers`,
+`mobdrops`, `essences` — `flowers` (`FlowerObject.java:50` files every picked
+flower there, plus `mushroom` by hand) and `stone`/`essences` are easy to miss.
+`misc/questitems` (`ItemCategory.java:286`) is where `QuestItem.java:29` files
+all 32 vanilla quest items. Bare `materials` is where vanilla puts a crafted
+intermediate that belongs to no family — `glass`, `glassbottle`.
+
+## The chest sheet's attack sprites are addressed on a 32px grid
+
+**[jar]** `ChestArmorItem.getAttackArmSprite` returns
+`new GameSprite(armorTexture, 0, 8, 32)`, and that constructor is
+`(texture, spriteX, spriteY, spriteRes, size)` — a **32px** grid. Sprite (0, 8)
+is therefore the pixel block (0,256)-(32,288): the top-left QUARTER of cell
+(column 0, row 4) of the 64px sheet, i.e. half-res x0..15, y0..15.
+
+Vanilla `tungstenchest` row 4 accordingly holds BOTH its clusters inside the
+first 64px cell — the sleeve at half-res x8..11 / y7..11 and a second at
+x23..27 / y4..7. **`gen_armor._mantle_attack_row` puts its cuff cell in column
+1**, which is pixels (64,256)-(96,288) = sprite (2, 8), so the Warden's mantle
+draws nothing over the back of the hand. Not fixed here (the Warden's art
+belongs to another stream); `gen_skygear` copies vanilla's placement instead.
+
+## Vanilla armour is DARK: measure the value spread, not just the mass
+
+**[jar/measured]** `player/armor/tungstenhelmet.png` spans luminance 38..187,
+and its **most common colour is the darkest one** — 8120 of 22064 opaque pixels
+(37%) at luminance 38. A three-step ramp whose darkest step is luminance 65
+covers the same opaque mass and still reads as one flat mid-tone blob on a
+composited body, which `size_audit.py` cannot see because mass is all it
+measures. `gen_skygear` therefore mixes a fourth step toward the outline colour
+and shades in four planes.
+
+Two further things only a composited mock catches, both found that way here:
+a repeating row of bright glints inside a helmet's visor slit reads as **teeth**
+once the helm is on a head, and a shaded dome with no face plate reads as a
+balloon. Compose the armour onto `player/skin/{head,body,feet,arms_*}` before
+believing any armour sheet.
+
+## An audit that reads comments as code cries wolf
+
+**[run]** `tools/locale_audit.py`'s `check_registration_wrappers` matched the
+words `registerTech(stringID, itemStringID)` inside a PROSE COMMENT in
+`SkyreachStatusCommand` and reported a correct, documented probe as a
+registration hiding an ID behind a variable — a red gate on `master` with
+nothing wrong. The audit now blanks comment bodies (and, for the brace-depth
+scanner, string contents) before matching, preserving every offset so findings
+still name the right line.

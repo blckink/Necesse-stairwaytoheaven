@@ -9,7 +9,6 @@ import necesse.inventory.item.armorItem.ArmorItem;
 import necesse.inventory.item.armorItem.ArmorModifiers;
 import necesse.inventory.item.armorItem.BootsArmorItem;
 import necesse.inventory.item.armorItem.HelmetArmorItem;
-import necesse.inventory.item.matItem.MatItem;
 import necesse.inventory.item.placeableItem.consumableItem.food.FoodConsumableItem;
 import necesse.level.maps.levelData.settlementData.settler.FoodQuality;
 
@@ -69,10 +68,38 @@ public final class SkyLivestockItems {
             this.itemTexture = SkyPelt.tint("items/" + this.vanillaIcon, "items/" + this.getStringID(),
                     this.hue, this.satFloor, 0.45F, 1.0F, 0.02F);
         }
+
+        /**
+         * The same "what is this" line every Skyreach material carries.
+         *
+         * <p>Milk is not a {@code MatItem}, so it cannot inherit
+         * {@link stairwaytoheaven.items.SkyMatItem}'s version — but
+         * {@code FoodConsumableItem.getTooltips} is overridable (unlike
+         * {@code ArmorItem}'s and {@code TrinketItem}'s, which are final), so
+         * the line goes on here directly.
+         */
+        @Override
+        public necesse.gfx.gameTooltips.ListGameTooltips getTooltips(
+                InventoryItem item, necesse.entity.mobs.PlayerMob perspective,
+                necesse.engine.util.GameBlackboard blackboard) {
+            necesse.gfx.gameTooltips.ListGameTooltips tooltips =
+                    super.getTooltips(item, perspective, blackboard);
+            String line = stairwaytoheaven.items.ItemDescription.of(this.getStringID());
+            if (line != null) {
+                tooltips.add(line);
+            }
+            return tooltips;
+        }
     }
 
-    /** A raw livestock product: the thing that comes off the animal. */
-    public static class LivestockProduce extends MatItem {
+    /**
+     * A raw livestock product: the thing that comes off the animal.
+     *
+     * <p>Extends {@link stairwaytoheaven.items.SkyMatItem} rather than
+     * {@code MatItem} so Storm Down and Aurora Fleece carry the same
+     * "what is this" line as every other Skyreach material.
+     */
+    public static class LivestockProduce extends stairwaytoheaven.items.SkyMatItem {
 
         private final String vanillaIcon;
         private final float hue;
