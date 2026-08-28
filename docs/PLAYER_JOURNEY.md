@@ -106,20 +106,64 @@ the only place the bell comes from.
 
 ## What is fully integrated
 
-At the time of writing: 59 objects, 23 items, 14 tiles and 18 mobs registered;
-154 IDs and 47 literal message keys named in **both** `en.lang` and `de.lang`,
-locales in sync; 113 holdable IDs with a real icon file. All five audit gates
-(`furniture`, `locale`, `sheet_format`, `tile_behaviour`, `size`) pass together,
-the dedicated server boots and generates, and the painter oracle reports zero
-tile mismatches.
+Counts from the registries: **61 objects, 24 items, 15 tiles, 18 mobs, 8 biomes,
+5 journal quests**, 163 IDs named in **both** locales with the two in sync, and
+120 holdable IDs with a real icon file.
 
-## What is NOT integrated yet
+All five gates pass together — `furniture`, `locale`, `sheet_format`,
+`tile_behaviour`, `size` — and the dedicated server boots, generates and
+survives a restart.
 
-Everything below is registered, craftable, named and iconned — and **never
-appears in a generated world**, because no worldgen rule places it:
+**Proven in the running game**, not read off the source. These lines come out of
+the integration test's probes against a live world:
 
-- **Skywatch furniture** — the Warden's Spire preset still furnishes itself
-  from the old decoration objects, so the inhabited-POI request is not done.
+```
+Skyreach OK: class=SkyLevel identifier=skyreach2 dimension=1 isCave=false
+painter oracle: tileMismatches=0 (scan radius 64, spire footprint excluded)
+skyway: ground=skywaytile tiles=2520 seraphtrees=18 cloudtrees=17 rails=70
+entrance check: door=cloudmarbledoor isDoor=true approach=[air air air air] clear=true
+recruit check: skywarden settler=WardenSettler price=coinx30000
+npc check: wardens=1 cats=2 cloudlambs=48
+cat home check: ... STILL_WILD -> ... AT_BASKET   (both cats, across a restart)
+husbandry check: cloudlamb shear=windsilkx1 child=cloudlamb
+                 feed: cloudberry=hand:true/trough:true wheat=hand:true/trough:true
+```
 
-Everything else that used to be on this list is now generated; see
-*The Skyway Passages* above.
+### The four Skyreach biomes generate
+
+Driftlands (53.7% of land), Stormveil (18.6%), **Skyway Passages (14.6%)**,
+Aurora Shoals (13.1%), plus the skystone barrens that cut across all of them.
+Object density measured over 8 seeds and 2.2M natural land tiles: 0.358 / 0.307
+/ 0.371 / 0.322 — no biome is meaningfully emptier than another any more.
+
+### Worldgen actually places
+
+Terrain and flora for every biome; the Skyway's paving, cloudmarble railings
+with real gates where a road crosses, Seraph statues at junctions, and both
+tree species alternating along planted avenues; rock and ore formations;
+Skystone Lichen, Cragbloom and Sky Scree on the bare plate; the Warden's Spire
+at one canonical origin; cloud lamb flocks.
+
+### The Spire is furnished
+
+21×21 on the supplied plan: a double wall ring with a circulation corridor,
+eight doors on the axes, twelve candelabra on a regular rhythm, four furnished
+corner rooms (refectory, council table, the Warden's quarters, archive), and the
+beacon chamber left open. Machine-checked on the stamped world: 11 chairs, every
+one facing a table or desk; no unreachable interior tile; every table decoration
+on a real modular table.
+
+## Craftable but never generated — by design
+
+Saplings, the Séance Circle, the stairway pair, the Veil rifts and the
+decorative props (gloomwillow, withershrub, stormscreed, sky balloon, aeronaut
+wreck, sky parcel, ghost lantern) are player-built or quest-given on purpose.
+
+## Not placed anywhere yet
+
+- **Beetlefreak ground** (`beetlefreaktile`) and the **Beetlefreak wall set** —
+  registered, craftable and passing every gate, but no Veil worldgen rule puts
+  them anywhere. They need a home in `VeilTerrainPainter`.
+- The four furniture pieces the Spire's reference plan wants and we do not have:
+  `skywatchbookshelf`, `skywatchcabinet`, `skywatchclock`, `skywatchdisplay`.
+  Dresser and desk stand in for them today.
