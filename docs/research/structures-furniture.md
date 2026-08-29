@@ -536,7 +536,20 @@ wall (`attachesToObject` requires `isWall && !isDoor` on the tile it faces),
 `objects/paintings/<stringID>.png` (override via `this.texturePath`) —
 **32×128, 4 rows of 32×32**, one row per rotation (0=south/low placement
 `+8px` offset, 1=east, 2=north/high `-32px` offset, 3=west). Reference
-`paintings/paintingapple.png` = 32×128, exact match. `LargePaintingObject`/
+`paintings/paintingapple.png` = 32×128, exact match.
+
+> **Disputed, and it decides which side row gets which art.** For wall decor the
+> rotation names *where the wall is*, and
+> `WardenSpirePreset.WALL_BELOW/LEFT/ABOVE/RIGHT` — citing
+> `PaintingObject.attachesToObject` — reads the side rows the other way round:
+> `1` = wall **left**, `3` = wall **right**. Rows 0 and 2 are not in dispute.
+> `gen_banner_painting` follows the preset, because the preset names the method
+> it came from and this line does not. Whoever next has the decompile open:
+> read `attachesToObject`, settle it here, and delete this box.
+
+All four rows must also hold DIFFERENT art. The Skywatch Banner shipped with one
+cell pasted four times and therefore did not react to being turned at all;
+`tools/rotation_variety_audit.py` now fails on that. `LargePaintingObject`/
 `LargePaintingObject2` are bigger multi-tile variants of the same idea, also
 tagging `roomProperties.add("painting")` — used by the `ArtConnoisseurSettlerPersonality`
 settler trait, which literally filters room objects by

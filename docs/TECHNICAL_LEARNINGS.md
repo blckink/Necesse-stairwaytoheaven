@@ -2266,3 +2266,241 @@ worker at a time, dispatched by the reviewer, and check `git log` before AND
 after every dispatch so an unattributed commit is noticed immediately rather
 than discovered during a rebase.
 
+## Right cell, right size, same picture: the rotation-variety bug (v0.9)
+
+**[game]** Reported from a session: *"die durch Claude hinzugefügten Skyreach
+Türen und Tore etc lassen sich alle nicht ausrichten wie sonst im Game …
+eigentlich je nach Richtung in die man schaut sind Sachen oft am unteren oder
+oberen Ende des Blocks platziert am Rand statt einfach immer an selber
+Position."* Asked to narrow it down, the player picked **"dreht sich gar
+nicht"** — placing it looks the same whichever way they face.
+
+**[sprites]** Measured across every mod sheet the engine addresses per
+rotation, exactly one is a duplicate set: `objects/skywatchbanner.png`. Its
+four 32x32 `PaintingObject` rows are **byte-identical to each other**, because
+`gen_banner_painting` built one cell and pasted it four times:
+
+```python
+sheet = Canvas(32, 128)
+cell = banner_cell()
+for row in range(4):
+    sheet.paste(cell, 0, row * 32)     # one banner, four walls
+```
+
+So the engine dutifully read row 0 on a south wall, row 2 on a north wall and
+rows 1/3 on the side walls, and all four held the same face-on banner. Nothing
+about it is a geometry fault: the sheet is 32x128, the rows are 32px, every
+extent is where it belongs. `sheet_format_audit.py` was green on it, and always
+would have been — **it guards which cell, what size, what extent, and is blind
+to a cell holding the wrong picture, including the picture next door's.**
+
+**[jar]** What the four rows have to be, and why the art must not bake the
+offset in. For wall decor the rotation names WHERE THE WALL IS, not where the
+piece faces (`PaintingObject.attachesToObject`; the same convention
+`WardenSpirePreset.WALL_BELOW/LEFT/ABOVE/RIGHT` already places banners with),
+and the engine supplies the vertical nudge itself:
+
+| row | rotation | wall | engine offset | what the camera sees |
+|---|---|---|---|---|
+| 0 | 0 | below | `+8px` | the far side of that wall — rod and cloth foreshortened over its cap |
+| 1 | 1 | left | none | edge-on slab against the tile's left edge |
+| 2 | 2 | above | `-32px` | the face-on view, landing on the wall tile |
+| 3 | 3 | right | none | mirror of row 1, against the right edge |
+
+That `-32px` is why the face-on cell may use its whole 32px height, and the
+`+8px` is why row 0's art has to stay inside cell rows 0..23 — drawing it low
+*and* letting the engine push it down puts it a third of a tile into the wall.
+The same trap as the door cells, one class over.
+
+**[run]** `tools/rotation_variety_audit.py` is the gate for the class, not for
+this one sheet: for every family where the repository has an actual engine read
+— `PaintingObject` rows, `WallTorchObject`'s state x orientation grid,
+`StreetlampObject`'s two 32x96 state rows, `LampObject`'s lit/unlit pair, the
+eight wall-sheet door cells, the six fence-gate columns, the five fence columns
+and the four rotation columns of everything `sheet_format_audit` already knows
+— it asserts that cells the engine reads apart hold different pictures. Mirror
+pairs are reported and allowed: vanilla's own left/right views are mirrors.
+Verified against the pre-fix sheet, where it reports all six banner row pairs;
+green on the fix. It reuses `sheet_format_audit`'s two sheet tables rather than
+copying them, so a piece added there cannot silently miss this check.
+
+**[run]** `tools/rotation_preview.py` is the picture, on the same principle as
+`wall_render_preview.py`: it draws every cell **where the engine puts it**, over
+a tile grid, with the object's own tile at the centre of a 3x3 stage and a grey
+block on the wall the rotation names — so "is this the right view" and "does it
+land on that wall" are both judgeable by eye. Where no anchor is recorded (the
+wall lights, the streetlamps) the strip says so instead of implying one.
+
+**Deliberately not covered by either tool:** the 1x2 multi-tile furniture
+(bench, bed, dinner table). `docs/research/furniture-formats.md` records their
+sheet size but not the engine read that splits it, and their generators paste
+64px-wide blocks across two 32px columns — so "column 2 equals column 3" cannot
+be judged without the decompiled draw call. `skywatchdinnertable` does have two
+byte-identical 32px columns under a 4-column reading; that is a **hypothesis
+about a frame we have not read**, not a finding. Read `DinnerTableObject`, then
+add it.
+
+**[unverified]** One record disagrees with two others and the disagreement is
+recorded rather than silently resolved. `docs/research/structures-furniture.md`
+§3.7 writes the side rows as "1=east, 3=west"; `WardenSpirePreset` and the wall
+decor section above both say `1` = wall **left**, `3` = wall right, and the
+preset cites `PaintingObject.attachesToObject`. The banner's side rows are drawn
+to the preset's convention because it names the method it came from. If a
+screenshot ever shows the edge-on banner hugging the wrong edge, that is this
+line, and swapping the two `paste` calls in `gen_banner_painting` is the fix.
+
+## The side-wall window is a slot in the roof, and three sets never got the fix (v0.9)
+
+**[jar]** `WallWindowObject.getWindowDir` returns 1 for a NORTH-SOUTH wall —
+the left and right walls of a room — and then draws only cols 4-5 rows 0-1 over
+the band `drawY-16 .. drawY+16`. In a north-south run that band is unbroken
+ROOF, so the picture is the wall from directly above with an opening cut into
+it, and the player looking DOWN into the opening.
+
+**[sprites]** Measured off vanilla `stonewall`, `brickwall` and `granitewall`:
+the opening runs ALONG the wall — 10-12px wide, ~28px long, never a wide pane
+across the cell — with a dark reveal on the NEAR inside faces, a lit lip on the
+far one, the glass at the BOTTOM of the cut and BRIGHTER than the roof around
+it, and no horizontal terminator at either end.
+
+**[game]** `gen_beetlewall` learned that in August and **the fix was never
+ported**. A player looking at the spire's side walls reported it as "die
+Fenster sind seitlich falsch und nicht wie bei Käferwand gefixt" — and it was
+three sheets, not one: cloudmarble drew a gold-framed 2x2-mullion pane,
+skystonebrick and nightfell an 18x22 frame with glazing bars, all standing
+upright out of the roof. The geometry gate was green on all three, because
+`sheet_format_audit` asserts rows 0-1 are 512/512 opaque and rows 2-4 empty,
+which a pane satisfies exactly as well as a slot does.
+
+The construction now lives once, in `tools/asset_generator/wall_window_slot.py`,
+and all four sets call it. **A frame seen from above is still a frame**; three
+passes tried to fix this by making the pane flatter or darker, and only the
+slot's shape and its reveals read as an opening.
+
+## A supplied illustration is a source of record, not a sheet (v0.9)
+
+**[sprites]** `objects/cloudmarblewall.png` shipped as the hand-made art from
+`kk-sprites/`, copied in as-is, with `gen_cloudmarble_wall` deliberately not
+called. Measured against the three walls that are drawn:
+
+| sheet | distinct colours | cap mean luminance | cap dominant tone |
+|---|---|---|---|
+| cloudmarble (supplied) | **10,858** | **228** | none — commonest was pure white at 6% |
+| skystonebrick | 19 | 52 | 91% |
+| nightfell | 19 | 25 | 91% |
+| beetlefreak | 38 | 31 | 78% |
+
+Vanilla wall caps are ~93% one flat tone. The cap is the band the engine draws
+for **every tile of a run except the last**, so a bright, tone-less cap is most
+of a building — which is exactly what reached the player: "die ganzen Wände
+blenden fast". The same illustration is also why the side-window cell held a
+pane: an illustration draws a window, and the engine wanted a roof.
+
+Beetlefreak had already been moved off its supplied sheet for the same reason.
+Cloudmarble now is too, at 22 colours and a 79% dominant cap.
+
+**[sprites]** The second half of "blenden" is a TRIM INVERSION and it is worth
+stating as a rule. `SKYGOLD`'s base is luminance 178. The old stone ramp ran
+205..249, so **the gold arcade, cornice and stars were up to 47 steps darker
+than the marble they decorate** — a white-and-gold set in which the gold cannot
+read as gold. Trim must be brighter than what it trims. The stone base is now
+~152 and `SKYGOLD["hi"]` (~221) is the brightest pixel on the sheet. The value
+law for a whole room is in `docs/ART_DIRECTION.md`.
+
+## The dedicated server is a free download, and it carries the whole toolchain (v0.9)
+
+**[run]** Three sessions in a row reported "no game install here, so nothing can
+be compiled, tested or verified" and worked around it. That was wrong, and the
+player said so: the **dedicated server** at <https://necessegame.com/server/> is
+a free public download — no account, no purchase, no Steam. Every published
+version is on that page, 1.3.2 included.
+
+`scripts/fetch_dedicated_server.sh` fetches it (the page's links are S3
+presigned URLs that expire in an hour, so they must be read fresh, never
+hard-coded) and unpacks `Server.jar` plus a bundled `jre`. Measured on this
+session's run, that single file turns on:
+
+| gate | needs | status without the server |
+|---|---|---|
+| `./gradlew buildModJar` | `Server.jar` on the compile classpath | impossible |
+| `scripts/integration_test.sh` | `Server.jar` + `jre` | impossible |
+| `scripts/tile_sprite_check.sh` | same | impossible |
+| `scripts/sky_map_render.sh` (the offline painter) | same | impossible |
+| `./gradlew decompileToSources` | the jar to decompile | impossible |
+
+The decompile writes `$NECESSE_GAME_DIR/decompiled/Necesse-sources.jar` in about
+a minute — **6,464 readable classes**. Every "I cannot check that signature"
+answer in this repo's history was one command away from being checkable.
+
+**[run]** What the server does NOT bring is art. It never renders, so
+`Server.jar` contains **zero `.png` entries** — verified by listing the archive.
+So the vanilla sprite dump the art tooling wants stays missing:
+`wall_render_preview --vanilla stonewall` still warns that its comparison strips
+are absent, and `size_audit` still reports individual vanilla refs missing. Those
+need a client install. Say "unavailable", not "skipped".
+
+**[jar]** First thing the decompile settled, and it had been blocking a player
+report for two sessions: `FruitBushObject`'s constructor is
+
+```java
+FruitBushObject(String textureName, String seedStringID,
+                float minGrowTimeSeconds, float maxGrowTimeSeconds,
+                String fruitStringID, float fruitPerStage, int maxStage,
+                Color mapColor)
+```
+
+and vanilla's three berry bushes all register as
+`("blueberrybush", "blueberrysapling", 900.0F, 1800.0F, "blueberry", 1.0F, 2, colour)`.
+It carries a `FruitGrowerObjectEntity`, publishes a `HarvestFruitLevelJob` (so
+settlers harvest it), and sets `objectHealth = 1`, `toolType = ALL`.
+
+And `loadTextures` reads the sheet as **64x64 cells** —
+`textures[width/64][height/64]`, variants across, growth stages down. That is
+the second half of the same player report: a fruit bush is drawn on a 64px cell,
+two tiles wide and two tall, where our cloudberry bush is a `GrassObject` on a
+32px one. The archetype swap fixes *both* "one berry and it is gone" and "die
+Buesche sind viel zu klein" — they were always the same bug.
+
+## A berry bush that regrows and a berry bush that is big are the same fix (v0.9)
+
+**[jar]** The whole loop, read out of the decompile:
+
+- `FruitBushObject(textureName, seedStringID, minGrow, maxGrow, fruitStringID,
+  fruitPerStage, maxStage, mapColor)`. Vanilla's three berry bushes are all
+  `(..., "<x>sapling", 900.0F, 1800.0F, "<x>", 1.0F, 2, colour)` registered
+  `0.0F, false, false, true`.
+- It carries a `FruitGrowerObjectEntity` whose `stage` climbs while
+  `stage < maxStage` and **resets to 0 on harvest** — the bush is never
+  consumed. It publishes a `HarvestFruitLevelJob`, so settlers pick it.
+- `getLootTable` returns **the seed alone** — breaking a bush drops the sapling
+  and no fruit. That is the growth gate: replanting cannot be an infinite-berry
+  exploit because the berries only come from the timer.
+- `getFruitDropCount` sums `fruitPerStage` once per stage, the fractional part
+  as a chance. So `1.0F` at maxStage 2 is 2 berries; ours is `1.5F` = 3.
+- `loadTextures` slices `textures[width / 64][height / 64]` — **64px cells**,
+  variants across, **stages down** — and `addDrawables` uses
+  `spriteY = min(fruitStage, rows - 1)` with a per-tile random `spriteX`.
+- Anchor: `.pos(drawX - 32 + 16, drawY - height + offset)`, `offset = 28 ± 4`.
+  The cell is centred on the tile in x and its bottom row lands 28px below the
+  tile's top edge, so the plant stands ~36px proud. The cell is also **mirrored
+  at random per tile**, so nothing in the art may depend on handedness.
+
+**[game]** Ours was a `GrassObject` on a 32px cell. The player reported it as
+two things — *"man kriegt nur eine Beere beim Abbauen statt wie bei den Vanilla
+Bueschen die Buesche abbauen kann und wieder aufbauen damit die Beeren
+nachwachsen"* and *"die Buesche sind auch viel zu klein"* — and they were one:
+the grass archetype is one-shot **and** one tile. Nothing about the loot table
+could have fixed the first; nothing about the drawing could have fixed the
+second.
+
+**[jar]** The trap in the second half: `SaplingObject.validTiles` defaults to
+`grasstile / overgrown* / swampgrass* / plainsgrass* / dirttile / farmland /
+snowtile`. **The Skyreach has none of them.** Without passing `cloudturftile`
+through the varargs the player could not replant a sky bush anywhere in the sky.
+The mod's tree saplings already document this trap; a fourth family hit it.
+
+**[run]** Verified end to end on a real server: `buildModJar` succeeds,
+`integration_test.sh` exits 0, and the census reports `object cloudberrybush
+x53 / expected x53` — the archetype swap did not disturb worldgen placement,
+because `SkyTerrainPainter` places it by registry ID and the string ID is
+unchanged.

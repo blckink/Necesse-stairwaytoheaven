@@ -16,7 +16,10 @@ modifying anything in this repository.
 6. the domain doc for what you are touching — `docs/ART_DIRECTION.md`,
    `docs/PLAYTEST_LOG.md`, `docs/ARCHITECTURE.md`, `docs/DESIGN.md`,
    `docs/research/`
-7. recent git history (`git log --oneline -20` and the diff of anything your
+7. `docs/WORLDBUILDING_LOOP.md` if you are expanding the world rather than
+   fixing something — what already exists, the texture law on one page, and the
+   seven-role loop the `.claude/agents/` definitions implement
+8. recent git history (`git log --oneline -20` and the diff of anything your
    task touches)
 
 ## Rules
@@ -25,9 +28,25 @@ modifying anything in this repository.
 summary, or your own memory of this project can be stale. What is on disk and
 in `git log` is the truth. Check before you act on a belief.
 
-**Verify API behaviour before implementing.** The decompiled game sources are
-at `$NECESSE_GAME_DIR/../decompiled` (and the sprite dump beside it). Read the
-real class before calling it. Never write "should be" reasoning into code.
+**Verify API behaviour before implementing.** Read the real class before
+calling it. Never write "should be" reasoning into code.
+
+**You can always get a game install — do not stand down for the lack of one.**
+The Necesse **dedicated server** is a free public download, no account and no
+purchase: `scripts/fetch_dedicated_server.sh` fetches and unpacks it and prints
+the `NECESSE_GAME_DIR` to export. That one file unlocks `buildModJar`,
+`scripts/integration_test.sh`, `scripts/tile_sprite_check.sh`,
+`scripts/sky_map_render.sh` **and** `./gradlew decompileToSources
+-PuseDecompiledSources=true`, which writes `$NECESSE_GAME_DIR/decompiled/` —
+6,464 readable classes, i.e. every API question answered from source instead of
+from memory. A session that reports "no game install, cannot verify" has simply
+not run the script.
+
+What the server does NOT bring is **sprites**: it never renders, so `Server.jar`
+ships zero PNGs. The vanilla sprite dump the art tooling wants
+(`wall_render_preview --vanilla stonewall`, `size_audit`'s reference sheets)
+still needs a client install, and without it those comparisons are honestly
+unavailable rather than merely skipped.
 
 **Never silently reverse a design decision.** If `docs/DESIGN_DECISIONS.md`
 records something and you believe it is wrong, say so to the user and wait.
@@ -68,15 +87,22 @@ Say which one you have. Use the verification states defined in
 ## Build and test
 
 ```bash
+scripts/fetch_dedicated_server.sh     # free download; prints the path to export
 export NECESSE_GAME_DIR=/path/to/necesse-dedicated-server   # contains Server.jar
+./gradlew decompileToSources -PuseDecompiledSources=true    # -> $DIR/decompiled/
 ./gradlew buildModJar                 # or: ./gradlew clean buildModJar
 scripts/integration_test.sh           # boots a real server, generates, restarts
 scripts/tile_sprite_check.sh          # client-side tile sprite indices (headless)
+scripts/java_syntax_check.sh          # NO game install? javac syntax-only gate
 python3 tools/size_audit.py           # sprite mass vs vanilla; must print 0 flags
 python3 tools/locale_audit.py         # every registered ID named in both locales
 python3 tools/sheet_format_audit.py   # sheets the engine reads at fixed offsets
+python3 tools/rotation_variety_audit.py # a cell the engine reads apart holds its own art
+python3 tools/template_audit.py       # sprite templates match the cards that spec them
+python3 tools/content_ledger.py --check # nothing registered ships undescribed
 python3 tools/tile_behaviour_audit.py # every tile is what it is presented as
 python3 tools/wall_render_preview.py  # walls: compose scenes, then LOOK at build/qa/
+python3 tools/rotation_preview.py     # rotations: every cell where it lands, then LOOK
 ```
 
 The server integration test **cannot see client rendering bugs**. See

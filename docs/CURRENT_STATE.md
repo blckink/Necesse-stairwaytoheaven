@@ -22,7 +22,7 @@ with distance band. The return gate resolves each player's own bound stairway
 from `quest/SkywatchQuestData`, which persists per-player bindings.
 
 The **Warden** is the progression NPC. Meeting him completes the find-the-spire
-quest; paying 100,000 coins recruits him, which places a real `HumanShop`
+quest; paying 30,000 coins recruits him, which places a real `HumanShop`
 settler (`mobs/WardenSettlerMob`, registered as settler type
 `settlement/WardenSettler`) on the Surface at the player's stairway and hands
 over the Silver Bell.
@@ -37,7 +37,7 @@ PNG in `src/main/resources/`. Editing a PNG directly is always wrong.
   Warden and both cats still present (asserted every test run).
 - The Warden's recruit path is live per mob, not just registered:
   `/skyreachstatus` reports
-  `recruit check: skywarden settler=WardenSettler price=coinx100000` and
+  `recruit check: skywarden settler=WardenSettler price=coinx30000` and
   `recruit check: wardensettler settler=WardenSettler price=free`. Those two
   values are exactly what was null before, and null is what made vanilla's
   recruit button impossible.
@@ -56,6 +56,12 @@ PNG in `src/main/resources/`. Editing a PNG directly is always wrong.
   the bands measured off vanilla's own sheets.
 - `python3 tools/sheet_format_audit.py` reports the 16 wall-sheet door cells
   at the extents the engine draws them at.
+- `python3 tools/rotation_variety_audit.py` reports 123 rotation/state
+  comparisons in which no cell the engine reads separately repeats another's
+  picture. It caught the Skywatch Banner, whose four `PaintingObject` rows
+  were one cell pasted four times — the sheet the player meant by "lässt
+  sich nicht ausrichten". `tools/rotation_preview.py` renders every one of
+  those cells where the engine puts it into `build/qa/rotations/`.
 - v0.6 sprint gates (2026-08-25): generator output byte-identical on
   regeneration, `buildModJar` builds, `scripts/integration_test.sh` passes on
   this Mac against the Downloads dedicated-server install.

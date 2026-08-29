@@ -231,7 +231,86 @@ cat home check: basket=-196,-314 object=catbasket homeFlags black=true tabby=tru
 
 ---
 
-## 2026-08-29 — item icons, measured rather than reported
+## 2026-08-28 (3) — "lässt sich nicht ausrichten"
+
+> "die durch Claude hinzugefügten skyreach Türen und Tore etc lassen sich alle
+> nicht ausrichten wie sonst im Game … eigentlich je nach Richtung in die man
+> schaut sind Sachen oft am unteren oder oberen Ende des Blocks platziert am
+> Rand statt einfach immer an selber Position."
+
+Asked which of the two failure shapes it was, the player picked **"dreht sich
+gar nicht"** — nothing changes when they turn it — and **"weiß ich nicht
+genau"** for which object, having seen it once rather than swept the set. So
+the response is a sweep plus a gate, not a single-object patch.
+
+| Area | Observation | Status |
+|---|---|---|
+| Skywatch Banner shows one picture on every wall | The reported shape, found by measurement. | **FIXED — NOT YET PLAYER CONFIRMED.** `gen_banner_painting` pasted ONE 32x32 cell into all four `PaintingObject` rotation rows, so a banner on a north wall, a south wall and both side walls drew byte-identical art. Now four real views: face-on for the wall above (the old art, unchanged), a foreshortened over-the-cap view for the wall below, and mirrored edge-on slabs for the two side walls. The engine's own `+8px` / `-32px` nudges are left to the engine — see `docs/TECHNICAL_LEARNINGS.md`. The item icon now crops row 2, the face-on view, instead of row 0. |
+| Everything else the engine reads per rotation | Swept, since the player could not name the object. | **NOT REPRODUCED.** All eight door cells of all four wall sheets, both fence gates' six columns, both fences' five columns, both wall lights' state x orientation grid, both streetlamps' on/off rows, the candelabra's lit/unlit pair and every four-column furniture and station sheet hold distinct art. 123 comparisons, one failure, and it was the banner. Doors and gates in particular are vanilla `WallDoorObject`/`FenceGateObject` on distinct cells, so if turning one still does nothing in game the cause is not the sheet and the next step is a screenshot of the piece mid-placement. |
+| The gate that was missing | `sheet_format_audit.py` was green on the banner and always would have been. | **ADDED.** `tools/rotation_variety_audit.py` fails when a cell the engine reads separately holds a picture it already read somewhere else; `tools/rotation_preview.py` draws every cell where the engine puts it, over a tile grid, with the wall the rotation names beside it, into `build/qa/rotations/`. Both are in the AGENTS.md gate list. Verified: the audit reports all six banner row pairs against the pre-fix sheet. |
+| The 1x2 furniture (bench, bed, dinner table) | Not swept, on purpose. | **OPEN — needs the decompile.** Their sheet size is recorded, the engine read that splits it is not, and their generators paste 64px blocks across two 32px columns. `skywatchdinnertable` has two identical columns under a 4-column reading, which is a hypothesis about a frame nobody has read. Read `DinnerTableObject`/`BenchObject`/`BedObject`, then decide. |
+
+---
+
+## 2026-08-29 — the Warden's Spire, seen from inside
+
+> "Turm ist leider viel zu hell und sieht schrecklich aus. die ganzen Wände
+> blenden fast und passen nicht zu braunen Böden und grauen Möbeln. die Fenster
+> sind seitlich falsch und nicht wie bei Käferwand gefixt, du hast zu viele
+> Zäune in Welt die keinen Sinn ergeben leider.. bitte hier muss irgendwie ein
+> bisschen aufgeräumt werden und farblich stimmiges Konzept geschaffen werden
+> mit Atmosphäre"
+
+Three reports, all three real, and the first two had one root cause between
+them: `objects/cloudmarblewall.png` was not generated at all. It was the
+supplied illustration from `kk-sprites/`, copied in as-is.
+
+| Area | Observation | Status |
+|---|---|---|
+| The tower is blinding and does not sit with the room | "die ganzen Wände blenden fast und passen nicht zu braunen Böden und grauen Möbeln" | **FIXED — NOT YET PLAYER CONFIRMED.** Measured, not guessed: the shipped sheet carried **10,858 distinct colours** against 19 / 19 / 38 for the three drawn walls, and its cap band — the band the engine draws for every tile of a run but the last — had **no dominant tone at all** (commonest: pure white, 6%) at mean luminance **228**, against skystonebrick 52, nightfell 25, Beetlefreak 31. The face averaged 196 where Skywatch furniture averages 107–114. `gen_cloudmarble` has drawn the whole sheet correctly since it was written; the pipeline just never called it. It does now (the same call the Beetlefreak wall already makes, for the same reason), and the ramp was retuned to a stated value law: cap ~85, face ~160, and **the gold above the stone** — at the old stone base of 225 against SKYGOLD's 178 the gold trim was 47 steps *darker* than the marble it decorates, which is most of why the set read flat as well as bright. Now 22 colours, cap 79% one dominant tone. `docs/ART_DIRECTION.md` carries the value law. |
+| Side windows still wrong | "die Fenster sind seitlich falsch und nicht wie bei Käferwand gefixt" | **FIXED — NOT YET PLAYER CONFIRMED.** Exactly right, and broader than reported: **three** wall sets had it, not one. `gen_beetlewall` learned that rows 0-1 of the window strip are the wall's ROOF with a slot cut ALONG it, and the fix was never ported — cloudmarble drew a gold-framed 2×2-mullion pane, skystonebrick and nightfell an 18×22 frame with glazing bars, all three standing upright out of the roof. The construction is now one module, `tools/asset_generator/wall_window_slot.py`, used by all four sets, so they cannot drift apart again. A frame seen from above is still a frame; only the slot's shape and its reveals read as an opening. |
+| Cloudmarble door rotations | Not reported — found by the gate. | **FIXED.** Switching to the drawn sheet exposed that its "open, edge-on" branch drew rotations 0 and 2 identically: two door views, one picture, so half the door's rotations did nothing. `tools/rotation_variety_audit.py` caught it the first time it ran on this sheet, which is what it exists for. rot 2 is now the mirror, the way the closed edge-on cells already mirrored rot 3. |
+| Too many fences | "du hast zu viele Zäune in Welt die keinen Sinn ergeben" | **OPEN — diagnosed, deliberately not changed blind.** The sources are `SkyLandscape`: fenced roadside beds at waypoints where the kind roll lands above `WAYPOINT_MILESTONE` (0.74), i.e. ~26% of waypoints at `WAYPOINT_SPACING` 14 — roughly one fenced bed every 54 tiles of road — plus the passage balustrade fallback and the forecourt ring at radius 13, which roads cut into short stubs. The obvious knob is the bed's share of the waypoint roll. It is NOT being turned here: the last fence pass was justified by measurements over three seeds through the offline painter (`scripts/sky_map_render.sh`, 4,111 → 5,562 fence tiles, 3.9% → 0.2% lone posts), that painter needs `NECESSE_GAME_DIR`, and this session has no game install. Tuning worldgen density by eye and calling it fixed is how the count went up last time. Next session with the game: render the same three seeds, count fence tiles per road tile, then turn the knob once. |
+
+---
+
+## 2026-08-29 (2) — bushes, rays, golems, and "es fehlt alles"
+
+| Area | Observation | Status |
+|---|---|---|
+| Settlers have professions | "die haben sehr wohl Berufe! es gibt Bauern, Magier (mit Store), Erforscher (kann Expeditionen machen), Angler / Fischer (kann als einziger angeln von npcs)" | **CORRECTION ACCEPTED — the earlier answer was wrong.** Necesse has settler TYPES through `SettlerRegistry`, and this mod already registers one (`WardenSettler`). What the previous note described was the work PRIORITY a workstation job files under, which is a different mechanism; conflating them made "there are no professions" read as "professions do not exist". They do, the mod has the working pattern, and the Thief / Brewer / Scientist are being designed as real settler types. |
+| Too many rays, too few golems | "zu viele rochen, zu wenig Golems" | **FIXED — NOT YET PLAYER CONFIRMED.** Read straight off the spawn tables and the report is exact. The Galehound is darkness-only and the Mistserpent is `IN_MISTSEA`, so the Driftlands' DAYTIME LAND roster was the Zephyr Ray at weight 80 out of 80 — **100% of what a daylight player meets in the mod's common biome** — while the Skystone Golem was absent from it entirely (0 here against 25 Stormveil, 55 Aurora, 55 Skyway). The rarest biomes had the bruiser and the one everybody walks through had the flier. Now ray 40 / golem 40, i.e. 50/50, and the ray's local cap drops 3 → 2 because the cap is what a player feels. The golem is placed on the bare skystone scree that already covers 14.7% of Driftlands land. |
+| Berry bushes: one berry, no regrowth | "man kriegt nur eine Beere beim Abbauen statt wie bei den Vanilla Büschen die Büsche abbauen kann und wieder aufbauen damit die Beeren nachwachsen" | **PARTIALLY FIXED — the real fix needs the game install.** Root cause found and it is architectural: **the cloudberry bush is not a bush.** It is a `GrassObject` — the trampled-grass archetype — so it is one-shot and gone. Vanilla berry bushes are the `FruitBushObject` family placed by `.placeObjectFruitGrower(...)`, dropping berries **plus a sapling** (`StabbyBushMob`: `blueberry x2 + blueberrysapling`), and the sapling is the growth gate that makes replanting a loop instead of an exploit. Done now: the yield goes 1–2 → 2–4 so the animal-feed loop is bearable. NOT done: the archetype swap and a `cloudberrysapling`, because `FruitBushObject`'s and `SaplingObject`'s constructors cannot be read without the decompiled sources and nothing can be compiled in this session. Written down in full at `SkyObjects.cloudberryLoot`. |
+| Bushes far too small | "die Büsche sind auch viel zu klein leider" | **FIXED — NOT YET PLAYER CONFIRMED.** Measured: 31×23 px and 520 opaque in a 32×32 cell — grass-clump mass on a plant the player has to find and harvest to feed animals. Now 32×30 and ~800 opaque, crown raised from row 9 to row 4, with 3–4 berries per cluster instead of 2–3 so the berries still read at 1×. A bush genuinely LARGER than one tile is not reachable from here: `GrassObject` sheets are N×32 wide and 32 tall, so the cell is the ceiling — two tiles of bush is the same `FruitBushObject` swap as above. |
+| No POIs, NPCs, special places | "es fehlen weiterhin jegliche POIs, NPCs, besondere Plätze, Häuser etc. es gibt nur die 2-3 POIs die aber nie besonderen Loot haben oder neue Gegner oder irgendwas interessantes" | **IN PROGRESS.** The design phase of `docs/WORLDBUILDING_LOOP.md` is running: one agent on ≥10 Skyreach POIs with room plans and a stated reward each, one on the cast — the three requested settler types, place-bound enemies, and the unique loot the existing POIs are missing. Output lands in `docs/design/`. |
+
+---
+
+## 2026-08-29 (3) — the master-branch mobs, and a window that should never have had a recipe
+
+Reported from the build on `master`. Every line below was re-measured on this
+branch before being written down; the player is right on all of them, and on two
+counts the measurement is worse than the report.
+
+| Area | Observation | Status |
+|---|---|---|
+| Windows are separately craftable | "Beetle window unnötig als extra craftbar, bei anderen Wänden setzte man normale Fenster ein und sie passen vom Design sich an. also Sprite ok aber Integration falsch" | **CONFIRMED — not yet fixed.** And it is all four, not just Beetlefreak: `skystonebrickwindow`, `beetlewindow`, `nightfellwindow` and `cloudmarblewindow` each carry their own `WORKSTATION` recipe. The repo already recorded the divergence and kept it — `TECHNICAL_LEARNINGS.md`: *"vanilla leaves its window unnamed because vanilla windows are not separately craftable. Ours are, so ours are named."* Vanilla ships item icons for exactly three obtainable wall pieces (wall, door, locked door); the window is not one of them. Decide deliberately: match vanilla (drop the four recipes, drop the four item icons, let the window come from the wall) or keep the divergence and write down why. Right now it is neither. |
+| Cloudlamb reads as a recoloured sheep | "heftig wenig Details und eigentlich gleiches Tier nur mit anderer Wolle... sowas Kirby-ähnliches wär cooler" | **CONFIRMED.** Densest 64px frame is **38×27 at 734 opaque px in 10 colours**. For comparison the mod's own size law puts a *grass clump* at 500+ px. Ten colours across a whole mob sheet is the "wenig Details" quantified. The design note matters more than the pixel count though: a sky sheep that is a sheep with different wool has no reason to exist. It needs its own silhouette. |
+| Galehound too few details | | **CONFIRMED.** 62×46, 1205 px, **18 colours** — the best of the critters measured, and still thin for a pack hunter that is meant to be the night threat. |
+| Glowmoth does not glow, is not netable, reads as two mini clouds | | **CONFIRMED, all three.** `SkyCritterMob`'s constructor sets **no `lightLevel` at all**, so nothing makes it glow. `/skyreachstatus` reports `net dewsnail=NETABLE` and nothing else — **the Dew Snail is the only netable critter in the mod**. And the sprite is 59×47 in **8 colours**, which is how a moth ends up reading as two blobs. |
+| Mistserpent never seen | "sollte mehr aussehen wie Fuchur bzw ein Kristalldrache (gibt's Vanilla in Incursions)" | **EXPLAINED.** It is weighted 28 and gated `IN_MISTSEA`, so it only ever spawns in open cloud sea — a player walking islands will not meet it. The construction note is already in `TECHNICAL_LEARNINGS.md` (the crystal dragon's compact cranium + radiating blade fan); the sprite followed it once and has never been seen in play to confirm. |
+| Skystone Golem far too small | "es gibt bei Vanilla auch Golem das genutzt werden könnte bzgl Größe und Details" | **CONFIRMED.** Densest frame **43×50**. A player's bare head is 28px wide and the torso 20px, so our "armoured bruiser" is barely wider than the player it is meant to threaten. Vanilla has golems to measure against — do that first, then rebuild. |
+| Sparkbeetle ok but not fancy | | **CONFIRMED as thin.** 48×46 at **484 opaque px in 8 colours** — the lowest mass of any mob measured. |
+| Both cats too small, tail missing, eyes unreadable | | **CONFIRMED, and worse than reported.** Densest 32px cell is **24×15 at ~190 opaque px in 8–9 colours** — under half the mass the mod's own size law demands of a *grass clump*. At 15 rows tall there is no room for a readable eye, and a tail cannot survive the outline pass. These are story characters the player is sent to find; they are the smallest sprites in the mod. |
+
+**The pattern across the whole table** is one number: **8–18 colours per mob
+sheet**, where the style guide asks for 3–6 readable micro-details in every 32px
+cell. The mobs were built to the *format* correctly and to the *density* not at
+all — the same class of miss the walls had, one category over.
+
+---
+
+## 2026-08-29 (4) — item icons and world sprites, measured rather than reported
 
 Not a play session: a measurement pass, prompted by re-reading the still-open
 "Missing icons" row above. The icon FILES were all there since `0b4dc33`. What
@@ -252,4 +331,3 @@ the picture caught: the redrawn `aurorapetal` was a fuller five-petal flower tha
 single detached petal.
 
 **Nobody has opened an inventory in the real client and looked at any of this.**
-

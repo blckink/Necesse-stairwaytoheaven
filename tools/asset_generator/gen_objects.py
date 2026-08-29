@@ -219,41 +219,59 @@ def gen_windwheat(path):
 
 
 def gen_cloudberrybush(path):
-    """64x32 strip: 2 variants of a low cloudberry bush (v0.6 readability
-    redesign — the old ~18x10 puff read as two mushrooms/stones in game).
+    """128x192 FruitBushObject sheet: 2 variants across x 3 growth stages down.
 
-    Vanilla berrybush construction compressed into the 32px grass-object
-    tile: a dense leaf-clump DOME roughly 30px wide and 20px tall over dark
-    woody stems, with amber berry clusters sunk into the mass. Variant 0 is
-    a round dome, variant 1 wider with a slight saddle — same species, not
-    copies. True pixel art: clumps and dither, no gradients."""
-    sheet = Canvas(64, 32)
+    FORMAT, read out of the 1.3.2 decompile rather than guessed:
+    `FruitBushObject.loadTextures` slices the sheet as
+    `textures[width / 64][height / 64]` -- **64px cells**, variants across,
+    stages down -- and `addDrawables` picks `spriteY = min(fruitStage, rows-1)`
+    with a per-tile random `spriteX`. Stage runs 0..maxStage inclusive
+    (`FruitGrowerObjectEntity` increments while `stage < maxStage`), and vanilla's
+    three berry bushes all use maxStage 2, so three rows.
+
+    ANCHOR: `.pos(drawX - 32 + 16, drawY - height + offset)` with
+    `offset = 28 +- 4`. So the cell is centred on the tile in x, and its BOTTOM
+    row lands 28px below the tile's top edge -- 4px above the tile's bottom.
+    The plant therefore stands ~36px proud of its tile. Draw the root at the
+    bottom of the cell, not the middle. The engine also mirrors the cell at
+    random per tile, so nothing here may depend on handedness.
+
+    WHY IT IS 64px NOW. It was a 32x32 `GrassObject` cell, and the player saw
+    both halves of that one mistake at once: "man kriegt nur eine Beere beim
+    Abbauen statt wie bei den Vanilla Bueschen ... die Buesche sind auch viel zu
+    klein". A grass object is one-shot AND one tile. The archetype is what makes
+    a berry bush regrow, and it is also what makes it big.
+
+    The body is identical across the three stages -- only the fruit appears.
+    Vanilla resets `stage` to 0 on harvest, so a stage change must read as
+    "the berries came back", never as "the bush regrew".
+    """
     B = palette.CLOUDBERRY
-    for v in range(2):
-        c = Canvas(32, 32)
-        rng = Rng(0xBE44 + v * 977)
-        # dome silhouette: overlapping leaf masses filling the tile width
+    STAGE_CLUSTERS = (0.0, 0.45, 1.0)          # fraction of clusters shown
+
+    def body(v, rng):
+        c = Canvas(64, 64)
+        # Dome: overlapping leaf masses, rooted at the bottom of the cell.
         if v == 0:
-            masses = [(16, 20, 13, 9), (8, 22, 7, 6.5), (24, 22, 7, 6.5),
-                      (12, 16, 6, 5), (21, 16, 6, 5), (16, 13, 6, 4.5)]
+            masses = [(32, 38, 27, 19), (14, 46, 15, 13), (50, 46, 15, 13),
+                      (22, 27, 14, 11), (43, 27, 14, 11), (32, 19, 14, 10)]
         else:
-            masses = [(10, 21, 9, 8), (23, 21, 8, 7.5), (16, 17, 8, 6),
-                      (5, 24, 5, 4.5), (27, 24, 5, 4.5), (13, 13, 5.5, 4.5),
-                      (20, 13, 5, 4)]
-        for (mx, my, rx, ry) in masses:          # deep under-mass first
-            c.ellipse(mx + 1, my + 2, rx, ry, B["leaf_deep"])
+            masses = [(20, 40, 19, 17), (45, 40, 18, 16), (32, 30, 18, 13),
+                      (9, 48, 11, 10), (55, 48, 11, 10), (23, 18, 12, 10),
+                      (42, 18, 11, 9)]
+        for (mx, my, rx, ry) in masses:                  # under-mass first
+            c.ellipse(mx + 2, my + 3, rx, ry, B["leaf_deep"])
         for (mx, my, rx, ry) in masses:
             c.ellipse(mx, my, rx, ry, B["leaf"])
-        # leaf-clump texture: lit 2px ticks upper-left, deep creases below,
-        # clustered so the mass reads as leaves rather than noise
-        for _ in range(46):
-            x, y = rng.range(3, 28), rng.range(9, 28)
+        # Leaf texture: lit ticks toward the top-left, creases below.
+        for _ in range(210):
+            x, y = rng.range(4, 59), rng.range(8, 57)
             if c.get(x, y)[:3] != B["leaf"][:3]:
                 continue
-            rel = (x - 16) * 0.6 + (y - 18)
-            if rel < -4:
+            rel = (x - 32) * 0.6 + (y - 34)
+            if rel < -9:
                 tone = B["leaf_light"] if rng.chance(0.75) else B["leaf"]
-            elif rel > 6:
+            elif rel > 12:
                 tone = B["leaf_deep"]
             else:
                 tone = B["leaf_light"] if rng.chance(0.3) else B["leaf_deep"]
@@ -261,34 +279,70 @@ def gen_cloudberrybush(path):
             c.put(x + 1, y, tone)
             if rng.chance(0.5):
                 c.put(x, y + 1, B["leaf_deep"])
-        # woody stems visible at the base between the leaf skirts
-        for sx in (11, 16, 22):
-            for i in range(3):
-                c.put(sx + (i % 2), 28 - i, B["wood"])
-        c.ellipse(16, 29, 12, 2, B["leaf_deep"])  # grounded shaded underside
-        # amber berry clusters sunk INTO the mass (vanilla berry idiom:
-        # 2x2 berry, hi glint top-left, deep rim bottom-right)
-        clusters = ([(9, 18), (14, 13), (22, 16)] if v == 0
-                    else [(7, 20), (15, 14), (24, 19), (19, 22)])
-        for (bx0, by0) in clusters:
-            for k in range(rng.range(2, 3)):
-                bx = bx0 + (k * 3) % 4 - 1
-                by = by0 + (k * 2) % 3
+        for sx in (20, 31, 43):                          # woody stems at the base
+            for i in range(7):
+                c.put(sx + (i % 2), 57 - i, B["wood"])
+                c.put(sx + 1 + (i % 2), 57 - i, B["wood"])
+        c.ellipse(32, 58, 24, 3, B["leaf_deep"])         # grounded underside
+        return c
+
+    def berries(c, v, stage, rng):
+        clusters = ([(16, 34), (28, 20), (45, 27), (34, 45), (22, 48), (50, 41)]
+                    if v == 0 else
+                    [(12, 38), (28, 21), (48, 33), (38, 47), (20, 30), (44, 18)])
+        show = int(round(len(clusters) * STAGE_CLUSTERS[stage]))
+        for (bx0, by0) in clusters[:show]:
+            for k in range(rng.range(3, 5)):
+                bx = bx0 + (k * 3) % 6 - 2
+                by = by0 + (k * 2) % 5
+                if not c.filled(bx, by):
+                    continue
                 c.rect(bx, by, 2, 2, B["berry"])
                 c.put(bx, by, B["berry_hi"])
                 c.put(bx + 1, by + 1, B["berry_deep"])
-        for _ in range(2):                        # lone berries near the rim
-            bx, by = rng.range(4, 26), rng.range(20, 26)
-            if c.filled(bx, by):
-                c.rect(bx, by, 2, 2, B["berry"])
-                c.put(bx, by, B["berry_hi"])
-                c.put(bx + 1, by + 1, B["berry_deep"])
-        c.outline(palette.OUTLINE)
-        sheet.paste(c, v * 32, 0)
+
+    sheet = Canvas(128, 192)
+    for v in range(2):
+        base = body(v, Rng(0xBE44 + v * 977))
+        for stage in range(3):
+            c = Canvas(64, 64)
+            c.paste(base, 0, 0)
+            berries(c, v, stage, Rng(0xB3881 + v * 613 + stage * 71))
+            c.outline(palette.OUTLINE)
+            sheet.paste(c, v * 64, stage * 64)
     sheet.save(path)
 
 
-# --- Crystal clusters --------------------------------------------------------
+def gen_cloudberrysapling(path):
+    """32x32 SaplingObject sprite: what a harvested bush leaves behind.
+
+    `SaplingObject` reads one plain texture (no cells), and its `validTiles`
+    default to vanilla grass/dirt/snow -- none of which exist in the Skyreach --
+    so the registration has to pass `cloudturftile` explicitly. Same trap the
+    mod's tree saplings already document.
+    """
+    B = palette.CLOUDBERRY
+    c = Canvas(32, 32)
+    for y in range(20, 30):                              # stem
+        c.put(15, y, B["wood"])
+        c.put(16, y, B["wood"])
+    for y in range(27, 30):                              # root flare
+        w = y - 26
+        for x in range(15 - w, 17 + w):
+            c.put(x, y, B["wood"])
+    for (lx, ly, rx, ry) in ((10, 18, 6, 4), (22, 19, 6, 4),
+                             (16, 13, 7, 5)):            # three young leaves
+        c.ellipse(lx, ly + 1, rx, ry, B["leaf_deep"])
+        c.ellipse(lx, ly, rx, ry, B["leaf"])
+    for (hx, hy) in ((12, 16), (20, 17), (15, 11)):      # lit upper-left flanks
+        c.put(hx, hy, B["leaf_light"])
+        c.put(hx + 1, hy, B["leaf_light"])
+    c.rect(17, 15, 2, 2, B["berry"])                     # one berry, the promise
+    c.put(17, 15, B["berry_hi"])
+    c.put(18, 16, B["berry_deep"])
+    c.outline(palette.OUTLINE)
+    c.save(path)
+
 
 def _shard(c, x, y_base, h, w, ramp, lean=0, seam=False, cut=True, bright=False):
     """One CHUNKY faceted crystal (vanilla amethystcluster construction):

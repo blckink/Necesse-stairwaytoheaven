@@ -35,7 +35,15 @@ PAIRS = [
      "objects/copperstreetlamp.png", (0, 0, 32, 96), "streetlamp (on half)"),
     ("objects/mistglasslantern.png", (0, 0, 32, 32),
      "objects/walltorch.png", ("auto", 32, 32), "wall light (densest cell)"),
-    ("objects/skywatchbanner.png", (0, 0, 32, 32),
+    # Ours was a FIXED (0,0,32,32) crop while the vanilla side is "auto"
+    # (densest cell) and the note claimed densest for both. That asymmetry was
+    # invisible for as long as our banner drew the SAME picture in all four
+    # rotation rows -- 738 px four times over, which is the rotation-variety bug
+    # itself. The moment the sheet got four real views, the fixed crop started
+    # measuring row 0, the foreshortened over-the-cap view, against vanilla's
+    # face-on row, and reported 0.55 on art that had just been corrected.
+    # Compare densest to densest, as the note always said.
+    ("objects/skywatchbanner.png", ("auto", 32, 32),
      "objects/bannerofpeace.png", ("auto", 32, 32), "wall banner (densest 32px cell)"),
     ("objects/gloomshroom.png", (0, 0, 32, 32),
      "objects/mushroom.png", ("auto", 32, 32), "mushroom (densest cell)"),

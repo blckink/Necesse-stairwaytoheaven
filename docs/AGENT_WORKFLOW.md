@@ -90,3 +90,43 @@ unrelated work, so it can be pulled and tested on its own.
 The message explains **why**, and states what was verified and how. "Fixed the
 crash" is not a record; the root cause, the reason vanilla does not hit it, and
 the evidence are. Future agents read these before they read the code.
+
+## Running the worldbuilding loop
+
+The six phases above are how *a* task runs. `docs/WORLDBUILDING_LOOP.md` is how
+a **chapter of new world** runs: a design brief, then a POI dossier, then four
+art specialists in parallel, then one integrator who wires it up, gates it,
+commits it and reports. The seven roles have agent definitions in
+`.claude/agents/`, and each one carries its own formats, budget and acceptance
+criterion so it does not have to go looking.
+
+Everything on this page still applies inside that loop — one owner per file, the
+gates matched to the change, workers do not commit. What the loop adds is the
+sequencing between the roles and a hard cap on how long art batches may run.
+
+## Moving a session between the web and a terminal
+
+Work started at claude.ai/code runs in a cloud VM that is **reclaimed after
+inactivity** — the session is then marked expired, and any background work it
+had running (subagents, shell commands) is not restored, though the conversation
+is. Reopening it from claude.ai/code provisions a fresh VM.
+
+To continue such a session locally, `claude --resume` is the wrong command: it
+only lists conversations stored on *this* machine under `~/.claude/projects/`
+and never shows cloud sessions. The documented mechanism is **`--teleport`**:
+
+```bash
+claude --teleport                 # interactive picker
+claude --teleport <session-id>    # straight to one session
+```
+
+from a shell, or `/teleport` (`/tp`) from inside a running CLI session. It wants
+a clean git state, the same repository, the same account, and **the branch
+already pushed** — which is the practical reason this repo's rule is that a
+session pushes its branch before it stops.
+
+Teleport makes a **local copy**: work done afterwards stays local and does not
+flow back to the web session. So the branch, `docs/CURRENT_STATE.md` and the
+commit messages remain the real handoff between one session and the next,
+exactly as the six phases above assume. Teleport moves the conversation; the
+repository moves the work.

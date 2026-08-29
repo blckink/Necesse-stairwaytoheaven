@@ -48,7 +48,7 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              "objects/skyseraphtree.png", "items/skyseraphtree.png",
              "objects/statues/seraph.png", "items/seraphstatue.png",
              "objects/cloudtree.png", "items/cloudtree.png",
-             "objects/nimbuswillow.png", "objects/cloudmarblewall.png")
+             "objects/nimbuswillow.png")
 
 
 def _stamp(out, rel):
@@ -124,6 +124,7 @@ def main():
     gen_objects.gen_stairway_up(f"{out}/objects/skystairwayup.png")
     gen_objects.gen_windwheat(f"{out}/objects/windwheat.png")
     gen_objects.gen_cloudberrybush(f"{out}/objects/cloudberrybush.png")
+    gen_objects.gen_cloudberrysapling(f"{out}/objects/cloudberrysapling.png")
     gen_rocks.gen_rock_sheet(f"{out}/objects/veilrock.png", palette.VEILROCK, variants=6, salt=0x3E1F)
     gen_veil.gen_whisperreeds(f"{out}/objects/whisperreeds.png")
     gen_veil.gen_gloomshroom(f"{out}/objects/gloomshroom.png")
@@ -266,6 +267,10 @@ def main():
     gen_skyfurniture.generate(f"{out}/objects", f"{out}/items")
     # Cloudmarble masonry. The Skyway ground it used to draw now comes from
     # tools/convert_biome_art.py instead — see the note in gen_cloudmarble.
+    # The WALL, however, is drawn here again: shipping the supplied
+    # illustration as the sheet put 10,858 colours and a near-white cap into a
+    # format vanilla builds out of ~20, which is what "die Wände blenden fast"
+    # was. Same call the Beetlefreak wall already makes, same reason.
     gen_cloudmarble.generate(f"{out}/objects", f"{out}/items", f"{out}/tiles")
     # Beetlefreak masonry. The supplied sheet in kk-sprites/ is a continuous
     # illustration, not an auto-tile blob, so it could not tile however it was

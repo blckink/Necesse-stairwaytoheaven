@@ -103,6 +103,8 @@ public final class SkyRegistry {
     public static int skyreedsID;
     public static int windwheatID;
     public static int cloudberryBushID;
+    /** The sapling a broken Cloudberry Bush leaves behind — its only drop. */
+    public static int cloudberrySaplingID;
 
     // ===== v0.2: building set & quest structure =====
 

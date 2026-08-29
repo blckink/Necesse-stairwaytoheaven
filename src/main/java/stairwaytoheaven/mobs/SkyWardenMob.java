@@ -58,11 +58,16 @@ import stairwaytoheaven.quest.SkywatchWorldData;
 public class SkyWardenMob extends HumanShop {
 
     /**
-     * The recruitment price. Intentional design value: it equals the top
-     * vanilla settlement expansion tier (100,000 coins), so an endgame player
-     * who has finished incursion-tier content pays a meaningful but achievable
-     * lump sum — the single largest NPC purchase in the mod, benchmarked
-     * against the wiki economy (Elder's priciest stock item is ~6,000).
+     * The recruitment price. Still the single largest NPC purchase in the mod
+     * — the Elder's priciest stock item is around 6,000 — but deliberately
+     * reachable well before the top vanilla settlement-expansion tier, because
+     * the Warden is the ENTRY to the Skyreach's content and pricing him at
+     * endgame wealth gates the whole layer behind it.
+     *
+     * <p>This comment used to justify 100,000 while the constant said 30,000:
+     * `5ce05ae` dropped the fee and updated neither this nor
+     * `DESIGN_DECISIONS.md` nor `CURRENT_STATE.md`. All three now agree with
+     * the constant, which is the value the integration test observes.
      */
     public static final int RECRUIT_COST = 30_000;
 
