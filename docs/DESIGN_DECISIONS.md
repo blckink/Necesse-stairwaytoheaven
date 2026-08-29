@@ -43,9 +43,19 @@ that could reset Surface state is a bug, not a trade-off.
 
 ## The Warden
 
-**Recruitment costs 100,000 coins.** *Why:* it equals the top vanilla
-settlement expansion tier, so an endgame player pays a meaningful but reachable
-lump sum. It is the single largest NPC purchase in the mod on purpose.
+**Recruitment costs 30,000 coins.** *Why:* it is still the single largest NPC
+purchase in the mod, but reachable well before the top vanilla
+settlement-expansion tier — the Warden is the ENTRY to the Skyreach's content,
+so a price that gates him behind endgame wealth gates the whole layer behind it.
+
+*This value changed and the record did not follow it.* It read 100,000 here,
+justified as matching the top expansion tier, while `SkyWardenMob.RECRUIT_COST`
+had been 30,000 since `5ce05ae` — a deliberate change ("drop the Warden's fee to
+30,000"), verified in that commit's integration run as `price=coinx30000`, which
+updated `PLAYER_JOURNEY.md` and left this file, `CURRENT_STATE.md` and the code
+comment above the constant all still explaining 100,000. Four records against
+one number. The code was right; the records are corrected to it. `CHANGELOG.md`
+keeps its 100,000 line because that is what v0.5 actually shipped.
 
 **The payment IS the recruitment.** It is a real settlement recruitment that
 turns him into a `HumanShop` settler on the Surface. **It is never the purchase
