@@ -133,170 +133,244 @@ The last three write pictures into `build/qa/`. **Look at them.** Every art bug
 this project has shipped was invisible to the numeric audits and obvious in a
 contact sheet with vanilla beside it.
 
-Building and running the game needs `NECESSE_GAME_DIR`; without it you can still
-run every Python gate, and you must say so rather than implying a build passed.
+Building and running the game needs `NECESSE_GAME_DIR` — and that is a **free
+download**, not a blocker: `scripts/fetch_dedicated_server.sh` fetches the
+dedicated server, and `./gradlew decompileToSources -PuseDecompiledSources=true`
+then gives you 6,464 readable engine classes. Three sessions in a row reported
+"no game install, cannot verify" and worked around it; there is no excuse left
+for a guessed signature. What the server does NOT bring is sprites (it never
+renders, so its jar holds zero PNGs), so the vanilla comparison strips in
+`wall_render_preview` and `size_audit` are honestly *unavailable* without a
+client install — say that, do not say "skipped".
 
 ---
 
-## 3. The loop
+## 3. The loop, and how to leave it running
 
-One **chapter** = one themed region and everything it needs. Chapters run in
-sequence; inside a chapter, phases 3a–3d run in parallel.
+One **chapter** = one themed slice of world and everything it needs to be
+playable. Chapters run in sequence; inside a chapter the art runs in parallel.
 
 ```
-  1  DESIGNER      theme, story, cast, where it attaches      -> chapter brief
-  2  POI ARCHITECT reads the brief -> >=10 POIs with contents -> POI dossier
-  3  ART (parallel, all four read both documents)
-       3a walls & tiles      3b wearables
-       3c creatures          3d props & furniture
-  4  INTEGRATOR    registers, wires, gates, plays, documents  -> chapter report
+  1  DESIGNER       theme, story, cast, where it attaches        -> chapter brief
+  2  POI ARCHITECT  reads the brief -> >=8 POIs with plans       -> POI dossier
+  3  ART (parallel, all read both documents)
+       3a walls & tiles     3b wearables     3c creatures
+       3d props & furniture 3e codex-artist  (style-critical sprites)
+  4  INTEGRATOR     registers, wires, gates, plays, DOCUMENTS    -> chapter report
   5  loop
 ```
 
-### The seven roles
+### Running it unattended
 
-Each has an agent definition in `.claude/agents/`. Every one of them reads
-`AGENTS.md` + `docs/CURRENT_STATE.md` first, and none of them commits except the
-integrator (`docs/AGENT_WORKFLOW.md`: workers do not commit or push).
+One chapter is one command:
 
-| # | Agent | Owns | Produces | Acceptance |
-|---|---|---|---|---|
-| 1 | `biome-designer` | `docs/design/chapter-NN-*.md` | the chapter brief | Names the biome, its palette (3 ramps + 1 exclusive accent), where it attaches to an existing layer, 3–6 enemies, 1–2 NPCs with a reason to talk, 2 resources, and one sentence of story per POI. No pixel or Java decisions. |
-| 2 | `poi-architect` | `docs/design/chapter-NN-pois.md` | ≥10 POIs | Each: footprint in tiles, room plan, object list with rotations, what the player *does* there, and its loot/encounter/story hook. Proportions measured off `docs/references/presets/`. |
-| 3 | `art-walls-tiles` | one new `gen_*.py` per chapter | wall sets, floors, terrain, splats | `sheet_format_audit` + `rotation_variety_audit` green, `wall_render_preview` composed **with `--vanilla stonewall`** and inspected. |
-| 4 | `art-wearables` | `gen_armor.py`-family modules | armor, hoods, masks, outfits for player *and* NPCs | 7×4 cells at 32px upscaled 2×, the four repeat patterns honoured, row 3 = mirror of row 1, `size_audit` green. |
-| 5 | `art-creatures` | `gen_mobs.py`-family modules | enemies, critters, tameable animals | 6×4 64px cells in Up/Right/Down/Left order, walk cycle actually changes pose, bestiary icon present, **a tameable animal reads as tameable at 1×**. |
-| 6 | `art-props` | `gen_props.py` / `gen_furniture.py`-family | deco, furniture, lights, statues | Correct base-class sheet for each piece, every rotation drawn, `furniture_audit` green. |
-| 7 | `content-integrator` | all Java, all docs, all commits | working content + the chapter report | §4 below. |
+```
+/chapter                          # picks the next open theme from §7
+/chapter veil zombie apocalypse   # or name one
+```
 
-### File ownership
+`.claude/commands/chapter.md` is that command, and it is self-contained: it
+fetches the game install if `NECESSE_GAME_DIR` is unset, runs the phases, holds
+the completeness checklist, runs every gate, and refuses to stop at "design
+done" or "art done".
 
-**One owner per file, declared before anyone starts.** Two agents editing one
-generator module will silently clobber each other. Each art agent gets its own
-new module; shared files (`palette.py`, `px.py`, the audits, `CHANGELOG.md`,
-`docs/`) belong to the integrator.
+To keep building rather than stopping after a burst:
 
-Watch shared helpers: two sprites can share a function inside one file. After
-any art change, regenerate and check `git status` — a PNG you did not mean to
-touch changed means a helper moved under someone else.
+```
+/loop /chapter
+```
+
+That is the answer to *"immer wieder, nicht nur paar Sachen dann wieder Stopp"*.
+Each iteration is a whole chapter, ending green, committed and pushed — so an
+interrupted loop always leaves the repo in a shippable state rather than
+half-integrated.
+
+**Two rules make an unattended loop safe rather than merely long.**
+
+1. **A chapter ends green or it ends loudly.** The integrator does not commit a
+   chapter whose gates are red. If it cannot finish, it says exactly what
+   blocked it, in the report and in `docs/CURRENT_STATE.md`, and the next
+   iteration picks that up first.
+2. **Nothing player-approved is touched.** `docs/PLAYTEST_LOG.md` marks content
+   KEEP. A loop that quietly redesigns liked content burns the run.
+
+### The eight roles
+
+Definitions live in `.claude/agents/`. All read `AGENTS.md` and
+`docs/CURRENT_STATE.md` first; **only the integrator commits**.
+
+| # | Agent | Produces | Acceptance |
+|---|---|---|---|
+| 1 | `biome-designer` | the chapter brief | Names where it attaches, 3 ramps + one **exclusive** accent, 3–6 enemies, 1–2 NPCs, 2 resources, one story sentence per POI. No pixels, no Java. |
+| 2 | `poi-architect` | ≥8 POIs | Each: footprint, ASCII plan, object list with rotations, lighting rhythm, **what the player leaves with**. Proportions from `docs/references/presets/`. |
+| 3 | `art-walls-tiles` | walls, floors, terrain, splats | `sheet_format_audit` + `rotation_variety_audit` green, `wall_render_preview --vanilla stonewall` looked at. |
+| 4 | `art-wearables` | armour, hoods, outfits | 7×4 cells at 32px upscaled 2×, the four repeat patterns, row 3 = mirror of row 1. |
+| 5 | `art-creatures` | enemies, critters, livestock | 6×4 64px cells Up/Right/Down/Left, the walk cycle actually changes pose, tameable reads as tameable at 1×. |
+| 6 | `art-props` | deco, furniture, lights, stations | Right base-class sheet, every rotation drawn, `furniture_audit` green. |
+| 7 | `codex-artist` | style-critical sprites, via a local Codex | Draft converted or redrawn, 20–40 colours, hard alpha, in the generator — never a Codex PNG copied into `src/`. |
+| 8 | `content-integrator` | working content + the report | §4. |
+
+**One owner per file.** Each art agent gets its own generator module; shared
+files (`palette.py`, `px.py`, the audits, the docs) belong to the integrator.
+After any art change, regenerate and check `git status` — a PNG you did not mean
+to touch means a shared helper moved under someone else.
+
+### What Codex is for, and what it is not
+
+Codex is better at **style** — silhouette, colour, attitude, the freaky idea —
+and worse at **discipline**: it drifts off sheet formats, invents cell layouts,
+and produces thousands of anti-aliased colours with soft alpha. So the split is
+fixed: **Codex draws the look, this pipeline supplies the format.** A Codex draft
+is a reference render that goes through `tools/convert_reference.py` and lands in
+the generator, or gets redrawn there from its palette and silhouette. It never
+ships as a sheet — that is exactly how the spire came out white and blinding at
+10,858 colours. `docs/CODEX_SPRITE_TEMPLATE_BRIEF.md` covers the other direction,
+where Codex prepares specs instead of art, and §7 there covers the cross-machine
+round trip, which has no notification and needs none as long as the review
+travels on the branch.
 
 ---
 
 ## 4. What the integrator has to prove
 
-Not "it compiles". Per `docs/IMPLEMENTATION_RULES.md` §1 and §12, for **every**
-new family:
+Not "it compiles". Per `IMPLEMENTATION_RULES.md` §1 and §12, for **every** new
+family:
 
-- correct native archetype and registry category — a table that is not a
-  `TableObject` is a rock as far as room scoring is concerned
-- world sprite / mob sheet **and** `items/<id>.png` icon
-- EN + DE display name, and a tooltip where it helps
-- **a crafting recipe at the right workstation, or an explicit reason there is
-  none** (quest reward, worldgen only) written down
-- correct tool type and tier — not everything is a pickaxe
-- drops / loot / captured-item behaviour
-- **tameable animals recognisable as tameable**: the vanilla husbandry path, a
-  trough food they can actually eat, breeding that produces their own species,
-  and a hover tooltip that says what they are for
-- save/persistence/despawn semantics
-- placed by worldgen somewhere a player will actually find it
-- every gate in §2 run, and the verification level stated honestly
+- correct native archetype and registry category — established by **reading the
+  decompiled class**, never from memory. `scripts/fetch_dedicated_server.sh`
+  and `./gradlew decompileToSources` make that a two-minute step, so there is no
+  excuse left for a guessed signature.
+- world sprite / mob sheet **and** `items/<id>.png`
+- EN + DE display name, tooltip where it helps
+- **a recipe at the right station, or a written reason there is none**
+- correct tool type and tier, HP, break speed, drops, light, collision,
+  shore/water, persistence and despawn
+- **reachable** — worldgen places it or a quest hands it over, somewhere a
+  player will find it. Registered-but-unplaced is not content.
+- tameable animals recognisable as tameable: the husbandry path, a trough food
+  they can actually eat, breeding that produces their own species, and a
+  tooltip that says what the animal is for
+- **a row in `docs/CONTENT_LEDGER.md`, in the same commit** — see §6
 
-Then the **chapter report**: what is new, where to find it in game, what was
-verified `[jar]` / `[run]` / `[game]`, and what is still open. Append to
-`docs/CURRENT_STATE.md` and `CHANGELOG.md`; append anything newly proven about
-the engine to `docs/TECHNICAL_LEARNINGS.md`.
-
-Never upgrade an automated result to player-confirmed. The states are in
-`IMPLEMENTATION_RULES.md` §14.
+Then the gates, with the verification level stated honestly
+(`IMPLEMENTATION_RULES.md` §14). And **open the contact sheets**: every art bug
+this project shipped passed the numeric gates.
 
 ---
 
-## 5. Run-time discipline — why a PNG took thirty minutes
+## 5. Run-time discipline
 
-The cause is not model speed. It is three habits:
+Art runs used to take thirty minutes per PNG. Three habits caused it: drawing
+each sprite from zero, a visual iteration loop *per sprite*, and re-reading the
+format specs per sprite. The fixes are not optional:
 
-1. **Drawing each sprite from zero.** Every new sprite got its own bespoke
-   pixel-pushing code, re-deriving what a "slab" or a "lit edge" is.
-2. **A visual iteration loop per sprite** — render, judge, redraw, render —
-   which is a full reasoning cycle each time.
-3. **Re-reading the format specs per sprite** instead of once per batch.
-
-The fixes, and they are not optional:
-
-- **Work in families, never in single sprites.** One agent run produces 6–12
-  related pieces in one module. The format reading, the palette decisions and
-  the QA pass are paid once and amortised.
-- **Build a `_piece()` helper first, then variants.** Every module in
-  `tools/asset_generator/` that reads well does this: a shared constructor for
-  the family's silhouette and shading, then short functions that differ.
-  `gen_skyfurniture.py`'s `_slab` / `_panel` / `_grain` / `_iron_rail` is the
-  pattern to copy.
-- **One candidate set, at most one correction pass, then stop.** This is
-  already in `AGENTS.md` and it is the rule most often broken. If the batch is
-  still visually uncertain after one pass, hand it over and say what is
-  uncertain.
-- **QA per batch, not per sprite.** One contact sheet for the family, looked at
-  once.
-- **Budget: ~2 minutes per sprite, ~15 minutes per batch of 8.** If a batch is
-  over budget, ship what is coherent and report the rest — do not keep going.
-- **Never redraw an asset marked KEEP** in `docs/PLAYTEST_LOG.md` because a
-  metric could be better.
-
-The other half of speed is not searching. The four art agents each have their
-format lines in §2 above and their spec files named. First action is reading the
-one line for the family, not exploring the repo.
+- **Work in families, never single sprites.** 6–12 related pieces per run, in
+  one module. Format reading, palette decisions and QA are paid once.
+- **Build a `_piece()` helper first, then variants.** `gen_skyfurniture.py`'s
+  `_slab` / `_panel` / `_grain` / `_iron_rail` is the pattern.
+- **One candidate set, at most one correction pass, then stop.** If it is still
+  uncertain, hand it over and name what is uncertain.
+- **QA per batch, not per sprite.**
+- **Budget ~2 minutes per sprite, ~15 per batch of 8.**
+- **Never redraw content marked KEEP** because a metric could be better.
 
 ---
 
-## 6. Creative direction
+## 6. Documentation is part of the content
 
-The requested register is **Tim Burton**: Beetlejuice, ghost world, zombie
-apocalypse, gates of heaven, a magic world. Two constraints keep that from
-turning into a costume box:
+*"sauber dokumentiert jeder Inhalt + Quest, Sprite etc der dazu kommt."* This is
+enforced, not remembered:
 
-- **`IMPLEMENTATION_RULES.md` §10** — each realm keeps its own language. The
-  Skyreach's core biomes are pastoral and luminous; the gothic-morbid comedy is
-  the Veil's; a perfect-Heaven register is its own place. Don't mix all three
-  into every screen.
-- **Exclusive accents.** Cyan/silver = Driftlands, indigo/violet = Stormveil,
-  rose/teal = Aurora Shoals. A new region earns a new accent and does not borrow.
+```bash
+python3 tools/content_ledger.py --check     # fails on anything undescribed
+python3 tools/content_ledger.py --scaffold  # empty rows for what is new
+```
 
-The existing **Beetlefreak Hollow** — violet stone with swirls, cream-and-black
-bead trim, brass lanterns with a green flame, magenta glass — is the reference
-for how loud a mod set may get while still reading as Necesse: **vanilla
-construction, unhinged palette and motifs.** Copy that ratio, not that palette.
+The ledger reads registrations **out of the source** (it reuses the locale
+audit's own scan, so the two cannot drift) and requires one line per ID saying
+what it is for a player. The ~200 IDs that predate it sit in a baseline the
+check exempts; **everything added from now on does not get that exemption**, and
+a scaffolded row with an empty description still fails.
 
-Where the requested themes attach:
-
-| Theme | Layer | Hook that already exists |
-|---|---|---|
-| Beetlejuice / striped gothic | Veil | Beetlefreak Hollow, "Haunted & Homely" set (ROADMAP v0.3) |
-| Ghost world / bureaucratic afterlife | Veil | the Model Town and the Office of Eternity are designed, unbuilt |
-| Zombie apocalypse | Veil or a new Veil sub-biome | Ashen Reach is the ash waste; the Ashwyrm is its unbuilt mid-boss |
-| Gates of Heaven | Skyreach, above the Skyway | Skyway Passages (cloudmarble + gold) already point up |
-| Magic world | Skyreach endgame | the Storm Sovereign arc, ROADMAP v0.6 |
-
-**Bias to the endgame.** The mod's shipped power band stops around Tungsten.
-New chapters should sit at or past that: Aetherium-tier gear, boss-adjacent
-arenas, POIs worth crossing a dimension for. A new low-tier flower is not what
-is missing.
-
-Every POI has to answer `IMPLEMENTATION_RULES.md` §9 — navigation, harvest,
-loot, encounter, collection, storytelling, progression, or a rare oddity — and
-§8: compose scenes, don't scatter. The player should keep thinking *"what is
-that over there?"*.
+Per chapter the integrator also updates `docs/CURRENT_STATE.md`, appends newly
+proven engine behaviour to `docs/TECHNICAL_LEARNINGS.md`, adds player feedback to
+`docs/PLAYTEST_LOG.md`, and writes the chapter into `CHANGELOG.md`. Quests and
+sprites that carry no registration of their own go in the ledger's free-text
+sections.
 
 ---
 
-## 7. Starting a chapter
+## 7. What to build — the open themes
+
+Bias everything to the **endgame**. The shipped power band stops around Tungsten
+and the roster is mostly easy; new content sits at or past Aetherium, up toward
+incursion pressure, with loot that is a new capability rather than a bigger
+number.
+
+### The Veil — Beetlejuice and Burton, and NOT just black
+
+The Veil is the mod's comedy-horror realm and it has been drifting monochrome.
+Burton is not darkness, it is **contrast**: acid green against violet, bone
+white against black, stripes, checkerboards, spirals, sickly pinks, brass and
+verdigris. Beetlejuice is *loud*. The existing **Beetlefreak Hollow** — violet
+stone with swirls, cream-and-black bead trim, brass lanterns with a green flame,
+magenta glass — is the reference for how far a set may go while still reading as
+Necesse: **vanilla construction, unhinged palette**.
+
+Rules for the Veil's chapters: every set gets one saturated accent that is
+nobody else's; black is an outline colour and a shadow, never a fill; at least
+one piece per chapter should be funny. Open ground:
+
+- **The Model Town** — doll-scale streets, one house enterable (designed, unbuilt)
+- **The Office of Eternity** — waiting-room dungeon, ticket numbers, Form 13-K
+- **A zombie-apocalypse quarter** in or beside the Ashen Reach, with the
+  **Ashwyrm** as its mid-boss
+- **Mortimer the Broker** and **Vesper the medium** — the Veil's cast
+- The **"Haunted & Homely"** deco set, usable in a surface base
+
+### The Surface — something new between the known things
+
+The mod already reaches the overworld (Skyfall shards, the Aeronaut Camp, the
+Skyward Shrine, the Fragment Crater). A **surface biome of our own** is the next
+step: somewhere a player stumbles into mid-game, that gives base materials and
+textures they cannot get elsewhere, with its own inhabitants and its own trouble.
+It must read as *found*, not as a second Skyreach — the Veil's language leaking
+upward is the obvious hook, and it is already established that the Veil leaks
+(`DESIGN.md` Part IV §26).
+
+### The Skyreach
+
+`docs/design/chapter-01-skyreach-pois.md` (14 POIs) and
+`chapter-01-skyreach-cast.md` (three settler types, three place-bound enemies,
+eight rewards) are written and unbuilt. That is the next chapter's work order.
+
+### Every chapter, whatever the theme
+
+- **Materials for the base.** New building sets, floors, furniture the player
+  actually wants to haul home.
+- **Inhabitants with a want.** An NPC who sells, teaches, or asks for something.
+- **Endgame encounters.** Something that can kill a geared player.
+- **Loot worth crossing a dimension for** — per `IMPLEMENTATION_RULES.md` §9,
+  every piece answers navigation, harvest, loot, an encounter, a collection,
+  environmental storytelling, progression, or a rare oddity.
+
+Register discipline still holds (`IMPLEMENTATION_RULES.md` §10): the Skyreach
+core is pastoral and luminous, the Veil is gothic comedy, the perfect-Heaven
+register belongs above the Skyway. Do not mix all three into one screen.
+
+---
+
+## 8. Starting
 
 ```bash
 git fetch && git log --oneline -20
 cat docs/CURRENT_STATE.md
+scripts/fetch_dedicated_server.sh        # free; prints the path to export
+export NECESSE_GAME_DIR=<that path>
+./gradlew decompileToSources -PuseDecompiledSources=true
+/loop /chapter
 ```
 
-Pick the next theme from §6, then run phase 1. Sequence the loop; do not start
-chapter N+1's art while chapter N is unintegrated. Stop looping when the
-integrator's report says a chapter shipped without a player-visible reason to
-go there — that is the signal the world needs playing, not more content.
+Stop looping when a chapter report says a chapter shipped without a
+player-visible reason to go to the new place. That is the signal the world needs
+playing, not more content.

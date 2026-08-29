@@ -47,6 +47,10 @@ From `IMPLEMENTATION_RULES.md` §1 and §12:
 - animation and frame layout the native renderer expects
 - bestiary/journal support where the category uses it
 - **reachable**: placed by worldgen or obtainable somewhere a player will find it
+- **a row in `docs/CONTENT_LEDGER.md`, in the same commit that adds it.**
+  `python3 tools/content_ledger.py --check` reads registrations out of the
+  source and fails on anything undescribed, so this is a gate, not a habit.
+  `--scaffold` writes the empty rows; an empty description still fails.
 - **tameable animals recognisable as tameable** — vanilla husbandry path, a
   trough food they can actually eat, breeding that produces their own species,
   and a hover tooltip that says what the animal is for. "I caught it, what now?"

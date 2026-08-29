@@ -47,6 +47,12 @@ One file: `docs/design/chapter-NN-<slug>.md`. It must answer all of:
 - **`IMPLEMENTATION_RULES.md` §10 is binding**: each realm keeps its own
   language. Do not mix gothic comedy, pastoral sky and perfect-Heaven into one
   region because all three are on the wish list.
+- **In the Veil, Burton is contrast, not darkness.** The realm has been drifting
+  monochrome and the player has called it: acid green against violet, bone
+  white against black, stripes, checkerboards, spirals, sickly pink, brass and
+  verdigris. Beetlejuice is LOUD. Black is an outline colour and a shadow,
+  never a fill. Every Veil set earns one saturated accent that is nobody
+  else's, and at least one piece per chapter should be funny.
 - **Never reverse a decision in `docs/DESIGN_DECISIONS.md`.** If your idea needs
   one reversed, say so in the brief and stop.
 - Keep it to about two pages. A brief nobody finishes is a brief nobody follows.
