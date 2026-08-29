@@ -281,55 +281,6 @@ PAIRS = [
      "items/frozenheart.png", None, "trinket item icon"),
     ("items/zephyrharness.png", None,
      "items/airvessel.png", None, "trinket item icon"),
-    # The thin-icon batch. These twelve shipped between 29 and 117 opaque px
-    # while every vanilla 32x32 item icon in the dump carries 288-712 (median
-    # 440) -- tempestedge, one of the mod's two original weapons, was a 45px
-    # hairline. None of them had a row here, which is the whole reason they
-    # shipped: this audit only ever sees what it is pointed at, and 207 of the
-    # mod's 307 PNGs were pointed at nothing. Each analogue below is the
-    # vanilla icon whose CONSTRUCTION the redraw was briefed against, so the
-    # gate and the brief rest on the same fact.
-    ("items/flickerlightgarland.png", None,
-     "items/silk.png", None, "strung deco item icon"),
-    ("items/tempestedge.png", None,
-     "items/quartzglaive.png", None, "sword item icon"),
-    ("items/veilessence.png", None,
-     "items/resistancepotion.png", None, "essence item icon"),
-    ("items/ghostlantern.png", None,
-     "items/oakclock.png", None, "lantern item icon (tall, narrow)"),
-    ("items/wardencandelabra.png", None,
-     "items/oakclock.png", None, "candelabra item icon (tall, narrow)"),
-    ("items/stormshard.png", None,
-     "items/glass.png", None, "mineral shard item icon"),
-    ("items/aeronautwreck.png", None,
-     "items/airvessel.png", None, "wreckage item icon"),
-    ("items/fulgurite.png", None,
-     "items/glass.png", None, "mineral item icon"),
-    ("items/galehowl.png", None,
-     "items/tungstengreatbow.png", None, "bow item icon"),
-    ("items/glowfern.png", None,
-     "items/birchsapling.png", None, "soft plant item icon"),
-    ("items/withershrub.png", None,
-     "items/birchsapling.png", None, "shrub item icon"),
-    ("items/aurorapetal.png", None,
-     "items/inefficientfeather.png", None, "petal item icon"),
-    # Both held sprites share their icon's drawing helper (_tempest_blade,
-    # _galehowl_bow), so a thickened blade reaches them whether or not anyone
-    # meant it to. Rows here make that an intended, watched output instead of
-    # collateral nobody looked at.
-    #
-    # They are deliberately MANUAL rows, not ratios. These two sit on a 32x32
-    # canvas while every other held weapon in the mod matches vanilla's own
-    # much larger sheets (skyreave 96x95 vs quartzglaive 104x88; thunderhead
-    # 22x62 vs tungstengreatbow 20x60). An opaque-mass ratio between canvases
-    # that differ by 3x measures the canvas, not the drawing, and would need an
-    # ACCEPTED floor so low it gated nothing. The canvas question is real and
-    # open -- see docs/CURRENT_STATE.md -- but it is a rendering-geometry
-    # change, not an art change, so it is not silently folded in here.
-    ("player/weapons/tempestedge.png", None,
-     None, None, "sword held sprite: 32x32 canvas, cf. skyreave at 96x95"),
-    ("player/weapons/galehowl.png", None,
-     None, None, "bow held sprite: 32x32 canvas, cf. thunderhead at 22x62"),
 ]
 
 THRESHOLD = 0.75
