@@ -2109,3 +2109,57 @@ than the marble they decorate** — a white-and-gold set in which the gold canno
 read as gold. Trim must be brighter than what it trims. The stone base is now
 ~152 and `SKYGOLD["hi"]` (~221) is the brightest pixel on the sheet. The value
 law for a whole room is in `docs/ART_DIRECTION.md`.
+
+## The dedicated server is a free download, and it carries the whole toolchain (v0.9)
+
+**[run]** Three sessions in a row reported "no game install here, so nothing can
+be compiled, tested or verified" and worked around it. That was wrong, and the
+player said so: the **dedicated server** at <https://necessegame.com/server/> is
+a free public download — no account, no purchase, no Steam. Every published
+version is on that page, 1.3.2 included.
+
+`scripts/fetch_dedicated_server.sh` fetches it (the page's links are S3
+presigned URLs that expire in an hour, so they must be read fresh, never
+hard-coded) and unpacks `Server.jar` plus a bundled `jre`. Measured on this
+session's run, that single file turns on:
+
+| gate | needs | status without the server |
+|---|---|---|
+| `./gradlew buildModJar` | `Server.jar` on the compile classpath | impossible |
+| `scripts/integration_test.sh` | `Server.jar` + `jre` | impossible |
+| `scripts/tile_sprite_check.sh` | same | impossible |
+| `scripts/sky_map_render.sh` (the offline painter) | same | impossible |
+| `./gradlew decompileToSources` | the jar to decompile | impossible |
+
+The decompile writes `$NECESSE_GAME_DIR/decompiled/Necesse-sources.jar` in about
+a minute — **6,464 readable classes**. Every "I cannot check that signature"
+answer in this repo's history was one command away from being checkable.
+
+**[run]** What the server does NOT bring is art. It never renders, so
+`Server.jar` contains **zero `.png` entries** — verified by listing the archive.
+So the vanilla sprite dump the art tooling wants stays missing:
+`wall_render_preview --vanilla stonewall` still warns that its comparison strips
+are absent, and `size_audit` still reports individual vanilla refs missing. Those
+need a client install. Say "unavailable", not "skipped".
+
+**[jar]** First thing the decompile settled, and it had been blocking a player
+report for two sessions: `FruitBushObject`'s constructor is
+
+```java
+FruitBushObject(String textureName, String seedStringID,
+                float minGrowTimeSeconds, float maxGrowTimeSeconds,
+                String fruitStringID, float fruitPerStage, int maxStage,
+                Color mapColor)
+```
+
+and vanilla's three berry bushes all register as
+`("blueberrybush", "blueberrysapling", 900.0F, 1800.0F, "blueberry", 1.0F, 2, colour)`.
+It carries a `FruitGrowerObjectEntity`, publishes a `HarvestFruitLevelJob` (so
+settlers harvest it), and sets `objectHealth = 1`, `toolType = ALL`.
+
+And `loadTextures` reads the sheet as **64x64 cells** —
+`textures[width/64][height/64]`, variants across, growth stages down. That is
+the second half of the same player report: a fruit bush is drawn on a 64px cell,
+two tiles wide and two tall, where our cloudberry bush is a `GrassObject` on a
+32px one. The archetype swap fixes *both* "one berry and it is gone" and "die
+Buesche sind viel zu klein" — they were always the same bug.

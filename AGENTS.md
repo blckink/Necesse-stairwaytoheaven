@@ -28,9 +28,25 @@ modifying anything in this repository.
 summary, or your own memory of this project can be stale. What is on disk and
 in `git log` is the truth. Check before you act on a belief.
 
-**Verify API behaviour before implementing.** The decompiled game sources are
-at `$NECESSE_GAME_DIR/../decompiled` (and the sprite dump beside it). Read the
-real class before calling it. Never write "should be" reasoning into code.
+**Verify API behaviour before implementing.** Read the real class before
+calling it. Never write "should be" reasoning into code.
+
+**You can always get a game install — do not stand down for the lack of one.**
+The Necesse **dedicated server** is a free public download, no account and no
+purchase: `scripts/fetch_dedicated_server.sh` fetches and unpacks it and prints
+the `NECESSE_GAME_DIR` to export. That one file unlocks `buildModJar`,
+`scripts/integration_test.sh`, `scripts/tile_sprite_check.sh`,
+`scripts/sky_map_render.sh` **and** `./gradlew decompileToSources
+-PuseDecompiledSources=true`, which writes `$NECESSE_GAME_DIR/decompiled/` —
+6,464 readable classes, i.e. every API question answered from source instead of
+from memory. A session that reports "no game install, cannot verify" has simply
+not run the script.
+
+What the server does NOT bring is **sprites**: it never renders, so `Server.jar`
+ships zero PNGs. The vanilla sprite dump the art tooling wants
+(`wall_render_preview --vanilla stonewall`, `size_audit`'s reference sheets)
+still needs a client install, and without it those comparisons are honestly
+unavailable rather than merely skipped.
 
 **Never silently reverse a design decision.** If `docs/DESIGN_DECISIONS.md`
 records something and you believe it is wrong, say so to the user and wait.
@@ -71,7 +87,9 @@ Say which one you have. Use the verification states defined in
 ## Build and test
 
 ```bash
+scripts/fetch_dedicated_server.sh     # free download; prints the path to export
 export NECESSE_GAME_DIR=/path/to/necesse-dedicated-server   # contains Server.jar
+./gradlew decompileToSources -PuseDecompiledSources=true    # -> $DIR/decompiled/
 ./gradlew buildModJar                 # or: ./gradlew clean buildModJar
 scripts/integration_test.sh           # boots a real server, generates, restarts
 scripts/tile_sprite_check.sh          # client-side tile sprite indices (headless)
