@@ -356,7 +356,7 @@ def gen_crystal_item(path, ramp, salt):
 def gen_sapling_item_icons(objects_dir, items_dir):
     """Copy each 32x32 sapling object sprite to its item icon, vanilla-style."""
     from PIL import Image
-    for name in ("nimbussapling", "fulgursapling", "prismasapling"):
+    for name in ("nimbussapling", "fulgursapling", "prismasapling", "cloudberrysapling"):
         src = Image.open(f"{objects_dir}/{name}.png").convert("RGBA")
         src.save(f"{items_dir}/{name}.png")
 

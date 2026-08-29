@@ -124,6 +124,7 @@ def main():
     gen_objects.gen_stairway_up(f"{out}/objects/skystairwayup.png")
     gen_objects.gen_windwheat(f"{out}/objects/windwheat.png")
     gen_objects.gen_cloudberrybush(f"{out}/objects/cloudberrybush.png")
+    gen_objects.gen_cloudberrysapling(f"{out}/objects/cloudberrysapling.png")
     gen_rocks.gen_rock_sheet(f"{out}/objects/veilrock.png", palette.VEILROCK, variants=6, salt=0x3E1F)
     gen_veil.gen_whisperreeds(f"{out}/objects/whisperreeds.png")
     gen_veil.gen_gloomshroom(f"{out}/objects/gloomshroom.png")

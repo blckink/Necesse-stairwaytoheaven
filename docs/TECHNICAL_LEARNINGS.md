@@ -2163,3 +2163,47 @@ the second half of the same player report: a fruit bush is drawn on a 64px cell,
 two tiles wide and two tall, where our cloudberry bush is a `GrassObject` on a
 32px one. The archetype swap fixes *both* "one berry and it is gone" and "die
 Buesche sind viel zu klein" — they were always the same bug.
+
+## A berry bush that regrows and a berry bush that is big are the same fix (v0.9)
+
+**[jar]** The whole loop, read out of the decompile:
+
+- `FruitBushObject(textureName, seedStringID, minGrow, maxGrow, fruitStringID,
+  fruitPerStage, maxStage, mapColor)`. Vanilla's three berry bushes are all
+  `(..., "<x>sapling", 900.0F, 1800.0F, "<x>", 1.0F, 2, colour)` registered
+  `0.0F, false, false, true`.
+- It carries a `FruitGrowerObjectEntity` whose `stage` climbs while
+  `stage < maxStage` and **resets to 0 on harvest** — the bush is never
+  consumed. It publishes a `HarvestFruitLevelJob`, so settlers pick it.
+- `getLootTable` returns **the seed alone** — breaking a bush drops the sapling
+  and no fruit. That is the growth gate: replanting cannot be an infinite-berry
+  exploit because the berries only come from the timer.
+- `getFruitDropCount` sums `fruitPerStage` once per stage, the fractional part
+  as a chance. So `1.0F` at maxStage 2 is 2 berries; ours is `1.5F` = 3.
+- `loadTextures` slices `textures[width / 64][height / 64]` — **64px cells**,
+  variants across, **stages down** — and `addDrawables` uses
+  `spriteY = min(fruitStage, rows - 1)` with a per-tile random `spriteX`.
+- Anchor: `.pos(drawX - 32 + 16, drawY - height + offset)`, `offset = 28 ± 4`.
+  The cell is centred on the tile in x and its bottom row lands 28px below the
+  tile's top edge, so the plant stands ~36px proud. The cell is also **mirrored
+  at random per tile**, so nothing in the art may depend on handedness.
+
+**[game]** Ours was a `GrassObject` on a 32px cell. The player reported it as
+two things — *"man kriegt nur eine Beere beim Abbauen statt wie bei den Vanilla
+Bueschen die Buesche abbauen kann und wieder aufbauen damit die Beeren
+nachwachsen"* and *"die Buesche sind auch viel zu klein"* — and they were one:
+the grass archetype is one-shot **and** one tile. Nothing about the loot table
+could have fixed the first; nothing about the drawing could have fixed the
+second.
+
+**[jar]** The trap in the second half: `SaplingObject.validTiles` defaults to
+`grasstile / overgrown* / swampgrass* / plainsgrass* / dirttile / farmland /
+snowtile`. **The Skyreach has none of them.** Without passing `cloudturftile`
+through the varargs the player could not replant a sky bush anywhere in the sky.
+The mod's tree saplings already document this trap; a fourth family hit it.
+
+**[run]** Verified end to end on a real server: `buildModJar` succeeds,
+`integration_test.sh` exits 0, and the census reports `object cloudberrybush
+x53 / expected x53` — the archetype swap did not disturb worldgen placement,
+because `SkyTerrainPainter` places it by registry ID and the string ID is
+unchanged.
