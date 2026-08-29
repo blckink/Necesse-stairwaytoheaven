@@ -233,24 +233,38 @@ def gen_cloudberrybush(path):
         c = Canvas(32, 32)
         rng = Rng(0xBE44 + v * 977)
         # dome silhouette: overlapping leaf masses filling the tile width
+        #
+        # v0.9: raised and thickened. The v0.6 pass fixed "reads as two
+        # mushrooms" but the crown still started at row 9 and the whole bush
+        # came to 31x23 in a 32x32 cell -- grass-clump mass on something the
+        # player has to find, harvest and feed animals from, which is what
+        # "die Buesche sind auch viel zu klein" is. The crown now starts around
+        # row 4 and the mass is up by about half.
+        #
+        # A bush that is genuinely BIGGER than one tile is a different problem
+        # and it is not solvable here: GrassObject sheets are N*32 wide and 32
+        # TALL (docs/assets-style-guide.md), so the cell is the ceiling. Two
+        # tiles of bush needs the vanilla FruitBushObject archetype -- which is
+        # also what makes berries regrow instead of the bush vanishing. See the
+        # note on the loot table in SkyObjects.
         if v == 0:
-            masses = [(16, 20, 13, 9), (8, 22, 7, 6.5), (24, 22, 7, 6.5),
-                      (12, 16, 6, 5), (21, 16, 6, 5), (16, 13, 6, 4.5)]
+            masses = [(16, 17, 15, 12), (7, 21, 9, 8), (25, 21, 9, 8),
+                      (11, 12, 8, 6.5), (22, 12, 8, 6.5), (16, 8, 8, 5.5)]
         else:
-            masses = [(10, 21, 9, 8), (23, 21, 8, 7.5), (16, 17, 8, 6),
-                      (5, 24, 5, 4.5), (27, 24, 5, 4.5), (13, 13, 5.5, 4.5),
-                      (20, 13, 5, 4)]
+            masses = [(10, 18, 11, 10), (23, 18, 10, 9.5), (16, 13, 10, 7.5),
+                      (4, 22, 6.5, 6), (28, 22, 6.5, 6), (12, 8, 7, 6),
+                      (21, 8, 6.5, 5.5)]
         for (mx, my, rx, ry) in masses:          # deep under-mass first
             c.ellipse(mx + 1, my + 2, rx, ry, B["leaf_deep"])
         for (mx, my, rx, ry) in masses:
             c.ellipse(mx, my, rx, ry, B["leaf"])
         # leaf-clump texture: lit 2px ticks upper-left, deep creases below,
         # clustered so the mass reads as leaves rather than noise
-        for _ in range(46):
-            x, y = rng.range(3, 28), rng.range(9, 28)
+        for _ in range(72):
+            x, y = rng.range(2, 29), rng.range(4, 28)
             if c.get(x, y)[:3] != B["leaf"][:3]:
                 continue
-            rel = (x - 16) * 0.6 + (y - 18)
+            rel = (x - 16) * 0.6 + (y - 15)
             if rel < -4:
                 tone = B["leaf_light"] if rng.chance(0.75) else B["leaf"]
             elif rel > 6:
@@ -268,17 +282,21 @@ def gen_cloudberrybush(path):
         c.ellipse(16, 29, 12, 2, B["leaf_deep"])  # grounded shaded underside
         # amber berry clusters sunk INTO the mass (vanilla berry idiom:
         # 2x2 berry, hi glint top-left, deep rim bottom-right)
-        clusters = ([(9, 18), (14, 13), (22, 16)] if v == 0
-                    else [(7, 20), (15, 14), (24, 19), (19, 22)])
+        clusters = ([(8, 16), (14, 9), (22, 13), (17, 21)] if v == 0
+                    else [(6, 18), (14, 10), (24, 16), (19, 22), (10, 24)])
+        # Correction pass: 3-4 berries per cluster, not 2-3. On the enlarged
+        # dome the old count read as a few crumbs on a green blob -- and this
+        # is the plant a player has to FIND to feed animals with, so the
+        # berries are its whole identifier at 1x.
         for (bx0, by0) in clusters:
-            for k in range(rng.range(2, 3)):
-                bx = bx0 + (k * 3) % 4 - 1
-                by = by0 + (k * 2) % 3
+            for k in range(rng.range(3, 4)):
+                bx = bx0 + (k * 3) % 5 - 1
+                by = by0 + (k * 2) % 4
                 c.rect(bx, by, 2, 2, B["berry"])
                 c.put(bx, by, B["berry_hi"])
                 c.put(bx + 1, by + 1, B["berry_deep"])
-        for _ in range(2):                        # lone berries near the rim
-            bx, by = rng.range(4, 26), rng.range(20, 26)
+        for _ in range(4):                        # lone berries near the rim
+            bx, by = rng.range(4, 26), rng.range(18, 27)
             if c.filled(bx, by):
                 c.rect(bx, by, 2, 2, B["berry"])
                 c.put(bx, by, B["berry_hi"])

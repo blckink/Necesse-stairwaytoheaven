@@ -75,6 +75,7 @@ export NECESSE_GAME_DIR=/path/to/necesse-dedicated-server   # contains Server.ja
 ./gradlew buildModJar                 # or: ./gradlew clean buildModJar
 scripts/integration_test.sh           # boots a real server, generates, restarts
 scripts/tile_sprite_check.sh          # client-side tile sprite indices (headless)
+scripts/java_syntax_check.sh          # NO game install? javac syntax-only gate
 python3 tools/size_audit.py           # sprite mass vs vanilla; must print 0 flags
 python3 tools/locale_audit.py         # every registered ID named in both locales
 python3 tools/sheet_format_audit.py   # sheets the engine reads at fixed offsets

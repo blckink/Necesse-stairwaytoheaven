@@ -242,9 +242,38 @@ final class SkyObjects {
             new necesse.inventory.lootTable.LootTable(
                     necesse.inventory.lootTable.lootItem.LootItem.between("cinderpearl", 1, 1));
 
+    /**
+     * What a harvested cloudberry bush drops.
+     *
+     * <p>v0.9 raised this from 1-2 to 2-4, and that is a stopgap, not the fix.
+     * The player's report is the whole shape of the problem: <em>"die Beeren
+     * Buesche sind schwierig gerade weil man die Beeren als Futter braucht
+     * aber man nur eine Beere kriegt beim Abbauen statt wie bei den Vanilla
+     * Bueschen die Buesche abbauen kann und wieder aufbauen damit die Beeren
+     * nachwachsen."</em>
+     *
+     * <p>They are describing vanilla's loop exactly, and ours cannot do it,
+     * because <b>the cloudberry bush is not a bush</b>. It is a
+     * {@link necesse.level.gameObject.GrassObject} — the archetype behind
+     * trampled grass — so it is one-shot: harvest it and it is gone from the
+     * world for good. Vanilla berry bushes are the {@code FruitBushObject}
+     * family placed by {@code .placeObjectFruitGrower(...)}, they drop
+     * berries PLUS a sapling ({@code StabbyBushMob}'s loot table is
+     * {@code blueberry x2 + blueberrysapling}), and the sapling is the growth
+     * gate that makes replanting a loop rather than an exploit — replanting
+     * the bush itself would let a player break and re-place the same bush for
+     * unlimited berries.
+     *
+     * <p>So the real fix is an archetype swap plus a {@code cloudberrysapling},
+     * and it is deliberately NOT done here: this session has no game install,
+     * so {@code FruitBushObject}'s and {@code SaplingObject}'s constructors
+     * cannot be read and nothing can be compiled. Writing them from memory is
+     * how the wrong thing ships. Raising the yield makes the animal-feed loop
+     * bearable in the meantime and changes one number.
+     */
     static final necesse.inventory.lootTable.LootTable cloudberryLoot =
             new necesse.inventory.lootTable.LootTable(
-                    necesse.inventory.lootTable.lootItem.LootItem.between("cloudberry", 1, 2));
+                    necesse.inventory.lootTable.lootItem.LootItem.between("cloudberry", 2, 4));
 
     private static void allowShore(String... objectStringIDs) {
         for (String stringID : objectStringIDs) {
