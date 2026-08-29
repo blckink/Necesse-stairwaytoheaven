@@ -2143,7 +2143,7 @@ everything else in the player's hand. Their audit rows are deliberately manual
 **Open question, not fixed here:** changing that canvas is rendering geometry,
 not art, and wants its own verified pass.
 
-## Driving Codex non-interactively as an art worker
+## Driving a second agent non-interactively as an art worker
 
 **[run]** `codex exec` takes a brief on stdin/argv and runs headless:
 
@@ -2235,3 +2235,34 @@ was **87 commits** behind `master` on 2026-08-29, so the docs it held — and an
 "owned by another agent" note in them — were three days stale. `git worktree
 list` plus `git rev-list --left-right --count master...HEAD` is the first thing
 to run, before believing any doc in the tree.
+
+**[run]** `opencode` is the other worker CLI on this box and takes the same
+shape of instruction:
+
+```bash
+opencode run --dir <worktree> --variant high "$(cat brief.md)"
+```
+
+`--dir` scopes it to one worktree (the equivalent of `codex exec -C`),
+`--variant` is the reasoning-effort knob, `--format json` gives machine-readable
+events, and `-m provider/model` picks the model. Its binary is at
+`~/.opencode/bin/opencode`, which is NOT on the default PATH; credentials live in
+`~/.local/share/opencode/auth.json`. Verified working against this worktree on
+2026-08-29 (`opencode run --dir …` reported branch, HEAD and PNG count correctly).
+
+**[run] Run workers one at a time, and never leave one unattended in a worktree
+you are editing.** On 2026-08-29 two commits appeared on `ai/claude` inside a
+three-minute window — `13afc95` at 21:51:53 and `98dab20` at 21:54:05 — that the
+reviewer driving the session did not issue; the reviewer's own commit sits
+between them at 21:52:40, and one of them rewrote a CHANGELOG section while it
+was being written. Ruled out afterwards, none of which explained it: git hooks
+(none installed), Claude hooks (none), cron and systemd timers (none relevant),
+the interactive Codex TUI (idle since 20:44, read-only git only) and all four
+`codex exec` rollouts (no commit call, no matching message text). **The origin
+was never established.** The content happened to be correct and every gate was
+green, which is luck, not process. `docs/AGENT_WORKFLOW.md` already says two
+agents must never hold the same file; the practical form of that rule is: one
+worker at a time, dispatched by the reviewer, and check `git log` before AND
+after every dispatch so an unattributed commit is noticed immediately rather
+than discovered during a rebase.
+
