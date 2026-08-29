@@ -25,6 +25,7 @@ An empty art-templates/ passes: there is nothing to be wrong about yet.
 Usage:  python3 tools/template_audit.py
 Exit code 1 if any card is unsupported by its files.
 """
+import argparse
 import os
 import re
 import sys
@@ -32,6 +33,10 @@ import sys
 from PIL import Image
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Mutable on purpose: --root points this audit at a DIFFERENT checkout, because
+# the reviewer runs it over a worktree of somebody else's branch while this
+# file lives in their own. Deriving them from __file__ alone silently audits
+# the wrong tree and reports it as clean.
 ROOT = os.path.join(REPO, "art-templates")
 RES = os.path.join(REPO, "src", "main", "resources")
 
@@ -138,10 +143,72 @@ def check_one(folder, problems, notes, dec, shipped):
                             "decompiled sources" % (tid, cls))
 
 
+def write_review(path, folders, problems, notes, dec):
+    """A fix list addressed to whoever produced the templates.
+
+    Codex works in a different checkout on a different machine; the git remote
+    is the only channel between us. So the review has to be a FILE that travels
+    on a branch, not console output someone has to copy by hand.
+    """
+    lines = ["# Template review", ""]
+    lines.append("Produced by `tools/template_audit.py --review` against "
+                 "`art-templates/`.")
+    lines.append("")
+    lines.append("- templates found: **%d**" % len(folders))
+    lines.append("- blocking problems: **%d**" % len(problems))
+    lines.append("- notes: **%d**" % len(notes))
+    lines.append("- decompiled sources available to cross-check class names: **%s**"
+                 % ("yes" if dec else "no"))
+    lines.append("")
+    if problems:
+        lines += ["## Fix these", "",
+                  "Each line is a template whose files and card disagree. A card "
+                  "that does not match its own canvas is a wrong specification, "
+                  "not art to be corrected later.", ""]
+        lines += ["- [ ] %s" % p for p in problems]
+        lines.append("")
+    if notes:
+        lines += ["## Notes, not blocking", ""]
+        lines += ["- %s" % n for n in notes]
+        lines.append("")
+    if not folders:
+        lines += ["## Nothing produced yet", "",
+                  "`art-templates/` does not exist or holds no template folders. "
+                  "This is not a pass — it is an empty inbox.", ""]
+    elif not problems and not notes:
+        lines += ["## Nothing to fix", "",
+                  "Every template is an empty canvas at the size its own card "
+                  "cites, with every field filled and cited. Ready to be drawn "
+                  "in `tools/asset_generator/`.", ""]
+    lines += ["---", "",
+              "Contract: `docs/CODEX_SPRITE_TEMPLATE_BRIEF.md` §2 (layout), §3 "
+              "(the card's fields), §4 (what this audit checks)."]
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(lines) + "\n")
+
+
 def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--root", metavar="REPO",
+                    help="audit a different checkout (a worktree of another "
+                         "agent's branch) instead of this one")
+    ap.add_argument("--review", metavar="FILE",
+                    help="also write the result as a fix list for the agent that "
+                         "produced the templates (they are on another machine; "
+                         "the branch is the only channel)")
+    args = ap.parse_args()
+
+    global ROOT, RES
+    if args.root:
+        base = os.path.abspath(args.root)
+        ROOT = os.path.join(base, "art-templates")
+        RES = os.path.join(base, "src", "main", "resources")
+
     if not os.path.isdir(ROOT):
         print("OK: no art-templates/ yet -- nothing to check. See "
               "docs/CODEX_SPRITE_TEMPLATE_BRIEF.md.")
+        if args.review:
+            write_review(args.review, [], [], [], decompiled_root())
         return 0
     dec = decompiled_root()
     shipped = shipped_ids()
@@ -155,6 +222,9 @@ def main():
         if not os.path.exists(os.path.join(ROOT, f)):
             problems.append("art-templates/%s is missing" % f)
 
+    if args.review:
+        write_review(args.review, folders, problems, notes, dec)
+        print("review written to %s" % args.review)
     for n in notes:
         print("  note: %s" % n)
     if problems:

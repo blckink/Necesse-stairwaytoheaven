@@ -103,3 +103,30 @@ criterion so it does not have to go looking.
 Everything on this page still applies inside that loop — one owner per file, the
 gates matched to the change, workers do not commit. What the loop adds is the
 sequencing between the roles and a hard cap on how long art batches may run.
+
+## Moving a session between the web and a terminal
+
+Work started at claude.ai/code runs in a cloud VM that is **reclaimed after
+inactivity** — the session is then marked expired, and any background work it
+had running (subagents, shell commands) is not restored, though the conversation
+is. Reopening it from claude.ai/code provisions a fresh VM.
+
+To continue such a session locally, `claude --resume` is the wrong command: it
+only lists conversations stored on *this* machine under `~/.claude/projects/`
+and never shows cloud sessions. The documented mechanism is **`--teleport`**:
+
+```bash
+claude --teleport                 # interactive picker
+claude --teleport <session-id>    # straight to one session
+```
+
+from a shell, or `/teleport` (`/tp`) from inside a running CLI session. It wants
+a clean git state, the same repository, the same account, and **the branch
+already pushed** — which is the practical reason this repo's rule is that a
+session pushes its branch before it stops.
+
+Teleport makes a **local copy**: work done afterwards stays local and does not
+flow back to the web session. So the branch, `docs/CURRENT_STATE.md` and the
+commit messages remain the real handoff between one session and the next,
+exactly as the six phases above assume. Teleport moves the conversation; the
+repository moves the work.

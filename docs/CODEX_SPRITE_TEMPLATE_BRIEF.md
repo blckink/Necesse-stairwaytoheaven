@@ -180,3 +180,48 @@ that the generator overwrites is a bug waiting to happen
 (`IMPLEMENTATION_RULES.md` §6). What the template buys is that the generator
 starts from a canvas whose size and cell meaning were established from the
 engine rather than assumed.
+
+---
+
+## 7. The round trip, and the thing it cannot do
+
+Codex works in **its own checkout on its own machine**. There is no shared
+filesystem with the session reviewing it. **The git remote is the only channel
+between the two**, and that has one consequence worth stating plainly before
+anyone builds a habit on a wrong assumption:
+
+> **Nothing notifies the reviewer when Codex finishes.** There is no hook, no
+> watch, no event. A reviewing session finds out either because a human says so,
+> or because it goes and looks.
+
+So the loop is explicit, and every step is a real command:
+
+1. **Codex pushes a branch** carrying `art-templates/`. Name it
+   `codex/sprite-templates` so it is obvious what it holds. Codex does not
+   commit to the feature branch and never touches `src/` or `tools/`.
+2. **A human says the branch is up**, or the reviewer polls
+   `git fetch origin codex/sprite-templates`.
+3. **The reviewer runs the round trip:**
+
+   ```bash
+   scripts/review_templates_branch.sh codex/sprite-templates --push
+   ```
+
+   It fetches the branch into a **throwaway worktree** (so reviewing can never
+   disturb the branch the reviewer is working on), runs
+   `tools/template_audit.py --root <worktree>` against it, writes
+   `art-templates/REVIEW.md` — a checkbox fix list, one line per template whose
+   files and card disagree — and pushes that review back **onto Codex's own
+   branch**.
+4. **Codex pulls and starts its next run by reading its own fix list.** That is
+   the whole feedback mechanism: a file that travels on the branch, not console
+   output somebody has to copy by hand.
+
+`--root` is load-bearing and it is a trap worth naming: `template_audit.py`
+derives its paths from its own file location, so a reviewer who forgets it
+audits their *own* checkout and reports the branch clean without ever having
+looked at it.
+
+Repeat from step 1 until `REVIEW.md` says *Nothing to fix*. Note that **zero
+templates is not a pass** — the review says "Nothing produced yet" for an empty
+inbox precisely so it cannot be mistaken for one.
