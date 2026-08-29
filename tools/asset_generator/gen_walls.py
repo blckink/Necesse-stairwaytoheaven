@@ -21,6 +21,7 @@ from WallObject.addWallDrawOptions (the draw code is the ground truth — each
 
 from px import Canvas, Rng, with_alpha, mix
 import palette
+import wall_window_slot
 
 
 def _ceiling(c, x0, y0, w, h, mat, salt):
@@ -196,41 +197,43 @@ def _build_wall(mat, salt):
         return mat["ceil_hi"] if Rng((x * 7349 + y * 12611) ^ salt).float() < 0.06 else mat["ceil"]
 
     # --- dir 1: north-south wall, seen from above (rows 0-1) ---
-    for y in range(0, 32):
-        for x in range(32):
-            c.put(64 + x, y, cap_px(64 + x, y, salt + 50))
-    for y in range(0, 32):                       # the cap's own rims, east+west
-        c.put(64, y, mat["rim"])
-        c.put(64 + 31, y, mat["rim"])
-    # The window itself, lying flat: a frame with the glass catching the sky.
-    # It runs ALONG the wall, so it is tall and narrow in the cell, not wide.
-    # Seen from above the glass is looking straight up at the sky, so it reads
-    # DARKER than the same glass does edge-on, not brighter. A full-strength
-    # pane here looks like a sticker on the roof rather than an opening in it.
-    roof_glass = mix(mat["glass"], mat["ceil"], 0.45)
-    roof_glass_hi = mix(mat["glass"], mat["ceil"], 0.25)
-    for y in range(5, 27):
-        for x in range(7, 25):
-            c.put(64 + x, y, mat["face"])
-    for y in range(7, 25):
-        for x in range(9, 23):
-            c.put(64 + x, y, roof_glass_hi if (x + y) % 7 == 0 else roof_glass)
-    for x in range(7, 25):                       # frame: lit top, shadowed foot
-        c.put(64 + x, 5, mat["face_hi"])
-        c.put(64 + x, 6, mat["face_hi"])
-        c.put(64 + x, 25, mat["face_deep"])
-        c.put(64 + x, 26, mat["face_deep"])
-    for y in range(5, 27):
-        c.put(64 + 7, y, mat["face_hi"])
-        c.put(64 + 8, y, mat["face_hi"])
-        c.put(64 + 23, y, mat["face_deep"])
-        c.put(64 + 24, y, mat["face_deep"])
-    for x in range(9, 23):                       # glazing bars: two lights each way
-        c.put(64 + x, 15, mat["face_deep"])
-        c.put(64 + x, 16, mat["face_deep"])
-    for y in range(7, 25):
-        c.put(64 + 15, y, mat["face_deep"])
-        c.put(64 + 16, y, mat["face_deep"])
+    #
+    # A SLOT CUT ALONG THE ROOF, not a pane lying on it. This block used to
+    # draw an 18x22 frame with glazing bars and call it "the window lying
+    # flat"; a player looking at the left and right walls of the Warden's
+    # Spire reported it as "die Fenster sind seitlich falsch und nicht wie bei
+    # Kaeferwand gefixt", and they were right -- gen_beetlewall had already
+    # learned this and the fix was never ported to the other three sets.
+    #
+    # A frame seen from above is still a frame; what reads as an opening is the
+    # slot's SHAPE and its reveals. The construction, and the reasons for every
+    # part of it, live in wall_window_slot.py so the four sets cannot drift
+    # apart again.
+    cap_field = lambda x, y: cap_px(64 + x, y, salt + 50)  # noqa: E731
+    slot_tones = {
+        # The roof's own ends: the bright rim outermost, one step in behind it.
+        "rim_w": (mat["rim"], mat["ceil_hi"]),
+        "rim_e": (mat["ceil_hi"], mat["rim"]),
+        # The cut is the deepest tone on the sheet. Mixed toward BLACK, not
+        # toward the outline: nightfell's cap is already darker than
+        # palette.OUTLINE, so mixing that way would make its cut lighter than
+        # the roof it is cut into.
+        "dark": mix(mat["ceil"], (0, 0, 0), 0.35),
+        "cap_deep": mat["ceil"],
+        "cap_base": mat["ceil_hi"],
+        "cap_hi": mix(mat["ceil_hi"], mat["rim"], 0.40),
+        "stone_base": mat["face"],
+        "stone_light": mat["face_hi"],
+        "glass": {
+            "deep": mix(mat["glass"], mat["ceil"], 0.55),
+            "base": mix(mat["glass"], mat["ceil"], 0.25),
+            "light": mat["glass"],
+            "hi": mix(mat["glass"], (255, 255, 255), 0.35),
+        },
+        "bar": (mat["rim"], mat["face_deep"]),
+        "stud": mat["face_hi"],
+    }
+    c.paste(wall_window_slot.build(cap_field, slot_tones), 64, 0)
 
     # --- dir 0: east-west wall, seen from the front (rows 5-7) ---
     # Rows 2-4 are drawn at drawY-64/-48/-32 -- two whole tiles above the tile

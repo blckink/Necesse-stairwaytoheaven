@@ -2051,3 +2051,61 @@ preset cites `PaintingObject.attachesToObject`. The banner's side rows are drawn
 to the preset's convention because it names the method it came from. If a
 screenshot ever shows the edge-on banner hugging the wrong edge, that is this
 line, and swapping the two `paste` calls in `gen_banner_painting` is the fix.
+
+## The side-wall window is a slot in the roof, and three sets never got the fix (v0.9)
+
+**[jar]** `WallWindowObject.getWindowDir` returns 1 for a NORTH-SOUTH wall —
+the left and right walls of a room — and then draws only cols 4-5 rows 0-1 over
+the band `drawY-16 .. drawY+16`. In a north-south run that band is unbroken
+ROOF, so the picture is the wall from directly above with an opening cut into
+it, and the player looking DOWN into the opening.
+
+**[sprites]** Measured off vanilla `stonewall`, `brickwall` and `granitewall`:
+the opening runs ALONG the wall — 10-12px wide, ~28px long, never a wide pane
+across the cell — with a dark reveal on the NEAR inside faces, a lit lip on the
+far one, the glass at the BOTTOM of the cut and BRIGHTER than the roof around
+it, and no horizontal terminator at either end.
+
+**[game]** `gen_beetlewall` learned that in August and **the fix was never
+ported**. A player looking at the spire's side walls reported it as "die
+Fenster sind seitlich falsch und nicht wie bei Käferwand gefixt" — and it was
+three sheets, not one: cloudmarble drew a gold-framed 2x2-mullion pane,
+skystonebrick and nightfell an 18x22 frame with glazing bars, all standing
+upright out of the roof. The geometry gate was green on all three, because
+`sheet_format_audit` asserts rows 0-1 are 512/512 opaque and rows 2-4 empty,
+which a pane satisfies exactly as well as a slot does.
+
+The construction now lives once, in `tools/asset_generator/wall_window_slot.py`,
+and all four sets call it. **A frame seen from above is still a frame**; three
+passes tried to fix this by making the pane flatter or darker, and only the
+slot's shape and its reveals read as an opening.
+
+## A supplied illustration is a source of record, not a sheet (v0.9)
+
+**[sprites]** `objects/cloudmarblewall.png` shipped as the hand-made art from
+`kk-sprites/`, copied in as-is, with `gen_cloudmarble_wall` deliberately not
+called. Measured against the three walls that are drawn:
+
+| sheet | distinct colours | cap mean luminance | cap dominant tone |
+|---|---|---|---|
+| cloudmarble (supplied) | **10,858** | **228** | none — commonest was pure white at 6% |
+| skystonebrick | 19 | 52 | 91% |
+| nightfell | 19 | 25 | 91% |
+| beetlefreak | 38 | 31 | 78% |
+
+Vanilla wall caps are ~93% one flat tone. The cap is the band the engine draws
+for **every tile of a run except the last**, so a bright, tone-less cap is most
+of a building — which is exactly what reached the player: "die ganzen Wände
+blenden fast". The same illustration is also why the side-window cell held a
+pane: an illustration draws a window, and the engine wanted a roof.
+
+Beetlefreak had already been moved off its supplied sheet for the same reason.
+Cloudmarble now is too, at 22 colours and a 79% dominant cap.
+
+**[sprites]** The second half of "blenden" is a TRIM INVERSION and it is worth
+stating as a rule. `SKYGOLD`'s base is luminance 178. The old stone ramp ran
+205..249, so **the gold arcade, cornice and stars were up to 47 steps darker
+than the marble they decorate** — a white-and-gold set in which the gold cannot
+read as gold. Trim must be brighter than what it trims. The stone base is now
+~152 and `SKYGOLD["hi"]` (~221) is the brightest pixel on the sheet. The value
+law for a whole room is in `docs/ART_DIRECTION.md`.

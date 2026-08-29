@@ -83,6 +83,57 @@ missing. Overlapping canopy masses, dark undersides, bright top-left masses,
 intermediate midtones, shadow between lobes, better trunk integration.
 Controlled highlight clusters, no gradients.
 
+## The value law: a room is read in this order (v0.9)
+
+From a spire screenshot: *"die ganzen Wände blenden fast und passen nicht zu
+braunen Böden und grauen Möbeln."* The set was measurably inverted, and the
+rule that was missing is a **value order**, not a palette:
+
+| surface | what it is | luminance band |
+|---|---|---|
+| wall CAP | the wall seen from above — a **shadow** surface, and the band the engine draws for every tile of a run except the last | **25–85** |
+| furniture, props | what the room is furnished with | 100–120 mean |
+| wall FACE | the lit face, drawn only on a run's last tile | 45–160 |
+| floor | the bright surface a room stands on | material |
+| metal trim, glass, flame | the accents | **the brightest pixels on the sheet** |
+
+Two things follow and both had been broken:
+
+**A wall cap is not a light source.** Cloudmarble's cap averaged luminance 228
+against skystonebrick's 52, nightfell's 25 and Beetlefreak's 31, so the pale set
+was four times brighter than anything else in the mod on the band that covers
+most of a building. It now sits at ~85 — still the palest cap, and finally a
+cap.
+
+**Trim has to be brighter than what it trims.** SKYGOLD's base is luminance
+178. Against a stone base of 225 the gold arcade, the cornice and the
+four-point stars were **47 steps darker than the marble they decorate**, so the
+set read flat as well as bright. The stone base is now ~152 and the gold's
+highlight (~221) is the brightest pixel on the sheet — which is what makes a
+white-and-gold set read as white *and* gold.
+
+Check it with numbers before shipping a set, not by eye: dominant-tone share
+and mean luminance per band, against the other three walls. A set whose cap has
+no dominant tone at all is not a set, it is a photograph — see below.
+
+## Supplied art is a source of record, not a sheet
+
+`src/main/resources/kk-sprites/` holds hand-made reference art and it is the
+source of record for a piece's identity. It is **not** the shipped sheet.
+
+Measured: `cloudmarblewall.png` copied in as-is carried **10,858 distinct
+colours** where the three drawn walls carry 19, 19 and 38, its cap band had no
+dominant tone (the commonest was pure white at 6%), and its side-wall window
+strip held a front-facing pane where a north-south wall shows its roof. The
+Beetlefreak wall had already learned the same lesson for the same reason: these
+sheets are read by the engine as an auto-tile blob plus a window insert plus
+eight door cells, and a continuous illustration cannot satisfy that however it
+is repacked.
+
+So the identity comes from the supplied art and the **pixels come from the
+generator**. Both cloudmarble and Beetlefreak are now drawn; the references
+stay in `docs/references/` and `kk-sprites/` for what the material *is*.
+
 ## Worldgen is art direction too
 
 Placement can ruin good sprites.

@@ -32,6 +32,7 @@ import sys
 
 from px import Canvas, Rng, mix, with_alpha
 import palette
+import wall_window_slot
 import gen_splats
 
 # ---------------------------------------------------------------------------
@@ -40,14 +41,33 @@ import gen_splats
 # Deliberately local to this file — palette.py is owned elsewhere.
 # ---------------------------------------------------------------------------
 
-CLOUDMARBLE = {                  # the white cloud-stone body
-    "deep":  (186, 206, 224),
-    "base":  (214, 228, 236),
-    "light": (233, 240, 243),
-    "hi":    (247, 249, 250),
+# VALUE LAW for this set (v0.9, from a spire screenshot): cloudmarble is a PALE
+# STONE WITH GOLD AS ITS HIGHLIGHT, not a white light source.
+#
+# The ramp used to run 205..249 in luminance. Two things followed, and the
+# player reported both in one breath -- "die ganzen Waende blenden fast und
+# passen nicht zu braunen Boeden und grauen Moebeln":
+#
+#  * the wall was the brightest surface in any room by a distance. Skywatch
+#    furniture averages 107-114, the gloomwood floor is brown, and the wall
+#    face averaged 196 -- so everything standing against it read as dirt on it.
+#  * SKYGOLD's base is luminance 178. At a stone base of 225 the GOLD TRIM WAS
+#    47 STEPS DARKER THAN THE STONE IT DECORATES, so the arcade, the cornice
+#    and the four-point stars could not read as trim at all. That is most of
+#    why the set looked flat as well as bright.
+#
+# The ramp below puts the stone base at ~152 and leaves the gold at ~178, so
+# gold is now +26 over the stone and SKYGOLD["hi"] (~221) is the brightest
+# pixel on the sheet. The set stays unmistakably the pale one -- skystonebrick
+# faces at 115, nightfell at 45 -- it just stops out-shouting the room.
+CLOUDMARBLE = {                  # the pale cloud-stone body
+    "deep":  (110, 124, 142),
+    "base":  (140, 155, 172),
+    "light": (170, 184, 198),
+    "hi":    (203, 214, 224),
 }
-CLOUDMORTAR = (195, 219, 234)    # pale blue between the stones
-CLOUDGLYPH = (176, 208, 228)     # the soft blue swirl drawn into each stone
+CLOUDMORTAR = (126, 142, 160)    # cool recess between the stones, BELOW base
+CLOUDGLYPH = (128, 150, 172)     # the soft blue swirl drawn into each stone
 SKYGOLD = {                      # rims, cornices, arches and four-point stars
     "deep":  (166, 140,  96),
     "base":  (200, 176, 128),
@@ -60,11 +80,17 @@ SKYGOLD = {                      # rims, cornices, arches and four-point stars
 # mix (rather than a second sampled ramp) is what stops the cap drifting off the
 # material as the body ramp is tuned. The cap has to be clearly darker than the
 # face or a top-down wall reads as one flat slab with no thickness.
+# The mix factors are much deeper than they were (0.15 -> 0.52 on the base)
+# because a wall CAP is a shadow surface, and the cap is the band the engine
+# draws for every tile of a run except the last -- so a bright cap is most of a
+# building. Vanilla's caps sit at luminance 25-60; the mod's other three are
+# 25, 31 and 52. Ours lands at ~76: still the palest cap in the mod, and
+# finally a cap rather than a lamp.
 CAP = {
-    "deep":  mix(CLOUDMARBLE["deep"], palette.OUTLINE, 0.28),
-    "base":  mix(CLOUDMARBLE["deep"], palette.OUTLINE, 0.15),
-    "light": mix(CLOUDMARBLE["base"], palette.OUTLINE, 0.08),
-    "hi":    mix(CLOUDMARBLE["light"], palette.OUTLINE, 0.03),
+    "deep":  mix(CLOUDMARBLE["deep"], palette.OUTLINE, 0.65),
+    "base":  mix(CLOUDMARBLE["deep"], palette.OUTLINE, 0.52),
+    "light": mix(CLOUDMARBLE["base"], palette.OUTLINE, 0.45),
+    "hi":    mix(CLOUDMARBLE["light"], palette.OUTLINE, 0.40),
 }
 MORTAR_DEEP = mix(CLOUDMORTAR, palette.OUTLINE, 0.22)
 # The shaded rim of a cobble. CLOUDMARBLE["deep"] is LIGHTER than the mortar it
@@ -310,7 +336,17 @@ _FLOOR_GLYPH = mix(CLOUDGLYPH, CLOUDMARBLE["light"], 0.45)
 
 def _skyway_tile(variant):
     """One 32x32 Skyway ground look: cloud bed + slabs, stones and pebbles, the
-    larger ones carrying the blue swirl. Wraps in x and y."""
+    larger ones carrying the blue swirl. Wraps in x and y.
+
+    NOT SHIPPED. The Skyway ground the game loads is the converted reference art
+    (tiles/skyway.png + _splat, written by tools/convert_biome_art.py); this and
+    gen_skyway_splat stay as the drawn alternative. One consequence to know
+    before re-enabling them: they read off CLOUDMARBLE, and that ramp was pulled
+    down ~70 luminance in v0.9 because it is a WALL ramp and a wall cap is a
+    shadow surface. A FLOOR is the bright surface in the value law
+    (docs/ART_DIRECTION.md), so the drawn ground now comes out considerably
+    darker than the ground actually shipped. Give it its own light ramp rather
+    than reverting the wall's."""
     t = Wrap(32, 32, wrap_y=True)
     salt = 0x5CA9_0000 + variant * 0x2711
     _cloudfield(t, salt)
@@ -788,42 +824,42 @@ def _build_window(c, salt):
     X = 64
 
     # --- dir 1: north-south wall, its roof seen from above -----------------
-    t = Wrap(32, 32)
-    _cap_texture(t, 32, 32)
-    for y in range(32):                        # the cap's own east/west rims
-        t.put(0, y, SKYGOLD["light"])
-        t.put(1, y, SKYGOLD["base"])
-        t.put(30, y, SKYGOLD["base"])
-        t.put(31, y, SKYGOLD["deep"])
-    # The skylight lies FLAT in the roof, so it runs along the wall: tall and
-    # narrow in the cell, not wide. Its glass is looking straight up at the sky
-    # and is therefore darker than the cap, never a bright pane stuck on top.
-    roof_glass = mix(CLOUDGLYPH, palette.OUTLINE, 0.42)
-    roof_glass_hi = mix(CLOUDGLYPH, palette.OUTLINE, 0.26)
-    for y in range(4, 28):
-        for x in range(6, 26):
-            t.put(x, y, SKYGOLD["deep"])
-    for y in range(6, 26):
-        for x in range(8, 24):
-            t.put(x, y, roof_glass_hi if (x + y) % 7 == 0 else roof_glass)
-    for x in range(6, 26):                     # frame: lit head, shaded foot
-        t.put(x, 4, SKYGOLD["light"])
-        t.put(x, 5, SKYGOLD["base"])
-        t.put(x, 26, SKYGOLD["deep"])
-        t.put(x, 27, SKYGOLD["deep"])
-    for y in range(4, 28):
-        t.put(6, y, SKYGOLD["light"])
-        t.put(7, y, SKYGOLD["base"])
-        t.put(24, y, SKYGOLD["deep"])
-        t.put(25, y, SKYGOLD["deep"])
-    for x in range(8, 24):                     # glazing bars
-        t.put(x, 15, SKYGOLD["base"])
-        t.put(x, 16, SKYGOLD["deep"])
-    for y in range(6, 26):
-        t.put(15, y, SKYGOLD["base"])
-        t.put(16, y, SKYGOLD["deep"])
-    gold_star(t, 16, 16, 4, 6)
-    t.blit_to(c, X, 0)
+    #
+    # A SLOT CUT ALONG THE ROOF. What stood here was a gold-framed pane with a
+    # two-by-two mullion lattice and a star in the middle -- a window standing
+    # UP out of the roof, which is what a player saw on the left and right
+    # walls of the spire: "die Fenster sind seitlich falsch und nicht wie bei
+    # Kaeferwand gefixt". The previous pass already knew the cell was the roof
+    # and tried to fix it by DARKENING the glass; darkening a front-facing pane
+    # does not make it lie down, only the slot shape does. Construction and the
+    # vanilla measurements behind it: wall_window_slot.py.
+    _cap_field_for_slot = Wrap(32, 32)
+    _cap_texture(_cap_field_for_slot, 32, 32)
+    slot = wall_window_slot.build(
+        lambda x, y: _cap_field_for_slot.get(x, y),
+        {
+            # Gold rims, as everywhere else on this set: the light step
+            # outermost, one ramp step in behind it.
+            "rim_w": (SKYGOLD["light"], SKYGOLD["base"]),
+            "rim_e": (SKYGOLD["base"], SKYGOLD["deep"]),
+            "dark": mix(CAP["deep"], (0, 0, 0), 0.35),
+            "cap_deep": CAP["deep"],
+            "cap_base": CAP["base"],
+            "cap_hi": CAP["hi"],
+            "stone_base": CLOUDMARBLE["base"],
+            "stone_light": CLOUDMARBLE["light"],
+            "glass": {
+                "deep": mix(CLOUDGLYPH, CAP["deep"], 0.45),
+                "base": CLOUDGLYPH,
+                "light": mix(CLOUDGLYPH, CLOUDMARBLE["hi"], 0.45),
+                "hi": CLOUDMARBLE["hi"],
+            },
+            # The set's own gold saddle bar, and a four-point star would not
+            # fit on the rim of a 12px cut, so the studs carry the identity.
+            "bar": (SKYGOLD["base"], SKYGOLD["deep"]),
+            "stud": SKYGOLD["light"],
+        })
+    slot.blit_to(c, X, 0) if hasattr(slot, "blit_to") else c.paste(slot, X, 0)
 
     # --- rows 2-4 stay empty ----------------------------------------------
     # Drawn at drawY-64/-48/-32. Filling them is what once made the window
@@ -1096,15 +1132,33 @@ def _build_doors(c, salt):
         elif not head_on:
             # Open, edge-on: the leaf has swung a quarter turn and stands
             # against the jamb as a narrow slab, threshold below it.
-            leaf = [(68, 69, x0 + 24, x0 + 29), (70, 115, x0 + 22, x0 + 31)]
+            #
+            # rot 0 and rot 2 are the same east-west wall with the leaf swung to
+            # OPPOSITE jambs, so the two cells are mirrors — exactly as the
+            # closed edge-on branch above mirrors rot 3 against rot 1. This
+            # branch used to draw both against the right jamb, which made
+            # sheet cells 4 and 8 byte-identical: the engine read two different
+            # door views and got one picture, so half the door's rotations did
+            # nothing. Caught by tools/rotation_variety_audit.py the first time
+            # it ever ran on this sheet, which is the whole reason it exists.
+            mirror = rot == 2
+
+            def mx(a, b):
+                """A span (a, b) in cell coordinates, mirrored when needed."""
+                return (x0 + (31 - b), x0 + (31 - a)) if mirror else (x0 + a, x0 + b)
+
+            leaf = [(68, 69) + mx(24, 29), (70, 115) + mx(22, 31)]
             fill(leaf, lambda x, y: _leaf_px(x, y, False))
             rim_arch(leaf, CLOUDMARBLE["hi"])
-            gold_band(78, x0 + 22, x0 + 31)
-            gold_band(100, x0 + 22, x0 + 31)
-            _leaf_frame(c, x0 + 23, x0 + 30, 82, 98)
-            gold_star(c, x0 + 27, 89, 3, 5)
+            gold_band(78, *mx(22, 31))
+            gold_band(100, *mx(22, 31))
+            fa, fb = mx(23, 30)
+            _leaf_frame(c, fa, fb, 82, 98)
+            sa, _ = mx(27, 27)
+            gold_star(c, sa, 89, 3, 5)
+            ea, _ = mx(22, 22)
             for y in range(70, 116):                      # free edge of the leaf
-                c.put(x0 + 22, y, SKYGOLD["deep"])
+                c.put(ea, y, SKYGOLD["deep"])
             fill([(116, 126, x0, x0 + 31)], lambda x, y: _cap_pixel(x, y))
             floor_line(127, x0, x0 + 31)
 
@@ -1640,10 +1694,30 @@ def gen_skyway_icon(path):
 # ---------------------------------------------------------------------------
 
 def generate(objects_dir, items_dir, tiles_dir):
-    # objects/cloudmarblewall.png is NOT written here: it is supplied art, kept
-    # in src/main/resources/kk-sprites/ and copied in as-is. gen_cloudmarble_wall
-    # stays below for reference, but calling it would overwrite the supplied
-    # sheet on the next full run. The fence, gate and item icons are still ours.
+    # objects/cloudmarblewall.png IS written here again (v0.9).
+    #
+    # It used to be the supplied illustration from kk-sprites/, copied in
+    # as-is. Measured against the three walls that are drawn: that sheet
+    # carried 10,858 distinct colours where skystonebrick and nightfell carry
+    # 19 and the Beetlefreak wall 38, its cap band had no dominant tone at all
+    # (the commonest was pure white at 6%) at mean luminance 228 against
+    # skystone's 52, and its side-wall window strip held a front-facing pane
+    # where a north-south wall shows its ROOF with a slot cut along it.
+    #
+    # All three reached the player at once, from inside the spire: "die ganzen
+    # Waende blenden fast und passen nicht zu braunen Boeden und grauen
+    # Moebeln. die Fenster sind seitlich falsch und nicht wie bei Kaeferwand
+    # gefixt." The cap is the band the engine draws for every tile but the
+    # last, so a white cap is most of a building.
+    #
+    # This is the same call the Beetlefreak wall already makes for the same
+    # reason: the supplied art is a continuous illustration, and this sheet is
+    # read as an auto-tile blob plus a window insert plus eight door cells. The
+    # identity of the supplied art -- white-and-gold cloud masonry, blue
+    # swirls, the gold arcade, the four-point stars -- is what _build_wall
+    # draws; the reference renders stay the source of record in
+    # docs/references/.
+    gen_cloudmarble_wall(os.path.join(objects_dir, "cloudmarblewall.png"))
     gen_cloudmarble_fence(os.path.join(objects_dir, "cloudmarblefence.png"))
     gen_cloudmarble_fencegate(os.path.join(objects_dir, "cloudmarblefencegate.png"))
     # tiles/skyway.png and tiles/skyway_splat.png are NOT written here.
