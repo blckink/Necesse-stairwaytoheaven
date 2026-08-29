@@ -1062,80 +1062,93 @@ def gen_auroralily(path, variants=2):
 # on transparency; the engine masks them onto the parent rock) ---------------
 
 def gen_fulguriteore(path, variants=2):
-    """64x32: fused lightning-glass veins — jagged branching zigzags with
-    glassy nodes, the Stormveil's fulgurite."""
+    """64x32: connected, broad lightning-glass veins in the rock mask."""
     sheet = Canvas(variants * 32, 32)
     F = palette.FULGURITE
+
+    def vein(c, points):
+        # Deep silhouette first, then a two-step glass core and top-left glint.
+        # This follows ironore's connected seam construction while preserving
+        # fulgurite's forked lightning identity.
+        for a, b in zip(points, points[1:]):
+            for ox, oy in ((0, 0), (-1, 0), (1, 0), (0, -1), (0, 1)):
+                c.line(a[0] + ox, a[1] + oy, b[0] + ox, b[1] + oy, F["deep"])
+        for a, b in zip(points, points[1:]):
+            for ox, oy in ((0, 0), (-1, 0), (0, -1)):
+                c.line(a[0] + ox, a[1] + oy, b[0] + ox, b[1] + oy, F["base"])
+            c.line(a[0] - 1, a[1] - 1, b[0] - 1, b[1] - 1, F["light"])
+
     for v in range(variants):
-        x0 = v * 32
-        rng = Rng(0xF16 + v * 389)
-        starts = ((x0 + rng.range(4, 8), rng.range(3, 7), 1),
-                  (x0 + rng.range(18, 22), rng.range(12, 16), -1))
-        for (sx, sy, sway) in starts:
-            x, y = sx, sy
-            step_x = sway
-            for i in range(rng.range(10, 13)):
-                sheet.put(x, y, F["base"])
-                sheet.put(x + 1, y, F["deep"])
-                if i % 3 == 0:
-                    sheet.put(x, y - 1, F["light"])    # glassy top glint
-                if i % 4 == 2:                         # lightning jag
-                    step_x = -step_x
-                    sheet.put(x - step_x, y, F["deep"])
-                x += step_x if i % 2 else 0
-                y += 1
-                if i == 5:                             # branch spur
-                    bx, by = x, y
-                    for k in range(3):
-                        sheet.put(bx + (k + 1) * -step_x, by + k, F["base"])
-                        sheet.put(bx + (k + 1) * -step_x + 1, by + k, F["deep"])
-                    sheet.put(bx + 3 * -step_x, by + 2, F["hi"])
-            sheet.put(sx, sy, F["hi"])                 # fused node at the top
-            sheet.put(sx - 1, sy + 1, F["light"])
-        # loose glass beads between the veins
-        for _ in range(rng.range(4, 6)):
-            bx, by = x0 + rng.range(3, 28), rng.range(3, 28)
-            sheet.put(bx, by, F["light"])
-            sheet.put(bx + 1, by, F["deep"])
-            sheet.put(bx, by - 1, F["hi"] if rng.chance(0.4) else F["light"])
-        # one short fused stub vein for density (vanilla ore fills the face)
-        sx, sy = x0 + rng.range(10, 20), rng.range(20, 24)
-        for k in range(4):
-            sheet.put(sx + (k % 2), sy + k, F["base"])
-            sheet.put(sx + (k % 2) + 1, sy + k, F["deep"])
-        sheet.put(sx, sy - 1, F["hi"])
+        c = Canvas(32, 32)
+        if v % 2 == 0:
+            paths = (((0, 4), (7, 8), (5, 14), (13, 18), (11, 25), (18, 31)),
+                     ((18, 0), (20, 7), (28, 11), (24, 18), (32, 22)),
+                     ((6, 14), (1, 20)), ((12, 19), (20, 16)))
+            nodes = ((6, 9), (12, 19), (24, 11))
+        else:
+            paths = (((3, 0), (8, 6), (6, 12), (15, 16), (13, 23), (22, 29)),
+                     ((31, 3), (24, 7), (26, 14), (19, 19), (23, 27), (20, 32)),
+                     ((7, 11), (1, 15)), ((20, 19), (29, 17)))
+            nodes = ((7, 7), (20, 19), (24, 8))
+        for points in paths:
+            vein(c, points)
+        for nx, ny in nodes:
+            c.ellipse(nx, ny, 3, 2, F["deep"])
+            c.ellipse(nx - 1, ny - 1, 2, 1, F["light"])
+            c.put(nx - 1, ny - 1, F["hi"])
+        sheet.paste(c, v * 32, 0)
     sheet.save(path)
 
 
 def gen_prismshardore(path, variants=2):
-    """64x32: prismshard crystal clusters — faceted mini-shards with the
-    Shoals' teal accent, scattered like vanilla ore nuggets."""
+    """64x32: clustered broad prism shards with visible faceted planes."""
     sheet = Canvas(variants * 32, 32)
     P = palette.PRISMSHARD
-    for v in range(variants):
-        x0 = v * 32
-        rng = Rng(0x9515 + v * 271)
-        spots = ((9, 9), (23, 6), (6, 22), (18, 18), (27, 25))
-        for (cx, cy) in spots:
-            cx += x0 + rng.range(-2, 2)
-            cy += rng.range(-2, 2)
-            h = rng.range(5, 8)
-            lean = rng.pick((-2, -1, 1, 2))
-            base_y = cy + h // 2
-            for i in range(h):                          # mini faceted shard
+
+    def shard(c, cx, base_y, h, lean, width, teal=False):
+        rows = []
+        for i in range(h):
+            t = i / max(h - 1, 1)
+            px_ = cx + round(lean * (1.0 - t))
+            half = 1 + round((width / 2 - 1) * min(t * 1.5, 1.0))
+            y = base_y - h + 1 + i
+            rows.append((px_, y, half))
+            for dx in range(-half - 1, half + 2):
+                c.put(px_ + dx, y, P["deep"])
+        for px_, y, half in rows:
+            for dx in range(-half, half + 1):
+                tone = P["base"]
+                if dx <= -half + 1:
+                    tone = P["light"]
+                elif dx >= half:
+                    tone = P["deep"]
+                c.put(px_ + dx, y, tone)
+            c.put(px_ - half, y, P["light"])
+        tip_x = cx + lean
+        c.put(tip_x, base_y - h, P["hi"])
+        c.put(tip_x - 1, base_y - h + 1, P["hi"])
+        if teal:
+            for i in range(2, h - 2):
                 t = i / max(h - 1, 1)
-                half = max(1, round(2 * (1.0 - abs(t * 2 - 1))))
-                px_ = cx + round(lean * t)
-                for dx in range(-half, half + 1):
-                    tone = P["deep"] if dx in (-half, half) else P["base"]
-                    sheet.put(px_ + dx, base_y - i, tone)
-                if 0.3 < t < 0.85:
-                    sheet.put(px_ - half + 1, base_y - i, P["light"])
-            sheet.put(cx + lean, base_y - h + 1, P["hi"])
-            if rng.chance(0.6):                        # teal refraction glint
-                sheet.put(cx - 1, base_y - 1, P["teal"])
-        for _ in range(rng.range(2, 4)):               # sparkle dust
-            sheet.put(x0 + rng.range(3, 28), rng.range(3, 28), P["light"])
+                c.put(cx + round(lean * (1.0 - t)), base_y - h + 1 + i, P["teal"])
+
+    for v in range(variants):
+        c = Canvas(32, 32)
+        clusters = (((5, 15, 12, 5, 7, True), (13, 20, 10, -5, 6, False),
+                     (27, 13, 13, -5, 7, False), (8, 31, 13, 5, 7, False),
+                     (23, 29, 15, -5, 8, True))
+                    if v % 2 == 0 else
+                    ((3, 13, 12, 5, 7, False), (13, 18, 11, -5, 7, True),
+                     (27, 17, 14, -5, 8, False), (7, 30, 15, 5, 8, True),
+                     (23, 31, 13, -5, 7, False)))
+        for args in clusters:
+            shard(c, *args)
+        # Small chips bridge the clusters like vanilla ironore's connective
+        # tissue without turning the node back into sparse glitter.
+        for x, y in ((1, 20), (13, 17), (27, 20), (15, 31)):
+            c.rect(x, y, 3, 2, P["deep"])
+            c.put(x, y, P["light"])
+        sheet.paste(c, v * 32, 0)
     sheet.save(path)
 
 

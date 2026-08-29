@@ -480,45 +480,61 @@ def gen_riftup(path):
 
 
 def gen_ghostlantern(path):
-    """32x192 streetlamp sheet: green-flame lantern (on above, off below)."""
+    """32x192 streetlamp: the same broad ghost-flame cage, lit and unlit."""
     sheet = Canvas(32, 192)
-    iron = palette.IRONWORK
+    iron = palette.SKYIRON
     G = palette.GHOSTFLAME
     stone = palette.VEILROCK
     for state in range(2):
         lit = state == 0
         c = Canvas(32, 96)
-        # stone foot
-        c.rect(9, 86, 14, 5, stone["base"])
-        c.rect(9, 86, 14, 1, stone["light"])
-        c.rect(11, 82, 10, 4, stone["base"])
-        c.rect(11, 82, 10, 1, stone["light"])
-        # crooked post with a shepherd's-crook top
-        for y in range(30, 82):
-            x = 16 + (1 if 40 < y < 60 else 0)
-            c.put(x - 1, y, iron["light"])
-            c.put(x, y, iron["base"])
-            c.put(x + 1, y, iron["deep"])
-        for i, (dx, dy) in enumerate(((0, -1), (1, -2), (2, -2), (3, -1), (3, 0), (3, 1))):
-            c.put(16 + dx, 30 + dy, iron["base"])
-            c.put(16 + dx, 31 + dy, iron["deep"])
-        # hanging cage lantern
-        lx = 20
-        c.put(lx, 32, iron["light"])          # hook
-        c.rect(lx - 3, 33, 7, 9, iron["base"])
-        c.rect(lx - 2, 34, 5, 7, N_dark := palette.NIGHTFELL["deep"])
-        c.put(lx - 3, 33, iron["light"])
-        c.put(lx + 3, 41, iron["deep"])
-        c.put(lx, 43, iron["light"])          # finial drop
+        # Vanilla copperstreetlamp construction: broad head, thick upright and
+        # a stepped foot spanning most of the tile instead of a wire silhouette.
+        c.rect(5, 87, 22, 5, stone["base"])
+        c.rect(5, 87, 22, 2, stone["light"])
+        c.rect(5, 91, 22, 1, stone["deep"])
+        c.rect(8, 83, 16, 4, stone["base"])
+        c.rect(8, 83, 16, 1, stone["light"])
+        c.rect(11, 79, 10, 4, iron["base"])
+
+        # Seven-pixel crooked post with three collars and a lit left plane.
+        for y in range(35, 80):
+            cx = 16 + (1 if 49 <= y < 65 else 0)
+            c.rect(cx - 3, y, 7, 1, iron["base"])
+            c.put(cx - 3, y, iron["light"])
+            c.put(cx + 3, y, iron["deep"])
+        for ry, cx in ((47, 16), (63, 17), (77, 16)):
+            c.rect(cx - 5, ry, 11, 3, iron["base"])
+            c.rect(cx - 4, ry, 7, 1, iron["hi"])
+            c.rect(cx - 5, ry + 2, 11, 1, iron["deep"])
+
+        # Large capped cage. The glass stays opaque in both states so the two
+        # halves are exactly the same lamp and differ only in illumination.
+        c.rect(5, 8, 22, 4, iron["base"])
+        c.rect(6, 8, 20, 1, iron["hi"])
+        c.rect(8, 12, 18, 22, iron["deep"])
+        glass = G["glow"] if lit else palette.NIGHTFELL["base"]
+        c.rect(10, 14, 14, 17, glass)
         if lit:
-            c.rect(lx - 1, 35, 3, 5, G["glow"])
-            c.put(lx, 37, G["core"])
+            c.ellipse(15, 22, 5, 7, G["core"])
+            c.rect(11, 15, 4, 12, G["glow"])
         else:
-            c.put(lx, 38, G["deep"])          # dead ember
+            c.ellipse(16, 24, 3, 5, G["deep"])
+        for bx in (9, 15, 21, 25):
+            c.rect(bx, 13, 2, 19, iron["base"])
+            c.put(bx, 13, iron["light"])
+        c.rect(6, 33, 22, 4, iron["base"])
+        c.rect(7, 33, 20, 1, iron["light"])
+        c.rect(13, 3, 7, 5, iron["base"])
+        c.rect(14, 3, 5, 1, iron["hi"])
+        c.put(16, 2, iron["light"])
         c.outline(palette.OUTLINE)
-        if lit:
-            for (mx, my, a) in ((lx - 5, 36, 150), (lx + 5, 38, 150), (lx, 30, 130), (lx - 2, 45, 110)):
-                c.put(mx, my, with_alpha(G["glow"], a))
+        # Details after the outline pass: cage rivets and a visible flame slit.
+        c.put(7, 10, iron["hi"])
+        c.put(25, 35, iron["deep"])
+        c.put(12, 48, iron["hi"])
+        c.put(20, 64, iron["deep"])
+        c.put(14, 20, G["core"] if lit else G["deep"])
         sheet.paste(c, 0, state * 96)
     sheet.save(path)
 

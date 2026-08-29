@@ -330,6 +330,26 @@ PAIRS = [
      None, None, "sword held sprite: 32x32 canvas, cf. skyreave at 96x95"),
     ("player/weapons/galehowl.png", None,
      None, None, "bow held sprite: 32x32 canvas, cf. thunderhead at 22x62"),
+    # The world-sprite batch. Same cause as the icons above -- no row, never
+    # measured -- but these are what the player sees standing in the level, not
+    # a thumbnail in a slot. What makes each one damning is that the mod already
+    # had a sibling clearing the same bar against the same reference: the
+    # ghost lantern sat at 0.29 of copperstreetlamp while wardencandelabra was
+    # at 0.76, the garland at 0.17 of walltorch while mistglasslantern was at
+    # 1.18, and both new ore overlays under 0.40 of ironore while aetheriumore
+    # was at 1.23. The mod knew how; nothing was checking.
+    ("objects/ghostlantern.png", (0, 0, 32, 96),
+     "objects/copperstreetlamp.png", (0, 0, 32, 96), "streetlamp (on half)"),
+    ("objects/flickerlightgarland.png", ("auto", 32, 32),
+     "objects/walltorch.png", ("auto", 32, 32), "wall light (densest cell)"),
+    ("objects/fulguriteore.png", ("auto", 32, 32),
+     "objects/ironore.png", ("auto", 32, 32), "ore overlay (densest 32px cell)"),
+    ("objects/prismshardore.png", ("auto", 32, 32),
+     "objects/ironore.png", ("auto", 32, 32), "ore overlay (densest 32px cell)"),
+    ("objects/skyanchor.png", None,
+     "objects/bannerstand.png", None, "tall quest prop"),
+    ("objects/catbasket.png", None,
+     "objects/decorativepot1.png", None, "pet bed / small furniture"),
 ]
 
 THRESHOLD = 0.75

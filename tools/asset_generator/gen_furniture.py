@@ -250,18 +250,29 @@ def gen_garland(path):
 def gen_catbasket(path):
     c = Canvas(32, 32)
     wick = palette.WOOD
-    # oval woven basket
-    c.ellipse(16, 20, 11, 7, wick["base"])
-    c.ellipse(16, 19, 8.5, 5, wick["deep"])
-    c.ellipse(16, 20, 8, 4.5, (120, 100, 80))
-    # weave texture on the rim
-    for i, x in enumerate(range(6, 27, 2)):
-        y = 14 + abs(11 - i) // 3
-        c.put(x, y + 6 - 6, wick["light"] if i % 2 else wick["deep"])
-    # cushion inside
-    c.ellipse(16, 20, 6.5, 3.5, palette.AURORA["light"])
-    c.ellipse(15, 19, 4, 2, palette.AURORA["hi"])
+    cloth = palette.AURORA
+    # Decorativepot1 fills a broad grounded oval. This keeps that construction
+    # but opens it into a high-backed woven pet bed rather than a closed pot.
+    c.ellipse(16, 21, 13, 9, wick["deep"])
+    c.ellipse(15, 19, 11, 7, wick["base"])
+    c.ellipse(15, 17, 9, 4, wick["deep"])
+    c.ellipse(16, 21, 9, 5, cloth["deep"])
+    c.ellipse(15, 20, 7, 3.5, cloth["light"])
+    c.ellipse(13, 19, 3.5, 1.5, cloth["hi"])
+    # Thick braided rim and readable over-under weave on the basket face.
+    for x in range(5, 28):
+        y = 14 + abs(16 - x) // 5
+        c.put(x, y, wick["light"] if x % 3 else wick["base"])
+        c.put(x, y + 1, wick["base"])
+    for x in (7, 11, 15, 19, 23, 26):
+        for y in range(23, 28):
+            if c.filled(x, y):
+                c.put(x, y, wick["light"] if (x + y) % 2 else wick["deep"])
+    c.rect(8, 27, 17, 2, wick["deep"])
     c.outline(palette.OUTLINE)
+    c.put(8, 16, wick["light"])
+    c.put(21, 24, cloth["deep"])
+    c.put(12, 20, cloth["hi"])
     c.save(path)
 
 
@@ -939,31 +950,48 @@ def _wall_light_cell(kind, orientation, lit):
         wire = palette.GLOOMWOOD
         pts = []
         if orientation in (0, 2):
-            yb = 6 if orientation == 0 else 20
             for x in range(2, 30):
                 t = (x - 2) / 28.0
-                y = int(yb + 9 * (4 * t * (1 - t)))
+                y = (4 + round(5 * (4 * t * (1 - t))) if orientation == 0
+                     else 27 - round(5 * (4 * t * (1 - t))))
+                c.put(x, y - 1, wire["deep"])
                 c.put(x, y, wire["deep"])
+                c.put(x, y + 1, wire["base"])
                 pts.append((x, y))
-            c.put(2, yb - 1, iron["light"])
-            c.put(29, yb - 1, iron["light"])
+            for mx in (2, 29):
+                c.rect(mx - 1, pts[0 if mx == 2 else -1][1] - 2, 3, 4, iron["base"])
+                c.put(mx - 1, pts[0 if mx == 2 else -1][1] - 2, iron["light"])
+            bulb_dir = (0, 1 if orientation == 0 else -1)
         else:
-            xb = 25 if orientation == 1 else 6
             side = -1 if orientation == 1 else 1
             for y in range(2, 30):
                 t = (y - 2) / 28.0
-                x = int(xb + side * 8 * (4 * t * (1 - t)))
+                x = (27 - round(5 * (4 * t * (1 - t))) if orientation == 1
+                     else 4 + round(5 * (4 * t * (1 - t))))
+                c.put(x - 1, y, wire["deep"])
                 c.put(x, y, wire["deep"])
+                c.put(x + 1, y, wire["base"])
                 pts.append((x, y))
-        for i, (px_, py_) in enumerate(pts[3::5]):
+            for my in (2, 29):
+                px_ = pts[0 if my == 2 else -1][0]
+                c.rect(px_ - 2, my - 1, 4, 3, iron["base"])
+                c.put(px_ - 2, my - 1, iron["light"])
+            bulb_dir = (side, 0)
+        for i, idx in enumerate((2, 6, 10, 14, 18, 22, 26)):
+            px_, py_ = pts[idx]
             color = palette.GARLAND_LIGHTS[i % len(palette.GARLAND_LIGHTS)]
-            if not lit:
-                color = tuple(int(v * 0.35) for v in color)
-            off = (0, 2) if orientation in (0, 2) else ((2, 0) if orientation == 3 else (-2, 0))
-            c.put(px_ + off[0], py_ + off[1], color)
+            dx, dy = bulb_dir
+            c.put(px_ + dx, py_ + dy, palette.OUTLINE)
+            c.put(px_ + 2 * dx, py_ + 2 * dy, palette.OUTLINE)
+            bx, by = px_ + 4 * dx, py_ + 4 * dy
+            c.ellipse(bx, by, 2.5, 2.5, palette.OUTLINE)
+            c.ellipse(bx, by, 1.5, 1.5, color if lit else palette.NIGHTFELL["base"])
             if lit:
-                c.put(px_ + off[0], py_ + off[1] + (1 if orientation in (0, 2) else 0),
-                      tuple(int(v * 0.7) for v in color))
+                c.put(bx - 1, by - 1, palette.WINDSILK["hi"])
+                c.put(bx, by, color)
+            else:
+                c.put(bx, by, color)
+                c.put(bx - 1, by - 1, iron["light"])
     return c
 
 
@@ -1242,35 +1270,72 @@ def gen_beacon(path, lit):
 
 
 def gen_skyanchor(path):
-    """32x64 reforged island anchor (SkyDecoObject)."""
+    """32x64 reforged island anchor (SkyDecoObject).
+
+    Thickened, not redesigned. The previous version had the right anatomy --
+    open ring, shank, stock, curved arms into flukes -- drawn entirely in 1px
+    lines, which came to 143 opaque px, 0.36 of vanilla `bannerstand`. A pass
+    that chased the number instead replaced the ring with a filled disc and the
+    flukes with two rectangles: 764 px, 1.93x the reference, and no longer
+    readable as an anchor at 1x. That is the "mass without form" failure
+    docs/ART_DIRECTION.md names. So every element below is the OLD element,
+    given real width and a lit/dark side -- the ring stays an annulus you can
+    see through, the stock stays a crossbar, and the arms still curve into
+    points.
+    """
+    import math
     c = Canvas(32, 64)
     a = palette.AETHERIUM
     iron = palette.IRONWORK
-    # ring
-    for ang in range(0, 360, 12):
-        import math
-        x = 16 + int(6.5 * math.cos(math.radians(ang)))
-        y = 16 + int(6.5 * math.sin(math.radians(ang)))
-        c.put(x, y, iron["light"])
-    # shank
-    for y in range(22, 50):
+
+    # Ring: an annulus, not a disc. Outer r 7.5, inner r 4.5, so the hole
+    # survives at 1x -- a filled circle reads as a knob on a post.
+    for yy in range(4, 26):
+        for xx in range(4, 29):
+            d = math.hypot(xx - 16, yy - 15)
+            if 4.6 <= d <= 7.6:
+                # lit on the upper-left of the ring, deep on the lower-right
+                c.put(xx, yy, iron["light"] if (xx - 16) + (yy - 15) < -1
+                      else iron["deep"] if (xx - 16) + (yy - 15) > 3
+                      else iron["base"])
+
+    # Shank: 5px wide, lit left edge / dark right edge.
+    for y in range(21, 50):
+        c.put(14, y, a["light"])
         c.put(15, y, a["light"])
         c.put(16, y, a["base"])
-        c.put(17, y, a["deep"])
-    # flukes
-    for i in range(9):
-        c.put(15 - i, 50 - i // 2, a["base"])
-        c.put(16 + i, 50 - i // 2, a["deep"])
-    c.put(5, 44, a["hi"])
-    c.put(26, 44, a["hi"])
-    # crossbar
-    for x in range(9, 24):
+        c.put(17, y, a["base"])
+        c.put(18, y, a["deep"])
+
+    # Stock (crossbar): 3px tall and wide enough to read as a bar.
+    for x in range(7, 26):
+        c.put(x, 27, iron["light"])
         c.put(x, 28, iron["base"])
+        c.put(x, 29, iron["deep"])
+    c.put(6, 28, iron["base"])
+    c.put(26, 28, iron["base"])
+
+    # Arms: curved, 3px thick, sweeping out and up into pointed flukes.
+    for i in range(12):
+        t = i / 11.0
+        dx = int(round(11 * t))
+        dy = int(round(9 * t * t))          # curve: shallow first, then lifts
+        for k in range(3):
+            c.put(15 - dx, 49 - dy + k, a["light"] if k == 0 else a["base"] if k == 1 else a["deep"])
+            c.put(17 + dx, 49 - dy + k, a["base"] if k == 0 else a["deep"] if k == 1 else a["deep"])
+    # Fluke points: a triangle at each arm tip so it ends in a barb.
+    for k in range(4):
+        for j in range(4 - k):
+            c.put(4 + j, 40 + k, a["base"])
+            c.put(27 - j, 40 + k, a["deep"])
+    c.put(4, 39, a["hi"])
+    c.put(27, 39, a["hi"])
+
     c.outline(palette.OUTLINE)
-    c.put(16, 24, a["hi"])
+    # Highlights after the outline pass, or it eats them.
+    c.put(13, 12, iron["hi"])
+    c.put(15, 23, a["hi"])
     c.save(path)
-
-
 def gen_marblechecker(path):
     """64x64 legacy tile for SimpleTiledFloorTile: 2x2 world-locked checker."""
     c = Canvas(64, 64)
