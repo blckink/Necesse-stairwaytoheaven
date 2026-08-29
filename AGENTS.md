@@ -98,6 +98,7 @@ python3 tools/size_audit.py           # sprite mass vs vanilla; must print 0 fla
 python3 tools/locale_audit.py         # every registered ID named in both locales
 python3 tools/sheet_format_audit.py   # sheets the engine reads at fixed offsets
 python3 tools/rotation_variety_audit.py # a cell the engine reads apart holds its own art
+python3 tools/template_audit.py       # sprite templates match the cards that spec them
 python3 tools/tile_behaviour_audit.py # every tile is what it is presented as
 python3 tools/wall_render_preview.py  # walls: compose scenes, then LOOK at build/qa/
 python3 tools/rotation_preview.py     # rotations: every cell where it lands, then LOOK
