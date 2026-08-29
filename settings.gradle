@@ -9,9 +9,9 @@
 def modInfo = [
         modID          : "stairwaytoheaven",
         modName        : "Stairway to Heaven",
-        modVersion     : "0.5.0",
+        modVersion     : "0.6.0",
         gameVersion    : "auto",
-        modDescription : "Adds a third stairway that ascends above the clouds into the Skyreach: floating islands over an endless mistsea, three new sky biomes, new enemies, Aetherium gear and more.",
+        modDescription : "A stairway that climbs above the clouds into the Skyreach - four sky biomes of floating islands over an endless mistsea - and a seance circle that opens the Veil below. Adds the Sky Warden as a recruitable settler, sky livestock and settlement workstations, seven weapons and the Stormsteel set, two building sets and a cast of new creatures.",
         author         : "blckink",
         clientside     : false,
         modDependencies         : [],

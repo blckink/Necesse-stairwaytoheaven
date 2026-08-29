@@ -3,9 +3,9 @@
 Short, current, and rewritten as things change. History belongs in
 `CHANGELOG.md` and `docs/PLAYTEST_LOG.md`, not here.
 
-**Version:** 0.5.0 (v0.6 visual sprint unreleased) · **Game:** Necesse 1.3.2 ·
+**Version:** 0.6.0 · **Game:** Necesse 1.3.2 · **Branch:** `master`
 **Branch:** `master`
-**Updated:** 2026-08-25, v0.6 visual production sprint
+**Updated:** 2026-08-30, v0.6.0 released
 
 ## Architecture in one screen
 
@@ -370,7 +370,9 @@ Ordered by the player's own priority. Full detail in `docs/PLAYTEST_LOG.md`.
   recruited Warden specifically.
 - The Cat Basket is a quest reward with no recipe, so a player has exactly one.
   If moving house is meant to be easy, it wants a craft.
-- `ROADMAP.md` still describes the pre-v0.5 direction.
+- ~~`ROADMAP.md` still describes the pre-v0.5 direction.~~ Rewritten 2026-08-30:
+  released milestones tabulated, Chapter 01 named as the next piece, the rest
+  reordered by priority.
 - Wiring the new Stormveil/Aurora prop families into `SkyTerrainPainter`
   (registered + craftable now; worldgen composition is a later, tuned pass).
 

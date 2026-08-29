@@ -10,50 +10,80 @@ Mistsea.
 
 ![Preview](src/main/resources/preview.png)
 
-## Features (v0.1.0 "First Ascent")
+## What is in it (v0.6.0)
 
-- **A real third world layer.** The Skyreach is a persistent, infinite, seeded dimension
-  (`+1`, above `surface`/`cave`/`deepcave`), generated region-by-region exactly like the
-  underground layers — not an instanced pocket level. Each world gets its own sky.
-- **Stairway pair.** Craft the Stairway to Heaven at a Tungsten Workstation
-  (8 Tungsten Bars + 15 Quartz), place it on the surface, climb up. A return stairway is
-  placed in the sky automatically; both sides use the vanilla ladder netcode, so
-  multiplayer works out of the box.
-- **Three sky sub-biomes**, painted per-tile into the biome layer like cave biomes:
-  - **Driftlands** (common) — silver-green isles, Sky Reeds, Zephyr Rays
-  - **Stormveil** (uncommon) — charcoal slate, glowing Storm Crystals, Storm Wisps
-  - **Aurora Shoals** (rare) — cold dawn light, Aurora Blooms, rich Aetherium, Skystone Golems
-- **The Mistsea** — the swimmable cloud-ocean between islands; bridge it by placing
-  tiles (reclaims Cloudturf, not dirt) or swim across.
-- **Three enemies** tuned to the Tungsten era: Zephyr Ray (fast melee flier),
-  Storm Wisp (ranged spark-caster), Skystone Golem (armored bruiser).
-- **New materials & gear:** Skystone, Aetherium Ore/Bars, Storm Shards, Windsilk,
-  Aurora Petals — crafted into the **Tempest Edge** (sword) and **Galehowl** (bow),
-  deliberate sidegrades to Tungsten weapons, not power creep.
-- **English + German localization.**
-- **Reproducible pixel-art pipeline:** every texture is generated deterministically by
-  `tools/asset_generator/` in vanilla sheet formats — regenerate or hand-replace any
-  sprite at will.
+Counted from the registries, not from memory: **73 objects · 46 items · 15 tiles ·
+26 mobs · 7 biomes · 5 journal quests · 2 dimensions · 92 recipes**, every ID named
+in English and German.
 
-## New in v0.2.0 "The Warden's Call"
+### The Skyreach — four sky biomes
 
-- **A story and a resident.** The ruined **Warden's Spire** now stands somewhere in the
-  Driftlands (seed-deterministic, once per world — existing v0.1 worlds get it too). The
-  **Sky Warden** inside gives a four-stage quest chain: find him, rekindle the spire's
-  beacon, bring his two runaway cats **Siggi** and **Peanut** home with Cloudpuff
-  Treats, and reforge an island anchor. Every stage visibly changes the spire, all
-  turn-ins are server-authoritative and multiplayer-safe, dialogue is fully localized
-  (EN/DE) with speech bubbles.
-- **"Nightfell & Skylight" building set.** Two wall sets with doors and windows,
-  a world-locked checkered marble floor, gloomwood planks, wrought-iron fence + gate,
-  the Warden's Candelabra, Mistglass Lantern, gothic Gloomraven Statue, crooked
-  Gloomwillow — plus quest-exclusive rewards: the colorful Flickerlight Garland,
-  the Cat Basket and the Skywatch Banner.
-- **Render upgrade.** All sky terrain moved to the vanilla `_splat` autotile format
-  (verified cell-by-cell against 1.3.2) and the Mistsea got animated liquid splats.
+A real third world layer (`+1`, above `surface`/`cave`/`deepcave`): persistent,
+infinite and seeded, generated region-by-region exactly like the underground
+layers — not an instanced pocket level. Every world gets its own sky.
 
-See [ROADMAP.md](ROADMAP.md) for what comes next (storm events, Aetherium armor,
-structures, settlements, the Storm Sovereign boss).
+- **Driftlands** (54% of the land) — silver-green isles, Sky Reeds, Zephyr Rays
+- **Stormveil** (19%) — charcoal slate, glowing Storm Crystals, Storm Wisps
+- **Skyway Passages** (15%) — a *built* biome: cloudmarble causeways with
+  balustrades, real fence gates where a road breaks one, Seraph statues at the
+  junctions, Sky Seraphs growing wild in their frost form
+- **Aurora Shoals** (13%) — cold dawn light, Aurora Blooms, rich Aetherium
+- plus the **skystone barrens** cutting across all four, and the **Mistsea**,
+  the swimmable cloud-ocean you bridge or swim
+
+### The Stairway, and the Warden
+
+Craft the Stairway to Heaven at a Tungsten Workstation (8 Tungsten Bars +
+15 Quartz) and climb. It is a **portal, not a coordinate ladder**: wherever you
+build it, it routes to the one canonical Old Warden Spire, a furnished 21×21 hall
+with a double wall ring, eight doors and four furnished corner rooms.
+
+The **Sky Warden** living there is hired through Necesse's own recruitment flow
+and moves into your Surface settlement as a real settler. He hands over the
+**Silver Bell**, which is the only key to the Veil. His quest chain sends you
+after his two runaway cats, **Siggi and Peanut** — place a **Cat Basket**
+anywhere, on any level, and that is where they live.
+
+### The Veil
+
+A second dimension below the deep caves, opened with a **Séance Circle** while
+holding the Silver Bell. Gothic-comedy underworld with the **Gloomfen** and the
+**Ashen Reach**, fen flora, ash bones and the Gloom Shade.
+
+### Gear, and things to make
+
+- **Seven weapons**, each calibrated against the vanilla weapon of the same class
+  at the deep-cave tier: Tempest Edge (sword), Galehowl (bow), Skyreave (glaive),
+  Thunderhead (greatbow), Prismcaller (staff), Skywatch Whistle (summon) and
+  Stormdisc (returning thrown ring).
+- **The Stormsteel set** — helm, cuirass, greaves — plus three real trinkets
+  (Stormsteel Vambrace, Aurora Locket, Zephyr Harness), all benchmarked against
+  their vanilla counterparts rather than invented.
+- **Three settlement workstations** a settler runs unattended: the Windsilk Loom,
+  the Aether Forge (the only source of Stormsteel) and the Stormglass Kiln.
+- **Sky livestock**: Nimbus Yak, Thunderquill Fowl, Glimmergoat and the Cloud
+  Lamb — milked, sheared and bred like vanilla animals, with nine recipes hanging
+  off their products.
+- **Two building sets** — "Nightfell & Skylight" and Cloudmarble — with walls,
+  doors, windows, fences, gates, floors, lighting and furniture.
+
+### On the Surface
+
+Three rare points of interest scattered by vanilla's own world-preset system
+(an aeronaut camp, a sky-fragment crater, a skyward shrine), and the **Skyfall**
+night event.
+
+### Under the hood
+
+- **English + German** throughout; 371 locale entries, both languages in sync.
+- **Reproducible pixel-art pipeline:** every texture is generated deterministically
+  by `tools/asset_generator/` in vanilla sheet formats — same input, byte-identical
+  output, so art changes diff cleanly.
+- **Eight verification gates**, from a headless dedicated-server integration test
+  to sprite-mass, sheet-format, tile-behaviour and rotation-variety audits.
+
+See [CHANGELOG.md](CHANGELOG.md) for the release history and
+[ROADMAP.md](ROADMAP.md) for what comes next.
 
 ## Installation (players)
 
@@ -163,13 +193,19 @@ whose `settings.gradle` shows the current `modVersion` — not in a
 
 | Path | Contents |
 |---|---|
-| `src/main/java/stairwaytoheaven/` | mod code: entry, registries facade, `level/`, `worldgen/`, `biomes/`, `tiles/`, `objects/`, `mobs/`, `items/`, `commands/` |
+| `src/main/java/stairwaytoheaven/` | mod code: entry, registry facade, `level/`, `worldgen/`, `biomes/`, `tiles/`, `objects/`, `mobs/`, `items/`, `arsenal/`, `livestock/`, `settlement/`, `surface/`, `quest/`, `commands/` |
 | `src/main/resources/` | generated textures (vanilla sheet formats), `locale/` (en, de), mod preview |
 | `tools/asset_generator/` | deterministic Python/Pillow pixel-art pipeline |
-| `scripts/` | headless dedicated-server integration test |
-| `docs/DESIGN.md` | full design document (vision, content spec, tuning) |
-| `docs/ARCHITECTURE.md` | how the mod hooks the engine, module by module |
-| `docs/assets-style-guide.md` | palette + pixel style rules + sheet format cheat sheet |
+| `tools/*_audit.py` | the verification gates: sprite mass, sheet format, tile behaviour, rotation variety, furniture, locale, content ledger |
+| `scripts/` | `fetch_dedicated_server.sh`, the headless integration test, tile-sprite and map-render checks |
+| `AGENTS.md` | entry point for anyone (human or agent) changing this repository |
+| `docs/CURRENT_STATE.md` | where the project actually is right now |
+| `docs/DESIGN.md` · `docs/ARCHITECTURE.md` | design document · how the mod hooks the engine |
+| `docs/PLAYER_JOURNEY.md` | the player's path A to Z, read out of the code |
+| `docs/CONTENT_LEDGER.md` | every registered ID and one line on what it is |
+| `docs/PLAYTEST_LOG.md` | real in-game feedback, append-only, KEEP entries are player-confirmed |
+| `docs/TECHNICAL_LEARNINGS.md` | verified engine behaviour, so nobody re-derives it |
+| `docs/assets-style-guide.md` · `docs/ART_DIRECTION.md` | pixel rules · what to aim for |
 | `docs/research/` | knowledge base: verified engine/API notes this mod is built on |
 | `ROADMAP.md`, `CHANGELOG.md`, `CONTRIBUTING.md` | project management |
 
@@ -194,15 +230,30 @@ und Tiefen-Leiter (Deep Caves) führt die **Himmelstreppe** nach **oben** in die
 **Himmelsweite** (Skyreach) — eine persistente, unendliche Himmelsebene mit schwebenden
 Inseln über einem begehbaren Nebelmeer.
 
+Stand **v0.6.0**, aus den Registries gezählt: 73 Objekte, 46 Items, 15 Tiles,
+26 Mobs, 7 Biome, 5 Quests, 2 Dimensionen, 92 Rezepte.
+
 - **Bauen:** Tungsten-Werkbank → 8 Wolframbarren + 15 Quarz → Treppe auf der Oberfläche
-  platzieren und benutzen. Der Rückweg wird oben automatisch platziert; Multiplayer
-  funktioniert wie bei Vanilla-Leitern.
-- **Drei Himmels-Biome:** Driftlande (häufig), Sturmschleier (Sturmkristalle, Irrlichter)
-  und die seltenen Aurorabänke (Aurorablüten, viel Aetherium, Golems).
-- **Neue Gegner** (Wolfram-Ära): Zephyrrochen, Sturmirrlicht, Himmelsstein-Golem.
-- **Neue Materialien & Waffen:** Aetherium-Erz/-Barren, Sturmsplitter, Windseide,
-  Aurorablätter → **Sturmklinge** (Schwert) und **Windheuler** (Bogen).
-- Vollständig auf Deutsch lokalisiert.
+  platzieren und benutzen. Die Treppe ist ein **Portal**: egal wo sie steht, sie führt
+  zur einen Alten Wächterspitze. Multiplayer funktioniert wie bei Vanilla-Leitern.
+- **Vier Himmels-Biome:** Driftlande (54 % der Landfläche), Sturmschleier (19 %,
+  Sturmkristalle und Irrlichter), **Himmelswege** (15 %, ein *gebautes* Biom aus
+  Cloudmarble-Alleen mit Balustraden, Toren und Seraph-Statuen) und die Aurorabänke
+  (13 %, viel Aetherium) — dazu das begehbare Nebelmeer.
+- **Der Himmelswächter** wird über Necesses eigenen Anwerbe-Dialog eingestellt und
+  zieht als echter Siedler in deine Siedlung. Er übergibt das **Silberglöckchen**,
+  den einzigen Schlüssel zum Veil, und schickt dich nach seinen Katzen **Siggi und
+  Peanut** — ein platzierter **Katzenkorb** ist ihr Zuhause, auf jeder Ebene.
+- **Der Veil:** zweite Dimension unter den Tiefen Höhlen, geöffnet mit dem
+  **Séance-Kreis**. Gloomfen und Aschenweite, gotische Komik.
+- **Sieben Waffen** (Sturmklinge, Windheuler, Himmelsreißer, Donnerhaupt,
+  Prismarufer, Skywatch-Pfeife, Sturmscheibe), das **Sturmstahl-Set** und drei
+  echte Accessoires.
+- **Himmels-Viehzucht** (Nimbus-Yak, Donnerkiel-Huhn, Glimmerziege, Wolkenlamm) und
+  **drei Siedlungs-Werkbänke**, die ein Siedler selbstständig bedient.
+- **Zwei Bausets** („Nightfell & Skylight" und Cloudmarble) mit Wänden, Türen,
+  Fenstern, Zäunen, Böden, Licht und Möbeln.
+- Vollständig auf Deutsch lokalisiert (371 Einträge, beide Sprachen synchron).
 
 Bauen: Ein JDK 17–25 installieren (empfohlen: Temurin 21, z. B. per
 `winget install EclipseAdoptium.Temurin.21.JDK`), neues Terminal öffnen, dann im

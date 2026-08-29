@@ -1,142 +1,91 @@
 # Roadmap — Stairway to Heaven
 
-Milestones are scoped so that every release is a complete, playable, save-compatible
-increment. Versioning: `MAJOR.MINOR.PATCH`; content milestones bump MINOR.
+Every release is a complete, playable, save-compatible increment. Versioning is
+`MAJOR.MINOR.PATCH`; content milestones bump MINOR.
 
-## v0.1.0 — "First Ascent" (current)
+**This file was rewritten on 2026-08-30.** It had described the pre-v0.5
+direction for four releases, and its milestone names no longer matched what
+actually shipped under those version numbers — v0.4.0 and v0.5.0 both released
+with different content than the plan below them. What shipped is now in
+`CHANGELOG.md`; what is left is here, and nowhere else.
 
-The complete core loop.
+## Released
 
-- [x] Skyreach dimension (`+1`, infinite, seeded, persistent) with region generation
-- [x] Stairway to Heaven / return stairway object pair (vanilla ladder netcode)
-- [x] 3 sub-biomes painted into the biome layer: Driftlands, Stormveil, Aurora Shoals
-- [x] Tiles: Cloudturf, Skystone, Stormslate, Mistsea (liquid)
-- [x] Objects: Skystone Rock, Aetherium Rock, Storm Crystal, Aurora Bloom, Skyreeds
-- [x] Enemies: Zephyr Ray, Storm Wisp, Skystone Golem (biome spawn tables)
-- [x] Items: Skystone, Aetherium Ore/Bar, Storm Shard, Windsilk, Aurora Petal,
-      Tempest Edge (sword), Galehowl (bow)
-- [x] Recipes & loot tables, English + German localization
-- [x] Reproducible pixel-art asset pipeline (`tools/asset_generator/`)
-- [x] Headless dedicated-server integration test (`scripts/`)
+| version | name | what it added |
+|---|---|---|
+| 0.1.0 | First Ascent | The Skyreach dimension, the stairway pair, three sub-biomes, the first enemies and materials |
+| 0.2.0 | The Warden's Call | The Warden's Spire, the Sky Warden, Siggi and Peanut, the "Nightfell & Skylight" building set, real `_splat` autotiles |
+| 0.3.0 | The Veil Below | The Séance Circle, the Veil dimension, Gloomfen and Ashen Reach |
+| 0.4.0 | The Living Sky | Per-biome fill, the tree families, more critters and ores |
+| 0.4.1 | — | Palette and colour-identity pass |
+| 0.5.0 | The Skywatch Opens | The stairway became a portal to one canonical hub; recruitment replaced the fetch chain |
+| 0.6.0 | The Working Sky | The Skyway Passages biome, livestock, settlement workstations, five more weapons, the Stormsteel set, the Cat Basket, surface POIs, the icon and world-sprite passes |
 
-## v0.2.0 — "The Warden's Call" (released)
+Detail for each is in `CHANGELOG.md`. **Nothing in 0.6.0 has been played by a
+human yet** — see the verification states in `docs/IMPLEMENTATION_RULES.md` §14.
 
-Story, quests, and a reason to build. The Skyreach gets a resident.
+## Next — Chapter 01: the Skyreach has one building
 
-- [x] **Render-correctness pass**: terrain tiles on the real `_splat` autotile format,
-      ore overlay in the correct variant-strip format, Mistsea liquid splats
-- [x] **The Warden's Spire**: unique ruined tower stamped once per world in the
-      Driftlands (deterministic, save-persistent placement)
-- [x] **The Sky Warden** NPC: interact-driven dialogue, 4-stage quest chain
-      (find him → rekindle the beacon → bring the cats home → forge the anchor),
-      server-authoritative item turn-ins, journal hint on first ascent
-- [x] **Spire cats Siggi & Peanut**: unique friendly critters hidden in the Stormveil /
-      Aurora Shoals, brought home with Cloudpuff Treats, live at the spire afterwards
-- [x] **"Nightfell & Skylight" building set**: Skystone Brick wall + door, Nightfell
-      wall, Checkered Marble + Gloomwood floors, Wrought Iron fence + gate, Warden's
-      Candelabra, Mistglass Lantern, Gloomwillow, Raven Statue, Flickerlight Garland,
-      Cat Basket, Skywatch Banner (quest-exclusive pieces stay earned)
-- [x] Warden's shop (opens after stage 2) selling the building set
-- [x] Spire visibly evolves with quest progress (beacon, basket, anchor)
+This is the largest open item and it is already designed, not merely wished for:
 
-## v0.3.0 — "The Veil Below" (next)
+- `docs/design/chapter-01-skyreach-pois.md` — **14 points of interest** with
+  tile-level room plans, object lists with rotations, and one concrete reward
+  each.
+- `docs/design/chapter-01-skyreach-cast.md` — **three settler types** (a thief,
+  a brewer, a scholar), three enemies that belong to a specific place, and eight
+  unique rewards.
+- `docs/WORLDBUILDING_LOOP.md` and `.claude/commands/chapter.md` — the process
+  for building it: designer → POI architect → art in parallel → integrator, with
+  a completeness checklist and every gate.
 
-The afterlife layer: gothic-comedy underworld, entered by ritual, leaking into
-the overworld. Full concept: DESIGN.md Part IV. Rolling art batches (terrain,
-mobs, building sets — see the style guide's art direction) continue throughout.
+The player's own words after v0.5.1: *"solche Orte und Häuser mit NPCs, unique
+Objekten usw"* — the roads and gardens landed, the buildings did not.
 
-- [x] **Séance Circle ritual** (crafted circle + the Silver Bell as the
-      un-consumed key) opening a persistent **Rift** portal to the Veil
-      (one-world dimension below the deep caves) — shipped in 0.3.0
-- [x] **The Veil** level: permanent-night region streaming; sub-biomes
-      **Gloomfen** (green-moon marsh) and **Ashen Reach** (ash waste) —
-      shipped in 0.3.0 with fen flora, ash bones and the Gloom Shade
-- [ ] Structures: **The Model Town** (doll-scale streets) and the
-      **Office of Eternity** (waiting-room dungeon, ticket-number humor)
-- [ ] **Ashwyrm**: summoned mid-boss in the Ashen Reach + juvenile
-      **Wormground** set-piece eruptions on vanilla desert islands
-- [ ] NPCs: **Mortimer the Broker** (wandering trickster ghost peddler, sells
-      the séance chalk) and **Vesper** (deadpan medium, quest handler)
-- [ ] Quest chain **"Three Stamps for Eternity"** (Wormsign → Séance →
-      Take a Number → The Third Stamp)
-- [ ] **"Haunted & Homely" deco set**, usable in overworld bases: ghost
-      lantern, striped fence/gate, zigzag runner, crooked gate, self-playing
-      piano, model-house set (largest is enterable), ticket dispenser +
-      Form 13-K, ghost-train platform pieces
-- [ ] New materials: Wyrmash chitin, Cinder Pearl
+## Then — the direction, in priority order
 
-## v0.4.0 — "The Living Sky"
+**Endgame pressure.** Shipped power stops at Tungsten and most enemies are easy.
+New content sits at Aetherium and above, toward incursion-tier pressure, and its
+loot should be a new **ability** rather than a bigger number.
 
-Full vanilla-fidelity art across the sky, a dense living world, weather, and
-ties to the surface. Full concept: DESIGN.md Part III; the per-biome content
-lock (trees, plants, animals, enemies, ores, structures, second NPC) is
-DESIGN.md **Part V**.
+**The Veil, properly.** Contrast rather than darkness: poison green on violet,
+bone white on black, stripes, checkerboard, spirals, sickly pink, brass and
+verdigris — black is outline and shadow, never fill. One saturated accent per
+set that nothing else has, and one funny piece per chapter. Open: the Model
+Town, the Office of Eternity, the zombie quarter on the Ashen Reach with the
+Ashwyrm, Mortimer and Vesper, and the "Haunted & Homely" deco set.
 
-- [ ] **Per-biome fill (Part V lock)**: one tree family per biome with its own
-      wood + plank floor (Nimbus Willow / Fulgur Pine / Prisma Birch), 2 new
-      plants per biome, a new critter and a new enemy where a biome lacks one
-      (Zephyr Finch + Galehound, Dew Snail + Dawnpiercer), 2 new ores
-      (Fulgurite, Prismshard), and generated structures: Sky Cottage with the
-      **Cloud Shepherd NPC** (shop + small journal quest), Storm Ruin with
-      loot + golem guards, Aurora Shrine
-- [ ] **Art overhaul** of every existing sprite to vanilla detail density
-      (terrain splats → Mistsea → nodes/plants → mobs/NPCs → building set → items),
-      each batch gated by the contact-sheet QA process
-      (`.claude/skills/necesse-pixel-art/`) and verified on gameplay screenshots
-- [ ] **Mistsea recast as a cloudsea**: puffy animated cloud deck, shore wisps,
-      Mist Lilies, drifting cloud shadows
-- [ ] **World density & diversity**: higher decor/node density, more sheet variants,
-      and new per-biome gathering loops — Windwheat, Cloudberry, Drift Boulder,
-      Nimbus Tuft, Fulgurite Spire, Charged Slate, Static Bloom, Prismshell,
-      Aurora Kelp, Chimeflower; new materials (Cloudfluff, Fulgurite Glass,
-      Prismshell) feeding new building/furniture pieces
-- [ ] **Sky weather cycle**: Radiance, Overcast Drift, Tempest (Stormveil storm
-      event with lightning + shard yield), Mist Surge — seeded, announced via chat
-      line + palette/particles, vanilla level-event pattern
-- [ ] **Cats as settlement companions**: after the finale, Siggi and Peanut become
-      individually recruitable to the player's settlement (vanilla pet path,
-      carrier item from the Warden; declining keeps them at the spire)
-- [ ] **Fallen stars**: post-beacon skyfall event drops small Aetherium meteors on
-      surface islands
-- [ ] Mistsea **fishing loot table** (new fish + rare catches)
-- [ ] Balance pass from playtest feedback
+**A surface biome of its own.** Something you stumble into mid-to-late, with base
+materials and textures found nowhere else, its own inhabitants and its own
+trouble. It has to feel *found*, not like a second Skyreach; the Veil seeping
+upward is the established hook (`docs/DESIGN.md` Part IV §26).
 
-## v0.5.0 — "The Aviary"
+**The Storm Sovereign.** Summoned at a Stormveil altar, fought over the Mistsea;
+trophy and relic drops, and a post-boss tier that bridges into incursion-era
+power. Teased by the Warden's finale dialogue and still unbuilt.
 
-Making the sky a place to live.
+## Carried over, still true
 
-- [ ] **Aetherium armor set** (head/chest/boots; Tungsten-tier set bonus: fall-themed
-      mobility perk, e.g. brief glide/slow-fall visual + speed after damage)
-- [ ] Sky **structures/presets**: more ruined skystone spires with loot, small
-      abandoned observatories (uses the vanilla preset generation system)
-- [ ] **Settlement support**: allow claiming a Skyreach settlement flag; settler pathing
-      audit around Mistsea; sky-specific settler dialogue lines
-- [ ] Wandering **Skyward Trader** visiting surface settlements with sky-exclusive stock
-- [ ] **Surface-ingredient requests**: repeatable Warden task trading surface goods
-      for sky materials
-- [ ] Sound pass: wind ambience, mob sounds (reuse-plus-pitch first, custom later)
-- [ ] Journal/quest hooks expanded into a full sky questline
+- **Weather**: Radiance, Overcast Drift, Tempest, Mist Surge — seeded, announced,
+  on the vanilla level-event pattern. The Skyfall event shipped in 0.6.0; the
+  rest did not.
+- **Mistsea fishing** loot table (`Biome.getFishingLootTable` is verified).
+- **Settlement support in the sky**: claiming a flag up there, settler pathing
+  around the Mistsea.
+- **Sound pass**: wind ambience and mob sounds.
+- **Cooking and utility**: Cloudberry Jam, the Cloud Charm, a Windsilk glider —
+  the traverse problem the Mistsea creates still has no answer.
 
-## v0.6.0 — "Crown of the Sky"
+## v1.0.0
 
-The endgame of the sky arc.
-
-- [ ] **Boss: the Storm Sovereign** — summoned at a Stormveil altar with a crafted item;
-      arena-style fight over the Mistsea; trophy + relic drops (teased by the Warden's
-      finale dialogue)
-- [ ] Post-boss weapon/relic tier (bridges into vanilla incursion-era power)
-- [ ] Unique boss music slot (custom track if available, curated vanilla list otherwise)
-
-## v1.0.0 — Release
-
-- [ ] Full localization sweep (all vanilla-supported languages where feasible)
-- [ ] Steam Workshop packaging, workshop art, trailer GIFs
-- [ ] Performance audit (region generation profiling, spawn-table load)
-- [ ] Public modding notes: how to extend the Skyreach from other mods
+- Full localization sweep beyond EN/DE
+- Steam Workshop packaging, workshop art, trailer GIFs
+- Performance audit (region generation profiling, spawn-table load)
+- Public modding notes: how to extend the Skyreach from another mod
 
 ## Compatibility policy
 
-- Never modify vanilla registries' existing entries; additive registration only.
-- Keep save compatibility within a MAJOR version; migrations documented in CHANGELOG.
-- Track Necesse updates: re-verify against each game patch (decompiled-API notes in
-  `docs/research/` record which game version each finding was verified on).
+- Never modify existing vanilla registry entries; additive registration only.
+- Keep save compatibility within a MAJOR version; document migrations in
+  `CHANGELOG.md`.
+- Re-verify against every Necesse patch. `docs/research/` records which game
+  version each API finding was checked against.

@@ -3,9 +3,69 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
-## [Unreleased] — Item icons that read, and a gate that measures — 2026-08-29
+## [0.6.0] — "The Working Sky" — 2026-08-30
 
-### Fixed
+The release that gives the sky a reason to be lived in rather than visited: a
+fourth biome that was **built** rather than grown, animals and workstations that
+produce, five more weapons and a real armour set, the cats living wherever you
+put their basket — and an art pass that finally measured itself.
+
+Counted from the registries: **73 objects · 46 items · 15 tiles · 26 mobs ·
+7 biomes · 5 journal quests · 2 dimensions · 92 recipes**, every ID named in
+English and German (371 locale entries, both in sync).
+
+Three things in here are worth reading as process rather than content. The
+Marble Checker crash was a vanilla bug nothing else in the game could reach.
+`size_audit.py` was passing by comparing **nothing at all** on any machine
+without one specific path. And the mod's banner drew the same picture in all
+four rotation rows for months, which is what hid an asymmetry in the audit that
+was supposed to catch it. Each is written up in
+`docs/TECHNICAL_LEARNINGS.md`.
+
+**Nothing in this release has been played by a human yet.** Everything below is
+verified by the gates listed at the end, which cannot see client rendering.
+
+### The worldbuilding loop, the wall sets and the spire — 2026-08-29
+
+Landed on a parallel branch and merged in for this release.
+
+#### Fixed
+- **The spire was white because its wall was never generated.** The preset
+  referenced a wall the worldgen never placed.
+- **The Warden's price was wrong in four records.** Four documents still said
+  100,000 coins; he has cost 30,000 since `5ce05ae`. The records now match the
+  code.
+- **The common biome had exactly one daylight enemy**, and the Cloudberry bush
+  was still not a bush — one fix covered both halves of that report: it now
+  regrows AND has a bush's silhouette, plus a Cloudberry sapling.
+- **The rotation-variety bug**: sheets that drew the right cell at the right
+  size and *the same picture* in every rotation. `objects/skywatchbanner.png`
+  drew 738 identical pixels in all four rotation rows; it now has four real
+  views (over-the-cap, edge, face-on, edge), the shape vanilla's own
+  `bannerofpeace` has.
+- **The side-wall window is a slot in the roof**, and three wall sets never got
+  that fix. Cloudmarble, Nightfell and Skystone Brick corrected.
+
+#### Added
+- `tools/rotation_variety_audit.py` — every cell the engine reads separately
+  must actually differ. This is the gate that catches "right size, same
+  picture", which no mass or format check can see.
+- `tools/template_audit.py` and `docs/CODEX_SPRITE_TEMPLATES.md` — a sprite
+  template treated as a specification that can be checked.
+- `tools/content_ledger.py` + `docs/CONTENT_LEDGER.md` — every registered ID
+  needs one line saying what it is, read out of the source rather than a
+  hand-kept list, so nothing can ship undescribed.
+- `scripts/fetch_dedicated_server.sh` — the game install is a free download, so
+  "cannot verify on this machine" stopped being true.
+- `scripts/sky_map_render.sh` — renders the painter's output so placement can be
+  judged at screen scale instead of argued about.
+- `docs/WORLDBUILDING_LOOP.md`, `.claude/commands/chapter.md` and the chapter
+  design documents (`docs/design/chapter-01-skyreach-*.md`) — the process for
+  running world expansion as a loop rather than as one-off sprints.
+
+### Item icons that read, and a gate that measures — 2026-08-29
+
+#### Fixed
 - **Twelve item icons redrawn.** Every vanilla 32x32 item icon carries 288-712
   opaque px (median 440). The mod shipped `tempestedge` — one of its two
   original weapons — at **45 px**: `gen_items._tempest_blade` laid a 1px core on
@@ -25,7 +85,7 @@ All notable changes to this project are documented here. Format loosely follows
   checkout's own `vanilla-sprites/`, reports how many rows compared, and fails
   when nothing was measured. A gate that compares no sprite is not a pass.
 
-### Changed
+#### Changed
 - `size_audit.py` gained a row for each redrawn icon, so none can thin out
   again unseen. The two held weapon sprites are **manual** rows on purpose:
   they are on a 32x32 canvas while every later mod weapon matches vanilla's
@@ -33,14 +93,14 @@ All notable changes to this project are documented here. Format loosely follows
   measures the canvas, not the drawing. That canvas mismatch is recorded as
   open in `docs/CURRENT_STATE.md`, not silently folded into an art change.
 
-### Known / follow-up
+#### Known / follow-up
 - **35 item icons remain below the thinnest vanilla icon** and are still
   uncovered by the audit; measured and listed worst-first in
   `docs/CURRENT_STATE.md`. `aurorabloom` (141 px) is first in line — the
   redrawn `aurorapetal` (461 px) now sits next to it in the inventory.
 - The audit maps 100 of 307 shipped PNGs; the other 207 are unmeasured.
 
-### Verified
+#### Verified
 - `buildModJar`; `scripts/integration_test.sh` (boots, generates, restarts,
   spire/warden/cats persist, no log errors); `size_audit` 0 flags with 119 of
   122 rows genuinely compared; `locale_audit` 203 IDs; `tile_behaviour_audit`,
@@ -48,13 +108,13 @@ All notable changes to this project are documented here. Format loosely follows
   `src/main/resources` byte-for-byte and exactly the 14 intended PNGs differ.
 - **Not seen in the real client by anyone.**
 
-## [Unreleased] — Cat Basket: the cats live where you put their basket — 2026-08-28
+### Cat Basket: the cats live where you put their basket — 2026-08-28
 
 Player report: *"Katzenbetten sollen in normalem Haus platziert werden können
 etc in der Stadt damit die Katzen dort wohnen. ich habe beide gerade platziert
 und die sind weg oder irgendwo anders dann erschienen wo ich es nicht weiss"*.
 
-### Fixed
+#### Fixed
 - **Placing a Cat Basket now makes that tile the cats' home**, on whatever level
   it stands. It was a bare `FurnitureObject` with no object entity, no placement
   hook and no connection to Siggi and Peanut at all — placing one was pure
@@ -62,7 +122,7 @@ und die sind weg oder irgendwo anders dann erschienen wo ich es nicht weiss"*.
   Warden's Spire, in the Skyreach. The cats were never lost; nothing in the game
   ever said where they had gone.
 
-### Added
+#### Added
 - `objects/CatBasketObject` — a real object that claims its tile on
   `placeObject` and releases it on `onDestroyed`, still a `FurnitureObject` with
   `furnitureType = "petbed"` so it keeps counting toward a settlement room's
@@ -83,7 +143,7 @@ und die sind weg oder irgendwo anders dann erschienen wo ich es nicht weiss"*.
   out there and want a treat first, or the basket is gone and they went back to
   the spire.
 
-### Changed
+#### Changed
 - `/skyreachstatus`'s cat probe prints the home actually in effect with its
   level identifier (`home=surface:-10,1064 homeSource=placed`), measures every
   cat against it, and looks for the cats on the home level as well as the
@@ -96,13 +156,13 @@ und die sind weg oder irgendwo anders dann erschienen wo ich es nicht weiss"*.
   `docs/TECHNICAL_LEARNINGS.md`), which is what the test's "flaky persistence
   assertions" have really been.
 
-## [Unreleased] — v0.6 visual production sprint — 2026-08-25
+### v0.6 visual production sprint — 2026-08-25
 
 The large visual assets finally match the mini vegetation, critters and
 atmosphere that already worked. Everything regenerated through the pipeline;
 inspected on contact sheets; NOT yet played by a human.
 
-### Changed
+#### Changed
 - **Rock family rebuilt** (`gen_rocks.py`): 8 Skystone / 6 Veilrock variants
   with real geological characters (slab, strata, boulder domes, fracture,
   split fissure, rubble, weathered pits, broken terrace) instead of two
@@ -133,7 +193,7 @@ inspected on contact sheets; NOT yet played by a human.
   sigil plinth, banded pillar with a snapped armature, brass yoke cradling a
   faceted storm-glass lens (burning cold-teal when lit).
 
-### Added
+#### Added
 - **Spire hero accents**: `skywatchtelescope` (brass refractor on a stone
   tripod) and `skywatchastrolabe` (navigation table with armillary rings).
 - **Stormveil prop families**: `stormscreed` (scorched ground decal),
@@ -147,7 +207,7 @@ inspected on contact sheets; NOT yet played by a human.
   (`gen_prop_icons`) so no crafting entry shows the error texture.
 - 11 new locale entries in both languages (locale audit now gates 77 IDs).
 
-### Verified
+#### Verified
 - Regeneration byte-identical; `size_audit` 0 flags; `locale_audit` 77/77;
   `buildModJar` builds; `scripts/integration_test.sh` passes (generate,
   restart, spire/warden/cats persist, no errors).
