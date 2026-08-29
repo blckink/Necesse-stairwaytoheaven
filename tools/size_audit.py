@@ -281,6 +281,55 @@ PAIRS = [
      "items/frozenheart.png", None, "trinket item icon"),
     ("items/zephyrharness.png", None,
      "items/airvessel.png", None, "trinket item icon"),
+    # The thin-icon batch. These twelve shipped between 29 and 117 opaque px
+    # while every vanilla 32x32 item icon in the dump carries 288-712 (median
+    # 440) -- tempestedge, one of the mod's two original weapons, was a 45px
+    # hairline. None of them had a row here, which is the whole reason they
+    # shipped: this audit only ever sees what it is pointed at, and 207 of the
+    # mod's 307 PNGs were pointed at nothing. Each analogue below is the
+    # vanilla icon whose CONSTRUCTION the redraw was briefed against, so the
+    # gate and the brief rest on the same fact.
+    ("items/flickerlightgarland.png", None,
+     "items/silk.png", None, "strung deco item icon"),
+    ("items/tempestedge.png", None,
+     "items/quartzglaive.png", None, "sword item icon"),
+    ("items/veilessence.png", None,
+     "items/resistancepotion.png", None, "essence item icon"),
+    ("items/ghostlantern.png", None,
+     "items/oakclock.png", None, "lantern item icon (tall, narrow)"),
+    ("items/wardencandelabra.png", None,
+     "items/oakclock.png", None, "candelabra item icon (tall, narrow)"),
+    ("items/stormshard.png", None,
+     "items/glass.png", None, "mineral shard item icon"),
+    ("items/aeronautwreck.png", None,
+     "items/airvessel.png", None, "wreckage item icon"),
+    ("items/fulgurite.png", None,
+     "items/glass.png", None, "mineral item icon"),
+    ("items/galehowl.png", None,
+     "items/tungstengreatbow.png", None, "bow item icon"),
+    ("items/glowfern.png", None,
+     "items/birchsapling.png", None, "soft plant item icon"),
+    ("items/withershrub.png", None,
+     "items/birchsapling.png", None, "shrub item icon"),
+    ("items/aurorapetal.png", None,
+     "items/inefficientfeather.png", None, "petal item icon"),
+    # Both held sprites share their icon's drawing helper (_tempest_blade,
+    # _galehowl_bow), so a thickened blade reaches them whether or not anyone
+    # meant it to. Rows here make that an intended, watched output instead of
+    # collateral nobody looked at.
+    #
+    # They are deliberately MANUAL rows, not ratios. These two sit on a 32x32
+    # canvas while every other held weapon in the mod matches vanilla's own
+    # much larger sheets (skyreave 96x95 vs quartzglaive 104x88; thunderhead
+    # 22x62 vs tungstengreatbow 20x60). An opaque-mass ratio between canvases
+    # that differ by 3x measures the canvas, not the drawing, and would need an
+    # ACCEPTED floor so low it gated nothing. The canvas question is real and
+    # open -- see docs/CURRENT_STATE.md -- but it is a rendering-geometry
+    # change, not an art change, so it is not silently folded in here.
+    ("player/weapons/tempestedge.png", None,
+     None, None, "sword held sprite: 32x32 canvas, cf. skyreave at 96x95"),
+    ("player/weapons/galehowl.png", None,
+     None, None, "bow held sprite: 32x32 canvas, cf. thunderhead at 22x62"),
 ]
 
 THRESHOLD = 0.75
@@ -326,9 +375,25 @@ def measure(img, cell):
     return (max(xs) - min(xs) + 1, max(ys) - min(ys) + 1, opaque)
 
 
+def default_vanilla():
+    """Where the sprite dump actually is, preferring this checkout's own copy.
+
+    The default used to be a hard-coded dev-container path. On any machine
+    without that exact directory EVERY pair resolved to "vanilla ref missing",
+    the flag count stayed 0, and the audit printed "0 sprite(s) flagged" while
+    comparing nothing at all -- which is what AGENTS.md documents as the way to
+    run it. `vanilla-sprites/` is gitignored on purpose but is where the dump
+    lives in a working checkout, so look there first.
+    """
+    local = os.path.join(REPO, "vanilla-sprites")
+    if os.path.isdir(os.path.join(local, "items")):
+        return local
+    return "/home/user/necesse-game/sprites"
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--vanilla", default="/home/user/necesse-game/sprites")
+    parser.add_argument("--vanilla", default=default_vanilla())
     args = parser.parse_args()
 
     rows = []
@@ -359,7 +424,18 @@ def main():
         if ratio is not None and ratio < limit:
             flagged += 1
         print(f"{mark} {ours:40s} [{note}] {detail}")
+    compared = sum(1 for _, _, ratio, _ in rows if ratio is not None)
+    manual = sum(1 for _, _, ratio, detail in rows
+                 if ratio is None and "manual check" in detail)
+    unref = len(rows) - compared - manual
+
     print(f"\n{flagged} sprite(s) flagged below {THRESHOLD:.0%} of vanilla mass.")
+    print(f"{compared} of {len(rows)} row(s) actually compared against the dump at "
+          f"{args.vanilla} ({manual} manual, {unref} without a reference).")
+    if compared == 0:
+        print("FAIL: nothing was measured. A run that compares no sprite is not a "
+              "pass -- point --vanilla at a sprite dump.")
+        return 1
     return 1 if flagged else 0
 
 

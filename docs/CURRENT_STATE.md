@@ -161,6 +161,62 @@ six 32px icons, drawn on `gen_armor`'s measured human anatomy and
 vanilla piece each answers to AND composited onto a real player body.
 **Nobody has worn any of it in the real client.**
 
+## Item icons — thin-icon batch (IMPLEMENTED, not player-confirmed)
+
+`tools/size_audit.py` is a hand-maintained mapping, so a sprite with no row is
+never measured. **100 of 307 shipped PNGs had a row; 207 did not** — and among
+the uncovered were 94 32x32 item icons, **47 of them below the thinnest vanilla
+item icon in the dump**. Vanilla's 32x32 icons carry 288-712 opaque px (median
+440); the mod shipped `tempestedge` — one of its two original weapons — at
+**45 px**, a hairline whose blade core was single stacked pixels per diagonal
+step. `docs/REVIEW-2026-08-24.md` listed widening exactly that blade as art
+action **#1**; it had stayed undone since.
+
+Twelve icons redrawn through the generator, each briefed against a named
+vanilla analogue and its measured mass: `flickerlightgarland` 29→379,
+`tempestedge` 45→334, `veilessence` 70→402, `ghostlantern` 77→448,
+`wardencandelabra` 78→456, `stormshard` 85→505, `aeronautwreck` 101→466,
+`fulgurite` 101→451, `galehowl` 101→310, `glowfern` 101→655,
+`withershrub` 113→500, `aurorapetal` 117→461. `player/weapons/tempestedge.png`
+and `player/weapons/galehowl.png` change with them because they share the
+`_tempest_blade` / `_galehowl_bow` helpers — intended, and now watched.
+
+**The gate changed too, which is the durable half.** `size_audit.py` gained a
+row per redrawn icon, so none can silently thin out again — and two real
+defects in the gate itself were fixed:
+
+- It **passed by measuring nothing.** `--vanilla` defaulted to a dev-container
+  path, so on this machine **0 of 122 rows compared** and it still printed
+  "0 sprite(s) flagged" and exited 0. That green tick was quoted in this file as
+  verified. It now prefers the checkout's own `vanilla-sprites/`, prints how
+  many rows actually compared, and **fails** when nothing was measured.
+- The two held weapon sprites are deliberately **manual** rows, not ratios:
+  they sit on a 32x32 canvas while every later mod weapon matches vanilla's much
+  larger held sheets (`skyreave` 96x95 vs `quartzglaive` 104x88). A mass ratio
+  between canvases differing 3x measures the canvas, not the drawing.
+
+Art produced by Codex under brief (`codex exec`, see TECHNICAL_LEARNINGS);
+reviewed, gated and integrated here. **Nobody has seen any of it in the real
+client.**
+
+### Follow-up: 35 icons still below the thinnest vanilla icon
+
+Measured, uncovered by the audit, and deliberately NOT in this batch — one
+coherent set per pass, per the bounded-art rule in `AGENTS.md`. Worst first:
+`cloudbell` 120, `thunderbloom` 124, `skywatchtelescope` 129, `aurorabloom` 141,
+`prismshard` 141, `stormcrystal` 141, `skyballoon` 146, `auroralily` 148,
+`cloudberry` 149, `gloomwillow` 149, `cloudpufftreat` 157, `silverbell` 161,
+`skywatchastrolabe` 166, `cinderpearl` 178, `aetheriumore` 181, `aetheriumbar`
+184, `catbasket` 186, `cloudberrybush` 186, `skystone` 189, `windsilk` 198,
+`starfall` 203, `skytulip` 207, `skyreeds` 210, `mistglasslantern` 213,
+`charwood`/`nimbuswood`/`prismwood` 225, `staticmoss` 230, `stormscreed` 239,
+`skystonerock` 245, `seraphstatue` 247, `seancecircle` 251, `windwheat` 255,
+`skywatchchalice` 267, `skyparcel` 283.
+
+`aurorabloom` (141) is the one to take first: the redrawn `aurorapetal` (461)
+now sits beside it in the inventory, and the flower should not read thinner than
+a petal picked off it.
+
 ## Known issues — open
 
 Ordered by the player's own priority. Full detail in `docs/PLAYTEST_LOG.md`.

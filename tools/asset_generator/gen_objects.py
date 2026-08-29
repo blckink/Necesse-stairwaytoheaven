@@ -1307,46 +1307,45 @@ def gen_auroralily_item(path):
 
 
 def gen_glowfern_item(path):
-    """A cut glowfern frond (silhouette-first, no outline pass — the
-    skyreeds-item trick keeps the feathered leaflets crisp)."""
+    """A dense five-frond bunch built on vanilla sapling's full crown mass."""
     c = Canvas(32, 32)
     G = palette.GLOWFERN
-    spine = []
-    for i in range(22):
-        t = i / 21.0
-        x = 8 + round(16 * (t + 0.2 * t * t))
-        y = 27 - round(20 * (t - 0.28 * t * t))
-        spine.append((x, y, t))
-    # dark silhouette mass behind spine + leaflets
-    for (x, y, t) in spine:
-        c.put(x - 1, y, palette.OUTLINE)
-        c.put(x + 1, y, palette.OUTLINE)
-        c.put(x, y + 1, palette.OUTLINE)
-        c.put(x, y - 1, palette.OUTLINE)
-    for i in range(2, 20, 2):
-        x, y, t = spine[i]
-        ln = 4 if 0.15 < t < 0.5 else (3 if t < 0.7 else 2)
-        for d in range(1, ln + 1):
-            sx = x - d if i % 4 == 0 else x + d
-            sy = y - d // 2
-            c.put(sx, sy, palette.OUTLINE)
-            c.put(sx, sy + 1, palette.OUTLINE)
-    # lit frond on top
-    for (x, y, t) in spine:
-        c.put(x, y, G["deep"] if t < 0.4 else G["base"])
-    for i in range(2, 20, 2):
-        x, y, t = spine[i]
-        ln = 4 if 0.15 < t < 0.5 else (3 if t < 0.7 else 2)
-        for d in range(1, ln + 1):
-            sx = x - d if i % 4 == 0 else x + d
-            sy = y - d // 2
-            c.put(sx, sy, G["light"] if d == ln else G["base"])
-    tx, ty, _ = spine[-1]
-    c.put(tx, ty, G["hi"])                          # curled glowing tip
-    c.put(tx - 1, ty - 1, G["hi"])
-    c.put(spine[0][0], spine[0][1] + 1, G["hi"])    # clean-cut stem end
-    c.put(spine[0][0] - 1, spine[0][1] + 1, G["light"])
-    c.put(9, 6, with_alpha(G["hi"], 150))           # spore mote
+    c.ellipse(16, 27, 10, 3, G["deep"])
+    specs = ((15, 27, 5, 8, -5), (15, 27, 9, 4, -3),
+             (16, 27, 16, 2, 0), (17, 27, 23, 5, 3),
+             (18, 27, 28, 10, 5))
+    fronds = []
+    for x0, y0, tx, ty, bend in specs:
+        spine = []
+        for i in range(19):
+            t = i / 18.0
+            x = round(x0 * (1 - t) + tx * t + bend * 4 * t * (1 - t))
+            y = round(y0 * (1 - t) + ty * t)
+            spine.append((x, y, t))
+            c.ellipse(x, y, 2, 2, G["deep"])
+        fronds.append(spine)
+        # Broad alternating leaflets make a feathered crown, not five sticks.
+        for i in range(3, 17, 3):
+            x, y, t = spine[i]
+            side = -1 if (i // 3) % 2 else 1
+            c.ellipse(x + side * 3, y - 1, 3, 1.5, G["deep"])
+    for spine in fronds:
+        for x, y, t in spine:
+            c.ellipse(x - 1, y - 1, 1.2, 1.0,
+                      G["light"] if t > 0.48 else G["base"])
+        for i in range(3, 17, 3):
+            x, y, t = spine[i]
+            side = -1 if (i // 3) % 2 else 1
+            c.ellipse(x + side * 3 - 1, y - 2, 1.8, 1.0,
+                      G["light"] if t > 0.45 else G["base"])
+    c.outline(palette.OUTLINE)
+    for spine in fronds:
+        tx, ty, _ = spine[-1]
+        c.put(tx - 1, ty - 1, G["hi"])
+    c.put(9, 13, G["hi"])
+    c.put(22, 11, G["deep"])
+    c.put(14, 24, G["light"])
+    c.put(27, 7, with_alpha(G["hi"], 150))
     c.save(path)
 
 
@@ -1385,40 +1384,39 @@ def gen_staticmoss_item(path):
 
 
 def gen_fulgurite_item(path):
-    """A fulgurite shard: fused lightning-glass, jagged and branching."""
+    """A broad Y-shaped fulgurite, built with vanilla glass's chunky mass."""
     c = Canvas(32, 32)
     F = palette.FULGURITE
-    # main zigzag column, 4-5px wide; kinks stay 1px so rows keep >=3px of
-    # overlap and the outline pass cannot shred the column into dashes
-    x = 16
-    kinks = (0, 0, -1, 0, 0, 1, 0, 1, 0, -1, 0, 1, 0, -1, -1, 0, 1, 0, 0, -1)
-    for i, k in enumerate(kinks):
-        y = 27 - i
-        x += k
-        w = 5 if 4 < i < 14 else 4
-        for dx in range(w):
-            tone = F["base"]
-            if dx == 0:
-                tone = F["light"]
-            elif dx >= w - 1:
-                tone = F["deep"]
-            c.put(x + dx, y, tone)
-        if k != 0:                                  # glint at each kink
-            c.put(x + 1, y, F["hi"])
-    # branch spur (2px thick so it survives the outline)
-    bx, by = x + 2, 14
-    for k in range(4):
-        c.put(bx + 2 + k, by - k, F["base"])
-        c.put(bx + 3 + k, by - k, F["base"])
-        c.put(bx + 3 + k, by - k + 1, F["deep"])
-    c.put(bx + 6, by - 4, F["light"])
-    # hollow glassy tip (fulgurites are tubes)
-    c.put(x + 1, 8, F["deep"])
-    c.put(x + 2, 8, F["deep"])
-    c.put(x + 1, 7, F["hi"])
+
+    def glass_branch(points, outer, inner):
+        for (x0, y0), (x1, y1) in zip(points, points[1:]):
+            for ox in range(-outer, outer + 1):
+                for oy in range(-outer, outer + 1):
+                    if ox * ox + oy * oy <= outer * outer:
+                        c.line(x0 + ox, y0 + oy, x1 + ox, y1 + oy, F["deep"])
+        for (x0, y0), (x1, y1) in zip(points, points[1:]):
+            for ox in range(-inner, inner + 1):
+                for oy in range(-inner, inner + 1):
+                    if ox * ox + oy * oy <= inner * inner:
+                        c.line(x0 + ox - 1, y0 + oy - 1,
+                               x1 + ox - 1, y1 + oy - 1, F["base"])
+
+    c.ellipse(16, 27, 9, 3, F["deep"])
+    c.ellipse(14, 26, 7, 2, F["base"])
+    glass_branch(((16, 27), (14, 20), (17, 13), (15, 5)), 4, 2)
+    glass_branch(((16, 19), (9, 14), (5, 8)), 3, 1)
+    glass_branch(((17, 15), (24, 11), (28, 5)), 3, 1)
     c.outline(palette.OUTLINE)
-    c.put(x - 1, 12, F["hi"])                       # outer glass sparkle
-    c.put(16, 22, F["hi"])
+    # Lit facets, three kink glints, and hollow tube mouths.
+    c.line(12, 24, 11, 18, F["light"])
+    c.line(10, 13, 6, 9, F["light"])
+    c.line(22, 10, 27, 6, F["light"])
+    c.put(13, 19, F["hi"])
+    c.put(17, 13, F["hi"])
+    c.put(23, 10, F["hi"])
+    for x, y in ((15, 5), (5, 8), (28, 5)):
+        c.put(x, y, F["deep"])
+        c.put(x - 1, y - 1, F["hi"])
     c.save(path)
 
 

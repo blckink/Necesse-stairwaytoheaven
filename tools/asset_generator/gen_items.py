@@ -63,16 +63,33 @@ def gen_aetheriumbar(path):
 def gen_stormshard(path):
     c = Canvas(32, 32)
     r = palette.STORMCRYSTAL
-    for i in range(16):
-        t = i / 15.0
-        half = max(1, round(4 * (1.0 - abs(t * 2 - 1))))
-        for dx in range(-half, half + 1):
-            c.put(15 + dx + round(t * 3), 25 - i, r["base"] if dx > -half else r["deep"])
-        if 0.2 < t < 0.85:
-            c.put(13 + round(t * 3), 25 - i, r["light"])
-    c.put(17, 11, r["hi"])
-    c.put(21, 18, r["hi"])
-    _finish(c).save(path)
+    # One broad, glass-like storm crystal.  Vanilla glass fills a skewed
+    # lozenge rather than tracing its material as a narrow shard, so this uses
+    # the same large faceted mass while retaining the violet crystal identity.
+    for y in range(4, 29):
+        if y < 10:
+            half = 2 * (y - 3)
+        elif y <= 22:
+            half = 12
+        else:
+            half = 2 * (29 - y)
+        cx = 19 - round((y - 4) * 0.23)
+        for x in range(cx - half, cx + half + 1):
+            tone = r["base"]
+            if x < cx - 2:
+                tone = r["light"]
+            elif x > cx + 6:
+                tone = r["deep"]
+            c.put(x, y, tone)
+    _finish(c)
+    # Facet seams and three sharp reflected-light details.
+    c.line(7, 15, 15, 25, r["deep"])
+    c.line(18, 5, 15, 25, r["light"])
+    c.line(18, 5, 27, 12, r["hi"])
+    c.rect(7, 12, 3, 2, r["hi"])
+    c.put(22, 22, r["deep"])
+    c.put(11, 23, r["hi"])
+    c.save(path)
 
 
 def gen_windsilk(path):
@@ -93,17 +110,32 @@ def gen_windsilk(path):
 def gen_aurorapetal(path):
     c = Canvas(32, 32)
     r = palette.AURORA
-    # single faceted petal, teardrop leaning right
-    for i in range(17):
-        t = i / 16.0
-        half = max(1, round(5 * (1.0 - abs(t * 2 - 1)) + 1 - t))
-        cx = 14 + round(t * 5)
-        for dx in range(-half, half + 1):
-            c.put(cx + dx, 25 - i, r["base"])
-    c.ellipse(15, 20, 2.5, 3.5, r["light"])
-    c.put(17, 12, r["hi"])
-    c.put(14, 23, r["teal"])
-    _finish(c).save(path)
+    # One detached petal, not a miniature of the whole aurorabloom.  The
+    # broad diagonal teardrop fills the inventory cell while its angular
+    # planes keep the Aurora flower's rose-glass identity.
+    import math
+    for y in range(3, 30):
+        t = (y - 3) / 26.0
+        cx = 25 - round(17 * t)
+        half = 2 + round(9 * math.sin(math.pi * t) ** 0.72)
+        for x in range(cx - half, cx + half + 1):
+            rel = (x - cx) / max(half, 1)
+            if rel < -0.28:
+                tone = r["light"]
+            elif rel > 0.48 or t > 0.82:
+                tone = r["deep"]
+            else:
+                tone = r["base"]
+            c.put(x, y, tone)
+    _finish(c)
+    # Facet breaks converge off-centre instead of forming a flower heart.
+    c.line(24, 6, 16, 16, r["hi"])
+    c.line(16, 16, 9, 27, r["deep"])
+    c.line(16, 16, 7, 19, r["light"])
+    c.line(16, 16, 25, 14, r["deep"])
+    c.line(10, 26, 12, 23, r["teal"])
+    c.put(13, 22, r["teal"])
+    c.save(path)
 
 
 # --- Weapons -----------------------------------------------------------------
@@ -113,45 +145,54 @@ def _tempest_blade(c, grip_x, grip_y):
     the auto-outline pass would eat a thin diagonal blade otherwise."""
     steel = palette.AETHERIUM
     wood = palette.WOOD
-    # 1. dark silhouette mass (5px wide diagonal)
-    for i in range(18):
-        x = grip_x + 3 + i
-        y = grip_y - 3 - i
-        for k in range(5):
-            c.put(x - k, y + k - 1, palette.OUTLINE)
-    # 2. blade core on top: hi edge, light, base
-    for i in range(16):
-        x = grip_x + 4 + i
-        y = grip_y - 4 - i
-        c.put(x, y - 1, steel["hi"])
-        c.put(x - 1, y, steel["light"])
-        c.put(x - 2, y + 1, steel["base"])
-    # tapered bright tip
-    c.put(grip_x + 20, grip_y - 21, steel["hi"])
-    c.put(grip_x + 19, grip_y - 20, steel["light"])
-    # storm-crystal crossguard, perpendicular to the blade
-    for d in range(-3, 4):
-        c.put(grip_x + 2 - d, grip_y - 2 - d, palette.OUTLINE)
-    for d in range(-2, 3):
-        c.put(grip_x + 2 - d, grip_y - 2 - d, palette.STORMCRYSTAL["light"] if d % 2 else palette.STORMCRYSTAL["base"])
-    # wrapped grip + crystal pommel
-    for i in range(5):
-        c.put(grip_x - i, grip_y + i, wood["base"] if i % 2 else wood["deep"])
-        c.put(grip_x - i - 1, grip_y + i, palette.OUTLINE)
-        c.put(grip_x - i + 1, grip_y + i + 1, palette.OUTLINE)
-    c.put(grip_x - 5, grip_y + 5, palette.STORMCRYSTAL["light"])
-    c.put(grip_x - 6, grip_y + 6, palette.STORMCRYSTAL["base"])
+    blade_x = grip_x + 2
+    blade_y = grip_y - 2
+    length = 21
+    # 1. A continuous 13px dark silhouette mass.  Each column overlaps the
+    # next, avoiding the disconnected checker that a stacked-pixel diagonal
+    # produced in the old 45px sprite.
+    for i in range(length):
+        taper = max(1, 6 - max(0, i - (length - 6)))
+        x = blade_x + i
+        y = blade_y - i
+        for dy in range(-taper, taper + 1):
+            c.put(x, y + dy, palette.OUTLINE)
+    # 2. Broad three-plane aetherium core on top, narrowing to the tip.
+    for i in range(length - 1):
+        taper = max(1, 4 - max(0, i - (length - 6)))
+        x = blade_x + i
+        y = blade_y - i
+        for dy in range(-taper, taper + 1):
+            tone = steel["base"]
+            if dy <= -2:
+                tone = steel["hi"] if (i + dy) % 4 else steel["light"]
+            elif dy >= 3:
+                tone = steel["deep"]
+            c.put(x, y + dy, tone)
+    # Storm-crystal crossguard: one substantial diamond rather than a line.
+    c.ellipse(grip_x + 1, grip_y - 1, 7, 4, palette.STORMCRYSTAL["deep"])
+    c.ellipse(grip_x, grip_y - 2, 5, 2.5, palette.STORMCRYSTAL["base"])
+    c.put(grip_x - 3, grip_y - 4, palette.STORMCRYSTAL["hi"])
+    # Wrapped grip + broad crystal pommel, still anchored bottom-left.
+    for i in range(7):
+        x = grip_x - i
+        y = grip_y + i
+        c.rect(x - 2, y - 1, 5, 3, palette.OUTLINE)
+        c.rect(x - 1, y, 3, 2, wood["light"] if i % 2 else wood["base"])
+        c.put(x + 1, y + 1, wood["deep"])
+    c.ellipse(grip_x - 7, grip_y + 7, 3, 3, palette.STORMCRYSTAL["deep"])
+    c.put(grip_x - 8, grip_y + 6, palette.STORMCRYSTAL["light"])
 
 
 def gen_tempestedge_icon(path):
     c = Canvas(32, 32)
-    _tempest_blade(c, 8, 24)
+    _tempest_blade(c, 8, 23)
     c.save(path)
 
 
 def gen_tempestedge_held(path):
     c = Canvas(32, 32)
-    _tempest_blade(c, 6, 26)
+    _tempest_blade(c, 7, 24)
     c.save(path)
 
 
@@ -159,39 +200,60 @@ def _galehowl_bow(c):
     wood = palette.WOOD
     silk = palette.WINDSILK
     steel = palette.AETHERIUM
-    # vertical recurve bow (2px thick limbs), string well to the left
-    for i in range(24):
-        t = i / 23.0
-        x = 17 + round(7 * (1 - abs(t * 2 - 1) ** 1.7))
-        y = 4 + i
-        c.put(x, y, wood["light"])
-        c.put(x + 1, y, wood["base"])
-        c.put(x + 2, y, wood["deep"])
-    # aetherium limb tips
-    for (ty, up) in ((4, True), (27, False)):
-        c.put(17, ty, steel["light"])
-        c.put(17, ty - 1 if up else ty + 1, steel["hi"])
-    # windsilk string
-    c.line(17, 4, 10, 16, silk["light"])
-    c.line(10, 16, 17, 27, silk["light"])
-    c.put(10, 16, silk["hi"])
-    c.put(11, 16, silk["hi"])
-    # wrapped grip in the middle of the bow
-    for y in range(14, 19):
-        c.put(23, y, silk["base"])
-        c.put(24, y, silk["deep"])
+    import math
+    points = []
+    for y in range(2, 30):
+        t = (y - 2) / 27.0
+        # A near-vertical recurve, matching the greatbow's readable grammar:
+        # nocks beside the string, with the thick belly pushed far to the right.
+        x = 6 + round(17 * math.sin(math.pi * t) ** 0.72)
+        half = 2 + round(2 * math.sin(math.pi * t))
+        points.append((x, y, t, half))
+
+    # Silhouette first.  The 7-11px dark mass leaves a 5-9px wooden core, so
+    # the C-shape survives the icon at native scale instead of becoming a rod.
+    for x, y, _t, half in points:
+        c.line(x - half - 1, y, x + half + 1, y, palette.OUTLINE)
+    for x, y, t, half in points:
+        for dx in range(-half, half + 1):
+            if dx <= -half + 1:
+                tone = wood["light"]
+            elif dx >= half - 1:
+                tone = wood["deep"]
+            else:
+                tone = wood["base"]
+            c.put(x + dx, y, tone)
+        if y % 6 == 4 and 0.12 < t < 0.88:
+            c.put(x - half, y, wood["light"])
+
+    # Small aetherium nocks, kept on the limb so neither crowds the air gap.
+    for x, y, _t, _half in (points[0], points[-1]):
+        c.rect(x - 3, y - 1, 7, 3, palette.OUTLINE)
+        c.rect(x - 2, y, 5, 1, steel["base"])
+        c.put(x - 2, y, steel["hi"])
+
+    # Narrow windsilk wrap exactly at the belly's centre, following the limb.
+    for x, y, _t, _half in points[11:18]:
+        c.put(x - 1, y, silk["deep"])
+        c.put(x, y, silk["base"])
+        c.put(x + 1, y, silk["light"])
+
+    # One uninterrupted 1px light string.  Clear transparent air separates it
+    # from the limb everywhere except the two nocks.
+    c.line(points[0][0], points[0][1], points[-1][0], points[-1][1], silk["light"])
+    c.put(points[0][0], points[0][1], silk["hi"])
 
 
 def gen_galehowl_icon(path):
     c = Canvas(32, 32)
     _galehowl_bow(c)
-    _finish(c).save(path)
+    c.save(path)
 
 
 def gen_galehowl_held(path):
     c = Canvas(32, 32)
     _galehowl_bow(c)
-    _finish(c).save(path)
+    c.save(path)
 
 
 # --- Object items ------------------------------------------------------------

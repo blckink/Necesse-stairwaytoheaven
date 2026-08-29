@@ -2085,3 +2085,153 @@ the cats' home flags AND the Skyfall's `restored=false` are both world-scoped
 state, both are written by the same save, and both come back stale together —
 which is precisely what losing the stop-save looks like. Both were red on the
 same runs and green together once the explicit save went in.
+
+## `size_audit.py` passed by measuring nothing, on every machine but one
+
+**[run]** `AGENTS.md` documents the gate as `python3 tools/size_audit.py`, no
+arguments. Its `--vanilla` default was the hard-coded path
+`/home/user/necesse-game/sprites` — a dev-container location. Anywhere else,
+every pair resolved to "vanilla ref missing", `flagged` stayed 0, and the script
+printed **"0 sprite(s) flagged below 75% of vanilla mass"** and exited 0.
+
+Measured on this checkout before the fix: **0 of 122 rows actually compared**,
+119 of them reporting a missing reference, and the run still passed. That green
+tick is quoted in `docs/CURRENT_STATE.md` as verified. It meant nothing unless
+whoever ran it happened to pass `--vanilla vanilla-sprites` by hand.
+
+Two changes, both in `tools/size_audit.py`:
+
+- `default_vanilla()` prefers this checkout's own `vanilla-sprites/` when it
+  holds an `items/` directory, falling back to the old path. The dump is
+  gitignored on purpose but it is where it actually lives in a working tree.
+- The summary now prints how many rows compared, how many are manual, and how
+  many had no reference, and a run where **nothing** was measured exits 1 with
+  `FAIL: nothing was measured`. A gate that compares no sprite is not a pass.
+
+**The general rule this is the third instance of:** ask what a green gate
+actually measured, not whether it was green. `sheet_format_audit` passed the
+Beetlefreak wall because it guards cell geometry, not whether art tiles.
+`wall_render_preview` drew both faults without complaint because it only ever
+composed our own sheet. This one passed because it compared nothing at all.
+
+## The audit only sees what it is pointed at — 207 of 307 PNGs were invisible
+
+**[run]** `size_audit.PAIRS` is a hand-maintained mapping, so a sprite with no
+row is simply never measured. Cross-checking every shipped PNG against the
+mapping: **100 of 307 covered, 207 not**. Among the uncovered were 94 32x32 item
+icons, **47 of which sit below the thinnest vanilla item icon in the dump**.
+
+Measured reference, from `vanilla-sprites/items/` (34 icons at 32x32):
+opaque mass **288–712 px, median 440**, bbox at least 16x20 and typically 24x26.
+Against that, the mod shipped `flickerlightgarland` at 29 px, `tempestedge` — one
+of its two original weapons — at **45 px**, `veilessence` 70, `ghostlantern` 77,
+`wardencandelabra` 78, `stormshard` 85.
+
+`tempestedge`'s cause is visible in the generator: `gen_items._tempest_blade`
+draws the blade core as single stacked pixels per diagonal step. The helper's own
+docstring warns that the outline pass eats thin diagonals and says to lay a dark
+mass first — it does that for the silhouette, then puts a 1px core on top, so the
+finished icon is a hairline. `docs/REVIEW-2026-08-24.md` listed widening this
+blade as art action **#1** and it stayed undone for four months.
+
+**[run]** Both held weapon sprites are on a **32x32** canvas while every later
+mod weapon matches vanilla's much larger held sheets — `skyreave` 96x95 against
+`quartzglaive` 104x88, `thunderhead` 22x62 against `tungstengreatbow` 20x60. So
+`tempestedge` and `galehowl` are drawn at roughly a third of the linear size of
+everything else in the player's hand. Their audit rows are deliberately manual
+(a mass ratio between canvases differing 3x measures the canvas, not the art).
+**Open question, not fixed here:** changing that canvas is rendering geometry,
+not art, and wants its own verified pass.
+
+## Driving Codex non-interactively as an art worker
+
+**[run]** `codex exec` takes a brief on stdin/argv and runs headless:
+
+```bash
+codex exec -C <repo> -s workspace-write --skip-git-repo-check \
+  -c model_reasoning_effort="high" -o <report.md> "$(cat brief.md)"
+```
+
+`-C` scopes it to one worktree, `-o` captures its final message, and
+`/home/blackoffset/dev` is already `trust_level = "trusted"` in
+`~/.codex/config.toml`, so subdirectories inherit trust. It is NOT a Claude peer
+session and does not appear in `ListAgents`; `codex queue --thread <id>` talks to
+an already-running interactive session instead.
+
+What made the hand-off work, in the order it mattered:
+
+- **Numeric acceptance criteria in the brief.** Every icon got its vanilla
+  analogue *and* that analogue's measured mass, plus a floor (>=300 px, bbox
+  >=20x22) and a self-check script to run before reporting. The worker's
+  criterion and the reviewer's gate then rest on the same fact.
+- **Explicit file ownership, including a deny list.** `tools/size_audit.py` was
+  being edited in parallel and was named as forbidden; it came back untouched.
+  Workers do not commit — `docs/AGENT_WORKFLOW.md` — and saying so in the brief
+  is what makes that true.
+- **Pillow is not installed system-wide here**, so the exact
+  `PYTHONPATH=/home/blackoffset/dev/pylib python3 …` command belongs in the
+  brief verbatim, or the worker's own QA silently does not run.
+
+**[run]** What the numbers could not catch, and a human read of a contact sheet
+did: the redrawn `aurorapetal` came back at 565 px as a full five-petal bloom
+with leaves and a stem — a **fuller flower than `aurorabloom` itself** (141 px,
+untouched, sitting next to it in the inventory). Every acceptance number passed.
+The brief caused it: "must read as *that* plant" was meant as "keep the plant's
+identity", and was read as "draw the plant". **Say what the SUBJECT is, not only
+which family it belongs to** — for a picked material, name it as picked.
+
+## This Linux box: what it had, and what had to be built (2026-08-29)
+
+**[run]** The v0.6 notes above describe a Mac with a dedicated server in
+`~/Downloads`. This machine (WSL2, Ubuntu, Python 3.14, Temurin 21) started with
+**none** of the toolchain: no game jar, no decompiled tree, no Pillow, no pip, no
+`python3-venv` that can bootstrap pip, and no passwordless sudo. Every gate
+except `locale_audit.py` was therefore unrunnable, and `gradlew` could not
+resolve a game jar at all.
+
+All three are fixable without root, and this is how:
+
+- **Game jar.** `https://necessegame.com/server/` lists every build, not just the
+  newest, as presigned S3 links of the form
+  `.../server/<ver>/necesse-server-linux64-<ver>.zip?X-Amz-...`. The version the
+  mod pins, `1-3-2-24650233`, is still offered. It is unzipped at
+  `/home/blackoffset/dev/necesse-server-1-3-2-24650233/necesse-server-1-3-2-24650233`
+  (the zip contains its own top-level directory, so the path repeats) and that
+  is what `NECESSE_GAME_DIR` must point at — it holds `Server.jar`. **Take the
+  pinned version, not "latest":** 1.3.3 is on the same page and building against
+  it would silently move the compile target.
+- **Decompiled sources.** `./gradlew decompileToSources` (quiltflower 1.8.1,
+  fetched from `maven.quiltmc.org`) writes
+  `$NECESSE_GAME_DIR/decompiled/Necesse-sources.jar`; unzipped beside it that is
+  **6,464 `.java` files**. This is far better than the `javap -c` route the v0.6
+  notes had to fall back to, and it is what `AGENTS.md`'s "verify API behaviour
+  before implementing" needs. Note the path is `$NECESSE_GAME_DIR/decompiled`,
+  not `$NECESSE_GAME_DIR/../decompiled` as AGENTS.md says.
+- **Pillow without pip.** Fetch the wheel URL from
+  `https://pypi.org/pypi/Pillow/json`, pick the `cp<pyver>`+`manylinux`+`x86_64`
+  build, and unzip it into a directory — manylinux wheels bundle their native
+  libs, so no compiler and no root is needed:
+
+  ```bash
+  curl -sSL -o pillow.whl "<url from the JSON>"
+  python3 -c "import zipfile; zipfile.ZipFile('pillow.whl').extractall('/home/blackoffset/dev/pylib')"
+  export PYTHONPATH=/home/blackoffset/dev/pylib     # every Pillow tool needs this
+  ```
+
+  It lives at `/home/blackoffset/dev/pylib`. Pillow 12 deprecates
+  `Image.getdata()` in favour of `get_flattened_data()`; the repo's tools use
+  `.load()` and are unaffected.
+
+**[run]** With those three in place every gate runs here: `buildModJar`,
+`scripts/integration_test.sh` (boots, generates, restarts, cats persist),
+`locale_audit`, `size_audit`, `tile_behaviour_audit`, `sheet_format_audit`,
+`furniture_audit`, and the generator reproduces `src/main/resources`
+byte-for-byte.
+
+**[run]** The repo is checked out as three worktrees off one `.git`
+(`Necesse-stairwaytoheaven` on `master`, `Necesse-claude` on `ai/claude`,
+`Necesse-opencode` on `ai/opencode`). A worktree can sit far behind: `ai/claude`
+was **87 commits** behind `master` on 2026-08-29, so the docs it held — and any
+"owned by another agent" note in them — were three days stale. `git worktree
+list` plus `git rev-list --left-right --count master...HEAD` is the first thing
+to run, before believing any doc in the tree.

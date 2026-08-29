@@ -147,7 +147,7 @@ The follow-up to "White floor places huge" above: not one floor, all of them.
 | Red region | "rote skyreach Region ist auch cool" | KEEP |
 | Grey-floor region empty | "die Welt mit grauen Böden viel leerer und hat eigentlich nur paar einzelne Steinblöcke und sonst keine Inhalte im Vergleich zum Rest" | **FIXED — NOT YET PLAYER CONFIRMED**. Measured, not guessed: over three seeds and 235,528 natural land tiles the grey ground (`skystone`, laid down by `isRockPatch`, 14.7% of all land) carried **0.032 objects per tile in the Driftlands and 0.044 in the Aurora Shoals** against 0.311–0.384 on every vegetated ground — and its entire content was `skystoneRock`. Cause: `rollObject` answers `isRockPatch ? 0 : plant` for nearly every plant, and the meadow-carpet and aurora-colony rules are both gated on `!isRockPatch`, so three separate rules switched all growth off and nothing switched anything on. Now `SkyTerrainPainter.screeObject` gives the barrens their own formation field (lichen beds on a lattice, same shape as the aurora colonies) with three new objects — Skystone Lichen, Cragbloom, Sky Scree — plus boulders for vertical relief and one lit biome accent. Re-measured on the same 235k tiles: **0.304 / 0.352 / 0.356**. |
 | Fences | "Zäune sind leider perspektivisch noch schrecklich und z.t. nicht sinnvoll aufgebaut in Levels" | **FIXED — NOT YET PLAYER CONFIRMED**. The player diagnosed it exactly right, and it was the same class of error as the wall windows: our fence sheet was drawn to an invented column layout ("post / horizontal run / top cap / left / right") while `FenceObject.addDrawables` addresses those five columns as post / north joint / south rail / WEST run / EAST run. So the engine drew a full-width horizontal rail whenever a fence connected NORTH, a 3px hairline for every vertical run, and the west and east runs on each other's side of the tile. On top of that 79% of the sprite's pixels were literally the outline colour, so there was no lit top surface and no dark front face — no perspective at all. Both sheets are rebuilt cell by cell against vanilla `ironfence.png` / `ironfencegate.png`. Second half of the report: fence rings were rasterised as one-tile-thick annuli, which step diagonally, and `FenceObject` attaches only orthogonally — measured **3.9% lone posts and 28.0% dead ends** across 4,111 placed fence tiles. Now **0.2% and 6.0%** across 5,562, and a road crossing a ring gets a real fence gate instead of a gap. |
-| Missing icons | "düsterpilz immer noch ERR Thumbnail, flüsterried auch .. das sind echt basics" | OPEN |
+| Missing icons | "düsterpilz immer noch ERR Thumbnail, flüsterried auch .. das sind echt basics" | **FIXED — NOT YET PLAYER CONFIRMED** — `0b4dc33` drew the four items that were rendering as the engine's ERR tile, `items/gloomshroom.png` and `items/whisperreeds.png` among them. This row stayed OPEN after the fix landed; corrected on 2026-08-29 after verifying both files exist, both read at healthy mass (`whisperreeds` 483 opaque px, `gloomshroom` 429, against a vanilla item-icon median of 440) and `locale_audit` resolves 149 holdable IDs to a real icon file. |
 | Cat vanished after coming home | "hab Siggi jetzt gefunden und Snack gegeben aber danach nie wieder gesehen" | OPEN |
 | Warden quests still invisible | "warden gibt weiterhin keine quests die ich finden kann" | OPEN — a fix landed the same day; the player may not have that build. Needs confirming before anything else is changed. |
 | Cloud Lambs have no purpose | "Wolkenschafe konnte ich fangen aber was bringen sie jetzt? und es gibt halt schon normale schafe. was muss in Trog bei wolkenschafen?" | OPEN |
@@ -228,3 +228,28 @@ cat home check: basket=-196,-314 object=catbasket homeFlags black=true tabby=tru
 ```
 
 **Nobody has placed one in a real client yet.**
+
+---
+
+## 2026-08-29 — item icons, measured rather than reported
+
+Not a play session: a measurement pass, prompted by re-reading the still-open
+"Missing icons" row above. The icon FILES were all there since `0b4dc33`. What
+nobody had measured was whether they read.
+
+| Area | Observation | Status |
+|---|---|---|
+| `size_audit.py` passed by measuring nothing | Its `--vanilla` default was a dev-container path that does not exist on any other machine, so **0 of 122 rows compared** and it still printed "0 sprite(s) flagged" and exited 0. `docs/CURRENT_STATE.md` quotes that green tick as verified. | **FIXED**. Defaults to this checkout's own `vanilla-sprites/`, prints how many rows actually compared, and a run that measures nothing now exits 1. |
+| 207 of 307 shipped PNGs had no audit row | `PAIRS` is hand-maintained, so a sprite with no entry is never measured. Among the uncovered: 94 item icons, **47 of them below the thinnest vanilla item icon in the dump**. | **FIXED for this batch** — 14 rows added. The remaining ~35 thin icons are listed in `docs/CURRENT_STATE.md` as the follow-up. |
+| Twelve icons far below vanilla mass | Vanilla 32x32 item icons carry 288–712 opaque px (median 440). We shipped `flickerlightgarland` at 29, **`tempestedge` — one of the mod's two original weapons — at 45**, `veilessence` 70, `ghostlantern` 77, `wardencandelabra` 78, `stormshard` 85. `docs/REVIEW-2026-08-24.md` listed widening the Tempest Edge blade as art action #1 four months ago. | **FIXED — NOT YET PLAYER CONFIRMED**. All twelve redrawn in the generator against a named vanilla analogue each; every one now 310–655 px. |
+| Held weapon sprites are a third the size of every other weapon's | `player/weapons/tempestedge.png` and `galehowl.png` sit on a 32x32 canvas while `skyreave` is 96x95 against vanilla `quartzglaive`'s 104x88 and `thunderhead` 22x62 against `tungstengreatbow`'s 20x60. | **OPEN** — found, not fixed. Changing the canvas is rendering geometry, not art, and wants its own verified pass. |
+
+The three-way split that produced this: I measured and set the acceptance
+numbers, Codex redrew in the generator, I reviewed on contact sheets against the
+vanilla analogue and sent one correction pass back. What the numbers passed and
+the picture caught: the redrawn `aurorapetal` was a fuller five-petal flower than
+`aurorabloom` itself, which sits beside it in the inventory. Corrected to a
+single detached petal.
+
+**Nobody has opened an inventory in the real client and looked at any of this.**
+

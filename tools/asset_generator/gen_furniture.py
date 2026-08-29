@@ -380,6 +380,102 @@ def gen_v2_item_icons(dir_path):
     c.save(f"{dir_path}/silverbell.png")
 
 
+def gen_flickerlightgarland_icon(path):
+    """Three open light swags: cord, hanging bulbs, and real negative space."""
+    c = Canvas(32, 32)
+    wire = palette.GLOOMWOOD
+    silk = palette.WINDSILK
+
+    def swag(y0, sag):
+        points = []
+        for x in range(3, 29):
+            t = (x - 3) / 25.0
+            y = y0 + round(sag * 4 * t * (1 - t))
+            c.put(x, y, wire["deep"])
+            c.put(x, y + 1, wire["base"])
+            points.append((x, y))
+        return points
+
+    runs = (swag(3, 6), swag(11, 5), swag(19, 5))
+    c.outline(palette.OUTLINE)
+
+    bulb_sites = ((0, 5), (0, 11), (0, 18), (0, 25),
+                  (1, 7), (1, 15), (1, 23),
+                  (2, 5), (2, 11), (2, 20), (2, 27))
+    for index, (run, x) in enumerate(bulb_sites):
+        y = runs[run][x - 3][1]
+        # A short drop makes each coloured shape a hanging bulb, not a bead.
+        c.put(x, y + 1, palette.OUTLINE)
+        c.put(x, y + 2, palette.OUTLINE)
+        c.ellipse(x, y + 4, 2.5, 2.5, palette.OUTLINE)
+        color = palette.GARLAND_LIGHTS[index % len(palette.GARLAND_LIGHTS)]
+        c.ellipse(x, y + 4, 1.5, 1.5, color)
+        c.put(x - 1, y + 3, silk["hi"])
+    c.save(path)
+
+
+def gen_ghostlantern_icon(path):
+    """Tall clock-like portrait of the crooked post and green cage."""
+    c = Canvas(32, 32)
+    iron = palette.IRONWORK
+    flame = palette.GHOSTFLAME
+    stone = palette.VEILROCK
+    # Oak clock construction: stacked plinth, upright body, broad face, cap.
+    c.rect(6, 27, 20, 4, stone["deep"])
+    c.rect(8, 25, 16, 3, stone["base"])
+    c.rect(8, 25, 16, 1, stone["light"])
+    c.rect(13, 17, 7, 9, iron["base"])
+    c.rect(13, 17, 2, 9, iron["light"])
+    c.rect(18, 17, 2, 9, iron["deep"])
+    c.rect(7, 6, 18, 13, iron["deep"])
+    c.rect(9, 8, 14, 9, flame["deep"])
+    c.rect(10, 8, 8, 8, flame["glow"])
+    c.rect(12, 9, 6, 6, flame["core"])
+    c.rect(6, 4, 20, 3, iron["base"])
+    c.rect(7, 4, 18, 1, iron["light"])
+    c.rect(12, 2, 9, 3, iron["base"])
+    for x in (9, 15, 22):
+        c.rect(x, 7, 2, 11, iron["base"])
+        c.put(x, 7, iron["light"])
+    c.outline(palette.OUTLINE)
+    c.put(11, 9, flame["core"])
+    c.put(22, 13, iron["hi"])
+    c.put(10, 26, stone["hi"])
+    c.save(path)
+
+
+def gen_wardencandelabra_icon(path):
+    """Three-light candelabra with oak clock's stacked vertical hierarchy."""
+    c = Canvas(32, 32)
+    iron = palette.IRONWORK
+    glow = palette.STAIRLIGHT
+    stone = palette.SKYSTONE
+    c.rect(6, 27, 20, 4, stone["deep"])
+    c.rect(8, 25, 16, 3, stone["base"])
+    c.rect(8, 25, 16, 1, stone["light"])
+    c.rect(13, 11, 7, 15, iron["base"])
+    c.rect(13, 11, 2, 15, iron["light"])
+    c.rect(18, 11, 2, 15, iron["deep"])
+    c.rect(4, 9, 25, 5, iron["base"])
+    c.rect(4, 9, 25, 1, iron["light"])
+    c.rect(4, 13, 25, 1, iron["deep"])
+    # Central lantern and two broad candle cups make three distinct lights.
+    c.rect(11, 2, 11, 10, iron["deep"])
+    c.rect(13, 4, 7, 6, glow["glow"])
+    c.rect(14, 4, 4, 5, glow["hi"])
+    for x in (5, 24):
+        c.rect(x - 3, 6, 7, 5, iron["base"])
+        c.rect(x - 2, 4, 5, 3, glow["light"])
+        c.put(x, 3, glow["hi"])
+        c.put(x - 1, 4, glow["glow"])
+    c.outline(palette.OUTLINE)
+    c.put(14, 4, glow["hi"])
+    c.put(5, 3, glow["glow"])
+    c.put(24, 3, glow["glow"])
+    c.put(10, 26, stone["hi"])
+    c.save(path)
+
+
 def gen_set_icons(dir_path):
     """32x32 item icons for the placeable set pieces (miniatures cropped and
     scaled from the freshly generated object sprites)."""
@@ -398,11 +494,11 @@ def gen_set_icons(dir_path):
 
     base = os.path.dirname(dir_path)
     obj = f"{base}/objects"
-    mini_from(f"{obj}/wardencandelabra.png", (0, 8, 32, 96), "wardencandelabra.png")
+    gen_wardencandelabra_icon(f"{dir_path}/wardencandelabra.png")
     mini_from(f"{obj}/gloomwillow.png", (0, 16, 48, 80), "gloomwillow.png")
     mini_from(f"{obj}/catbasket.png", (0, 6, 32, 30), "catbasket.png")
     mini_from(f"{obj}/mistglasslantern.png", (0, 0, 32, 32), "mistglasslantern.png")
-    mini_from(f"{obj}/flickerlightgarland.png", (0, 0, 32, 32), "flickerlightgarland.png")
+    gen_flickerlightgarland_icon(f"{dir_path}/flickerlightgarland.png")
     mini_from(f"{obj}/skywatchbanner.png", (0, 0, 32, 32), "skywatchbanner.png")
     mini_from(f"{base}/objects/statues/gloomraven.png", (8, 34, 56, 92), "gloomravenstatue.png")
     # walls: crop a front-face piece; doors: rotation-0 closed leaf
@@ -425,7 +521,7 @@ def gen_set_icons(dir_path):
     # engine's error icon.
     # The lantern head only: the full 80px post scaled into a 32px icon left a
     # 6px-wide stick (48 opaque px against vanilla copperstreetlamp's 240).
-    mini_from(f"{obj}/ghostlantern.png", (6, 14, 27, 52), "ghostlantern.png")
+    gen_ghostlantern_icon(f"{dir_path}/ghostlantern.png")
     mini_from(f"{obj}/seancecircle.png", (0, 8, 32, 64), "seancecircle.png")
     # The fence and the gate get DRAWN icons rather than a crop of their object
     # sheet. Vanilla does the same -- items/ironfence.png is a post with a rail

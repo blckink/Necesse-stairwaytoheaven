@@ -704,18 +704,42 @@ def gen_veil_item_icons(items_dir):
     424, items/caverock.png 456, items/cactus.png 356.
     """
     G = palette.GHOSTFLAME
-    # veilessence: a curling wisp
+    # Veil Essence: a broad stoppered phial holding the same curling wisp.
+    # Resistance potion's construction is the analogue: substantial shoulders,
+    # a full shaded bottle body, narrow neck, then the effect drawn inside.
     c = Canvas(32, 32)
     S = palette.SHADE
-    import math
-    for a in range(0, 540, 14):
-        r = 3 + a / 60.0
-        x = 16 + round(r * math.cos(math.radians(a)))
-        y = 17 + round(r * 0.75 * math.sin(math.radians(a)))
-        c.put(x, y, S["light"] if a % 42 else G["glow"])
-        c.put(x + 1, y, S["base"])
-    c.put(16, 17, G["core"])
+    stopper = palette.BONEASH
+    c.rect(12, 2, 8, 4, stopper["base"])
+    c.rect(12, 2, 8, 1, stopper["light"])
+    c.rect(12, 5, 8, 1, stopper["deep"])
+    c.rect(11, 6, 10, 4, S["base"])
+    c.rect(12, 6, 4, 4, S["light"])
+    # Rounded shoulders and a heavy potion belly, lit from upper-left.
+    for y in range(9, 29):
+        if y < 13:
+            half = 6 + (y - 9)
+        elif y < 24:
+            half = 10
+        else:
+            half = 10 - (y - 23) * 2
+        for x in range(16 - half, 17 + half):
+            tone = S["base"]
+            if x <= 11 and y < 23:
+                tone = S["light"]
+            elif x >= 22 or y >= 24:
+                tone = S["deep"]
+            c.put(x, y, tone)
     c.outline(palette.OUTLINE)
+    # The original spiral identity survives as a luminous wisp sealed inside.
+    for x, y in ((10, 19), (11, 16), (14, 14), (18, 14), (21, 16),
+                 (22, 19), (20, 22), (17, 24), (14, 23), (13, 20),
+                 (15, 18), (18, 18), (19, 20), (17, 21)):
+        c.put(x, y, G["glow"])
+    c.put(14, 13, G["core"])
+    c.put(16, 18, G["core"])
+    c.put(17, 20, G["core"])
+    c.put(9, 13, S["hi"])
     c.save(f"{items_dir}/veilessence.png")
 
     # cinderpearl: pearl with green inner fire

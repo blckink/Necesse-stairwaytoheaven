@@ -406,6 +406,81 @@ def gen_skyparcel(path):
     c.save(path)
 
 
+def gen_withershrub_icon(path):
+    """Dense picked-shrub portrait built like vanilla's broad sapling crown."""
+    c = Canvas(32, 32)
+    wood = palette.CHARWOOD
+
+    def thick_line(x0, y0, x1, y1, radius, color):
+        for ox in range(-radius, radius + 1):
+            for oy in range(-radius, radius + 1):
+                if ox * ox + oy * oy <= radius * radius:
+                    c.line(x0 + ox, y0 + oy, x1 + ox, y1 + oy, color)
+
+    # Five distinct gnarled limbs share a heavy root crown, leaving readable
+    # notches between them instead of becoming a uniformly fat twig.
+    c.ellipse(16, 27, 10, 3, wood["deep"])
+    c.ellipse(14, 25, 8, 3, wood["base"])
+    limbs = ((16, 26, 10, 14, 7, 5), (15, 25, 19, 14, 25, 6),
+             (16, 22, 8, 19, 4, 13), (18, 23, 25, 20, 29, 14),
+             (16, 19, 14, 9, 17, 3))
+    for x0, y0, x1, y1, x2, y2 in limbs:
+        thick_line(x0, y0, x1, y1, 2, wood["deep"])
+        thick_line(x1, y1, x2, y2, 2, wood["deep"])
+    for x0, y0, x1, y1, x2, y2 in limbs:
+        thick_line(x0 - 1, y0 - 1, x1 - 1, y1 - 1, 1, wood["base"])
+        thick_line(x1 - 1, y1 - 1, x2 - 1, y2 - 1, 1, wood["light"])
+    c.outline(palette.OUTLINE)
+    # Cut ends, bark scars and pale dead-leaf flecks.
+    for x, y in ((7, 5), (25, 6), (4, 13), (29, 14), (17, 3)):
+        c.put(x, y, wood["hi"])
+        c.put(x + 1, y + 1, wood["deep"])
+    c.put(10, 17, wood["hi"])
+    c.put(20, 13, wood["deep"])
+    c.put(13, 24, wood["light"])
+    c.put(21, 22, wood["hi"])
+    c.save(path)
+
+
+def gen_aeronautwreck_icon(path):
+    """A compact wreck portrait using airvessel's overlapping body masses."""
+    c = Canvas(32, 32)
+    canvas = palette.WINDSILK
+    wood = palette.WOOD
+    iron = palette.IRONWORK
+    trim = palette.WARDEN
+    # Torn canvas wing: large rounded upper-left plane and deep lower-right
+    # plane, with an asymmetric broken trailing edge.
+    c.ellipse(15, 16, 13, 9, canvas["deep"])
+    c.ellipse(13, 13, 10, 7, canvas["base"])
+    c.ellipse(10, 10, 6, 4, canvas["light"])
+    c.rect(5, 17, 21, 7, canvas["deep"])
+    c.rect(6, 17, 15, 4, canvas["base"])
+    # Heavy snapped spar crosses the wing; the lit edge stays upper-left.
+    for i in range(24):
+        x = 4 + i
+        y = 25 - i // 2
+        c.rect(x, y, 3, 4, wood["deep"])
+        c.put(x, y, wood["light"])
+        c.put(x + 1, y + 1, wood["base"])
+    # Bent brass propeller and iron hub remain clear of the canvas mass.
+    c.ellipse(24, 21, 4, 4, iron["base"])
+    c.ellipse(23, 20, 2, 2, iron["light"])
+    for x0, y0, x1, y1 in ((23, 20, 29, 7), (23, 20, 10, 27)):
+        for off in (-1, 0, 1):
+            c.line(x0 + off, y0, x1 + off, y1, trim["trim"])
+    c.outline(palette.OUTLINE)
+    # Tears, stitches, bolt heads and a single brass glint.
+    c.line(8, 15, 13, 18, canvas["deep"])
+    c.line(17, 9, 20, 14, canvas["deep"])
+    c.put(10, 16, canvas["hi"])
+    c.put(18, 12, canvas["light"])
+    c.put(23, 20, trim["trim_hi"])
+    c.put(7, 24, iron["hi"])
+    c.put(27, 25, iron["base"])
+    c.save(path)
+
+
 def gen_prop_icons(items_dir):
     """32x32 item icons for the prop objects (GameObject.generateItemTexture
     resolves items/<stringID> for any object registered with createItem=true;
@@ -432,11 +507,11 @@ def gen_prop_icons(items_dir):
     mini_from("stormscreed.png", (2, 15, 30, 29), "stormscreed.png")
     mini_from("skywatchrubble.png", (4, 8, 30, 40), "skywatchrubble.png")
     mini_from("chargecrystal.png", (2, 10, 30, 40), "chargecrystal.png")
-    mini_from("withershrub.png", (4, 12, 28, 40), "withershrub.png")
+    gen_withershrub_icon(os.path.join(items_dir, "withershrub.png"))
     mini_from("aurorashards.png", (2, 8, 30, 36), "aurorashards.png")
     mini_from("starfall.png", (4, 2, 28, 30), "starfall.png")
     mini_from("skyballoon.png", (2, 4, 30, 52), "skyballoon.png")
-    mini_from("aeronautwreck.png", (2, 20, 46, 56), "aeronautwreck.png")
+    gen_aeronautwreck_icon(os.path.join(items_dir, "aeronautwreck.png"))
     mini_from("skyparcel.png", (2, 4, 30, 28), "skyparcel.png")
 
 

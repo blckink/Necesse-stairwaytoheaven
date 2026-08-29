@@ -3,6 +3,51 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [Unreleased] — Item icons that read, and a gate that measures — 2026-08-29
+
+### Fixed
+- **Twelve item icons redrawn.** Every vanilla 32x32 item icon carries 288-712
+  opaque px (median 440). The mod shipped `tempestedge` — one of its two
+  original weapons — at **45 px**: `gen_items._tempest_blade` laid a 1px core on
+  top of its silhouette mass, so the finished blade was a hairline.
+  `docs/REVIEW-2026-08-24.md` listed widening that exact blade as art action #1
+  and it had stayed undone. Redrawn against a named vanilla analogue each:
+  `flickerlightgarland` 29→379, `tempestedge` 45→334, `veilessence` 70→402,
+  `ghostlantern` 77→448, `wardencandelabra` 78→456, `stormshard` 85→505,
+  `aeronautwreck` 101→466, `fulgurite` 101→451, `galehowl` 101→310,
+  `glowfern` 101→655, `withershrub` 113→500, `aurorapetal` 117→461.
+  `player/weapons/tempestedge.png` and `player/weapons/galehowl.png` move with
+  them through the shared `_tempest_blade` / `_galehowl_bow` helpers.
+- **`size_audit.py` passed by measuring nothing.** Its `--vanilla` default was a
+  dev-container path, so anywhere else every pair reported "vanilla ref missing",
+  the flag count stayed 0, and it printed "0 sprite(s) flagged" and exited 0 —
+  **0 of 122 rows actually compared** on this checkout. It now prefers the
+  checkout's own `vanilla-sprites/`, reports how many rows compared, and fails
+  when nothing was measured. A gate that compares no sprite is not a pass.
+
+### Changed
+- `size_audit.py` gained a row for each redrawn icon, so none can thin out
+  again unseen. The two held weapon sprites are **manual** rows on purpose:
+  they are on a 32x32 canvas while every later mod weapon matches vanilla's
+  much larger held sheets, and a mass ratio across a 3x canvas difference
+  measures the canvas, not the drawing. That canvas mismatch is recorded as
+  open in `docs/CURRENT_STATE.md`, not silently folded into an art change.
+
+### Known / follow-up
+- **35 item icons remain below the thinnest vanilla icon** and are still
+  uncovered by the audit; measured and listed worst-first in
+  `docs/CURRENT_STATE.md`. `aurorabloom` (141 px) is first in line — the
+  redrawn `aurorapetal` (461 px) now sits next to it in the inventory.
+- The audit maps 100 of 307 shipped PNGs; the other 207 are unmeasured.
+
+### Verified
+- `buildModJar`; `scripts/integration_test.sh` (boots, generates, restarts,
+  spire/warden/cats persist, no log errors); `size_audit` 0 flags with 119 of
+  122 rows genuinely compared; `locale_audit` 203 IDs; `tile_behaviour_audit`,
+  `sheet_format_audit`, `furniture_audit` all OK; the generator reproduces
+  `src/main/resources` byte-for-byte and exactly the 14 intended PNGs differ.
+- **Not seen in the real client by anyone.**
+
 ## [Unreleased] — Cat Basket: the cats live where you put their basket — 2026-08-28
 
 Player report: *"Katzenbetten sollen in normalem Haus platziert werden können
