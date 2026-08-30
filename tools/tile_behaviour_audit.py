@@ -42,6 +42,7 @@ Exit code 1 on any finding. The vanilla dump is optional and is only used by
 --recalibrate, which reprints the bands from the real vanilla sheets.
 """
 import argparse
+import collections
 import os
 import re
 import sys
@@ -409,6 +410,111 @@ CELL_NAMES = {
 }
 
 
+# Only three numbers, and deliberately NOT the peak. Peak |dRGB| in a full-tile
+# cell is set by a handful of feature pixels -- a tuft, a charge spark, a bone
+# fleck -- which are SUPPOSED to be loud; vanilla's own crafted floors peak at
+# 102. The mean is what measures whether the BED is loud, because a few accent
+# pixels barely move an average taken over every deviating pixel.
+TEXTURE_BANDS = {
+    # role: (density_lo, density_hi, mean_max)
+    # Measured off vanilla-sprites/tiles/ on 2026-08-30:
+    #   TERRAIN, 37 natural grounds  density 294-993  mean 5.0-16.7  peak 5-33
+    #   FLOOR,   9 crafted floors    density 446-771  mean 7.9-27.0  peak 16-102
+    #   LIQUID,  lava, the only one  density 401      mean 4.3       peak 8
+    TERRAIN: (280, 620, 14.0),
+    FLOOR:   (440, 780, 24.0),
+    LIQUID:  (280, 620, 14.0),
+}
+# 2x2 BLOCK COHERENCE IS 100% ON EVERY VANILLA SPLAT WE HAVE, without exception,
+# natural ground and crafted floor alike. It is the strongest convention in the
+# tile set and the one this mod broke on all fifteen sheets.
+COHERENCE_MIN = 100.0
+
+# Sheets this check deliberately does not judge, and why. Both are CONVERTED
+# from artwork the user supplied, through tools/convert_reference.py -- a hand
+# painted illustration resampled onto the grid. Holding a painting to a
+# procedural generator's conventions would be measuring the wrong thing, and
+# "make it 2x2 coherent" would destroy the art it was converted from.
+CONVERTED_ART = {"beetlefreak", "skyway"}
+
+# Known, measured, not yet done. Kept here rather than silently exempted so the
+# debt is visible in the code that would otherwise hide it.
+#   mistsea: density 617-704 (fine) but mean 31.8-49.7 and 40-48% coherent --
+#   the last loud, non-block-built procedural sheet in the mod. It is the sky's
+#   signature surface, so it wants its own deliberate pass, not a drive-by.
+KNOWN_UNFIXED = {"mistsea_shallow", "mistsea_deep"}
+
+
+def _cell_stats(cell):
+    """density, mean |dRGB| from the modal colour, peak |dRGB|, 2x2 coherence."""
+    px = list(cell.getdata())
+    counts = collections.Counter(px)
+    modal, modal_n = counts.most_common(1)[0]
+    dev = [max(abs(a - b) for a, b in zip(c, modal)) for c in px if c != modal]
+    load = cell.load()
+    w, h = cell.size
+    blocks = ok = 0
+    for by in range(0, h - 1, 2):
+        for bx in range(0, w - 1, 2):
+            blocks += 1
+            if len({load[bx, by], load[bx + 1, by],
+                    load[bx, by + 1], load[bx + 1, by + 1]}) == 1:
+                ok += 1
+    return (len(px) - modal_n,
+            sum(dev) / len(dev) if dev else 0.0,
+            max(dev) if dev else 0,
+            ok / blocks * 100 if blocks else 100.0)
+
+
+def audit_texture(tiles, problems):
+    """Does each splat carry vanilla's texture, at vanilla's loudness, built the
+    way vanilla builds it?
+
+    Three numbers, checked together, because each one alone is gameable. The mod
+    shipped six natural grounds at 63-114 density against a vanilla floor of 294
+    -- flat ground reads as dead ground. Then the first repair pass hit the
+    density band exactly (cloudturf 345 against vanilla grass's 344) and looked
+    like camouflage netting, because density counts pixels that differ from the
+    modal colour and says nothing about how FAR they differ or what unit they
+    are drawn in. Vanilla carries its entire grass texture inside FIVE RGB
+    levels, on 2x2 blocks.
+    """
+    checked = 0
+    for string_id, (role, textures) in sorted(tiles.items()):
+        for texture in textures or ():
+            path = os.path.join(TILES, texture + "_splat.png")
+            if texture in CONVERTED_ART or texture in KNOWN_UNFIXED:
+                continue
+            if not os.path.exists(path):
+                continue                 # legacy no-splat tiles: audit_sheets' job
+            img = Image.open(path).convert("RGB")
+            if img.width < 7 * 32:
+                continue
+            lo, hi, mean_max = TEXTURE_BANDS[role]
+            rows = [_cell_stats(img.crop((c * 32, 0, c * 32 + 32, 32)))
+                    for c in range(3, 7)]    # the four full-tile variant cells
+            avg = sum(r[0] for r in rows) / len(rows)
+            worst_mean = max(r[1] for r in rows)
+            worst_coh = min(r[3] for r in rows)
+            checked += 1
+            if not lo <= avg <= hi:
+                problems.append(
+                    f"{string_id}: texture density {avg:.0f} outside the vanilla "
+                    f"{role} band {lo}-{hi}.")
+            if worst_mean > mean_max:
+                problems.append(
+                    f"{string_id}: mean |dRGB| {worst_mean:.1f} over {mean_max} -- "
+                    f"louder than any vanilla {role}. Density has to come from many "
+                    f"QUIET steps, which is what the grain_d/grain_l ramp steps are "
+                    f"for, not from few loud ones.")
+            if worst_coh < COHERENCE_MIN:
+                problems.append(
+                    f"{string_id}: 2x2 block coherence {worst_coh:.1f}% -- vanilla is "
+                    f"100% on every splat in the game. The tone unit is a 2x2 block, "
+                    f"never a lone pixel.")
+    return checked
+
+
 def recalibrate(dump):
     """Reprint the bands from a vanilla sprite dump (development aid)."""
     import glob
@@ -440,9 +546,18 @@ def recalibrate(dump):
                       f"min {min(v):6.1f}  med {statistics.median(v):6.1f}  max {max(v):6.1f}")
 
 
+def _default_vanilla():
+    """This checkout's own dump first. Same defect size_audit.py had: a default
+    path nobody has makes --recalibrate silently useless."""
+    local = os.path.join(REPO, "vanilla-sprites")
+    if os.path.isdir(os.path.join(local, "tiles")):
+        return local
+    return "/home/user/necesse-game/sprites"
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--vanilla", default="/home/user/necesse-game/sprites")
+    ap.add_argument("--vanilla", default=_default_vanilla())
     ap.add_argument("--recalibrate", action="store_true",
                     help="reprint the vanilla cell bands instead of auditing")
     args = ap.parse_args()
@@ -454,6 +569,7 @@ def main():
     sources = java_sources()
     tiles = audit_java(sources, problems)
     cells = audit_sheets(tiles, problems)
+    textured = audit_texture(tiles, problems)
 
     for p in problems:
         print(f"FIX  {p}")
@@ -464,7 +580,8 @@ def main():
     terrain = sum(1 for r, _ in tiles.values() if r == TERRAIN)
     liquids = sum(1 for r, _ in tiles.values() if r == LIQUID)
     print(f"OK: {len(tiles)} tiles ({floors} floors, {terrain} terrain, {liquids} liquid) "
-          f"match their declared role; {cells} splat cells within the vanilla bands.")
+          f"match their declared role; {cells} splat cells within the vanilla bands; "
+          f"{textured} sheet(s) at vanilla texture density, loudness and 2x2 build.")
     return 0
 
 
