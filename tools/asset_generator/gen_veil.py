@@ -290,32 +290,82 @@ def features_ashsand(c, x0, y0, salt, k):
 
 
 def material_murkwater(deep):
-    """Black marsh water: near-still, with a few thick drifting ripple bands
-    and rare green glints. 8-frame loop (bands shift 4px/frame, period 32)."""
+    """Black marsh water on the same 2x2 grain construction as the Veil ground.
+
+    A liquid `_splat` is 224*frames wide and animates as a PING-PONG
+    (0,1..7,6..1 over 3.2s, no 7->0 wrap), so what matters is that ADJACENT
+    frames barely differ. Three decisions follow, and they are why this is not
+    just `_grain` with a frame argument:
+
+      * The BED is frame-independent. `_grain` keys off the section salt only,
+        so all eight frames paint the identical bed and the water is still.
+        A field re-randomised per frame is the boiling failure mode.
+      * Of the two ripple crests, only the UPPER one travels; the lower is a
+        contour baked into the bed. Still water wants one traveller, not two.
+      * The travelling crest's WAVE SHAPE is fixed in world space (the wobble
+        is keyed on bx) and only the light running ALONG it scrolls (the dash
+        runs are keyed on the drifting index, one block = 2px per frame).
+        Keying the wobble on the drifting index instead makes the whole line
+        undulate bodily every frame: measured, that took the frame-to-frame
+        delta from 0.39 to 2.87 levels/px - a boil, not a drift.
+
+    Measured on the four full-tile cells: within-frame energy 3.81 (shallow) /
+    3.29 (deep) levels per pixel, frame-to-frame delta 0.39 / 0.35 - a tenth
+    of the texture, and the ~30 changed pixels per step are confined to the
+    travelling crest's rows rather than scattered over the cell.
+
+    Contrast is the vanilla water budget, not the old ramp's: the bed is the
+    two ~7-level `grain_*` steps with sparse darker/lighter accents, and the
+    crest is the one d16-d20 tone on the sheet. The green `glint` is GONE. At
+    d152 from the bed it blew the max-25 ceiling by itself, and animation time
+    is global - every murkwater tile on the map flashed green on the same
+    tick, a field-wide blink rather than a twinkle.
+    """
+    M = palette.MURKWATER
+    if deep:
+        base, gd, gl = M["deep"], M["deepgrain_d"], M["deepgrain_l"]
+        dark, lite = M["abyss"], M["base"]
+        crest, shade = M["base"], M["deepgrain_d"]
+    else:
+        base, gd, gl = M["base"], M["grain_d"], M["grain_l"]
+        dark, lite = M["deep"], M["light"]
+        crest, shade = M["light"], M["grain_d"]
+
     def painter(c, x0, y0, salt, frame=0):
-        M = palette.MURKWATER
-        base = M["deep"] if deep else M["base"]
-        mid = M["base"] if deep else M["light"]
-        lite = M["light"] if deep else M["hi"]
-        shift = (frame * 4) % 32
-        for x in range(32):
-            for y in range(32):
-                c.put(x0 + x, y0 + y, base)
-        # two lazy ripple bands per tile, broken by hash gaps
-        for band, gy in ((0, 6), (1, 21)):
-            for x in range(32):
-                gx = (x0 + x + shift * (1 if band == 0 else -1)) % 32
-                h = Rng((gx * 733 + band * 7919) ^ 0x3E77A00D)
-                wob = ((x0 + x) // 7 + band) % 2
-                if h.chance(0.78):
-                    c.put(x0 + x, y0 + (gy + wob) % 32, mid)
-                    if h.chance(0.4):
-                        c.put(x0 + x, y0 + (gy + wob + 1) % 32, lite)
-        rng = Rng(salt & 0xFFFF0000)
-        gx = rng.range(3, 28)
-        gy2 = rng.range(3, 28)
-        if frame in (2, 3):
-            c.put(x0 + (gx + shift) % 32, y0 + gy2, M["glint"])
+        s = _ground_salt(salt, x0, y0)
+        # still bed: identical in every frame
+        _grain(c, x0, y0, s, base, [
+            (0.130, gd),
+            (0.080, gl),
+            (0.025, dark),
+            (0.012, lite),
+        ], gain=1.30)
+        # Two ripple crests; see the docstring for why only band 0 moves and
+        # why the wobble is keyed on bx rather than on the drifting index.
+        # Long runs matter too: a 1-block shift then only changes the run
+        # ENDS, which is what keeps the delta at 0.39 levels/px.
+        rng = Rng(s ^ 0x3E77A00D)
+        for band in range(2):
+            row = rng.range(1, 6) + band * 7           # block row, 0..15
+            amp = rng.range(1, 2)                      # wobble, in BLOCKS
+            ph = rng.float() * 2.0 * math.pi
+            # long runs: a 1-block shift then only changes the run ENDS
+            runs, i = [False] * 16, rng.range(0, 3)
+            while i < 16:
+                ln = rng.range(4, 7)
+                for j in range(i, min(16, i + ln)):
+                    runs[j] = True
+                i = i + ln + rng.range(4, 6)
+            drift = frame % 16 if band == 0 else 0
+            for bx in range(16):
+                if not runs[(bx + drift) % 16]:
+                    continue
+                # one smooth cycle per 16 blocks - seamless on the 32px tile
+                wob = int(round(amp * math.cos(2.0 * math.pi * bx / 16.0 + ph)))
+                by = (row + wob) % 16
+                _blk(c, x0 + bx * 2, y0 + by * 2, 2, crest)
+                _blk(c, x0 + bx * 2, y0 + ((by + 1) % 16) * 2, 2, shade)
+
     return painter
 
 

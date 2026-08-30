@@ -202,6 +202,15 @@ GLOOMWOOD = {
     "base":  (66, 52, 60),
     "light": (88, 72, 78),
     "hi":    (110, 92, 96),
+    # Diele: Nahstufen fuer Bodentextur in Vanilla-Lautstaerke.
+    # deadwoodfloor_splat traegt seinen ganzen Bretterboden in 6 Farben
+    # mit max. 20 RGB Abstand; diese Rampe sprang zuvor 36-64. Gleiche
+    # Farbe, nur naeher am Grundton -- KEINE Palettenverschiebung.
+    "grain_d": (61, 48, 55),
+    "grain_l": (71, 57, 64),
+    "lip":     (76, 61, 68),
+    "joint":   (57, 45, 53),
+    "seam":    (49, 39, 46),
 }
 
 IRONWORK = {
@@ -358,6 +367,15 @@ MURKWATER = {
     "light": (50, 64, 62),
     "hi":    (70, 92, 84),
     "glint": (122, 196, 160),
+    # ~7-level grain steps, the whole contrast budget for a water bed (the
+    # shallow sheet's modal colour is "base", the deep sheet's is "deep", so
+    # each needs its own pair). "abyss" is the deep sheet's dark accent - it
+    # had no tone below "deep" to fleck with.
+    "grain_d":      (27, 37, 39),
+    "grain_l":      (41, 51, 53),
+    "deepgrain_d":  (15, 21, 23),
+    "deepgrain_l":  (29, 35, 37),
+    "abyss":        (12, 16, 18),
 }
 
 VEILROCK = {
@@ -396,6 +414,15 @@ NIMBUSWOOD = {
     "base":  (150, 136, 124),
     "light": (186, 172, 158),
     "hi":    (214, 202, 188),
+    # Diele: Nahstufen fuer Bodentextur in Vanilla-Lautstaerke.
+    # deadwoodfloor_splat traegt seinen ganzen Bretterboden in 6 Farben
+    # mit max. 20 RGB Abstand; diese Rampe sprang zuvor 36-64. Gleiche
+    # Farbe, nur naeher am Grundton -- KEINE Palettenverschiebung.
+    "grain_d": (143, 130, 118),
+    "grain_l": (156, 142, 130),
+    "lip":     (164, 150, 137),
+    "joint":   (135, 122, 111),
+    "seam":    (120, 107, 98),
 }
 
 NIMBUSLEAF = {
@@ -414,6 +441,19 @@ CHARWOOD = {
     "light": (88, 82, 98),
     "hi":    (118, 110, 128),
     "ember": (255, 176, 92),
+    # Diele: Nahstufen fuer Bodentextur in Vanilla-Lautstaerke.
+    # deadwoodfloor_splat traegt seinen ganzen Bretterboden in 6 Farben
+    # mit max. 20 RGB Abstand; diese Rampe sprang zuvor 36-64. Gleiche
+    # Farbe, nur naeher am Grundton -- KEINE Palettenverschiebung.
+    "grain_d":   (56, 53, 66),
+    "grain_l":   (68, 64, 78),
+    "lip":       (74, 69, 84),
+    "joint":     (53, 50, 62),
+    "seam":      (47, 44, 56),
+    # smouldering ember for the FLOOR variant: the full "ember" is 193 RGB from
+    # base and would set the tile's contrast on its own. Vanilla junkfloor's
+    # loudest accent cell measures 76; this one measures 73.
+    "ember_low": (135, 103, 80),
 }
 
 FULGURPINE_NEEDLE = {
@@ -431,6 +471,19 @@ PRISMWOOD = {
     "base":  (210, 196, 210),
     "light": (234, 224, 235),
     "hi":    (250, 245, 250),
+    # Diele: Nahstufen fuer Bodentextur in Vanilla-Lautstaerke.
+    # deadwoodfloor_splat traegt seinen ganzen Bretterboden in 6 Farben
+    # mit max. 20 RGB Abstand; diese Rampe sprang zuvor 36-64. Gleiche
+    # Farbe, nur naeher am Grundton -- KEINE Palettenverschiebung.
+    "grain_d": (202, 187, 202),
+    "grain_l": (215, 202, 215),
+    "lip":     (221, 209, 221),
+    "joint":   (194, 179, 195),
+    "seam":    (179, 163, 180),
+    # iridescence pulled toward the board so the inlay glints read as sheen in
+    # the polish rather than as two saturated pixels of a different material.
+    "teal":    (173, 201, 205),
+    "rose":    (230, 171, 196),
 }
 
 PRISMLEAF = {

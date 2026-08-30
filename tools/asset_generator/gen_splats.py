@@ -577,51 +577,139 @@ def features_stormslate(c, x0, y0, salt, k):
         c.put(x0 + rng.range(4, 27), y0 + rng.range(4, 27), ramp["light"])
 
 
-def material_gloomwood(c, x0, y0, salt, frame=0):
-    """Dark plank floor: horizontal boards, staggered seams, sparse grain."""
-    ramp = palette.GLOOMWOOD
-    rng = Rng(salt)
+# --- crafted plank floors: vanilla's half-res board construction -------------
+#
+# Measured on vanilla-sprites/tiles/deadwoodfloor_splat.png, cell (3,0): SIX
+# colours, 660 off-modal pixels, mean deviation 7.9, MAX 20. The entire floor
+# is a base tone, a second body tone 3-4 RGB away, a joint tone 12-16 RGB
+# darker doing BOTH the board separators and the butt joints, and a few 2x2
+# warm flecks 20 away. It is authored at 16x16 and doubled: every 2x2 block on
+# the even grid is one flat colour, without exception. bamboofloor (max 24),
+# dryadfloor (22), deepstonetiledfloor (36) and stonebrickfloor (46) bracket
+# the same construction; junkfloor is the only crafted floor with a loud accent
+# (max 76, on one variant cell).
+#
+# Ours ran mean 28-41 / max 45-72 at 59-68% block coherence, because the boards
+# alternated `base` against `light` (36 RGB apart) ONE PIXEL at a time and the
+# separators used `deep` (42) under `hi` lips (64). The structure was right;
+# the unit and the step size were not. `_plank_bed` rebuilds it on the block
+# grid out of the near-base `grain_*`/`lip`/`joint`/`seam` palette steps.
+
+
+def _mix(a, b, t):
+    return tuple(int(round(a[i] + (b[i] - a[i]) * t)) for i in range(3))
+
+
+def _floor_tones(ramp):
+    """The five near-base plank tones, with derived fallbacks.
+
+    Nothing here may REQUIRE the new palette keys: gen_veil monkeypatches
+    `palette.GLOOMWOOD` with a four-key DEADWOOD ramp, and a KeyError raised
+    from inside somebody else's regen is the worst way to learn that.
+    """
+    base, deep, light = ramp["base"], ramp["deep"], ramp["light"]
+    return {
+        "grain_d": ramp.get("grain_d", _mix(base, deep, 0.18)),
+        "grain_l": ramp.get("grain_l", _mix(base, light, 0.22)),
+        "lip":     ramp.get("lip", _mix(base, light, 0.45)),
+        "joint":   ramp.get("joint", _mix(base, deep, 0.38)),
+        "seam":    ramp.get("seam", _mix(base, deep, 0.58)),
+    }
+
+
+_PITCH = 8   # board pitch: a 2px separator plus a 6px board, four to a tile
+
+
+def _plank_bed(c, x0, y0, salt, ramp, vertical=False, sheen=False):
+    """Position-locked plank bed painted entirely on the 2x2 block grid.
+
+    `vertical` turns the boards 90 degrees (charfloor, so the two dark woods
+    never read as the same floor). `sheen` adds one long `lip` streak per
+    board — prismwood's polish.
+
+    Every primitive starts on an even coordinate and has an even extent; that
+    is the whole of what 100% block coherence asks for. Nothing consults the
+    per-CELL salt, so the marching-square blend cells carry the identical bed
+    as the full-tile variants and no blend edge can show a seam.
+    """
+    t = _floor_tones(ramp)
+    vs = _block_salt(x0, y0, salt) & 0xFFFFFFFF
+    field = _blend_fields(_mottle(vs ^ 0x91A2D, blur=1, passes=2),
+                          _mottle(vs ^ 0x5EA71, blur=3, passes=2), 0.35)
+    # 14% darker grain, 72% board, 14% lighter grain — deadwood's a/b mottle.
+    band = _bander_blocks(field, (0.14, 0.86))
+    tone = (t["grain_d"], ramp["base"], t["grain_l"])
+
+    boards = []
+    for b in range(4):
+        h = Rng(vs ^ (0xB0A2D + b * 7919))
+        butt = (h.next() % 14) * 2 + 2                  # butt joint, even col
+        marks = []
+        for _ in range(2):                              # grain dashes
+            marks.append(((h.next() % 16) * 2,
+                          4 + (h.next() % 2) * 2,
+                          4 + (h.next() % 2) * 2,
+                          t["joint"]))
+        if sheen:
+            marks.append(((h.next() % 16) * 2,
+                          4 + (h.next() % 2) * 2,
+                          8 + (h.next() % 3) * 2,
+                          t["lip"]))
+        boards.append((butt, marks))
+
     for x in range(32):
         for y in range(32):
-            gy = (y0 + y) % 32
-            board = gy // 8
-            tone = ramp["base"] if board % 2 == 0 else ramp["light"]
-            if gy % 8 == 0:
-                tone = ramp["deep"]
-            c.put(x0 + x, y0 + y, tone)
-    for board in range(4):
-        seam_x = (Rng(0x600D + board * 31 + (y0 // 96) * 7).next() % 4) * 8 + 4
-        for yy in range(board * 8 + 1, board * 8 + 8):
-            c.put(x0 + (seam_x + x0) % 32, y0 + yy, ramp["deep"])
-    for _ in range(rng.range(1, 2)):
-        c.put(x0 + rng.range(1, 30), y0 + rng.range(1, 30),
-              ramp["hi"] if rng.chance(0.3) else ramp["deep"])
+            gx, gy = (x0 + x) % 32, (y0 + y) % 32
+            across = gx if vertical else gy
+            along = gy if vertical else gx
+            b, r = across // _PITCH, across % _PITCH
+            butt, marks = boards[b]
+            if r < 2:
+                col = t["seam"]                         # board separator
+            elif (along - butt) % 32 < 2:
+                col = t["joint"]                        # butt joint, 2px wide
+            elif r < 4 and b % 2 == 1:
+                col = t["lip"]                          # lit plank edge
+            else:
+                bx, by = _blk(gx, gy)
+                col = tone[band(bx, by)]
+                for (off, row, ln, mcol) in marks:
+                    if row <= r < row + 2 and (along - off) % 32 < ln:
+                        col = mcol
+                        break
+            c.put(x0 + x, y0 + y, col)
+
+
+def material_gloomwood(c, x0, y0, salt, frame=0):
+    """Dark plank floor: horizontal boards, staggered butt joints, quiet grain."""
+    _plank_bed(c, x0, y0, salt, palette.GLOOMWOOD)
 
 
 def features_gloomwood(c, x0, y0, salt, k):
     ramp = palette.GLOOMWOOD
+    t = _floor_tones(ramp)
     rng = Rng(salt)
     if k == 0:
         return
     if k == 1:  # knot in one board
-        kx, ky = x0 + rng.range(6, 24), y0 + rng.range(0, 3) * 8 + 4
-        c.put(kx, ky, ramp["deep"])
-        c.put(kx + 1, ky, ramp["deep"])
-        c.put(kx - 1, ky, ramp["light"])
-        c.put(kx + 2, ky, ramp["light"])
-        c.put(kx, ky - 1, ramp["light"])
-        c.put(kx, ky + 1, ramp["deep"])
-    elif k == 2:  # nail heads at a board seam
+        kx, ky = x0 + rng.range(6, 24), y0 + rng.range(0, 3) * 8 + 5
+        for dx in range(3):
+            c.put(kx + dx, ky, t["seam"])
+        c.put(kx - 1, ky, t["grain_l"])
+        c.put(kx + 3, ky, t["grain_l"])
+        c.put(kx + 1, ky - 1, t["grain_l"])
+        c.put(kx + 1, ky + 1, t["joint"])
+    elif k == 2:  # nail heads sunk beside a board separator
         for _ in range(2):
-            nx, ny = x0 + rng.range(4, 27), y0 + rng.range(0, 3) * 8 + 1
-            c.put(nx, ny, ramp["hi"])
-            c.put(nx + 1, ny + 1, ramp["deep"])
-    else:  # grain streaks along a board
-        by = y0 + rng.range(0, 3) * 8 + rng.range(2, 6)
+            nx, ny = x0 + rng.range(4, 27), y0 + rng.range(0, 3) * 8 + 4
+            c.put(nx, ny, t["lip"])
+            c.put(nx + 1, ny + 1, t["seam"])
+    else:  # grain streaks wandering along a board
+        by = y0 + rng.range(0, 3) * 8 + rng.range(4, 6)
         for _ in range(3):
             gx = x0 + rng.range(2, 24)
             for i in range(rng.range(3, 6)):
-                c.put(gx + i, by, ramp["deep"])
+                c.put(gx + i, by, t["joint"])
             by += rng.pick((-1, 1))
 
 
@@ -809,185 +897,120 @@ def material_mist(deep):
     return painter
 
 
-# --- v0.4 buildable wood floors (gloomwoodfloor pattern: position-locked
-# boards + staggered seams; character lives in the full-variant features) ----
-
-def _plank_flecks(c, x0, y0, salt, ramp, chance_hi=0.3):
-    """1-2 free speckles per cell (the only non-position-locked detail,
-    same budget the gloomwood floor uses)."""
-    rng = Rng(salt)
-    for _ in range(rng.range(1, 2)):
-        c.put(x0 + rng.range(1, 30), y0 + rng.range(1, 30),
-              ramp["hi"] if rng.chance(chance_hi) else ramp["deep"])
-
+# --- v0.4 buildable wood floors (same `_plank_bed` construction; each wood
+# is told apart by hue, board direction and the motifs on its variant cells) --
 
 def material_nimbusfloor(c, x0, y0, salt, frame=0):
-    """Pale nimbuswood planks: horizontal boards, staggered seams, a sunlit
-    lip on alternating boards. Boards stay CALM (vanilla floor rule); grain
-    is a few position-locked dashes per board, not per-pixel noise."""
-    ramp = palette.NIMBUSWOOD
-    for x in range(32):
-        for y in range(32):
-            gy = (y0 + y) % 32
-            board = gy // 8
-            tone = ramp["base"] if board % 2 == 0 else ramp["light"]
-            if gy % 8 == 0:
-                tone = ramp["deep"]
-            elif gy % 8 == 1 and board % 2 == 1:
-                tone = ramp["hi"]                     # sunlit plank lip
-            c.put(x0 + x, y0 + y, tone)
-    for board in range(4):
-        h = Rng(0x81B + board * 31 + (y0 // 96) * 7)
-        seam_x = (h.next() % 4) * 8 + 4
-        for yy in range(board * 8 + 1, board * 8 + 8):
-            c.put(x0 + (seam_x + x0) % 32, y0 + yy, ramp["deep"])
-        for _ in range(2):                            # grain dashes
-            gx = h.next() % 26 + 2
-            gy2 = board * 8 + 3 + h.next() % 4
-            for i in range(3 + h.next() % 2):
-                c.put(x0 + (gx + i) % 32, y0 + gy2, ramp["deep"])
-    _plank_flecks(c, x0, y0, salt, ramp)
+    """Pale nimbuswood planks: horizontal boards with a sunlit lip on every
+    other board, staggered butt joints, quiet position-locked grain."""
+    _plank_bed(c, x0, y0, salt, palette.NIMBUSWOOD)
 
 
 def features_nimbusfloor(c, x0, y0, salt, k):
     ramp = palette.NIMBUSWOOD
+    t = _floor_tones(ramp)
     rng = Rng(salt)
     if k == 0:
         return
     if k == 1:  # knot in one board
-        kx, ky = x0 + rng.range(6, 24), y0 + rng.range(0, 3) * 8 + 4
-        c.put(kx, ky, ramp["deep"])
-        c.put(kx + 1, ky, ramp["deep"])
-        c.put(kx - 1, ky, ramp["light"])
-        c.put(kx + 2, ky, ramp["light"])
-        c.put(kx, ky - 1, ramp["hi"])
-        c.put(kx, ky + 1, ramp["deep"])
-    elif k == 2:  # pegs at a board seam
+        kx, ky = x0 + rng.range(6, 24), y0 + rng.range(0, 3) * 8 + 5
+        for dx in range(3):
+            c.put(kx + dx, ky, t["seam"])
+        c.put(kx - 1, ky, t["grain_d"])
+        c.put(kx + 3, ky, t["grain_d"])
+        c.put(kx + 1, ky - 1, t["lip"])
+        c.put(kx + 1, ky + 1, t["joint"])
+    elif k == 2:  # pegs driven at a board separator
         for _ in range(2):
-            nx, ny = x0 + rng.range(4, 27), y0 + rng.range(0, 3) * 8 + 1
-            c.put(nx, ny, ramp["hi"])
-            c.put(nx + 1, ny + 1, ramp["deep"])
+            nx, ny = x0 + rng.range(4, 27), y0 + rng.range(0, 3) * 8 + 4
+            c.put(nx, ny, t["lip"])
+            c.put(nx + 1, ny + 1, t["seam"])
     else:  # wandering grain streaks along a board
-        by = y0 + rng.range(0, 3) * 8 + rng.range(2, 6)
+        by = y0 + rng.range(0, 3) * 8 + rng.range(4, 6)
         for _ in range(3):
             gx = x0 + rng.range(2, 24)
             for i in range(rng.range(3, 6)):
-                c.put(gx + i, by, ramp["deep"])
+                c.put(gx + i, by, t["joint"])
             by += rng.pick((-1, 1))
 
 
 def material_charfloor(c, x0, y0, salt, frame=0):
-    """Charwood planks: VERTICAL boards (turned 90 degrees from the pale
-    floors — each wood reads distinct at a glance). Calm boards; char grain
-    is a few position-locked vertical scorch dashes per board."""
-    ramp = palette.CHARWOOD
-    for x in range(32):
-        for y in range(32):
-            gx = (x0 + x) % 32
-            board = gx // 8
-            tone = ramp["base"] if board % 2 == 0 else ramp["light"]
-            if gx % 8 == 0:
-                tone = ramp["deep"]
-            elif gx % 8 == 1 and board % 2 == 0:
-                tone = ramp["light"]                  # lit left plank edge
-            c.put(x0 + x, y0 + y, tone)
-    for board in range(4):
-        h = Rng(0xC4A + board * 31 + (y0 // 96) * 7)
-        seam_y = (h.next() % 4) * 8 + 4
-        for xx in range(board * 8 + 1, board * 8 + 8):
-            c.put(x0 + xx, y0 + (seam_y + y0) % 32, ramp["deep"])
-        for _ in range(2):                            # vertical scorch dashes
-            gy = h.next() % 26 + 2
-            gx2 = board * 8 + 3 + h.next() % 4
-            for i in range(3 + h.next() % 2):
-                c.put(x0 + gx2, y0 + (gy + i) % 32, ramp["deep"])
-    _plank_flecks(c, x0, y0, salt, ramp, chance_hi=0.25)
+    """Charwood planks, turned 90 degrees from the pale floors so the two dark
+    woods never read as the same board at a glance."""
+    _plank_bed(c, x0, y0, salt, palette.CHARWOOD, vertical=True)
 
 
 def features_charfloor(c, x0, y0, salt, k):
     ramp = palette.CHARWOOD
+    t = _floor_tones(ramp)
     rng = Rng(salt)
     if k == 0:
         return
-    if k == 1:  # charred crack down a board
-        cx = x0 + rng.range(0, 3) * 8 + rng.range(2, 6)
+    if k == 1:  # charred crack running down a board
+        cx = x0 + rng.range(0, 3) * 8 + rng.range(4, 7)
         cy = y0 + rng.range(4, 14)
         for i in range(rng.range(8, 12)):
-            c.put(cx, cy + i, ramp["deep"])
+            c.put(cx, cy + i, t["seam"])
             if rng.chance(0.4):
                 cx += rng.pick((-1, 1))
-        c.put(cx + 1, cy + 4, ramp["hi"])
+        c.put(cx + 1, cy + 4, t["lip"])
     elif k == 2:  # one dying ember caught in the grain (this floor's charm)
-        ex, ey = x0 + rng.range(6, 25), y0 + rng.range(6, 25)
-        c.put(ex, ey, ramp["ember"])
-        c.put(ex + 1, ey, ramp["deep"])
-        c.put(ex - 1, ey + 1, ramp["deep"])
-        c.put(ex, ey - 1, ramp["hi"])
-    else:  # scorch streaks + a peg
-        bx = x0 + rng.range(0, 3) * 8 + rng.range(2, 5)
+        # Snapped to a whole block on purpose: `_block_snap` breaks a tie
+        # inside a 2x2 by colour order, and a lone ember pixel sharing its
+        # block with its own shadow lost that vote and vanished from the sheet.
+        ex = (x0 + rng.range(6, 24)) & ~1
+        ey = (y0 + rng.range(6, 24)) & ~1
+        for dx in (0, 1):
+            for dy in (0, 1):
+                c.put(ex + dx, ey + dy, ramp.get("ember_low", t["lip"]))
+        c.put(ex + 2, ey, t["joint"])
+        c.put(ex + 2, ey + 1, t["joint"])
+        c.put(ex - 1, ey + 2, t["seam"])
+        c.put(ex, ey - 1, t["lip"])
+    else:  # scorch streaks plus a peg
+        bx = x0 + rng.range(0, 3) * 8 + rng.range(4, 7)
         by = y0 + rng.range(3, 20)
         for i in range(rng.range(3, 5)):
-            c.put(bx, by + i, ramp["deep"])
-            c.put(bx + 1, by + i + 1, ramp["deep"])
-        c.put(x0 + rng.range(4, 27), y0 + rng.range(4, 27), ramp["hi"])
+            c.put(bx, by + i, t["seam"])
+            c.put(bx + 1, by + i + 1, t["joint"])
+        c.put(x0 + rng.range(4, 27), y0 + rng.range(4, 27), t["lip"])
 
 
 def material_prismfloor(c, x0, y0, salt, frame=0):
-    """Polished prismwood planks: horizontal boards; each board carries one
-    long position-locked sheen streak (polished glint) and one grain dash —
-    calm otherwise."""
-    ramp = palette.PRISMWOOD
-    for x in range(32):
-        for y in range(32):
-            gy = (y0 + y) % 32
-            board = gy // 8
-            tone = ramp["base"] if board % 2 == 0 else ramp["light"]
-            if gy % 8 == 0:
-                tone = ramp["deep"]
-            c.put(x0 + x, y0 + y, tone)
-    for board in range(4):
-        h = Rng(0x981 + board * 31 + (y0 // 96) * 7)
-        seam_x = (h.next() % 4) * 8 + 4
-        for yy in range(board * 8 + 1, board * 8 + 8):
-            c.put(x0 + (seam_x + x0) % 32, y0 + yy, ramp["deep"])
-        gx = h.next() % 22 + 2                        # polished sheen streak
-        gy2 = board * 8 + 2 + h.next() % 2
-        for i in range(5 + h.next() % 3):
-            c.put(x0 + (gx + i) % 32, y0 + gy2, ramp["hi"])
-        dx_ = h.next() % 24 + 3                       # one grain dash
-        dy_ = board * 8 + 5 + h.next() % 2
-        for i in range(3):
-            c.put(x0 + (dx_ + i) % 32, y0 + dy_, ramp["deep"])
-    _plank_flecks(c, x0, y0, salt, ramp, chance_hi=0.45)
+    """Polished prismwood planks: horizontal boards, each carrying one long
+    position-locked sheen streak — calm otherwise."""
+    _plank_bed(c, x0, y0, salt, palette.PRISMWOOD, sheen=True)
 
 
 def features_prismfloor(c, x0, y0, salt, k):
     ramp = palette.PRISMWOOD
-    leaf = palette.PRISMLEAF
+    t = _floor_tones(ramp)
     rng = Rng(salt)
     if k == 0:
         return
-    if k == 1:  # iridescent inlay glints at a seam (teal + rose, sparse)
-        nx, ny = x0 + rng.range(5, 24), y0 + rng.range(0, 3) * 8 + 3
-        c.put(nx, ny, leaf["teal"])
-        c.put(nx + 1, ny + 1, ramp["deep"])
-        mx, my = x0 + rng.range(5, 24), y0 + rng.range(0, 3) * 8 + 5
-        c.put(mx, my, leaf["rose"])
-        c.put(mx - 1, my + 1, ramp["deep"])
+    if k == 1:  # iridescent inlay glints, pulled toward the board's own tone
+        nx, ny = x0 + rng.range(5, 24), y0 + rng.range(0, 3) * 8 + 5
+        c.put(nx, ny, ramp.get("teal", t["lip"]))
+        c.put(nx + 1, ny, ramp.get("teal", t["lip"]))
+        c.put(nx + 2, ny + 1, t["joint"])
+        mx, my = x0 + rng.range(5, 24), y0 + rng.range(0, 3) * 8 + 7
+        c.put(mx, my, ramp.get("rose", t["lip"]))
+        c.put(mx + 1, my, ramp.get("rose", t["lip"]))
+        c.put(mx - 1, my + 1, t["joint"])
     elif k == 2:  # pale knot with a bright ring
-        kx, ky = x0 + rng.range(6, 24), y0 + rng.range(0, 3) * 8 + 4
-        c.put(kx, ky, ramp["deep"])
-        c.put(kx + 1, ky, ramp["deep"])
-        c.put(kx - 1, ky, ramp["hi"])
-        c.put(kx + 2, ky, ramp["hi"])
-        c.put(kx, ky - 1, ramp["hi"])
-        c.put(kx, ky + 1, ramp["light"])
+        kx, ky = x0 + rng.range(6, 24), y0 + rng.range(0, 3) * 8 + 5
+        for dx in range(3):
+            c.put(kx + dx, ky, t["seam"])
+        c.put(kx - 1, ky, t["lip"])
+        c.put(kx + 3, ky, t["lip"])
+        c.put(kx + 1, ky - 1, t["lip"])
+        c.put(kx + 1, ky + 1, t["grain_l"])
     else:  # long polished glint streak
-        by = y0 + rng.range(0, 3) * 8 + 2
+        by = y0 + rng.range(0, 3) * 8 + 5
         gx = x0 + rng.range(3, 18)
-        for i in range(rng.range(5, 9)):
-            c.put(gx + i, by, ramp["hi"])
-        c.put(gx - 1, by + 1, ramp["deep"])
+        for i in range(rng.range(6, 10)):
+            c.put(gx + i, by, t["lip"])
+        c.put(gx - 1, by + 1, t["joint"])
 
 
 # Vanilla's features are block-aligned too (ash's debris, grass's tufts): the
@@ -997,3 +1020,7 @@ def features_prismfloor(c, x0, y0, salt, k):
 features_cloudturf = _block_snap(features_cloudturf)
 features_skystone = _block_snap(features_skystone)
 features_stormslate = _block_snap(features_stormslate)
+features_gloomwood = _block_snap(features_gloomwood)
+features_nimbusfloor = _block_snap(features_nimbusfloor)
+features_charfloor = _block_snap(features_charfloor)
+features_prismfloor = _block_snap(features_prismfloor)
