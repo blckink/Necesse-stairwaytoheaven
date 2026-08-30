@@ -161,18 +161,22 @@ final class SkyBuildingSet {
         // Sky oddities: rare-encounter SEEDS. Registered + craftable so they
         // exist and map builders can place them, but deliberately absent from
         // normal worldgen (docs/DESIGN.md keeps rare discoveries special).
-        ObjectRegistry.registerObject("skyballoon",
+        SkyRegistry.skyBalloonID = ObjectRegistry.registerObject("skyballoon",
                 new SkyDecoObject("skyballoon", 32, new Color(196, 206, 216),
                         null, "objects", "decorations")
                         .setTool(ToolType.ALL), 2.0F, true);
-        ObjectRegistry.registerObject("aeronautwreck",
+        SkyRegistry.aeronautWreckID = ObjectRegistry.registerObject("aeronautwreck",
                 new SkyDecoObject("aeronautwreck", 48, new Color(122, 96, 72),
                         new Rectangle(8, 24, 32, 24), "objects", "decorations")
                         .setTool(ToolType.AXE), 8.0F, true);
-        ObjectRegistry.registerObject("skyparcel",
+        SkyRegistry.skyParcelID = ObjectRegistry.registerObject("skyparcel",
                 new SkyDecoObject("skyparcel", 32, new Color(122, 96, 72),
                         new Rectangle(6, 14, 20, 14), "objects", "decorations")
                         .setTool(ToolType.ALL).setObjectHealth(1), 2.0F, true);
+        // The rich container tier, on vanilla's incursion crate sheet.
+        SkyRegistry.skyCacheID = ObjectRegistry.registerObject("skycache",
+                new stairwaytoheaven.objects.SkyCacheObject(), 0.0F, false);
+
         // Natural props must survive the shore sweep if worldgen later places
         // them near the Mistsea (same reason SkyObjects calls allowShore).
         for (String propId : new String[]{"stormscreed", "skywatchrubble",

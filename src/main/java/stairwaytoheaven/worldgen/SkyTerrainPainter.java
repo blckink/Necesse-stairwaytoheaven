@@ -245,6 +245,13 @@ public final class SkyTerrainPainter {
      */
     public static final int SALT_BUILT_PICK = 67;
 
+    /** Wreck sites: a lattice of rare crash scenes. */
+    public static final int SALT_WRECK = 137;
+    public static final int WRECK_CELL = 300;
+    /** Roughly one site per 2.5 lattice cells, i.e. one per ~225,000 tiles of
+     *  sky -- a few in a world, which is what makes finding one an event. */
+    public static final float WRECK_CHANCE = 0.40F;
+
     /** Salvage-crate placement. Rare on purpose: a crate you meet every
      *  screen stops being a find. */
     public static final int SALT_CRATE = 131;
@@ -528,6 +535,77 @@ public final class SkyTerrainPainter {
      * so blooms and lilies grow in patches of roughly one to five with real
      * gaps between them instead of an even per-tile sprinkle.
      */
+
+    /**
+     * A crash scene, laid out in rings around one hashed site.
+     *
+     * The player's note on the scattered crates: "die kisten sollen auch
+     * sinnvoll verteilt sein... mal an Stelle wo Ballon abgestürzt ist
+     * mehrere, verschiedene Wertigkeiten." A crate that appears with the same
+     * probability everywhere is scenery; a crate lying with three others around
+     * a broken hull is a story, and it is the same object either way.
+     *
+     * Rings, from the middle out: the wreck itself on the centre tile, the
+     * sealed cache beside it, the ordinary crates spilled around that, and
+     * parcels and a stray balloon at the edge where the cargo bounced. Every
+     * ring is gated by its own per-tile roll, so no two sites lay out the same.
+     *
+     * This is also what finally puts the sky oddities into the world.
+     * `aeronautwreck`, `skyparcel` and `skyballoon` had been registered,
+     * drawn and craftable since v0.6 and placed by nothing -- three of the 49
+     * registered objects worldgen never touched.
+     */
+    public static int wreckSiteObject(int seed, int tileX, int tileY) {
+        int cellX = Math.floorDiv(tileX, WRECK_CELL);
+        int cellY = Math.floorDiv(tileY, WRECK_CELL);
+        float best = Float.MAX_VALUE;
+        int hullX = 0;
+        int hullY = 0;
+        for (int ox = -1; ox <= 1; ox++) {
+            for (int oy = -1; oy <= 1; oy++) {
+                int cx = cellX + ox;
+                int cy = cellY + oy;
+                if (SkyNoise.hash(seed + SALT_WRECK, cx, cy) >= WRECK_CHANCE) {
+                    continue;
+                }
+                float siteX = cx * WRECK_CELL
+                        + SkyNoise.hash(seed + SALT_WRECK + 1, cx, cy) * WRECK_CELL;
+                float siteY = cy * WRECK_CELL
+                        + SkyNoise.hash(seed + SALT_WRECK + 2, cx, cy) * WRECK_CELL;
+                float dx = tileX - siteX;
+                float dy = tileY - siteY;
+                float d = (float) Math.sqrt(dx * dx + dy * dy);
+                if (d < best) {
+                    best = d;
+                    hullX = Math.round(siteX);
+                    hullY = Math.round(siteY);
+                }
+            }
+        }
+        if (best > 6.0F) {
+            return 0;
+        }
+        // The hull is ONE tile, not a radius. A distance test put three
+        // 48px-wide hulls side by side on the first cut, which reads as a
+        // pile-up rather than a crash.
+        if (tileX == hullX && tileY == hullY) {
+            return SkyRegistry.aeronautWreckID;
+        }
+        float roll = SkyNoise.tileRoll(seed, tileX, tileY, SALT_WRECK + 3);
+        if (best < 2.2F) {
+            // At most a couple of caches per site: the rich tier stops being
+            // rich if six of them lie in one clearing.
+            return roll < 0.14F ? SkyRegistry.skyCacheID
+                    : (roll < 0.55F ? SkyRegistry.skyCrateID : 0);
+        }
+        if (best < 4.0F) {
+            return roll < 0.34F ? SkyRegistry.skyCrateID
+                    : (roll < 0.50F ? SkyRegistry.skyParcelID : 0);
+        }
+        return roll < 0.14F ? SkyRegistry.skyParcelID
+                : (roll < 0.18F ? SkyRegistry.skyBalloonID : 0);
+    }
+
     public static int auroraColonyObject(int seed, int tileX, int tileY) {
         int cellX = Math.floorDiv(tileX, AURORA_COLONY_CELL);
         int cellY = Math.floorDiv(tileY, AURORA_COLONY_CELL);
@@ -798,9 +876,15 @@ public final class SkyTerrainPainter {
             objectID = auroraColonyObject(seed, tileX, tileY);
         }
 
-        // Salvage crates come FIRST, before every growth rule, or grass would
-        // win the tile and the rarest thing in the world would be the thing
-        // most easily crowded out.
+        // Wreck sites and loose crates come FIRST, before every growth rule, or
+        // grass wins the tile and the rarest things in the world become the
+        // ones most easily crowded out.
+        if (objectID == 0) {
+            int wreck = wreckSiteObject(seed, tileX, tileY);
+            if (wreck != 0) {
+                return pack(groundID, wreck, biomeID, false);
+            }
+        }
         if (objectID == 0 && SkyNoise.tileRoll(seed, tileX, tileY, SALT_CRATE)
                 < (isRockPatch ? CRATE_CHANCE_BARREN : CRATE_CHANCE)) {
             return pack(groundID, SkyRegistry.skyCrateID, biomeID, false);

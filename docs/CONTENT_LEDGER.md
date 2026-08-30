@@ -64,6 +64,7 @@ them. Anything registered from now on does not get that exemption.
 - `cloudsapling`
 - `cloudtree`
 - `aurorashoaltile`
+- `skycache`
 - `skycrate`
 - `cloudturftile`
 - `cloudwood`
