@@ -36,38 +36,45 @@ Do not renegotiate a number without re-measuring the analogue and saying so.
 
 ## Queue
 
-### 1. Skystone Golem — drawn small, on a cell that is too small
-- [ ] **`mobs/skystonegolem.png`** + a Java change (reviewer's, not the worker's)
+### 1. Skystone Golem — not too small for its cell; too small for a golem
+- [ ] **`mobs/skystonegolem.png`** at 96px + the Java change (reviewer's)
 
 The player: *"golem sollte neu gemacht werden weil er viel zu klein ist statt
 die grösse eines Golems zu haben im Game."*
 
-**Correction, 2026-08-30.** An earlier version of this entry claimed vanilla
-golems use 64x80 cells. That was wrong and came from a measuring script that
-divided sheet height by 4 rather than from the engine. Read the renderers:
-vanilla mob cells are **square** — `.sprite(x, y, size)` — and only the SIZE
-varies. `boar` and `sheep`, ordinary animals, have exactly the same 384x320
-sheet as `crystalgolem` and `ascendedgolem`. So our golem is not on a wrong
-canvas; it is drawn small on the standard one, and the cell itself is the
-smaller of the two things wrong with it.
+**This entry has been wrong twice. The measurements below are the third and
+verified set** — taken with SQUARE cells, which is what the renderers use
+(`.sprite(x, y, size)`), and with the cell size each mob's own class passes.
 
-    vanilla FurnaceGolemMob   .sprite(x, y, 96)    sheet 1152x448
-    vanilla AshGolemMob       .sprite(x, y, spriteSize)  sheet 640x640
-    vanilla crystal/ascended  .sprite(x, y, 64)    sheet 384x320
-    vanilla boar (an animal)  64                   1536px in its densest frame
-    OURS skystonegolem        .sprite(x, y, 64)    1390px, bbox 43x50
+| | cell | mass | bbox |
+|---|---|---|---|
+| vanilla `crystalgolem` | 64 | 1232 | 36x62 |
+| vanilla `ascendedgolem` | 64 | 1232 | 36x62 |
+| vanilla `boar` | 64 | 1536 | 54x42 |
+| **ours** | 64 | **1390** | **43x50** |
+| vanilla `furnacegolem` | **96** | **3768** | **70x78** |
 
-So it is lighter than a BOAR while being the mod's armoured bruiser.
+Two earlier claims here were false and are retracted: that vanilla golems use
+64x80 cells (they do not; cells are square, and `boar` and `sheep` ship the same
+384x320 sheet), and that ours is "lighter than a boar" in any meaningful sense
+(a boar is wide and low, a golem narrow and tall — the shapes are not
+comparable). **Ours is in fact HEAVIER than both small vanilla golems.**
 
-Target: move to the **furnace golem's 96px square cell** — sheet **576x384**,
-6 columns x 4 rows, rows Up/Right/Down/Left. Densest frame **>= 2600 opaque
-px**, bbox at least **62x76**. Reference `furnacegolem.png` for how vanilla
-fills a 96 cell, and `crystalgolem.png` for golem anatomy at 64.
+What is actually wrong is HEIGHT. Ours is 50px tall where vanilla's small golems
+are 62 — it is stubby, and it does not tower. And the small golems are not what
+the player means by "die grösse eines Golems": `furnacegolem` at 96 is.
 
-**The Java is the reviewer's.** `SkystoneGolemMob` hardcodes
-`.sprite(sprite.x, sprite.y, 64)` and `drawX -32 / drawY -51`; those become 96
-and their matching offsets. A worker who changes only the PNG will produce a
-scrambled mob. Say what you need and stop.
+Target: the **furnace golem's 96px square cell** — sheet **576x384**, 6 columns
+x 4 rows, rows Up/Right/Down/Left. Densest frame **>= 2800 opaque px**, bbox at
+least **64x74**. Reference `furnacegolem.png` for how vanilla fills a 96 cell.
+
+**The Java is the reviewer's, and it is not optional.** `SkystoneGolemMob`
+hardcodes `.sprite(sprite.x, sprite.y, 64)`, `drawX -32`, `drawY -51`. Vanilla's
+own 96 golem uses `drawX -48` and `drawY -78`; copy those rather than deriving
+them. A PNG-only change produces a mob drawn from the wrong rectangle.
+
+Note for the worker: `CELL = 64` in `gen_mobs.py` is module-wide and used by
+every other mob. The golem needs its own constant, not a change to that one.
 
 ### 2. Cloud Lamb — a sheep with different wool has no reason to exist
 - [ ] **`mobs/cloudlamb.png`**, `mobs/cloudlamb_sheared.png`,
