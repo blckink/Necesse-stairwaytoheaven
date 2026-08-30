@@ -5,6 +5,7 @@ import java.awt.Color;
 import necesse.entity.mobs.friendly.human.humanShop.BuyingShopItem;
 import necesse.entity.mobs.friendly.human.humanShop.SellingShopItem;
 import necesse.gfx.HumanGender;
+import necesse.entity.mobs.friendly.human.humanShop.SellingShopItem;
 
 /**
  * Ossian Vane — the Skywatch's last reader.
@@ -29,16 +30,27 @@ public class OssianMob extends SkySettlerMob {
     public OssianMob() {
         super("ossiansettler");
 
-        // --- the bridge into incursion tier, rationed and expensive ---
-        this.shop.addSellingItem("crystalessence", new SellingShopItem(8, 1))
-                .setStaticPriceBasedOnHappiness(900, 1800, 160);
-        this.shop.addSellingItem("ascendedshard", new SellingShopItem(3, 1))
-                .setStaticPriceBasedOnHappiness(2600, 5000, 400);
-        // reading light and glassware: the archive's own stock
-        this.shop.addSellingItem("stormglass", new SellingShopItem(16, 2))
-                .setStaticPriceBasedOnHappiness(150, 300, 30);
-        this.shop.addSellingItem("prismshard", new SellingShopItem(24, 3))
-                .setStaticPriceBasedOnHappiness(90, 190, 20);
+        // --- THE EXCLUSIVE STOCK, and it rotates every day ------------------
+        // The player's ask: "Ossian soll exklusiv items aus den incursionen
+        // anbieten da die sonst nirgends kaufbar sind. Jeden Tag wechselnd."
+        //
+        // Everything in this block comes out of an incursion and has no other
+        // vendor in the game. Each line is gated by a REQUIREMENT rather than
+        // by stock, because `SellingShopItem.requirement` is tested every time
+        // the shop page is built -- so a line is simply not on the page on a
+        // day it is not offered, instead of being visibly sold out.
+        //
+        // Three of the eight show on any given day, chosen by the world day
+        // itself, so every player in a world sees the same window and it moves
+        // at midnight without anything having to tick.
+        offerOnRotation("crystalessence", 0, 6, 1, 900, 1800, 160);
+        offerOnRotation("ascendedshard",  1, 3, 1, 2600, 5000, 400);
+        offerOnRotation("voidbullet",     2, 200, 40, 26, 52, 6);
+        offerOnRotation("arcanichelmet",  3, 1, 1, 5200, 9000, 700);
+        offerOnRotation("arcanicchestplate", 4, 1, 1, 6400, 11000, 850);
+        offerOnRotation("arcanicboots",   5, 1, 1, 4800, 8400, 650);
+        offerOnRotation("voidbag",        6, 1, 1, 7500, 13000, 1000);
+        offerOnRotation("eyeofthevoid",   7, 1, 1, 12000, 20000, 1600);
 
         // --- and he takes the sky's own top tier off the player's hands ---
         this.shop.addBuyingItem("aetheriumbar", new BuyingShopItem())
@@ -61,4 +73,33 @@ public class OssianMob extends SkySettlerMob {
     }
     @Override protected int recruitCost() { return 18000; }
     @Override protected String talkKey() { return "ossiantalk"; }
+
+    /**
+     * One rotating line.
+     *
+     * `slot` is this item's fixed place in the rotation. The window is three
+     * wide and steps once per world day, so on day D the shop shows slots
+     * D, D+1 and D+2 modulo the roster -- every item comes round in under
+     * three days, nothing is ever gone for a week, and the sequence is a pure
+     * function of the day, so it needs no state, no tick and no save data, and
+     * two players in one world always see the same shelf.
+     */
+    private void offerOnRotation(String itemID, int slot, int maxStock, int restockPerDay,
+                                 int minPrice, int maxPrice, int priceStep) {
+        this.shop.addSellingItem(itemID, new SellingShopItem(maxStock, restockPerDay))
+                .setStaticPriceBasedOnHappiness(minPrice, maxPrice, priceStep)
+                .setRequirement((random, client, mob, blackboard) -> {
+                    if (client == null || client.getServer() == null
+                            || client.getServer().world == null) {
+                        return true;      // no world to ask: show everything
+                    }
+                    int day = client.getServer().world.worldEntity.getDay();
+                    int offset = Math.floorMod(slot - day, ROTATION_SIZE);
+                    return offset < ROTATION_WINDOW;
+                });
+    }
+
+    /** How many incursion lines exist, and how many show at once. */
+    private static final int ROTATION_SIZE = 8;
+    private static final int ROTATION_WINDOW = 3;
 }

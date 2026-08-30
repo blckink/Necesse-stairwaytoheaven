@@ -36,6 +36,41 @@ Do not renegotiate a number without re-measuring the analogue and saying so.
 
 ## Queue
 
+### 0. Halda's Fermentation Vat — the next content family, NOT art alone
+- [ ] `skywatchvat` station + tech, four brews, and the fattening feed
+
+The player, on the residents shipped in `80557e5`: *"die sollen nicht nur Shops
+haben für items die sonst auch jeder kauft... der eine soll sich speziell um die
+Braufässer kümmern und Bier, met etc an Vanilla Fässern herstellen und
+zusätzlich Mastfutter herstellen können an Fässern für Tiere aus skyreach und
+normale tier2 (also Schweine etc) dass ihre Produktion steigert."*
+
+**Verified before designing, so nobody re-derives it:**
+
+- Vanilla's `barrel` is an `InventoryObject` — plain storage. It is NOT a
+  crafting station, has no tech, and a settler cannot work at it. Brewing "at
+  vanilla barrels" is therefore impossible additively; it needs OUR station,
+  shaped like a barrel. `RecipeTechRegistry` has no brewing or fermenting tech
+  either, so that is ours too. Build it on `StormglassKilnObject`, which is
+  already the cheese-press pattern: settler loads it, walks away, collects.
+- **The feed bonus has to live in the MOB, not the item.** The trough calls
+  `mob.onFed(item)` directly (`FeedingTroughObjectEntity:142`). So:
+  - our own animals (NimbusYak, Thunderquill, Glimmergoat, CloudLamb) CAN take
+    the bonus from a trough, because we own their `onFed`;
+  - **vanilla tier-2 animals cannot** — their `onFed` is vanilla's and the mod
+    is additive-only. Do not promise it.
+  - The half that DOES reach vanilla animals is hand-feeding:
+    `GrainItem.onMobInteract` is overridable, and `HusbandryMob.birthingCooldown`
+    is a public field, so a custom feed can shorten a vanilla pig's breeding
+    cooldown when fed by hand.
+- `canFeed` requires `item.item instanceof GrainItem`, so the feed MUST extend
+  `GrainItem` or no trough will accept it.
+
+Art needed: one 32x32 barrel-vat object sheet (+ `_on` lit sibling, optional —
+`fromFileRaw` degrades to the cold sheet), one item icon per brew, one for the
+feed. Reference vanilla `barrel.png` and the mod's own `stormglasskiln`.
+
+
 ### 1. Skystone Golem — not too small for its cell; too small for a golem
 - [ ] **`mobs/skystonegolem.png`** at 96px + the Java change (reviewer's)
 
