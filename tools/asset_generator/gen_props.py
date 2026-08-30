@@ -527,3 +527,121 @@ def gen_all(dir_path):
     gen_skyballoon(f"{dir_path}/skyballoon.png")
     gen_aeronautwreck(f"{dir_path}/aeronautwreck.png")
     gen_skyparcel(f"{dir_path}/skyparcel.png")
+    gen_skycrate(f"{dir_path}/skycrate.png")
+    gen_skycratedebris(f"{dir_path}/skycratedebris.png")
+
+
+def gen_skycrate(path):
+    """192x64 salvage crate for the Skyreach, on vanilla `crates.png`'s layout:
+    six variants across, each 32 wide, all BOTTOM-ANCHORED (vanilla's sit at
+    y=24..60 and end on the same ground line, which is what makes a scattered
+    field of them read as standing on the floor rather than floating).
+
+    Vanilla's crates are warm brown cooperage. These are what falls off a sky
+    freighter: pale skystone-grey boards lashed with windsilk cord and cornered
+    in brass. Measured target is vanilla's own 440-752 opaque px per variant.
+    """
+    wood = palette.WOOD
+    silk = palette.WINDSILK
+    iron = palette.IRONWORK
+    trim = palette.WARDEN["trim"]
+    trim_hi = palette.WARDEN["trim_hi"]
+    c = Canvas(192, 64)
+
+    def box(ox, w, h, staves=True):
+        """A crate body ending on the ground line at y=60.
+
+        Vanilla's construction, measured off `crates.png`: the LID is a large
+        lit face in the same wood covering roughly the top third, and the front
+        below it is the base tone with vertical stave shadows. A first cut put a
+        thin bright windsilk band there instead and the crates read as brown
+        boxes with a white stripe -- the lid has to be a surface, not a line.
+        """
+        top = 60 - h
+        lid = max(5, h // 3)
+        c.rect(ox, top, w, h, wood["base"])
+        c.rect(ox, top, w, lid, wood["light"])       # the lit lid face
+        c.rect(ox + 1, top + 1, w - 2, 1, silk["deep"])   # its sunlit front lip
+        c.rect(ox, top + lid, w, 1, wood["deep"])    # lid/front joint
+        c.rect(ox, 57, w, 3, wood["deep"])           # shadowed foot
+        if staves:
+            for sx in range(ox + 3, ox + w - 2, 4):
+                c.rect(sx, top + lid + 2, 1, h - lid - 5, wood["deep"])
+        for cx in (ox, ox + w - 1):                  # brass corner posts
+            c.rect(cx, top, 1, h, trim)
+            c.put(cx, top + 1, trim_hi)
+        return top
+
+    def cord(ox, w, top, h):
+        """One lashing across the belly.
+
+        Drawn DARK. Vanilla's crates carry no bright band at all; a windsilk
+        strap in `silk["light"]` read as a white stripe painted across a brown
+        box and was the loudest thing on the sheet. A rope reads as a rope by
+        being a shadow line with one lit pixel on its upper edge.
+        """
+        y = top + h // 2 + 2
+        c.rect(ox, y, w, 1, wood["deep"])
+        c.rect(ox, y + 1, w, 1, palette.OUTLINE)
+        c.put(ox + w // 2, y, silk["deep"])
+
+    # v0 — a plain crate
+    t = box(3, 26, 26); cord(3, 26, t, 26)
+    # v1 — tall crate with a smaller one stacked on it
+    t = box(35, 22, 30); cord(35, 22, t, 30)
+    c.rect(39, t - 12, 14, 12, wood["base"])
+    c.rect(39, t - 12, 14, 2, silk["deep"])
+    c.rect(39, t - 2, 14, 2, wood["deep"])
+    c.rect(39, t - 12, 1, 12, trim); c.rect(52, t - 12, 1, 12, trim)
+    # v2 — a narrow upright
+    t = box(70, 18, 26); cord(70, 18, t, 26)
+    # v3 — two crates side by side
+    t = box(99, 15, 28); cord(99, 15, t, 28)
+    t2 = box(115, 13, 22); cord(115, 13, t2, 22)
+    # v4 — a lashed bale. Its top is a LIT WOOD face like vanilla's barrels,
+    # not a pale cap: a grey dome read as a mushroom on the first cut.
+    c.ellipse(147, 46, 14, 13, wood["base"])
+    c.ellipse(147, 42, 13, 8, wood["light"])
+    c.ellipse(146, 41, 9, 5, wood["light"])
+    c.ellipse(146, 40, 6, 3, silk["deep"])
+    for sx in range(136, 159, 4):
+        c.rect(sx, 47, 1, 10, wood["deep"])
+    c.rect(133, 45, 28, 1, trim)                     # the lashing, one line
+    c.put(147, 45, trim_hi)
+    c.rect(134, 53, 26, 1, iron["base"])
+    # v5 — a barrel. Sized against vanilla's own smallest crate (440 px at
+    # 24x24); the first cut came out at 299 and would have read as a pebble in
+    # a field of proper crates.
+    c.ellipse(176, 47, 12, 12, wood["base"])
+    c.ellipse(176, 41, 11, 6, wood["light"])
+    c.ellipse(175, 40, 8, 4, wood["light"])
+    c.ellipse(175, 39, 5, 2, silk["deep"])
+    for sx in range(166, 188, 3):
+        c.rect(sx, 44, 1, 13, wood["deep"])
+    c.rect(164, 43, 24, 2, trim)
+    c.put(176, 43, trim_hi)
+    c.rect(164, 53, 24, 1, iron["base"])
+    c.rect(165, 56, 22, 2, wood["deep"])
+
+    c.outline(palette.OUTLINE)
+    c.save(path)
+
+
+def gen_skycratedebris(path):
+    """192x32, one debris cell per crate variant — vanilla `cratesdebris.png`'s
+    layout. Splinters of board and a curl of cut windsilk."""
+    wood = palette.WOOD
+    silk = palette.WINDSILK
+    c = Canvas(192, 32)
+    for v in range(6):
+        ox = v * 32
+        rng = Rng(0x5C0 + v * 977)
+        cx, cy = ox + 16, 22
+        c.blob(cx, cy, 5 - (v % 2), wood["base"], rng, lumps=3)
+        c.blob(cx - 2, cy - 2, 2, wood["light"], rng, lumps=2)
+        for _ in range(3):
+            c.put(cx + rng.range(-6, 6), cy + rng.range(-4, 4), wood["deep"])
+        c.put(cx + 3, cy - 3, silk["light"])
+        c.put(cx + 4, cy - 2, silk["deep"])
+    c.outline(palette.OUTLINE)
+    c.save(path)

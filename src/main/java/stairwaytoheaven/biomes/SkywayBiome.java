@@ -2,6 +2,9 @@ package stairwaytoheaven.biomes;
 
 import necesse.level.maps.Level;
 import necesse.level.maps.biomes.MobSpawnTable;
+import necesse.inventory.lootTable.LootTable;
+import necesse.inventory.lootTable.lootItem.ChanceLootItem;
+import necesse.inventory.lootTable.lootItem.LootItem;
 
 /**
  * Skyway Passages — pale cloudstone paving rimmed in gold, laid down by whoever
@@ -43,5 +46,21 @@ public class SkywayBiome extends SkyBiome {
     @Override
     public MobSpawnTable getCritterSpawnTable(Level level) {
         return critters;
+    }
+
+    /**
+     * Freight left on the passages: worked goods, not raw ones.
+     *
+     * The base table in {@link SkyBiome} is the common cargo; this adds what
+     * only this biome gives, so a crate tells the player where they are.
+     */
+    @Override
+    public LootTable getCrateLootTable(necesse.level.maps.Level level, int tileX, int tileY) {
+        return new LootTable(
+                ChanceLootItem.between(0.45F, "stormglass", 1, 3),
+                ChanceLootItem.between(0.30F, "skyweave", 1, 2),
+                ChanceLootItem.between(0.10F, "silverbell", 1, 1),
+                super.getCrateLootTable(level, tileX, tileY)
+        );
     }
 }

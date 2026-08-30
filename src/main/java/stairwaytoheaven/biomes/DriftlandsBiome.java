@@ -2,6 +2,9 @@ package stairwaytoheaven.biomes;
 
 import necesse.level.maps.Level;
 import necesse.level.maps.biomes.MobSpawnTable;
+import necesse.inventory.lootTable.LootTable;
+import necesse.inventory.lootTable.lootItem.ChanceLootItem;
+import necesse.inventory.lootTable.lootItem.LootItem;
 
 /**
  * Driftlands — the common Skyreach biome: silver-green isles, soft wind, home
@@ -64,5 +67,20 @@ public class DriftlandsBiome extends SkyBiome {
     @Override
     public MobSpawnTable getCritterSpawnTable(Level level) {
         return critters;
+    }
+
+    /**
+     * The common biome pays in common goods -- the floor of the loot curve.
+     *
+     * The base table in {@link SkyBiome} is the common cargo; this adds what
+     * only this biome gives, so a crate tells the player where they are.
+     */
+    @Override
+    public LootTable getCrateLootTable(necesse.level.maps.Level level, int tileX, int tileY) {
+        return new LootTable(
+                ChanceLootItem.between(0.50F, "windwheat", 2, 6),
+                ChanceLootItem.between(0.30F, "nimbuswood", 3, 8),
+                super.getCrateLootTable(level, tileX, tileY)
+        );
     }
 }

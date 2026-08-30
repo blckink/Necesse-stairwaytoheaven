@@ -354,6 +354,11 @@ PAIRS = [
      "objects/ironore.png", ("auto", 32, 32), "ore overlay (densest 32px cell)"),
     ("objects/prismshardore.png", ("auto", 32, 32),
      "objects/ironore.png", ("auto", 32, 32), "ore overlay (densest 32px cell)"),
+    # The salvage crate answers to vanilla's own crates, sheet for sheet: same
+    # 192x64 six-variant layout, same ground line, so a field of ours and a
+    # field of vanilla's read at the same scale.
+    ("objects/skycrate.png", ("auto", 32, 64),
+     "objects/crates.png", ("auto", 32, 64), "salvage crate (densest variant)"),
     ("objects/skyanchor.png", None,
      "objects/bannerstand.png", None, "tall quest prop"),
     ("objects/catbasket.png", None,

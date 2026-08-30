@@ -245,6 +245,15 @@ public final class SkyTerrainPainter {
      */
     public static final int SALT_BUILT_PICK = 67;
 
+    /** Salvage-crate placement. Rare on purpose: a crate you meet every
+     *  screen stops being a find. */
+    public static final int SALT_CRATE = 131;
+    /** Roughly one crate per 900 land tiles, and three times that on the
+     *  bare stone, which is where wreckage would actually come to rest and
+     *  which the player reported as the emptiest ground in the sky. */
+    public static final float CRATE_CHANCE = 0.0011F;
+    public static final float CRATE_CHANCE_BARREN = 0.0033F;
+
     /**
      * Sub-biome classes as {@link #describeTile} reports them.
      *
@@ -787,6 +796,14 @@ public final class SkyTerrainPainter {
         // Aurora flora grows in colonies, not as an even sprinkle.
         if (objectID == 0 && isAurora && !isRockPatch) {
             objectID = auroraColonyObject(seed, tileX, tileY);
+        }
+
+        // Salvage crates come FIRST, before every growth rule, or grass would
+        // win the tile and the rarest thing in the world would be the thing
+        // most easily crowded out.
+        if (objectID == 0 && SkyNoise.tileRoll(seed, tileX, tileY, SALT_CRATE)
+                < (isRockPatch ? CRATE_CHANCE_BARREN : CRATE_CHANCE)) {
+            return pack(groundID, SkyRegistry.skyCrateID, biomeID, false);
         }
 
         // The stone barrens have their own beds. This runs where every other

@@ -2,6 +2,9 @@ package stairwaytoheaven.biomes;
 
 import necesse.level.maps.Level;
 import necesse.level.maps.biomes.MobSpawnTable;
+import necesse.inventory.lootTable.LootTable;
+import necesse.inventory.lootTable.lootItem.ChanceLootItem;
+import necesse.inventory.lootTable.lootItem.LootItem;
 
 /**
  * Aurora Shoals — the rare Skyreach biome: shallow mist banks under cold dawn
@@ -39,5 +42,21 @@ public class AuroraShoalsBiome extends SkyBiome {
     @Override
     public MobSpawnTable getCritterSpawnTable(Level level) {
         return critters;
+    }
+
+    /**
+     * The Shoals are the richest ground in the sky, and their crates say so.
+     *
+     * The base table in {@link SkyBiome} is the common cargo; this adds what
+     * only this biome gives, so a crate tells the player where they are.
+     */
+    @Override
+    public LootTable getCrateLootTable(necesse.level.maps.Level level, int tileX, int tileY) {
+        return new LootTable(
+                LootItem.between("aurorapetal", 2, 5),
+                ChanceLootItem.between(0.45F, "prismshard", 1, 4),
+                ChanceLootItem.between(0.15F, "aetheriumbar", 1, 2),
+                super.getCrateLootTable(level, tileX, tileY)
+        );
     }
 }

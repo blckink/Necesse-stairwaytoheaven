@@ -271,6 +271,18 @@ final class SkyObjects {
                 .setTool(ToolType.AXE);
         SkyRegistry.deadtreeID = ObjectRegistry.registerObject("deadtree", deadtree, 4.0F, true);
 
+        // Salvage crates: vanilla's entire exploration loop is containers, and
+        // the Skyreach had none. RandomCrateObject asks
+        // Level.getCrateLootTable -> Biome.getCrateLootTable, which every
+        // SkyBiome now answers with its own cargo, so opening one tells the
+        // player where they are. Debris texture is the second sheet the
+        // RandomBreakObject base expects.
+        // RandomBreakObject.loadTextures resolves the debris sheet itself as
+        // "objects/<texturePath>debris", so skycratedebris.png needs no wiring.
+        necesse.level.gameObject.RandomCrateObject skycrate =
+                new necesse.level.gameObject.RandomCrateObject("skycrate");
+        SkyRegistry.skyCrateID = ObjectRegistry.registerObject("skycrate", skycrate, 0.0F, false);
+
         allowShore("veilrock", "whisperreeds", "gloomshroom", "ashbones", "deadtree");
     }
 

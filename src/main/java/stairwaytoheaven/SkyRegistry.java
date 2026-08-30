@@ -82,6 +82,7 @@ public final class SkyRegistry {
     public static StormslateTile stormslateTile;
     public static MistseaTile mistseaTile;
 
+    public static int skyCrateID;
     public static int cloudturfID;
     public static int auroraShoalID;
     public static int skystoneTileID;
