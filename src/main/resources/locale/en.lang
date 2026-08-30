@@ -185,6 +185,12 @@ cloudpufftreattip=Irresistible to sky cats. Smells faintly of thunderstorms
 silverbelltip=It was Siggi's. He hates it
 
 [mob]
+magpiesettler=Magpie
+haldasettler=Halda
+ossiansettler=Ossian Vane
+magpiesettlername=<name>, called Magpie
+haldasettlername=<name> the Cellarer
+ossiansettlername=Ossian <name>, the last reader
 galehound=Galehound
 dawnpiercer=Dawnpiercer
 zephyrfinch=Zephyr Finch
@@ -224,6 +230,21 @@ veil=The Veil
 skyreach=The Skyreach
 
 [misc]
+magpietalkpitch=You want the short version. I flew freight for the Skywatch, the Skywatch stopped answering, and I have been sitting on bonded cargo ever since with nowhere to land. Give me a roof and a market and I will make you rich enough to regret asking.
+magpietalk1=Everything in this pack has a serial number. Ask me about none of them.
+magpietalk2=I do not steal from my own settlement. Write that down, it saves an argument later.
+magpietalk3=It was already falling. I merely arranged where.
+magpietalk4=Bring me salvage. I am the only one up here who pays properly for it.
+haldatalkpitch=I kept the stores after the last of them walked out. Forty years of counting barrels for nobody. I will come, and I will bring the cellar with me - you will want what comes out of it.
+haldatalk1=A cellar keeps time better than a clock. Both are patient. Only one is worth opening.
+haldatalk2=Bring me the raw and I will hand you back the worked. That is the whole trade.
+haldatalk3=The cats used to sit on the warm vat. I did not have the heart to move them.
+haldatalk4=Everything up here tastes of storm. You learn to call that seasoning.
+ossiantalkpitch=I stayed for the archive, not the order. Half of it is unreadable and the other half I have read too often. I have things in my bag from further out than this sky - and a price, which you will not like.
+ossiantalk1=I have read every roster the Skywatch kept. Yours is the first new name in a long while.
+ossiantalk2=What I sell did not come from here. Do not ask where it did.
+ossiantalk3=The tower is not a ruin. A ruin has stopped meaning something.
+ossiantalk4=Bring me bars, not ore. I have no patience left for smelting.
 seanceneedbell=The circle waits. It wants to hear the Silver Bell.
 seancealreadyveil=The Veil is already all around you.
 riftopened=The bell rings once - and something on the other side answers. The circle tears open.

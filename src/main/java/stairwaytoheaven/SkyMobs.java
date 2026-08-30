@@ -37,6 +37,9 @@ final class SkyMobs {
         // LevelSettler requireNonNulls it), so he could never move in.
         necesse.engine.registries.SettlerRegistry.registerSettler("wardensettler",
                 new stairwaytoheaven.settlement.WardenSettler());
+        // The three Skyreach residents: mob AND settler type together, because
+        // a mob without a registered Settler can never move in.
+        stairwaytoheaven.settlement.SkySettlers.register();
         // ambient critters, one per sub-biome
         MobRegistry.registerMob("cloudlamb", stairwaytoheaven.mobs.CloudLambMob.class, false);
         MobRegistry.registerMob("glowmoth", SkyCritterMob.GlowMoth.class, false);

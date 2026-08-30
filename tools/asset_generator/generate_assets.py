@@ -203,6 +203,7 @@ def main():
     gen_npcs.gen_warden(f"{out}/mobs/skywarden.png")
     gen_npcs.gen_cats(f"{out}/mobs/spirecatblack.png", f"{out}/mobs/spirecattabby.png")
     gen_npcs.gen_npc_icons(f"{out}/mobs/icons")
+    gen_npcs.gen_resident_icons(f"{out}/mobs/icons")
     gen_critters.gen_critters(f"{out}/mobs")
     gen_critters.gen_critter_icons(f"{out}/mobs/icons")
     gen_veil.gen_gloomshade(f"{out}/mobs/gloomshade.png")

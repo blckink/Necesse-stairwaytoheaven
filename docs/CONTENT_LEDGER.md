@@ -12,6 +12,18 @@ sections at the bottom.
 | id | kind | what it is, in one line |
 |---|---|---|
 
+## Chapter 01 — the Skyreach residents
+
+The mod's first settlers after the Warden. Each is a `HumanShop` with a
+registered `Settler` type, hired through vanilla's own recruit page, found
+standing at a derelict workshop in the Skyreach.
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `magpiesettler` | mob | Magpie, the courier who kept the cargo: the only vendor who BUYS sky salvage in quantity, and stocks goods from biomes you are nowhere near. |
+| `haldasettler` | mob | Halda the Cellarer: sells the worked goods of the three stations (skyweave, stormglass, stormsteel) and buys the raw end of every sky gathering loop. |
+| `ossiansettler` | mob | Ossian Vane, the last reader: the only source of incursion-tier salvage without an incursion, and the Aether Forge's customer for high-tier bars. |
+
 ## Baseline — registered before the ledger existed
 
 These predate the ledger and are described in `CHANGELOG.md`,

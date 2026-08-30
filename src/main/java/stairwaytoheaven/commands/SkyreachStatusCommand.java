@@ -673,7 +673,15 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         // sky-side Warden shipped with an unregistered key for two releases,
         // which is why the mod hand-rolled its own payment and spawned a second
         // mob at home. Assert the live wiring, not the registration.
-        for (String mobID : new String[]{"skywarden", "wardensettler"}) {
+        // The three residents are in this sweep for the same reason the Warden
+        // is: a settler key that resolves to null makes vanilla answer
+        // "notsettler" and the recruit button can never work, and NOTHING else
+        // in the build catches it -- the mod shipped exactly that for two
+        // releases. Their shop sizes are printed too, because a HumanShop with
+        // an empty shop is a person with nothing to say, which is how a
+        // profession quietly becomes decoration.
+        for (String mobID : new String[]{"skywarden", "wardensettler",
+                "magpiesettler", "haldasettler", "ossiansettler"}) {
             necesse.entity.mobs.Mob probe = necesse.engine.registries.MobRegistry.getMob(mobID, level);
             String settlerName = "NOT A HUMAN";
             String recruitPrice = "n/a";
@@ -691,7 +699,17 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                         : items.stream().map(i -> i.item.getStringID() + "x" + i.getAmount())
                                 .reduce((a, b) -> a + "+" + b).orElse("free");
             }
-            logs.add("recruit check: " + mobID + " settler=" + settlerName + " price=" + recruitPrice);
+            // GameRegistry keeps its element stream protected, so the shop's
+            // size is not readable from here. What IS readable, and is the
+            // thing that actually breaks, is whether the mob has a shop object
+            // at all -- a HumanShop whose constructor threw before stocking it
+            // would still register and would still be recruitable.
+            String stock = probe instanceof necesse.entity.mobs.friendly.human.humanShop.HumanShop
+                    ? (((necesse.entity.mobs.friendly.human.humanShop.HumanShop) probe).shop == null
+                        ? "shop=NULL" : "shop=present")
+                    : "shop=n/a";
+            logs.add("recruit check: " + mobID + " settler=" + settlerName
+                    + " price=" + recruitPrice + " " + stock);
         }
         // ---- why nothing spawns -----------------------------------------
         // MobChance.spawnMob calls mob.isValidSpawnLocation and drops the mob

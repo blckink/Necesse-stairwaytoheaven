@@ -608,3 +608,77 @@ def gen_npc_icons(dir_path):
         c.put(19, 12, colors["eye"])
         c.put(16, 14, colors["nose"])
         c.save(f"{dir_path}/{name}.png")
+
+
+# --- The three Skyreach residents -------------------------------------------
+# One parameterised portrait rather than three bespoke ones. A settler icon is
+# 32x32 and read at 1x in the settlement list, so what has to differ between
+# them is the SILHOUETTE of the headgear and the value of the hair against the
+# skin -- not the pixel-level face work the Warden's own icon carries.
+
+RESIDENTS = (
+    # id,               skin,             hair,            head-gear, accent, eye
+    ("magpiesettler",  (214, 176, 148), (58, 46, 42),  "brim",  (92, 84, 74),  (96, 122, 108)),
+    ("haldasettler",   (226, 190, 160), (176, 148, 96), "cap",   (198, 186, 172), (124, 108, 76)),
+    ("ossiansettler",  (206, 182, 166), (188, 190, 206), "hood",  (86, 78, 128), (108, 196, 186)),
+)
+
+
+def _shade(c, f):
+    return tuple(max(0, min(255, int(v * f))) for v in c[:3])
+
+
+def gen_resident_icons(dir_path):
+    """A face per resident, distinguished by headgear silhouette first."""
+    for name, skin, hair, gear, accent, eye in RESIDENTS:
+        c = Canvas(32, 32)
+        skin_dk = _shade(skin, 0.82)
+        hair_lit = _shade(hair, 1.18)
+        acc_dk = _shade(accent, 0.72)
+
+        c.ellipse(16, 17, 8.5, 8.0, skin)              # head
+        c.ellipse(16, 12, 8.6, 6.0, hair)              # hair mass
+        c.ellipse(15, 10, 6.0, 3.4, hair_lit)          # lit top-left
+
+        if gear == "brim":                             # courier's brimmed hat
+            c.rect(5, 11, 22, 2, accent)
+            c.rect(5, 13, 22, 1, acc_dk)
+            c.ellipse(16, 8, 6.5, 4.0, accent)
+            c.ellipse(15, 6, 4.5, 2.2, _shade(accent, 1.2))
+        elif gear == "cap":                            # cellarer's linen cap
+            c.ellipse(16, 8, 7.5, 4.6, accent)
+            c.ellipse(15, 6, 5.0, 2.6, _shade(accent, 1.14))
+            c.rect(8, 11, 16, 1, acc_dk)
+        else:                                          # scholar's hood
+            # The hood has to WRAP: a coloured cap over the crown alone reads
+            # as dyed hair. Cowl first, face cut out of it, then the two
+            # falling sides that make it a hood at 1x.
+            c.ellipse(16, 14, 11.0, 11.0, accent)
+            c.ellipse(15, 8, 6.0, 3.2, _shade(accent, 1.22))
+            c.ellipse(16, 18, 7.6, 7.2, skin)          # face opening
+            for y in range(14, 27):                    # falling sides
+                c.put(5 + (y - 14) // 6, y, acc_dk)
+                c.put(6 + (y - 14) // 6, y, accent)
+                c.put(25 - (y - 14) // 6, y, accent)
+                c.put(26 - (y - 14) // 6, y, acc_dk)
+
+        # Brow bar before the eyes, the way the Warden's icon builds a face:
+        # a flat 2x2 eye on a flat cheek reads as a doll at 1x.
+        for x in list(range(11, 15)) + list(range(18, 22)):
+            c.put(x, 15, palette.OUTLINE)              # brow
+            c.put(x, 16, skin_dk)                      # socket shade
+        for x in (12, 13, 19, 20):
+            c.put(x, 17, eye)                          # iris
+            c.put(x, 18, (46, 42, 54))                 # lash line
+        c.put(12, 17, _shade(eye, 1.5))                # catchlight, left eye
+        c.put(19, 17, _shade(eye, 1.5))
+        c.rect(15, 17, 2, 3, skin)                     # nose bridge
+        c.rect(15, 20, 2, 1, skin_dk)                  # nose tip
+        for x in range(13, 20):                        # mouth
+            c.put(x, 23, skin_dk)
+        c.put(13, 23, palette.OUTLINE)
+        c.put(19, 23, palette.OUTLINE)
+        for x in (10, 11, 21, 22):                     # cheek shade
+            c.put(x, 21, skin_dk)
+        c.outline(palette.OUTLINE)
+        c.save(f"{dir_path}/{name}.png")

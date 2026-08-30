@@ -65,6 +65,7 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
         super.onRegionGenerated(region, skipGenerateForced);
         region.checkGenerationValid();
         placeCloudLambFlock(region);
+        placeResident(region);
     }
 
     /**
@@ -88,6 +89,94 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
      * world always grows the same flocks, and persistent (canDespawn false) so
      * a flock the player walked past is still there when they come back.
      */
+    /**
+     * The three Skyreach residents, standing at the derelict workshop they
+     * refused to leave.
+     *
+     * WHY THEY ARE PLACED AT ALL, and why here. The mod registered one settler
+     * for four releases and the player's question was why a settler with one of
+     * our professions had never turned up. Half the answer was that none
+     * existed; this is the other half. A hireable NPC that worldgen never
+     * places is a class file, not a character -- the same failure as the three
+     * workstations, which were craftable, correct and referenced by worldgen
+     * exactly zero times.
+     *
+     * They stand at a workshop because that is where a loom-keeper, a cellarer
+     * and an archivist would be, and because the workshop is already the thing
+     * that says "somebody worked here". Finding the station and finding the
+     * person is one discovery, not two.
+     *
+     * Deterministic from the level seed and the region, persistent, and each
+     * person exists at most once in a world -- they are individuals, not a
+     * spawn table.
+     */
+    private void placeResident(Region region) {
+        if (this.isClient()) {
+            return;
+        }
+        long seed = (this.getWorldGenSeed() * 0x9E3779B97F4A7C15L)
+                ^ ((long) region.regionX * 0x27D4EB2FL)
+                ^ ((long) region.regionY * 0x165667B1L);
+        GameRandom random = new GameRandom(seed);
+        if (!random.getChance(RESIDENT_REGION_CHANCE)) {
+            return;
+        }
+        String who = RESIDENTS[random.nextInt(RESIDENTS.length)];
+        // One of each per world. The level's own entity list is the record:
+        // asking it is cheaper than a world flag and cannot drift out of sync
+        // with what is actually standing there.
+        for (Mob existing : this.entityManager.mobs) {
+            if (who.equals(existing.getStringID())) {
+                return;
+            }
+        }
+        for (int attempt = 0; attempt < 40; attempt++) {
+            int tileX = region.tileXOffset + random.getIntBetween(2, region.tileWidth - 3);
+            int tileY = region.tileYOffset + random.getIntBetween(2, region.tileHeight - 3);
+            if (!this.isTileWithinBounds(tileX, tileY) || this.isSolidTile(tileX, tileY)) {
+                continue;
+            }
+            if (this.getObjectID(tileX, tileY) != 0) {
+                continue;
+            }
+            // Only beside a workshop: the station is the landmark that makes
+            // the person findable rather than a figure alone in a field.
+            if (!this.hasWorkstationNear(tileX, tileY)) {
+                continue;
+            }
+            Mob mob = MobRegistry.getMob(who, this);
+            if (mob == null) {
+                return;
+            }
+            mob.canDespawn = false;
+            this.entityManager.addMob(mob, tileX * 32 + 16, tileY * 32 + 16);
+            return;
+        }
+    }
+
+    /** Is one of the three settlement stations within three tiles? */
+    private boolean hasWorkstationNear(int tileX, int tileY) {
+        for (int dx = -3; dx <= 3; dx++) {
+            for (int dy = -3; dy <= 3; dy++) {
+                int id = this.getObjectID(tileX + dx, tileY + dy);
+                if (id != 0
+                        && (id == stairwaytoheaven.settlement.SkyProfessions.windsilkLoomID
+                        || id == stairwaytoheaven.settlement.SkyProfessions.aetherForgeID
+                        || id == stairwaytoheaven.settlement.SkyProfessions.stormglassKilnID)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static final String[] RESIDENTS = {
+            "magpiesettler", "haldasettler", "ossiansettler",
+    };
+
+    /** Rare: a workshop with somebody still at it is the exception. */
+    private static final float RESIDENT_REGION_CHANCE = 0.16F;
+
     private void placeCloudLambFlock(Region region) {
         if (this.isClient()) {
             return;

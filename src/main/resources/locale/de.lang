@@ -185,6 +185,12 @@ cloudpufftreattip=Unwiderstehlich für Himmelskatzen. Riecht schwach nach Gewitt
 silverbelltip=Sie war Siggis. Er hasst sie
 
 [mob]
+magpiesettler=Elster
+haldasettler=Halda
+ossiansettler=Ossian Vane
+magpiesettlername=<name>, genannt Elster
+haldasettlername=<name> die Kellermeisterin
+ossiansettlername=Ossian <name>, der letzte Leser
 galehound=Sturmwindhund
 dawnpiercer=Morgenstecher
 zephyrfinch=Zephyrfink
@@ -224,6 +230,21 @@ veil=Der Schleier
 skyreach=Die Himmelsweite
 
 [misc]
+magpietalkpitch=Die kurze Fassung: Ich flog Fracht fuer die Skywatch, die Skywatch hoerte auf zu antworten, und seither sitze ich auf verzollter Ladung ohne Landeplatz. Gib mir ein Dach und einen Markt, und ich mache dich reich genug, dass du es bereust gefragt zu haben.
+magpietalk1=Alles in diesem Sack hat eine Seriennummer. Frag mich nach keiner davon.
+magpietalk2=Ich bestehle nicht die eigene Siedlung. Schreib das auf, das spart uns spaeter Streit.
+magpietalk3=Es fiel ohnehin. Ich habe nur arrangiert, wohin.
+magpietalk4=Bring mir Bergungsgut. Ich bin die Einzige hier oben, die anstaendig dafuer zahlt.
+haldatalkpitch=Ich habe die Vorraete gehuetet, nachdem der Letzte gegangen war. Vierzig Jahre Faesser zaehlen fuer niemanden. Ich komme mit - und ich bringe den Keller mit, du wirst wollen, was daraus kommt.
+haldatalk1=Ein Keller haelt die Zeit besser als eine Uhr. Beide sind geduldig. Nur eines lohnt das Oeffnen.
+haldatalk2=Bring mir das Rohe, ich gebe dir das Fertige zurueck. Das ist der ganze Handel.
+haldatalk3=Die Katzen sassen immer auf dem warmen Bottich. Ich brachte es nicht uebers Herz.
+haldatalk4=Alles hier oben schmeckt nach Sturm. Man lernt, das Wuerze zu nennen.
+ossiantalkpitch=Ich blieb wegen des Archivs, nicht wegen des Ordens. Die Haelfte ist unleserlich, die andere habe ich zu oft gelesen. Ich habe Dinge im Beutel von weiter draussen als diesem Himmel - und einen Preis, der dir nicht gefallen wird.
+ossiantalk1=Ich habe jede Liste gelesen, die die Skywatch fuehrte. Deiner ist der erste neue Name seit Langem.
+ossiantalk2=Was ich verkaufe, stammt nicht von hier. Frag nicht, woher.
+ossiantalk3=Der Turm ist keine Ruine. Eine Ruine hat aufgehoert, etwas zu bedeuten.
+ossiantalk4=Bring mir Barren, kein Erz. Fuer Schmelzen fehlt mir die Geduld.
 seanceneedbell=Der Kreis wartet. Er will das Silberglöckchen hören.
 seancealreadyveil=Der Schleier ist bereits überall um dich herum.
 riftopened=Die Glocke schlägt einmal an - und etwas auf der anderen Seite antwortet. Der Kreis reißt auf.
