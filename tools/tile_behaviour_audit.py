@@ -73,6 +73,7 @@ FLOOR, TERRAIN, LIQUID = "floor", "terrain", "liquid"
 # ---------------------------------------------------------------------------
 ROLES = {
     "cloudturftile": TERRAIN,
+    "aurorashoaltile": TERRAIN,
     "skystonetile": TERRAIN,
     "stormslatetile": TERRAIN,
     "mistseatile": LIQUID,

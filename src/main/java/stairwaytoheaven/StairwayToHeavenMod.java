@@ -126,6 +126,7 @@ public class StairwayToHeavenMod {
 
     private void registerTiles() {
         SkyRegistry.cloudturfTile = new CloudturfTile();
+        SkyRegistry.auroraShoalTile = new stairwaytoheaven.tiles.AuroraShoalTile();
         SkyRegistry.skystoneTile = new SkystoneTile();
         SkyRegistry.stormslateTile = new StormslateTile();
         SkyRegistry.mistseaTile = new MistseaTile();
@@ -133,6 +134,7 @@ public class StairwayToHeavenMod {
         // "...tile" suffix mirrors vanilla naming (rocktile vs. the "stone"
         // item) and keeps tile items from colliding with material items.
         SkyRegistry.cloudturfID = TileRegistry.registerTile("cloudturftile", SkyRegistry.cloudturfTile, 1.0F, true);
+        SkyRegistry.auroraShoalID = TileRegistry.registerTile("aurorashoaltile", SkyRegistry.auroraShoalTile, 1.0F, true);
         SkyRegistry.skystoneTileID = TileRegistry.registerTile("skystonetile", SkyRegistry.skystoneTile, 1.0F, true);
         SkyRegistry.stormslateID = TileRegistry.registerTile("stormslatetile", SkyRegistry.stormslateTile, 1.0F, true);
         SkyCloudmarbleSet.registerTiles();

@@ -425,6 +425,81 @@ def features_cloudturf(c, x0, y0, salt, k):
             c.put(px + 1, py, ramp["deep"])
 
 
+
+def material_auroraturf(c, x0, y0, salt, frame=0):
+    """Cold dawn turf of the Aurora Shoals.
+
+    Built exactly like `material_cloudturf` -- a quiet clumped mottle on
+    `grain_d`/`grain_l`, ~7 RGB either side of base, on the 2x2 block grid -- so
+    the two grounds sit in the same construction and differ only in colour and
+    in what grows on them. The bed is a shade cooler and flatter than the
+    meadow: dawn light on frosted turf, not tussock. `deep`/`light`/`hi` and the
+    biome's rose and teal are spent exclusively in the features, where their
+    contrast buys a readable motif.
+    """
+    ramp = palette.AURORASHOAL
+    vs = _block_salt(x0, y0, salt)
+    field = _blend_fields(_mottle(vs ^ 0xA5C0, blur=2, passes=2),
+                          _mottle(vs ^ 0x6E31, blur=5, passes=2), 0.42)
+    # Slightly calmer than the meadow (15/70/15 against 17/66/17): a frosted
+    # flat reads smoother than turf, and the Shoals' interest is meant to come
+    # from what stands ON the ground, not from the ground itself.
+    band = _bander_blocks(field, (0.15, 0.85))
+    tone = (ramp["grain_d"], ramp["base"], ramp["grain_l"])
+    for x in range(32):
+        for y in range(32):
+            gx, gy = (x0 + x) % 32, (y0 + y) % 32
+            bx, by = _blk(gx, gy)
+            b = band(bx, by)
+            col = tone[b]
+            # A lit rim on the UPPER side of each pale patch, the opposite hand
+            # to the meadow's lit lip below a hollow: low dawn light rakes these
+            # flats from the north-west rather than sitting overhead.
+            if b == 2 and band(bx, (by - 2) % 32) < 2:
+                col = ramp["hi"] if (bx + by) % 8 == 0 else ramp["grain_l"]
+            c.put(x0 + x, y0 + y, col)
+
+
+def features_auroraturf(c, x0, y0, salt, k):
+    """Four variants: bare frost, a rime patch, a shard scatter, a bloom seed.
+
+    Sparse and high-contrast, which is the division of labour the whole tile
+    pass established -- quiet bed, loud features. The teal and rose are the
+    Shoals' own accent and appear NOWHERE else on a ground in this mod, which
+    is what makes the biome recognisable underfoot.
+    """
+    ramp = palette.AURORASHOAL
+    rng = Rng(salt ^ 0xA5C0)
+
+    def rime(px, py):
+        """A small frost star: three arms off a lit core. Deliberately not a
+        five-point star -- `_block_snap` dilates every mark to a 2x2 block, so a
+        motif drawn at vanilla's 1px scale doubles before the player sees it."""
+        c.put(px, py, ramp["light"])
+        for dx, dy in ((-2, 0), (2, 0), (0, 2)):
+            c.put(px + dx, py + dy, ramp["grain_l"])
+
+    # Accent budget, tuned on a 5x5 field rather than per cell. The first cut
+    # put a mark in three of four variants and read as a peppered flat next to
+    # cloudturf's sparse tussocks -- and each 1px mark is a 2x2 block once
+    # snapped. Two of four variants are bare now, and the Shoals' rose and teal
+    # appear once per cell at most: they are the biome's signature and stop
+    # being one if the ground is covered in them.
+    if k in (0, 1):                              # bare dawn flat
+        if k == 1:                               # ...with a single frost star
+            rime(x0 + rng.range(8, 23), y0 + rng.range(8, 23))
+        return
+    if k == 2:                                   # one prism shard, half-buried
+        sx, sy = x0 + rng.range(6, 25), y0 + rng.range(6, 25)
+        c.put(sx, sy, ramp["teal"])
+        c.put(sx, sy + 1, ramp["deep"])
+    else:                                        # a bloom seed taking root
+        bx, by = x0 + rng.range(8, 23), y0 + rng.range(8, 23)
+        c.put(bx, by, ramp["bloom"])
+        c.put(bx, by + 1, ramp["deep"])
+        c.put(x0 + rng.range(4, 27), y0 + rng.range(4, 27), ramp["grain_l"])
+
+
 def material_skystone(c, x0, y0, salt, frame=0):
     """Pale weathered skystone, built like vanilla `rock_splat`: a clumped grit
     mottle with a broken plate network drawn over it. The plates come from the
@@ -1017,6 +1092,7 @@ def features_prismfloor(c, x0, y0, salt, k):
 # 2x2 unit is the whole sheet's, not just the bed's. Wrapping here rather than
 # inside build_splat keeps every other material on this sheet — and gen_veil's,
 # which call build_splat too — bit-for-bit unchanged.
+features_auroraturf = _block_snap(features_auroraturf)
 features_cloudturf = _block_snap(features_cloudturf)
 features_skystone = _block_snap(features_skystone)
 features_stormslate = _block_snap(features_stormslate)

@@ -735,6 +735,11 @@ public final class SkyTerrainPainter {
             groundID = SkyRegistry.stormslateID;
         } else if (biomeID == BIOME_SKYWAY) {
             groundID = SkyCloudmarbleSet.skywayTileID;
+        } else if (isAurora) {
+            // The Shoals used to fall through to cloudturf with everything
+            // else, so the rarest biome wore the commonest floor. isAurora was
+            // computed above and never spent.
+            groundID = SkyRegistry.auroraShoalID;
         } else {
             groundID = SkyRegistry.cloudturfID;
         }

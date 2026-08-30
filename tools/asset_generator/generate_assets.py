@@ -88,6 +88,8 @@ def main():
     # richer repetition breakup across large meadows.
     gen_splats.build_splat(f"{out}/tiles/cloudturf_splat.png", gen_splats.material_cloudturf, 6, 0xC1,
                            features=gen_splats.features_cloudturf)
+    gen_splats.build_splat(f"{out}/tiles/aurorashoal_splat.png", gen_splats.material_auroraturf, 5, 0xA5,
+                           features=gen_splats.features_auroraturf)
     gen_splats.build_splat(f"{out}/tiles/skystone_splat.png", gen_splats.material_skystone, 5, 0x51,
                            features=gen_splats.features_skystone)
     gen_splats.build_splat(f"{out}/tiles/stormslate_splat.png", gen_splats.material_stormslate, 6, 0x57,

@@ -77,11 +77,13 @@ public final class SkyRegistry {
     // ===== Tiles =====
 
     public static CloudturfTile cloudturfTile;
+    public static stairwaytoheaven.tiles.AuroraShoalTile auroraShoalTile;
     public static SkystoneTile skystoneTile;
     public static StormslateTile stormslateTile;
     public static MistseaTile mistseaTile;
 
     public static int cloudturfID;
+    public static int auroraShoalID;
     public static int skystoneTileID;
     public static int stormslateID;
     public static int mistseaID;

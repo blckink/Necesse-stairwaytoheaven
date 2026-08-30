@@ -63,6 +63,7 @@ them. Anything registered from now on does not get that exemption.
 - `cloudpufftreat`
 - `cloudsapling`
 - `cloudtree`
+- `aurorashoaltile`
 - `cloudturftile`
 - `cloudwood`
 - `cragbloom`
