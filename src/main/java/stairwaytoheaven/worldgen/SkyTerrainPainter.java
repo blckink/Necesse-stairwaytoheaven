@@ -6,6 +6,7 @@ import stairwaytoheaven.SkyCloudmarbleSet;
 import stairwaytoheaven.SkyRegistry;
 
 import java.awt.Point;
+import stairwaytoheaven.settlement.SkyProfessions;
 
 /**
  * Paints one region of the Skyreach: floating islands over the Mistsea, with the
@@ -244,6 +245,11 @@ public final class SkyTerrainPainter {
      * material choices stay in one readable table.
      */
     public static final int SALT_BUILT_PICK = 67;
+
+    /** Abandoned workshops: a lattice of derelict Skywatch work sites. */
+    public static final int SALT_WORKSHOP = 149;
+    public static final int WORKSHOP_CELL = 170;
+    public static final float WORKSHOP_CHANCE = 0.70F;
 
     /** Wreck sites: a lattice of rare crash scenes. */
     public static final int SALT_WRECK = 137;
@@ -606,6 +612,74 @@ public final class SkyTerrainPainter {
                 : (roll < 0.18F ? SkyRegistry.skyBalloonID : 0);
     }
 
+    /**
+     * An abandoned Skywatch workshop: one of the three settlement stations,
+     * standing where its owner left it, with a crate and some clutter.
+     *
+     * WHY THIS EXISTS. `windsilkloom`, `aetherforge` and `stormglasskiln` were
+     * registered, given recipes, given a working
+     * {@code streamSettlementRecipes} and asserted by the integration test --
+     * and referenced by worldgen exactly ZERO times. The player's report is the
+     * direct consequence: "auch ihre Stationen gibt es nirgends". A station
+     * obtainable only by crafting a thing you have never seen is a thing nobody
+     * discovers.
+     */
+    public static int workshopObject(int seed, int tileX, int tileY) {
+        int cellX = Math.floorDiv(tileX, WORKSHOP_CELL);
+        int cellY = Math.floorDiv(tileY, WORKSHOP_CELL);
+        float best = Float.MAX_VALUE;
+        int siteTileX = 0;
+        int siteTileY = 0;
+        int pick = 0;
+        for (int ox = -1; ox <= 1; ox++) {
+            for (int oy = -1; oy <= 1; oy++) {
+                int cx = cellX + ox;
+                int cy = cellY + oy;
+                if (SkyNoise.hash(seed + SALT_WORKSHOP, cx, cy) >= WORKSHOP_CHANCE) {
+                    continue;
+                }
+                float sx = cx * WORKSHOP_CELL
+                        + SkyNoise.hash(seed + SALT_WORKSHOP + 1, cx, cy) * WORKSHOP_CELL;
+                float sy = cy * WORKSHOP_CELL
+                        + SkyNoise.hash(seed + SALT_WORKSHOP + 2, cx, cy) * WORKSHOP_CELL;
+                float dx = tileX - sx;
+                float dy = tileY - sy;
+                float d = (float) Math.sqrt(dx * dx + dy * dy);
+                if (d < best) {
+                    best = d;
+                    siteTileX = Math.round(sx);
+                    siteTileY = Math.round(sy);
+                    pick = (int) (SkyNoise.hash(seed + SALT_WORKSHOP + 3, cx, cy) * 3.0F) % 3;
+                }
+            }
+        }
+        if (best > 4.0F) {
+            return 0;
+        }
+        // A workshop is a small FLOOR, not a point. The first cut put the
+        // station on the single tile nearest the hashed site and produced zero
+        // of them across a 400x400 window: this method is only ever called on
+        // land, and 61% of the sky is Mistsea, so the exact centre tile is
+        // usually sea and the site yielded nothing but its ring of rubble.
+        // A 1.5-tile disc always has land in it if the ring does, and two
+        // stations sharing one derelict floor reads as a workshop rather than
+        // as a duplicate.
+        float here = SkyNoise.tileRoll(seed, tileX, tileY, SALT_WORKSHOP + 5);
+        if (best < 1.5F && here < 0.55F) {
+            int which = (pick + (int) (here * 7.0F)) % 3;
+            if (which == 0) {
+                return SkyProfessions.windsilkLoomID;
+            }
+            return which == 1 ? SkyProfessions.aetherForgeID : SkyProfessions.stormglassKilnID;
+        }
+        float roll = SkyNoise.tileRoll(seed, tileX, tileY, SALT_WORKSHOP + 4);
+        if (best < 2.4F) {
+            return roll < 0.22F ? SkyRegistry.skyCrateID
+                    : (roll < 0.40F ? SkyRegistry.skywatchRubbleID : 0);
+        }
+        return roll < 0.14F ? SkyRegistry.skywatchRubbleID : 0;
+    }
+
     public static int auroraColonyObject(int seed, int tileX, int tileY) {
         int cellX = Math.floorDiv(tileX, AURORA_COLONY_CELL);
         int cellY = Math.floorDiv(tileY, AURORA_COLONY_CELL);
@@ -884,6 +958,12 @@ public final class SkyTerrainPainter {
             if (wreck != 0) {
                 return pack(groundID, wreck, biomeID, false);
             }
+        if (objectID == 0) {
+            int shop = workshopObject(seed, tileX, tileY);
+            if (shop != 0) {
+                return pack(groundID, shop, biomeID, false);
+            }
+        }
         }
         if (objectID == 0 && SkyNoise.tileRoll(seed, tileX, tileY, SALT_CRATE)
                 < (isRockPatch ? CRATE_CHANCE_BARREN : CRATE_CHANCE)) {

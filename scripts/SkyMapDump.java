@@ -47,6 +47,11 @@ public class SkyMapDump {
     private static final Class<?>[] ID_HOLDERS = {
             SkyRegistry.class,
             stairwaytoheaven.SkyCloudmarbleSet.class,
+            // The settlement stations live in their own holder, and leaving it
+            // out did exactly what the comment above warns about: the painter
+            // was placing looms, forges and kilns and the dump reported zero of
+            // them, because their IDs were still 0 and 0 means "no object".
+            stairwaytoheaven.settlement.SkyProfessions.class,
     };
 
     public static void main(String[] args) throws Exception {
@@ -194,6 +199,9 @@ public class SkyMapDump {
             }
         }
         // Readable aliases for what those two actually resolve to in game.
+        NAMES.put(stairwaytoheaven.settlement.SkyProfessions.windsilkLoomID, "windsilkLoom");
+        NAMES.put(stairwaytoheaven.settlement.SkyProfessions.aetherForgeID, "aetherForge");
+        NAMES.put(stairwaytoheaven.settlement.SkyProfessions.stormglassKilnID, "stormglassKiln");
         NAMES.put(SkyRegistry.skyroadTileID, "skyroad");
         NAMES.put(SkyRegistry.skyplinthTileID, "skyplinth");
     }
