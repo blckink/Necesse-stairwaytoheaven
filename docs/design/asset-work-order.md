@@ -36,29 +36,38 @@ Do not renegotiate a number without re-measuring the analogue and saying so.
 
 ## Queue
 
-### 1. Skystone Golem — wrong canvas, not just small
-- [ ] **`mobs/skystonegolem.png`**
+### 1. Skystone Golem — drawn small, on a cell that is too small
+- [ ] **`mobs/skystonegolem.png`** + a Java change (reviewer's, not the worker's)
 
 The player: *"golem sollte neu gemacht werden weil er viel zu klein ist statt
-die grösse eines Golems zu haben im Game."* Measured, and it is worse than
-"small" — it is on the **smallest mob cell the engine offers**:
+die grösse eines Golems zu haben im Game."*
 
-| | mass | bbox | cell |
-|---|---|---|---|
-| vanilla `ashgolem` | 4168 | 60x160 | **64x160** |
-| vanilla `furnacegolem` | 8808 | 166x112 | **192x112** |
-| vanilla `swampguardian` | 3268 | 70x58 | 80x72 |
-| vanilla `crystalgolem` / `ascendedgolem` | 1596 | 36x80 | **64x80** |
-| **ours** | **1390** | **43x50** | **64x64** |
+**Correction, 2026-08-30.** An earlier version of this entry claimed vanilla
+golems use 64x80 cells. That was wrong and came from a measuring script that
+divided sheet height by 4 rather than from the engine. Read the renderers:
+vanilla mob cells are **square** — `.sprite(x, y, size)` — and only the SIZE
+varies. `boar` and `sheep`, ordinary animals, have exactly the same 384x320
+sheet as `crystalgolem` and `ascendedgolem`. So our golem is not on a wrong
+canvas; it is drawn small on the standard one, and the cell itself is the
+smaller of the two things wrong with it.
 
-Target: the **`crystalgolem` / `ascendedgolem` format — 64x80 cells, sheet
-384x320**, 6 columns x 4 rows (Up/Right/Down/Left). Mass >= 1600, bbox at least
-40x76. It is an armoured bruiser in the Tungsten-plus tier, so it should read
-heavier than a boar (1536), not lighter.
-Open `ascendedgolem.png` and `crystalgolem.png` in the dump first — they are the
-exact format and they are the same kind of creature.
-Watch: `SkyRegistry`/`SkyMobs` may hardcode 64x64 draw offsets; if the taller
-cell needs a Java change, **say so and stop** — that is the reviewer's to make.
+    vanilla FurnaceGolemMob   .sprite(x, y, 96)    sheet 1152x448
+    vanilla AshGolemMob       .sprite(x, y, spriteSize)  sheet 640x640
+    vanilla crystal/ascended  .sprite(x, y, 64)    sheet 384x320
+    vanilla boar (an animal)  64                   1536px in its densest frame
+    OURS skystonegolem        .sprite(x, y, 64)    1390px, bbox 43x50
+
+So it is lighter than a BOAR while being the mod's armoured bruiser.
+
+Target: move to the **furnace golem's 96px square cell** — sheet **576x384**,
+6 columns x 4 rows, rows Up/Right/Down/Left. Densest frame **>= 2600 opaque
+px**, bbox at least **62x76**. Reference `furnacegolem.png` for how vanilla
+fills a 96 cell, and `crystalgolem.png` for golem anatomy at 64.
+
+**The Java is the reviewer's.** `SkystoneGolemMob` hardcodes
+`.sprite(sprite.x, sprite.y, 64)` and `drawX -32 / drawY -51`; those become 96
+and their matching offsets. A worker who changes only the PNG will produce a
+scrambled mob. Say what you need and stop.
 
 ### 2. Cloud Lamb — a sheep with different wool has no reason to exist
 - [ ] **`mobs/cloudlamb.png`**, `mobs/cloudlamb_sheared.png`,
