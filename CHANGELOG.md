@@ -3,6 +3,59 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [Unreleased] — the ground the player walks on — 2026-08-30
+
+### Fixed
+- **Every natural terrain tile was flat.** 63-114 pixels of texture per
+  full-tile cell, against 294 for `snow_splat`, the sparsest natural ground in
+  vanilla Necesse, and a median of 603 across 37 of them. cloudturf alone is 54%
+  of the Skyreach's land. Now 364-406, at vanilla's loudness.
+- **The four craftable floors** had the opposite fault: density already in band,
+  but louder than any vanilla floor (mean 28-41 against 7.9-27.0) and built on
+  single pixels. Boards, courses and tile seams still read; checked on a 4x4
+  field against vanilla `deadwoodfloor`, `bamboofloor` and
+  `deepstonetiledfloor`.
+- **`murkwater`** was the flattest surface in the mod at 70, missed by the
+  terrain pass because it is a liquid. Its green glint is gone, deliberately:
+  Necesse's animation time is global, so it made every water tile in view blink
+  on the same tick.
+
+### Added
+- **`aurorashoaltile` (Dawnturf / Morgengras)** — the Aurora Shoals had no
+  ground of their own and wore the Driftlands' cloudturf, the commonest floor in
+  the sky. Complete family: palette ramp, generator material and features, tile
+  class at terrain priority 215, registration, the painter branch that was
+  missing, both locales, ledger row and audit role. Proven placed, not merely
+  registered: 967 tiles over a 400x400 window from the offline painter dump.
+- **`tools/tile_behaviour_audit.py` now checks the texture itself** — density,
+  mean loudness and 2x2 block coherence, per role, against bands measured off
+  the vanilla dump. Verified by making it fail on the pre-fix cloudturf.
+
+### Changed
+- `palette.py` gained `grain_d` / `grain_l` at ~7 RGB either side of base on
+  every ground ramp. The smallest existing step was d25-d32 where vanilla
+  carries its whole grass texture inside d5, so any density built from the old
+  ramps was automatically several times too loud. Same hues; no biome palette
+  shift, and no other sprite changed.
+
+### Learned, and written down
+- Every vanilla splat in the game is **100% coherent on a 2x2 pixel block
+  grid** — natural ground and crafted floor alike, without one exception. That
+  is how vanilla reaches its density without dithering. This mod broke it on all
+  fifteen sheets.
+- Density alone is a **gameable** target. The first repair pass hit the band
+  exactly (cloudturf 345 against vanilla grass's 344) and looked like camouflage
+  netting, because the number counts pixels and says nothing about how far they
+  deviate. Full reasoning in `docs/TECHNICAL_LEARNINGS.md`.
+
+### Not done, on purpose
+- `beetlefreak` and `skyway` are converted from supplied reference art; holding
+  a painting to a procedural rule measures the wrong thing.
+- `mistsea` is recorded in the audit's `KNOWN_UNFIXED` rather than silently
+  skipped. Its density is fine but it runs mean 31.8-49.7 at 40-48% coherence.
+  A cloud deck legitimately carries more relief than still water, so it wants a
+  deliberate pass with the player's eyes on it.
+
 ## [0.6.0] — "The Working Sky" — 2026-08-30
 
 The release that gives the sky a reason to be lived in rather than visited: a

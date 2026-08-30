@@ -2504,3 +2504,60 @@ The mod's tree saplings already document this trap; a fourth family hit it.
 x53 / expected x53` — the archetype swap did not disturb worldgen placement,
 because `SkyTerrainPainter` places it by registry ID and the string ID is
 unchanged.
+
+## What a vanilla ground tile actually is, in three numbers
+
+**[run]** Measured across the vanilla tile dump (240 sheets; the repo's own
+`vanilla-sprites/` had only items, mobs and objects until 2026-08-30 — the
+tiles were sitting unused in the sprite dump beside it and are now copied in).
+Every figure below is per 32x32 full-tile variant cell, cells (3..6, 0).
+
+| | density | mean \|dRGB\| | peak |
+|---|---|---|---|
+| natural ground, 37 sheets | 294-993 (median 603) | 5.0-16.7 | 5-33 |
+| crafted floors, 9 sheets | 446-771 | 7.9-27.0 | 16-102 |
+| liquid (lava) | 401 | 4.3 | 8 |
+
+- **density** = pixels that are not the single most common colour.
+- **mean |dRGB|** = how far those pixels deviate from it. `grass_splat` carries
+  its ENTIRE texture inside **five RGB levels**.
+
+**[run] Every vanilla splat is 100% coherent on a 2x2 pixel block grid.** grass,
+dirt, ash, mud, snow, rock and all nine crafted floors: exactly 100.0%, no
+exceptions. The tone unit is a 2x2 block, never a lone pixel. That is how vanilla
+reaches 300-600 density without dithering, which the style guide forbids as
+texture. This mod violated it on all fifteen sheets.
+
+**The trap, paid for twice.** Density alone is a gameable target: it counts
+pixels and says nothing about how far they deviate or what unit they are drawn
+in. A first repair pass hit the band exactly — cloudturf 345 against vanilla
+grass's 344 — and looked like camouflage netting, measuring mean 35 against
+vanilla's 5. Both agents had optimised the brief honestly; the brief was wrong.
+**Density, loudness and block unit have to be gated together**, which
+`tools/tile_behaviour_audit.py` now does.
+
+**[run] The palette is what caps loudness.** The terrain ramps' smallest step
+from base was d25-d32 where vanilla's whole texture range is d5, so ANY density
+built from them was automatically 2-7x too loud. Fixed by adding `grain_d` /
+`grain_l` at ~7 RGB either side of base on every ground ramp — same hue, nearer
+the base. That is a palette EXTENSION, not one of the biome palette shifts the
+playtest marks KEEP, and it changed no other sprite.
+
+**Quiet bed, loud features.** Vanilla `ash_splat` reaches 514 density on a
+nearly uniform dark bed carrying LARGE black debris shapes. The bed obeys the
+contrast ceiling; the motifs do not, and should not. An early draft of the audit
+checked peak deviation and flagged six sheets for exactly the tufts, sparks and
+flecks the agents had been told to preserve — the peak is set by a handful of
+feature pixels and vanilla's own floors peak at 102. The mean is what measures
+whether the BED is loud.
+
+**Liquids animate, so texture has to travel coherently.** A liquid splat is
+224*frames x 96*variants on an 8-frame ping-pong. A grain re-randomised per
+frame boils rather than flows. Murkwater's bed is frame-independent and only one
+ripple crest travels, one 2px block per frame: frame-to-frame delta 0.34-0.46
+against a within-frame energy of 9-10.
+
+**[jar] Animation time is global.** A bright accent that appears on certain
+frames appears on EVERY tile of that liquid at the same instant — a field-wide
+blink, not a twinkle. Murkwater's green glint was removed for that reason.
+Position-varied features are the way to get sparkle; a time-keyed bed is not.

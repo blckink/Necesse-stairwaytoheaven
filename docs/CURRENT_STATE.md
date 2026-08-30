@@ -223,6 +223,51 @@ coherent set per pass, per the bounded-art rule in `AGENTS.md`. Worst first:
 now sits beside it in the inventory, and the flower should not read thinner than
 a petal picked off it.
 
+## The tile pass (2026-08-30) — IMPLEMENTED, not player-confirmed
+
+Every ground surface in the mod, measured against the vanilla tile dump for the
+first time. The dump had been sitting beside the repo unused: `vanilla-sprites/`
+held items, mobs and objects but no tiles, so no tile had ever been compared to
+anything.
+
+**All six natural terrains were flat** — 63-114 density where vanilla's
+sparsest natural ground, snow, carries 294. The four craftable floors were the
+opposite problem: density fine, but louder than any vanilla floor and built on
+single pixels. And `murkwater` was the flattest surface in the game at 70.
+
+|  | density | mean \|dRGB\| | 2x2 |
+|---|---|---|---|
+| cloudturf | 63 → 378 | 7.0 | 100% |
+| skystone | 70 → 396 | 7.0 | 100% |
+| stormslate | 88 → 406 | 10.7 | 100% |
+| blackpeat | 64 → 399 | 8.7 | 100% |
+| murkmoss | 64 → 364 | 10.1 | 100% |
+| ashsand | 114 → 372 | 9.9 | 100% |
+| charfloor | 548 → 650 | 34.8 → 11.8 | 62% → 100% |
+| gloomwoodfloor | 590 → 642 | 28.1 → 11.6 | 68% → 100% |
+| nimbusfloor | 608 → 668 | 40.9 → 18.4 | 61% → 100% |
+| prismfloor | 610 → 686 | 39.9 → 20.3 | 59% → 100% |
+| murkwater ×2 | 70 → 361/362 | 27/21 → 10.5/9.2 | 84% → 100% |
+
+**A new tile: `aurorashoaltile` (Dawnturf).** The Aurora Shoals had no ground of
+their own — the painter's else-branch handed them cloudturf, so the rarest biome
+wore the commonest floor. Full family: ramp, material, tile class at priority
+215, registration, painter branch, both locales, ledger row, audit role. Proven
+placed by `scripts/sky_map_render.sh`: 967 tiles over a 400x400 window.
+
+**The gate changed too.** `tile_behaviour_audit.py` now checks density, mean
+loudness and 2x2 block coherence per role, with bands measured off vanilla.
+Verified by making it fail on the pre-fix cloudturf.
+
+**Deliberately not touched:** `beetlefreak` and `skyway` are converted from the
+user's own reference art — a painting is not judged by a procedural rule.
+`mistsea` is in `KNOWN_UNFIXED`: density is fine (617-704) but it runs mean
+31.8-49.7 at 40-48% coherence. It is the sky's signature surface and a cloud
+deck legitimately has more relief than still water, so it wants its own pass
+with the player's eyes on it, not a drive-by.
+
+**Nobody has walked on any of this.**
+
 ## Known issues — open
 
 Ordered by the player's own priority. Full detail in `docs/PLAYTEST_LOG.md`.
