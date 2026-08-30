@@ -10,38 +10,239 @@ import gen_splats
 CELL = 64
 
 
+# --- vanilla natural-ground grain ---------------------------------------------
+#
+# Measured off the vanilla sheets (ash/mud/cryptash/dirt/grass/snow/sand_splat):
+# every natural-ground cell is 100% coherent on a 2x2 PIXEL BLOCK grid - the
+# tone unit is a 2x2 block, never a lone pixel. That is where vanilla gets its
+# 294-603 "pixels unlike the modal colour" per 1024 without reading as dither,
+# and why a 1px speckle at 3-6% density capped out at 64. Tone coverage is then
+# swelled and thinned by a low-frequency drift field, so the surface reads as
+# patches and grain rather than static.
+#
+# Everything below is exactly periodic on 32px by construction (block index
+# mod 16; drift built from integer-frequency cosines over 32px), so it stays
+# locked to the tile grid and adjacent tiles show no seam.
+#
+# CONTRAST, measured the same way (mean/max |dRGB| of every non-modal pixel
+# from the cell's modal colour, full-tile cell (3,0)):
+#
+#   grass 5.0/5   mud 5.2/12   rock 9.7/13   ash 13.0/25   dirt 16.7/33
+#
+# Vanilla carries an ENTIRE ground texture inside 5-13 levels. The bulk tones
+# sit 5-12 off the base and the loud steps are a thin minority - vanilla ash
+# is 320px at d9/d12 plus 132px at d20/d25, and vanilla sand's whole dune
+# structure is two tones 5 and 7 levels apart. So the bed is built from the
+# `grain_d`/`grain_l` steps (~7 off base) and `deep`/`light` appear only as
+# sparse accents; `hi` and `tuft` are left to the features and set pieces.
+# Density alone was the wrong target: it rewards all-over noise, and a bed of
+# loud steps at the right density reads as static rather than as ground.
+
+
+def _ground_salt(salt, x0, y0):
+    """Grain seed for one cell of a splat block.
+
+    build_splat hands a material `vsalt + cx*17 + cy*53` with x0=cx*32,
+    y0=cy*32, so the section salt comes back exactly. The four full-tile
+    variants (3..6, 0) each get their OWN field on top of it - that is what
+    vanilla does (dirt_splat's four full cells are four independent grains) and
+    it is what stops a 4x4 field of placed tiles reading as one repeated stamp.
+    Every blend cell shares the one section field, so the fading edges stay a
+    single consistent surface. Both wrap on the 32px grid, so neither seams.
+
+    NB: the recovery mirrors gen_splats.build_splat's salt formula; if that
+    formula changes this quietly degrades to a per-cell field (still seamless,
+    just less deliberate)."""
+    cx, cy = x0 // 32, y0 // 32
+    base = (salt - cx * 17 - cy * 53) & 0xFFFFFFFF
+    if cy == 0 and 3 <= cx <= 6:
+        return (base ^ (0x9E3779B9 * (cx - 2))) & 0xFFFFFFFF
+    return base
+
+
+def _drift(salt, waves=3):
+    """Smooth patch field across the tile, exactly periodic on 32px."""
+    rng = Rng(salt ^ 0xD817F)
+    terms = []
+    for _ in range(waves):
+        fx, fy = rng.range(0, 3), rng.range(0, 3)
+        if fx == 0 and fy == 0:
+            fx = 1
+        terms.append((fx, fy, rng.float() * 2.0 * math.pi))
+
+    def field(gx, gy):
+        v = 0.0
+        for (fx, fy, ph) in terms:
+            v += math.cos(2.0 * math.pi * (fx * gx + fy * gy) / 32.0 + ph)
+        return v / len(terms)
+
+    return field
+
+
+def _blk(c, x, y, size, color):
+    for yy in range(size):
+        for xx in range(size):
+            c.put(x + xx, y + yy, color)
+
+
+def _fp(c, x, y, color):
+    """Paint a feature mark as the 2x2 BLOCK that contains (x, y).
+
+    Vanilla's full-variant cells are 100% coherent on the 2x2 pixel grid
+    INCLUDING their debris and tuft motifs - ash_splat's black flakes are
+    block-built, not stippled. Our features were laid with bare c.put, which
+    dropped the cells that carry them to 95-99% coherence and made the motifs
+    read as dither rather than as objects. Placement, shape and tone are
+    unchanged; only the mark unit is. Cell origins are multiples of 32, so
+    snapping on the global even grid keeps every block inside its cell.
+    """
+    _blk(c, x & ~1, y & ~1, 2, color)
+
+
+def _fblob(c, cx, cy, r, color, rng, lumps=4):
+    """Canvas.blob's shape, painted in 2x2 blocks (see _fp)."""
+    els = [(cx, cy, float(r), r * 0.85)]
+    for _ in range(lumps):
+        ox = rng.range(-int(r * 0.7), int(r * 0.7))
+        oy = rng.range(-int(r * 0.5), int(r * 0.5))
+        lr = max(1.0, r * (0.35 + rng.float() * 0.35))
+        els.append((cx + ox, cy + oy, lr, lr * 0.8))
+    reach = int(r * 2) + 4
+    for by in range((cy - reach) & ~1, cy + reach, 2):
+        for bx in range((cx - reach) & ~1, cx + reach, 2):
+            px, py = bx + 0.5, by + 0.5
+            for (ex, ey, rx, ry) in els:
+                if ((px - ex) / rx) ** 2 + ((py - ey) / ry) ** 2 <= 1.0:
+                    _blk(c, bx, by, 2, color)
+                    break
+
+
+def _grain(c, x0, y0, salt, base, tones, gain=0.9, size=2):
+    """Paint one 32x32 cell as vanilla 2x2 ground grain.
+
+    `tones` is [(coverage, colour), ...] or [(coverage, colour, band), ...];
+    each tone carries its own drift field, so its coverage swells and thins
+    across the tile into patches instead of scattering evenly. `band` is an
+    optional (fx, fy, amp) directional wave laid on top of that drift - one
+    integer cycle per 32px, so it stays seamless - which is how vanilla
+    sand_splat gets its broad dune banding. Unclaimed blocks take `base`, which
+    has to stay the modal colour: keep the coverages summing well under 0.5."""
+    fields = [_drift(salt ^ (0x51F * (i + 3))) for i in range(len(tones))]
+    phases = [Rng(salt ^ (0x7A3 * (i + 1))).float() * 2.0 * math.pi
+              for i in range(len(tones))]
+    n = 32 // size
+    for by in range(n):
+        for bx in range(n):
+            gx, gy = bx * size, by * size
+            h = Rng(((bx * 7349 + by * 12611) ^ salt ^ 0x2B10C) & 0xFFFFFFFF).float()
+            acc, col = 0.0, base
+            for i, tone in enumerate(tones):
+                frac, tint = tone[0], tone[1]
+                d = fields[i](gx, gy)
+                if len(tone) > 2 and tone[2] is not None:
+                    fx, fy, amp = tone[2]
+                    d += amp * math.cos(
+                        2.0 * math.pi * (fx * gx + fy * gy) / 32.0 + phases[i])
+                p = frac * (1.0 + gain * d)
+                if p > 0.0:
+                    acc += p
+                if h < acc:
+                    col = tint
+                    break
+            _blk(c, x0 + gx, y0 + gy, size, col)
+
+
 # --- terrain splat materials --------------------------------------------------
 
 def material_murkmoss(c, x0, y0, salt, frame=0):
-    gen_splats._speckle_cell(c, x0, y0, palette.MURKMOSS, 0x3E110000, density=0.05)
+    """Drowned moss, built like vanilla grass_splat: 2x2 grain that clumps into
+    wet and dry patches, plus short horizontal strands - vanilla's grass grain
+    runs along the blade direction rather than scattering. The bulk of both the
+    grain and the strands is the two ~7-level `grain_*` steps; `deep`/`light`
+    are sparse accents. The poison green now lives entirely in the tuft motifs
+    of features_murkmoss, which is what lets it read at all: on a bed that was
+    itself 22-50 levels loud, it was just more noise."""
+    m = palette.MURKMOSS
+    s = _ground_salt(salt, x0, y0)
+    _grain(c, x0, y0, s, m["base"], [
+        (0.155, m["grain_d"]),
+        (0.095, m["grain_l"]),
+        (0.030, m["deep"]),
+        (0.015, m["light"]),
+    ], gain=1.35)
+    rng = Rng(s ^ 0x5711)
+    for _ in range(6):
+        bx, by, ln = rng.range(0, 15), rng.range(0, 15), rng.range(2, 4)
+        r = rng.float()
+        tone = m["deep"] if r < 0.2 else (m["grain_l"] if r < 0.5
+                                          else m["grain_d"])
+        for i in range(ln):
+            _blk(c, x0 + ((bx + i) % 16) * 2, y0 + by * 2, 2, tone)
+
+
+def material_blackpeat(c, x0, y0, salt, frame=0):
+    """Sodden black peat on vanilla mud_splat/dirt_splat's construction: 2x2
+    grain clumped by drift into waterlogged hollows and drier crust. The bed is
+    the two ~7-level `grain_*` steps; `deep` hollows and `light` sheen are
+    sparse accents on top, and `hi` is left to the features - one `hi` block is
+    34 levels off the base, past the whole sheet's contrast budget."""
+    p = palette.BLACKPEAT
+    s = _ground_salt(salt, x0, y0)
+    _grain(c, x0, y0, s, p["base"], [
+        (0.180, p["grain_d"]),
+        (0.115, p["grain_l"]),
+        (0.045, p["deep"]),
+        (0.025, p["light"]),
+    ], gain=1.35)
+
+
+def material_ashsand(c, x0, y0, salt, frame=0):
+    """Bone-ash flats on vanilla sand_splat's construction. The wind ripple is
+    sand_splat's BROAD low-contrast diagonal banding - one cycle per 32px, dark
+    banks and pale crests in antiphase - rather than a 16px high-contrast
+    diagonal, which read as corduroy across a field of placed tiles.
+
+    Vanilla sand carries that entire dune structure in two tones 5 and 7 levels
+    apart, so the banding here is carried by the antiphase COVERAGE of
+    `grain_d` and `grain_l` rather than by a darker tone. `deep` sits 26 levels
+    off the base and is therefore out of the bed's budget entirely: the dark
+    debris this ground wants has to come from features_ashsand's motifs, not
+    from the bed. Flagged - if the flats want a dark bed accent, the palette
+    needs an ASHSAND step around 15-18 levels below base."""
+    A = palette.ASHSAND
+    s = _ground_salt(salt, x0, y0)
+    _grain(c, x0, y0, s, A["base"], [
+        (0.185, A["grain_d"], (1, 1, 0.85)),
+        (0.130, A["grain_l"], (1, 1, -0.85)),
+        (0.030, A["light"], (1, 1, -0.85)),
+    ])
 
 
 def features_murkmoss(c, x0, y0, salt, k):
     m = palette.MURKMOSS
     rng = Rng(salt)
     if k == 0:
-        c.put(x0 + rng.range(6, 26), y0 + rng.range(6, 26), m["hi"])
+        # Variant 0 stays a bare bed, as blackpeat and ashsand already do.
+        # It used to drop one lone `hi` pixel here: not a readable motif, but
+        # 46 RGB levels off the modal colour in the very cell the contrast
+        # gate measures, so it alone set the sheet's peak deviation.
         return
     if k == 1:  # moss tuft clusters
         for _ in range(2):
             tx, ty = x0 + rng.range(5, 26), y0 + rng.range(6, 26)
             for (dx, dy) in ((0, 0), (1, 0), (-1, 0), (0, -1), (1, -2)):
-                c.put(tx + dx, ty + dy, m["tuft"])
-            c.put(tx, ty + 1, m["deep"])
+                _fp(c, tx + dx, ty + dy, m["tuft"])
+            _fp(c, tx, ty + 1, m["deep"])
     elif k == 2:  # wet sheen patch + spore glints
         mx, my = x0 + rng.range(10, 21), y0 + rng.range(10, 21)
-        c.blob(mx, my, 4, m["light"], rng, lumps=3)
-        c.put(mx, my, m["hi"])
-        c.put(x0 + rng.range(4, 27), y0 + rng.range(4, 27), palette.GHOSTFLAME["deep"])
+        _fblob(c, mx, my, 4, m["light"], rng, lumps=3)
+        _fp(c, mx, my, m["hi"])
+        _fp(c, x0 + rng.range(4, 27), y0 + rng.range(4, 27), palette.GHOSTFLAME["deep"])
     else:  # root line + tuft
         rx, ry = x0 + rng.range(4, 16), y0 + rng.range(8, 24)
         for i in range(rng.range(7, 11)):
-            c.put(rx + i, ry + (i // 3), m["deep"])
-        c.put(x0 + rng.range(5, 26), y0 + rng.range(5, 26), m["tuft"])
-
-
-def material_blackpeat(c, x0, y0, salt, frame=0):
-    gen_splats._speckle_cell(c, x0, y0, palette.BLACKPEAT, 0xB1AC0000, density=0.06)
+            _fp(c, rx + i, ry + (i // 3), m["deep"])
+        _fp(c, x0 + rng.range(5, 26), y0 + rng.range(5, 26), m["tuft"])
 
 
 def features_blackpeat(c, x0, y0, salt, k):
@@ -52,34 +253,20 @@ def features_blackpeat(c, x0, y0, salt, k):
     if k == 1:  # drying cracks
         x, y = x0 + rng.range(4, 14), y0 + rng.range(8, 24)
         for i in range(rng.range(8, 12)):
-            c.put(x + i, y, p["deep"])
+            _fp(c, x + i, y, p["deep"])
             if rng.chance(0.4):
                 y += rng.pick((-1, 1))
-        c.put(x + 2, y + 1, p["light"])
+        _fp(c, x + 2, y + 1, p["light"])
     elif k == 2:  # marsh-gas bubbles
         for _ in range(3):
             bx, by = x0 + rng.range(5, 26), y0 + rng.range(5, 26)
-            c.put(bx, by, p["light"])
-            c.put(bx, by - 1, p["hi"])
+            _fp(c, bx, by, p["light"])
+            _fp(c, bx, by - 1, p["hi"])
     else:
         rx, ry = x0 + rng.range(6, 20), y0 + rng.range(6, 20)
         for i in range(5):
-            c.put(rx + i, ry, p["deep"])
-        c.put(rx + 5, ry + 1, p["hi"])
-
-
-def material_ashsand(c, x0, y0, salt, frame=0):
-    A = palette.ASHSAND
-    gen_splats._speckle_cell(c, x0, y0, A, 0xA5E50000, density=0.05)
-    for x in range(32):
-        for y in range(32):
-            gx, gy = (x0 + x) % 32, (y0 + y) % 32
-            m = (gx + 2 * gy) % 16
-            h = Rng((gx * 7013 + gy * 331) ^ 0xA5E5D00D)
-            if m == 0 and h.chance(0.55):
-                c.put(x0 + x, y0 + y, A["light"])   # wind ripples
-            elif m == 1 and h.chance(0.3):
-                c.put(x0 + x, y0 + y, A["deep"])
+            _fp(c, rx + i, ry, p["deep"])
+        _fp(c, rx + 5, ry + 1, p["hi"])
 
 
 def features_ashsand(c, x0, y0, salt, k):
@@ -90,16 +277,16 @@ def features_ashsand(c, x0, y0, salt, k):
     if k == 1:  # bone flecks
         for _ in range(2):
             bx, by = x0 + rng.range(5, 26), y0 + rng.range(5, 26)
-            c.put(bx, by, palette.BONEASH["base"])
-            c.put(bx + 1, by, palette.BONEASH["light"])
+            _fp(c, bx, by, palette.BONEASH["base"])
+            _fp(c, bx + 1, by, palette.BONEASH["light"])
     elif k == 2:  # ember speck
-        c.put(x0 + rng.range(6, 26), y0 + rng.range(6, 26), palette.GHOSTFLAME["deep"])
-        c.put(x0 + rng.range(6, 26), y0 + rng.range(6, 26), A["hi"])
+        _fp(c, x0 + rng.range(6, 26), y0 + rng.range(6, 26), palette.GHOSTFLAME["deep"])
+        _fp(c, x0 + rng.range(6, 26), y0 + rng.range(6, 26), A["hi"])
     else:  # small dune crest
         dx0, dy0 = x0 + rng.range(6, 18), y0 + rng.range(8, 24)
         for i in range(rng.range(6, 9)):
-            c.put(dx0 + i, dy0 + i // 4, A["hi"])
-            c.put(dx0 + i, dy0 + i // 4 + 1, A["deep"])
+            _fp(c, dx0 + i, dy0 + i // 4, A["hi"])
+            _fp(c, dx0 + i, dy0 + i // 4 + 1, A["deep"])
 
 
 def material_murkwater(deep):

@@ -19,6 +19,12 @@ CLOUDTURF = {
     "light": (180, 210, 170),
     "hi":    (212, 233, 198),
     "tuft":  (110, 152, 112),
+    # Feinkorn: zwei Stufen ~7 RGB vom Grundton, fuer Bodentextur in
+    # Vanilla-Lautstaerke. Vanilla grass traegt seine GESAMTE Textur in 5
+    # RGB-Stufen; diese Rampe sprang zuvor mindestens 32.
+    # Gleiche Farbe, nur naeher am Grundton -- KEINE Palettenverschiebung.
+    "grain_d": (141, 177, 139),
+    "grain_l": (155, 190, 150),
 }
 
 SKYSTONE = {
@@ -26,6 +32,12 @@ SKYSTONE = {
     "base":  (116, 126, 143),
     "light": (144, 154, 170),
     "hi":    (176, 185, 199),
+    # Feinkorn: zwei Stufen ~7 RGB vom Grundton, fuer Bodentextur in
+    # Vanilla-Lautstaerke. Vanilla grass traegt seine GESAMTE Textur in 5
+    # RGB-Stufen; diese Rampe sprang zuvor mindestens 28.
+    # Gleiche Farbe, nur naeher am Grundton -- KEINE Palettenverschiebung.
+    "grain_d": (110, 119, 136),
+    "grain_l": (123, 133, 150),
 }
 
 STORMSLATE = {
@@ -36,6 +48,12 @@ STORMSLATE = {
     "light": (89, 82, 122),
     "hi":    (115, 108, 150),
     "charge": (168, 150, 240),
+    # Feinkorn: zwei Stufen ~7 RGB vom Grundton, fuer Bodentextur in
+    # Vanilla-Lautstaerke. Vanilla grass traegt seine GESAMTE Textur in 5
+    # RGB-Stufen; diese Rampe sprang zuvor mindestens 27.
+    # Gleiche Farbe, nur naeher am Grundton -- KEINE Palettenverschiebung.
+    "grain_d": (61, 55, 88),
+    "grain_l": (72, 66, 102),
 }
 
 MISTSEA = {
@@ -300,6 +318,12 @@ MURKMOSS = {
     "light": (76, 90, 76),
     "hi":    (98, 114, 96),
     "tuft":  (88, 118, 94),
+    # Feinkorn: zwei Stufen ~7 RGB vom Grundton, fuer Bodentextur in
+    # Vanilla-Lautstaerke. Vanilla grass traegt seine GESAMTE Textur in 5
+    # RGB-Stufen; diese Rampe sprang zuvor mindestens 22.
+    # Gleiche Farbe, nur naeher am Grundton -- KEINE Palettenverschiebung.
+    "grain_d": (50, 61, 52),
+    "grain_l": (62, 75, 64),
 }
 
 BLACKPEAT = {
@@ -307,6 +331,12 @@ BLACKPEAT = {
     "base":  (42, 36, 44),
     "light": (58, 50, 60),
     "hi":    (76, 66, 78),
+    # Feinkorn: zwei Stufen ~7 RGB vom Grundton, fuer Bodentextur in
+    # Vanilla-Lautstaerke. Vanilla grass traegt seine GESAMTE Textur in 5
+    # RGB-Stufen; diese Rampe sprang zuvor mindestens 16.
+    # Gleiche Farbe, nur naeher am Grundton -- KEINE Palettenverschiebung.
+    "grain_d": (35, 30, 37),
+    "grain_l": (49, 42, 51),
 }
 
 ASHSAND = {
@@ -314,6 +344,12 @@ ASHSAND = {
     "base":  (98, 94, 92),
     "light": (122, 118, 114),
     "hi":    (148, 143, 138),
+    # Feinkorn: zwei Stufen ~7 RGB vom Grundton, fuer Bodentextur in
+    # Vanilla-Lautstaerke. Vanilla grass traegt seine GESAMTE Textur in 5
+    # RGB-Stufen; diese Rampe sprang zuvor mindestens 24.
+    # Gleiche Farbe, nur naeher am Grundton -- KEINE Palettenverschiebung.
+    "grain_d": (91, 87, 86),
+    "grain_l": (105, 101, 98),
 }
 
 MURKWATER = {

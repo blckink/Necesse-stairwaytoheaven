@@ -145,6 +145,194 @@ def build_splat(path, material, variants=3, salt=0x51A7, frames=1, features=None
 
 # --- material painters (32x32 cells, seamless via position-locked speckle) ---
 
+# --- natural ground: clumped mottle, built the way vanilla builds it ---------
+#
+# Measured over vanilla-sprites/tiles/ (grass, dirt, ash, rock, snow,
+# deepstonefloor): vanilla natural ground is NOT per-pixel speckle. It is a
+# low-contrast MOTTLE of 2-5px clumps covering roughly a third of the cell,
+# sometimes with a darker contour network of plate/crack lines laid over it.
+# grass_splat is one darker-green clump layer at 29% coverage and nothing
+# else; deepstonefloor adds rectangular slab outlines; ash adds big lumps.
+# Detail density (pixels that are not the cell's modal colour, out of 1024)
+# runs 294 on snow — the calmest natural ground in the game — to 993.
+#
+# Our three sky grounds used to be `_speckle_cell(density=0.04..0.06)`, i.e.
+# 4-6% stray pixels, and measured 63/70/88. That is a fifth of vanilla's
+# quietest ground: from a few tiles away the Driftlands read as flat colour.
+#
+# Everything below is a function of (gx, gy) = position modulo the 32px tile
+# and of the per-SECTION salt only. Two consequences, both required:
+#  * the field wraps exactly on both axes, so neighbouring tiles never seam;
+#  * every cell of a 224x96 block paints the same material, so the marching
+#    -square blend pieces still match the full-tile variants they fade into.
+
+_MOTTLE_CACHE = {}
+
+
+def _block_salt(x0, y0, salt):
+    """Recover the per-section salt this cell's salt was derived from.
+
+    Mirrors build_splat's `material(block, cx*CELL, cy*CELL,
+    vsalt + cx*17 + cy*53, frame)`. A material must not vary from cell to cell
+    inside a block, so it works from this value and never from the raw salt.
+    """
+    return salt - (x0 // CELL) * 17 - (y0 // CELL) * 53
+
+
+def _mottle(salt, blur=2, passes=2):
+    """Seamless 32x32 clump field, wrapping on both axes.
+
+    White noise smoothed by wrapping box blurs: `blur` sets the clump radius
+    (1 -> ~3px specks, 4 -> broad drifts), `passes` how round they come out.
+    Cached: build_splat calls a material 21 times per block.
+    """
+    key = (salt, blur, passes)
+    got = _MOTTLE_CACHE.get(key)
+    if got is not None:
+        return got
+    f = [[Rng((x * 7349 + y * 12611) ^ ((salt * 2654435761) & 0xFFFFFFFF)).float()
+          for x in range(32)] for y in range(32)]
+    span = 2 * blur + 1
+    area = float(span * span)
+    for _ in range(passes):
+        g = [[0.0] * 32 for _ in range(32)]
+        for y in range(32):
+            for x in range(32):
+                s = 0.0
+                for dy in range(-blur, blur + 1):
+                    row = f[(y + dy) % 32]
+                    for dx in range(-blur, blur + 1):
+                        s += row[(x + dx) % 32]
+                g[y][x] = s / area
+        f = g
+    _MOTTLE_CACHE[key] = f
+    return f
+
+
+def _blend_fields(fine, coarse, w):
+    """Clumps riding on broad tonal drift — one field, so coverage stays exact."""
+    return [[(1.0 - w) * fine[y][x] + w * coarse[y][x] for x in range(32)]
+            for y in range(32)]
+
+
+def _bander(field, fracs):
+    """Quantile thresholds -> a band(gx, gy) function.
+
+    `fracs` are cumulative coverages, so the tone mix is set in percent of the
+    cell rather than guessed from threshold values, and it is identical in
+    every section however that section's noise happened to fall.
+    """
+    vals = sorted(v for row in field for v in row)
+    cuts = [vals[min(1023, int(f * 1024))] for f in fracs]
+
+    def band(gx, gy):
+        v = field[gy][gx]
+        b = 0
+        for cut in cuts:
+            if v < cut:
+                break
+            b += 1
+        return b
+    return band
+
+
+def _contour(band, gx, gy):
+    """True on a band boundary: the plate/crack network vanilla stone floors
+    draw over their mottle. Boundaries of a wrapping field are closed loops,
+    so they cross tile edges without a seam."""
+    b = band(gx, gy)
+    return (band((gx + 1) % 32, gy) != b) or (band(gx, (gy + 1) % 32) != b)
+
+
+# --- the 2x2 block grid: vanilla's actual tone unit ---------------------------
+#
+# Measured over every vanilla natural-ground `_splat` (grass, dirt, ash, mud,
+# rock, snow): the four full-variant cells are 100.0% coherent on the 2x2 pixel
+# block grid. Not "mostly" — every single 2x2 block on the even grid is one
+# flat colour, features included. Vanilla ground is authored at half
+# resolution and doubled; a lone off-tone pixel does not exist in it.
+#
+# Our sheets measured 75%/48%/48%, i.e. per-pixel mottle, and that is half of
+# why they read as static rather than as ground. Everything below therefore
+# evaluates its noise, its contours and its hashes at BLOCK coordinates
+# (gx & ~1, gy & ~1) and fills all four pixels with the result. 32 is even, so
+# the block grid survives the modulo wrap and cells still start on a block
+# boundary — seamlessness is unaffected.
+#
+# The second half is contrast. Vanilla carries a whole ground texture inside a
+# handful of RGB levels (grass 5, mud 12, rock 13); our beds ran 27-35 mean
+# because the ramps had no near-base step. The `grain_d`/`grain_l` palette
+# steps (~7 RGB either side of base) exist for exactly this: they carry the
+# BULK of the bed, while `deep`/`light`/`hi` are spent only on the features.
+
+
+def _blk(gx, gy):
+    """Snap a tile-local coordinate pair onto the 2x2 block grid."""
+    return gx & ~1, gy & ~1
+
+
+def _bander_blocks(field, fracs):
+    """`_bander`, but quantised over the 256 blocks rather than 1024 pixels.
+
+    Taking the cuts from the block sublattice is what makes the coverage
+    percentages exact once the field is only ever sampled at block origins —
+    pixel quantiles would drift by a few percent and put the density gate out
+    of reach by luck of the noise.
+    """
+    vals = sorted(field[y][x] for y in range(0, 32, 2) for x in range(0, 32, 2))
+    cuts = [vals[min(255, int(f * 256))] for f in fracs]
+
+    def band(bx, by):
+        v = field[by][bx]
+        b = 0
+        for cut in cuts:
+            if v < cut:
+                break
+            b += 1
+        return b
+    return band
+
+
+def _contour_blocks(band, bx, by):
+    """`_contour` on the block grid: steps two pixels, so the seam it marks is
+    a 2px-wide line rather than a 1px hairline that would break coherence."""
+    b = band(bx, by)
+    return (band((bx + 2) % 32, by) != b) or (band(bx, (by + 2) % 32) != b)
+
+
+def _block_snap(features):
+    """Wrap a `features_*` painter so its motifs land on the 2x2 block grid.
+
+    The motifs themselves are untouched — this is a dilation, not a redraw: any
+    block containing at least one painted pixel is filled with that pixel's
+    colour, so a 1px crack becomes a 2px crack and a lone speck becomes a 2x2
+    dot. That is what vanilla debris looks like up close, and it is the only
+    way a cell that carries features can be 100% block-coherent.
+
+    Ties are broken by frequency and then by colour tuple order, never by
+    iteration accident: same seed -> same bytes stays true.
+    """
+    def wrapped(c, x0, y0, salt, k):
+        overlay = Canvas(c.width, c.height)
+        features(overlay, x0, y0, salt, k)
+        for by in range(0, c.height - 1, 2):
+            for bx in range(0, c.width - 1, 2):
+                votes = {}
+                for dy in (0, 1):
+                    for dx in (0, 1):
+                        px = overlay.get(bx + dx, by + dy)
+                        if px[3] > 0:
+                            votes[px] = votes.get(px, 0) + 1
+                if not votes:
+                    continue
+                col = max(sorted(votes), key=votes.get)
+                for dy in (0, 1):
+                    for dx in (0, 1):
+                        c.put(bx + dx, by + dy, col)
+    wrapped.__name__ = getattr(features, "__name__", "features") + "_blocked"
+    return wrapped
+
+
 def _speckle_cell(c, x0, y0, ramp, salt, density=0.10):
     for x in range(32):
         for y in range(32):
@@ -160,9 +348,38 @@ def _speckle_cell(c, x0, y0, ramp, salt, density=0.10):
 
 
 def material_cloudturf(c, x0, y0, salt, frame=0):
-    """Calm silver-green turf. All character lives in the full-variant motifs
-    (vanilla construction: quiet base, clustered features per variant)."""
-    _speckle_cell(c, x0, y0, palette.CLOUDTURF, 0xC10D0000, density=0.04)
+    """Silver-green meadow turf, built like vanilla `grass_splat`: a quiet
+    clumped mottle of slightly darker and slightly lighter turf riding on a
+    broad tonal drift, with a lit lip along the top of every shadowed clump so
+    the ground reads as tussocky rather than as noise.
+
+    The whole bed lives on `grain_d`/`grain_l`, ~7 RGB either side of base.
+    Vanilla `grass_splat` carries its ENTIRE texture inside 5 RGB levels at 300
+    off-modal pixels; this cell answers with 7 levels at ~350. The previous
+    version put the bulk on `light` (32 RGB away) and measured a mean deviation
+    of 35 — seven times vanilla's, which is why it read as camouflage blotches
+    instead of ground. `light`/`deep`/`hi`/`tuft` are now spent exclusively on
+    the features, where their contrast buys a readable motif.
+    """
+    ramp = palette.CLOUDTURF
+    vs = _block_salt(x0, y0, salt)
+    field = _blend_fields(_mottle(vs ^ 0xC10D, blur=2, passes=2),
+                          _mottle(vs ^ 0x9A55, blur=4, passes=2), 0.34)
+    # 17% shadow clumps, 66% base, 17% lit turf, measured on the block grid.
+    band = _bander_blocks(field, (0.17, 0.83))
+    tone = (ramp["grain_d"], ramp["base"], ramp["grain_l"])
+    for x in range(32):
+        for y in range(32):
+            gx, gy = (x0 + x) % 32, (y0 + y) % 32
+            bx, by = _blk(gx, gy)
+            b = band(bx, by)
+            col = tone[b]
+            # sunlit lip where a hollow gives way upward: a structural edge
+            # that turns a dark clump into a blade cluster. It repaints dark
+            # blocks as light ones, so the off-base coverage is unchanged.
+            if b == 0 and band(bx, (by - 2) % 32) > 0:
+                col = ramp["grain_l"]
+            c.put(x0 + x, y0 + y, col)
 
 
 def features_cloudturf(c, x0, y0, salt, k):
@@ -182,8 +399,11 @@ def features_cloudturf(c, x0, y0, salt, k):
         c.put(x - 1, y + 1, ramp["deep"])
         c.put(x, y + 1, ramp["deep"])
 
-    if k == 0:  # near-plain
-        c.put(x0 + rng.range(6, 26), y0 + rng.range(6, 26), ramp["hi"])
+    if k == 0:  # plain turf: the bed alone, like skystone's and slate's k == 0
+        # This used to drop a single `hi` speck here. `hi` is 64 RGB from base,
+        # and cell (3,0) is the variant the contrast gate measures, so that one
+        # pixel set the whole tile's max deviation at 64 against vanilla
+        # ground's 5-33. The variant stays distinct: k=1..3 all carry motifs.
         return
     if k == 1:  # two tuft clusters, each of two neighboring tufts
         for _ in range(2):
@@ -206,8 +426,44 @@ def features_cloudturf(c, x0, y0, salt, k):
 
 
 def material_skystone(c, x0, y0, salt, frame=0):
-    """Calm pale stone; cracks and chips are per-variant features."""
-    _speckle_cell(c, x0, y0, palette.SKYSTONE, 0x51A90000, density=0.05)
+    """Pale weathered skystone, built like vanilla `rock_splat`: a clumped grit
+    mottle with a broken plate network drawn over it. The plates come from the
+    contour of a coarse field, so they are closed loops that cross tile borders
+    — the same read as vanilla's slab outlines, without hand-placing a line
+    that would repeat every 32px.
+
+    Both the grit and the seams are drawn in `grain_d`/`grain_l` (~7 RGB from
+    base). Vanilla `rock_splat` runs mean 9.7 / max 13 over five tones; the
+    seams used to be `deep` and `light`, 35 and 28 RGB out, which is what made
+    this tile read as crazy paving seen through static. The loud steps are the
+    features' budget now.
+    """
+    ramp = palette.SKYSTONE
+    vs = _block_salt(x0, y0, salt)
+    grit = _blend_fields(_mottle(vs ^ 0x51A9, blur=1, passes=2),
+                         _mottle(vs ^ 0x33C7, blur=4, passes=2), 0.40)
+    # 13% shadow pockets, 74% base, 13% lit grit — leaner than cloudturf's bed
+    # because the plate seams below spend the rest of the density budget.
+    band = _bander_blocks(grit, (0.13, 0.87))
+    tone = (ramp["grain_d"], ramp["base"], ramp["grain_l"])
+    plates = _mottle(vs ^ 0x7E11, blur=6, passes=2)
+    pband = _bander_blocks(plates, (0.5,))
+    for x in range(32):
+        for y in range(32):
+            gx, gy = (x0 + x) % 32, (y0 + y) % 32
+            bx, by = _blk(gx, gy)
+            col = tone[band(bx, by)]
+            # Plate seams are BROKEN, not a continuous web: an unbroken contour
+            # network reads as crazy paving, which is a floor pattern, not
+            # weathered ground. The gate is hashed at BLOCK coordinates, so a
+            # seam block is broken or kept whole — never half of each, which
+            # would put a lone pixel back on the grid.
+            seam = Rng((bx * 4177 + by * 8623) ^ 0x7E11BEEF).float()
+            if _contour_blocks(pband, bx, by) and seam < 0.45:
+                col = ramp["grain_d"]
+            elif _contour_blocks(pband, bx, (by + 2) % 32) and seam < 0.25:
+                col = ramp["grain_l"]                  # lit lip above the seam
+            c.put(x0 + x, y0 + y, col)
 
 
 def features_skystone(c, x0, y0, salt, k):
@@ -245,24 +501,51 @@ def features_skystone(c, x0, y0, salt, k):
 
 
 def material_stormslate(c, x0, y0, salt, frame=0):
-    """Layered night-violet slate: position-locked dashed diagonal strata
-    (period 16 divides the 32px tile, so it stays seamless).
+    """Layered night-violet slate: a clumped mineral bed with the tile's
+    signature dashed diagonal strata (period 16, which divides the 32px tile,
+    so it stays seamless) drawn over it.
 
-    v0.5 art sprint: measured LRNGE 118 / EDGE 5.2 vs vanilla stone ~10-47 /
-    1.1 — the old double-noise read as visual static. Speckle halved, strata
-    softened to single-step accents; character now comes from the per-variant
-    feature clusters (veins/ridges), like vanilla."""
+    v0.5 halved the speckle because the old double-noise read as static, then
+    the density pass overcorrected into a `deep`/`light` field 27 RGB from base
+    — loud enough to camouflage anything standing on it. The strata stay, they
+    are what makes this ground read as SLATE, but bed and strata are both drawn
+    in `grain_d`/`grain_l` now. Compare vanilla `dirt_splat`, whose whole
+    texture is four tones inside 33 RGB, and `mud_splat`, eleven tones inside
+    12.
+    """
     ramp = palette.STORMSLATE
-    _speckle_cell(c, x0, y0, ramp, 0x570A0000, density=0.04)
+    vs = _block_salt(x0, y0, salt)
+    field = _blend_fields(_mottle(vs ^ 0x570A, blur=1, passes=2),
+                          _mottle(vs ^ 0x2B93, blur=4, passes=2), 0.42)
+    # 15% shadowed bedding, 70% base, 15% lit face; the strata add the rest.
+    band = _bander_blocks(field, (0.15, 0.85))
+    tone = (ramp["grain_d"], ramp["base"], ramp["grain_l"])
     for x in range(32):
         for y in range(32):
             gx, gy = (x0 + x) % 32, (y0 + y) % 32
-            m = (gx + gy) % 16
-            h = Rng((gx * 5081 + gy * 947) ^ 0x570A5EED)
+            bx, by = _blk(gx, gy)
+            c.put(x0 + x, y0 + y, tone[band(bx, by)])
+    for x in range(32):
+        for y in range(32):
+            gx, gy = (x0 + x) % 32, (y0 + y) % 32
+            bx, by = _blk(gx, gy)
+            # On the block grid (bx + by) is always even, so the lit dash sits
+            # at m == 2 — at m == 1 it would be dead code and the strata would
+            # lose their sunlit side entirely.
+            m = (bx + by) % 16
+            h = Rng((bx * 5081 + by * 947) ^ 0x570A5EED)
+            # The shadowed bedding line is the ONE step this material spends
+            # outside the grain: `deep` sits exactly 25 RGB from base, the
+            # contrast ceiling, and vanilla `rock_splat` runs a mean of 9.7 for
+            # the same reason. Drawn in `grain_d` the strata vanished, which
+            # cost the tile the layered read it is named for. The lit side
+            # stays on `grain_l`: `light` is 27 RGB out and would break the
+            # ceiling. Recolouring these blocks costs no density — they are
+            # already off-modal either way.
             if m == 0 and h.chance(0.45):
                 c.put(x0 + x, y0 + y, ramp["deep"])
-            elif m == 1 and h.chance(0.18):
-                c.put(x0 + x, y0 + y, ramp["light"])
+            elif m == 2 and h.chance(0.18):
+                c.put(x0 + x, y0 + y, ramp["grain_l"])
 
 
 def features_stormslate(c, x0, y0, salt, k):
@@ -705,3 +988,12 @@ def features_prismfloor(c, x0, y0, salt, k):
         for i in range(rng.range(5, 9)):
             c.put(gx + i, by, ramp["hi"])
         c.put(gx - 1, by + 1, ramp["deep"])
+
+
+# Vanilla's features are block-aligned too (ash's debris, grass's tufts): the
+# 2x2 unit is the whole sheet's, not just the bed's. Wrapping here rather than
+# inside build_splat keeps every other material on this sheet — and gen_veil's,
+# which call build_splat too — bit-for-bit unchanged.
+features_cloudturf = _block_snap(features_cloudturf)
+features_skystone = _block_snap(features_skystone)
+features_stormslate = _block_snap(features_stormslate)
