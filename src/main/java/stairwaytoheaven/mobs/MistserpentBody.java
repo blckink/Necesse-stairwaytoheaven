@@ -5,6 +5,9 @@ import java.awt.Rectangle;
 import java.util.List;
 
 import necesse.engine.gameLoop.tickManager.TickManager;
+import necesse.engine.network.server.ServerClient;
+import necesse.entity.mobs.GameDamage;
+import necesse.entity.mobs.Mob;
 import necesse.entity.mobs.MobDrawable;
 import necesse.entity.mobs.PlayerMob;
 import necesse.entity.mobs.hostile.HostileWormMobBody;
@@ -21,24 +24,56 @@ import necesse.level.maps.light.GameLight;
  * (SandwormBody is the same shape) so the segments follow the head through the
  * cloud sea on the engine's own worm mathematics.
  *
- * The sheet is drawn top-down and rotated to the segment's heading, so it holds
- * one orientation only: row 0 is the head, rows 1-4 are body coils and row 5 is
- * the tail. {@code sprite} selects which coil this segment shows.
+ * <p>The sheet is drawn top-down and rotated to the segment's heading, so it
+ * holds one orientation only: row 0 is the head, rows 1-4 are body coils and
+ * row 5 is the tail. {@code sprite} selects which coil this segment shows.
+ *
+ * <p><b>This class owns no balance.</b> A worm's health and armour live on the
+ * head — VERIFIED [jar], see the note on {@link MistserpentHead}. The values
+ * passed to {@code super} below are overwritten from the master before the coil
+ * has taken a single tick, so tuning them would change nothing; the real
+ * numbers are {@link MistserpentHead#MAX_HEALTH} and
+ * {@link MistserpentHead#ARMOR}. What this class does own is
+ * {@link #getCollisionDamage}, exactly as {@code SandwormBody} does
+ * (SandwormBody.java:71) — a coil that does not override it deals nothing.
  */
 public class MistserpentBody extends HostileWormMobBody<MistserpentHead, MistserpentBody> {
 
     public Point sprite = new Point(0, 1);
 
     public MistserpentBody() {
-        this(900);
+        this(MistserpentHead.MAX_HEALTH);
     }
 
+    /**
+     * @param health mirrors {@link MistserpentHead#MAX_HEALTH} so a coil is
+     *     never briefly wrong on a client that draws it before the first tick.
+     *     It is not a tuning knob: {@code WormMobHead.init()} assigns the head's
+     *     pool over it as the chain is built (WormMobHead.java:219-220) and
+     *     {@code WormMobBody.tickMaster()} re-mirrors health and armour off the
+     *     master every tick thereafter (WormMobBody.java:150-163).
+     */
     protected MistserpentBody(int health) {
         super(health);
-        this.setArmor(12);
+        // Same story as the health above — overwritten from the head's
+        // getArmorFlat() on the first tick (WormMobBody.java:155). Kept equal
+        // to MistserpentHead.ARMOR so the two never read as different mobs.
+        this.setArmor(MistserpentHead.ARMOR);
         this.collision = new Rectangle(-18, -14, 36, 28);
         this.hitBox = new Rectangle(-22, -18, 44, 36);
         this.selectBox = new Rectangle(-28, -52, 56, 58);
+    }
+
+    /**
+     * 130 per coil. Vanilla analogue: {@code CrystalGolemMob.damage =
+     * GameDamage(130.0F)} (CrystalGolemMob.java:57), an incursion tier 1
+     * inhabitant and therefore the mod's damage floor. VERIFIED [jar].
+     * Why a coil is not scaled down from the head the way
+     * {@code SandwormBody} is: see {@link MistserpentHead#HEAD_COLLISION}.
+     */
+    @Override
+    public GameDamage getCollisionDamage(Mob target, boolean fromPacket, ServerClient packetSubmitter) {
+        return MistserpentHead.BODY_COLLISION;
     }
 
     @Override
@@ -74,7 +109,7 @@ public class MistserpentBody extends HostileWormMobBody<MistserpentHead, Mistser
     /** The last coil: the sheet's tail cell, and no segment follows it. */
     public static class Tail extends MistserpentBody {
         public Tail() {
-            super(900);
+            super(MistserpentHead.MAX_HEALTH);
             this.sprite = new Point(0, 5);
         }
     }
