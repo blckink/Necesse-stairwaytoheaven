@@ -1106,6 +1106,60 @@ one pass (`docs/VANILLA_ASSET_MAP.md`). A realm built from vanilla stand-ins and
 fully populated is worth far more than a realm with bespoke art and nothing in
 it.
 
+## A4.5 What vanilla actually does — measured, not guessed
+
+The player: *"schau doch bei Vanilla mal nach zum Beispiel"*. Done. Two patterns
+answer most of A4.1 and A4.2, and one principle explains the rest.
+
+### Valuable animals come in HERDS, placed at generation
+
+`GenerationTools.spawnMobHerds(level, random, mobID, mobAmount, tile,
+minHerdSize, maxHerdSize)` — `mobAmount` is the total for a **whole island**,
+placed as clumps of `minHerdSize..maxHerdSize` within **±5 tiles** of a random
+point on the right ground.
+
+`PlainsSurfaceLevel:234` gives a whole plains island **25-50 sheep** and
+**15-40 cows**, in herds of **2-6**. Vanilla never puts livestock in a spawn
+table, because a spawn table is a per-tile roll and a per-tile roll puts an
+animal on every corner. That is exactly what this mod was doing.
+
+### A concentrated place is built from MODULAR PRESETS
+
+The pirate village — the player's own example of "geballt, hart wenn man es
+findet, mit Mini-Boss" — is assembled from
+`presets/modularPresets/vilagePresets/pirateVillagePresets/`: separate Room,
+Wall and Walkway presets combined into one settlement, plus
+`BigPirateShipPreset` and a `PirateSettler`. That is the template for every
+town, tavern and guarded POI this mod owes: **parts, not one stamped building.**
+
+### Scarcity comes from DEMAND, not from spawn rate
+
+The player's clearest statement of the whole economy:
+
+> *"bäume stehen überall aber sind am Anfang trotzdem rar weil man nur Steine
+> und holz findet und daraus alles bauen muss. wenn man Eisen findet braucht man
+> dauernd Eisen für neue items und dadurch ist es rar, Stein gibt's dann en
+> Masse. dann gibt es Siedler die Berufe haben und bestimmte Zutaten brauchen,
+> tier3 bestimmtes futter, neue Werkbänke und Upgrades wieder anders Material,
+> coole Wände die man gesehen hat und einbauen will nochmal andere Ressourcen —
+> also farmt man genau diese Wände und sucht dieses Gebiet überall ab."*
+
+So the rule is **not** "make everything rarer". Grass and trees may be
+everywhere. A resource feels scarce when **something always wants it**:
+
+- Every tier of workbench and every upgrade needs a *different* material, so no
+  single stockpile ever finishes the game.
+- Settlers with professions consume specific ingredients; tier-3 animals need
+  their own feed.
+- A wall or piece of furniture the player *saw and wants* costs yet another
+  resource — which is what sends them back to a specific region to farm it.
+
+**Design consequence:** when a realm is built, its resources are designed
+together with their SINKS. A material with no consumer is either loot or
+clutter; a material with three consumers across three tiers is an economy. This
+is the same rule §34 states from the other end (never make an old resource
+worthless) — §34 protects the past, A4.5 protects the present.
+
 ## A4.4 What this changes about the plan
 
 - The build order in §43 stands, but **"build Eden" now means all of A4.3**, not

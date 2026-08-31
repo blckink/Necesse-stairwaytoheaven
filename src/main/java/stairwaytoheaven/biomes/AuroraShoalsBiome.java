@@ -45,13 +45,8 @@ public class AuroraShoalsBiome extends SkyBiome {
             .add(28, mistseaSerpent(1), "mistserpent");
 
     public static final MobSpawnTable critters = new MobSpawnTable()
-            .addLimited(80, "glowmoth", 5, 60)
-            .addLimited(60, "dewsnail", 3, 60)
-            // The Glimmergoat is the rarest of the three sky herds because the
-            // Aurora Shoals are the rarest ground; its fleece is the material
-            // the Glimmerstride boots are made of. Table-spawnable because the
-            // mob implements isValidSpawnLocation (livestock/SkyBreed).
-            .addLimited(30, stairwaytoheaven.livestock.SkyLivestock.GLIMMERGOAT, 4, 90);
+            .addLimited(80, "glowmoth", 5, RANGE_STANDARD)
+            .addLimited(60, "dewsnail", 3, RANGE_STANDARD);
 
     @Override
     public MobSpawnTable getMobSpawnTable(Level level) {

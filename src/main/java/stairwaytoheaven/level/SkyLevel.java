@@ -178,16 +178,42 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
     private static final float RESIDENT_REGION_CHANCE = 0.16F;
 
     private void placeCloudLambFlock(Region region) {
+        // Cloudturf meadows: the Driftlands' own flock.
+        placeHerd(region, "cloudlamb", SkyRegistry.cloudturfID, FLOCK_REGION_CHANCE, 0x85EBCA77L);
+        // The three husbandry animals used to ride the CRITTER SPAWN TABLES,
+        // which is a per-tile roll and put them on every corner of the sky.
+        // Vanilla never does that with livestock: GenerationTools.spawnMobHerds
+        // drops 25-50 sheep on a WHOLE ISLAND, in clumps of 2-6 within 5 tiles
+        // of a point (PlainsSurfaceLevel:234). The player's own words:
+        // "wertvolle Tiere nicht an jeder Ecke". So they are herds now, each on
+        // its own ground, and each rarer than the Cloud Lamb because each is
+        // worth more.
+        placeHerd(region, stairwaytoheaven.livestock.SkyLivestock.NIMBUS_YAK,
+                SkyRegistry.cloudturfID, YAK_REGION_CHANCE, 0x9E3779B1L);
+        placeHerd(region, stairwaytoheaven.livestock.SkyLivestock.THUNDERQUILL,
+                SkyRegistry.stormslateID, FOWL_REGION_CHANCE, 0x27D4EB2FL);
+        placeHerd(region, stairwaytoheaven.livestock.SkyLivestock.GLIMMERGOAT,
+                SkyRegistry.auroraShoalID, GOAT_REGION_CHANCE, 0x165667B1L);
+    }
+
+    /**
+     * One herd of one species, on one ground, at most once per region.
+     *
+     * Modelled on {@code GenerationTools.spawnMobHerds}: a herd is a clump
+     * around a point, not a scatter. Persistent ({@code canDespawn = false}) so
+     * a herd the player walked past is still there on return.
+     */
+    private void placeHerd(Region region, String mobID, int groundID, float chance, long salt) {
         if (this.isClient()) {
             return;
         }
         // Seed mixes the world seed with the region coordinates, so a flock
         // belongs to a place rather than to the order regions happen to load.
         long flockSeed = (this.getWorldGenSeed() * 0x9E3779B97F4A7C15L)
-                ^ ((long) region.regionX * 0x85EBCA77L)
+                ^ ((long) region.regionX * salt)
                 ^ ((long) region.regionY * 0xC2B2AE3DL);
         GameRandom random = new GameRandom(flockSeed);
-        if (!random.getChance(FLOCK_REGION_CHANCE)) {
+        if (!random.getChance(chance)) {
             return;
         }
         int originX = region.tileXOffset + random.getIntBetween(4, region.tileWidth - 5);
@@ -200,10 +226,10 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
             if (!this.isTileWithinBounds(tileX, tileY) || this.isSolidTile(tileX, tileY)) {
                 continue;
             }
-            if (this.getTileID(tileX, tileY) != SkyRegistry.cloudturfID || this.getObjectID(tileX, tileY) != 0) {
+            if (this.getTileID(tileX, tileY) != groundID || this.getObjectID(tileX, tileY) != 0) {
                 continue;
             }
-            Mob lamb = MobRegistry.getMob("cloudlamb", this);
+            Mob lamb = MobRegistry.getMob(mobID, this);
             if (lamb == null) {
                 return;
             }
@@ -215,6 +241,15 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
 
     /** Roughly one flock every four regions -- meadow livestock, not a herd biome. */
     private static final float FLOCK_REGION_CHANCE = 0.25F;
+    /**
+     * The three husbandry animals are rarer than the Cloud Lamb, because each
+     * is a production animal rather than scenery: milk, storm down, fleece.
+     * One yak herd per ~12 regions, fowl per ~10, goats per ~14 -- the goat is
+     * rarest because the Aurora Shoals are the rarest ground.
+     */
+    private static final float YAK_REGION_CHANCE = 0.085F;
+    private static final float FOWL_REGION_CHANCE = 0.100F;
+    private static final float GOAT_REGION_CHANCE = 0.070F;
 
     @Override
     public boolean canRain() {
