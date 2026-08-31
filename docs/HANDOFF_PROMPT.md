@@ -21,7 +21,7 @@ it would strand every save that has been there. It simply takes no new content.
 
 Details and measurements: `docs/CURRENT_STATE.md`. History: `CHANGELOG.md`.
 
-## 2. The five commits
+## 2. The six commits
 
 | commit | what |
 |---|---|
@@ -30,6 +30,7 @@ Details and measurements: `docs/CURRENT_STATE.md`. History: `CHANGELOG.md`.
 | `2111c6a` | `evilwall` drops `crystalstone` rather than vanilla stone |
 | `01b7cba` | The Outlands spawn `crystalgolem`, `ascendedgolem`, `crystalarmadillo` |
 | `e1b2f7d` | Both of the above turned into live gates in `integration_test.sh` |
+| `8c111f1` | That floor gate corrected: it had asserted a rule outside the floor it was testing, and failed on a correct world |
 
 ## 3. The state of the gates
 
