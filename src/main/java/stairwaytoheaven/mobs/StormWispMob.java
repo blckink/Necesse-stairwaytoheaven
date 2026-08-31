@@ -32,20 +32,45 @@ import necesse.level.maps.light.GameLight;
 /**
  * Storm Wisp — a crackling storm core drifting through the Stormveil, firing
  * spark bolts at range (vanilla Cryo Flake AI pattern).
+ *
+ * <p><b>Tier: Skyreach floor, ranged role</b> ({@link SkyMobTiers}).
+ *
+ * <p>The Skyreach floor is vanilla's ORDINARY ascended mob — what a player
+ * meets on incursion tier 1, which VERIFIED [jar] applies no multiplier at all
+ * ({@code BiomeMissionIncursionData} SUMS its per-tier scaling arrays, and
+ * both start at {@code 0.0F}). Measured: {@code AscendedGolemMob.MAX_HEALTH = new
+ * MaxHealthGetter(400, 750, 1000, 1300, 1800)} → 1000 HP on CLASSIC, with
+ * {@code CrystalGolemMob}'s {@code new GameDamage(130.0F)} and armour 40.
+ *
+ * <p>The wisp never has to stand in melee, so it takes the ranged discount:
+ * x0.70 HP and x0.85 damage of that floor = 700 HP / 110.5 damage, with the
+ * floor's armour of 40 (it was 10). The AI shape it copies,
+ * {@code CryoFlakeMob}, measures 350 HP / {@code baseDamage} 65 /
+ * {@code incursionDamage} 100 / armour 20 — a mid-game mob, borrowed for its
+ * behaviour only, never for its numbers.
+ *
+ * <p>Until this pass it was 280 HP / 55 damage / 10 armour. Loot is unchanged:
+ * the Skyreach's drop value is x1.0.
  */
 public class StormWispMob extends FlyingHostileMob {
 
     public static GameTexture texture;
 
+    /** Skyreach drop value is x1.0 — the floor multiplies nothing. */
     public static LootTable lootTable = new LootTable(LootItem.between("stormshard", 1, 2));
-    public static GameDamage damage = new GameDamage(55.0F);
+    /** Skyreach floor damage 130 ({@code CrystalGolemMob.damage}) x0.85 ranged = 110.5. */
+    public static GameDamage damage = SkyMobTiers.damage(SkyMobTiers.SKYREACH_DAMAGE, SkyMobTiers.ROLE_RANGED_DAMAGE);
+    /** Skyreach floor 1000 HP ({@code AscendedGolemMob} on CLASSIC) x0.70 ranged = 700. */
+    public static final int MAX_HEALTH = SkyMobTiers.hp(SkyMobTiers.SKYREACH_HP, SkyMobTiers.ROLE_RANGED_HP);
+    /** Measured 40 on {@code CrystalGolemMob}/{@code AscendedBatMob}; armour has no role modifier. */
+    public static final int ARMOR = SkyMobTiers.SKYREACH_ARMOR;
 
     public StormWispMob() {
-        super(280);
+        super(MAX_HEALTH);
         this.setSpeed(35.0F);
         this.setFriction(1.0F);
         this.setKnockbackModifier(0.3F);
-        this.setArmor(10);
+        this.setArmor(ARMOR);
         this.moveAccuracy = 10;
         // vanilla spawn-light rules: lit areas are safe (see ZephyrRayMob note)
         this.collision = new Rectangle(-14, -14, 28, 28);

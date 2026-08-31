@@ -30,19 +30,55 @@ import necesse.level.maps.light.GameLight;
  * Gloom Shade — a hooded wisp of the fen that drifts out of the dark and
  * claws at the living. The Veil's bread-and-butter enemy: only spawns in
  * darkness, so every lantern carves out real safety.
+ *
+ * <p><b>Tier: Ghost Realm (the Veil), standard role</b> ({@link SkyMobTiers}).
+ * The Veil sits a whole realm above the Skyreach, at roughly incursion 7 on
+ * vanilla's own curve. VERIFIED [jar]: {@code BiomeMissionIncursionData} SUMS
+ * its per-tier scaling arrays, and by tier 7 {@code healthScalingPerTier}
+ * totals +1.80 (x2.80) and {@code damageScalingPerTier} +0.75 (x1.75) —
+ * against +3.00 (x4.00) and +1.15 (x2.15) at tier 10. Applied to the Skyreach
+ * floor — the ordinary ascended mob, measured
+ * {@code AscendedGolemMob.MAX_HEALTH = new MaxHealthGetter(400, 750, 1000,
+ * 1300, 1800)} → 1000 HP on CLASSIC with {@code CrystalGolemMob}'s
+ * {@code new GameDamage(130.0F)} and armour 40 — that is 2800 HP and 227.5
+ * damage, which the ladder rounds to a flat 230, over 55 armour. The shade is
+ * the fen's standard enemy and carries no role modifier, so it IS the Veil's
+ * floor.
+ *
+ * <p>Until this pass it was 240 HP / 50 damage / no armour, a fifth of an
+ * ordinary ascended mob. Its drops are lifted by the realm's x1.9 drop value.
  */
 public class GloomShadeMob extends HostileMob {
 
     public static GameTexture texture;
 
+    /**
+     * Ghost Realm drop value is x1.9, so the essence roll goes 1-2 → 2-4
+     * (1 x 1.9 = 1.9, 2 x 1.9 = 3.8). The 0.6 chance is the mob's identity and
+     * stays as it was — only the quantity carries the tier.
+     */
     public static LootTable lootTable = new LootTable(
-            new ChanceLootItemList(0.6F, LootItem.between("veilessence", 1, 2)));
-    public static GameDamage damage = new GameDamage(50.0F);
+            new ChanceLootItemList(0.6F, LootItem.between("veilessence",
+                    SkyMobTiers.drop(1, SkyMobTiers.VEIL_DROP_VALUE),
+                    SkyMobTiers.drop(2, SkyMobTiers.VEIL_DROP_VALUE))));
+    /**
+     * Veil floor damage: the Skyreach floor's measured
+     * {@code CrystalGolemMob.damage} of 130 x1.75 = 227.5, rounded to 230.
+     * Cross-checked against the ascended fliers:
+     * {@code NightSwarmBatMob.COLLISION_DAMAGE} measures
+     * {@code new GameDamage(115.0F)}, so a shade hits exactly twice as hard.
+     */
+    public static GameDamage damage = new GameDamage(SkyMobTiers.VEIL_DAMAGE);
+    /** Veil floor HP: 1000 ({@code AscendedGolemMob} on CLASSIC) x2.8 = 2800. */
+    public static final int MAX_HEALTH = SkyMobTiers.VEIL_HP;
+    /** One realm step over the ascended 40 measured on golem and both bats. */
+    public static final int ARMOR = SkyMobTiers.VEIL_ARMOR;
 
     public GloomShadeMob() {
-        super(240);
+        super(MAX_HEALTH);
         this.setSpeed(40.0F);
         this.setFriction(2.0F);
+        this.setArmor(ARMOR);
         // Vanilla spawn-light rules: torch-lit and daylit areas stay SAFE.
         // (v0.1 raised the threshold for daytime spawns — playtests showed that
         // breaks the game's core "light = safety" contract, so nights and dark

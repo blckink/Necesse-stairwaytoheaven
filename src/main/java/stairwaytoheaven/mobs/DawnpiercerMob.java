@@ -26,22 +26,52 @@ import necesse.level.maps.light.GameLight;
 
 /**
  * Dawnpiercer — a crystal-crested dive bird of the Aurora Shoals: fast and
- * fragile with a hard-hitting swoop (glass-cannon counterpart to the golem's
- * tankiness). Same melee-flier pattern as the Zephyr Ray.
+ * fragile, the mobile counterpart to the golem's tankiness. Same melee-flier
+ * pattern as the Zephyr Ray.
+ *
+ * <p><b>Tier: Skyreach floor, fast role</b> ({@link SkyMobTiers}).
+ *
+ * <p>The Skyreach floor is vanilla's ORDINARY ascended mob — what a player
+ * meets on incursion tier 1, which VERIFIED [jar] applies no multiplier at all
+ * ({@code BiomeMissionIncursionData} SUMS its per-tier scaling arrays, and
+ * both start at {@code 0.0F}). Measured: {@code AscendedGolemMob.MAX_HEALTH = new
+ * MaxHealthGetter(400, 750, 1000, 1300, 1800)} → 1000 HP on CLASSIC, with
+ * {@code CrystalGolemMob}'s {@code new GameDamage(130.0F)} and armour 40.
+ *
+ * <p>The fast role's x0.60 HP and x0.80 damage give 600 HP / 104 damage, with
+ * the floor's armour of 40 (it had none) — the same bracket as the two
+ * measured ascended fliers, {@code AscendedBatMob.COLLISION_DAMAGE = new
+ * GameDamage(90.0F)} and {@code NightSwarmBatMob}'s {@code 115.0F}, which also
+ * carry armour 40. What still separates it from the Zephyr Ray is what the
+ * ladder does not govern: speed 64 against the ray's 52, and the lowest
+ * knockback of the roster (70), so it stays on a player between swoops.
+ *
+ * <p>Until this pass it was 180 HP / 60 damage / no armour — the "glass
+ * cannon" read came from being under-tiered on both halves rather than from
+ * out-hitting its realm, so the per-hit damage now sits under the golem's
+ * where a fast mob's belongs. Loot is unchanged: the Skyreach's drop value
+ * is x1.0.
  */
 public class DawnpiercerMob extends HostileMob {
 
     public static GameTexture texture;
 
+    /** Skyreach drop value is x1.0 — the floor multiplies nothing. */
     public static LootTable lootTable = new LootTable(
             new ChanceLootItemList(0.5F, LootItem.between("prismshard", 1, 2)),
             new ChanceLootItemList(0.4F, LootItem.between("aurorapetal", 1, 1)));
-    public static GameDamage damage = new GameDamage(60.0F);
+    /** Skyreach floor damage 130 ({@code CrystalGolemMob.damage}) x0.80 fast = 104. */
+    public static GameDamage damage = SkyMobTiers.damage(SkyMobTiers.SKYREACH_DAMAGE, SkyMobTiers.ROLE_FAST_DAMAGE);
+    /** Skyreach floor 1000 HP ({@code AscendedGolemMob} on CLASSIC) x0.60 fast = 600. */
+    public static final int MAX_HEALTH = SkyMobTiers.hp(SkyMobTiers.SKYREACH_HP, SkyMobTiers.ROLE_FAST_HP);
+    /** Measured 40 on {@code AscendedBatMob}/{@code NightSwarmBatMob}; armour has no role modifier. */
+    public static final int ARMOR = SkyMobTiers.SKYREACH_ARMOR;
 
     public DawnpiercerMob() {
-        super(180);
+        super(MAX_HEALTH);
         this.setSpeed(64.0F);
         this.setFriction(2.0F);
+        this.setArmor(ARMOR);
         this.collision = new Rectangle(-10, -7, 20, 14);
         this.hitBox = new Rectangle(-14, -12, 28, 24);
         this.selectBox = new Rectangle(-16, -40, 32, 40);

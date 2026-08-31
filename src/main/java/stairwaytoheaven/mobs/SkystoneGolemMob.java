@@ -28,21 +28,45 @@ import necesse.level.maps.light.GameLight;
 /**
  * Skystone Golem — an animated hulk of island rock guarding the Aurora Shoals.
  * Slow, heavily armored melee bruiser; the tank of the Skyreach roster.
+ *
+ * <p><b>Tier: Skyreach floor, elite role</b> ({@link SkyMobTiers}). The
+ * Skyreach is the mod's entry realm, and its floor is vanilla's ORDINARY
+ * ascended mob — what a player meets on incursion tier 1, which VERIFIED [jar]
+ * adds nothing at all: {@code BiomeMissionIncursionData} SUMS its per-tier
+ * scaling arrays and both start at {@code 0.0F}. Measured there:
+ * {@code AscendedGolemMob.MAX_HEALTH = new MaxHealthGetter(400, 750, 1000,
+ * 1300, 1800)} → 1000 HP on CLASSIC, extending {@code CrystalGolemMob} with
+ * {@code new GameDamage(130.0F)}, armour 40 and speed 20.
+ *
+ * <p>This golem is that mob's direct counterpart and the realm's elite, so it
+ * takes the analogue's damage and armour unchanged and x1.40 of its health:
+ * 1400 HP / 130 damage / 40 armour. Speed stays 18 — the crystal golem's
+ * measured 20 is what it was always modelled on.
+ *
+ * <p>Until this pass it was 520 HP / 70 damage / 30 armour, roughly half an
+ * ordinary ascended mob. Loot is unchanged because the Skyreach's drop value
+ * is x1.0: it is the floor the other realms multiply up from.
  */
 public class SkystoneGolemMob extends HostileMob {
 
     public static GameTexture texture;
 
+    /** Skyreach drop value is x1.0 — the floor multiplies nothing. */
     public static LootTable lootTable = new LootTable(
             LootItem.between("skystone", 2, 4),
             new ChanceLootItemList(0.4F, LootItem.between("aetheriumore", 1, 2)));
-    public static GameDamage damage = new GameDamage(70.0F);
+    /** Skyreach floor 1000 HP ({@code AscendedGolemMob} on CLASSIC) x1.40 elite = 1400. */
+    public static final int MAX_HEALTH = SkyMobTiers.hp(SkyMobTiers.SKYREACH_HP, SkyMobTiers.ROLE_ELITE_HP);
+    /** Elite takes the floor's damage unchanged: {@code CrystalGolemMob.damage}, measured 130. */
+    public static GameDamage damage = new GameDamage(SkyMobTiers.SKYREACH_DAMAGE);
+    /** Measured 40 on {@code CrystalGolemMob}/{@code AscendedGolemMob}; armour has no role modifier. */
+    public static final int ARMOR = SkyMobTiers.SKYREACH_ARMOR;
 
     public SkystoneGolemMob() {
-        super(520);
+        super(MAX_HEALTH);
         this.setSpeed(18.0F);
         this.setFriction(3.0F);
-        this.setArmor(30);
+        this.setArmor(ARMOR);
         this.setKnockbackModifier(0.25F);
         // vanilla spawn-light rules: lit areas are safe (see ZephyrRayMob note)
         this.collision = new Rectangle(-12, -8, 24, 16);
