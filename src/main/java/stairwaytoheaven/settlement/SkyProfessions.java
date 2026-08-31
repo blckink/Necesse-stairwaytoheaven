@@ -111,13 +111,33 @@ public final class SkyProfessions {
                 new SkyMatItem(500, Item.Rarity.UNCOMMON).setItemCategory("materials"),
                 20.0F, true);
         // The Aether Forge's own tier: aetherium quenched in storm shard.
+        //
+        // Worth (incursion rebalance): a bar is 4 Aetherium Ore + 1 Storm
+        // Shard (see registerRecipes below), and the Storm Shard moved to the
+        // tier-1 incursion floor of 25.0F in SkyItems, so its ingredients now
+        // cost 4 x 8.0F + 25.0F = 57.0F. 58.0F keeps the same razor-thin forge
+        // margin the bar had before (44.0F of ore and shard into 45.0F).
+        // VERIFIED [jar]: that puts the mod's endgame bar above vanilla's
+        // dearest materials/bars entry, `fuelskull` at brokerValue 42.0F
+        // (ItemRegistry.java:921) — deliberately, because it is bought with an
+        // incursion-tier crystal that vanilla's bars never cost.
         ItemRegistry.registerItem("stormsteelbar",
                 new SkyMatItem(250, Item.Rarity.RARE).setItemCategory("materials", "bars"),
-                45.0F, true);
+                58.0F, true);
         // Fired in the Stormglass Kiln out of lightning-fused sand.
+        //
+        // Worth (incursion rebalance): the kiln turns 2 Fulgurite + 1 Skystone
+        // into 2 panes, so one pane is 1 Fulgurite + half a Skystone — 26.0F
+        // now that Fulgurite carries the tier-1 incursion floor. 32.0F
+        // preserves the kiln's old +23% margin (13.0F of stock into a 16.0F
+        // pane).
+        // Anchor: `shadowessence` 25.0F (ItemRegistry.java:977) through the
+        // Fulgurite it is fired from; for scale, vanilla's dearest
+        // materials/minerals entries are the gems, `amethyst` and its four
+        // siblings, at 25.0F (ItemRegistry.java:901).
         ItemRegistry.registerItem("stormglass",
                 new SkyMatItem(500, Item.Rarity.UNCOMMON).setItemCategory("materials", "minerals"),
-                16.0F, true);
+                32.0F, true);
     }
 
     /**

@@ -54,8 +54,26 @@ public final class SkyItems {
                 new SkyMatItem(250, Item.Rarity.UNCOMMON).setItemCategory("materials", "ore"), 8.0F, true);
         ItemRegistry.registerItem("aetheriumbar",
                 new SkyMatItem(250, Item.Rarity.UNCOMMON).setItemCategory("materials", "bars"), 25.0F, true);
+        // Worth (incursion rebalance): this pass prices the Skyreach's
+        // materials against an incursion's own loot instead of the tungsten
+        // tier they were first tuned to.
+        //
+        // VERIFIED [jar]: the entire biome loot of the first (tier-1)
+        // incursion is `deepstone` 0.1F, `tungstenore` 6.0F, `ectoplasm`
+        // 12.0F, `shadowessence` 25.0F, `upgradeshard` 8.0F and
+        // `alchemyshard` 8.0F (JournalRegistry.java:265). The crystal is the
+        // dear one, and it comes off the two sources a Storm Shard does: a
+        // node you mine — `shadowessencedeeprock`, a RockOreObject dropping
+        // one per rock (ObjectRegistry.java:1538-1544) — and the mobs, where
+        // every boss adds one and the incursion's own boss 20-25
+        // (ForestDeepCaveIncursionBiome.java:50, :98). `shadowessence`
+        // registers at brokerValue 25.0F (ItemRegistry.java:977).
+        //
+        // Storm Shards, Fulgurite and Prism Shards are the Skyreach's version
+        // of that crystal and sat at 12.0F, under half the tier-1 floor.
+        // Anchor: `shadowessence` 25.0F.
         ItemRegistry.registerItem("stormshard",
-                new SkyMatItem(500, Item.Rarity.UNCOMMON).setItemCategory("materials", "minerals"), 12.0F, true);
+                new SkyMatItem(500, Item.Rarity.UNCOMMON).setItemCategory("materials", "minerals"), 25.0F, true);
         ItemRegistry.registerItem("windsilk",
                 new SkyMatItem(500, Item.Rarity.UNCOMMON).setItemCategory("materials", "mobdrops"), 12.0F, true);
         // A PETAL, not a mineral. Vanilla files every picked flower under
@@ -98,10 +116,32 @@ public final class SkyItems {
                         .spoilDuration(480), 3.0F, true);
 
         // v0.3: Veil materials
+        //
+        // Worth (incursion rebalance): the Veil is the mod's second realm and
+        // its dead sit around incursion tier 7, so its two materials are
+        // priced a rung above the Skyreach's tier-1 floor. VERIFIED [jar]:
+        // vanilla runs that ladder itself, in EssenceMatItem tiers — tier 1
+        // (`shadowessence` and its three siblings) 25.0F, tier 2
+        // (`slimeessence`, `bloodessence`, `spideressence`) 30.0F, tier 3
+        // (`crystalessence`, `radiatedessence`) 35.0F, ItemRegistry.java:977,
+        // :1001, :1010 — so the Veil is priced on the rungs rather than on a
+        // flat multiplier, which after the Skyreach floor moved to 25.0F would
+        // have left the two realms 8% apart.
+        //
+        // Veil Essence is the realm's signature drop: Gloom Shades, Fen
+        // Wraiths and Cinder Cantors all pay in it and the Crooked House chest
+        // holds 2-6. Anchor: `crystalessence` 35.0F, vanilla's top essence —
+        // ours lands just under it at 34.0F, which is also exactly the realm's
+        // 1.9 on the 18.0F it carried.
         ItemRegistry.registerItem("veilessence",
-                new SkyMatItem(500, Item.Rarity.RARE).setItemCategory("materials", "mobdrops"), 18.0F, true);
+                new SkyMatItem(500, Item.Rarity.RARE).setItemCategory("materials", "mobdrops"), 34.0F, true);
+        // The Cinder Pearl is the Veil's common mineral — knocked out of
+        // ashbones and dropped by the same wraiths — so it takes the rung
+        // below. Anchor: `slimeessence`, the tier-2 essence, at brokerValue
+        // 30.0F (ItemRegistry.java:1001): a clear step above the Skyreach's
+        // 25.0F crystals and below the Veil Essence above it.
         ItemRegistry.registerItem("cinderpearl",
-                new SkyMatItem(250, Item.Rarity.UNCOMMON).setItemCategory("materials", "minerals"), 14.0F, true);
+                new SkyMatItem(250, Item.Rarity.UNCOMMON).setItemCategory("materials", "minerals"), 30.0F, true);
 
         // Weapons
         // The Warden's clothes, as real armor items on the vanilla human body
@@ -133,14 +173,26 @@ public final class SkyItems {
                 new SkyMatItem(500, "anylog").setItemCategory("materials", "logs"), 2.0F, true);
         ItemRegistry.registerItem("nimbuswood",
                 new SkyMatItem(500, "anylog").setItemCategory("materials", "logs"), 2.0F, true);
+        // Charwood is the Veil's building wood, but it deliberately does NOT
+        // take the Veil's x1.9: the fulgurpine it drops from grows in the
+        // Skyreach's own Stormveil (SkyTerrainPainter.java:499, 1086), and
+        // VERIFIED [jar] vanilla prices every log flat at 2.0F no matter how
+        // deep it grows — `oaklog`, `deadwoodlog` and even `dryadlog` are all
+        // 2.0F (ItemRegistry.java:845-855). Realm worth does not belong in a
+        // material the player can farm by the stack.
         ItemRegistry.registerItem("charwood",
                 new SkyMatItem(500, "anylog").setItemCategory("materials", "logs"), 2.0F, true);
         ItemRegistry.registerItem("prismwood",
                 new SkyMatItem(500, "anylog").setItemCategory("materials", "logs"), 2.0F, true);
+        // Both are mined out of a Skyreach rock (fulguriterock /
+        // prismshardrock, SkyObjects.java:197-201), so both take the same
+        // anchor as the Storm Shard above: vanilla `shadowessence` 25.0F
+        // (ItemRegistry.java:977), the crystal a tier-1 incursion's essence
+        // rock drops.
         ItemRegistry.registerItem("fulgurite",
-                new SkyMatItem(250, Item.Rarity.UNCOMMON).setItemCategory("materials", "minerals"), 12.0F, true);
+                new SkyMatItem(250, Item.Rarity.UNCOMMON).setItemCategory("materials", "minerals"), 25.0F, true);
         ItemRegistry.registerItem("prismshard",
-                new SkyMatItem(250, Item.Rarity.UNCOMMON).setItemCategory("materials", "minerals"), 12.0F, true);
+                new SkyMatItem(250, Item.Rarity.UNCOMMON).setItemCategory("materials", "minerals"), 25.0F, true);
 
         registerGear();
     }
