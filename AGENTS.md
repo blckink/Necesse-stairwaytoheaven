@@ -18,20 +18,24 @@ modifying anything in this repository.
    The working method is: build with vanilla stand-ins now, the player replaces
    them all in one pass later. **A borrowed asset that is not in that file
    breaks the swap**, so add the row in the same commit that uses it.
-4. `docs/CURRENT_STATE.md` — where the project actually is right now
-5. `docs/DESIGN_DECISIONS.md` — invariants you must not silently reverse
-6. `docs/TECHNICAL_LEARNINGS.md` — verified Necesse behaviour, so you do not
+4. **`docs/STATUS.md` — what actually WORKS right now.** One page: which
+   biomes, quests, NPCs, stations and structures are live, what is registered
+   but dead, and what is not built at all. Every row carries a verification
+   state. Start here before claiming anything works.
+5. `docs/CURRENT_STATE.md` — the longer narrative of where the project is
+6. `docs/DESIGN_DECISIONS.md` — invariants you must not silently reverse
+7. `docs/TECHNICAL_LEARNINGS.md` — verified Necesse behaviour, so you do not
    rediscover the same APIs and bugs
-7. `docs/IMPLEMENTATION_RULES.md` — production rules for complete, vanilla-like
+8. `docs/IMPLEMENTATION_RULES.md` — production rules for complete, vanilla-like
    content families, tool behaviour, UI/icon completeness, worldgen composition,
    and verification states
-8. the domain doc for what you are touching — `docs/ART_DIRECTION.md`,
+9. the domain doc for what you are touching — `docs/ART_DIRECTION.md`,
    `docs/PLAYTEST_LOG.md`, `docs/ARCHITECTURE.md`, `docs/DESIGN.md`,
    `docs/research/`
-9. `docs/WORLDBUILDING_LOOP.md` if you are expanding the world rather than
+10. `docs/WORLDBUILDING_LOOP.md` if you are expanding the world rather than
    fixing something — what already exists, the texture law on one page, and the
    seven-role loop the `.claude/agents/` definitions implement
-10. recent git history (`git log --oneline -20` and the diff of anything your
+11. recent git history (`git log --oneline -20` and the diff of anything your
    task touches)
 
 ## Rules
