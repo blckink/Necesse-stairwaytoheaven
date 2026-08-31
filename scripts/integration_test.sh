@@ -322,10 +322,10 @@ done
 # loud, and a promise that holds most of the time is a different promise.
 grep -qE "outlands check: floor=900 " "$LOG1" \
     || { echo "FAIL: no outlands check line, or the 900-tile floor moved"; STATUS=1; }
-for near in 200 600 850; do
-    grep -qE "outlands check: .* r$near=0/[0-9]+" "$LOG1" \
-        || { echo "FAIL: wrong ground appears at $near tiles, inside the 900-tile floor"; STATUS=1; }
-done
+# The floor, as the promise itself: zero wrong tiles anywhere in the disc
+# inside 900, out of a land count that proves the sweep actually found ground.
+grep -qE "outlands check: .* inside=0/[1-9][0-9]*" "$LOG1" \
+    || { echo "FAIL: wrong ground appears inside the 900-tile floor (or the sweep found no land)"; STATUS=1; }
 # ...and it must actually arrive further out, or the region is unreachable.
 grep -qE "outlands check: .* r3200=[1-9][0-9]*/" "$LOG1" \
     || { echo "FAIL: no Outland ground at 3200 tiles -- the ramp never rises"; STATUS=1; }

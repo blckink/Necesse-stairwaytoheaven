@@ -335,12 +335,22 @@ decides them is DISTANCE, not the biome noise.
 Server.jar, all five python audits, and `scripts/integration_test.sh` on a real
 server boot — which now covers this region rather than merely surviving it:
 
-- `outlands check:` reports the ramp measured off `describeTile` at real world
-  positions. The 900-tile floor is asserted as an **exact zero** at 200, 600
-  and 850 tiles, not as "rare" — "the spire's surroundings are safe" is a
-  promise this mod makes out loud, and a promise that holds most of the time is
-  a different promise. It also asserts wrongness actually arrives by 3200, so
-  the region cannot silently become unreachable.
+- `outlands check:` reports the floor and the ramp, measured off
+  `describeTile` at real world positions. The floor is tested as the promise
+  ITSELF rather than through a proxy: the whole disc inside 900 tiles is swept
+  and the wrong-tile count must be an **exact zero**, out of a land count that
+  proves the sweep found ground (`inside=0/13582` on the test world). "The
+  spire's surroundings are safe" is a promise this mod makes out loud, and a
+  promise that holds most of the time is a different promise. A second
+  assertion requires wrongness to have arrived by 3200, so the region cannot
+  silently become unreachable.
+  - The first version of this gate sampled ±60 tiles around nominal radii of
+    200/600/850 and **failed at 850** — because that window reaches 910 and
+    legitimately crosses the floor. The world was right and the gate was
+    wrong. Measuring true distance per tile removed the whole class of error.
+  - The per-radius numbers in the line are ONE seed through a small window, so
+    they swing (`r2000=0/1008` here against 7.68% over five seeds offline).
+    Only the floor and the by-3200 arrival are asserted, for that reason.
 - `spawn check:` now probes `crystalgolem`, `ascendedgolem` and
   `crystalarmadillo`. They are VANILLA mobs used by string ID and never
   subclassed, so nothing in this repo can prove they spawn — only the live

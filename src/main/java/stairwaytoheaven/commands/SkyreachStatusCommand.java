@@ -832,7 +832,44 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                     .append((int) stairwaytoheaven.worldgen.SkyOutlands.WRONG_START);
             int wallSeen = 0;
             int portalSeen = 0;
-            for (int radius : new int[]{200, 600, 850, 1200, 2000, 3200}) {
+
+            // The floor, tested as the promise itself rather than through a
+            // proxy: sweep the WHOLE disc inside WRONG_START and count wrong
+            // tiles. There must be none.
+            //
+            // The first version of this check sampled +/-60 tiles around
+            // nominal radii of 200/600/850, and the 850 band failed -- because
+            // that window reaches 910 and legitimately crosses the floor. The
+            // world was right and the gate was wrong. Measuring true distance
+            // per tile removes the whole class of error.
+            int insideLand = 0;
+            int insideWrong = 0;
+            int floor = (int) stairwaytoheaven.worldgen.SkyOutlands.WRONG_START;
+            for (int dx = -floor; dx <= floor; dx += 10) {
+                for (int dy = -floor; dy <= floor; dy += 10) {
+                    if ((long) dx * dx + (long) dy * dy > (long) floor * floor) {
+                        continue;
+                    }
+                    int tx = outOrigin.x + dx;
+                    int ty = outOrigin.y + dy;
+                    long desc = stairwaytoheaven.worldgen.SkyTerrainPainter.describeTile(
+                            outSeed, tx, ty, outOrigin.x, outOrigin.y);
+                    if (stairwaytoheaven.worldgen.SkyTerrainPainter.descTile(desc)
+                            == SkyRegistry.mistseaID) {
+                        continue;
+                    }
+                    insideLand++;
+                    if (stairwaytoheaven.worldgen.SkyTerrainPainter.descBiome(desc)
+                            == stairwaytoheaven.worldgen.SkyTerrainPainter.BIOME_OUTLANDS) {
+                        insideWrong++;
+                    }
+                }
+            }
+            ramp.append(" inside=").append(insideWrong).append("/").append(insideLand);
+
+            // ...and the ramp, at radii far enough out that the sampling window
+            // cannot reach back over the floor.
+            for (int radius : new int[]{1200, 2000, 3200}) {
                 int land = 0;
                 int wrong = 0;
                 for (int dx = -60; dx <= 60; dx += 2) {
