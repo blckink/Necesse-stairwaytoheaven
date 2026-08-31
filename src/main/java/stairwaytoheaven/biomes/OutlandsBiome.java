@@ -64,19 +64,32 @@ public class OutlandsBiome extends SkyBiome {
      * and it needs our own subclass to apply.
      */
     public static final MobSpawnTable mobs = new MobSpawnTable()
-            // The bruiser: slow, 130 damage behind 40 armour. The one that
-            // punishes standing still.
-            .addLimited(55, "crystalgolem", 3, 80)
-            // The wall. 1000 HP on Classic, so it is rarer and capped tighter
-            // than anything else in the sky.
-            .addLimited(30, "ascendedgolem", 2, 96)
+            // Radii are PIXELS, not tiles -- see SkyBiome's header. Every cap
+            // in this table used to pass 60/80/96, i.e. 1.9/2.5/3 tiles, so
+            // none of them could bind. They now use the shared archetype
+            // radii, which is what makes a cap a mix control at all.
+            //
+            // Weights changed with the endgame re-tier. The old comment here
+            // said the mod's own mobs were "demoted to atmosphere" beside
+            // vanilla's ascended cast; after the rebalance that is no longer
+            // true -- the Gloom Shade is 2800 HP and the Fen Wraith 2800/230,
+            // the same rung as crystalgolem. They are peers now, so they are
+            // weighted as peers.
+            //
+            // The bruiser: 130 damage behind 40 armour, slow. Punishes standing
+            // still, and the cap is what stops two from arriving together.
+            .addLimited(50, "crystalgolem", 2, RANGE_STANDARD)
+            // The wall. 1000 HP on Classic and the rarest thing in the mix, so
+            // it is an event rather than a fight you have on the way past.
+            .addLimited(25, "ascendedgolem", 1, RANGE_ELITE)
             // The charger: armour 60 until it commits, then speed 200 at you.
-            .addLimited(45, "crystalarmadillo", 3, 80)
-            // The Veil's own residents stay, demoted to what they now are out
-            // here — atmosphere between the real threats.
-            .addLimited(60, "gloomshade", 4, 60)
-            .addLimited(30, "fenwraith", 2, 80)
-            .addLimited(20, "cindercantor", 2, 96);
+            .addLimited(45, "crystalarmadillo", 2, RANGE_STANDARD)
+            // The Veil's own residents, now at the same tier rather than below
+            // it. The shade is the ground's common enemy and keeps the widest
+            // share; the wraith is its slow bruiser, the cantor its range.
+            .addLimited(70, "gloomshade", 3, RANGE_STANDARD)
+            .addLimited(40, "fenwraith", 2, RANGE_STANDARD)
+            .addLimited(30, "cindercantor", 2, RANGE_RANGED);
 
     @Override
     public MobSpawnTable getMobSpawnTable(Level level) {

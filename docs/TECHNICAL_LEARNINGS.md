@@ -2864,3 +2864,46 @@ the material chain is the load-bearing one. Check what a recipe's ingredients
 actually require before concluding that its station lets anyone in early —
 three careful workers reached the same wrong conclusion from the tech constant
 alone.
+
+## `MobSpawnTable.addLimited`'s searchRange is in PIXELS, not tiles (2026-08-31, VERIFIED [jar])
+
+The single most consequential finding of the endgame rebalance, and it had
+silently disabled almost every spawn cap this mod ever wrote.
+
+`addLimited(weight, mobID, max, searchRange)` measures `searchRange` in
+**pixels**: it builds `GameUtils.rangeBounds(spawnTile.x * 32 + 16, ...,
+searchRange)` and filters on `Mob.getDistance`. The sibling that takes tiles is
+`rangeTileBounds`, which multiplies by 32 — and the neighbouring
+`MobSpawnLocation.checkMaxMobsAround(max, tileRange)` *is* in tiles, which is
+exactly how the confusion survived review.
+
+Every cap in this mod passed **60, 80 or 96** — that is **1.9, 2.5 and 3
+tiles**. None of them could bind in practice, and several code comments called
+80 an "eight-tile radius". The tables now use named constants
+(`SkyBiome.RANGE_STANDARD` = 8*32, `RANGE_RANGED` = 12*32, `RANGE_ELITE` =
+16*32) so the unit is visible at every call site.
+
+Three more facts that bound what a spawn table can actually do:
+
+- **A per-kind cap is a MIX control, not a pressure control.** The engine
+  already allows only four hostiles within eight tiles
+  (`EntityManager.tickMobSpawning` → `checkMaxHostilesAround(4, 8, client)`)
+  plus a per-player headcount. Your table cannot raise total pressure; it only
+  decides *which* four.
+- **A cap of 4 at 8 tiles is therefore dead weight**, and
+  `checkMaxHostilesAround` measures the enclosing SQUARE
+  (`GameMath.squareDistance` = `max(|dx|,|dy|)`), not a circle.
+- **A bound cap redistributes tickets rather than emptying ground** —
+  `addCanSpawns` plus `spawnRandomMob`'s `withoutRandomMob` retry means the
+  slot goes to another entry instead of going unused.
+- And, as recorded above: an entry for a mob without `isValidSpawnLocation` is
+  silently inert.
+
+### The loot gap this exposed
+
+Crate loot tables exist **only** in the four Skyreach biomes.
+`VeilBiome` has no `getCrateLootTable` override and `VeilTerrainPainter` places
+no crate at all — `skycrate` is scattered by `SkyTerrainPainter` alone. So the
+harder realms have no container to pay out of, and if a crate were ever placed
+down there the inherited fallback is surface-tier `basicCrate`. That is a
+worldgen gap, not a loot-table one, and it is still open.
