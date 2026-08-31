@@ -8,6 +8,13 @@ this repository. Where `docs/DESIGN.md`, `docs/ART_DIRECTION.md` or
 It exists so the player never has to brief this again. Do not summarise it away,
 do not "simplify" it, and do not quietly drop a section because it is large.
 
+**Part A (§1–40)** is the player's final briefing, reproduced faithfully.
+**Part A2** is the player's amendment on the Sky Warden, his house and travel.
+**Part A3** is the player's EARLIER, rougher concept, supplied afterwards as
+inspiration — it does not override Part A, it restores the atmosphere the
+tighter briefing compressed out, and it carries the doors motif that the final
+version dropped. Read A for what a realm is; read A3 for what it feels like.
+
 Sections 1–40 are the player's concept, reproduced faithfully.
 **Section 41 onward is this repo's own work**: the review, the gaps found in the
 concept, the migration path from what is already built, and the vanilla asset
@@ -838,6 +845,179 @@ anywhere, and a demonic lift.
 - **`docs/DESIGN_DECISIONS.md`'s 30,000 coin recruit price** now has a second
   reason to stay low: he is a first-hour companion, not an endgame unlock.
 
+---
+
+# Part A3 — the visual bible (the player's earlier concept, kept as texture)
+
+The player supplied this on 2026-08-31 **"als Inspiration"** — it is the rough
+concept that came BEFORE the final briefing in Part A. It does not override Part
+A; it restores the atmosphere the tighter briefing compressed out, and it adds
+one motif that the final version dropped entirely and should not have.
+
+Read Part A for what a realm *is*. Read this for what it *feels like*.
+
+## A3.1 The doors — promote this to a design pillar
+
+**This is the strongest idea in either document and it is missing from Part A.**
+
+> Free-standing doors begin appearing in Steinfeld. At first ordinary. Then
+> increasingly strange. In the Ghost Realm, old Victorian doors. In Crooked
+> Beyond: a tiny door, a gigantic door, a door in the floor, a door standing in
+> the middle of nothing. **Some work. Some do not. One opens onto plain black.**
+>
+> *"Damit kannst du Übergänge zwischen Biomen elegant erklären."*
+
+Why this deserves to be a pillar rather than a decoration:
+
+- It is **one motif that spans five realms** and escalates with `distortion`
+  (§3), so it visualises the world's decay without any new system.
+- It gives biome transitions a **diegetic explanation** instead of a noise
+  threshold.
+- It already connects to three things Part A establishes independently: **Mr.
+  Knott the Doorman** (§15) who sells doors and portals; the **Architect's Key**
+  (§16) that opens something nobody will name; and the **Pocket Door** from the
+  Reality Stitcher (§13).
+- And it lands exactly on **A2.3's travel anchors** — the Crooked anchor in the
+  Warden's house is *"eine absurde rote Tür"*. The doors motif is what makes
+  that read as belonging to the world rather than as a teleporter with a skin.
+
+Implementation note for whoever builds it: a door that does nothing is content,
+not a bug. The ratio matters — most should be scenery, a few should be real, and
+exactly one per world should open onto black.
+
+## A3.2 Skyreach — "nicht steril"
+
+The single most useful correction in this document, and the reason the player
+flagged the old palette rule as wrong:
+
+> *"Viele Vanilla-Himmelwelten bestehen nur aus weißem Marmor und Gold. Deine
+> sollte fast gemütlich sein."*
+
+The area around the tower is **a small celestial town**: cloud paths, golden
+gates, fountains, angel statues, little gardens, cloud trees, small floating
+islets. Furnished with fluffy cloud bushes, pink flowers, golden lamps, small
+benches, fountains, cloth banners.
+
+Accents beyond Part A §4's palette: **small rainbow / mother-of-pearl
+highlights.**
+
+Residents include *"vielleicht verstorbene freundliche NPCs"* — friendly dead
+people, living in heaven. A quiet lore hook Part A does not have, and one that
+sets up the Ghost Realm long before the player gets there.
+
+The intended first thought is: *"Okay. Ich bin tatsächlich im Himmel."* — and
+the whole road afterwards works **because** that landed.
+
+## A3.3 Eden — uncomfortably perfect
+
+Not "green heaven": *"fast schon unangenehm perfekt und fruchtbar"*.
+
+Adds to Part A §5: waterfalls, lagoons, white sand, turquoise water, clearings
+with **absurdly large fruit** (pomegranates, figs, grapes, apples). Trees should
+read **much larger than vanilla Necesse trees**.
+
+The design thesis, in one line: **beauty can be dangerous.** Snakes in the tall
+grass, carnivorous plants, aggressive paradise insects, living vines.
+
+Around the Knowledge Tree, snakes grow more common and rare resources lie about
+— a soft difficulty gradient that needs no gate.
+
+## A3.4 Steinfeld — a much stronger identity than Part A gives it
+
+Part A §7 calls it "the death of paradise". This is better:
+
+> **It is the place where the sky stops working properly.**
+> *"Hier landen Dinge, die nicht mehr richtig zum Himmel gehören."*
+
+That single line gives Steinfeld the reason to exist that Part B §42.8 records
+it as lacking.
+
+The gradient, as the player drew it:
+
+```
+Skyreach          ☁☁☁  /  🌸🪽🌸
+outer Steinfeld   🌱🪨🌱  /  ☁🪨☁
+inner Steinfeld   🪦🪨🪦  /  🌫👻🌫
+Ghost Realm
+```
+
+Concretely: white stone and pale grass with single sky flowers at the inner
+edge; further out the clouds go grey, vegetation dies, statues are damaged, and
+**the gold oxidises and darkens** — a detail worth keeping, because it is the
+only place in the mod where Skyreach's own material visibly ages.
+
+**The ghosts here are mostly not enemies.** Some simply stand. Some walk without
+purpose. One might walk the same path between two gravestones forever. Part A §7
+already has non-attackable ghost world-events; this says what they should be
+doing, and it is the moment the player understands where they are going.
+
+## A3.5 Ghost Realm — intense, not desaturated
+
+Explicitly, and it is the second realm where the retired "muted" rule would have
+produced the wrong thing:
+
+> **intense violet shadows · glowing ectoplasm · blue moonlight** — *"statt
+> einfach Grau"*.
+
+Dark petrol, violet, cold blue, poison green as accent, dirty white. The world
+is still physically coherent here; it is simply **dead and crooked**. Full
+Beetlejuice comes later.
+
+Ghosts get a **society**: some friendly, some mad, some hostile.
+
+## A3.6 Crooked Beyond — the reason it looks like that
+
+Part A §13 describes the look. This supplies the *why*, which is what makes it
+more than a texture pack:
+
+> **After death it is not only the landscape that decays. The rules of the world
+> decay.**
+
+Additions worth building: tiles that create **optical illusions**; paths that
+run visibly wrong; stairs that lead nowhere; **windows lying on the floor**;
+lanterns growing out of plants; a rock that reads as a clenched mouth; trees
+shaped as spirals, eye-trunks, bones or worms.
+
+## A3.7 Infernal Processing — the waiting room
+
+Part A §18 has the clerk. This adds the joke that sells it: beside the counter
+sits **a skeleton that has evidently been waiting 400 years.**
+
+Palette: dirty beige, dark red, brass, dirty green, black — with heat arriving
+gradually. Pipes begin to glow; the floor cracks open. Only then does the player
+descend.
+
+## A3.8 Hell has four sub-themes, not one
+
+Part A §19 builds the Infernal City. The rough concept has three more, and they
+are what stop Hell from being one long red corridor:
+
+| sub-theme | what it is |
+|---|---|
+| **Infernal City** | crooked houses, demon shops, forges, bars, prisons |
+| **The Furnace** | huge machines, chains, cogs, ovens, lava |
+| **Flesh Gardens** | black plants, red flowers, eyes, teeth, bone trees |
+| **Hell Carnival** | broken fairground stalls, demonic games, clowns, a carousel |
+
+And the tone that makes it work: demons do not have to attack. One runs a food
+stall. Another openly sells stolen angel goods — which is Vex (§19), now with a
+reason to exist beyond a shop slot.
+
+## A3.9 What this changes for the build
+
+Nothing in Part A is retracted. What this adds to the work already planned:
+
+1. **The doors motif** should be scheduled as its own small content family — a
+   handful of door objects placed by `distortion`, most non-functional. It is
+   cheap, it spans five realms, and it is the mod's most distinctive image.
+2. **Steinfeld gets its identity line** and therefore an answer to Part B
+   §42.8's "a whole tier with nothing to come back for".
+3. **Hell needs four sub-theme object sets**, not one, when its asset list is
+   written.
+4. **Two more realms are explicitly non-desaturated** (Skyreach and Ghost),
+   which is now consistent everywhere after the palette rule was retired
+   (§41.1).
+
 # Part B — this repo's review of the concept
 
 Everything from here is **not** the player's text. It is the analysis this
@@ -1007,7 +1187,10 @@ Skyreach one. Unspecified.
 
 - **Steinfeld has no NPC, no boss and no station.** §7 gives it resources and
   enemies only. It is a whole tier with nothing to come back for, which §40
-  forbids.
+  forbids. **Partly answered by A3.4**, which supplies the identity line ("the
+  place where the sky stops working properly — where things land that no longer
+  belong to heaven") and the walking ghosts. It still has no NPC, no station and
+  no boss, so the economy half of the gap stands.
 - **Steinfeld and Infernal Fringe have no husbandry animal** (§28 skips both).
 - **The Knowledge Tree** (§5) is named as a rare object with no stated function.
 - **"Personal Offering"** (§9) is a quest ingredient with no definition.
