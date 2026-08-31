@@ -70,7 +70,13 @@ public class CrookedHouseWorldPreset extends WorldPreset {
         // Identifier only. hasAnyOfBiome() would consult the vanilla biome
         // weights, which never know about our painted biomes (see the class
         // comment), so it would always answer false.
-        return presetsRegion.identifier.equals(SkyRegistry.VEIL_IDENTIFIER);
+        //
+        // The Skyreach joined the Veil here when the Outlands moved the
+        // Hollows' ground into the sky. The house is the only building either
+        // wrong place has, and it was standing in the layer almost nobody
+        // opened; the sky is where a player will actually walk into it.
+        return presetsRegion.identifier.equals(SkyRegistry.VEIL_IDENTIFIER)
+                || presetsRegion.identifier.equals(SkyRegistry.SKYREACH_IDENTIFIER);
     }
 
     /**
@@ -95,16 +101,57 @@ public class CrookedHouseWorldPreset extends WorldPreset {
                 && VeilTerrainPainter.isHollow(seed, tileX, tileY);
     }
 
+    /**
+     * The same five-point test for the Skyreach's Outlands.
+     *
+     * It asks {@link SkyTerrainPainter#describeTile} rather than re-deriving
+     * the masks, because up here "is this buildable ground" is more than land
+     * plus wrongness: the built landscape (roads, courts, the spire grounds)
+     * paves its own tiles and a house dropped on a carriageway would be a bug
+     * nobody could see coming. describeTile already knows all of it, and it is
+     * the same pure function the painter will run later.
+     */
+    public boolean isValidSkySite(int seed, int tileX, int tileY, int width, int height,
+                                  int originX, int originY) {
+        int x1 = tileX + width - 1;
+        int y1 = tileY + height - 1;
+        int cx = tileX + width / 2;
+        int cy = tileY + height / 2;
+        return goodSky(seed, tileX, tileY, originX, originY)
+                && goodSky(seed, x1, tileY, originX, originY)
+                && goodSky(seed, tileX, y1, originX, originY)
+                && goodSky(seed, x1, y1, originX, originY)
+                && goodSky(seed, cx, cy, originX, originY);
+    }
+
+    private static boolean goodSky(int seed, int tileX, int tileY, int originX, int originY) {
+        long desc = SkyTerrainPainter.describeTile(seed, tileX, tileY, originX, originY);
+        // An Outland's Mistsea keeps the Outlands biome, so "wrong" alone is
+        // not "dry" — the tile has to be checked for water separately.
+        return SkyTerrainPainter.descBiome(desc) == SkyTerrainPainter.BIOME_OUTLANDS
+                && SkyTerrainPainter.descTile(desc) != SkyRegistry.mistseaID
+                && !SkyTerrainPainter.descBuilt(desc);
+    }
+
     @Override
     public void addToRegion(GameRandom random, final LevelPresetsRegion presetsRegion,
                             BiomeGeneratorStack generatorStack, PerformanceTimerManager performanceTimer) {
-        final int seed = VeilLevel.worldGenSeed(presetsRegion.worldRegion.worldEntity.worldSeed);
+        final boolean inSky = presetsRegion.identifier.equals(SkyRegistry.SKYREACH_IDENTIFIER);
+        // The two layers derive their generation seed differently, and using
+        // the wrong one would place houses against a mask the painter never
+        // draws — every site would look valid here and be open water there.
+        final int seed = inSky
+                ? SkyOrigin.worldGenSeed(presetsRegion.worldRegion.worldEntity)
+                : VeilLevel.worldGenSeed(presetsRegion.worldRegion.worldEntity.worldSeed);
+        final Point origin = inSky ? SkyOrigin.compute(seed) : new Point(0, 0);
         final Dimension size = new Dimension(CrookedHousePreset.WIDTH, CrookedHousePreset.HEIGHT);
         int total = getTotalPoints(random, presetsRegion, HOUSES_PER_REGION);
 
         for (int i = 0; i < total; i++) {
             Point tile = findRandomPresetTile(random, presetsRegion, SITE_ATTEMPTS, size, OCCUPIED_BOARD,
-                    (tileX, tileY) -> isValidSite(seed, tileX, tileY, size.width, size.height));
+                    (tileX, tileY) -> inSky
+                            ? isValidSkySite(seed, tileX, tileY, size.width, size.height, origin.x, origin.y)
+                            : isValidSite(seed, tileX, tileY, size.width, size.height));
             if (tile == null) {
                 continue;
             }

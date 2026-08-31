@@ -220,6 +220,7 @@ driftlands=Driftlands
 stormveil=Stormveil
 aurorashoals=Aurora Shoals
 skyway=Skyway Passages
+outlands=Beetle Outlands
 
 [level]
 // One entry per world generation (SkyRegistry.WORLD_GENERATION).
@@ -247,6 +248,7 @@ ossiantalk3=The tower is not a ruin. A ruin has stopped meaning something.
 ossiantalk4=Bring me bars, not ore. I have no patience left for smelting.
 seanceneedbell=The circle waits. It wants to hear the Silver Bell.
 seancealreadyveil=The Veil is already all around you.
+seancesilent=You ring the bell. The chalk drinks the sound, and nothing under the sky answers - yet.
 riftopened=The bell rings once - and something on the other side answers. The circle tears open.
 wardenchatformat=<name>: <line>
 spiremarker=Warden's Spire

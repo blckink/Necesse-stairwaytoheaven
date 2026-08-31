@@ -279,6 +279,16 @@ public final class SkyTerrainPainter {
     public static final int BIOME_DRIFTLANDS = 1;
     public static final int BIOME_AURORA = 2;
     public static final int BIOME_SKYWAY = 3;
+    /**
+     * The Beetle Outlands. Appended, not inserted, per the rule above: the
+     * offline dumps taken before it existed still decode correctly.
+     *
+     * Unlike the other four this one is NOT a band of the biome noise — it is
+     * cut out of whatever was there by {@link SkyOutlands}, which is why
+     * {@link #biomeClassOf} cannot return it and only {@link #describeTile}
+     * ever produces it.
+     */
+    public static final int BIOME_OUTLANDS = 4;
 
     /** Sub-biome class -> the registered biome the region layer stores. */
     public static int biomeRegistryID(int biomeClass) {
@@ -289,6 +299,8 @@ public final class SkyTerrainPainter {
                 return SkyRegistry.auroraShoals.getID();
             case BIOME_SKYWAY:
                 return SkyRegistry.skyway.getID();
+            case BIOME_OUTLANDS:
+                return SkyRegistry.outlands.getID();
             default:
                 return SkyRegistry.driftlands.getID();
         }
@@ -872,6 +884,16 @@ public final class SkyTerrainPainter {
         // A CLASS, not a registry ID: describeTile stays callable from the
         // offline map renderer, which has no biome registry.
         int biomeID = biomeClassOf(biomeValue);
+
+        // The Outlands cut ACROSS all four bands above rather than being a
+        // fifth one: what decides them is distance from the spire, not the
+        // biome noise. Resolved here, once, so the ground, the props and the
+        // biome layer can never disagree about which world a tile is in.
+        boolean isWrong = SkyOutlands.isWrong(seed, tileX, tileY, hubDist);
+        if (isWrong) {
+            biomeID = BIOME_OUTLANDS;
+        }
+
         boolean isStormveil = biomeID == BIOME_STORMVEIL;
         boolean isAurora = biomeID == BIOME_AURORA;
 
@@ -884,9 +906,15 @@ public final class SkyTerrainPainter {
             return pack(SkyRegistry.mistseaID, 0, biomeID, false);
         }
 
-        boolean isRockPatch = SkyNoise.fbm(seed + SALT_ROCK_PATCH, tileX, tileY, ROCK_PATCH_SCALE, 2) > ROCK_PATCH_THRESHOLD;
+        // Bedrock does not surface inside an Outland: the striped ground owns
+        // its region outright, and letting the sky's own grey plateau show
+        // through would read as the nice world leaking back in.
+        boolean isRockPatch = !isWrong
+                && SkyNoise.fbm(seed + SALT_ROCK_PATCH, tileX, tileY, ROCK_PATCH_SCALE, 2) > ROCK_PATCH_THRESHOLD;
         int groundID;
-        if (isRockPatch) {
+        if (isWrong) {
+            groundID = SkyOutlands.groundTile(seed, tileX, tileY);
+        } else if (isRockPatch) {
             // Bare bedrock surfaces through every biome's ground, the passages
             // included — that is what SkywayTile's terrain priority of 260 is
             // for: where the paving meets an outcrop it stays on top of the
@@ -929,6 +957,28 @@ public final class SkyTerrainPainter {
         }
 
         int band = SkyOrigin.bandFor(hubDist);
+
+        // --- the Outlands furnish themselves ---
+        //
+        // Everything below this block — outcrops, aurora colonies, wreck
+        // sites, workshops, meadow carpets, the scree beds — is the BRIGHT
+        // world's furniture. None of it belongs out here, and letting any of
+        // it run would turn a wrong place back into a sky island wearing a
+        // different floor. So the Outlands answer for their own tiles and
+        // return.
+        //
+        // Order inside the block matters the same way it does outside it: the
+        // portal is the rarest thing in the world and must not lose its tile
+        // to a crate or a dead tree.
+        if (isWrong) {
+            if (SkyOutlands.isPortalSite(seed, tileX, tileY, hubDist)) {
+                return pack(groundID, SkyRegistry.seanceCircleID, biomeID, false);
+            }
+            if (SkyNoise.tileRoll(seed, tileX, tileY, SALT_CRATE) < CRATE_CHANCE_BARREN) {
+                return pack(groundID, SkyRegistry.skyCrateID, biomeID, false);
+            }
+            return pack(groundID, SkyOutlands.rollObject(seed, tileX, tileY), biomeID, false);
+        }
 
         // Geology first. Rocks and ore no longer come out of the same per-tile
         // roll as the plants — they belong to formations, and a formation owns

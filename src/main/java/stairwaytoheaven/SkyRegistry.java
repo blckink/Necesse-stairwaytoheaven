@@ -73,6 +73,12 @@ public final class SkyRegistry {
     public static AuroraShoalsBiome auroraShoals;
     /** v0.8 Skyway Passages: the built biome, paved in Skyway and Cloudmarble. */
     public static SkywayBiome skyway;
+    /**
+     * The Beetle Outlands: the sky's wrong ground, gated by distance from the
+     * spire rather than by the biome noise. See
+     * {@link stairwaytoheaven.worldgen.SkyOutlands}.
+     */
+    public static stairwaytoheaven.biomes.OutlandsBiome outlands;
 
     // ===== Tiles =====
 

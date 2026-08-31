@@ -118,6 +118,11 @@ public class StairwayToHeavenMod {
         SkyRegistry.stormveil = BiomeRegistry.registerBiome("stormveil", new StormveilBiome(), false);
         SkyRegistry.auroraShoals = BiomeRegistry.registerBiome("aurorashoals", new AuroraShoalsBiome(), false);
         SkyRegistry.skyway = BiomeRegistry.registerBiome("skyway", new SkywayBiome(), false);
+        // The sky's wrong ground. Registered beside the other sky sub-biomes
+        // because that is what it is now: SkyTerrainPainter paints it into the
+        // Skyreach's own biome layer, gated by distance from the spire.
+        SkyRegistry.outlands = BiomeRegistry.registerBiome("outlands",
+                new stairwaytoheaven.biomes.OutlandsBiome(), false);
         SkyRegistry.gloomfen = BiomeRegistry.registerBiome("gloomfen", new GloomfenBiome(), false);
         SkyRegistry.ashenReach = BiomeRegistry.registerBiome("ashenreach", new AshenReachBiome(), false);
         SkyRegistry.beetlefreakHollow = BiomeRegistry.registerBiome("beetlefreakhollow",

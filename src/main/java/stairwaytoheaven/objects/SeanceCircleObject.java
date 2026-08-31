@@ -37,6 +37,22 @@ public class SeanceCircleObject extends SkyDecoObject {
             client.sendChatMessage(new LocalMessage("misc", "seancealreadyveil"));
             return;
         }
+        // In the sky a circle is a SUMMONING ring, not a door.
+        //
+        // Worldgen stands one at a hashed site inside every Beetle Outland
+        // (SkyOutlands.isPortalSite), which is what the player asked the
+        // circles to become: "seance zirkel wuerde ich stattdessen als
+        // boss-portal nehmen ... an bestimmten stellen, nicht random".
+        //
+        // What is NOT here yet is the thing it calls. The sky has no boss, so
+        // the ring says so instead of opening a rift into a layer this
+        // direction is folding away. Wiring the summon is the next step and it
+        // needs a boss mob to exist first; until then this is deliberately an
+        // honest dead end rather than a door that contradicts the design.
+        if (SkyRegistry.SKYREACH_IDENTIFIER.equals(level.getIdentifier())) {
+            client.sendChatMessage(new LocalMessage("misc", "seancesilent"));
+            return;
+        }
         int bells = player.getInv().main.getAmount(level, player,
                 ItemRegistry.getItem("silverbell"), "seance");
         if (bells <= 0) {

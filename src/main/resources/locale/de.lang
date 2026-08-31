@@ -220,6 +220,7 @@ driftlands=Driftlande
 stormveil=Sturmschleier
 aurorashoals=Aurorabänke
 skyway=Himmelspfade
+outlands=Käferlande
 
 [level]
 // One entry per world generation (SkyRegistry.WORLD_GENERATION).
@@ -247,6 +248,7 @@ ossiantalk3=Der Turm ist keine Ruine. Eine Ruine hat aufgehoert, etwas zu bedeut
 ossiantalk4=Bring mir Barren, kein Erz. Fuer Schmelzen fehlt mir die Geduld.
 seanceneedbell=Der Kreis wartet. Er will das Silberglöckchen hören.
 seancealreadyveil=Der Schleier ist bereits überall um dich herum.
+seancesilent=Du läutest. Die Kreide schluckt den Klang, und nichts unter diesem Himmel antwortet - noch nicht.
 riftopened=Die Glocke schlägt einmal an - und etwas auf der anderen Seite antwortet. Der Kreis reißt auf.
 wardenchatformat=<name>: <line>
 spiremarker=Wardens Turm
