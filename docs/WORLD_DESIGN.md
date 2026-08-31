@@ -200,7 +200,20 @@ collecting three Eden plants. Can join the settlement; works Farming and
 Forestry. Store: seeds, saplings, rare plants, Bee Hive. Later: Knowledge
 Cutting, Ambrosia recipe.
 
-## 6. First main boss — The Garden Warden
+## 6. First main boss — the Keeper of the First Garden
+
+> **RENAMED 2026-08-31, by the player.** This boss was called "The Garden
+> Warden" in the original concept. That collides with the mod's existing **Sky
+> Warden**, who is not a boss at all but the player's central companion from the
+> first hour (see §41.7). Candidate names the player offered: **Keeper of the
+> First Garden**, **The Serpent Crown**, **The First Thorn**. "Keeper of the
+> First Garden" is used throughout this document until the player picks;
+> whoever implements it should confirm the final name first.
+>
+> The drop keeps its role but not its name: **Warden Seed** should become
+> **Keeper's Seed** (or the equivalent for the chosen name), because the séance
+> quest hands it to the Ferryman and "Warden" there would read as the Sky
+> Warden.
 
 **Where.** A large Ancient Garden / Sanctuary deep in Eden, toward Steinfeld.
 
@@ -209,8 +222,8 @@ Cutting, Ambrosia recipe.
 **Phases.** (1) classic guardian, melee + vines. (2) arena overgrows, poison
 plants appear. (3) a Forbidden Serpent merges with him.
 
-**Drops.** Guaranteed: **Warden Seed** (progression item). Also: Warden Bark ·
-Serpent Crown · Eden Core · Garden Warden Weapon · Garden Warden Armor Material.
+**Drops.** Guaranteed: **Keeper's Seed** (progression item). Also: Warden Bark ·
+Serpent Crown · Eden Core · Keeper's Weapon · Keeper's Armor Material.
 
 **Quest.** The Caretaker, after the win:
 > "The Garden has opened its roots to you. But what you woke beneath them was
@@ -263,7 +276,7 @@ effect is checked against the **world region**.
 
 ## 9. Séance questline
 
-After the Garden Warden and first contact with the Veil, **Madame Orla** appears
+After the Keeper of the First Garden and first contact with the Veil, **Madame Orla** appears
 — an eccentric medium, friendly-strange rather than grim-evil, living in a small
 house in Skyreach.
 
@@ -273,7 +286,7 @@ house in Skyreach.
 > — "Not where you are going."
 
 **Quest — A CALL TO THE OTHER SIDE.** Needs 5 Spirit Moss · 3 Echo Shards ·
-1 Warden Seed · 1 Golden Candle · 1 Personal Offering.
+1 Keeper's Seed · 1 Golden Candle · 1 Personal Offering.
 
 Orla crafts the **Séance Table** (placeable station). On placement: light dims,
 candles react, a spirit appears — **The Ferryman / Elias**.
@@ -282,7 +295,7 @@ candles react, a spirit appears — **The Ferryman / Elias**.
 > — "I need to cross." / "I am looking for someone." / "Never mind."
 > — "The Veil does not care what you need. It cares what you are."
 
-The player hands over the Warden Seed.
+The player hands over the Keeper's Seed.
 
 > — "Life touched by death. That might confuse it."
 
@@ -589,7 +602,7 @@ Each must enable at least one of: terrarium, cage, pet, alchemy, decoration.
 
 NPC offers are not static; they react to quest tier.
 
-**Seraphine, by stage:** initial → Minor Celestial Remedy. Garden Warden
+**Seraphine, by stage:** initial → Minor Celestial Remedy. The Keeper
 defeated → Eden Remedy, Antivenom. Veil unlocked → Spirit Cleanse, Soul Ward
 Potion. Architect defeated → Reality Stabilizer. Hell unlocked → Infernal
 Resistance Potion. Auditor defeated → Ascendant Elixir.
@@ -662,7 +675,7 @@ So no realm feels like a single tileset.
 ## 37. Story summary
 
 The player wakes in Skyreach. The sky seems perfect. In the Garden of Eden he
-discovers even paradise holds danger. The Garden Warden falls. Behind the garden
+discovers even paradise holds danger. The Keeper of the First Garden falls. Behind it
 lies Steinfeld, where life slowly disappears. The Geisternebel blocks passage.
 Through Madame Orla the player holds a séance and receives the Ferryman's
 permission to cross the Veil.
@@ -681,7 +694,7 @@ his death the border between realms becomes unstable — the postgame begins.
 ## 38. Main quest order
 
 01 Welcome to Skyreach · 02 A Garden Below · 03 Fruit of Paradise · 04 The
-Watcher in the Garden · 05 Garden Warden · 06 Whispers Beyond the Stones ·
+Watcher in the Garden · 05 The Keeper of the First Garden · 06 Whispers Beyond the Stones ·
 07 Into the Mist · 08 A Call to the Other Side · 09 Preparations for a Séance ·
 10 The Ferryman · 11 Marked for Passage · 12 Beyond the Veil · 13 The Dead Have
 Problems Too · 14 Something Is Wrong With Reality · 15 Every Door Leads
@@ -697,7 +710,7 @@ Administrative Error (postgame begins)
 | game start | Skyreach |
 | Eden discovered | Botanist can appear |
 | Eden farming started | Eden Press |
-| Garden Warden defeated | Spirit quest, new stores |
+| The Keeper defeated | Spirit quest, new stores |
 | Séance completed | Veil Mark |
 | Veil Mark | Ghost Realm |
 | Ghost Realm entered | Spirit Forge |
@@ -724,6 +737,106 @@ material. Then Stairway to Heaven does not feel like seven biomes in a row, but
 like one connected world with a working economy, progression and society.
 
 ---
+
+---
+
+# Part A2 — the Sky Warden and his house (player amendment, 2026-08-31)
+
+This section was added by the player after the concept above, and it changes two
+things in it: the Eden boss's name (§6) and the answer to the travel problem
+(§42.2). It is part of the constitution, not a review note.
+
+## A2.1 The Warden is a companion, not a gate
+
+> *"dann darf der Warden nicht als späterer Boss/Unlock-NPC gedacht werden. Er
+> ist von Anfang an dein zentraler Begleiter in der Stadt, und seine Progression
+> sollte über sein Haus bzw. zusätzliche Räume laufen. Das passt viel besser zu
+> dem, was schon existiert."*
+
+- He is recruited **very early** and moves into the settlement.
+- His first quest stays the **two cats**, who then live in the placeable Cat
+  Basket. That establishes him immediately as an odd but friendly quest NPC.
+- **After that the NPC does not grow — his BUILDING does.**
+
+## A2.2 The house grows with the story
+
+Each chapter adds a room. The world's progression becomes physically visible in
+the player's own town, which is the point.
+
+| room | unlocked by |
+|---|---|
+| Living quarters | from the start |
+| **Cat room** | the cat quest |
+| **Observatory / map room** | Eden discovered |
+| **Séance room** | contact with the Geisternebel |
+| **Relic chamber** | first major Ghost / Crooked progress |
+| **Infernal Archive** | hell artefacts appear |
+| **Final archive / portal room** | endgame |
+
+The Warden asks for space after each chapter, and either triggers the extension
+himself or **requires the player to build it** to a spec: a room of a minimum
+size holding named furniture and station objects. The room becomes functional
+only once it is built.
+
+Worked example, the séance:
+
+> *"Der Nebel reagiert nicht auf Gewalt. Wir brauchen jemanden, der mit ihm
+> sprechen kann. Und dafür brauche ich einen Raum, in dem die Toten glauben, sie
+> seien eingeladen."*
+
+Requirements: a room of a minimum size · a **Séance Table** · **4 Spirit
+Candles** · a **Spirit Basin** · possibly a **Veil Bell**. The séance quest then
+starts in that room.
+
+And the hell equivalent, when the player brings back an **Infernal Seal**:
+
+> — *"Bitte sag mir, dass du das nicht im Haus öffnen willst."*
+> — *"..."*
+> — *"Ich brauche einen neuen Raum."*
+
+That produces the **Relic chamber**, where dangerous items sit on pedestals.
+Those pedestals should carry real function later rather than staying quest
+markers.
+
+## A2.3 The house IS the travel system
+
+**This is the answer to the travel problem** that Part B §42.2 records as the
+concept's largest hole. It is not a generic teleporter network: each anchor is a
+themed room in the Warden's house, and each is earned.
+
+| stage | what opens |
+|---|---|
+| early game | ordinary travel between Skyreach, Eden and Steinfeld |
+| after the séance | Warden's house ↔ **Ghost Realm** anchor |
+| after Crooked | a second anchor in **Crooked Beyond** |
+| after the Hell unlock | the **Infernal** anchor |
+
+**The rule that makes it work: a route only becomes fast travel after the player
+has physically made it once.** Exploration stays mandatory on first contact; the
+grind of the return trip does not.
+
+The anchors are world-flavoured, never generic pads:
+
+- **Ghost** — a séance mirror, or a spirit door
+- **Crooked** — an absurd red door (Mr. Knott's, §15)
+- **Hell** — an infernal elevator
+
+Each stands in a different room, so the house reads as increasingly absurd:
+living room and cats at the start; later a cat room, a map room, a séance
+chamber full of candles, sealed ghost relics, a red door that should not fit
+anywhere, and a demonic lift.
+
+## A2.4 What this overturns
+
+- **§6's boss name.** Retired — see the note there.
+- **§42.2 (travel).** Answered. The gap entry stays for its reasoning, but the
+  solution is this section.
+- **The mod's shipped Warden content is now on-plan rather than legacy.** The
+  recruitment path, the cat quest, the Cat Basket and the Warden's Spire preset
+  were all built before this concept and looked like orphans under it. They are
+  the foundation of A2.1 and A2.2 instead. Do not retire them.
+- **`docs/DESIGN_DECISIONS.md`'s 30,000 coin recruit price** now has a second
+  reason to stay low: he is a first-hour companion, not an endgame unlock.
 
 # Part B — this repo's review of the concept
 
@@ -839,6 +952,11 @@ The concept has no travel system. `ROADMAP.md` already flagged the smaller
 version of this ("the traverse problem the Mistsea creates still has no
 answer"), and nine tiers make it nine times worse.
 
+**ANSWERED 2026-08-31 by Part A2.3** — the Warden's house becomes the travel
+hub, one themed anchor per realm, each unlocked only after the player has made
+that journey once. The analysis below stands as the reasoning; A2.3 is the
+design.
+
 **This must be designed before the outer tiers are built, not after.**
 Recommended shape: a waypoint network, one anchor per realm, unlocked by that
 realm's gate quest, on vanilla's own portal/teleport pattern. The gates in §1
@@ -861,7 +979,7 @@ two configurations. One implementation, two quests, no second code path.
 
 ### 42.5 Boss arenas are unspecified
 
-Three bosses (Garden Warden, Architect, Auditor) need places to be fought. The
+Three bosses (the Keeper of the First Garden, the Architect, the Auditor) need places to be fought. The
 Architect's needs geometry that changes mid-fight (§16). Nothing says whether
 these are worldgen structures, instanced arenas, or summoned encounters.
 

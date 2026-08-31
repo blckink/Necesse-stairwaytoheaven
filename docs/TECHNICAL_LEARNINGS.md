@@ -2620,3 +2620,82 @@ Recorded because two sessions stood down for want of one:
   `SkyRegistry`'s ID fields are all **0** outside a running game, so a probe
   must compare biome CLASSES and call `SkyOutlands`/`SkyNoise` rather than
   compare registry IDs.
+
+## Vanilla can re-skin a whole existing area, and it has an API for it (2026-08-31, VERIFIED [jar])
+
+The player's observation: the incursion-10 Void Wizard fight happens partly in
+your own base, with every texture darkened and trees turned to deadwood — and
+the question was whether we can reuse that to fill our realms quickly from
+existing buildings.
+
+**Yes, and it is a named, reusable mechanism.**
+
+### The level-copy pattern
+
+`necesse/level/maps/incursion/SettlementRuinsIncursionLevel.generateLevel(Level
+copyLevel, Rectangle tileRectangle, ...)` takes a **source level** and a
+rectangle, reads it through a `RegionBoundsExecutor`, and writes a transformed
+copy. Every single tile and object passes through one of two hooks:
+
+```
+changeTile  (random, newX, newY, sourceTile,   sourceLevel, srcX, srcY)
+changeObject(random, layerID, newX, newY, sourceLevel, sourceObject, srcX, srcY)
+```
+
+Object copying preserves **rotation** and the **player-placed** flag, iterates
+**every object layer**, and handles multi-tile objects by acting only on
+`isMultiTileMaster()`. Returning `null` from a hook deletes that tile/object.
+
+### What the "make it dark" table actually does
+
+`changeTile`: `farmland` is kept; anything that is not a floor and not a liquid
+becomes a random pick from a `TicketSystemList` of dark grounds (`cryptash`,
+`basaltrock`); a `PathTiledTile` becomes `cryptpath` or `basaltpath`; a floor
+has a 25% chance to become `basaltfloor` or `deadwoodfloor`; otherwise kept.
+
+`changeObject`, in order: grass is removed; **15% of everything is removed
+outright** (that is the decay); a blacklist is removed; **anything with
+`getLightLevel() > 0` is removed** — which is literally how the place goes dark;
+trees become `deadwoodtree`; fruit bushes and seeds are removed; a
+`SingleRockSmall` becomes `basaltcaverocksmall` and a `SingleRockObject` becomes
+`basaltcaverock`; **everything else falls through to the furniture-set swap.**
+
+The important property: the table branches on **type** (`isFloor`, `isLiquid`,
+`isTree`, `isGrass`, `instanceof PathTiledTile`, `instanceof SingleRockObject`),
+almost never on a specific ID. That is why it works on ANY input layout,
+including a base the player built by hand.
+
+### `FurnitureSet` — the piece that makes this cheap for us
+
+`necesse/level/maps/presets/set/FurnitureSet` is a prefix-keyed furniture family
+with a fixed slot list: `chest`, `dinnerTable`, `dinnerTable2`, `desk`,
+`modularTable`, `chair`, `bench`, `bench2`, `bookshelf`, `cabinet`, `bed`,
+`bed2`, `doublebed1..3`, and more. Vanilla ships twelve of them: **oak, spruce,
+maple, birch, pine, palm, dungeon, deadwood, willow, bone, bamboo, dryad**.
+
+The swap is one call:
+
+```
+targetSet.replaceSingleObjectRandomly(random, oldSet, objectID)
+```
+
+It returns a different ID when `objectID` belongs to `oldSet`, and the same ID
+when it does not — so a caller loops its `oldFurnitureSets` and takes the first
+hit.
+
+**What this buys this mod.** Any vanilla building, preset or player settlement
+can be restyled into another family for the cost of naming two sets. Our own
+`SkyFurnitureSet` already ships the matching slots (bookshelf, cabinet, clock,
+display stand, tables, chairs, beds) — registering it as a real `FurnitureSet`
+with a `prefixStringID` would make every vanilla preset re-skinnable into
+Skyreach style automatically, and the same trick gives Ghost Realm the `bone`
+and `deadwood` sets for free.
+
+**Caveats worth knowing before relying on it:**
+- The furniture swap only covers pieces that are IN a set. Bespoke objects fall
+  through unchanged, so a re-skin is never 100% and still needs a blacklist.
+- `SettlementRuinsIncursionLevel` is an `IncursionLevel`; the copy machinery is
+  in its own `generateLevel`, not in a shared utility, so we would port the
+  pattern rather than call it.
+- Deleting every light source is what sells the mood. Any re-skin that keeps the
+  lamps will not read as corrupted.
