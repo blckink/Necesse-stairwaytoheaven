@@ -43,6 +43,18 @@ All notable changes to this project are documented here. Format loosely follows
 - `evilwall` sets no tool tier, where vanilla's own `crystalrock` uses tool
   tier 10. Pickaxe-gating a whole biome is a separate decision.
 
+### Added — the Outlands hit at ascended tier
+- `crystalgolem`, `ascendedgolem` and `crystalarmadillo` spawn in the Beetle
+  Outlands, by vanilla string ID — no new classes and no new art. The player
+  had finished incursion 10 and reported everything too easy; the numbers
+  agreed, since this mod topped out near 520 HP / 70 damage against vanilla's
+  ordinary ascended mobs at 1000 HP (Classic) and 130 damage behind 40 armour.
+  `HostileMob.isValidSpawnLocation` is implemented, so unlike the Cloud Lamb's
+  inert table entry these actually place. All three are dark-spawners, so the
+  Outlands are uneasy by day and dangerous after dark.
+- This gives the sky a non-incursion source of ascended-tier fights and their
+  drops, gated behind distance rather than behind a boss. Deliberate.
+
 ### Progression note
 - **`evilwall` drops `crystalstone`**, so the sky now has a source of a
   deep-cave material. Deliberate, and the player's call. It is a late source —

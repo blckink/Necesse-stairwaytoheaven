@@ -350,9 +350,20 @@ Server.jar, and all five python audits green.
    source — the Outlands start past 900 tiles and only reach ~25% of land by
    3200 — but nobody has played it. Vanilla's `toolTier 10` is still NOT
    copied; pickaxe-gating a whole biome is a separate decision, still open.
-4. **No Outland-specific mobs, loot or structures beyond the Crooked House.**
-   The region is currently the Veil's furniture in a new place.
-5. **The player has more art coming** ("ich liefere dir gleich noch weitere
+4. **Difficulty: PARTLY addressed 2026-08-31, still open.** The player, after
+   finishing incursion 10: *"mir ist langweilig! alles zu einfach überall"*.
+   The numbers agreed — everything this mod ships tops out near the Skystone
+   Golem's 520 HP / 70 damage, while vanilla's ORDINARY ascended mobs sit at
+   1000 HP (Classic) and 130 damage behind 40 armour. The Outlands now spawn
+   `crystalgolem`, `ascendedgolem` and `crystalarmadillo` by vanilla string ID
+   — no new classes, no new art, and `HostileMob.isValidSpawnLocation` is
+   implemented so the entries are live rather than inert. What is still open:
+   the rest of the mod is untouched, and the sky's own weapons and armour are
+   still calibrated at deep-cave tier, so the Outlands now out-scale the gear
+   you can craft to enter them.
+5. **No Outland-specific mobs, loot or structures beyond the Crooked House.**
+   The region is the Veil's furniture plus vanilla's ascended cast.
+6. **The player has more art coming** ("ich liefere dir gleich noch weitere
    böden usw"). See `docs/design/asset-work-order.md` for what a full biome
    actually needs in tiles.
 
