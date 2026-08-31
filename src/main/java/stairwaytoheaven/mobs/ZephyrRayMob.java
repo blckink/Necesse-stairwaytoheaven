@@ -29,19 +29,44 @@ import necesse.level.maps.light.GameLight;
 /**
  * Zephyr Ray — a sleek manta gliding over the Mistsea that swoops at intruders.
  * Fast, fragile melee flier of the Driftlands (vanilla crypt bat AI pattern).
+ *
+ * <p><b>Tier: Skyreach floor, fast role</b> ({@link SkyMobTiers}).
+ *
+ * <p>The Skyreach floor is vanilla's ORDINARY ascended mob — what a player
+ * meets on incursion tier 1, which VERIFIED [jar] applies no multiplier at all
+ * ({@code BiomeMissionIncursionData} SUMS its per-tier scaling arrays, and
+ * both start at {@code 0.0F}). Measured: {@code AscendedGolemMob.MAX_HEALTH = new
+ * MaxHealthGetter(400, 750, 1000, 1300, 1800)} → 1000 HP on CLASSIC, with
+ * {@code CrystalGolemMob}'s {@code new GameDamage(130.0F)} and armour 40.
+ *
+ * <p>"Fragile" is now measured against that floor rather than against nothing:
+ * the fast role's x0.60 HP and x0.80 damage give 600 HP / 104 damage, with the
+ * floor's armour of 40 (it had none). Both ascended fliers agree on the
+ * bracket — {@code AscendedBatMob.COLLISION_DAMAGE = new GameDamage(90.0F)}
+ * and {@code NightSwarmBatMob}'s {@code 115.0F}, each with armour 40.
+ *
+ * <p>Until this pass it was 220 HP / 45 damage / no armour. Loot is unchanged:
+ * the Skyreach's drop value is x1.0.
  */
 public class ZephyrRayMob extends HostileMob {
 
     public static GameTexture texture;
 
+    /** Skyreach drop value is x1.0 — the floor multiplies nothing. */
     public static LootTable lootTable = new LootTable(
             new ChanceLootItemList(0.6F, LootItem.between("windsilk", 1, 2)));
-    public static GameDamage damage = new GameDamage(45.0F);
+    /** Skyreach floor damage 130 ({@code CrystalGolemMob.damage}) x0.80 fast = 104. */
+    public static GameDamage damage = SkyMobTiers.damage(SkyMobTiers.SKYREACH_DAMAGE, SkyMobTiers.ROLE_FAST_DAMAGE);
+    /** Skyreach floor 1000 HP ({@code AscendedGolemMob} on CLASSIC) x0.60 fast = 600. */
+    public static final int MAX_HEALTH = SkyMobTiers.hp(SkyMobTiers.SKYREACH_HP, SkyMobTiers.ROLE_FAST_HP);
+    /** Measured 40 on {@code AscendedBatMob}/{@code NightSwarmBatMob}; armour has no role modifier. */
+    public static final int ARMOR = SkyMobTiers.SKYREACH_ARMOR;
 
     public ZephyrRayMob() {
-        super(220);
+        super(MAX_HEALTH);
         this.setSpeed(52.0F);
         this.setFriction(2.0F);
+        this.setArmor(ARMOR);
         // Vanilla spawn-light rules: torch-lit and daylit areas stay SAFE.
         // (v0.1 raised the threshold for daytime spawns — playtests showed that
         // breaks the game's core "light = safety" contract, so nights and dark
