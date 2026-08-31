@@ -97,6 +97,45 @@ game yet.
 - **Sky oddity seeds** (registered + craftable, deliberately NOT in worldgen):
   `skyballoon`, `aeronautwreck`, `skyparcel`.
 
+## Endgame rebalance — the ladder is written down (`docs/BALANCE.md`)
+
+The player is ten incursions deep and asked for the mod to start "mindestens
+auf Niveau der 1. incursion für die schwächsten gegner". **The mod is becoming
+endgame-only**, and `docs/BALANCE.md` is the reference every balance change now
+points at. It is `VERIFIED [jar]` — read out of the decompiled 1.3.2 sources —
+and **not player-confirmed**; nobody has fought anything at these values.
+
+The load-bearing finding: incursion difficulty is a **level modifier**, not mob
+stats. `BiomeMissionIncursionData.initModifiers()` (lines 66-69, 117) builds
+`ENEMY_MAX_HEALTH`, `ENEMY_DAMAGE` and `LOOT` out of two cumulative arrays that
+both **open with `0.0F`**, so **tier 1 applies no multiplier at all** — it is
+the raw strength of the classes vanilla spawns in an incursion. Tier 10, for
+comparison, is HP x4.00 / damage x2.15 / loot x2.50.
+
+That makes the floor concrete rather than abstract: **1000 HP / 130 damage / 40
+armour** (`AscendedGolemMob.MAX_HEALTH` at Classic; `CrystalGolemMob`'s damage
+and armour), and for gear **Arcanic — 29 chest / 1900 enchant / EPIC**. The
+ladder from there:
+
+| realm | ~incursion | HP | damage | armour | drop value |
+|---|---|---|---|---|---|
+| Skyreach | 1 | 1000 | 130 | 40 | x1.0 |
+| Eden | 3 | 1500 | 165 | 45 | x1.3 |
+| Steinfeld | 5 | 2100 | 200 | 50 | x1.6 |
+| Ghost Realm | 7 | 2800 | 230 | 55 | x1.9 |
+| Crooked Beyond | 10 | 4000 | 280 | 60 | x2.5 |
+| Hell | past 10 | 5500 | 340 | 70 | x3.2 |
+
+Role modifiers, per-realm worked examples, the `MaxHealthGetter` difficulty
+spread, the gear ladder and a re-derivation recipe are all in `docs/BALANCE.md`.
+
+**This supersedes the deep-cave calibration described in the two sections
+below.** Sky Arsenal weapons are calibrated against deep-cave vanilla weapons
+and Stormsteel is documented as sitting under glacial (25/26/16, enchant 1300,
+UNCOMMON); those statements are now historical. Stormsteel's target is
+Arcanic's 29 / 1900 / EPIC. Until the classes are retuned, `docs/BALANCE.md` is
+a **target, not a record** — read the classes for what is actually shipped.
+
 ## Sky Arsenal (content/arsenal) — IMPLEMENTED, awaiting player confirmation
 
 The mod shipped two weapons for four releases (`tempestedge`, `galehowl`).

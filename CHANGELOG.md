@@ -3,6 +3,55 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [Unreleased] — the endgame ladder — 2026-08-31
+
+Alongside the tile pass below, in the same unreleased version.
+
+### Decided
+- **The mod becomes endgame-only.** The player, ten incursions deep: "bitte
+  Schwierigkeit und Wertigkeit startet mindestens auf Niveau der 1. incursion
+  für die schwächsten gegner .. wir sind mittlerweile bei 10 durch und brauchen
+  Herausforderung für danach". Every mob, drop and piece of gear moves from the
+  deep-cave / tungsten tier it was built at to a six-rung ladder that starts at
+  vanilla's incursion floor and ends past tier 10. The Skyreach's weakest enemy
+  becomes the game's incursion baseline; Hell's is the rung vanilla does not
+  have.
+
+### Added
+- **`docs/BALANCE.md`** — the reference every later balance change points at,
+  and the arithmetic behind the ladder: the incursion scaling arrays with their
+  source lines, the derived tier 1-10 table for HP / damage / loot, the measured
+  floor mobs and gear with the class each number was read from, the realm
+  ladder, the role modifiers worked out per realm, the `MaxHealthGetter`
+  difficulty spread, the gear ladder, and a recipe for re-deriving all of it
+  after a version bump rather than trusting the file. `VERIFIED [jar]`, and
+  explicitly **not** player-confirmed.
+
+### Learned, and written down
+- **Incursion difficulty is a level modifier, not mob stats.**
+  `BiomeMissionIncursionData.initModifiers()` builds exactly three —
+  `ENEMY_MAX_HEALTH`, `ENEMY_DAMAGE`, `LOOT` — from two cumulative arrays plus a
+  flat 15% loot per tablet tier. The same mob classes are spawned at every tier.
+- **Incursion tier 1 applies no multiplier at all.** Both arrays open with
+  `0.0F` and the sum loop is bounded by `tabletTier`, so tier 1 is HP x1.00 /
+  damage x1.00 with only loot moving (+15%). "Niveau der 1. Incursion" is
+  therefore not an abstract multiplier but a set of printed stats that can be
+  read straight off vanilla's classes: **1000 HP / 130 damage / 40 armour**
+  (`AscendedGolemMob` at Classic, `CrystalGolemMob`'s damage and armour), and
+  **Arcanic's 29 chest / 1900 enchant / EPIC** for gear. Tier 10 is HP x4.00 /
+  damage x2.15 / loot x2.50.
+- **Past tier 10 the arrays run out** and vanilla falls back to +0.45 HP and
+  +0.04 damage per tier — health keeps climbing, damage nearly flattens. The
+  ladder's Hell rung deliberately ignores that flattening, which is why it is
+  documented as the one rung that is not a vanilla tier.
+
+### Not done in this entry, on purpose
+- **No Java changed.** This is the specification and its evidence; the mob,
+  drop and gear retunes that implement it are separate work, and until they land
+  `docs/BALANCE.md` is a target rather than a record. The deep-cave calibration
+  still described in `docs/CURRENT_STATE.md`'s Sky Arsenal and item-polish
+  sections is now marked as historical there.
+
 ## [Unreleased] — the ground the player walks on — 2026-08-30
 
 ### Fixed
