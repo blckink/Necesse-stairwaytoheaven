@@ -40,9 +40,14 @@ All notable changes to this project are documented here. Format loosely follows
 
 ### Not done, on purpose
 - The boss the portals call does not exist.
-- `evilwall` drops vanilla `stone` and sets no tool tier, where vanilla's own
-  `crystalrock` drops `crystalstone` at tool tier 10. Both are progression
-  decisions nobody has balanced.
+- `evilwall` sets no tool tier, where vanilla's own `crystalrock` uses tool
+  tier 10. Pickaxe-gating a whole biome is a separate decision.
+
+### Progression note
+- **`evilwall` drops `crystalstone`**, so the sky now has a source of a
+  deep-cave material. Deliberate, and the player's call. It is a late source —
+  the Outlands begin past 900 tiles and only reach ~25% of land by 3200 — but
+  it has not been played.
 
 ## [Unreleased] — the ground the player walks on — 2026-08-30
 

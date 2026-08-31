@@ -259,12 +259,24 @@ final class SkyObjects {
         // generateItemTexture) -- which is why both supplied files carry
         // the one name.
         //
-        // It drops vanilla stone, the same as veilrock above. Vanilla's
-        // own crystalrock drops crystalstone and sets toolTier 10; both
-        // are deliberately NOT copied, because either would be a
-        // progression decision (a sky source of a deep-cave material, or a
-        // pickaxe gate on a whole biome) that nobody has balanced yet.
-        RockObject evilwall = new RockObject("evilwall", new Color(99, 15, 143), "stone", SKY_CATEGORY);
+        // It drops crystalstone, the same as the vanilla rock it was drawn
+        // on -- the player's call: "crystalstone passt doch, sieht gleich
+        // aus.. nicht vanilla droppen". It reads right because the drop
+        // matches the sprite: a violet crystal massif handing out grey stone
+        // was the placeholder, not the design.
+        //
+        // Mechanically this is a drop-in swap, not a new item class. Vanilla
+        // registers crystalstone as a StonePlaceableItem at stack 5000 and
+        // broker 0.1 -- byte for byte the same registration shape as "stone"
+        // -- so RockObject's loot AND its placedStoneAmount (placing the rock
+        // back costs the same item) behave identically.
+        //
+        // This DOES put a deep-cave material in the sky, which is a real
+        // progression change: the Outlands start past 900 tiles and reach
+        // ~25% of land by 3200, so it is a late-game source, not an early one.
+        // Vanilla's toolTier 10 is still deliberately NOT copied -- that would
+        // pickaxe-gate a whole biome, which is a separate decision.
+        RockObject evilwall = new RockObject("evilwall", new Color(99, 15, 143), "crystalstone", SKY_CATEGORY);
         SkyRegistry.evilwallID = ObjectRegistry.registerObject("evilwall", evilwall, -1.0F, true);
 
         GrassObject whisperreeds = new GrassObject("whisperreeds", 4);

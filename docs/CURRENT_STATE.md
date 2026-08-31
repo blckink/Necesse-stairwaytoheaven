@@ -343,11 +343,13 @@ Server.jar, and all five python audits green.
    `ROADMAP.md` is the obvious candidate.
 2. **Nothing tunes the wall density.** 2.7-5.5% of Outland tiles is a first
    number, not a balanced one. Re-run the probe after changing it.
-3. **`evilwall` drops vanilla `stone` and has no tool tier.** Vanilla's own
-   `crystalrock` drops `crystalstone` and sets `toolTier 10`; both were
-   deliberately NOT copied, because either is a progression decision nobody has
-   balanced (a sky source of a deep-cave material, or a pickaxe gate on a whole
-   biome). Decide it.
+3. **`evilwall` drops `crystalstone`** (the player's call, 2026-08-31 —
+   *"crystalstone passt doch, sieht gleich aus.. nicht vanilla droppen"*). That
+   is a deliberate progression change and the one thing here worth watching in
+   a playtest: the sky now has a source of a deep-cave material. It is a LATE
+   source — the Outlands start past 900 tiles and only reach ~25% of land by
+   3200 — but nobody has played it. Vanilla's `toolTier 10` is still NOT
+   copied; pickaxe-gating a whole biome is a separate decision, still open.
 4. **No Outland-specific mobs, loot or structures beyond the Crooked House.**
    The region is currently the Veil's furniture in a new place.
 5. **The player has more art coming** ("ich liefere dir gleich noch weitere
