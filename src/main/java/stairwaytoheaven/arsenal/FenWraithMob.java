@@ -2,6 +2,12 @@ package stairwaytoheaven.arsenal;
 
 import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
+import necesse.engine.util.GameRandom;
+import necesse.entity.levelEvent.mobAbilityLevelEvent.RuneSpiritPoolEvent;
+import necesse.entity.mobs.GameDamage;
+import necesse.entity.mobs.MaxHealthGetter;
+import necesse.entity.mobs.ai.behaviourTree.BehaviourTreeAI;
+import necesse.entity.mobs.ai.behaviourTree.trees.ConfusedCollisionPlayerChaserWandererAI;
 import necesse.entity.mobs.hostile.SpiritGhoulMob;
 import necesse.inventory.lootTable.LootTable;
 import necesse.inventory.lootTable.lootItem.ChanceLootItemList;
@@ -20,9 +26,30 @@ import stairwaytoheaven.mobs.SkySpawnRules;
  * {@code RuneSpiritPoolEvent} every 16 units it runs on dry land — so the fen
  * fills up with pools behind it and standing still is not an option.
  *
- * <p><b>Nothing is re-tuned.</b> 275 HP / 52 damage / 20 armour sits between
- * the Veil's existing Gloom Shade (240/50) and the Skyreach's Skystone Golem
- * (520/70), which is where the Veil's slow bruiser belongs.
+ * <h2>Tier</h2>
+ * The ladder and the incursion measurement behind it are written out once, in
+ * {@link RimeSentryMob} — the mob that sits on its floor. In short: incursion
+ * tier 1 applies no multiplier at all (VERIFIED [jar]:
+ * {@code BiomeMissionIncursionData}'s cumulative per-tier arrays both begin
+ * {@code 0.0F}), which pins the Skyreach floor at 1000 HP / 130 damage / 40
+ * armour, and summing those same arrays to <b>incursion tier 7</b> gives +1.80
+ * health / +0.75 damage — 1000 x 2.80 = 2800 and 130 x 1.75 = 227.5, taken as
+ * 230. That is the Ghost Realm's rung: <b>2800 HP / 230 damage / 55 armour</b>
+ * (armour has no incursion array and is walked up the ladder by hand).
+ *
+ * <p>The Fen Wraith is the Ghost Realm's standard bruiser, so it takes the rung
+ * whole with no role discount. Vanilla's own ghoul is a surface-cave mob at
+ * 275 HP / 52 damage / 20 armour and stays exactly that; only this subclass
+ * moves.
+ *
+ * <p><b>Why {@code init()} and {@code serverTick()} are overridden.</b> Neither
+ * of the ghoul's two damage numbers is reachable by assignment: the melee
+ * damage is a {@code new GameDamage(52.0F)} local built inside
+ * {@code SpiritGhoulMob.init}, and the pool damage is a
+ * {@code new GameDamage(38.0F)} local built inside its {@code serverTick}
+ * (VERIFIED [jar]). Both are therefore re-declared here — see
+ * {@link #serverTick()} for how the pool is taken over without vanilla
+ * double-spawning one.
  *
  * <p>Vanilla's loot table is surface-cave loot (coins, amber, dryad saplings);
  * ours is replaced with Veil materials.
@@ -30,15 +57,110 @@ import stairwaytoheaven.mobs.SkySpawnRules;
 public class FenWraithMob extends SpiritGhoulMob {
 
     /**
+     * Ghost Realm rung (incursion tier 7) = 1000 x 2.80 = <b>2800 HP</b> on
+     * Classic, no role discount. The other four difficulties reuse the ratios of
+     * the getter the floor was measured from —
+     * {@code AscendedGolemMob.MAX_HEALTH}'s 0.40 / 0.75 / 1.00 / 1.30 / 1.80
+     * around Classic (VERIFIED [jar]). Vanilla's ghoul is 275.
+     */
+    public static final MaxHealthGetter MAX_HEALTH = new MaxHealthGetter(1120, 2100, 2800, 3640, 5040);
+
+    /**
+     * Ghost Realm rung (incursion tier 7) = 130 x 1.75 = 227.5, snapped onto the
+     * ladder's five-step damage grid = <b>230</b>; the 130 is
+     * {@code CrystalGolemMob.damage} (VERIFIED [jar]). Vanilla builds 52 as a
+     * local inside {@code SpiritGhoulMob.init}.
+     */
+    public static final GameDamage DAMAGE = new GameDamage(230.0F);
+
+    /**
+     * The burning wake. Vanilla's pool is {@code GameDamage(38)} against a melee
+     * {@code GameDamage(52)} — 0.73 of the mob's own hit (VERIFIED [jar]). Held
+     * at that same ratio against our 230, the trail is 168, so dawdling in the
+     * wake stays the mistake it was designed to be instead of a rounding error.
+     */
+    public static final GameDamage POOL_DAMAGE = new GameDamage(168.0F);
+
+    /** Vanilla's cadence, unchanged: one pool per 16 units run on dry land. */
+    public static final double POOL_SPAWN_RUN_DISTANCE = 16.0;
+
+    /** Vanilla's linger, unchanged. */
+    public static final float POOL_LINGER_SECONDS = 4.0F;
+
+    /**
+     * Ghost Realm rung = <b>55 armour</b>. There is no armour array in
+     * {@code BiomeMissionIncursionData} (VERIFIED [jar]: it scales health and
+     * damage only), so the ladder walks armour up by hand from the floor's 40 —
+     * {@code CrystalGolemMob}'s {@code setArmor(40)}, matched by the rolling
+     * {@code CrystalArmadillo} and {@code AscendedBatMob}. Vanilla's ghoul
+     * wears 20.
+     */
+    public static final int ARMOR = 55;
+
+    /**
      * Veil essence is what a shade is made of and what the mod already drops
      * from the Gloom Shade; the cinder pearl is the Stormdisc's burning hub.
+     *
+     * <p>Quantities are the Skyreach baseline (1-2 apiece) x the Ghost Realm's
+     * drop-value multiplier of 1.9, rounded to whole items: 1-2 becomes 2-4.
+     * The chances are unchanged — the rung is paid in stack size, so a kill
+     * still sometimes drops nothing and the drop still feels earned.
      */
     public static LootTable lootTable = new LootTable(
-            new ChanceLootItemList(0.65F, LootItem.between("veilessence", 1, 2)),
-            new ChanceLootItemList(0.35F, LootItem.between("cinderpearl", 1, 2)));
+            new ChanceLootItemList(0.65F, LootItem.between("veilessence", 2, 4)),
+            new ChanceLootItemList(0.35F, LootItem.between("cinderpearl", 2, 4)));
 
     public FenWraithMob() {
         super();
+        // Registered in construction the way AscendedGolemMob registers its own
+        // MAX_HEALTH: MobDifficultyChanges throws if it is touched after init().
+        this.difficultyChanges.setMaxHealth(MAX_HEALTH);
+        this.setArmor(ARMOR);
+    }
+
+    @Override
+    public void init() {
+        super.init();
+        // Same tree vanilla builds (768 search, 50 knockback, 40s wander), only
+        // against our own damage — SpiritGhoulMob.init's GameDamage(52) is a
+        // local with no seam to write through.
+        this.ai = new BehaviourTreeAI<>(this,
+                new ConfusedCollisionPlayerChaserWandererAI<>(null, 768, DAMAGE, 50, 40000));
+    }
+
+    /**
+     * Takes over the burning wake so it lands at {@link #POOL_DAMAGE} instead of
+     * vanilla's 38.
+     *
+     * <p>{@code SpiritGhoulMob.serverTick} spawns its pool from a
+     * {@code GameDamage} it constructs inline, so the only way to re-tune it is
+     * to get there first: spawn ours, then move
+     * {@code distanceRanSinceLastPoolSpawn} (vanilla's own {@code protected}
+     * marker) up to the current distance. When {@code super.serverTick()} then
+     * runs its identical check it measures a delta of exactly zero, so it never
+     * fires and the pool is never doubled.
+     *
+     * <p>That zero is not a near miss but a guarantee. <b>VERIFIED [jar]:</b>
+     * {@code distanceRan} is written in exactly one place,
+     * {@code Mob.tickMovement}, and {@code EntityManager} runs movement as a
+     * separate pass from the server tick — {@code frameTick} does
+     * {@code mobs.frameTick(tickManager, Mob::tickMovement)} while
+     * {@code serverTick} does {@code mobs.serverTick(mob -> mob.serverTick())}.
+     * Nothing between our write and vanilla's read can move the mob, whatever
+     * its speed or the cadence threshold.
+     */
+    @Override
+    public void serverTick() {
+        if (!this.inLiquid()) {
+            double distanceRan = this.getDistanceRan();
+            if (distanceRan - this.distanceRanSinceLastPoolSpawn > POOL_SPAWN_RUN_DISTANCE) {
+                this.getLevel().entityManager.events.add(new RuneSpiritPoolEvent(
+                        this, (int) this.x, (int) this.y, GameRandom.globalRandom,
+                        POOL_DAMAGE, POOL_LINGER_SECONDS));
+                this.distanceRanSinceLastPoolSpawn = distanceRan;
+            }
+        }
+        super.serverTick();
     }
 
     @Override
