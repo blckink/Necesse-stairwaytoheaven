@@ -1,6 +1,7 @@
 package stairwaytoheaven.mobs;
 
 import necesse.entity.mobs.GameDamage;
+import necesse.entity.mobs.MaxHealthGetter;
 
 /**
  * The one place the mod's enemy statline is derived, so no mob carries a bare
@@ -100,6 +101,29 @@ public final class SkyMobTiers {
     public static final int ROLE_FAST_HP = 60;
     /** Fast role: x0.80 damage. */
     public static final int ROLE_FAST_DAMAGE = 80;
+
+    /**
+     * A Classic health value as a full difficulty curve.
+     *
+     * <p>Vanilla scales endgame mobs with world difficulty rather than shipping
+     * one number: {@code AscendedGolemMob.MAX_HEALTH = MaxHealthGetter(400,
+     * 750, 1000, 1300, 1800)} — CASUAL / ADVENTURE / <b>CLASSIC</b> / HARD /
+     * BRUTAL, i.e. the ratios 0.40 / 0.75 / 1.00 / 1.30 / 1.80.
+     *
+     * <p>This applies those same ratios to any Classic value, so a rung of the
+     * ladder holds on all five difficulties instead of only the middle one.
+     * Apply it in the constructor via
+     * {@code this.difficultyChanges.setMaxHealth(...)} —
+     * {@code MobDifficultyChanges} throws if it is touched after {@code init()}.
+     */
+    public static MaxHealthGetter scaled(int classicHealth) {
+        return new MaxHealthGetter(
+                Math.round(classicHealth * 0.40F),
+                Math.round(classicHealth * 0.75F),
+                classicHealth,
+                Math.round(classicHealth * 1.30F),
+                Math.round(classicHealth * 1.80F));
+    }
 
     /** A realm's HP floor with a role percentage applied, e.g. {@code hp(SKYREACH_HP, ROLE_ELITE_HP)} = 1400. */
     public static int hp(int realmHealth, int rolePercent) {

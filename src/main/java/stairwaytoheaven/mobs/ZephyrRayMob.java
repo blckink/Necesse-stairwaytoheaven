@@ -64,6 +64,10 @@ public class ZephyrRayMob extends HostileMob {
 
     public ZephyrRayMob() {
         super(MAX_HEALTH);
+        // Difficulty curve on vanilla's own ratios, so this rung holds on all
+        // five difficulties rather than only Classic. Must be set here:
+        // MobDifficultyChanges throws if it is touched after init().
+        this.difficultyChanges.setMaxHealth(SkyMobTiers.scaled(MAX_HEALTH));
         this.setSpeed(52.0F);
         this.setFriction(2.0F);
         this.setArmor(ARMOR);

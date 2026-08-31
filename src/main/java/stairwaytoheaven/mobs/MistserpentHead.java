@@ -202,6 +202,12 @@ public class MistserpentHead extends HostileWormMobHead<MistserpentBody, Mistser
 
     public MistserpentHead() {
         super(MAX_HEALTH, WAVE_LENGTH, 70.0F, TOTAL_BODY_PARTS, 20.0F, -24.0F);
+        // Difficulty curve on vanilla's own ratios, so this rung holds on all
+        // five difficulties rather than only Classic. Safe on a worm head:
+        // WormMobHead.init() calls super.init() first (:195), so Mob.init()'s
+        // difficultyChanges.init() has already applied the health before the
+        // chain copies it out to the segments.
+        this.difficultyChanges.setMaxHealth(SkyMobTiers.scaled(MAX_HEALTH));
         this.moveAccuracy = 120;
         this.setSpeed(94.0F);
         this.setArmor(ARMOR);

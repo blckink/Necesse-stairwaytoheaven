@@ -1018,6 +1018,104 @@ Nothing in Part A is retracted. What this adds to the work already planned:
    which is now consistent everywhere after the palette rule was retired
    (§41.1).
 
+---
+
+# Part A4 — the play rules (player amendment, 2026-08-31)
+
+Three rules from the player, after the endgame rebalance. They are **binding on
+every biome built from now on**, and they contradict how the world currently
+generates. Build against these, not against what the code does today.
+
+## A4.1 Enemies GUARD, they do not harass
+
+> *"bei incursions muss dir klar sein dass man auf meinem Level diese Gegner
+> schon one-shottet und die fast keine damage machen. es nervt aber wenn die
+> alle 2 Sekunden überall angreifen und man nichts in Ruhe ins Inventar tun
+> kann. sie sollen mal geballt kommen und ein Gebiet z.b. bewachen wo es loot
+> gibt, in anderen Ecken aber nicht dauernd angeflogen kommen."*
+
+**This is the most important correction in this file, because the previous pass
+optimised the wrong variable.** Raising HP and damage does not make an
+overpowered player's experience better — it makes ambient trash slightly slower
+to delete while remaining just as constant. The problem was never that enemies
+are weak. It is that they are **everywhere, all the time**.
+
+The rule:
+
+- **Open ground between places is CALM.** A player must be able to walk, sort
+  their inventory and look around without something arriving every few seconds.
+- **Enemies concentrate where there is a reason to be**: around a POI, a loot
+  cache, a resource node worth taking, a structure. A pack that guards
+  something.
+- **A guarded place is a real fight**, because the whole local budget is spent
+  there rather than smeared across the region.
+- Ambient spawns still exist, but at a fraction of today's rate — enough that
+  the world is not empty, not enough to interrupt.
+
+Consequence for implementation: `MobSpawnTable` alone cannot express this,
+because it is a per-tile weighted roll with no notion of place. Guarding needs
+either mobs placed at generation next to the thing they guard (the pattern
+`SkyLevel.placeCloudLambFlock` and `placeResident` already use), or a spawn
+rule keyed to proximity to a POI. **Do not answer this by re-weighting spawn
+tables.**
+
+## A4.2 Resources are SCARCE
+
+> *"seltene Ressourcen, gängige Ressourcen, aber nichts so im Überfluss dass man
+> nach einem Run schon so viel gesammelt hat dass man Kisten füllen kann und
+> eigentlich nicht mehr farmen muss. so ist es aktuell ehrlich gesagt leider
+> noch."*
+
+A judgement on the **current** state, not a worry about the future. The sky's
+scatter rates today put a plant or a node on roughly a third of all walkable
+tiles; one exploration run fills chests and ends the need to gather.
+
+The rule:
+
+- **Common resources** should sustain crafting, not saturate it. A run yields
+  enough to build with, not enough to retire on.
+- **Rare resources stay rare enough to be a reason to travel**, and should not
+  drop from the common node as a side effect.
+- Farm animals do **not** stand on every corner (A4.1's sibling: livestock is a
+  place, not a texture).
+- The test: after one full run through a realm, the player should still want to
+  go back for something specific.
+
+## A4.3 A biome ships COMPLETE or it does not ship
+
+> *"ich brauche vollständig aufgebaute biome mit geborgten assets.. bringt
+> nichts wenn Anfang geht und Rest weiterhin nicht, das will dann niemand
+> spielen länger als 2 Minuten."*
+
+§35 already lists what a complete biome needs. A4.3 makes it a **gate rather
+than an aspiration**: a realm that has terrain and flora but no NPCs, no
+traders, no POIs and no quests is not a realm, and shipping it that way is worse
+than not shipping it.
+
+Specifically, every realm needs, before it counts as done:
+
+- **Different buildings**, not one repeated preset — houses, and distinct areas:
+  a settlement or town, a tavern, ruins worth entering.
+- **NPCs and at least one trader** who sells something found nowhere else.
+- **POIs worth discovering**, with the guarded-loot shape of A4.1.
+- **Quests** anchored in the realm.
+- Common and rare resources per A4.2.
+
+**Use borrowed vanilla assets to get there.** The player will replace them in
+one pass (`docs/VANILLA_ASSET_MAP.md`). A realm built from vanilla stand-ins and
+fully populated is worth far more than a realm with bespoke art and nothing in
+it.
+
+## A4.4 What this changes about the plan
+
+- The build order in §43 stands, but **"build Eden" now means all of A4.3**, not
+  a tileset.
+- **The existing Skyreach fails A4.1 and A4.2 today** and needs the same pass —
+  it is the realm the player actually walks through.
+- The endgame rebalance (`docs/BALANCE.md`) is not wrong, but it is not the
+  answer to "too easy" on its own. Density and placement are the other half, and
+  they are the half the player is asking for.
+
 # Part B — this repo's review of the concept
 
 Everything from here is **not** the player's text. It is the analysis this

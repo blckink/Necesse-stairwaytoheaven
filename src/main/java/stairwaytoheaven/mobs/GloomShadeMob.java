@@ -76,6 +76,10 @@ public class GloomShadeMob extends HostileMob {
 
     public GloomShadeMob() {
         super(MAX_HEALTH);
+        // Difficulty curve on vanilla's own ratios, so this rung holds on all
+        // five difficulties rather than only Classic. Must be set here:
+        // MobDifficultyChanges throws if it is touched after init().
+        this.difficultyChanges.setMaxHealth(SkyMobTiers.scaled(MAX_HEALTH));
         this.setSpeed(40.0F);
         this.setFriction(2.0F);
         this.setArmor(ARMOR);
