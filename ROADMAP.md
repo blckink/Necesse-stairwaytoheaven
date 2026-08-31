@@ -24,7 +24,14 @@ with different content than the plan below them. What shipped is now in
 Detail for each is in `CHANGELOG.md`. **Nothing in 0.6.0 has been played by a
 human yet** — see the verification states in `docs/IMPLEMENTATION_RULES.md` §14.
 
-## Next — Chapter 01: the Skyreach has one building
+## Next — a boss for the Outland portals
+
+The Beetle Outlands shipped (2026-08-31) with Seance Circles standing at fixed
+sites, and nothing behind them. `SeanceCircleObject` says so out loud in the
+sky. That is the smallest piece that turns the new region from scenery into a
+destination, and the **Storm Sovereign** below is the obvious candidate.
+
+## Then — Chapter 01: the Skyreach has one building
 
 This is the largest open item and it is already designed, not merely wished for:
 
@@ -47,7 +54,14 @@ Objekten usw"* — the roads and gardens landed, the buildings did not.
 New content sits at Aetherium and above, toward incursion-tier pressure, and its
 loot should be a new **ability** rather than a bigger number.
 
-**The Veil, properly.** Contrast rather than darkness: poison green on violet,
+**Outland chapters.** *(Rewritten 2026-08-31. This entry used to read "The
+Veil, properly" and describe a second dimension. The player retired that plan —
+"das wird zu viel arbeit, wir machen nur sky region" — so the Veil's material
+now lives in the Skyreach as the distance-gated Beetle Outlands, and everything
+below is a list of themes for FURTHER Outland regions rather than for a
+separate layer.)*
+
+Contrast rather than darkness: poison green on violet,
 bone white on black, stripes, checkerboard, spirals, sickly pink, brass and
 verdigris — black is outline and shadow, never fill. One saturated accent per
 set that nothing else has, and one funny piece per chapter. Open: the Model

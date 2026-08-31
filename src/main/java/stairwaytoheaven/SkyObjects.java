@@ -240,6 +240,33 @@ final class SkyObjects {
         RockObject veilrock = new RockObject("veilrock", new Color(70, 66, 84), "stone", SKY_CATEGORY);
         SkyRegistry.veilrockID = ObjectRegistry.registerObject("veilrock", veilrock, -1.0F, true);
 
+        // The Evil Wall: the crystal massif the Beetle Outlands are built out of.
+        //
+        // Registered exactly the way vanilla registers the sheet this art
+        // was drawn on. That sheet is crystalwall.png, and the thing that
+        // owns it is NOT a building wall: in the 1.3.2 jar the object under
+        // that texture is a RockObject -- a mineable rock -- carrying map
+        // colour 99/15/143, dropping crystalstone and set to tool tier 10.
+        // (Read out of ObjectRegistry's bytecode, not remembered.)
+        //
+        // So RockObject is what this is, and the supplied 128x208 is exactly
+        // its format:
+        // randomWidth = width/32 = 4 variants, each two 16px sprite
+        // columns wide, over the 13 sprite rows addRockDrawables reads.
+        //
+        // rockTextureName drives BOTH halves -- objects/<name>.png for the
+        // world sheet and items/<name>.png for the icon (loadTextures and
+        // generateItemTexture) -- which is why both supplied files carry
+        // the one name.
+        //
+        // It drops vanilla stone, the same as veilrock above. Vanilla's
+        // own crystalrock drops crystalstone and sets toolTier 10; both
+        // are deliberately NOT copied, because either would be a
+        // progression decision (a sky source of a deep-cave material, or a
+        // pickaxe gate on a whole biome) that nobody has balanced yet.
+        RockObject evilwall = new RockObject("evilwall", new Color(99, 15, 143), "stone", SKY_CATEGORY);
+        SkyRegistry.evilwallID = ObjectRegistry.registerObject("evilwall", evilwall, -1.0F, true);
+
         GrassObject whisperreeds = new GrassObject("whisperreeds", 4);
         whisperreeds.mapColor = new Color(96, 110, 96);
         SkyRegistry.whisperreedsID = ObjectRegistry.registerObject("whisperreeds", whisperreeds, 1.0F, true);

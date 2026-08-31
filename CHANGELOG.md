@@ -3,6 +3,47 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [Unreleased] — one world, and it stops being nice — 2026-08-31
+
+### Changed — the direction
+- **The Veil stops being a second dimension to build out.** The player's call:
+  *"das wird zu viel arbeit, wir machen nur sky region ... bitte nichts
+  wegwerfen der bestehenden sachen sondern auf eine welt eindampfen"*. Its
+  ground, props, mobs and its one building now appear in the Skyreach instead.
+  The Veil dimension stays registered and still generates — un-registering it
+  would strand every save that has been there — but no new content goes into it.
+
+### Added
+- **The Beetle Outlands** (`worldgen/SkyOutlands`, `biomes/OutlandsBiome`): the
+  sky's wrong ground, gated by DISTANCE from the spire rather than by the biome
+  noise. Impossible within 900 tiles — a hard floor, not a low probability —
+  then rising linearly to 3000. Measured over 5 seeds and 956,566 land tiles:
+  0.00% at 800, 0.40% at 900, 1.13% at 1000, 2.39% at 1400, 7.68% at 2000,
+  17.67% at 2600, 25.16% at 3200, 26.53% at 4000.
+- **`evilwall`** — crystal massifs, from supplied hand-drawn art. Registered as
+  a vanilla `RockObject`, which is what actually owns the `crystalwall` sheet
+  the art was drawn on (read out of the 1.3.2 jar, see TECHNICAL_LEARNINGS).
+  Placed through the existing outcrop formation field, so massifs come out as
+  ridges and knots with walkable gaps: 2.7-5.5% of Outland tiles.
+- **Seance Circles now stand in the world**, one hashed site per 260-tile
+  lattice cell that lands on wrong ground — "an bestimmten stellen, nicht
+  random", as asked.
+- **The Crooked House scatters in the sky**, not only in the fen. Its sky site
+  test runs through `describeTile`, so it cannot land on a road or in the
+  Mistsea.
+
+### Changed
+- In the sky a Seance Circle is a summoning ring rather than a door. The sky has
+  no boss yet, so it says so (`misc.seancesilent`) instead of opening a rift
+  into the layer this direction is folding away. Deliberately an honest dead
+  end; wiring the summon needs a boss mob first.
+
+### Not done, on purpose
+- The boss the portals call does not exist.
+- `evilwall` drops vanilla `stone` and sets no tool tier, where vanilla's own
+  `crystalrock` drops `crystalstone` at tool tier 10. Both are progression
+  decisions nobody has balanced.
+
 ## [Unreleased] — the ground the player walks on — 2026-08-30
 
 ### Fixed

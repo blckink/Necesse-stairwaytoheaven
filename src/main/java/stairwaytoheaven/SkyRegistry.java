@@ -170,6 +170,8 @@ public final class SkyRegistry {
     public static int veilRiftDownID;
     public static int veilRiftUpID;
     public static int seanceCircleID;
+    /** The Outlands' crystal massifs. Vanilla RockObject, supplied art. */
+    public static int evilwallID;
 
     public static int whisperreedsID;
     public static int gloomshroomID;

@@ -3,9 +3,10 @@
 Short, current, and rewritten as things change. History belongs in
 `CHANGELOG.md` and `docs/PLAYTEST_LOG.md`, not here.
 
-**Version:** 0.6.0 · **Game:** Necesse 1.3.2 · **Branch:** `master`
-**Branch:** `master`
-**Updated:** 2026-08-30, v0.6.0 released
+**Version:** 0.6.0 (+ unreleased) · **Game:** Necesse 1.3.2
+**Branch:** `claude/aktueller-stand-offene-themen-k4ztas`
+**Updated:** 2026-08-31 — the Beetle Outlands landed; the direction changed to
+ONE world (see "Direction change" below)
 
 ## Architecture in one screen
 
@@ -268,6 +269,91 @@ with the player's eyes on it, not a drive-by.
 
 **Nobody has walked on any of this.**
 
+## Direction change (2026-08-31) — ONE world, not two
+
+The player's call, and it reshapes the roadmap:
+
+> *"aktuell ist veil ja als dunkles 2. gebiet gedacht mit dem seance circle
+> aber das wird zu viel arbeit, wir machen nur sky region ... bitte nichts
+> wegwerfen der bestehenden sachen sondern auf eine welt eindampfen statt
+> skyreach und veil."*
+
+**The Veil stops being a destination and becomes material.** Its ground, props,
+mobs and its one building now appear IN the Skyreach, gated by distance from the
+spire. The Veil dimension itself is still registered and still generates —
+deliberately, because un-registering it would strand every save that has been
+there — but no new content goes into it, and nothing new should point a player
+at it.
+
+What this replaces: "The Veil, properly" in `ROADMAP.md` is no longer a
+separate layer to build out. Read that entry as a list of *themes for Outland
+chapters* instead (the Model Town, the Office of Eternity, Mortimer and Vesper).
+
+## The Beetle Outlands — IMPLEMENTED, not player-confirmed
+
+The answer to *"das gebiet ist einfach zu weiß und hell und wir brauchen
+kontrast"*. `worldgen/SkyOutlands` cuts wrong regions out of the sky, and what
+decides them is DISTANCE, not the biome noise.
+
+- **Hard floor at 900 tiles.** Inside it the answer is no for every seed — the
+  spire's surroundings cannot roll one. Past it the patch threshold falls
+  linearly to 3000 tiles, from the Veil's own measured 0.82 to 0.62.
+- **Measured** over 5 seeds and 956,566 land tiles (`Probe`, pure-function
+  sampling of `SkyOutlands.isWrong`):
+
+  | distance | share of land that is Outland |
+  |---|---|
+  | 400 / 800 | 0.00% (the floor holds) |
+  | 900 | 0.40% |
+  | 1000 | 1.13% |
+  | 1400 | 2.39% |
+  | 2000 | 7.68% |
+  | 2600 | 17.67% |
+  | 3200 | 25.16% |
+  | 4000 | 26.53% |
+
+- **Built from what already existed**: beetlefreak ground interrupted by
+  blackpeat, dead trees, ash bones, gloom shrooms, the Gloom Shade, the Fen
+  Wraith and the Cinder Cantor. `biomes/OutlandsBiome` carries its own crate
+  loot (veilessence, gloomshroom, charwood) so an Outland crate says where you
+  are.
+- **The Crooked House now scatters in the sky too** (`CrookedHouseWorldPreset`
+  fires on both identifiers; the sky site test goes through `describeTile`, so
+  it cannot drop a house on a road or in the Mistsea).
+- **`evilwall`** — the one new object, from supplied art. Crystal massifs built
+  on the existing outcrop formation field, which is why they come out as
+  ridges and knots with walkable gaps rather than as a maze. 2.7-5.5% of
+  Outland tiles, measured above.
+- **Seance Circles STAND in the world**: one hashed site per 260-tile lattice
+  cell that lands on wrong ground — "an bestimmten stellen, nicht random". 2
+  portals over the 956,566 tiles sampled.
+- The Outlands answer for their own tiles and return early in `describeTile`,
+  because everything below that point (outcrops, aurora colonies, wrecks,
+  workshops, meadows, scree) is the BRIGHT world's furniture.
+
+**Nobody has walked into one.** Gates: `buildModJar` against the real 1.3.2
+Server.jar, and all five python audits green.
+
+### What is NOT done here, and is the next agent's job
+
+1. **The boss portal has no boss.** In the sky a circle now says
+   `misc.seancesilent` ("nothing under this sky answers - yet") instead of
+   opening a Veil rift. That is a deliberate honest dead end, not an oversight:
+   wiring the summon needs a boss mob to exist first. The Storm Sovereign in
+   `ROADMAP.md` is the obvious candidate.
+2. **Nothing tunes the wall density.** 2.7-5.5% of Outland tiles is a first
+   number, not a balanced one. Re-run the probe after changing it.
+3. **`evilwall` drops vanilla `stone` and has no tool tier.** Vanilla's own
+   `crystalrock` drops `crystalstone` and sets `toolTier 10`; both were
+   deliberately NOT copied, because either is a progression decision nobody has
+   balanced (a sky source of a deep-cave material, or a pickaxe gate on a whole
+   biome). Decide it.
+4. **No Outland-specific mobs, loot or structures beyond the Crooked House.**
+   The region is currently the Veil's furniture in a new place.
+5. **The player has more art coming** ("ich liefere dir gleich noch weitere
+   böden usw"). See `docs/design/asset-work-order.md` for what a full biome
+   actually needs in tiles.
+
 ## Known issues — open
 
 Ordered by the player's own priority. Full detail in `docs/PLAYTEST_LOG.md`.
@@ -276,9 +362,11 @@ Ordered by the player's own priority. Full detail in `docs/PLAYTEST_LOG.md`.
 - Warden frequently stands facing north, so the player sees his back during
   the introduction. (Behaviour fix owned by another agent.)
 - Warden's first dialogue dumps too much lore at once. (Another agent.)
-- Old Warden Spire layout still reads as a small ordinary house — the asset
-  kit is now strong enough (beacon, telescope, astrolabe, rubble), the layout
-  itself is another agent's task.
+- ~~Old Warden Spire layout reads as a small ordinary house.~~ **Superseded
+  on 2026-08-31**: the spire was rebuilt as the furnished 21x21 hall described
+  further down this file (`worldgen/WardenSpirePreset`, the user's own
+  `warden-tower-layout.script`). This row and that one contradicted each other
+  for a release; the rebuilt hall is the true one. Still not player-confirmed.
 
 **P1 — fixed, not yet player-confirmed**
 - Rock/ore worldgen now uses a formation field (`7ef6486`).

@@ -2561,3 +2561,62 @@ against a within-frame energy of 9-10.
 frames appears on EVERY tile of that liquid at the same instant — a field-wide
 blink, not a twinkle. Murkwater's green glint was removed for that reason.
 Position-varied features are the way to get sparkle; a time-keyed bed is not.
+
+## `crystalwall` is a RockObject, not a wall (2026-08-31, read out of the 1.3.2 jar)
+
+Supplied art arrived named `…-crystalwall-now-evilwall.png` at **128x208**,
+which matches nothing this mod ships: every wall sheet here is **352x128**. The
+art was right and the assumption was wrong.
+
+`ObjectRegistry` builds the thing that owns `objects/crystalwall.png` as a
+**`RockObject`** — a mineable rock — registered under the object ID
+**`crystalrock`**, with map colour RGB(99,15,143), dropping `crystalstone`, and
+`toolTier` 10. The texture name and the object ID are simply different strings.
+
+The `RockObject` sheet contract, from `RockObject.java`:
+
+- `loadTextures()` reads `objects/<rockTextureName>.png`;
+  `generateItemTexture()` reads `items/<rockTextureName>.png`. **One name feeds
+  both halves**, which is why a supplied pair carries the same name twice.
+- `addRockDrawables` draws in **16px sprite cells**, not 32
+  (`list.addSprite(spriteX, spriteY, 16)`).
+- `int randomWidth = rockTexture.getWidth() / 32` and
+  `r1 = random.nextInt(randomWidth) * 2` — so each random VARIANT is **two 16px
+  sprite columns = 32px wide**, and the number of variants is `width / 32`.
+- Sprite rows 0..12 are read, i.e. **13 rows of 16px = 208px**.
+
+So a `RockObject` sheet is `32 * variants` wide by `208` tall. The supplied
+128x208 is exactly **4 variants**, 1:1 vanilla. Rows 0-4 are the plain set,
+5-9 the set used when a rock sits above/below, 10-12 the transitions.
+
+`RockObject` also sets `regionType = RegionType.WALL` and `isRock = true`, so
+one placed by worldgen is a solid, mineable wall.
+
+**The lesson**: "wall" in a vanilla filename says nothing about the class. Look
+up the registration before matching a sheet to a format — the mod already had
+two `RockObject`s (`skystonerock`, `veilrock`) doing exactly this.
+
+**A gate trap this exposed**: `tools/locale_audit.py` finds registrations by
+matching `registerObject("...")` in the SOURCE TEXT, comments included. Pasting
+vanilla's registration into a comment as documentation made the audit believe
+the mod registers `crystalrock` and demand `items/crystalrock.png`. Describe
+vanilla registrations in prose, never as a code-shaped comment.
+
+## This container can have a full game install (2026-08-31)
+
+Recorded because two sessions stood down for want of one:
+
+- `scripts/fetch_dedicated_server.sh` works here and takes about a minute.
+- `./gradlew decompileToSources -PuseDecompiledSources=true` then writes
+  `$NECESSE_GAME_DIR/decompiled/Necesse-sources.jar` — **unpack it** (`unzip`
+  into `decompiled/src`) to get 6,464 readable `.java` files. The task can
+  report success while the jar is still being written; wait until its size
+  stops changing and `unzip -t` passes.
+- `pip install Pillow numpy` works, which unlocks every python art audit.
+- Still absent: the **client sprite dump**. `scripts/sky_map_render.sh` renders
+  its text dump fine and then dies in the image half on a missing vanilla tile
+  PNG. For measuring worldgen, compile a small probe against `build/mod` +
+  `Server.jar` and call the pure functions directly — but note that
+  `SkyRegistry`'s ID fields are all **0** outside a running game, so a probe
+  must compare biome CLASSES and call `SkyOutlands`/`SkyNoise` rather than
+  compare registry IDs.

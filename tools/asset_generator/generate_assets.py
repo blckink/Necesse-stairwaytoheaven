@@ -48,7 +48,11 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              "objects/skyseraphtree.png", "items/skyseraphtree.png",
              "objects/statues/seraph.png", "items/seraphstatue.png",
              "objects/cloudtree.png", "items/cloudtree.png",
-             "objects/nimbuswillow.png")
+             "objects/nimbuswillow.png",
+             # Supplied hand-drawn art, copied in as-is: the sheet is
+             # already vanilla RockObject format (4 variants x 13 rows
+             # of 16px), so there is nothing to repack.
+             "objects/evilwall.png", "items/evilwall.png")
 
 
 def _stamp(out, rel):

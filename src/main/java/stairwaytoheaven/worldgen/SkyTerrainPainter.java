@@ -974,6 +974,15 @@ public final class SkyTerrainPainter {
             if (SkyOutlands.isPortalSite(seed, tileX, tileY, hubDist)) {
                 return pack(groundID, SkyRegistry.seanceCircleID, biomeID, false);
             }
+            // Crystal massifs. The formation field is reused rather than
+            // reinvented: it already produces knots, ridges and short veins
+            // with real gaps between them, which is what stops a solid-wall
+            // object from turning the region into a maze. Only the SOLID core
+            // becomes wall — the apron is what keeps the massif's foot walkable.
+            int massif = outcropAt(seed, tileX, tileY);
+            if ((massif & OUTCROP_SOLID) != 0) {
+                return pack(groundID, SkyRegistry.evilwallID, biomeID, false);
+            }
             if (SkyNoise.tileRoll(seed, tileX, tileY, SALT_CRATE) < CRATE_CHANCE_BARREN) {
                 return pack(groundID, SkyRegistry.skyCrateID, biomeID, false);
             }

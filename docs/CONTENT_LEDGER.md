@@ -24,6 +24,17 @@ standing at a derelict workshop in the Skyreach.
 | `haldasettler` | mob | Halda the Cellarer: sells the worked goods of the three stations (skyweave, stormglass, stormsteel) and buys the raw end of every sky gathering loop. |
 | `ossiansettler` | mob | Ossian Vane, the last reader: the only source of incursion-tier salvage without an incursion, and the Aether Forge's customer for high-tier bars. |
 
+## The Beetle Outlands — the sky's wrong ground
+
+The contrast the bright Skyreach was missing, gated by distance from the spire
+instead of by a door. See `docs/CURRENT_STATE.md` and
+`stairwaytoheaven/worldgen/SkyOutlands.java`.
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `outlands` | biome | The Beetle Outlands: striped violet ground, dead trees and crystal massifs, impossible within 900 tiles of the spire and ordinary in the far sky — the sky's own dark half, no second dimension required. |
+| `evilwall` | object | A crystal massif of the Outlands: a mineable rock wall on vanilla's `RockObject`, drawn on the game's own `crystalwall` sheet, that builds the region's ridges and dead ends and drops stone. |
+
 ## Baseline — registered before the ledger existed
 
 These predate the ledger and are described in `CHANGELOG.md`,

@@ -34,6 +34,91 @@ Do not renegotiate a number without re-measuring the analogue and saying so.
 
 ---
 
+## What a whole biome actually needs — answering "was brauchen wir für tiles?"
+
+Asked on 2026-08-31, while supplying Beetle World art. Measured against what
+the Skyreach's own biomes ship, so these are the real minimums, not a wish list.
+
+### The one required file per ground: `tiles/<name>_splat.png`
+
+Format, from `docs/research/splat-format.md` (decompiled and pixel-verified):
+
+- Stacked **224x96 blocks**. Each block is a **7-column x 3-row grid of 32x32
+  cells** — 21 cells, whose meaning is fixed engine-wide, not per tile.
+- **Width = 224 x frames.** One frame (224) for still ground; more only for an
+  animated surface like water.
+- **Height = 96 x sections.** Each section is a random per-position variant. Two
+  or three is normal; one is legal and reads repetitive.
+- So the smallest legal new ground is **224x96**, and a good one is
+  **224x192** or **224x288**.
+
+Two rules that are not optional, both learned the expensive way and both gated
+by `tools/tile_behaviour_audit.py`:
+
+1. **Every vanilla splat in the game is 100% coherent on a 2x2 pixel block
+   grid**, natural ground and crafted floor alike, without one exception. That
+   is how vanilla gets its density without dithering. Texture drawn on single
+   pixels fails, however good the numbers look.
+2. **Density is a gameable number.** Natural ground carries 294-712 opaque-ish
+   texture pixels per full-tile cell with **mean |dRGB| 7-27** off the base
+   colour. Hitting the density while missing the loudness produced camouflage
+   netting once already.
+
+A liquid has **no legacy fallback**: without `_splat` it renders as a flat
+colour quad. Terrain does fall back to a plain `tiles/<name>.png` + the shared
+mask, so a terrain tile can ship without `_splat` in a pinch.
+
+### The rest of the family, per ground
+
+A tile is not finished when the PNG exists. Each of these has failed a release
+on its own at least once:
+
+| piece | where | what fails without it |
+|---|---|---|
+| palette ramp | `tools/asset_generator/palette.py` | texture ends up several times too loud (needs `grain_d`/`grain_l` at ~7 RGB either side of base) |
+| tile class | `stairwaytoheaven/tiles/` | `TerrainSplatterTile` subclass with a **terrain priority** — that number decides which ground wins where two meet |
+| registration | `StairwayToHeavenMod.registerTiles` | — |
+| painter branch | `SkyTerrainPainter.describeTile` | the tile is registered and never placed. The Aurora Shoals wore cloudturf for three releases exactly this way |
+| both locales | `en.lang` / `de.lang` | `locale_audit` fails |
+| ledger row | `docs/CONTENT_LEDGER.md` | `content_ledger --check` fails |
+| audit role | `tools/tile_behaviour_audit.py` | the tile is never measured against vanilla |
+
+### For a whole biome, on top of the ground
+
+What the four shipped sky biomes each carry, as the shape to match:
+
+1. **One ground tile** (above). Optionally a second for its barrens — every sky
+   biome lets `skystone` surface through as bare rock.
+2. **A `Biome` subclass**: mob spawn table, critter table, `getCrateLootTable`
+   (so opening a crate tells you where you are), `getUnderLiquidTile`.
+3. **A band in the biome field** — or, like the Outlands, a rule that cuts it
+   out of the others.
+4. **Objects that only grow there**, at roughly **0.30-0.39 objects per land
+   tile**. That is the measured density of every shipped sky ground; below ~0.10
+   a biome reads as empty, which is what the grey skystone ground did.
+5. **At least one structure**, or the region is scenery you walk through.
+
+### So, concretely, for Beetle World
+
+Supplied so far: `evilwall` (integrated). What would finish it:
+
+- [ ] **`tiles/beetleground_splat.png`** — its own ground. It currently borrows
+      `beetlefreaktile`, which was drawn for the Veil's Hollows and is on
+      vanilla's `splattingmaskwide` stencil. 224x192 or 224x288.
+- [ ] **A second, calmer ground** to interrupt the first, the way `blackpeat`
+      does now. Same format.
+- [ ] **3-5 objects** that grow nowhere else (32x32 world sheet + 32x32 item
+      icon each, >= 300 opaque px per icon).
+- [ ] Optional: a **liquid** if the region wants one — then `_splat` is
+      mandatory and needs the animation frames.
+
+Anything drawn on a vanilla sheet should keep saying which one in the filename.
+That is what made `evilwall` land correctly: the name said `crystalwall`, and
+looking that up in the jar is what revealed it is a `RockObject` on 16px cells,
+not a wall on 32px ones.
+
+---
+
 ## Queue
 
 ### 0. Halda's Fermentation Vat — the next content family, NOT art alone

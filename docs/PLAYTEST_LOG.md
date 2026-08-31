@@ -331,3 +331,19 @@ the picture caught: the redrawn `aurorapetal` was a fuller five-petal flower tha
 single detached petal.
 
 **Nobody has opened an inventory in the real client and looked at any of this.**
+
+## 2026-08-31 — direction feedback on the Skyreach (no play session)
+
+Not a play report: a direction call plus supplied art, in chat.
+
+| Area | Observation | Status |
+|---|---|---|
+| The sky is too bright | *"das gebiet ist einfach zu weiß und hell und wir brauchen kontrast"* | **ADDRESSED — NOT PLAYER CONFIRMED.** The Beetle Outlands: wrong regions cut into the Skyreach, impossible within 900 tiles of the spire and 25%+ of land past 3200. Measured, see `docs/CURRENT_STATE.md`. |
+| Two dimensions is too much work | *"aktuell ist veil ja als dunkles 2. gebiet gedacht ... aber das wird zu viel arbeit, wir machen nur sky region ... auf eine welt eindampfen statt skyreach und veil"* | **ADOPTED.** The Veil's material moved into the sky; the dimension stays registered so existing saves survive, but takes no new content. |
+| Seance Circle should be a boss portal | *"seance zirkel würde ich stattdessen als 'boss-portal' nehmen ... an bestimmten stellen, nicht random"* | **HALF DONE.** Circles now stand at fixed hashed sites inside Outlands. The summon is NOT wired — there is no boss. In the sky the circle says so rather than opening a rift. |
+| Crazy areas should start away from the tower | *"man spawnt ja immer am turm und da ist alles schön und hell ... und dann muss es diese verrückten gebiete geben sobald man den turm verlässt und ca 1000m davon entfernt ist"* | **DONE** at a 900-tile hard floor. |
+| Beetle world first | *"das erste ist beetle world (basierend auf beetlejuice)"* | **STARTED.** Ground, props, mobs and the Crooked House are in. It is still the Veil's furniture in a new place — no Outland-specific cast or loot yet. |
+| Supplied art: evil wall | 128x208 sheet + 32x32 icon, drawn on vanilla `crystalwall` | **INTEGRATED** as `evilwall`, a vanilla `RockObject`. See TECHNICAL_LEARNINGS for why it is a rock and not a wall. |
+| The mistsea splat ground | *"der bestehende splat boden ist total buggy und hässlich, den kannst du aber nutzen und ich verbessere ihn jetzt"* | OPEN — player is reworking it. Stays in `tile_behaviour_audit.KNOWN_UNFIXED` until then. |
+| Cloud areas enclosed, crazy areas outside | *"die wolkengebiete sind halt im idealfall immer geschlossen und außerhalb der wolkengebiete gibt es diese verrückten gebiete"* | **PARTIAL.** Outlands are cut out of the biome field as their own regions, but the cloud biomes are not yet *enclosed* shapes. Open. |
+| A garden of eden of the serpent | *"himmel hat schon viele wolken böden usw aber eben auch einen garten eden der schlange"* | OPEN — named, not designed. Needs a chapter brief. |
