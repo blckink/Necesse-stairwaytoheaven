@@ -2755,3 +2755,28 @@ Consequences the rebalance had to respect:
 - **There are no arcanic weapons.** Arcanic exists as armour, tiles, presets and
   machinery only — a plausible-sounding anchor that does not exist, and one this
   session briefed two workers against before checking.
+- **A two-handed weapon carries TWO damage stats**, and a grep that is not
+  anchored on the field name will read the wrong one:
+
+  ```
+  BarkBladeSwordToolItem:
+    attackDamage     .setBaseValue( 60.0F).setUpgradedValue(1.0F,  93.33336F)
+    greatswordDamage .setBaseValue(160.0F).setUpgradedValue(1.0F, 186.66672F)
+    resilienceGain   .setBaseValue(  3.0F).setUpgradedValue(1.0F,   6.0F)
+  ```
+
+  All four stats use the same `setBaseValue(...).setUpgradedValue(...)` shape,
+  so `grep "setUpgradedValue"` alone returns crit chance and resilience gain
+  mixed in with damage. **Always anchor the grep on the field**
+  (`attackDamage.setBaseValue`), and compare like with like: a two-handed mod
+  weapon's `greatswordDamage` belongs against a vanilla `greatswordDamage`, not
+  against an `attackDamage`. This session sent two workers a set of example
+  weapons read from the unanchored pattern; the band was right and the examples
+  were the wrong field.
+- The 310 and 510 outliers are genuine `attackDamage`:
+  `ChargeBeamProjectileToolItem` 300 → 310 and `ChargeShowerProjectileToolItem`
+  500 → 510, both charge weapons.
+- **A bow's arrow adds to the bow**, it does not replace it: `ArrowItem.modDamage`
+  (`ArrowItem.java:49-51`) calls `damage.add(this.damage, ...)`, and vanilla
+  arrows run 5 (stone) to 17 (spiderite). A bow should therefore sit slightly
+  under a blade of the same tier.
