@@ -42,8 +42,27 @@ Three construction rules learned from vanilla:
 
 ## Palette (see tools/asset_generator/palette.py)
 
-Muted bases, few saturated accents. "Cool, not kitschy": weathered stone, cold air,
-electric light — no rainbows, no gold-trimmed clouds.
+**Per-realm palettes, not global desaturation.** *(Corrected 2026-08-31. This
+section used to read "Muted bases … no rainbows, no gold-trimmed clouds"; the
+player retired that rule — see `docs/WORLD_DESIGN.md` §41.1.)*
+
+Each realm owns a palette and stays inside it (`WORLD_DESIGN.md` §36):
+
+| realm | palette |
+|---|---|
+| Skyreach | white, cream, light blue, pink, warm gold, pastels — bright and friendly, gold highlights wanted |
+| Eden | high saturation, deep greens, turquoise water, big colourful blooms |
+| Steinfeld | the one realm the old "muted" rule still fits — pale, broken, negative space |
+| Ghost Realm | petrol, turquoise, violet, poison green, black, cold white — spooky but NOT grey |
+| Crooked Beyond | black-and-white + neon accents, stripes, checkerboard; no random noise |
+| Hell | brass, black, red, burnt beige; fire as a component, never the whole design |
+
+What survives from the old rule: **one exclusive accent per sub-biome**, and
+ramps come from `palette.py` rather than from free-hand colour picking.
+
+The ramps below are the Skyreach ramps as shipped. They predate the realm
+palettes above and several of them are still on the old cool/muted reading —
+treat a conflict between a ramp and the table above as a bug in the ramp.
 
 | Material | Ramp (dark → light) | Accent |
 |---|---|---|

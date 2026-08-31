@@ -60,8 +60,14 @@ analogue like anything else.
 - **Cute roundness:** corners rounded 1–2 px, blob-like silhouettes, slightly
   oversized heads/eyes on creatures. Necesse is friendly, not gritty.
 - **Dithering:** sparse single-pixel checker ONLY at ramp borders, never as texture.
-- **Saturation discipline:** dusty bases, few saturated accents. The accent colors
-  are what players remember — keep each sub-biome's accent exclusive.
+- **Saturation discipline:** per REALM, not globally. `docs/WORLD_DESIGN.md` §36
+  owns the palettes: Skyreach bright white/cream/gold/pink, Eden highly
+  saturated, Steinfeld pale and broken, Ghost petrol/violet/poison-green,
+  Crooked neon on black-and-white, Hell brass/black/red. *(This line used to say
+  "dusty bases, few saturated accents" as a global rule; the player retired that
+  on 2026-08-31 — "alles nur entsättigt … das ist falsch".)*
+  What still holds everywhere: keep each sub-biome's accent **exclusive**, and
+  take ramps from `palette.py`.
 - **Readability at 1×:** every sprite must read at game zoom against both a light
   tile (Cloudturf) and a dark tile (Stormslate). If it only reads at 4×, it fails.
 

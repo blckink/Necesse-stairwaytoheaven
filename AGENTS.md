@@ -6,23 +6,43 @@ modifying anything in this repository.
 ## Read these first, in order
 
 1. `AGENTS.md` (this file)
-2. `docs/CURRENT_STATE.md` — where the project actually is right now
-3. `docs/DESIGN_DECISIONS.md` — invariants you must not silently reverse
-4. `docs/TECHNICAL_LEARNINGS.md` — verified Necesse behaviour, so you do not
+2. **`docs/WORLD_DESIGN.md` — the mod's constitution.** The player's final
+   concept for the whole world: nine realms from Skyreach to Hell, the
+   realmDepth worldgen, the two gates, every realm's cast, economy and palette,
+   the full quest order. **It outranks every other design document here.** Where
+   `docs/DESIGN.md`, `docs/ART_DIRECTION.md` or `docs/assets-style-guide.md`
+   disagree with it, they are stale and it wins. Part B of that file is this
+   repo's own review: what the concept overturns in the existing code, the gaps
+   it does not answer, and the recommended build order. Read both halves.
+3. `docs/VANILLA_ASSET_MAP.md` — every vanilla asset the mod borrows, per realm.
+   The working method is: build with vanilla stand-ins now, the player replaces
+   them all in one pass later. **A borrowed asset that is not in that file
+   breaks the swap**, so add the row in the same commit that uses it.
+4. `docs/CURRENT_STATE.md` — where the project actually is right now
+5. `docs/DESIGN_DECISIONS.md` — invariants you must not silently reverse
+6. `docs/TECHNICAL_LEARNINGS.md` — verified Necesse behaviour, so you do not
    rediscover the same APIs and bugs
-5. `docs/IMPLEMENTATION_RULES.md` — production rules for complete, vanilla-like
+7. `docs/IMPLEMENTATION_RULES.md` — production rules for complete, vanilla-like
    content families, tool behaviour, UI/icon completeness, worldgen composition,
    and verification states
-6. the domain doc for what you are touching — `docs/ART_DIRECTION.md`,
+8. the domain doc for what you are touching — `docs/ART_DIRECTION.md`,
    `docs/PLAYTEST_LOG.md`, `docs/ARCHITECTURE.md`, `docs/DESIGN.md`,
    `docs/research/`
-7. `docs/WORLDBUILDING_LOOP.md` if you are expanding the world rather than
+9. `docs/WORLDBUILDING_LOOP.md` if you are expanding the world rather than
    fixing something — what already exists, the texture law on one page, and the
    seven-role loop the `.claude/agents/` definitions implement
-8. recent git history (`git log --oneline -20` and the diff of anything your
+10. recent git history (`git log --oneline -20` and the diff of anything your
    task touches)
 
 ## Rules
+
+**Colour: there is no global "muted" rule any more.** It was retired on
+2026-08-31 — the player: *"ich habe festgestellt dass viele Vorgaben für
+Skyreach nicht passen zb alles nur entsättigt sein soll.. das ist falsch"*.
+Saturation is per realm (`WORLD_DESIGN.md` §36). Skyreach is bright white,
+cream, light blue, pink and warm gold; Eden is highly saturated; only Steinfeld
+is pale. If you find a doc telling you to desaturate globally, it is stale —
+fix it rather than following it.
 
 **The repository overrides your assumptions.** A handoff message, an old
 summary, or your own memory of this project can be stale. What is on disk and
