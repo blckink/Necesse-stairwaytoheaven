@@ -2821,3 +2821,46 @@ what falls out of it. `stormcrystal` was hand-priced at 30.0F while dropping
 2-3 `stormshard` now worth 25.0F each. Vanilla hand-prices no cluster at all —
 `registerCrystalCluster("amethystcluster", ..., -1.0F, true, ...)` — so ours is
 now on the same computed convention.
+
+## The Tungsten crafting gate is not the hole it looks like (2026-08-31, VERIFIED [jar])
+
+Three of the eight rebalance workers independently flagged the same thing as
+"the single highest-impact leftover": after the endgame re-tier, the mod's
+EPIC gear is still crafted at `TUNGSTEN_WORKSTATION` / `TUNGSTEN_ANVIL`, so
+"a player who has just smelted tungsten can craft a 150-damage EPIC weapon".
+
+**That reading is wrong, and the proposed fix would have broken crafting.**
+
+### The real gate is the material, not the station
+
+Every one of the five arsenal weapons needs **`aetheriumbar`**. The only recipe
+that produces it runs on the mod's own `AETHER_FORGE` tech
+(`SkyProfessions.java:174`), and the Aether Forge itself costs
+`skystone 20, ironbar 8, stormshard 4`. `skystone` and `stormshard` exist only
+in the Skyreach.
+
+So the actual prerequisite chain is: reach the Skyreach → gather skystone and
+stormshard → build the Aether Forge → smelt aetheriumbar → only then craft.
+Tungsten is incidental to that, not the gate. The same holds for the Stormsteel
+set, whose bars come off the same forge.
+
+### And AETHER_FORGE cannot host a weapon recipe
+
+The obvious-looking fix — move the recipes onto the mod's own forge tech — does
+not work. `AetherForgeObjectEntity extends AnyLogFueledProcessingTechInventoryObjectEntity`:
+it is a **processing** station (load ore and fuel, collect bars later), not a
+crafting-menu station. A weapon recipe registered against that tech would have
+no UI to be crafted from. `StormglassKilnObjectEntity` is the same shape.
+
+**If a stricter station gate is genuinely wanted**, it needs a NEW crafting
+station object at endgame tier — a content family (object, entity, recipe,
+sheet, icon, locale, ledger row), not a one-line tech swap. That is a design
+decision, not a bug fix.
+
+### The lesson
+
+"Which station" and "which materials" are two different gates, and in this mod
+the material chain is the load-bearing one. Check what a recipe's ingredients
+actually require before concluding that its station lets anyone in early —
+three careful workers reached the same wrong conclusion from the tech constant
+alone.
