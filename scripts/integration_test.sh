@@ -300,6 +300,38 @@ for arsenal_mob in rimesentry auroraflake fenwraith cindercantor; do
     grep -qE "spawn check: $arsenal_mob .*dark=[1-9][0-9]*/" "$LOG2" \
         || { echo "FAIL: $arsenal_mob accepts no dark spawn tile"; STATUS=1; }
 done
+# The Beetle Outlands' ascended cast. These are VANILLA mobs used by string ID
+# and never subclassed, so nothing in this repo can prove they spawn -- only
+# the live registry can, which is the whole reason they are probed.
+#
+# The expectation differs from the arsenal block above ON PURPOSE. Arsenal
+# enemies use SkySpawnRules and must accept in DAYLIGHT. These three do not:
+# HostileMob.isValidSpawnLocation calls checkLightThreshold, so they are
+# dark-spawners, and asserting daylight here would be asserting a bug.
+for outland_mob in crystalgolem ascendedgolem crystalarmadillo; do
+    grep -qE "spawn check: $outland_mob .*validSpawnLocation=implemented" "$LOG1" \
+        || { echo "FAIL: $outland_mob does not implement isValidSpawnLocation -- its Outlands spawn entry is inert"; STATUS=1; }
+    grep -qE "spawn check: $outland_mob .*dark=[1-9][0-9]*/" "$LOG2" \
+        || { echo "FAIL: $outland_mob accepts no dark spawn tile"; STATUS=1; }
+done
+
+# The Outlands' distance ramp, measured in the live world.
+#
+# The floor is asserted as an EXACT zero at 200, 600 and 850 tiles, not as
+# "rare". "The spire's surroundings are safe" is a promise this mod makes out
+# loud, and a promise that holds most of the time is a different promise.
+grep -qE "outlands check: floor=900 " "$LOG1" \
+    || { echo "FAIL: no outlands check line, or the 900-tile floor moved"; STATUS=1; }
+for near in 200 600 850; do
+    grep -qE "outlands check: .* r$near=0/[0-9]+" "$LOG1" \
+        || { echo "FAIL: wrong ground appears at $near tiles, inside the 900-tile floor"; STATUS=1; }
+done
+# ...and it must actually arrive further out, or the region is unreachable.
+grep -qE "outlands check: .* r3200=[1-9][0-9]*/" "$LOG1" \
+    || { echo "FAIL: no Outland ground at 3200 tiles -- the ramp never rises"; STATUS=1; }
+grep -qE "outlands check: .* biome=NOT REGISTERED" "$LOG1" \
+    && { echo "FAIL: the Outlands biome is not registered"; STATUS=1; }
+
 # ...and the five weapons must be real registered items with a name, not IDs.
 for arsenal_item in skyreave thunderhead prismcaller skywatchwhistle stormdisc; do
     grep -qE "arsenal check: $arsenal_item id=[0-9]+ name=[^ ]" "$LOG1" \

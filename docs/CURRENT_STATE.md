@@ -332,7 +332,22 @@ decides them is DISTANCE, not the biome noise.
   workshops, meadows, scree) is the BRIGHT world's furniture.
 
 **Nobody has walked into one.** Gates: `buildModJar` against the real 1.3.2
-Server.jar, and all five python audits green.
+Server.jar, all five python audits, and `scripts/integration_test.sh` on a real
+server boot — which now covers this region rather than merely surviving it:
+
+- `outlands check:` reports the ramp measured off `describeTile` at real world
+  positions. The 900-tile floor is asserted as an **exact zero** at 200, 600
+  and 850 tiles, not as "rare" — "the spire's surroundings are safe" is a
+  promise this mod makes out loud, and a promise that holds most of the time is
+  a different promise. It also asserts wrongness actually arrives by 3200, so
+  the region cannot silently become unreachable.
+- `spawn check:` now probes `crystalgolem`, `ascendedgolem` and
+  `crystalarmadillo`. They are VANILLA mobs used by string ID and never
+  subclassed, so nothing in this repo can prove they spawn — only the live
+  registry can. The assertion is deliberately different from the arsenal
+  block's: those must accept in DAYLIGHT, these must accept in the DARK,
+  because `HostileMob.isValidSpawnLocation` calls `checkLightThreshold`.
+  Asserting daylight here would be asserting a bug.
 
 ### What is NOT done here, and is the next agent's job
 

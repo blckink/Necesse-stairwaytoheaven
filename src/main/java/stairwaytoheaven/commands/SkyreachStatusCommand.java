@@ -770,7 +770,19 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                 // false` and can never be table-spawned, so each of them
                 // implements isValidSpawnLocation itself and the two columns
                 // below are the proof that it took.
-                "nimbusyak", "thunderquill", "glimmergoat"};
+                "nimbusyak", "thunderquill", "glimmergoat",
+                // The Beetle Outlands' ascended cast. These are VANILLA mobs,
+                // referenced by string ID and never subclassed, so nothing in
+                // this repo can prove they spawn -- only the live registry
+                // can. They are probed for exactly the reason the Cloud Lamb
+                // is: a spawn-table entry whose mob rejects every location is
+                // indistinguishable from no entry at all.
+                //
+                // Expected shape, and the test asserts it: validSpawnLocation
+                // implemented (HostileMob provides it), and dark > 0 while lit
+                // may be 0 -- all three are dark-spawners, which is why the
+                // Outlands are uneasy by day and dangerous after dark.
+                "crystalgolem", "ascendedgolem", "crystalarmadillo"};
         String[] arsenalProbeMobs = stairwaytoheaven.arsenal.SkyArsenal.PROBE_MOB_IDS;
         String[] probeMobs = new String[coreProbeMobs.length + arsenalProbeMobs.length];
         System.arraycopy(coreProbeMobs, 0, probeMobs, 0, coreProbeMobs.length);
@@ -799,6 +811,61 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                     + " validSpawnLocation=" + (overrides ? "implemented" : "INHERITS Mob's false")
                     + " accepted lit=" + lit + "/" + probeTiles.size()
                     + " dark=" + dark + "/" + probeTiles.size());
+        }
+
+        // The Beetle Outlands, measured in the live world rather than offline.
+        //
+        // This exists because the region makes two promises that a screenshot
+        // cannot check and a unit test cannot reach: that nothing wrong can
+        // appear near the spire FOR ANY SEED, and that wrongness actually
+        // arrives as you walk out. Both are properties of the distance ramp,
+        // so both are read straight off describeTile at real world positions.
+        //
+        // The 900-tile floor is the one that matters. It is asserted as an
+        // exact zero, not as "rare": the spire's surroundings being safe is a
+        // fact this mod states out loud, and a fact that holds 99% of the time
+        // is a different fact.
+        if (level instanceof SkyLevel) {
+            int outSeed = ((SkyLevel) level).getWorldGenSeed();
+            java.awt.Point outOrigin = stairwaytoheaven.worldgen.SkyOrigin.compute(outSeed);
+            StringBuilder ramp = new StringBuilder("outlands check: floor=")
+                    .append((int) stairwaytoheaven.worldgen.SkyOutlands.WRONG_START);
+            int wallSeen = 0;
+            int portalSeen = 0;
+            for (int radius : new int[]{200, 600, 850, 1200, 2000, 3200}) {
+                int land = 0;
+                int wrong = 0;
+                for (int dx = -60; dx <= 60; dx += 2) {
+                    for (int dy = -60; dy <= 60; dy += 2) {
+                        int tx = outOrigin.x + radius + dx;
+                        int ty = outOrigin.y + dy;
+                        long desc = stairwaytoheaven.worldgen.SkyTerrainPainter.describeTile(
+                                outSeed, tx, ty, outOrigin.x, outOrigin.y);
+                        if (stairwaytoheaven.worldgen.SkyTerrainPainter.descTile(desc)
+                                == SkyRegistry.mistseaID) {
+                            continue;
+                        }
+                        land++;
+                        if (stairwaytoheaven.worldgen.SkyTerrainPainter.descBiome(desc)
+                                == stairwaytoheaven.worldgen.SkyTerrainPainter.BIOME_OUTLANDS) {
+                            wrong++;
+                            int obj = stairwaytoheaven.worldgen.SkyTerrainPainter.descObject(desc);
+                            if (obj == SkyRegistry.evilwallID) {
+                                wallSeen++;
+                            }
+                            if (obj == SkyRegistry.seanceCircleID) {
+                                portalSeen++;
+                            }
+                        }
+                    }
+                }
+                ramp.append(String.format(" r%d=%d/%d", radius, wrong, land));
+            }
+            ramp.append(" evilwall=").append(wallSeen).append(" portals=").append(portalSeen);
+            ramp.append(" biome=").append(SkyRegistry.outlands != null
+                    ? necesse.engine.localization.Localization.translate("biome", "outlands")
+                    : "NOT REGISTERED");
+            logs.add(ramp.toString());
         }
 
                 logs.add("name check: skywarden=" + necesse.engine.localization.Localization.translate("mob", "skywardenname", "name", "Test")
