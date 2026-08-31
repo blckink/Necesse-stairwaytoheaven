@@ -47,7 +47,7 @@ public final class SkyCloudmarbleSet {
     static void register() {
         // Wall + door pair + window from one 352x128 sheet.
         int[] wall = WallObject.registerWallObjects(
-                "cloudmarble", "cloudmarblewall", 2.0F, MAP_CLOUDMARBLE, -1.0F, -1.0F);
+                "cloudmarble", "cloudmarblewall", 2.0F, MAP_CLOUDMARBLE, -0.25F, -1.0F);
         cloudmarbleWallID = wall[0];
         cloudmarbleDoorID = wall[1];
         cloudmarbleWindowID = wall[3];

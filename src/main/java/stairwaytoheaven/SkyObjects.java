@@ -34,7 +34,12 @@ final class SkyObjects {
 
         // registerCrystalCluster registers the object plus its rotated variant
         // and links them, exactly like vanilla cave crystals.
-        CrystalClusterObject.registerCrystalCluster("stormcrystal", new Color(122, 108, 210), 0.72F, "stormshard", 30.0F, true, SKY_CATEGORY);
+        // Broker value -1.0F = "compute it", which is what vanilla passes for
+        // every one of its own clusters (amethystcluster ... -1.0F, true).
+        // It was hand-priced at 30.0F, and after the 2026-08-31 value pass that
+        // was below its own drops: a cluster gives 2-3 stormshard at 25.0F each.
+        // A node worth less than what falls out of it is a broken price.
+        CrystalClusterObject.registerCrystalCluster("stormcrystal", new Color(122, 108, 210), 0.72F, "stormshard", -1.0F, true, SKY_CATEGORY);
         SkyRegistry.stormCrystalID = ObjectRegistry.getObjectID("stormcrystal");
         SkyRegistry.stormCrystalRID = ObjectRegistry.getObjectID("stormcrystalr");
 

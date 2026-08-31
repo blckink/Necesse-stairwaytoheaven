@@ -41,17 +41,31 @@ final class SkyBuildingSet {
 
     static void register() {
         // ===== Walls (wall + door + window each, vanilla helper) =====
+        //
+        // The wall broker value is -0.25F, not -1.0F, and the quarter is load
+        // bearing. A NEGATIVE value means "compute from the recipe", and
+        // RecipeBrokerValueCompute reports
+        //   handler.handle(itemID, bestRecipeBrokerValue * valueMultiplier)
+        // where the multiplier is Math.abs(setBrokerValue) -- it sums the
+        // ingredients and NEVER divides by the recipe's yield. Every wall here
+        // is crafted 4 at a time, so at -1.0F each single wall was priced at the
+        // whole craft: buy 29F of stock, craft 4, sell 116F. A money printer.
+        //
+        // Vanilla never hits this because every vanilla wall recipe yields 1
+        // (stonewall, woodwall, cryptwall all `new Recipe(..., 1`). -0.25F is
+        // 1/yield and restores the true per-unit cost. Any future item with a
+        // negative broker value and a yield above 1 needs the same treatment.
         int[] skystoneWall = WallObject.registerWallObjects(
-                "skystonebrick", "skystonebrickwall", 2.0F, new Color(150, 158, 172), -1.0F, -1.0F);
+                "skystonebrick", "skystonebrickwall", 2.0F, new Color(150, 158, 172), -0.25F, -1.0F);
         SkyRegistry.skystoneBrickWallID = skystoneWall[0];
         int[] nightfellWall = WallObject.registerWallObjects(
-                "nightfell", "nightfellwall", 2.0F, new Color(52, 48, 66), -1.0F, -1.0F);
+                "nightfell", "nightfellwall", 2.0F, new Color(52, 48, 66), -0.25F, -1.0F);
         SkyRegistry.nightfellWallID = nightfellWall[0];
 
         // Beetlefreak masonry: the Veil's loud, wrong-coloured building set,
         // from supplied art. Same one-sheet-three-readers deal as the others.
         int[] beetleWall = WallObject.registerWallObjects(
-                "beetle", "beetlewall", 2.0F, new Color(88, 42, 120), -1.0F, -1.0F);
+                "beetle", "beetlewall", 2.0F, new Color(88, 42, 120), -0.25F, -1.0F);
         SkyRegistry.beetleWallID = beetleWall[0];
         // registerWallObjects returns {wall, doorClosed, doorOpen, window}
         // (WallObject.java:481). The Crooked House preset needs all four.

@@ -2780,3 +2780,44 @@ Consequences the rebalance had to respect:
   (`ArrowItem.java:49-51`) calls `damage.add(this.damage, ...)`, and vanilla
   arrows run 5 (stone) to 17 (spiderite). A bow should therefore sit slightly
   under a blade of the same tier.
+
+## A negative broker value plus a yield above 1 is a money printer (2026-08-31, VERIFIED [jar])
+
+Found during the value pass, and it had shipped on **all four** of the mod's
+wall sets.
+
+A negative `setBrokerValue` means "compute this from the recipe". The computation
+is `RecipeBrokerValueCompute`:
+
+```
+handler.handle(element.itemID, element.bestRecipeBrokerValue * element.valueMultiplier)
+```
+
+and the multiplier is `Math.abs(element.setBrokerValue)`
+(`ItemRegistry.java:3428-3429`). It sums the ingredients and **never divides by
+the recipe's yield.**
+
+Every mod wall is crafted four at a time and registered at `-1.0F`, so each
+single wall carried the price of the whole craft: buy 29F of stock, craft four,
+sell 116F.
+
+**Vanilla never hits this**, which is why the pattern looked safe: every vanilla
+wall recipe yields one — `stonewall`, `woodwall` and `cryptwall` are all
+`new Recipe(..., 1`. The mod's yield of 4 is what turns the same registration
+into an exploit.
+
+**The fix is `-1.0F / yield`** — `-0.25F` for a yield of four — because
+`Math.abs` turns the fraction into exactly the per-unit divisor. Applied to
+`skystonebrickwall`, `nightfellwall`, `beetlewall` and `cloudmarblewall`.
+
+**The rule to carry forward:** any item registered with a negative broker value
+AND a recipe yield above one needs `-1/yield`, not `-1.0F`. Check the yield
+whenever a computed price is set. Nothing in the build, the audits or the
+integration test detects this — the item registers, crafts and sells correctly,
+just at four times its worth.
+
+Related, from the same pass: a resource node should never be worth less than
+what falls out of it. `stormcrystal` was hand-priced at 30.0F while dropping
+2-3 `stormshard` now worth 25.0F each. Vanilla hand-prices no cluster at all —
+`registerCrystalCluster("amethystcluster", ..., -1.0F, true, ...)` — so ours is
+now on the same computed convention.
