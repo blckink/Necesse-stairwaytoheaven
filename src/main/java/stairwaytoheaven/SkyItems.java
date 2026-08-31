@@ -163,38 +163,73 @@ public final class SkyItems {
      * {@code itemtooltip.<id>tip} instead, like every other mod item.
      */
     private static void registerBuffs() {
-        // Stormsteel Vambrace. Anchors: vanilla `vambrace`
-        // (BuffRegistry.java:815, RESILIENCE_GAIN 0.5F) and vanilla
-        // `chainshirt` (:816, MAX_RESILIENCE_FLAT 50). Ours is the vambrace at
-        // full value plus half a chainshirt — vanilla itself combines the two
-        // at full value into `manica`, which is EPIC, so this sits deliberately
-        // between them.
+        // Stormsteel Vambrace. Shape: resilience, flat and gained. Anchors,
+        // VERIFIED [jar] in BuffRegistry.java: `vambracetrinket` (:819,
+        // RESILIENCE_GAIN 0.5F) and `chainshirttrinket` (:820,
+        // MAX_RESILIENCE_FLAT 50). Ours now takes BOTH at full value, which is
+        // exactly `manicatrinket` (:823, MAX_RESILIENCE_FLAT 50 +
+        // RESILIENCE_GAIN 0.5F) — vanilla's own combination of the two, and the
+        // ceiling of this shape: neither incursion trinket (`gelatincasings`,
+        // `bloodstonering`) touches resilience, so there is nothing above the
+        // manica to climb to. It was 0.5F + 25 (a full vambrace and half a
+        // chainshirt) while the mod sat at tungsten tier. Being a manica, it
+        // takes the manica's exclusions too — see `registerGear`.
         BuffRegistry.registerBuff("stormsteelvambracetrinket", new SimpleTrinketBuff(
                 new ModifierValue<>(BuffModifiers.RESILIENCE_GAIN, 0.5F),
-                new ModifierValue<>(BuffModifiers.MAX_RESILIENCE_FLAT, 25)));
+                new ModifierValue<>(BuffModifiers.MAX_RESILIENCE_FLAT, 50)));
 
-        // Aurora Locket. Anchors: vanilla `frozenheart` (:754,
-        // MAX_HEALTH_FLAT 50, UNCOMMON) and vanilla `regenpendant`
-        // (COMBAT_HEALTH_REGEN_FLAT 0.5F, COMMON). Ours takes 60% of the
-        // heart's health and all of the pendant's regen in one slot.
+        // Aurora Locket. Shape: flat health plus health regen. Anchors,
+        // VERIFIED [jar] in BuffRegistry.java: `frozenhearttrinket` (:758,
+        // MAX_HEALTH_FLAT 50) and `lifependanttrinket` (:727,
+        // COMBAT_HEALTH_REGEN_FLAT 1.0F) — the pendant that vanilla makes
+        // disable `regenpendanttrinket` (:691, 0.5F), i.e. the top of the regen
+        // ladder. Ours takes both at full value in one slot; it used to be 60%
+        // of the heart (30) and a full regenpendant (0.5F). It excludes both
+        // anchors, and the regenpendant the lifependant itself excludes — see
+        // `registerGear`.
         BuffRegistry.registerBuff("auroralockettrinket", new SimpleTrinketBuff(
-                new ModifierValue<>(BuffModifiers.MAX_HEALTH_FLAT, 30),
-                new ModifierValue<>(BuffModifiers.COMBAT_HEALTH_REGEN_FLAT, 0.5F)));
+                new ModifierValue<>(BuffModifiers.MAX_HEALTH_FLAT, 50),
+                new ModifierValue<>(BuffModifiers.COMBAT_HEALTH_REGEN_FLAT, 1.0F)));
 
-        // Zephyr Harness. Anchors: vanilla `trackerboot` (:679, SPEED 0.1F) and
-        // vanilla `zephyrcharm` (:682, STAMINA_CAPACITY 0.5F). Ours is the
-        // boot's speed at full value and 60% of the charm's stamina.
+        // Zephyr Harness. Shape: movement speed plus stamina. Anchors,
+        // VERIFIED [jar] in BuffRegistry.java: the speed ladder runs
+        // `trackerboottrinket` (:683, SPEED 0.1F) → `vampiresgifttrinket`
+        // (:685, 0.15F) → `spikedbatbootstrinket` (:748, 0.25F, which spends
+        // the rest of its budget on FRICTION), and `zephyrcharmtrinket` (:686,
+        // STAMINA_CAPACITY 0.5F) is the only stamina trinket vanilla has. Ours
+        // is the charm at full value and a speed between the gift and the
+        // boots; it used to be 0.10F + 0.30F. It excludes all three of those
+        // speed/stamina anchors, exactly as `spikedbatboots` excludes the two
+        // it outruns — see `registerGear`.
+        //
+        // Worn with the full Stormsteel set this is 0.20F + the set bonus's
+        // 0.10F = 30% movement from mod sources. That is under what vanilla
+        // itself reaches in the same two slots: `ArcanicBootsArmorItem` carries
+        // SPEED 0.25F on the armour and stacks with `spikedbatbootstrinket`'s
+        // 0.25F for 50%.
         BuffRegistry.registerBuff("zephyrharnesstrinket", new SimpleTrinketBuff(
-                new ModifierValue<>(BuffModifiers.SPEED, 0.10F),
-                new ModifierValue<>(BuffModifiers.STAMINA_CAPACITY, 0.30F)));
+                new ModifierValue<>(BuffModifiers.SPEED, 0.20F),
+                new ModifierValue<>(BuffModifiers.STAMINA_CAPACITY, 0.50F)));
 
-        // The Stormsteel set bonus. Anchor: GlacialHelmetBonusBuff, the NEXT
-        // tier's set, which grants MAX_RESILIENCE_FLAT 20 + RESILIENCE_GAIN
-        // 0.2F (plus icicles). Ours takes less of the resilience and spends the
-        // rest on being light.
+        // The Stormsteel set bonus. Anchors are the incursion tier's own set
+        // bonuses, VERIFIED [jar]: `ArcanicHelmetSetBonusBuff` — the arcanic
+        // set the armour above is measured against — carries NO flat modifiers
+        // at all and spends its whole budget on an ability (20 stacks of
+        // overcharged mana, then chain lightning at 80 damage rising to 180);
+        // `NightSteelHelmetSetBonusBuff`, the melee set of that tier, grants
+        // MAX_RESILIENCE_FLAT 30 + RESILIENCE_GAIN 0.2F on top of a 3s ability
+        // on a 60s cooldown; `SpideriteHelmetSetBonusBuff` grants 20 + 0.5F
+        // plus slow immunity and a spit attack.
+        //
+        // Ours takes Nightsteel's flat 30 exactly, drops the resilience gain
+        // and the ability entirely, and spends what vanilla spends on a trigger
+        // on being light instead — 10% movement, well under the 25% SPEED that
+        // `ArcanicBootsArmorItem` alone grants at this tier. It was 15 + 0.05F
+        // against `GlacialHelmetBonusBuff` (20 + 0.2F + icicles) when the mod
+        // sat a tier below the deep caves.
         BuffRegistry.registerBuff(StormsteelArmor.SET_BONUS, new SimpleSetBonusBuff(
-                new ModifierValue<>(BuffModifiers.MAX_RESILIENCE_FLAT, 15),
-                new ModifierValue<>(BuffModifiers.SPEED, 0.05F)));
+                new ModifierValue<>(BuffModifiers.MAX_RESILIENCE_FLAT, 30),
+                new ModifierValue<>(BuffModifiers.SPEED, 0.10F)));
     }
 
     /**
@@ -212,15 +247,43 @@ public final class SkyItems {
         ItemRegistry.registerItem("stormsteelchestplate", new StormsteelArmor.Chestplate(), 190.0F, true);
         ItemRegistry.registerItem("stormsteelboots", new StormsteelArmor.Boots(), 95.0F, true);
 
-        // Rarity follows the anchor: vanilla `vambrace` is RARE, `frozenheart`
-        // and `zephyrcharm` are UNCOMMON. Enchant costs sit at the top of the
-        // vanilla trinket band (200–600).
+        // Rarity and enchant cost follow the incursion trinket band. VERIFIED
+        // [jar]: three items sit on
+        // `IncursionTrinketsLootTable.incursionTrinkets` — `gelatincasings`
+        // and `bloodstonering` (ItemRegistry.java:1623 and :1629), both
+        // `Item.Rarity.EPIC` at enchantCost 1000, and `crystalshield` (:1467),
+        // which is a shield and priced as one at RARE / 900. So EPIC / 1000 is
+        // the band for a stat trinket of this tier.
+        // `manica`, the vanilla ceiling the vambrace's buff now matches, is
+        // itself EPIC (:1638, enchantCost 800). All three of ours were
+        // RARE/500, UNCOMMON/500 and UNCOMMON/400 at the mod's old tungsten
+        // tier.
+        //
+        // The `addDisables` lists are the other half of taking those anchors at
+        // full value. Vanilla never lets the same shape stack with itself once
+        // an item carries the whole of it: `manica` disables `vambrace` and
+        // `chainshirt` (ItemRegistry.java:1638), `lifependant` disables
+        // `regenpendant` (:1583), `spikedbatboots` disables `spikedboots` and
+        // `vampiresgift` (:1590). Each of ours now contains its anchors whole,
+        // so each declares the same exclusion — otherwise a player could wear
+        // our vambrace beside a manica for 100 flat resilience, which no
+        // vanilla combination allows. VERIFIED [jar]: `TrinketItem.addDisables`
+        // (TrinketItem.java:104) only stores string IDs, and
+        // `EquipmentBuffManager.updateTrinketBuffs` (:238) is what suppresses
+        // the other trinket's buffs, so naming a vanilla ID here is safe at
+        // registration time and enforced at equip time.
         ItemRegistry.registerItem("stormsteelvambrace",
-                new SkyTrinketItem(Item.Rarity.RARE, "stormsteelvambracetrinket", 500), 180.0F, true);
+                new SkyTrinketItem(Item.Rarity.EPIC, "stormsteelvambracetrinket", 1000)
+                        .addDisables("manica", "vambrace", "chainshirt"),
+                180.0F, true);
         ItemRegistry.registerItem("auroralocket",
-                new SkyTrinketItem(Item.Rarity.UNCOMMON, "auroralockettrinket", 500), 260.0F, true);
+                new SkyTrinketItem(Item.Rarity.EPIC, "auroralockettrinket", 1000)
+                        .addDisables("frozenheart", "lifependant", "regenpendant"),
+                260.0F, true);
         ItemRegistry.registerItem("zephyrharness",
-                new SkyTrinketItem(Item.Rarity.UNCOMMON, "zephyrharnesstrinket", 400), 160.0F, true);
+                new SkyTrinketItem(Item.Rarity.EPIC, "zephyrharnesstrinket", 1000)
+                        .addDisables("zephyrcharm", "trackerboot", "vampiresgift"),
+                160.0F, true);
     }
 
     /** Runs in postInit — the mod recipe registry closes right afterwards. */
