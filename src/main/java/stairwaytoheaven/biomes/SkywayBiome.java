@@ -19,20 +19,34 @@ import necesse.inventory.lootTable.lootItem.LootItem;
 public class SkywayBiome extends SkyBiome {
 
     // Built ground is patrolled ground: the golems are the passages' masonry
-    // come to life, and the same addLimited cap the other tables use keeps a
-    // cleared, lit stretch of causeway clear.
+    // come to life. A corridor is the worst place in the layer to be crowded —
+    // you cannot walk around anything on a causeway — so this is the table
+    // where the endgame caps bite hardest.
     public static final MobSpawnTable mobs = new MobSpawnTable()
-            .addLimited(55, "skystonegolem", 3, 96)
-            // The passages are a corridor, and a pack hunter that uses one is
-            // the reason to keep walking rather than to stop and look.
-            .addLimited(45, "galehound", 3, 80)
-            .addLimited(35, "zephyrray", 2, 80)
+            // Elite. 3 -> 2 over sixteen tiles: two golems block a causeway,
+            // three seal it. Weight 55 -> 45 so the masonry is still what this
+            // ground is made of without being most of what walks on it.
+            .addLimited(45, "skystonegolem", 2, RANGE_ELITE)
+            // Fast. The passages are a corridor, and a pack hunter that uses
+            // one is the reason to keep walking rather than to stop and look.
+            // Still three, now over eight tiles rather than 2.5, so it is one
+            // pack in a stretch of causeway instead of one per doorway.
+            .addLimited(45, "galehound", 3, RANGE_STANDARD)
+            // Standard.
+            .addLimited(35, "zephyrray", 2, RANGE_STANDARD)
             // --- content/arsenal ---
-            // The causeways are what the sentries were set to watch, so this
-            // is their densest ground - still capped at 3, still immobile.
-            .addLimited(45, "rimesentry", 3, 96)
-            // The cloud sea between the islands is not empty travelling ground
-            .add(28, stairwaytoheaven.mobs.MistserpentHead.IN_MISTSEA, "mistserpent");
+            // Ranged. The causeways are what the sentries were set to watch,
+            // so this is still their densest ground — but "densest" now means
+            // two within twelve tiles instead of three within three. An
+            // immobile shooter on a corridor is the one thing a player cannot
+            // disengage from, and at the Skyreach's new floor a third of them
+            // is not a harder fight, it is a closed road. Weight 45 -> 35 for
+            // the same reason.
+            .addLimited(35, "rimesentry", 2, RANGE_RANGED)
+            // The cloud sea between the islands is not empty travelling ground.
+            // Capped at one for the reason spelled out in DriftlandsBiome:
+            // fourteen isHostile segments, and it had no cap at all.
+            .add(28, mistseaSerpent(1), "mistserpent");
 
     public static final MobSpawnTable critters = new MobSpawnTable()
             .addLimited(90, "zephyrfinch", 4, 60)
@@ -52,13 +66,18 @@ public class SkywayBiome extends SkyBiome {
      * Freight left on the passages: worked goods, not raw ones.
      *
      * The base table in {@link SkyBiome} is the common cargo; this adds what
-     * only this biome gives, so a crate tells the player where they are.
+     * only this biome gives, so a crate tells the player where they are. The
+     * amounts carry the same tier-1 incursion rate as the base table, by the
+     * rule stated there.
      */
     @Override
     public LootTable getCrateLootTable(necesse.level.maps.Level level, int tileX, int tileY) {
         return new LootTable(
-                ChanceLootItem.between(0.45F, "stormglass", 1, 3),
+                // 1-3 -> 1-4 (expected 2.0 -> 2.5, +25%).
+                ChanceLootItem.between(0.45F, "stormglass", 1, 4),
+                // Unchanged: 1-2 -> 1-3 is +33%, past the band the rule allows.
                 ChanceLootItem.between(0.30F, "skyweave", 1, 2),
+                // Unchanged: the bell is a single unique piece, not a stack.
                 ChanceLootItem.between(0.10F, "silverbell", 1, 1),
                 super.getCrateLootTable(level, tileX, tileY)
         );
