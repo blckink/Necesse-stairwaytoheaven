@@ -119,7 +119,16 @@ fitting vanilla music lists in v0.1) and crate/fishing hooks where applicable.
 | `skystairwaydown` | player-placed on surface | the Stairway to Heaven itself |
 | `skystairwayup` | auto-placed in Skyreach | return stairway to the surface |
 
-## 4. Enemies (Tungsten-era tuning)
+## 4. Enemies (Tungsten-era tuning) — SUPERSEDED 2026-08-31
+
+> **The numbers in this section are historical.** The player, after clearing
+> incursion 10: *"alles zu einfach überall"*, and asked that the weakest enemy
+> start at first-incursion level. Every enemy in the mod was re-tiered on
+> 2026-08-31; **`docs/BALANCE.md` is the live reference** and this table records
+> what the mod shipped before that. Do not calibrate anything new against it.
+>
+> Scale of the change: the Skystone Golem went 520/70/30 → 1400/130/40, the
+> Gloom Shade 240/50/0 → 2800/230/55.
 
 Vanilla reference points: deep-cave ranged flyer Cryo Flake = 350 HP / 65 dmg / 20 armor.
 

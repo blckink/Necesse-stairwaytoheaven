@@ -2699,3 +2699,59 @@ and `deadwood` sets for free.
   pattern rather than call it.
 - Deleting every light source is what sells the mood. Any re-skin that keeps the
   lamps will not read as corrupted.
+
+## A mob that does not override `getCollisionDamage` deals nothing (2026-08-31, VERIFIED [jar])
+
+Found during the endgame rebalance, and it had shipped: the **Mistserpent dealt
+zero damage in play**.
+
+`MistserpentHead`/`MistserpentBody` defined `HEAD_COLLISION` and
+`BODY_COLLISION` constants — and nothing ever read them. `Mob.getCollisionDamage`
+returns **`null`** by default (`Mob.java:2124-2125`), meaning "no collision hit",
+and neither class overrode it. The AI it uses,
+`PlayerChargingCirclingChaserAI`, carries no `GameDamage` of its own. A worm's
+entire offence IS its collision — vanilla's own does it explicitly
+(`SandwormHead:121`, `SandwormBody:71` both override the method).
+
+**The trap generalises to every mob in this mod.** Declaring a damage constant
+is not wiring it. If a mob has no attack animation and no projectile, its damage
+must come from a `getCollisionDamage` override or it has none, and nothing in
+the build, the audits or the integration test will say so — the mob spawns,
+moves, and is simply harmless.
+
+Worth knowing alongside it, from the same investigation:
+
+- **A segmented worm has ONE health pool, on the head.** `WormMobHead.init()`
+  copies the head's pool onto every segment as it builds the chain
+  (`WormMobHead.java:219-220`); `WormMobBody.tickMaster()` re-mirrors max health,
+  current health **and armour** off the master every tick (`:150-163`);
+  `getHealth()/getMaxHealth()` delegate to the head (`:236-258`); and
+  `setHealthHidden()` pushes coil damage back onto the master (`:288-295`).
+  Health or armour set on a body class is a dead number.
+- **The chain lands one collision hit per window, not one per segment.**
+  `WormMobHead.modifyBodyPart` shares the head's own `collisionHitCooldowns`
+  with every segment (`:188-189`).
+- **`MaxHealthGetter` works on a worm head.** `WormMobHead.init()` calls
+  `super.init()` first (`:195`), so `Mob.init()`'s `difficultyChanges.init()`
+  has already applied difficulty health before the chain copies it outward.
+
+## Armour is a flat halving, which sets the whole damage economy (2026-08-31, VERIFIED [jar])
+
+`DamageType.getDamageReduction(float armor, boolean isItemsVsItems)` returns
+`armor * (isItemsVsItems ? 0.125F : 0.5F)` — so for a player hitting a mob,
+**every point of armour removes half a point from every hit**.
+
+Consequences the rebalance had to respect:
+
+- A 55-armour mob eats 27.5 off every swing; a 70-armour one eats 35.
+- Therefore **weapon damage and mob armour cannot be tuned separately.** At the
+  mod's old weapon damage (Skyreave 54) a 2800 HP / 55 armour enemy needed about
+  a hundred hits.
+- Vanilla's own weapon ceiling, measured across
+  `necesse/inventory/item/toolItem/`: fully-upgraded damage clusters at
+  **175-262**, with outliers at 310 and 510. Damage is set as
+  `attackDamage.setBaseValue(B).setUpgradedValue(1.0F, U)`, not as a
+  `GameDamage` constant.
+- **There are no arcanic weapons.** Arcanic exists as armour, tiles, presets and
+  machinery only — a plausible-sounding anchor that does not exist, and one this
+  session briefed two workers against before checking.
