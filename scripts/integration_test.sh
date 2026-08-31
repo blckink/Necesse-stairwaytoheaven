@@ -332,6 +332,16 @@ grep -qE "outlands check: .* r3200=[1-9][0-9]*/" "$LOG1" \
 grep -qE "outlands check: .* biome=NOT REGISTERED" "$LOG1" \
     && { echo "FAIL: the Outlands biome is not registered"; STATUS=1; }
 
+# The realm field (WORLD_DESIGN section 3). Two things are asserted: that depth 0
+# is Skyreach for every seed -- you always spawn at home -- and that the far end
+# is Hell, so the progression spine actually spans the world rather than
+# petering out. The realms between are noise-picked and vary by seed, so they
+# are reported and not asserted.
+grep -qE "realm check: scale=[0-9]+ .* 0=skyreach" "$LOG1" \
+    || { echo "FAIL: depth 0 is not Skyreach -- the spawn realm moved"; STATUS=1; }
+grep -qE "realm check: .* 5800=hell" "$LOG1" \
+    || { echo "FAIL: the far end of the realm field is not Hell"; STATUS=1; }
+
 # ...and the five weapons must be real registered items with a name, not IDs.
 for arsenal_item in skyreave thunderhead prismcaller skywatchwhistle stormdisc; do
     grep -qE "arsenal check: $arsenal_item id=[0-9]+ name=[^ ]" "$LOG1" \

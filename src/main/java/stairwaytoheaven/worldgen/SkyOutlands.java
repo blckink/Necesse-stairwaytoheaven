@@ -47,17 +47,49 @@ public final class SkyOutlands {
     /**
      * No wrong ground within this many tiles of the spire, ever.
      *
-     * The player asked for the change to start "ca 1000m" out from the tower.
-     * A Necesse tile is the world's metre, and the spire's own guaranteed hub
-     * island is {@link SkyOrigin#HUB_RADIUS} = 56, so 900 puts the first
-     * possible wrong ground a real walk away from home while still landing
-     * inside the first progression band's outer half
-     * ({@link SkyOrigin#CORE_RADIUS} = 700).
+     * <p>The player asked for the change to start "ca 1000m" out from the
+     * tower. A Necesse tile is the world's metre, and the spire's own
+     * guaranteed hub island is {@link SkyOrigin#HUB_RADIUS} = 56, so 900 puts
+     * the first possible wrong ground a real walk away from home.
+     *
+     * <p><b>INTERIM VALUE — see the note below.</b> Under
+     * {@code docs/WORLD_DESIGN.md} this region is Crooked Beyond, tier 4 of
+     * six, whose band is depth 0.70-0.88 = {@value #CROOKED_TRUE_START} tiles
+     * out ({@link RealmDepth}). It sits at 900 instead because the three realms
+     * that belong between it and the spire -- Eden, Steinfeld and the Ghost
+     * Realm -- <b>do not exist yet</b>, and moving Crooked out to its true band
+     * today would empty the world from 900 to 4200 and bring back the exact
+     * complaint that created this region: "das gebiet ist einfach zu weiss und
+     * hell und wir brauchen kontrast".
+     *
+     * <p>So this is a deliberate, named compromise rather than a disagreement
+     * with the concept. <b>The day Eden and Steinfeld land, delete this
+     * constant and let {@link RealmDepth} answer.</b>
+     * {@link #trueCrookedStart()} already reports where it belongs, and the
+     * status command prints both so the gap stays visible.
      */
     public static final float WRONG_START = 900.0F;
 
     /** Distance at which wrong regions reach their full share of the land. */
     public static final float WRONG_FULL = 3000.0F;
+
+    /**
+     * Where Crooked Beyond's inner edge belongs once the realms before it
+     * exist: the depth at which {@link RealmDepth} first gives it weight.
+     * Reported, not yet enforced -- see {@link #WRONG_START}.
+     */
+    public static final float CROOKED_TRUE_START = 4200.0F;
+
+    /** The band start {@link RealmDepth} actually derives, for the record. */
+    public static float trueCrookedStart() {
+        // Walk out until the realm field first gives Crooked any weight.
+        for (int d = 0; d <= (int) RealmDepth.DEPTH_SCALE; d += 10) {
+            if (RealmDepth.weightOf(RealmDepth.REALM_CROOKED, RealmDepth.depthFor(d)) > 0.0F) {
+                return d;
+            }
+        }
+        return RealmDepth.DEPTH_SCALE;
+    }
 
     /** Patch threshold at {@link #WRONG_START} (rare) and at {@link #WRONG_FULL} (common). */
     public static final float THRESHOLD_NEAR = 0.82F;

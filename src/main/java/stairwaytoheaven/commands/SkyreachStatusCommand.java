@@ -898,6 +898,27 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                 }
                 ramp.append(String.format(" r%d=%d/%d", radius, wrong, land));
             }
+            // The realm field from WORLD_DESIGN §3, reported so the concept and
+            // the code can be compared without reading either.
+            //
+            // The gap between the two starts below is the honest part: Crooked
+            // Beyond sits at 900 tiles today and belongs at ~4200. It is early
+            // because Eden, Steinfeld and the Ghost Realm do not exist yet and
+            // moving it out would empty the near world. Printed every run so
+            // the compromise cannot quietly become permanent.
+            StringBuilder realms = new StringBuilder("realm check: scale=")
+                    .append((int) stairwaytoheaven.worldgen.RealmDepth.DEPTH_SCALE)
+                    .append(" crookedNow=").append((int) stairwaytoheaven.worldgen.SkyOutlands.WRONG_START)
+                    .append(" crookedTrue=").append((int) stairwaytoheaven.worldgen.SkyOutlands.trueCrookedStart());
+            for (int dist : new int[]{0, 1800, 3200, 4000, 5200, 5800}) {
+                int realm = stairwaytoheaven.worldgen.RealmDepth.realmForDepth(
+                        outSeed, outOrigin.x + dist, outOrigin.y,
+                        stairwaytoheaven.worldgen.RealmDepth.depthFor(dist));
+                realms.append(' ').append(dist).append('=')
+                        .append(stairwaytoheaven.worldgen.RealmDepth.keyOf(realm));
+            }
+            logs.add(realms.toString());
+
             ramp.append(" evilwall=").append(wallSeen).append(" portals=").append(portalSeen);
             ramp.append(" biome=").append(SkyRegistry.outlands != null
                     ? necesse.engine.localization.Localization.translate("biome", "outlands")

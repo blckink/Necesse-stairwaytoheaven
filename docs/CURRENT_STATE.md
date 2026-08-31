@@ -269,6 +269,70 @@ with the player's eyes on it, not a drive-by.
 
 **Nobody has walked on any of this.**
 
+## The world concept is now law (2026-08-31, later the same day)
+
+The player supplied the final concept for the whole mod and asked that it live
+in the repo so it never has to be briefed again. It is **`docs/WORLD_DESIGN.md`**
+and `AGENTS.md` reads it second, before anything else. It outranks every other
+design document here.
+
+Nine realms on one road: **Skyreach → Eden → Steinfeld → the Veil →
+Ghost Realm → Crooked Beyond → Infernal Fringe → Hell Antechamber → Hell**, with
+only two real gates (the Veil fog, the Hell Gate) and everything else blending
+by distance.
+
+Three things landed with it:
+
+- **The global "muted" palette rule is retired.** `DESIGN.md` used to open with
+  *"the Skyreach is not a fluffy heaven fantasy … cool, muted, a little
+  hostile"*, the style guide banned "gold-trimmed clouds", and the pixel-art
+  skill made "dusty bases" a law. The player: *"alles nur entsättigt sein soll..
+  das ist falsch"*. Saturation is now **per realm** (`WORLD_DESIGN` §36); only
+  Steinfeld keeps the old register. All four files are corrected in place and
+  each says what it used to claim.
+- **`docs/VANILLA_ASSET_MAP.md`** — the working method is build with vanilla
+  stand-ins now, the player swaps them all in one pass later. §1 is what the
+  code borrows today, verified against the source; §2 is the shopping list per
+  realm, checked against the real dump.
+- **`vanilla-sprites/` is installed** (6,121 files, gitignored). `size_audit`
+  has teeth for the first time: 126 of 129 rows compared, 0 flagged.
+
+## The realm field — IMPLEMENTED, not player-confirmed
+
+`worldgen/RealmDepth` is the spine of `WORLD_DESIGN` §3: distance from the spire
+becomes a depth 0..1, depth becomes overlapping biome WEIGHTS, and a coarse
+noise field picks between the realms that overlap. Measured over 3 seeds:
+
+| tiles | depth | realms present |
+|---|---|---|
+| 0 | 0.00 | Skyreach 100% |
+| 1000 | 0.17 | Skyreach 62% · Eden 38% |
+| 1800 | 0.30 | Eden 100% |
+| 2500 | 0.42 | Eden 44% · Steinfeld 56% |
+| 3200 | 0.53 | Steinfeld 98% · Ghost 2% |
+| 4600 | 0.77 | Ghost 70% · Crooked 30% |
+| 5200 | 0.87 | Crooked 100% |
+| 5800 | 0.97 | Hell 100% |
+
+Pure realms in the middle of each band, real blending at the seams — the "no
+concentric rings" the concept asks for. The integration test asserts the two
+ends (depth 0 is Skyreach, the far end is Hell) and reports the rest.
+
+**`DEPTH_SCALE = 6000` is the one dial**, and it is a decision, not a default:
+`WORLD_DESIGN` §42.1 first sketched 12000, and §42.2 records that this mod has
+**no travel system at all**, while §40 requires the player to keep returning to
+Eden from Hell. Six thousand is the largest number that stays honest until
+waypoints exist.
+
+**What is NOT wired yet**: only Skyreach and Crooked Beyond have any content, so
+`RealmDepth` currently decides nothing the painter reads. Crooked Beyond also
+still sits at 900 tiles where it belongs at 4210, because Eden, Steinfeld and
+the Ghost Realm do not exist and moving it out would empty the near world and
+bring back the complaint that created it. That compromise is named in
+`SkyOutlands.WRONG_START`, and the status command prints
+`crookedNow=900 crookedTrue=4210` every run so it cannot quietly become
+permanent.
+
 ## Direction change (2026-08-31) — ONE world, not two
 
 The player's call, and it reshapes the roadmap:

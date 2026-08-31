@@ -6,6 +6,18 @@ after the Beetle Outlands landed.
 
 Branch: `claude/aktueller-stand-offene-themen-k4ztas`, pushed, clean.
 
+> **Read `docs/WORLD_DESIGN.md` first.** The player supplied the final world
+> concept on 2026-08-31 — nine realms, two gates, every realm's economy — and it
+> now outranks every other design document here, this one included. Part B of it
+> is the review: what it overturns in existing code, the gaps it does not
+> answer, and the build order. `docs/VANILLA_ASSET_MAP.md` is its companion:
+> every borrowed vanilla asset, per realm, because the player swaps them all out
+> in one pass later.
+>
+> Two things below are superseded by it: the "fork the player has not answered"
+> in §5 is now the smaller question, and the palette advice anywhere in this
+> repo that says "muted" is retired — saturation is per realm now.
+
 ---
 
 ## 1. What changed, in one paragraph
