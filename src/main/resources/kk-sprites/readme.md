@@ -48,6 +48,21 @@ path in its `converted` guard, which fails loudly if anything writes it again.
 The piece's companions (sapling, leaves, log icon) stay generated — only the
 supplied sheet changes hands.
 
+## Drawing a wall set? Two tools exist for exactly that
+
+* **`docs/references/wall-template-map.png`** — the annotated 352×128 template:
+  every region labeled (tile halves L/R, the col-1/2 swap in rows 1–2, the
+  roof-slot window, the dead cells, the doors' visible band), with the rules
+  written out underneath. Draw over it.
+* **`python3 tools/conform_wall_sheet.py your.png`** — measures the sheet
+  against five vanilla walls: size, region alpha, door extents, EVERY seam the
+  engine can compose (tolerance = vanilla's own contrast at the same join),
+  and the roof-slot test. `--fix` snaps integer upscales, fills alpha holes,
+  shifts door leaves into the visible box and blends failing seam edges;
+  `--fix --rebuild-roof-slot` rebuilds the N-S window with the shared
+  construction, tones sampled from your sheet. Writes 4× compare sheets next
+  to vanilla into `build/qa/`.
+
 ## The exception: a supplied sheet is only adopted if it is drawn ON the format
 
 Two files here are **design sources only** and are deliberately not shipped,
