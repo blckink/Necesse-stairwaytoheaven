@@ -554,7 +554,7 @@ def conform(path, out_path, fix, rebuild_slot, quantize):
                             "per docs/references/wall-template-map.png" % detail)
 
     # 6. colours
-    cols = {p[:3] for p in im.getdata() if p[3] >= 128}
+    cols = {p[:3] for p in im.get_flattened_data() if p[3] >= 128}
     if len(cols) > 64:
         note = ("%d distinct colours - shipped wall sets carry 19-38. Four "
                 "figures means an illustration; no automatic fix makes an "
