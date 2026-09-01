@@ -51,9 +51,11 @@ supplied sheet changes hands.
 ## Drawing a wall set? Two tools exist for exactly that
 
 * **`docs/references/wall-template-map.png`** — the annotated 352×128 template:
-  every region labeled (tile halves L/R, the col-1/2 swap in rows 1–2, the
-  roof-slot window, the dead cells, the doors' visible band), with the rules
-  written out underneath. Draw over it.
+  every cell labeled with its HALF (L/R), its screen BAND (abv/top/bot) and its
+  role, plus both window views and all eight door cells. Draw over it.
+  **Nothing on the sheet is unused** — cols 2–3 of rows 5–7 only appear where
+  your wall abuts a wall of a *different* material, and vanilla paints all six
+  solid; leaving them empty punches holes wherever two wall sets meet.
 * **`python3 tools/conform_wall_sheet.py your.png`** — measures the sheet
   against five vanilla walls: size, region alpha, door extents, EVERY seam the
   engine can compose (tolerance = vanilla's own contrast at the same join),
