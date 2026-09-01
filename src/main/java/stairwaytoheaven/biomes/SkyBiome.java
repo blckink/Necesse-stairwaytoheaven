@@ -233,7 +233,12 @@ public abstract class SkyBiome extends Biome implements GuardedBiome {
                 ChanceLootItem.between(0.20F, "cloudberry", 2, 6),
                 // Unchanged: one treat is one treat. A second would be +50% on
                 // a novelty food, which the baseline rung does not buy.
-                ChanceLootItem.between(0.12F, "cloudpufftreat", 1, 1)
+                ChanceLootItem.between(0.12F, "cloudpufftreat", 1, 1),
+                // The Eden grass seed's one entry point into the world until
+                // the Eden realm ships: rare enough to be a find, and one find
+                // is enough -- the planted patch seeds itself from then on
+                // (OvergrownEdenTile drops seed back at 4%).
+                ChanceLootItem.between(0.08F, "overgrownedenseed", 1, 2)
         );
     }
 }

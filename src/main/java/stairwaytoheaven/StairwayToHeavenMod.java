@@ -145,6 +145,14 @@ public class StairwayToHeavenMod {
         SkyCloudmarbleSet.registerTiles();
         SkyRegistry.mistseaID = TileRegistry.registerTile("mistseatile", SkyRegistry.mistseaTile, 0.0F, false);
 
+        // Eden grass, registered exactly the way vanilla registers
+        // overgrowngrasstile (the asset its supplied art names as source):
+        // brokerValue 0 and not obtainable -- the tile is never carried, the
+        // SEED is (overgrownedenseed, in SkyItems), and mining a patch gives
+        // seed back at vanilla's 4%. VERIFIED [jar] TileRegistry line 166.
+        SkyRegistry.overgrownEdenID = TileRegistry.registerTile("overgrownedentile",
+                new stairwaytoheaven.tiles.OvergrownEdenTile(), 0.0F, false, false, true);
+
         SkyRegistry.murkmossTile = new MurkmossTile();
         SkyRegistry.murkmossID = TileRegistry.registerTile("murkmosstile", SkyRegistry.murkmossTile, 1.0F, true);
         SkyRegistry.blackpeatID = TileRegistry.registerTile("blackpeattile", new BlackpeatTile(), 1.0F, true);

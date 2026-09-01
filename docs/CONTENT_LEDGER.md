@@ -38,6 +38,18 @@ instead of by a door. See `docs/CURRENT_STATE.md` and
 | `rarecrookedgolem` | mob | Rare Crooked Golem: the crimson wall, 1000 HP on Classic and the rarest thing in the mix — and, like the ascended body it inherits, it walks off again after twenty seconds if you leave it alone. |
 | `crookedarmadillo` | mob | Crooked Armadillo: a bone-white plate dome that plods at armour 60 until it sees you, then rolls up and comes at speed 200 for 90 damage on contact. |
 
+## The Garden of Eden — first brick
+
+The player supplied the ground pair on 2026-09-01
+(`kk-sprites/overgrowngrass_splat-overgrowneden_splatt.png` + seed icon,
+drawn on vanilla's overgrowngrass). The realm ships later as a complete
+chapter; the ground is real now.
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `overgrownedentile` | tile | Eden grass: deep lush ground that sprouts grass tufts on its own, spreads to dirt, and seeds itself back at 4% when mined — the Garden of Eden's first ground, plantable today. |
+| `overgrownedenseed` | item | Eden grass seeds: plant on dirt or Cloudturf to start an Eden patch; found rarely in sky crates, then self-renewing. |
+
 ## Baseline — registered before the ledger existed
 
 These predate the ledger and are described in `CHANGELOG.md`,

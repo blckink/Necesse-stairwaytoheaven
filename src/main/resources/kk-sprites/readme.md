@@ -19,6 +19,8 @@ repack is reproducible from this folder.
 | `nimbuswillow.png` 128×512 | `objects/nimbuswillow.png` | **replacement**, copied in as-is — same 128×512 single column of four variants the generator produced, so no repack is needed. |
 | `items-crystalwall-now-evilwall.png` 128×208 | `objects/evilwall.png` | copied in as-is. Already exactly vanilla `RockObject` format — 4 variants (`randomWidth = width/32`), each two 16px sprite columns wide, over the 13 sprite rows `addRockDrawables` reads. Nothing to repack. |
 | `objects-crystalwall-now-evilwall.png` 32×32 | `items/evilwall.png` | the item icon. `RockObject.rockTextureName` feeds **both** `objects/<name>.png` and `items/<name>.png`, which is why one name covers the pair. |
+| `overgrowngrass_splat-overgrowneden_splatt.png` 224×576 | `tiles/overgrowneden_splat.png` | copied in as-is — already vanilla's splat layout (the doubled `t` in the supplied name is normalised). Registered as `overgrownedentile` on vanilla's `OvergrownGrassTile` setup: grows grass tufts, spreads to dirt, seeds back 4%. Grain is per-pixel rather than 2×2 (density 713, mean dRGB 48.2), exempted in `tile_behaviour_audit` as converted art — the player judges it in game. |
+| `overgrowngrassseed-overgrownedenseed.png` 32×32 | `items/overgrownedenseed.png` | the seed's icon. `overgrownedenseed` is vanilla's `GrassSeedItem` plus one override so it plants on Cloudturf as well as dirt; found in sky crates. |
 
 ## A second naming form, and the trap in it
 

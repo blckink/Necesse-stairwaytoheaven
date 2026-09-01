@@ -73,6 +73,9 @@ FLOOR, TERRAIN, LIQUID = "floor", "terrain", "liquid"
 # ---------------------------------------------------------------------------
 ROLES = {
     "cloudturftile": TERRAIN,
+    # Eden grass: natural ground on vanilla's overgrowngrass setup, from the
+    # supplied art (kk-sprites), plantable via its seed.
+    "overgrownedentile": TERRAIN,
     "aurorashoaltile": TERRAIN,
     "skystonetile": TERRAIN,
     "stormslatetile": TERRAIN,
@@ -436,7 +439,16 @@ COHERENCE_MIN = 100.0
 # painted illustration resampled onto the grid. Holding a painting to a
 # procedural generator's conventions would be measuring the wrong thing, and
 # "make it 2x2 coherent" would destroy the art it was converted from.
-CONVERTED_ART = {"beetlefreak", "skyway"}
+CONVERTED_ART = {"beetlefreak", "skyway",
+                 # The supplied Eden ground (2026-09-01), drawn on vanilla's
+                 # overgrowngrass_splat layout. Measured before exempting:
+                 # density 713, mean |dRGB| 48.2, coherence 5.9% -- loud and
+                 # per-pixel, which is the supplied art's identity ("Eden is an
+                 # exaggerated biological explosion"), not a format fault: the
+                 # cell layout is vanilla's own. If it reads as noise in game,
+                 # that verdict belongs to the player and PLAYTEST_LOG, not to
+                 # this gate.
+                 "overgrowneden"}
 
 # Known, measured, not yet done. Kept here rather than silently exempted so the
 # debt is visible in the code that would otherwise hide it.

@@ -115,6 +115,18 @@ public final class SkyItems {
                 new necesse.inventory.item.placeableItem.consumableItem.food.GrainItem(250, Item.Rarity.NORMAL)
                         .spoilDuration(480), 3.0F, true);
 
+        // The Eden grass seed, from the supplied art. Registered exactly the
+        // way vanilla registers overgrowngrassseed -- GrassSeedItem at
+        // brokerValue 2.0F (VERIFIED [jar] ItemRegistry.java:3211) -- via the
+        // one subclass that lets it plant on Cloudturf, the sky's soil, as
+        // well as on dirt. Found in sky crates (SkyBiome's table); a planted
+        // patch then feeds itself, since mining Eden grass seeds back at 4%.
+        // First brick of the Garden of Eden -- the realm itself ships as a
+        // complete chapter later (WORLD_DESIGN A4.3), but the ground is real
+        // now and a player can garden with it today.
+        ItemRegistry.registerItem("overgrownedenseed",
+                new stairwaytoheaven.items.OvergrownEdenSeedItem(), 2.0F, true);
+
         // v0.3: Veil materials
         //
         // Worth (incursion rebalance): the Veil is the mod's second realm and

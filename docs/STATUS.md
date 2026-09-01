@@ -26,6 +26,10 @@ history. Updated 2026-08-31.
 | Beetlefreak Hollows | Ghost (in the Veil dimension) | beetlefreak | `[run]` full |
 
 **Not built at all:** Eden, Steinfeld, Infernal Fringe, Hell Antechamber, Hell.
+Eden's first brick exists as of 2026-09-01: `overgrownedentile` (supplied art)
++ `overgrownedenseed`, plantable on dirt and Cloudturf, found in sky crates,
+self-propagating — `[run]`, `eden check` in the integration test. The realm
+band itself ships with the Eden chapter.
 The `RealmDepth` field already places all six realms by distance, but only
 Skyreach and Crooked Beyond have any content behind them.
 
@@ -67,6 +71,14 @@ Vex. **The Warden's house-room progression does not exist** — see
 `windsilkloom` · `aetherforge` · `stormglasskiln` — all `[run]`, all placed by
 worldgen where a player can find them. Halda's Fermentation Vat is designed and
 unbuilt.
+
+## 4b. Play feel — A4.1 shipped 2026-09-01
+
+Enemies now GUARD instead of harass, `[run]`: ~80% of sky land spawns nothing
+(ticket field `SkyPressure`, wilds ~16-18%), every wreck/workshop site carries
+a placed persistent guard pack (4-8 by realm, `GuardedBiome`), ambient rate
+0.55x / cap 0.75x. Gated by `pressure check` + `guard check` in the
+integration test.
 
 ## 5. Combat — re-tiered 2026-08-31
 

@@ -360,6 +360,12 @@ grep -qE "guard check: site=NONE FOUND" "$LOG1" \
 grep -qE "guard check: .* atSite=[1-9][0-9]*" "$LOG1" \
     || { echo "FAIL: a guarded site has no guards standing on it -- placeGuardPacks did nothing"; STATUS=1; }
 
+# The Eden ground pair (supplied art, 2026-09-01): the tile and the seed must
+# be live registrations, and the seed must accept Cloudturf -- the one override
+# that makes it plantable in the sky at all.
+grep -qE "eden check: tile=[1-9][0-9]* seed=[1-9][0-9]* name=.+ placesOnCloudturf=true" "$LOG1" \
+    || { echo "FAIL: the Eden ground pair is not registered, or the seed rejects Cloudturf"; STATUS=1; }
+
 # The realm field (WORLD_DESIGN section 3). Two things are asserted: that depth 0
 # is Skyreach for every seed -- you always spawn at home -- and that the far end
 # is Hell, so the progression spine actually spans the world rather than

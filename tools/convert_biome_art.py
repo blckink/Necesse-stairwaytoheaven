@@ -323,6 +323,22 @@ def beetle_item_icons():
     return out
 
 
+TILES = os.path.join(ROOT, "src/main/resources/tiles")
+
+
+def copy_kk(src_name, out_dir, out_name):
+    """A supplied sheet that is already ON the shipped format: copy, verbatim.
+
+    The convert step still owns the file (one producer per path -- see
+    generate_assets.py's CONVERTED guard) so the copy is reproducible from
+    kk-sprites/ rather than being an opaque binary someone once placed.
+    """
+    src = Image.open(os.path.join(REFS_KK, src_name)).convert("RGBA")
+    path = os.path.join(out_dir, out_name)
+    src.save(path)
+    return path, src
+
+
 def main():
     path, sheet = build_skyseraph_tree()
     opaque = sum(1 for p in sheet.get_flattened_data() if p[3] > 0)
@@ -346,6 +362,17 @@ def main():
     # stays in kk-sprites/ as the source of record for the set's identity, and
     # fit_door_cells / beetle_item_icons stay below because the next supplied
     # sheet may well need them.
+
+    # The Eden ground pair. Supplied on vanilla's exact formats (the names
+    # record the source assets: overgrowngrass_splat 224x576, its seed 32x32),
+    # so both are verbatim copies. The doubled t in the supplied splat's name
+    # is the player's typo and is normalised here -- the shipped file matches
+    # the tile's texture name "overgrowneden".
+    for src, out_dir, out in (
+            ("overgrowngrass_splat-overgrowneden_splatt.png", TILES, "overgrowneden_splat.png"),
+            ("overgrowngrassseed-overgrownedenseed.png", ITEMS, "overgrownedenseed.png")):
+        path, im = copy_kk(src, out_dir, out)
+        print(f"{path}  {im.size}")
 
     path, sheet = repack_kk_tree("birchtree-new-cloudtree.png", "cloudtree.png")
     print(f"{path}  {sheet.size}  "

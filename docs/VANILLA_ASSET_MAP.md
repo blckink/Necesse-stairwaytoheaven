@@ -37,6 +37,12 @@ ones, and they moved to §4 on 2026-09-01.)*
 | vanilla ID | realm | stands in for | referenced in |
 |---|---|---|---|
 
+### 1.1b Vanilla objects grown at runtime
+
+| vanilla asset | where | why |
+|---|---|---|
+| `grass` (object, by string ID) | `tiles/OvergrownEdenTile` grows it on empty Eden-grass tiles (tick + simulate), exactly as vanilla's `OvergrownGrassTile` does | Eden's own flora does not exist yet; vanilla's green tufts read right on the supplied deep-green ground and swap out when the Eden chapter lands |
+
 ### 1.2 Vanilla mobs subclassed (behaviour + sheet both borrowed)
 
 Each of these is a mod class that extends a vanilla mob and wears that mob's own

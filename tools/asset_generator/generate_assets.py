@@ -74,6 +74,9 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              # vanilla's sheets by string ID.
              "mobs/crookedgolem.png", "mobs/rarecrookedgolem.png",
              "mobs/crookedarmadillo.png",
+             # The Eden ground pair, copied verbatim by convert_biome_art
+             # (both arrive already on vanilla's format).
+             "tiles/overgrowneden_splat.png", "items/overgrownedenseed.png",
              "objects/statues/gloomraven.png")
 
 

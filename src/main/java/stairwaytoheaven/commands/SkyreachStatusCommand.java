@@ -1088,6 +1088,60 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         }
         logs.add("arsenal check: recipes=" + arsenalRecipes);
 
+        // The Eden ground pair: registered tile, registered seed, and the one
+        // behaviour the mod adds over vanilla's GrassSeedItem -- that the seed
+        // accepts Cloudturf, the sky's soil. Asserted by integration_test.sh:
+        // every previous "registered but never reachable" failure in this mod
+        // (Cloud Lamb, the workstations, swh_beacon) would have been caught by
+        // a line like this one.
+        {
+            necesse.inventory.item.Item seed =
+                    necesse.engine.registries.ItemRegistry.getItem("overgrownedenseed");
+            necesse.level.gameTile.GameTile edenTile =
+                    necesse.engine.registries.TileRegistry.getTile("overgrownedentile");
+            if (seed == null || edenTile == null) {
+                logs.add("eden check: NOT REGISTERED (seed=" + (seed != null)
+                        + " tile=" + (edenTile != null) + ")");
+            } else {
+                boolean placesOnCloudturf = false;
+                if (level instanceof SkyLevel) {
+                    java.awt.Point o = stairwaytoheaven.worldgen.SkyOrigin.compute(
+                            ((SkyLevel) level).getWorldGenSeed());
+                    outer:
+                    for (int dx = -20; dx <= 20; dx++) {
+                        for (int dy = -20; dy <= 20; dy++) {
+                            int tx = o.x + dx;
+                            int ty = o.y + dy;
+                            if (level.getTileID(tx, ty) != SkyRegistry.cloudturfID) {
+                                continue;
+                            }
+                            // A degenerate position line AT the tile stands in
+                            // for the player: isInPlaceRange takes its position
+                            // from the line when one is given (VERIFIED [jar],
+                            // PlaceableItem line 167-170), and getPlaceRange
+                            // handles a null mob itself, so the probe needs no
+                            // PlayerMob to exist.
+                            float px = tx * 32 + 16;
+                            float py = ty * 32 + 16;
+                            String reason = ((stairwaytoheaven.items.OvergrownEdenSeedItem) seed)
+                                    .canPlace(level, (int) px, (int) py, null,
+                                            new java.awt.geom.Line2D.Float(px, py, px, py),
+                                            new necesse.inventory.InventoryItem(seed), null);
+                            // "outofrange" would mean the null player broke the
+                            // range check; null is the accept we are proving.
+                            placesOnCloudturf = reason == null;
+                            break outer;
+                        }
+                    }
+                }
+                logs.add("eden check: tile=" + SkyRegistry.overgrownEdenID
+                        + " seed=" + seed.getID()
+                        + " name=" + necesse.engine.registries.ItemRegistry.getDisplayName(seed.getID())
+                        + " placesOnCloudturf=" + placesOnCloudturf
+                        + " growObject=grass");
+            }
+        }
+
         // Where every mod item ACTUALLY lands, asked of the live registry
         // rather than read off setItemCategory calls in our source. Two
         // reasons: vanilla sets a category explicitly on almost nothing (only

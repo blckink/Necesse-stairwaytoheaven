@@ -160,6 +160,8 @@ public final class SkyRegistry {
     public static int blackpeatID;
     public static int ashsandID;
     public static int murkwaterID;
+    /** Eden grass, from the supplied art: the Garden of Eden's first ground. */
+    public static int overgrownEdenID;
     /** Veil: the Beetlefreak ground, on vanilla's spidernest tile setup. */
     public static int beetlefreakID;
     /** The same tile as an instance, for biome under-liquid reclamation. */
