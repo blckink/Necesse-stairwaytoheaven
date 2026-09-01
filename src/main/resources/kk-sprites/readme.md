@@ -45,3 +45,28 @@ overwrites the supplied art: `generate_assets.py` drops the call and lists the
 path in its `converted` guard, which fails loudly if anything writes it again.
 The piece's companions (sapling, leaves, log icon) stay generated — only the
 supplied sheet changes hands.
+
+## The exception: a supplied sheet is only adopted if it is drawn ON the format
+
+Two files here are **design sources only** and are deliberately not shipped,
+even though their names carry no `-new-` and the rule above would otherwise
+adopt them:
+
+| supplied | shipped instead | why |
+|---|---|---|
+| `beetlewall.png` 352×128, 16,001 colours | `tools/asset_generator/gen_beetlewall.py`, 37 colours | one continuous illustration painted across the 4×8 body block, which the engine reads as tile HALVES whose column-to-half mapping changes by row. No cell can meet its neighbour. The player saw exactly this in game: *"da stimmt kein Rand, Fenster oder sonst was von Layout"*. |
+| `cloudmarblewall.png` 352×128, 10,855 colours | `tools/asset_generator/gen_cloudmarble.py`, 23 colours | same fault, plus a cap band at mean luminance 228 against skystone's 52 and a front-facing pane in the strip that draws the wall's ROOF. Also seen in game: *"die ganzen Wände blenden fast ... die Fenster sind seitlich falsch"*. |
+
+Both were copied in once on 2026-09-01 and reverted the same day. The check
+that catches it is cheap and worth doing before adopting any wall sheet:
+
+```sh
+python3 -c "
+from PIL import Image; im=Image.open(PATH).convert('RGBA')
+print(len({c for c in im.get_flattened_data() if c[3]>8}))"
+```
+
+A drawn wall sheet in this mod carries **19–38** distinct colours. Four figures
+means an illustration, and an illustration of a wall is not a wall sheet. The
+supplied file stays the source of record for the set's *identity* — palette,
+motifs, mood — which is what the generator draws from.

@@ -57,8 +57,19 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              # Supplied replacements for sprites the generator used to write.
              # Once a file is here the generator must stop producing it, or the
              # next full run silently overwrites the supplied art.
-             "objects/cloudberrybush.png", "objects/cloudberrysapling.png",
-             "objects/beetlewall.png", "objects/cloudmarblewall.png",
+             #
+             # objects/beetlewall.png and objects/cloudmarblewall.png are
+             # deliberately NOT in this list, though kk-sprites/ holds a file
+             # for each. Both are continuous illustrations (16,001 and 10,855
+             # distinct colours, against 37 and 23 in the drawn sheets) painted
+             # straight across a body block the engine reads as tile HALVES
+             # whose column-to-half mapping changes by row -- see
+             # gen_beetlewall's header. They were copied in once and reverted;
+             # the cloudmarble one is the exact sheet the player saw in game
+             # and rejected ("die Waende blenden fast ... die Fenster sind
+             # seitlich falsch"), recorded at gen_cloudmarble.generate(). They
+             # stay the design source of record for those sets' IDENTITY and
+             # are not the shipped sheets.
              # Our own art for the three Outland mobs, which used to wear
              # vanilla's sheets by string ID.
              "mobs/crookedgolem.png", "mobs/rarecrookedgolem.png",
@@ -140,8 +151,11 @@ def main():
     gen_objects.gen_stairway_down(f"{out}/objects/skystairwaydown.png")
     gen_objects.gen_stairway_up(f"{out}/objects/skystairwayup.png")
     gen_objects.gen_windwheat(f"{out}/objects/windwheat.png")
-    gen_objects.gen_cloudberrybush(f"{out}/objects/cloudberrybush.png")
-    gen_objects.gen_cloudberrysapling(f"{out}/objects/cloudberrysapling.png")
+    # objects/cloudberrybush.png and objects/cloudberrysapling.png are the
+    # supplied art (CONVERTED above) and are NOT written here. gen_objects
+    # still carries the drawn versions; the item icons stay derived --
+    # gen_sapling_item_icons copies the sapling straight off disk, so it
+    # follows the supplied sheet on its own.
     gen_rocks.gen_rock_sheet(f"{out}/objects/veilrock.png", palette.VEILROCK, variants=6, salt=0x3E1F)
     gen_veil.gen_whisperreeds(f"{out}/objects/whisperreeds.png")
     gen_veil.gen_gloomshroom(f"{out}/objects/gloomshroom.png")
@@ -266,7 +280,10 @@ def main():
     gen_furniture.gen_candelabra(f"{out}/objects/wardencandelabra.png")
     gen_furniture.gen_wall_light(f"{out}/objects/mistglasslantern.png", "lantern")
     gen_furniture.gen_wall_light(f"{out}/objects/flickerlightgarland.png", "garland")
-    gen_furniture.gen_gloomraven_statue(f"{out}/objects/statues/gloomraven.png")
+    # objects/statues/gloomraven.png is the supplied art (CONVERTED above).
+    # gen_furniture.gen_gloomraven_statue still draws it; the shipped file
+    # is the player's. items/gloomravenstatue.png is cropped off disk by
+    # gen_furniture.gen_icons, so the icon follows the supplied statue.
     gen_furniture.gen_gloomwillow(f"{out}/objects/gloomwillow.png")
     gen_furniture.gen_catbasket(f"{out}/objects/catbasket.png")
     gen_furniture.gen_banner_painting(f"{out}/objects/skywatchbanner.png")
