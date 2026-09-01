@@ -333,6 +333,33 @@ grep -qE "outlands check: .* r3200=[1-9][0-9]*/" "$LOG1" \
 grep -qE "outlands check: .* biome=NOT REGISTERED" "$LOG1" \
     && { echo "FAIL: the Outlands biome is not registered"; STATUS=1; }
 
+# A4.1 -- guard, do not harass. Two halves, both asserted, because both are
+# invisible in a five-minute play session and both are easy to break by a
+# one-line edit somewhere else.
+#
+# The QUIET half: most of the sky must return zero spawn tickets, which is what
+# makes walking between places calm. Asserted as a band rather than a point --
+# under 60% and the drizzle the player complained about is back ("es nervt aber
+# wenn die alle 2 Sekunden ueberall angreifen"), over 95% and the world is a
+# museum. Measured 81-82% across runs.
+grep -qE "pressure check: land=[1-9][0-9]* calm=[0-9]+\((6[0-9]|7[0-9]|8[0-9]|9[0-4])\.[0-9]%\)" "$LOG1" \
+    || { echo "FAIL: calm share of the sky is outside 60-95% -- see the pressure check line"; STATUS=1; }
+# ...and the wilds must not be empty, or "calm" has quietly become "dead".
+grep -qE "pressure check: .* wilds=[1-9][0-9]*\(" "$LOG1" \
+    || { echo "FAIL: no wild ground at all -- nothing spawns anywhere outside a site"; STATUS=1; }
+# ...and guarded ground must exist, or there is nowhere for a pack to stand.
+grep -qE "pressure check: .* guarded=[1-9][0-9]*" "$LOG1" \
+    || { echo "FAIL: no guarded ground in the swept window"; STATUS=1; }
+
+# The LOUD half: a real site must actually have guards standing on it. This is
+# the assertion that catches the whole class of "placed by nothing" bugs this
+# mod has shipped before -- the Cloud Lamb, the three workstations, the three
+# sky oddities were all registered, correct and never put in the world.
+grep -qE "guard check: site=NONE FOUND" "$LOG1" \
+    && { echo "FAIL: no guarded site within 900 tiles of the spire"; STATUS=1; }
+grep -qE "guard check: .* atSite=[1-9][0-9]*" "$LOG1" \
+    || { echo "FAIL: a guarded site has no guards standing on it -- placeGuardPacks did nothing"; STATUS=1; }
+
 # The realm field (WORLD_DESIGN section 3). Two things are asserted: that depth 0
 # is Skyreach for every seed -- you always spawn at home -- and that the far end
 # is Hell, so the progression spine actually spans the world rather than

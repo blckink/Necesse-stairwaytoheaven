@@ -133,4 +133,18 @@ public class OutlandsBiome extends SkyBiome {
                 super.getCrateLootTable(level, tileX, tileY)
         );
     }
+
+    /**
+     * The Outlands' guard, and the heaviest in the mod.
+     *
+     * Anchored by the Rare Crooked Golem -- 1000 HP on Classic, the wall of
+     * this roster -- with a Crooked Golem beside it and the Veil's own cast
+     * filling in. A wreck out past 900 tiles is the richest thing in the sky
+     * and it is meant to read that way from across the ground.
+     */
+    @Override
+    public Guard getGuard() {
+        return new Guard(new String[]{"rarecrookedgolem", "crookedgolem"},
+                new String[]{"gloomshade", "gloomshade", "crookedarmadillo", "fenwraith"}, 6, 8);
+    }
 }

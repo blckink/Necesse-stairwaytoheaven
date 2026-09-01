@@ -43,4 +43,13 @@ public class AshenReachBiome extends VeilBiome {
     public MobSpawnTable getMobSpawnTable(Level level) {
         return mobs;
     }
+
+    /**
+     * The Reach's guard: cantors at range, which is what the open ash is for.
+     */
+    @Override
+    public Guard getGuard() {
+        return new Guard(new String[]{"fenwraith", "cindercantor"},
+                new String[]{"gloomshade", "cindercantor"}, 4, 6);
+    }
 }

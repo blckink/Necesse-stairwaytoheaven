@@ -48,4 +48,13 @@ public class GloomfenBiome extends VeilBiome {
     public MobSpawnTable getMobSpawnTable(Level level) {
         return mobs;
     }
+
+    /**
+     * The fen's guard: shades around a wraith.
+     */
+    @Override
+    public Guard getGuard() {
+        return new Guard(new String[]{"fenwraith"},
+                new String[]{"gloomshade", "gloomshade", "cindercantor"}, 4, 6);
+    }
 }

@@ -1,12 +1,6 @@
 package stairwaytoheaven.tiles;
 
 import java.awt.Color;
-import java.awt.Point;
-
-import necesse.engine.util.GameRandom;
-import necesse.gfx.gameTexture.GameTextureSection;
-import necesse.level.gameTile.TerrainSplatterTile;
-import necesse.level.maps.Level;
 
 /**
  * The paved cloud of the Skyway Passages: white cloudstone cobbles set in pale
@@ -15,25 +9,12 @@ import necesse.level.maps.Level;
  * — {@code super(false, ...)}, mineable, and it blends through its own
  * {@code _splat} atlas.
  */
-public class SkywayTile extends TerrainSplatterTile {
-
-    private final GameRandom drawRandom;
+public class SkywayTile extends SkyGroundTile {
 
     public SkywayTile() {
         super(false, "skyway");
         this.mapColor = new Color(214, 228, 236);
         this.canBeMined = true;
-        this.drawRandom = new GameRandom();
-    }
-
-    @Override
-    public Point getTerrainSprite(GameTextureSection terrainTexture, Level level, int tileX, int tileY) {
-        int tile;
-        synchronized (this.drawRandom) {
-            tile = this.drawRandom.seeded(getTileSeed(tileX, tileY)).nextInt(terrainTexture.getHeight() / 32);
-        }
-
-        return new Point(0, tile);
     }
 
     /**

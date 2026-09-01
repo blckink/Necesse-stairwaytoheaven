@@ -66,6 +66,7 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
         region.checkGenerationValid();
         placeCloudLambFlock(region);
         placeResident(region);
+        placeGuardPacks(region);
     }
 
     /**
@@ -236,6 +237,136 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
             lamb.canDespawn = false;
             this.entityManager.addMob(lamb, tileX * 32 + 16, tileY * 32 + 16);
             placed++;
+        }
+    }
+
+
+    // ---- Guarded places ---------------------------------------------------
+
+    /**
+     * The packs that stand over the sky's loot.
+     *
+     * <p>The player, after finishing incursion 10: <i>"es nervt aber wenn die
+     * alle 2 Sekunden ueberall angreifen ... sie sollen mal geballt kommen und
+     * ein Gebiet z.b bewachen wo es loot gibt in anderen Ecken aber nicht
+     * dauernd angeflogen kommen"</i>. {@link stairwaytoheaven.worldgen.SkyPressure}
+     * is the half that makes the open ground quiet; this is the half that makes
+     * arriving somewhere loud.
+     *
+     * <p>The two things the sky already builds that are worth guarding are the
+     * aeronaut wreck (which carries the sky caches) and the Skywatch workshop
+     * (which carries a station and a crate). The guards are found through the
+     * same lattice the painter placed those with —
+     * {@link SkyTerrainPainter#nearestSite} — so a pack cannot end up standing
+     * where the loot is not.
+     */
+    private void placeGuardPacks(Region region) {
+        if (this.isClient()) {
+            return;
+        }
+        placePacksOf(region, SkyTerrainPainter.WRECK_CELL, SkyTerrainPainter.SALT_WRECK,
+                SkyTerrainPainter.WRECK_CHANCE, 0x9E3779B1L);
+        placePacksOf(region, SkyTerrainPainter.WORKSHOP_CELL, SkyTerrainPainter.SALT_WORKSHOP,
+                SkyTerrainPainter.WORKSHOP_CHANCE, 0x85EBCA77L);
+    }
+
+    /**
+     * Every site of one lattice whose pack reaches into this region.
+     *
+     * <p><b>Why the loop is over cells and not over tiles.</b> A region is
+     * 16x16 tiles ({@code RegionManager.REGION_SIZE}) and a pack is spread over
+     * a disc of radius {@link stairwaytoheaven.worldgen.SkyPressure#GUARD_RADIUS}
+     * = 7, so a pack routinely straddles four regions. Scanning this region for
+     * site centres would place a pack only when the centre happened to land
+     * inside it and lose the rest; scanning the cells that could REACH this
+     * region, deriving every member's position from the site seed, and placing
+     * only the members whose tile falls inside it, puts each guard down exactly
+     * once no matter which order the regions generate in.
+     */
+    private void placePacksOf(Region region, int cell, int salt, float chance, long saltMix) {
+        int seed = this.getWorldGenSeed();
+        int reach = (int) Math.ceil(stairwaytoheaven.worldgen.SkyPressure.GUARD_RADIUS) + 1;
+        int minX = region.tileXOffset - reach;
+        int minY = region.tileYOffset - reach;
+        int maxX = region.tileXOffset + region.tileWidth + reach;
+        int maxY = region.tileYOffset + region.tileHeight + reach;
+        for (int cx = Math.floorDiv(minX, cell); cx <= Math.floorDiv(maxX, cell); cx++) {
+            for (int cy = Math.floorDiv(minY, cell); cy <= Math.floorDiv(maxY, cell); cy++) {
+                if (SkyNoise.hash(seed + salt, cx, cy) >= chance) {
+                    continue;
+                }
+                int siteX = Math.round(cx * cell + SkyNoise.hash(seed + salt + 1, cx, cy) * cell);
+                int siteY = Math.round(cy * cell + SkyNoise.hash(seed + salt + 2, cx, cy) * cell);
+                if (siteX < minX || siteX > maxX || siteY < minY || siteY > maxY) {
+                    continue;
+                }
+                placePackAt(region, siteX, siteY, saltMix);
+            }
+        }
+    }
+
+    /**
+     * One pack, around one site.
+     *
+     * <p>Every member's tile is a pure function of the site position and the
+     * member's index, so the pack is the same in every save and on every
+     * client, and a member is placed by whichever region happens to contain
+     * its tile. The eight-attempt search per member is what keeps a pack off
+     * the Mistsea without moving the site: 61% of the sky is sea, so a fixed
+     * offset would drown half of every pack.
+     */
+    private void placePackAt(Region region, int siteX, int siteY, long saltMix) {
+        necesse.level.maps.biomes.Biome biome = this.getBiome(siteX, siteY);
+        if (!(biome instanceof stairwaytoheaven.biomes.GuardedBiome)) {
+            return;
+        }
+        stairwaytoheaven.biomes.GuardedBiome.Guard guard =
+                ((stairwaytoheaven.biomes.GuardedBiome) biome).getGuard();
+        if (guard == null) {
+            return;
+        }
+        long packSeed = (this.getWorldGenSeed() * 0x9E3779B97F4A7C15L)
+                ^ ((long) siteX * saltMix)
+                ^ ((long) siteY * 0xC2B2AE3DL);
+        GameRandom random = new GameRandom(packSeed);
+        int size = random.getIntBetween(guard.minSize, guard.maxSize);
+        float radius = stairwaytoheaven.worldgen.SkyPressure.GUARD_RADIUS;
+        for (int i = 0; i < size; i++) {
+            String who = guard.memberAt(i, random.nextFloat());
+            // Anchors stand close in, rabble spreads to the edge of the ground
+            // the pressure field marks as the site's own.
+            float near = i < guard.anchors.length ? 3.0F : radius;
+            int tileX = 0;
+            int tileY = 0;
+            boolean found = false;
+            for (int attempt = 0; attempt < 8 && !found; attempt++) {
+                tileX = siteX + random.getIntBetween(-(int) near, (int) near);
+                tileY = siteY + random.getIntBetween(-(int) near, (int) near);
+                found = this.isTileWithinBounds(tileX, tileY)
+                        && !this.isSolidTile(tileX, tileY)
+                        && this.getTileID(tileX, tileY) != SkyRegistry.mistseaID
+                        && this.getObjectID(tileX, tileY) == 0;
+            }
+            if (!found) {
+                continue;
+            }
+            // Only this region's share: the other members belong to the regions
+            // their own tiles fall in, and will be placed when those generate.
+            if (tileX < region.tileXOffset || tileX >= region.tileXOffset + region.tileWidth
+                    || tileY < region.tileYOffset || tileY >= region.tileYOffset + region.tileHeight) {
+                continue;
+            }
+            Mob mob = MobRegistry.getMob(who, this);
+            if (mob == null) {
+                continue;
+            }
+            // Persistent, exactly like the herds and the residents. VERIFIED
+            // [jar]: EntityManager.tickMobSpawning counts only
+            // (isHostile && canDespawn) against the spawn cap, so a placed
+            // guard does not eat the ambient budget -- and the site is still
+            // guarded when the player comes back for the crate they left.
+            mob.canDespawn = false;
+            this.entityManager.addMob(mob, tileX * 32 + 16, tileY * 32 + 16);
         }
     }
 

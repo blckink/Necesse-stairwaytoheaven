@@ -86,7 +86,7 @@ import stairwaytoheaven.mobs.MistserpentHead;
  *     The Cloud Lamb is the one that did not; see {@link DriftlandsBiome}.</li>
  * </ol>
  */
-public abstract class SkyBiome extends Biome {
+public abstract class SkyBiome extends Biome implements GuardedBiome {
 
     // ---- Shared cap radii, in pixels, by archetype -------------------------
     // One definition so the policy is one line and an outlier is visible.
@@ -138,6 +138,31 @@ public abstract class SkyBiome extends Biome {
                     .filter(m -> m.getDistance(x, y) <= searchRange)
                     .count() < maxSerpents;
         };
+    }
+
+    /**
+     * Ambient spawn rate on this ground.
+     *
+     * <p>The place half of A4.1 is {@link stairwaytoheaven.worldgen.SkyPressure}
+     * — where a hostile may appear at all. This is the rate half: how often the
+     * engine tries. Vanilla has the exact precedent, at both ends of the same
+     * dial: {@code SettlementRuinsBiome} runs 0.3 rate / 0.5 cap and
+     * {@code TempleBiome} 0.75 / 0.75, both because those are places you are
+     * meant to explore rather than survive. The Skyreach is the same kind of
+     * place.
+     *
+     * <p>Deliberately NOT 1.0 even though the guards are placed rather than
+     * spawned: the wilds still spawn, and at full rate a wild patch would read
+     * as exactly the drizzle this pass removes.
+     */
+    @Override
+    public float getSpawnRateMod(Level level) {
+        return super.getSpawnRateMod(level) * 0.55F;
+    }
+
+    @Override
+    public float getSpawnCapMod(Level level) {
+        return super.getSpawnCapMod(level) * 0.75F;
     }
 
     @Override

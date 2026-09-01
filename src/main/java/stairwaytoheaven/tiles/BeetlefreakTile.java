@@ -1,12 +1,8 @@
 package stairwaytoheaven.tiles;
 
 import java.awt.Color;
-import java.awt.Point;
 
-import necesse.engine.util.GameRandom;
-import necesse.gfx.gameTexture.GameTextureSection;
 import necesse.inventory.lootTable.LootTable;
-import necesse.level.gameTile.TerrainSplatterTile;
 import necesse.level.maps.Level;
 
 /**
@@ -27,32 +23,19 @@ import necesse.level.maps.Level;
  * are; ours deliberately grows nothing, because this ground marks places that
  * are already wrong and does not need to spread.
  */
-public class BeetlefreakTile extends TerrainSplatterTile {
-
-    private final GameRandom drawRandom;
+public class BeetlefreakTile extends SkyGroundTile {
 
     public BeetlefreakTile() {
         super(false, "beetlefreak", "splattingmaskwide");
         this.mapColor = new Color(118, 46, 158);
         this.canBeMined = true;
         this.isOrganic = true;
-        this.drawRandom = new GameRandom();
     }
 
     /** Mining it yields nothing, matching the vanilla tile it is built on. */
     @Override
     public LootTable getLootTable(Level level, int tileX, int tileY) {
         return new LootTable();
-    }
-
-    @Override
-    public Point getTerrainSprite(GameTextureSection terrainTexture, Level level, int tileX, int tileY) {
-        int tile;
-        synchronized (this.drawRandom) {
-            tile = this.drawRandom.seeded(getTileSeed(tileX, tileY)).nextInt(terrainTexture.getHeight() / 32);
-        }
-
-        return new Point(0, tile);
     }
 
     @Override

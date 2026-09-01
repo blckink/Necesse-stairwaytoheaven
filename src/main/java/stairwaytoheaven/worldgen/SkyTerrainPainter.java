@@ -573,33 +573,80 @@ public final class SkyTerrainPainter {
      * drawn and craftable since v0.6 and placed by nothing -- three of the 49
      * registered objects worldgen never touched.
      */
-    public static int wreckSiteObject(int seed, int tileX, int tileY) {
-        int cellX = Math.floorDiv(tileX, WRECK_CELL);
-        int cellY = Math.floorDiv(tileY, WRECK_CELL);
+
+    /**
+     * The nearest hashed site of one lattice, searched over the 3x3 cell
+     * neighbourhood.
+     *
+     * This shape was written out twice — once in {@link #wreckSiteObject} and
+     * once in {@link #workshopObject} — and is now needed a third time, by
+     * {@link SkyPressure}, which has to find the same sites in order to put
+     * guards on them. Three copies of a lattice scan is three chances for the
+     * guards to stand somewhere the loot is not, so it is one function.
+     *
+     * The arithmetic is unchanged from those two, salt offsets included
+     * ({@code salt} decides whether a cell has a site, {@code salt + 1} and
+     * {@code salt + 2} place it inside the cell, {@code salt + 3} is left for
+     * the caller's own per-site choice), so every world generates exactly as it
+     * did before the extraction.
+     */
+    public static Site nearestSite(int seed, int tileX, int tileY,
+                                   int cell, int salt, float chance) {
+        int cellX = Math.floorDiv(tileX, cell);
+        int cellY = Math.floorDiv(tileY, cell);
         float best = Float.MAX_VALUE;
-        int hullX = 0;
-        int hullY = 0;
+        int bestX = 0;
+        int bestY = 0;
+        float pick = 0.0F;
         for (int ox = -1; ox <= 1; ox++) {
             for (int oy = -1; oy <= 1; oy++) {
                 int cx = cellX + ox;
                 int cy = cellY + oy;
-                if (SkyNoise.hash(seed + SALT_WRECK, cx, cy) >= WRECK_CHANCE) {
+                if (SkyNoise.hash(seed + salt, cx, cy) >= chance) {
                     continue;
                 }
-                float siteX = cx * WRECK_CELL
-                        + SkyNoise.hash(seed + SALT_WRECK + 1, cx, cy) * WRECK_CELL;
-                float siteY = cy * WRECK_CELL
-                        + SkyNoise.hash(seed + SALT_WRECK + 2, cx, cy) * WRECK_CELL;
-                float dx = tileX - siteX;
-                float dy = tileY - siteY;
+                float sx = cx * cell + SkyNoise.hash(seed + salt + 1, cx, cy) * cell;
+                float sy = cy * cell + SkyNoise.hash(seed + salt + 2, cx, cy) * cell;
+                float dx = tileX - sx;
+                float dy = tileY - sy;
                 float d = (float) Math.sqrt(dx * dx + dy * dy);
                 if (d < best) {
                     best = d;
-                    hullX = Math.round(siteX);
-                    hullY = Math.round(siteY);
+                    bestX = Math.round(sx);
+                    bestY = Math.round(sy);
+                    pick = SkyNoise.hash(seed + salt + 3, cx, cy);
                 }
             }
         }
+        return new Site(best, bestX, bestY, pick);
+    }
+
+    /** What {@link #nearestSite} found: how far, where, and the site's own hash. */
+    public static final class Site {
+        /** Tiles to the site centre, {@code Float.MAX_VALUE} when the neighbourhood is empty. */
+        public final float distance;
+        public final int tileX;
+        public final int tileY;
+        /** {@code hash(seed + salt + 3)} at the winning cell, for per-site choices. */
+        public final float pick;
+
+        Site(float distance, int tileX, int tileY, float pick) {
+            this.distance = distance;
+            this.tileX = tileX;
+            this.tileY = tileY;
+            this.pick = pick;
+        }
+
+        public boolean exists() {
+            return this.distance < Float.MAX_VALUE;
+        }
+    }
+
+    public static int wreckSiteObject(int seed, int tileX, int tileY) {
+        Site site = nearestSite(seed, tileX, tileY, WRECK_CELL, SALT_WRECK, WRECK_CHANCE);
+        float best = site.distance;
+        int hullX = site.tileX;
+        int hullY = site.tileY;
         if (best > 6.0F) {
             return 0;
         }
@@ -637,34 +684,9 @@ public final class SkyTerrainPainter {
      * discovers.
      */
     public static int workshopObject(int seed, int tileX, int tileY) {
-        int cellX = Math.floorDiv(tileX, WORKSHOP_CELL);
-        int cellY = Math.floorDiv(tileY, WORKSHOP_CELL);
-        float best = Float.MAX_VALUE;
-        int siteTileX = 0;
-        int siteTileY = 0;
-        int pick = 0;
-        for (int ox = -1; ox <= 1; ox++) {
-            for (int oy = -1; oy <= 1; oy++) {
-                int cx = cellX + ox;
-                int cy = cellY + oy;
-                if (SkyNoise.hash(seed + SALT_WORKSHOP, cx, cy) >= WORKSHOP_CHANCE) {
-                    continue;
-                }
-                float sx = cx * WORKSHOP_CELL
-                        + SkyNoise.hash(seed + SALT_WORKSHOP + 1, cx, cy) * WORKSHOP_CELL;
-                float sy = cy * WORKSHOP_CELL
-                        + SkyNoise.hash(seed + SALT_WORKSHOP + 2, cx, cy) * WORKSHOP_CELL;
-                float dx = tileX - sx;
-                float dy = tileY - sy;
-                float d = (float) Math.sqrt(dx * dx + dy * dy);
-                if (d < best) {
-                    best = d;
-                    siteTileX = Math.round(sx);
-                    siteTileY = Math.round(sy);
-                    pick = (int) (SkyNoise.hash(seed + SALT_WORKSHOP + 3, cx, cy) * 3.0F) % 3;
-                }
-            }
-        }
+        Site site = nearestSite(seed, tileX, tileY, WORKSHOP_CELL, SALT_WORKSHOP, WORKSHOP_CHANCE);
+        float best = site.distance;
+        int pick = (int) (site.pick * 3.0F) % 3;
         if (best > 4.0F) {
             return 0;
         }

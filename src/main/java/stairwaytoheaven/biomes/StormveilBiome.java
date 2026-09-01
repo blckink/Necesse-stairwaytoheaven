@@ -79,4 +79,16 @@ public class StormveilBiome extends SkyBiome {
                 super.getCrateLootTable(level, tileX, tileY)
         );
     }
+
+    /**
+     * The Stormveil's guard: a golem behind a Rime Sentry's line of fire.
+     *
+     * The wisps close, the sentry does not -- which is what makes crossing the
+     * open slate to reach the crate the dangerous part rather than the arrival.
+     */
+    @Override
+    public Guard getGuard() {
+        return new Guard(new String[]{"skystonegolem", "rimesentry"},
+                new String[]{"stormwisp", "stormwisp", "zephyrray"}, 4, 6);
+    }
 }

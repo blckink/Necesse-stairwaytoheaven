@@ -103,4 +103,16 @@ public class DriftlandsBiome extends SkyBiome {
                 super.getCrateLootTable(level, tileX, tileY)
         );
     }
+
+    /**
+     * The Driftlands' guard: a Skystone Golem with a pack of hounds.
+     *
+     * The golem is the reason a wreck out here is a fight rather than a
+     * pickup, and the hounds are the reason you cannot walk around it.
+     */
+    @Override
+    public Guard getGuard() {
+        return new Guard(new String[]{"skystonegolem"},
+                new String[]{"galehound", "galehound", "zephyrray"}, 4, 6);
+    }
 }

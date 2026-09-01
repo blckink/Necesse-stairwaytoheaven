@@ -921,6 +921,142 @@ public class SkyreachStatusCommand extends ModularChatCommand {
             }
             logs.add(realms.toString());
 
+            // A4.1, measured: how much of the sky a hostile may appear on.
+            //
+            // The whole guard-not-harass design turns on one number that is
+            // impossible to see by playing for five minutes and trivial to get
+            // wrong: the share of land that returns ZERO spawn tickets. Too
+            // low and the drizzle the player complained about is still there;
+            // too high and the sky is a museum. Sweeping real land tiles at
+            // real distances is the only honest way to know, so it is printed
+            // every run and asserted by scripts/integration_test.sh.
+            //
+            // guardedPacks counts the sites within the swept window, i.e. how
+            // many real fights that stretch of sky actually holds.
+            int calm = 0;
+            int approach = 0;
+            int guarded = 0;
+            int wilds = 0;
+            int pressureLand = 0;
+            for (int dx = -700; dx <= 700; dx += 7) {
+                for (int dy = -700; dy <= 700; dy += 7) {
+                    int tx = outOrigin.x + dx;
+                    int ty = outOrigin.y + dy;
+                    long desc = stairwaytoheaven.worldgen.SkyTerrainPainter.describeTile(
+                            outSeed, tx, ty, outOrigin.x, outOrigin.y);
+                    if (stairwaytoheaven.worldgen.SkyTerrainPainter.descTile(desc)
+                            == SkyRegistry.mistseaID) {
+                        continue;
+                    }
+                    pressureLand++;
+                    int tickets = stairwaytoheaven.worldgen.SkyPressure.spawnTickets(outSeed, tx, ty);
+                    if (tickets == stairwaytoheaven.worldgen.SkyPressure.GUARD_TICKETS) {
+                        guarded++;
+                    } else if (tickets == stairwaytoheaven.worldgen.SkyPressure.APPROACH_TICKETS) {
+                        approach++;
+                    } else if (tickets == stairwaytoheaven.worldgen.SkyPressure.WILD_TICKETS) {
+                        wilds++;
+                    } else {
+                        calm++;
+                    }
+                }
+            }
+            logs.add(String.format(
+                    "pressure check: land=%d calm=%d(%.1f%%) wilds=%d(%.1f%%)"
+                    + " approach=%d guarded=%d rateMod=%.2f capMod=%.2f",
+                    pressureLand, calm, 100.0F * calm / Math.max(1, pressureLand),
+                    wilds, 100.0F * wilds / Math.max(1, pressureLand),
+                    approach, guarded,
+                    level.getBiome(outOrigin.x, outOrigin.y).getSpawnRateMod(level),
+                    level.getBiome(outOrigin.x, outOrigin.y).getSpawnCapMod(level)));
+
+            // The guards themselves.
+            //
+            // These are PLACED mobs, not spawn-table entries, so the only proof
+            // they exist is counting persistent hostiles standing in the world.
+            // The probe has to go and find a site first: guarded ground is
+            // ~0.5% of land, so counting whatever happens to be loaded around
+            // the spire reports zero on a world where every pack is fine. It
+            // walks the wreck and workshop lattices outward from the origin,
+            // takes the first site on land, forces its regions in, and counts
+            // what is standing there.
+            // The first probe here scanned a polar grid outward and missed on
+            // some seeds: at 900 tiles its samples were ~350 tiles apart and a
+            // guarded disc is 7 tiles across, so finding one was luck. The
+            // sites live on lattices, so the probe now walks the LATTICES --
+            // the same enumeration placeGuardPacks uses -- and takes the
+            // nearest site whose centre stands on land.
+            int siteX = 0;
+            int siteY = 0;
+            boolean haveSite = false;
+            float siteBest = Float.MAX_VALUE;
+            int[][] lattices = {
+                    {stairwaytoheaven.worldgen.SkyTerrainPainter.WRECK_CELL,
+                     stairwaytoheaven.worldgen.SkyTerrainPainter.SALT_WRECK},
+                    {stairwaytoheaven.worldgen.SkyTerrainPainter.WORKSHOP_CELL,
+                     stairwaytoheaven.worldgen.SkyTerrainPainter.SALT_WORKSHOP}};
+            float[] chances = {stairwaytoheaven.worldgen.SkyTerrainPainter.WRECK_CHANCE,
+                    stairwaytoheaven.worldgen.SkyTerrainPainter.WORKSHOP_CHANCE};
+            for (int li = 0; li < lattices.length; li++) {
+                int cell = lattices[li][0];
+                int salt = lattices[li][1];
+                int reach = 1200 / cell + 1;
+                int baseCX = Math.floorDiv(outOrigin.x, cell);
+                int baseCY = Math.floorDiv(outOrigin.y, cell);
+                for (int cx = baseCX - reach; cx <= baseCX + reach; cx++) {
+                    for (int cy = baseCY - reach; cy <= baseCY + reach; cy++) {
+                        if (stairwaytoheaven.worldgen.SkyNoise.hash(outSeed + salt, cx, cy)
+                                >= chances[li]) {
+                            continue;
+                        }
+                        int tx = Math.round(cx * cell + stairwaytoheaven.worldgen.SkyNoise
+                                .hash(outSeed + salt + 1, cx, cy) * cell);
+                        int ty = Math.round(cy * cell + stairwaytoheaven.worldgen.SkyNoise
+                                .hash(outSeed + salt + 2, cx, cy) * cell);
+                        long desc = stairwaytoheaven.worldgen.SkyTerrainPainter.describeTile(
+                                outSeed, tx, ty, outOrigin.x, outOrigin.y);
+                        if (stairwaytoheaven.worldgen.SkyTerrainPainter.descTile(desc)
+                                == SkyRegistry.mistseaID) {
+                            continue;
+                        }
+                        float dx = tx - outOrigin.x;
+                        float dy = ty - outOrigin.y;
+                        float d = (float) Math.sqrt(dx * dx + dy * dy);
+                        if (d < siteBest) {
+                            siteBest = d;
+                            siteX = tx;
+                            siteY = ty;
+                            haveSite = true;
+                        }
+                    }
+                }
+            }
+            int placedGuards = 0;
+            int nearSite = 0;
+            if (haveSite) {
+                int gr = (int) stairwaytoheaven.worldgen.SkyPressure.GUARD_RADIUS + 2;
+                level.regionManager.ensureTilesAreLoaded(
+                        siteX - gr, siteY - gr, siteX + gr, siteY + gr);
+                for (necesse.entity.mobs.Mob m : level.entityManager.mobs) {
+                    if (!m.isHostile || m.canDespawn) {
+                        continue;
+                    }
+                    placedGuards++;
+                    if (Math.abs(m.getTileX() - siteX) <= gr && Math.abs(m.getTileY() - siteY) <= gr) {
+                        nearSite++;
+                    }
+                }
+            }
+            logs.add("guard check: site=" + (haveSite ? siteX + "," + siteY : "NONE FOUND")
+                    + " atSite=" + nearSite
+                    + " persistentHostiles=" + placedGuards
+                    + " radius=" + (int) stairwaytoheaven.worldgen.SkyPressure.GUARD_RADIUS
+                    + " driftlandsPack=" + (SkyRegistry.driftlands != null
+                            && SkyRegistry.driftlands.getGuard() != null
+                            ? SkyRegistry.driftlands.getGuard().minSize + "-"
+                              + SkyRegistry.driftlands.getGuard().maxSize
+                            : "NONE"));
+
             ramp.append(" evilwall=").append(wallSeen).append(" portals=").append(portalSeen);
             ramp.append(" biome=").append(SkyRegistry.outlands != null
                     ? necesse.engine.localization.Localization.translate("biome", "outlands")

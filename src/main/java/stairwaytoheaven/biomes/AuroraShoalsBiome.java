@@ -80,4 +80,16 @@ public class AuroraShoalsBiome extends SkyBiome {
                 super.getCrateLootTable(level, tileX, tileY)
         );
     }
+
+    /**
+     * The Shoals' guard: the golem, a Dawnpiercer and Aurora Flakes at range.
+     *
+     * The rarest ground in the sky carries the widest pack, because a Shoal
+     * wreck is the one a player travels TO rather than trips over.
+     */
+    @Override
+    public Guard getGuard() {
+        return new Guard(new String[]{"skystonegolem", "dawnpiercer"},
+                new String[]{"auroraflake", "auroraflake", "zephyrray"}, 5, 7);
+    }
 }

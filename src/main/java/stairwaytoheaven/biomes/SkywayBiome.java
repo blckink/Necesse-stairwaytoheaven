@@ -82,4 +82,17 @@ public class SkywayBiome extends SkyBiome {
                 super.getCrateLootTable(level, tileX, tileY)
         );
     }
+
+    /**
+     * The passages' guard: what still holds the road.
+     *
+     * A Skyway workshop stands ON the paving, so its pack is the one a player
+     * meets while following a route rather than while exploring -- hounds and
+     * a sentry covering the length of it, behind the golem that does not move.
+     */
+    @Override
+    public Guard getGuard() {
+        return new Guard(new String[]{"skystonegolem", "rimesentry"},
+                new String[]{"galehound", "galehound", "zephyrray"}, 4, 6);
+    }
 }

@@ -44,7 +44,7 @@ import stairwaytoheaven.SkyRegistry;
  * the Crooked House barrel, which carries its own table in
  * {@code worldgen/CrookedHousePreset}.
  */
-public abstract class VeilBiome extends Biome {
+public abstract class VeilBiome extends Biome implements GuardedBiome {
 
     @Override
     public boolean canRain(Level level) {
@@ -60,5 +60,25 @@ public abstract class VeilBiome extends Biome {
     public GameTile getUnderLiquidTile(Level level, int tileX, int tileY) {
         // Bridging the murkwater reclaims moss, not dirt.
         return SkyRegistry.murkmossTile;
+    }
+
+    /**
+     * Ambient spawn rate in the Veil, on the same policy as the sky.
+     *
+     * See {@code SkyBiome.getSpawnRateMod} for the reasoning and the vanilla
+     * precedent ({@code SettlementRuinsBiome} 0.3/0.5,
+     * {@code TempleBiome} 0.75/0.75). The Veil keeps the same numbers as the
+     * Skyreach rather than a harsher pair: A4.1 is about WHERE the pressure is,
+     * not about how much of it there is, and the Veil's answer to "how much" is
+     * its roster, which is two tiers above the sky's.
+     */
+    @Override
+    public float getSpawnRateMod(Level level) {
+        return super.getSpawnRateMod(level) * 0.55F;
+    }
+
+    @Override
+    public float getSpawnCapMod(Level level) {
+        return super.getSpawnCapMod(level) * 0.75F;
     }
 }

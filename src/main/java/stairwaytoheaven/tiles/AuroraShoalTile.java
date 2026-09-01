@@ -1,12 +1,6 @@
 package stairwaytoheaven.tiles;
 
 import java.awt.Color;
-import java.awt.Point;
-
-import necesse.engine.util.GameRandom;
-import necesse.gfx.gameTexture.GameTextureSection;
-import necesse.level.gameTile.TerrainSplatterTile;
-import necesse.level.maps.Level;
 
 /**
  * Cold dawn turf of the Aurora Shoals.
@@ -29,25 +23,12 @@ import necesse.level.maps.Level;
  * skystone plate (230) and the Skyway's paving (260) still surface through it,
  * which is the same relationship every other sky ground already has.
  */
-public class AuroraShoalTile extends TerrainSplatterTile {
-
-    private final GameRandom drawRandom;
+public class AuroraShoalTile extends SkyGroundTile {
 
     public AuroraShoalTile() {
         super(false, "aurorashoal");
         this.mapColor = new Color(161, 152, 176);
         this.canBeMined = true;
-        this.drawRandom = new GameRandom();
-    }
-
-    @Override
-    public Point getTerrainSprite(GameTextureSection terrainTexture, Level level, int tileX, int tileY) {
-        int tile;
-        synchronized (this.drawRandom) {
-            tile = this.drawRandom.seeded(getTileSeed(tileX, tileY)).nextInt(terrainTexture.getHeight() / 32);
-        }
-
-        return new Point(0, tile);
     }
 
     @Override

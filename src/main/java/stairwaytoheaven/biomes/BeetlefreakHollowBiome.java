@@ -73,4 +73,13 @@ public class BeetlefreakHollowBiome extends VeilBiome {
     public GameTile getUnderLiquidTile(Level level, int tileX, int tileY) {
         return SkyRegistry.beetlefreakTile;
     }
+
+    /**
+     * The Hollows' guard: the densest shade population in the Veil, massed.
+     */
+    @Override
+    public Guard getGuard() {
+        return new Guard(new String[]{"fenwraith"},
+                new String[]{"gloomshade", "gloomshade", "gloomshade", "cindercantor"}, 5, 7);
+    }
 }
