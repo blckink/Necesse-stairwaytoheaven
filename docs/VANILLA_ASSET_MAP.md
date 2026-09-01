@@ -31,17 +31,19 @@ here is a plan.
 These are vanilla mobs placed directly. No art was copied; the game supplies it.
 They swap out by replacing the string ID with a mod mob of the same role.
 
+*(empty — the three Crooked Beyond entries that used to live here were the only
+ones, and they moved to §4 on 2026-09-01.)*
+
 | vanilla ID | realm | stands in for | referenced in |
 |---|---|---|---|
-| `crystalgolem` | Crooked Beyond *(currently "Outlands")* | the slow heavy bruiser of the realm | `biomes/OutlandsBiome.mobs` |
-| `ascendedgolem` | Crooked Beyond | the rare wall — 1000 HP on Classic | `biomes/OutlandsBiome.mobs` |
-| `crystalarmadillo` | Crooked Beyond | the fast charger | `biomes/OutlandsBiome.mobs` |
 
 ### 1.2 Vanilla mobs subclassed (behaviour + sheet both borrowed)
 
 Each of these is a mod class that extends a vanilla mob and wears that mob's own
 texture from `MobRegistry.Textures`. Swapping means giving the subclass its own
-sheet — the behaviour stays.
+sheet — the behaviour stays. (The Outlands' three did exactly that on
+2026-09-01 and moved to §4; they still subclass vanilla mobs, so they borrow
+behaviour, but no vanilla art reaches the screen through them.)
 
 | vanilla base | mod mob | realm | why that base |
 |---|---|---|---|
@@ -86,6 +88,9 @@ vanilla's, so the vanilla file is the format reference and must stay findable.
 | `objects/crystalwall.png` | `objects/evilwall.png` + `items/evilwall.png` | `RockObject`: 16px sprite cells, `width/32` variants, 13 rows. See `docs/TECHNICAL_LEARNINGS.md` |
 | `tiles/spidernest_splat.png` | `tiles/beetlefreak_splat.png` | `TerrainSplatterTile` on the **wide** alpha mask (`splattingmaskwide`), not the default |
 | `objects/stonewall.png` | `objects/beetlewall.png` | `WallObject` autotile layout, doors and the roof-slot window |
+| `mobs/crystalgolem.png` | `mobs/crookedgolem.png` | walking-mob sheet, 384x320: 6 cols (idle, walk x4, in-liquid) x 4 dir rows at 64px, plus the 32px gib strip at row 8 cols 0-3 that `FleshParticle` cuts death chunks from |
+| `mobs/ascendedgolem.png` | `mobs/rarecrookedgolem.png` | same 384x320 layout |
+| `mobs/crystalarmadillo.png` | `mobs/crookedarmadillo.png` | same layout at 512x320 — 8 cols, because columns 6 and 7 are the two rolled-up ball frames |
 
 ---
 
@@ -189,7 +194,11 @@ and the realm cannot be faked without them:
 
 ## 4. Replaced — stand-ins that have been swapped out
 
-*(empty — nothing has been replaced yet)*
-
 | vanilla asset | replaced by | commit |
 |---|---|---|
+| `crystalgolem` (mob, by string ID) | `crookedgolem` — `mobs/CrookedGolemMob` on `mobs/crookedgolem.png`, a subclass of `CrystalGolemMob` that inherits every number and behaviour and overrides only `addDrawables` (and the sheet the death gibs are cut from) | this pass |
+| `ascendedgolem` (mob, by string ID) | `rarecrookedgolem` — `mobs/RareCrookedGolemMob` on `mobs/rarecrookedgolem.png`, same relationship to `AscendedGolemMob` | this pass |
+| `crystalarmadillo` (mob, by string ID) | `crookedarmadillo` — `mobs/CrookedArmadilloMob` on `mobs/crookedarmadillo.png`, same relationship to `CrystalArmadillo`. One thing did NOT come across: vanilla's second `crystalarmadillo_light` glow pass, because we have one sheet and not two — see the class comment | this pass |
+
+The vanilla sheets stay the format reference for these three and are listed as
+such in §1.5; the runtime no longer touches them.

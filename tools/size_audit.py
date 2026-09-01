@@ -73,6 +73,17 @@ PAIRS = [
      "mobs/boar.png", ("auto", 64, 64), "quadruped mob (densest 64px frame)"),
     ("mobs/skystonegolem.png", ("auto", 64, 64),
      "mobs/boar.png", ("auto", 64, 64), "heavy mob (densest 64px frame)"),
+    # The Beetle Outlands' three. Supplied art rather than generated, but ours
+    # all the same, and each answers to the vanilla sheet it replaced cell for
+    # cell -- same dimensions, same 6x5 (or 8x5) layout, same gib strip. Nothing
+    # was watching these until now, which is exactly how a future redraw would
+    # thin them without anyone noticing.
+    ("mobs/crookedgolem.png", ("auto", 64, 64),
+     "mobs/crystalgolem.png", ("auto", 64, 64), "heavy mob (densest 64px frame)"),
+    ("mobs/rarecrookedgolem.png", ("auto", 64, 64),
+     "mobs/ascendedgolem.png", ("auto", 64, 64), "heavy mob (densest 64px frame)"),
+    ("mobs/crookedarmadillo.png", ("auto", 64, 64),
+     "mobs/crystalarmadillo.png", ("auto", 64, 64), "rolling mob (densest 64px frame)"),
     # v0.4 saplings (chunky mini-trees like vanilla, not thin shoots)
     ("objects/nimbussapling.png", None,
      "objects/willowsapling.png", None, "sapling"),
@@ -213,6 +224,18 @@ PAIRS = [
      "mobs/icons/ancientskeletonmage.png", None, "bestiary icon"),
     ("mobs/icons/watchmote.png", None,
      "mobs/icons/playercryoflake.png", None, "bestiary icon"),
+    # The Beetle Outlands' three. Unlike the five above, their BODIES are ours
+    # too (the supplied sheets); the icons are still ours-only because loadIcon
+    # takes no setter. Each answers to the vanilla icon of the mob its class
+    # subclasses -- and both golems answer to crystalgolem, because vanilla
+    # ships no ascendedgolem bestiary icon (that mob is registered non-spawning
+    # and never reaches a bestiary list).
+    ("mobs/icons/crookedgolem.png", None,
+     "mobs/icons/crystalgolem.png", None, "bestiary icon"),
+    ("mobs/icons/rarecrookedgolem.png", None,
+     "mobs/icons/crystalgolem.png", None, "bestiary icon"),
+    ("mobs/icons/crookedarmadillo.png", None,
+     "mobs/icons/crystalarmadillo.png", None, "bestiary icon"),
     # Skywatch professions. The four spire furniture pieces answer to the oak
     # family, which is the vanilla set the engine draws with exactly the same
     # code; the front column (rotation 2) and one side column (rotation 1) are

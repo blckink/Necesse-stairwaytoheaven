@@ -771,18 +771,20 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                 // implements isValidSpawnLocation itself and the two columns
                 // below are the proof that it took.
                 "nimbusyak", "thunderquill", "glimmergoat",
-                // The Beetle Outlands' ascended cast. These are VANILLA mobs,
-                // referenced by string ID and never subclassed, so nothing in
-                // this repo can prove they spawn -- only the live registry
-                // can. They are probed for exactly the reason the Cloud Lamb
-                // is: a spawn-table entry whose mob rejects every location is
-                // indistinguishable from no entry at all.
+                // The Beetle Outlands' ascended cast. These are OUR classes now
+                // -- they subclass the vanilla mobs the biome used to spawn by
+                // string ID and change only the sheet they draw with -- but the
+                // reason to probe them is unchanged and is the Cloud Lamb's: a
+                // spawn-table entry whose mob rejects every location is
+                // indistinguishable from no entry at all, and the spawn rule is
+                // inherited rather than written here, so only the live registry
+                // can show that it survived the subclassing.
                 //
                 // Expected shape, and the test asserts it: validSpawnLocation
                 // implemented (HostileMob provides it), and dark > 0 while lit
                 // may be 0 -- all three are dark-spawners, which is why the
                 // Outlands are uneasy by day and dangerous after dark.
-                "crystalgolem", "ascendedgolem", "crystalarmadillo"};
+                "crookedgolem", "rarecrookedgolem", "crookedarmadillo"};
         String[] arsenalProbeMobs = stairwaytoheaven.arsenal.SkyArsenal.PROBE_MOB_IDS;
         String[] probeMobs = new String[coreProbeMobs.length + arsenalProbeMobs.length];
         System.arraycopy(coreProbeMobs, 0, probeMobs, 0, coreProbeMobs.length);

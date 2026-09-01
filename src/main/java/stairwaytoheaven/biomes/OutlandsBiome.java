@@ -41,12 +41,22 @@ public class OutlandsBiome extends SkyBiome {
      * ordinary one. A region that only exists past 900 tiles from the spire
      * has no business being softer than the fen it borrowed its props from.
      *
-     * <p><b>No new classes, no new art.</b> These are vanilla's own mobs by
-     * string ID. Spawn tables resolve through the one {@code MobRegistry}, and
-     * {@code HostileMob.isValidSpawnLocation} is implemented (light threshold,
-     * spawn location, max-hostiles-around), so unlike the Cloud Lamb's inert
-     * entry these actually place. Verified by reading the class, not assumed —
-     * that exact trap cost this mod three releases.
+     * <p><b>Vanilla behaviour, our art.</b> The three ascended entries used to
+     * be vanilla's own mobs by string ID, wearing vanilla's crystal-cave sheets
+     * in a biome that is neither a cave nor crystal. They are now
+     * {@link stairwaytoheaven.mobs.CrookedGolemMob},
+     * {@link stairwaytoheaven.mobs.RareCrookedGolemMob} and
+     * {@link stairwaytoheaven.mobs.CrookedArmadilloMob} — subclasses that
+     * inherit every number, ability and AI tree from those same vanilla mobs
+     * and change nothing but the {@code GameTexture} they draw with — plus, on
+     * the armadillo alone, the minimum-light floor that had to move onto its
+     * one draw pass when vanilla's second one was dropped. The tier did not
+     * move; only the sprite did. Spawn tables still resolve through the
+     * one {@code MobRegistry}, and {@code HostileMob.isValidSpawnLocation} is
+     * still the inherited implementation (light threshold, spawn location,
+     * max-hostiles-around), so unlike the Cloud Lamb's inert entry these
+     * actually place. Verified by reading the class, not assumed — that exact
+     * trap cost this mod three releases.
      *
      * <p><b>What this deliberately changes about progression</b>: it gives the
      * sky a non-incursion source of ascended-tier fights, and of what they
@@ -58,10 +68,12 @@ public class OutlandsBiome extends SkyBiome {
      * <p><b>Night, mostly.</b> {@code checkLightThreshold} makes all three
      * dark-spawners, and the Skyreach follows the world's day/night cycle
      * ({@code isCave} is false). So the Outlands are uneasy by day and
-     * genuinely dangerous after dark. That is a consequence of using vanilla's
-     * mobs directly rather than a choice, and it reads well enough to keep;
-     * {@code SkySpawnRules.daylightSpawn} is the lever if it should change,
-     * and it needs our own subclass to apply.
+     * genuinely dangerous after dark. That started as a consequence of using
+     * vanilla's mobs directly rather than a choice, and it reads well enough to
+     * keep. The three subclasses could now override
+     * {@code isValidSpawnLocation} with {@code SkySpawnRules.daylightSpawn} the
+     * way every arsenal enemy does — deliberately they do not, because that is a
+     * balance change and the art pass that created them was not one.
      */
     public static final MobSpawnTable mobs = new MobSpawnTable()
             // Radii are PIXELS, not tiles -- see SkyBiome's header. Every cap
@@ -78,12 +90,12 @@ public class OutlandsBiome extends SkyBiome {
             //
             // The bruiser: 130 damage behind 40 armour, slow. Punishes standing
             // still, and the cap is what stops two from arriving together.
-            .addLimited(50, "crystalgolem", 2, RANGE_STANDARD)
+            .addLimited(50, "crookedgolem", 2, RANGE_STANDARD)
             // The wall. 1000 HP on Classic and the rarest thing in the mix, so
             // it is an event rather than a fight you have on the way past.
-            .addLimited(25, "ascendedgolem", 1, RANGE_ELITE)
+            .addLimited(25, "rarecrookedgolem", 1, RANGE_ELITE)
             // The charger: armour 60 until it commits, then speed 200 at you.
-            .addLimited(45, "crystalarmadillo", 2, RANGE_STANDARD)
+            .addLimited(45, "crookedarmadillo", 2, RANGE_STANDARD)
             // The Veil's own residents, now at the same tier rather than below
             // it. The shade is the ground's common enemy and keeps the widest
             // share; the wraith is its slow bruiser, the cantor its range.

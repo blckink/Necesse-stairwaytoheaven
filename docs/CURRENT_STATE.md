@@ -454,13 +454,14 @@ server boot — which now covers this region rather than merely surviving it:
   - The per-radius numbers in the line are ONE seed through a small window, so
     they swing (`r2000=0/1008` here against 7.68% over five seeds offline).
     Only the floor and the by-3200 arrival are asserted, for that reason.
-- `spawn check:` now probes `crystalgolem`, `ascendedgolem` and
-  `crystalarmadillo`. They are VANILLA mobs used by string ID and never
-  subclassed, so nothing in this repo can prove they spawn — only the live
-  registry can. The assertion is deliberately different from the arsenal
-  block's: those must accept in DAYLIGHT, these must accept in the DARK,
-  because `HostileMob.isValidSpawnLocation` calls `checkLightThreshold`.
-  Asserting daylight here would be asserting a bug.
+- `spawn check:` now probes `crookedgolem`, `rarecrookedgolem` and
+  `crookedarmadillo` — our own classes since the art pass below, but each
+  inherits its spawn rule from the vanilla mob it subclasses rather than
+  declaring one, so only the live registry can show the entries still place.
+  The assertion is deliberately different from the arsenal block's: those must
+  accept in DAYLIGHT, these must accept in the DARK, because
+  `HostileMob.isValidSpawnLocation` calls `checkLightThreshold`. Asserting
+  daylight here would be asserting a bug.
 
 ### What is NOT done here, and is the next agent's job
 
@@ -483,14 +484,18 @@ server boot — which now covers this region rather than merely surviving it:
    The numbers agreed — everything this mod ships tops out near the Skystone
    Golem's 520 HP / 70 damage, while vanilla's ORDINARY ascended mobs sit at
    1000 HP (Classic) and 130 damage behind 40 armour. The Outlands now spawn
-   `crystalgolem`, `ascendedgolem` and `crystalarmadillo` by vanilla string ID
-   — no new classes, no new art, and `HostileMob.isValidSpawnLocation` is
-   implemented so the entries are live rather than inert. What is still open:
+   `crookedgolem`, `rarecrookedgolem` and `crookedarmadillo` — our own classes
+   wearing our own sheets, each a subclass of the vanilla mob the biome used to
+   name by string ID and each inheriting every number from it, so
+   `HostileMob.isValidSpawnLocation` is still the live implementation and the
+   entries are live rather than inert. What is still open:
    the rest of the mod is untouched, and the sky's own weapons and armour are
    still calibrated at deep-cave tier, so the Outlands now out-scale the gear
    you can craft to enter them.
-5. **No Outland-specific mobs, loot or structures beyond the Crooked House.**
-   The region is the Veil's furniture plus vanilla's ascended cast.
+5. **No Outland-specific loot or structures beyond the Crooked House.**
+   The region is the Veil's furniture plus three mobs that are now ours in art
+   and identity but still vanilla's ascended cast in every number and
+   behaviour — the ladder in `docs/BALANCE.md` did not move for them.
 6. **The player has more art coming** ("ich liefere dir gleich noch weitere
    böden usw"). See `docs/design/asset-work-order.md` for what a full biome
    actually needs in tiles.

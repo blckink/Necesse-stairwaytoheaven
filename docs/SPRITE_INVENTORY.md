@@ -14,7 +14,7 @@ on the next generator run. The exceptions are the supplied files listed in
 `generate_assets.py`'s `CONVERTED` guard, which are copied in as-is.
 
 
-**317 sprites** across 13 folders.
+**323 sprites** across 13 folders.
 
 
 ## `./` — 1 file(s)
@@ -156,12 +156,14 @@ on the next generator run. The exceptions are the supplied files listed in
 | `withershrub.png` | 32x32 |
 | `zephyrharness.png` | 32x32 |
 
-## `mobs/` — 18 file(s)
+## `mobs/` — 21 file(s)
 
 | file | size |
 |---|---|
 | `cloudlamb.png` | 384x320 |
 | `cloudlamb_sheared.png` | 384x320 |
+| `crookedarmadillo.png` | 512x320 |
+| `crookedgolem.png` | 384x320 |
 | `dawnpiercer.png` | 384x256 |
 | `dewsnail.png` | 192x128 |
 | `galehound.png` | 384x256 |
@@ -170,6 +172,7 @@ on the next generator run. The exceptions are the supplied files listed in
 | `mistserpent.png` | 128x384 |
 | `mistserpent_mask.png` | 64x64 |
 | `mistserpent_shadow.png` | 44x24 |
+| `rarecrookedgolem.png` | 384x320 |
 | `skystonegolem.png` | 384x256 |
 | `skywarden.png` | 384x256 |
 | `sparkbeetle.png` | 192x128 |
@@ -179,13 +182,15 @@ on the next generator run. The exceptions are the supplied files listed in
 | `zephyrfinch.png` | 192x128 |
 | `zephyrray.png` | 384x256 |
 
-## `mobs/icons/` — 24 file(s)
+## `mobs/icons/` — 27 file(s)
 
 | file | size |
 |---|---|
 | `auroraflake.png` | 32x32 |
 | `cindercantor.png` | 32x32 |
 | `cloudlamb.png` | 32x32 |
+| `crookedarmadillo.png` | 32x32 |
+| `crookedgolem.png` | 32x32 |
 | `dawnpiercer.png` | 32x32 |
 | `dewsnail.png` | 32x32 |
 | `fenwraith.png` | 32x32 |
@@ -196,6 +201,7 @@ on the next generator run. The exceptions are the supplied files listed in
 | `magpiesettler.png` | 32x32 |
 | `mistserpent.png` | 32x32 |
 | `ossiansettler.png` | 32x32 |
+| `rarecrookedgolem.png` | 32x32 |
 | `rimesentry.png` | 32x32 |
 | `skystonegolem.png` | 32x32 |
 | `skywarden.png` | 32x32 |

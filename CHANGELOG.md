@@ -3,6 +3,63 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [Unreleased] — the Outlands get their own faces — 2026-09-01
+
+### Changed
+- **The Beetle Outlands' three ascended mobs are the mod's own now.** They used
+  to be vanilla's `crystalgolem`, `ascendedgolem` and `crystalarmadillo` placed
+  by string ID, which meant crystal-cave art standing on striped violet ground.
+  The player drew replacement sheets, so the spawn table now names
+  `crookedgolem`, `rarecrookedgolem` and `crookedarmadillo` — `CrookedGolemMob`,
+  `RareCrookedGolemMob` and `CrookedArmadilloMob`, each a subclass of the vanilla
+  mob it replaces. **Nothing but the sprite moved**: every stat, ability, AI tree
+  and spawn rule is inherited untouched, weights and caps in the table are
+  unchanged, and `docs/BALANCE.md` did not need a line. This is an art and
+  identity pass, not a rebalance.
+- The three probe entries in `SkyreachStatusCommand` and the matching assertion
+  in `scripts/integration_test.sh` follow the new IDs.
+
+### Added
+- `mobs/icons/{crookedgolem,rarecrookedgolem,crookedarmadillo}.png` — bestiary
+  icons, drawn deterministically in the new `tools/asset_generator/gen_outlands.py`
+  from `palette.CROOKED_*` ramps sampled out of the supplied sheets.
+  `MobRegistry`'s `loadIcon` is hard-wired to `mobs/icons/<stringID>.png` with no
+  setter, so without these the bestiary would draw the engine's ERR tile.
+- English and German names for all three, ledger rows, and `size_audit` rows
+  against `mobs/icons/crystalgolem.png` and `mobs/icons/crystalarmadillo.png`.
+
+### Learned, and written down
+- **A vanilla mob's texture is not overridable — only its `addDrawables` is.**
+  All three vanilla classes read a static `MobRegistry.Textures.*` field inline
+  inside `addDrawables`, and `Mob` has no per-instance texture hook
+  (`VERIFIED [jar]`). Assigning into that static field would repaint vanilla's
+  own crystal golems in vanilla's own caves, so each subclass re-implements
+  `addDrawables` line for line and changes only the sampled `GameTexture`. The
+  override cannot call `super` — that IS the vanilla body draw — and nothing is
+  lost by skipping it, because the overridable `Mob.addDrawables` has an EMPTY
+  body; vanilla's own `AscendedGolemMob` already skips it for the same reason.
+- **Death gibs are cut from the mob's own sheet**, so `spawnDeathParticles` had
+  to be overridden too or a Crooked Golem would shatter into crystal shards. The
+  supplied sheets carry the gib strip in vanilla's own place (32 px row 8,
+  columns 0-3), so the sprite indices did not change.
+- All of the above is written up in `docs/TECHNICAL_LEARNINGS.md` under "A
+  vanilla mob's sheet is reachable only through `addDrawables`", including where
+  a second draw pass can hide a mob's whole minimum-light floor.
+
+### Known gap
+- **The armadillo lost its glow pass.** Vanilla draws `crystalarmadillo` twice —
+  the body at raw ambient light, then `crystalarmadillo_light` over it at a
+  `minLevelCopy(100)` floor, a dithered mask over 45% of the body that makes its
+  crystal shell shine in the dark. We have one sheet and not two, so the second
+  pass is dropped rather than faked by drawing our own body over itself, which
+  would self-illuminate the whole animal instead of its shards. What did NOT get
+  dropped with it is the light floor: that overlay is where vanilla's armadillo
+  keeps its entire minimum-light guarantee, so the single pass here carries
+  `minLevelCopy(100.0F)` — the same value, applied to the whole animal instead of
+  to 45% of it in a dither. Not pixel-identical to vanilla, and much closer to it
+  than an invisible 200-speed charger would have been. Drawing
+  `mobs/crookedarmadillo_light.png` restores the exact behaviour.
+
 ## [Unreleased] — the endgame ladder — 2026-08-31
 
 Alongside the tile pass below, in the same unreleased version.

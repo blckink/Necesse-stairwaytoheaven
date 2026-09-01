@@ -41,6 +41,7 @@ Details and measurements: `docs/CURRENT_STATE.md`. History: `CHANGELOG.md`.
 | `0be590e` | `evilwall` from supplied art, registered as a vanilla `RockObject`; crystal massifs through the outcrop formation field |
 | `2111c6a` | `evilwall` drops `crystalstone` rather than vanilla stone |
 | `01b7cba` | The Outlands spawn `crystalgolem`, `ascendedgolem`, `crystalarmadillo` |
+| *(this pass)* | Those three become `crookedgolem`, `rarecrookedgolem`, `crookedarmadillo` — our own classes and our own sheets on vanilla's unchanged bodies |
 | `e1b2f7d` | Both of the above turned into live gates in `integration_test.sh` |
 | `8c111f1` | That floor gate corrected: it had asserted a rule outside the floor it was testing, and failed on a correct world |
 
@@ -65,9 +66,9 @@ take the paragraphs above on trust:
 outlands check: floor=900 inside=0/13582 r1200=90/2838 r2000=0/1008
                 r3200=40/2029 evilwall=18 portals=0 biome=Beetle Outlands
 
-spawn check: crystalgolem      validSpawnLocation=implemented lit=0/6 dark=4/6
-spawn check: ascendedgolem     validSpawnLocation=implemented lit=0/6 dark=4/6
-spawn check: crystalarmadillo  validSpawnLocation=implemented lit=0/6 dark=4/6
+spawn check: crookedgolem      validSpawnLocation=implemented lit=0/6 dark=3/6
+spawn check: rarecrookedgolem  validSpawnLocation=implemented lit=0/6 dark=3/6
+spawn check: crookedarmadillo  validSpawnLocation=implemented lit=0/6 dark=3/6
 ```
 
 `inside=` is the whole disc within the 900-tile floor, and it is asserted as an

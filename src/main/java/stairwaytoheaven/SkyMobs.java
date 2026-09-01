@@ -57,6 +57,13 @@ final class SkyMobs {
         MobRegistry.registerMob("mistserpent", stairwaytoheaven.mobs.MistserpentHead.class, true);
         MobRegistry.registerMob("mistserpentbody", stairwaytoheaven.mobs.MistserpentBody.class, false);
         MobRegistry.registerMob("mistserpenttail", stairwaytoheaven.mobs.MistserpentBody.Tail.class, false);
+        // The Beetle Outlands' own cast. Each subclasses the vanilla mob the
+        // biome used to spawn by string ID, inherits every number and every
+        // behaviour from it, and overrides addDrawables so the sheet is ours
+        // rather than the crystal caves'. See the three class comments.
+        MobRegistry.registerMob("crookedgolem", stairwaytoheaven.mobs.CrookedGolemMob.class, true);
+        MobRegistry.registerMob("rarecrookedgolem", stairwaytoheaven.mobs.RareCrookedGolemMob.class, true);
+        MobRegistry.registerMob("crookedarmadillo", stairwaytoheaven.mobs.CrookedArmadilloMob.class, true);
     }
 
     /** Called from initResources — runs on the client only, never on servers. */
@@ -80,5 +87,8 @@ final class SkyMobs {
         stairwaytoheaven.mobs.DawnpiercerMob.texture = GameTexture.fromFile("mobs/dawnpiercer");
         SkyCritterMob.finchTexture = GameTexture.fromFile("mobs/zephyrfinch");
         SkyCritterMob.snailTexture = GameTexture.fromFile("mobs/dewsnail");
+        stairwaytoheaven.mobs.CrookedGolemMob.texture = GameTexture.fromFile("mobs/crookedgolem");
+        stairwaytoheaven.mobs.RareCrookedGolemMob.texture = GameTexture.fromFile("mobs/rarecrookedgolem");
+        stairwaytoheaven.mobs.CrookedArmadilloMob.texture = GameTexture.fromFile("mobs/crookedarmadillo");
     }
 }

@@ -39,6 +39,7 @@ import gen_beetlewall  # noqa: E402
 import gen_arsenal  # noqa: E402
 import gen_professions  # noqa: E402
 import gen_skygear  # noqa: E402
+import gen_outlands  # noqa: E402
 
 
 # Files owned by tools/convert_biome_art.py, which converts the supplied
@@ -322,6 +323,12 @@ def main():
     # projectile sprites, and the bestiary icons for the five mobs the
     # stream adds. See tools/asset_generator/gen_arsenal.py.
     gen_arsenal.generate(out)
+
+    # The Beetle Outlands' three ascended mobs. Their BODIES are the supplied
+    # sheets in CONVERTED above and are never written here; this call writes
+    # only their bestiary icons, which loadIcon reads from mobs/icons/<id>.png
+    # and which no sheet can supply. See tools/asset_generator/gen_outlands.py.
+    gen_outlands.generate(out)
 
     # Mod preview
     gen_misc.gen_preview(f"{out}/preview.png")

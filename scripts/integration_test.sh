@@ -300,15 +300,16 @@ for arsenal_mob in rimesentry auroraflake fenwraith cindercantor; do
     grep -qE "spawn check: $arsenal_mob .*dark=[1-9][0-9]*/" "$LOG2" \
         || { echo "FAIL: $arsenal_mob accepts no dark spawn tile"; STATUS=1; }
 done
-# The Beetle Outlands' ascended cast. These are VANILLA mobs used by string ID
-# and never subclassed, so nothing in this repo can prove they spawn -- only
-# the live registry can, which is the whole reason they are probed.
+# The Beetle Outlands' ascended cast. These are our own classes wearing our own
+# art, but each inherits its spawn rule from the vanilla mob it subclasses
+# rather than declaring one, so only the live registry can prove the entries
+# still place -- which is the whole reason they are probed.
 #
 # The expectation differs from the arsenal block above ON PURPOSE. Arsenal
 # enemies use SkySpawnRules and must accept in DAYLIGHT. These three do not:
 # HostileMob.isValidSpawnLocation calls checkLightThreshold, so they are
 # dark-spawners, and asserting daylight here would be asserting a bug.
-for outland_mob in crystalgolem ascendedgolem crystalarmadillo; do
+for outland_mob in crookedgolem rarecrookedgolem crookedarmadillo; do
     grep -qE "spawn check: $outland_mob .*validSpawnLocation=implemented" "$LOG1" \
         || { echo "FAIL: $outland_mob does not implement isValidSpawnLocation -- its Outlands spawn entry is inert"; STATUS=1; }
     grep -qE "spawn check: $outland_mob .*dark=[1-9][0-9]*/" "$LOG2" \

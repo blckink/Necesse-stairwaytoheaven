@@ -692,3 +692,68 @@ DAWNPIERCER = {
     "crystal_deep": (86, 164, 176),
     "beak":  (94, 86, 104),
 }
+
+
+# --- The Beetle Outlands' own cast -------------------------------------------
+#
+# These three ramps are NOT invented here: every value is sampled straight out
+# of the supplied sheets (src/main/resources/mobs/{crookedgolem,
+# rarecrookedgolem,crookedarmadillo}.png), which are the player's own art and
+# are not produced by this generator. They exist so the bestiary icons drawn in
+# gen_outlands.py sit in the same colours as the bodies they announce; drifting
+# from them would put a differently-coloured mob in the bestiary list than the
+# one the player just fought.
+#
+# Only the tones the icons actually draw are kept. The sheets carry 31 colours
+# each and a ramp entry nothing reads is not a palette, it is a note - the
+# sheets themselves are the record of the full palette.
+
+CROOKED_GOLEM = {
+    "dark":   (14, 12, 38),
+    "band":   (20, 33, 32),
+    "ring_d": (32, 20, 62),
+    "ring":   (76, 30, 117),
+    "ring_l": (114, 40, 164),
+    "ring_h": (180, 58, 222),
+    "iris":   (60, 113, 10),
+    "iris_l": (102, 169, 13),
+    "iris_h": (163, 230, 25),
+    "spark":  (235, 252, 75),
+    "bone_h": (251, 254, 251),
+}
+
+# iris_h and bone_h are deliberately the same value: (248, 215, 215) is the
+# palest tone in the rare sheet and it does BOTH jobs there - the lit core of
+# the eye and the white of the candy stripes.
+CROOKED_RARE = {
+    "dark":    (11, 4, 1),
+    "ring_d":  (11, 38, 18),
+    "ring":    (23, 75, 50),
+    "ring_l":  (29, 122, 99),
+    "ring_h":  (37, 173, 152),
+    "iris":    (255, 1, 109),
+    "iris_l":  (255, 74, 190),
+    "iris_h":  (248, 215, 215),
+    "spark":   (43, 231, 229),
+    "bone":    (230, 140, 142),
+    "bone_h":  (248, 215, 215),
+    "flesh_d": (71, 17, 11),
+    "flesh":   (125, 28, 25),
+    "flesh_l": (162, 27, 26),
+}
+
+CROOKED_SHELL = {
+    "hull_d":  (4, 40, 74),
+    "hull":    (6, 73, 122),
+    "hull_l":  (50, 102, 192),
+    "rim":     (135, 112, 240),
+    "rim_l":   (165, 156, 251),
+    "shell_d": (215, 211, 252),
+    "shell_l": (243, 238, 243),
+    "shell_h": (254, 255, 252),
+    "glow":    (149, 233, 253),
+    "eye_d":   (91, 17, 3),
+    "eye":     (216, 85, 5),
+    "eye_l":   (253, 184, 11),
+    "eye_h":   (253, 243, 115),
+}

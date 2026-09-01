@@ -2907,3 +2907,71 @@ no crate at all — `skycrate` is scattered by `SkyTerrainPainter` alone. So the
 harder realms have no container to pay out of, and if a crate were ever placed
 down there the inherited fallback is surface-tier `basicCrate`. That is a
 worldgen gap, not a loot-table one, and it is still open.
+
+## A vanilla mob's sheet is reachable only through `addDrawables` (2026-09-01, VERIFIED [jar])
+
+Subclassing a vanilla mob to change nothing but its art is not a matter of
+setting a field. There is no field to set.
+
+Every vanilla mob resolves its sheet from a **static** slot on
+`MobRegistry.Textures`, read **inline** at draw time:
+
+```
+CrystalGolemMob.addDrawables   -> MobRegistry.Textures.crystalGolem
+AscendedGolemMob.addDrawables  -> MobRegistry.Textures.ascendedGolem
+CrystalArmadillo.addDrawables  -> MobRegistry.Textures.crystalArmadillo
+                                  + crystalArmadillo_light (second pass)
+```
+
+`Mob` exposes no per-instance texture accessor and no overridable getter for it,
+so there is nothing a subclass can return. And the static must be left alone:
+assigning into `MobRegistry.Textures.crystalGolem` would repaint vanilla's own
+crystal golems in vanilla's own crystal caves, in the same world.
+
+**So the only hook is `addDrawables` itself**, re-implemented in the subclass
+with the same offsets, sprite indices, animation state, masks, light handling
+and shadow call, sampling the subclass's own `GameTexture`. That is what
+`mobs/CrookedGolemMob`, `mobs/RareCrookedGolemMob` and
+`mobs/CrookedArmadilloMob` do.
+
+### The override cannot call `super`, and loses nothing by not calling it
+
+`super.addDrawables(...)` from such a subclass IS the vanilla body draw — the
+thing being replaced — so calling it puts vanilla's sprite straight back on top
+of ours.
+
+Skipping it is safe, and this is the fact worth remembering: the overridable
+`Mob.addDrawables(List<MobDrawable>, OrderableDrawables, OrderableDrawables,
+Level, int, int, TickManager, GameCamera, PlayerMob)` has an **empty body**.
+`HostileMob` does not override it either. Health bars, status bars and rider
+drawables are added by the `final Mob.addDrawables` / `addDrawablesLoop` pair
+that *calls* it, not by it. Vanilla's own `AscendedGolemMob` already omits the
+super call for exactly this reason — it has the same problem, one class up.
+
+### Death gibs are cut from the mob's own sheet, so `spawnDeathParticles` needs the same treatment
+
+`CrystalGolemMob` and `CrystalArmadillo` build their death particles as
+`new FleshParticle(level, MobRegistry.Textures.<sheet>,
+GameRandom.globalRandom.nextInt(5), 8, 32, x, y, 20F, kbX, kbY)` — that is a
+**32 px** sprite at **row 8, column 0-4** of the mob's own sheet. Leave the
+method alone and a re-skinned mob shatters into the vanilla mob's rubble.
+
+Two details of that call are worth writing down: the sheets only carry gib art
+in columns 0-3, so vanilla's own `nextInt(5)` draws an empty chunk one time in
+five; and any replacement sheet must keep the strip in the same place, which is
+why the supplied Outlands sheets were checked cell for cell before use.
+
+`AscendedGolemMob` is the exception — it overrides `spawnDeathParticles` with
+ten `GameResources.ascendedParticle` shards, which sample a particle atlas
+rather than the body, so there is nothing to swap there.
+
+### Where a second draw pass hides a mob's minimum-light floor
+
+`CrystalArmadillo` draws twice: the body at raw `.light(light)`, then
+`crystalArmadillo_light` — a dithered mask over 22,996 of the body's 50,720
+opaque pixels — at `.light(light.minLevelCopy(100.0F))`. **The floor lives
+entirely on the second pass.** Port only the first and the mob is invisible at
+ambient 0, which in this mod matters: the Outlands cast are dark-spawners in a
+level that follows the day/night cycle. `CrystalGolemMob` (100) and
+`AscendedGolemMob` (150) carry their floors on their single pass instead, so
+they show the pattern by contrast.

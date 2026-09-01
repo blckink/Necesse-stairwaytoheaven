@@ -213,6 +213,13 @@ spirecattabby=Peanut
 mistserpent=Nebelschlange
 mistserpentbody=Nebelschlange
 mistserpenttail=Nebelschlange
+
+// Die eigene Besetzung des Käferödlands: unsere Kunst auf Vanillas
+// aufgestiegenen Körpern.
+crookedgolem=Krummer Golem
+rarecrookedgolem=Seltener krummer Golem
+crookedarmadillo=Krummes Gürteltier
+
 [biome]
 gloomfen=Düsterfenn
 ashenreach=Aschenöde

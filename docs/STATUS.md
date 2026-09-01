@@ -103,12 +103,13 @@ blocker for building any realm past Ghost.
 
 ## Sprites, for rework
 
-- **`docs/SPRITE_INVENTORY.md`** — all **317** PNGs this mod ships, by folder,
+- **`docs/SPRITE_INVENTORY.md`** — all **323** PNGs this mod ships, by folder,
   with dimensions. This is the rework list.
 - **`docs/VANILLA_ASSET_MAP.md`** — every vanilla asset borrowed, per realm:
-  3 mobs by string ID, 8 vanilla mobs subclassed, 12 textures recoloured at
-  load, 2 items dropped, 3 sheets used as a format template. Replacing these
-  means drawing something new, not reworking a file.
+  **0** mobs by string ID (the Outlands' last three were replaced on
+  2026-09-01), 8 vanilla mobs subclassed for behaviour AND sheet, 12 textures
+  recoloured at load, 2 items dropped, 6 sheets used as a format template.
+  Replacing these means drawing something new, not reworking a file.
 
 **Before touching any PNG:** they are all written by `tools/asset_generator/`.
 A hand-edited PNG is reverted on the next run. Supplied art goes in

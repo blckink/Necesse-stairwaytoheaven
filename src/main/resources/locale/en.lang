@@ -213,6 +213,12 @@ spirecattabby=Peanut
 mistserpent=Mistserpent
 mistserpentbody=Mistserpent
 mistserpenttail=Mistserpent
+
+// The Beetle Outlands' own cast: our art on vanilla's ascended bodies.
+crookedgolem=Crooked Golem
+rarecrookedgolem=Rare Crooked Golem
+crookedarmadillo=Crooked Armadillo
+
 [biome]
 gloomfen=Gloomfen
 ashenreach=Ashen Reach
