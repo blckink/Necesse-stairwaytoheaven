@@ -52,7 +52,17 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              # Supplied hand-drawn art, copied in as-is: the sheet is
              # already vanilla RockObject format (4 variants x 13 rows
              # of 16px), so there is nothing to repack.
-             "objects/evilwall.png", "items/evilwall.png")
+             "objects/evilwall.png", "items/evilwall.png",
+             # Supplied replacements for sprites the generator used to write.
+             # Once a file is here the generator must stop producing it, or the
+             # next full run silently overwrites the supplied art.
+             "objects/cloudberrybush.png", "objects/cloudberrysapling.png",
+             "objects/beetlewall.png", "objects/cloudmarblewall.png",
+             # Our own art for the three Outland mobs, which used to wear
+             # vanilla's sheets by string ID.
+             "mobs/crookedgolem.png", "mobs/rarecrookedgolem.png",
+             "mobs/crookedarmadillo.png",
+             "objects/statues/gloomraven.png")
 
 
 def _stamp(out, rel):
