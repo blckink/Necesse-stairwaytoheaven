@@ -17,9 +17,8 @@ on the next generator run. The exceptions are the supplied files listed in
 sprite sheet) is excluded from the counts below; see `docs/VANILLA_ASSET_MAP.md`
 and `docs/ART_DIRECTION.md` for what it holds.
 
-**334 sprites** across 13 folders. *(Regenerated 2026-09-02 — the previous count
-of 323 predated the Mistserpent resheet, the livestock art pass and the Eden
-tiles; `cloudlamb.png`/`cloudlamb_sheared.png` are gone with the mob.)*
+**341 sprites** across 13 folders. *(Regenerated 2026-09-02 after the supplied
+Mob and Tile upload; the current files in those folders are authoritative.)*
 
 ## `./` — 1 file(s)
 
@@ -161,11 +160,14 @@ tiles; `cloudlamb.png`/`cloudlamb_sheared.png` are gone with the mob.)*
 | `withershrub.png` | 32x32 |
 | `zephyrharness.png` | 32x32 |
 
-## `mobs/` — 30 file(s)
+## `mobs/` — 35 file(s)
 
 | file | size |
 |---|---|
 | `auroraflake.png` | 64x128 |
+| `catbasket.png` | 32x32 |
+| `cloudlamb.png` | 384x320 |
+| `cloudlamb_sheared.png` | 384x320 |
 | `crookedarmadillo.png` | 512x320 |
 | `crookedgolem.png` | 384x320 |
 | `dawnpiercer.png` | 384x256 |
@@ -177,12 +179,14 @@ tiles; `cloudlamb.png`/`cloudlamb_sheared.png` are gone with the mob.)*
 | `gimmergoat-ram.png` | 384x320 |
 | `gimmergoat-ram_shorn.png` | 384x320 |
 | `glimmergoat-lamb.png` | 384x320 |
+| `glimmergoat.png` | 384x320 |
+| `glimmergoat_shorn.png` | 384x320 |
 | `gloomshade.png` | 384x256 |
 | `glowmoth.png` | 192x128 |
 | `mistserpent.png` | 320x1792 |
-| `mistserpent_mask.png` | 64x64 |
 | `mistserpent_shadow.png` | 320x1792 |
-| `mistserpenthead.png` | 68x68 |
+| `mistserpent_head.png` | 68x68 |
+| `mistserpentshard.png` | 18x32 |
 | `nimbusyak.png` | 384x320 |
 | `nimbusyak_bull.png` | 384x320 |
 | `nimbusyak_calf.png` | 384x320 |
@@ -387,13 +391,14 @@ tiles; `cloudlamb.png`/`cloudlamb_sheared.png` are gone with the mob.)*
 | `stormdisc.png` | 32x32 |
 | `stormdisc_shadow.png` | 32x32 |
 
-## `tiles/` — 20 file(s)
+## `tiles/` — 21 file(s)
 
 | file | size |
 |---|---|
 | `ashsand_splat.png` | 224x288 |
 | `aurorashoal_splat.png` | 224x480 |
 | `beetlefreak_splat.png` | 224x288 |
+| `beetleground_splat.png` | 224x576 |
 | `blackpeat_splat.png` | 224x192 |
 | `charfloor_splat.png` | 224x192 |
 | `cloudturf_splat.png` | 224x576 |

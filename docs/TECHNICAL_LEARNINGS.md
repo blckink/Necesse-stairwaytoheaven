@@ -3097,3 +3097,12 @@ The dedicated server formats decimal percentages with the host locale:
 checks that parse diagnostic numbers must therefore accept both `.` and `,` as
 the decimal separator. The observed calm share was inside its required band;
 the former dot-only regex was the failure.
+
+## Client texture paths need their exact supplied filename (2026-09-02, VERIFIED [build])
+
+`buildModJar` cannot prove that a client-only texture exists: the dedicated
+server does not load `GameResources`. The supplied Mistserpent map marker is
+`mobs/mistserpent_head.png`; the former literal `mobs/mistserpenthead` compiled
+and survived a server boot but would have drawn the client ERR texture. The
+literal-path pass in `tools/locale_audit.py` caught it. Keep supplied filenames
+and `GameTexture.fromFile` literals in lockstep, including underscores.

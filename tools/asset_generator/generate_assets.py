@@ -50,7 +50,12 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              # SAME alpha mask, so it is a straight overwrite; beetleground
              # is new and shares overgrowneden's mask exactly (83,428 opaque
              # pixels in both), so it is ready for whatever ground claims it.
+             # The five established biome/floor splats are supplied art too;
+             # none of these may be recreated by gen_splats below.
              "tiles/beetlefreak_splat.png", "tiles/beetleground_splat.png",
+             "tiles/cloudturf_splat.png", "tiles/aurorashoal_splat.png",
+             "tiles/blackpeat_splat.png", "tiles/ashsand_splat.png",
+             "tiles/charfloor_splat.png",
              "objects/skyseraphtree.png", "items/skyseraphtree.png",
              "objects/statues/seraph.png", "items/seraphstatue.png",
              "objects/cloudtree.png", "items/cloudtree.png",
@@ -103,8 +108,8 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              "mobs/gimmergoat-ram.png", "mobs/gimmergoat-ram_shorn.png",
              "mobs/glimmergoat-lamb.png",
              "mobs/mistserpent.png", "mobs/mistserpent_shadow.png",
-             "mobs/mistserpenthead.png", "mobs/gloomshade.png",
-             "projectiles/mistserpentshard.png",
+             "mobs/mistserpent_head.png", "mobs/mistserpentshard.png",
+             "mobs/gloomshade.png", "mobs/catbasket.png",
              # The two spire cats on vanilla's DUCK sheet (384x320), the
              # spark beetle and the cat basket.
              "mobs/spirecatblack.png", "mobs/spirecattabby.png",
@@ -153,10 +158,7 @@ def main():
     # path; the marble checker deliberately stays legacy — see gen_furniture)
     # v0.5 art sprint: sky grounds ship 6 variants like vanilla grass (was 3) —
     # richer repetition breakup across large meadows.
-    gen_splats.build_splat(f"{out}/tiles/cloudturf_splat.png", gen_splats.material_cloudturf, 6, 0xC1,
-                           features=gen_splats.features_cloudturf)
-    gen_splats.build_splat(f"{out}/tiles/aurorashoal_splat.png", gen_splats.material_auroraturf, 5, 0xA5,
-                           features=gen_splats.features_auroraturf)
+    # cloudturf_splat and aurorashoal_splat are supplied art (CONVERTED above).
     gen_splats.build_splat(f"{out}/tiles/skystone_splat.png", gen_splats.material_skystone, 5, 0x51,
                            features=gen_splats.features_skystone)
     gen_splats.build_splat(f"{out}/tiles/stormslate_splat.png", gen_splats.material_stormslate, 6, 0x57,
@@ -170,10 +172,7 @@ def main():
     # v0.3: the Veil — terrain, water, flora, rift, lantern, shade
     gen_splats.build_splat(f"{out}/tiles/murkmoss_splat.png", gen_veil.material_murkmoss, 3, 0x3E,
                            features=gen_veil.features_murkmoss)
-    gen_splats.build_splat(f"{out}/tiles/blackpeat_splat.png", gen_veil.material_blackpeat, 2, 0xB1,
-                           features=gen_veil.features_blackpeat)
-    gen_splats.build_splat(f"{out}/tiles/ashsand_splat.png", gen_veil.material_ashsand, 3, 0xA5,
-                           features=gen_veil.features_ashsand)
+    # blackpeat_splat and ashsand_splat are supplied art (CONVERTED above).
     gen_splats.build_splat(f"{out}/tiles/murkwater_shallow_splat.png", gen_veil.material_murkwater(False), 1, 0x3E77, frames=8)
     gen_splats.build_splat(f"{out}/tiles/murkwater_deep_splat.png", gen_veil.material_murkwater(True), 1, 0xDEE7, frames=8)
     # remove the superseded legacy strips so only one source of truth ships
@@ -250,8 +249,7 @@ def main():
     # Buildable wood floors
     gen_splats.build_splat(f"{out}/tiles/nimbusfloor_splat.png", gen_splats.material_nimbusfloor, 2, 0x81B,
                            features=gen_splats.features_nimbusfloor)
-    gen_splats.build_splat(f"{out}/tiles/charfloor_splat.png", gen_splats.material_charfloor, 2, 0xC4A,
-                           features=gen_splats.features_charfloor)
+    # charfloor_splat is supplied art (CONVERTED above).
     gen_splats.build_splat(f"{out}/tiles/prismfloor_splat.png", gen_splats.material_prismfloor, 2, 0x981,
                            features=gen_splats.features_prismfloor)
     # Fauna: two critters, two enemies, bestiary icons

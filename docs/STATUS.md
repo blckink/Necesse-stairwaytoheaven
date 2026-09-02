@@ -131,10 +131,9 @@ house travel network from `WORLD_DESIGN.md` A2.3 remains unbuilt.
 
 ## Sprites, for rework
 
-- **`docs/SPRITE_INVENTORY.md`** — all **334** PNGs this mod ships (regenerated
-  2026-09-02; was 323 — the Mistserpent resheet, the livestock art pass and the
-  Eden tiles landed since), by folder, with dimensions. This is the rework
-  list.
+- **`docs/SPRITE_INVENTORY.md`** — all **341** PNGs this mod ships (regenerated
+  2026-09-02 after the supplied Mob and Tile upload), by folder, with
+  dimensions. This is the rework list.
 - **`docs/VANILLA_ASSET_MAP.md`** — every vanilla asset borrowed, per realm:
   **0** mobs by string ID (the Outlands' last three were replaced on
   2026-09-01), 6 vanilla mobs subclassed for behaviour (down from 8: the
