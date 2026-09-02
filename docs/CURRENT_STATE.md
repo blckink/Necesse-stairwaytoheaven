@@ -372,6 +372,89 @@ bring back the complaint that created it. That compromise is named in
 `crookedNow=900 crookedTrue=4210` every run so it cannot quietly become
 permanent.
 
+## The Veil's fog and Soul Exposure — IMPLEMENTED, not player-confirmed
+
+`WORLD_DESIGN` §8 asked for this from the start and nothing had been built.
+As of 2026-09-02 the gate exists, in `src/main/java/stairwaytoheaven/veil/`.
+
+**What it is.** Past realm depth **0.581** — about **3486 tiles** from the
+spire — a permanent fog stands on the Skyreach. A player inside it without the
+Veil Mark accumulates **Soul Exposure**, one stack per second, and gives one
+back per second once out (after a three-second grace, so stepping over the line
+and back does not shake it off). §8's table is the code:
+
+| seconds | what happens |
+|---|---|
+| 1-3 | sight dims (blindness 0.10 → 0.20) |
+| 4-7 | and slowed (0.15 → 0.30) |
+| 8-12 | and life drains (10 → 30 dps, health regen forced to zero) |
+| 13+ | 150 dps — a few seconds, after twelve seconds of warning |
+
+The bands are cumulative and the ceiling is 16 stacks. The slow and the regen
+shutdown are installed as high-priority `setMinModifier`/`setMaxModifier`
+floors, the way `StarvingBuff` does it, so no trinket can shrug the fog off:
+§8 says the only way through is §9's Mark.
+
+**Where the depth comes from.** It is derived, not typed:
+`VeilRegion.deriveVeilDepth()` scans `RealmDepth.weightOf` for the first depth
+where Steinfeld stops being wholly itself and the Ghost Realm has any weight —
+i.e. exactly §8's place between §7 and §10, and §38's step from *06 Whispers
+Beyond the Stones* to *07 Into the Mist*. Retune the bands and the fog line
+follows. This is also **the first thing in the mod that the realm field
+actually decides**; until now `RealmDepth` was a pure function nothing read.
+
+**The teleport answer (§8 is explicit about it).** There is no wall, no blocked
+tile, no boundary event and no "entered the fog" hook anywhere in the package.
+`VeilWorldData.tick()` — a `WorldData`, so `WorldEntity.serverTick` runs it
+every tick — asks each online player once a second where they are standing and
+applies the buffs on the answer. Rope, portal, bed respawn, mount, admin
+teleport, log out inside and back in: same question, same answer.
+
+**What gates the unlock, today.** §9's séance questline — Madame Orla, the
+Séance Table, the Ferryman, five ingredients — **is not built**. The Mark is a
+set of `ServerClient.authentication` values in `VeilWorldData` (a `WorldData`,
+like `SkywatchWorldData`, so it survives a generation bump and cannot be
+dropped as an item), per character as §9 requires, and the only thing that
+writes it is the admin command **`/veilmark [player] [1/0]`**. When §9 lands,
+the Ferryman calls `VeilWorldData.grantMark` and nothing else changes.
+`/veilmark` with no arguments reports where the wall is, how deep the player is
+standing and how many seconds of exposure they carry — which is the answer to
+"why is nothing happening", because it is almost always "you are 3000 tiles
+short".
+
+**One gate, not two.** §42.4 says Soul Exposure and the Infernal Visa are the
+same mechanic described twice and must not become two code paths. The split is
+along the line where they differ and nowhere else: `VeilRegion` = where,
+`SoulExposureBuff` = what it costs, `VeilWorldData` = the clock and the unlock
+ledger. Hell's gate is a second threshold, a second buff table and a second
+auth set in the same three files. Nothing was generalised past that.
+
+**No new art.** The debuff wears vanilla's `buffs/spirithaunted` icon and the
+fog is vanilla's own `particles/fog` sheet, both by literal path, both recorded
+in `docs/VANILLA_ASSET_MAP.md` §1.3b.
+
+### Two things to know before playing it
+
+- **The fog currently overlaps the deep Beetle Outlands.** The Outlands sit at
+  900 tiles where `RealmDepth` puts the Crooked Beyond at 4210 — the
+  compromise named in `SkyOutlands.WRONG_START` — so everything past 3486
+  tiles is now inside the Veil, including the outer Outlands. That is
+  *correct* against the concept (§39 gates the Crooked Beyond behind the Veil
+  Mark) and it resolves itself the day the Outlands move out to their true
+  band. Until then a player who walks far enough out into the Outlands will
+  start taking Soul Exposure.
+- **There is nothing behind the fog yet.** Eden, Steinfeld and the Ghost Realm
+  are not built, so past the wall is more Skyreach and more Outlands. The gate
+  is real; the place it gates is not there yet. That is the signal that the
+  next chapter belongs behind it.
+
+### Not implemented from §9
+
+The Mark disables Soul Exposure and leaves the fog visible, as §9 requires. It
+does **not** yet "part locally around the player when crossing" — the fog is
+drawn client-side by an invisible marker buff that does not know whether its
+owner is marked. Cosmetic, and a later pass.
+
 ## Direction change (2026-08-31) — ONE world, not two
 
 The player's call, and it reshapes the roadmap:

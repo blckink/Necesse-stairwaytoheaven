@@ -50,6 +50,20 @@ chapter; the ground is real now.
 | `overgrownedentile` | tile | Eden grass: deep lush ground that sprouts grass tufts on its own, spreads to dirt, and seeds itself back at 4% when mined — the Garden of Eden's first ground, plantable today. |
 | `overgrownedenseed` | item | Eden grass seeds: plant on dirt or Cloudturf to start an Eden patch; found rarely in sky crates, then self-renewing. |
 
+## The Veil — Geisternebel, and the gate it is
+
+`docs/WORLD_DESIGN.md` §8: past a defined realm depth a permanent fog stands,
+and until the player carries §9's Veil Mark it stacks **Soul Exposure** on
+them — vision at 0-3 seconds, slow at 4-7, health drain at 8-12, massive
+damage past 12. Built as ONE gate mechanic (§42.4) so the Infernal Visa is a
+second configuration rather than a second code path. See
+`stairwaytoheaven/veil/`.
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `soulexposure` | buff | Soul Exposure: what the Veil's fog does to anyone crossing it without the Veil Mark — one stack per second in the fog, dimming the view, then slowing you, then draining life, then killing you outright at thirteen seconds, and giving a stack back per second once you are out. |
+| `veilfog` | buff | The Veil's fog itself: an invisible marker the server puts on anyone standing past the fog line, which draws the drifting mist on their screen. It stays after the Veil Mark is earned, so the border between Steinfeld and the Ghost Realm remains something you can see rather than something you only remember. |
+
 ## Baseline — registered before the ledger existed
 
 These predate the ledger and are described in `CHANGELOG.md`,

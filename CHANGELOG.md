@@ -3,6 +3,60 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [Unreleased] — the Veil closes — 2026-09-02
+
+### Added
+- **The Veil's fog and the Soul Exposure debuff** (`WORLD_DESIGN` §8), in the
+  new `stairwaytoheaven/veil/` package. Past realm depth 0.581 — about 3486
+  tiles from the spire — a permanent fog stands, and a player inside it without
+  the Veil Mark stacks Soul Exposure at one second per stack: sight dims at
+  1-3s, movement slows at 4-7s, life drains at 8-12s, and at 13s it deals 150
+  damage a second. Stacks come back at one a second once you are out, after a
+  three-second grace, so stepping over the line and back does not clear it.
+  A short step in is possible; running through is not.
+- `soulexposure` — the visible debuff, on `QuicksandStacksBuff`'s stacking
+  shape, with English and German names, a tooltip that prints the band the
+  player is actually in, and a death message that says the Veil killed them
+  rather than vanilla's fallback "was too buffed".
+- `veilfog` — an invisible marker the server puts on anyone past the fog line;
+  it draws the drifting mist client-side. It stays after the Mark is earned,
+  because §9 requires the border to remain visible once it stops hurting.
+- `/veilmark [player] [1/0]` — grants, revokes and reports the Veil Mark, and
+  prints where the wall is and how deep the player is standing. §9's séance
+  questline is not built, so this is the only thing that writes the unlock
+  today; the Ferryman will call the same method.
+- `tools/locale_audit.py` now follows `BuffRegistry.registerBuff`. A visible
+  buff without a `[buff]` name prints `buff.<id>` in the HUD forever, and
+  nothing was checking it. Invisible buffs (everything on vanilla's
+  `ArmorBuff` — every trinket and set bonus the mod registers — and any of our
+  classes that sets `isVisible = false`) are correctly exempt, because the
+  engine never asks for their key. The audit also now resolves an ID given as
+  a `static final String` constant rather than skipping it.
+
+### Design notes
+- Built as **one** gate mechanic, per §42.4: `VeilRegion` decides where,
+  `SoulExposureBuff` decides what it costs, `VeilWorldData` holds the clock and
+  the unlock ledger. The Infernal Visa (§18) is a second threshold, a second
+  buff table and a second auth set in those same three files — not a second
+  implementation.
+- **The region check is a region check.** §8 forbids blocking tiles and calls
+  out teleport abuse by name, so there is no wall, no boundary event and no
+  entry hook: a `WorldData` tick asks every online player once a second where
+  they are standing. However they got there, the answer is the same.
+- The fog line is **derived** from `RealmDepth`'s own bands rather than typed,
+  so retuning the concept's table moves the fog with it. It is also the first
+  thing in the mod that the realm field actually decides.
+- **No new art.** The icon is vanilla's `buffs/spirithaunted` and the mist is
+  vanilla's `particles/fog`, both loaded by literal path and recorded in
+  `docs/VANILLA_ASSET_MAP.md` §1.3b.
+
+### Known consequence
+- The fog overlaps the deep Beetle Outlands, which sit at 900 tiles where the
+  realm field puts the Crooked Beyond at 4210. Correct against §39, which gates
+  the Crooked Beyond behind the Veil Mark, and it resolves itself when the
+  Outlands move out to their true band — but until then, walking far enough
+  into the Outlands means taking Soul Exposure.
+
 ## [Unreleased] — the Outlands get their own faces — 2026-09-01
 
 ### Changed

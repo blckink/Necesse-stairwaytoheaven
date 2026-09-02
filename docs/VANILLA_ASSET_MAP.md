@@ -70,6 +70,17 @@ stand-in and swaps out by shipping a real sheet under the mod's own name.
 |---|---|---|
 | `items/clothboots` | Skyreach | Glimmerstride Boots |
 
+### 1.3b Vanilla textures used as-is by literal path
+
+Loaded straight from the game's own resources, no copy in
+`src/main/resources/`. Each swaps out by shipping a mod file under the name the
+engine would look for by default.
+
+| vanilla texture | realm | used for | referenced in |
+|---|---|---|---|
+| `buffs/spirithaunted` | the Veil | the Soul Exposure debuff icon — vanilla's own "the dead have hold of you" icon, 32x32 | `veil/SoulExposureBuff.BORROWED_ICON`; swaps out by adding `buffs/soulexposure.png` and deleting the `loadTextures()` override |
+| `particles/fog` (`GameResources.fogParticles`) | the Veil | the drifting mist the fog is made of — the same sheet `HuginStatueObjectEntity` uses, four 32x16 frames | `veil/VeilFogBuff.clientTick` |
+
 ### 1.4 Vanilla items used as drops
 
 | vanilla item | realm | dropped by |

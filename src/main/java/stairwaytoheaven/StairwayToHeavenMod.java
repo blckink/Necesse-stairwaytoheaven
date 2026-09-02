@@ -101,6 +101,11 @@ public class StairwayToHeavenMod {
                 new necesse.level.maps.mapData.TextureGameMapIcon("ui/mapicons/skystairs"));
         necesse.engine.registries.MapIconRegistry.registerIcon("skycat",
                 new necesse.level.maps.mapData.TextureGameMapIcon("ui/mapicons/skycat"));
+        // The Veil's fog and its Soul Exposure debuff (WORLD_DESIGN §8), plus
+        // the world record of who carries the Veil Mark (§9). One call, because
+        // §42.4 asks for ONE gate mechanic rather than a second code path when
+        // the Infernal Visa lands — see stairwaytoheaven.veil.VeilGate.
+        stairwaytoheaven.veil.VeilGate.register();
     }
 
     private void registerDimension() {

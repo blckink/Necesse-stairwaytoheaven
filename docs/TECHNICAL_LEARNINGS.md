@@ -2980,3 +2980,112 @@ ambient 0, which in this mod matters: the Outlands cast are dark-spawners in a
 level that follows the day/night cycle. `CrystalGolemMob` (100) and
 `AscendedGolemMob` (150) carry their floors on their single pass instead, so
 they show the pattern by contrast.
+
+## An environmental stacking debuff, end to end (2026-09-02, VERIFIED [jar])
+
+Everything the Veil's Soul Exposure needed, read out of the 1.3.2 jar. The
+vanilla archetype is `QuicksandStacksBuff` — an environmental debuff whose
+source re-applies it while a condition holds and whose stacks drain on their
+own once it stops — with `SwampSporesBuff` and `StarvingBuff` supplying the
+rest.
+
+### `overridesStackDuration()` is what turns stacks into a clock
+
+With it false, every stack carries its own `BuffTime` and they expire
+independently. With it **true**:
+
+* `ActiveBuff.stack` (ActiveBuff.java:103-108) keeps exactly ONE `BuffTime`,
+  takes the LONGER of the old and the new duration, and adds the stack counts.
+  So a source that re-applies faster than the duration runs out can only ever
+  push the count up — the decay never fires while you are standing in it.
+* `ActiveBuff.tickExpired` (:183-193) then, when that single time runs out,
+  decrements ONE stack and restarts the same time at
+  `getRemainingStacksDuration(buff, sendUpdatePacket)` ms instead of removing
+  the buff. That method is therefore the decay rate, in milliseconds per stack.
+  Setting its `AtomicBoolean` sends a buff update packet per decay, which a
+  buff whose stack count IS its severity needs.
+* At one stack left the same branch takes `stacks >= 1` false and calls
+  `remove()`. There is no "zero stacks" state to handle.
+
+Vanilla's own numbers: swamp spores 100 stacks decaying at 25 ms
+(`SwampSporeObjectEntity.applyBuffs` re-applies every 100 ms with a 200 ms
+duration), quicksand 100 stacks at 100 ms.
+
+### The DOT modifier is multiplied by the stack count — by the ENGINE
+
+`BuffManager.tickDamageOverTime` (BuffManager.java:292):
+
+```java
+float dot = buff.getModifier(dotModifier) * (float)buff.getStacks();
+buff.dotBuffer += dot * damageMod / 20.0F;
+```
+
+So `POISON_DAMAGE_FLAT` is damage per second **per stack**, and the tick rate
+is 20/s. A buff whose severity is not linear in its stacks — a step function,
+say — has to store `desiredDps / stacks` or the curve is silently squared.
+
+The four channels are `POISON_`, `FIRE_`, `FROST_` and `BLEED_DAMAGE_FLAT`,
+each gated by its `*_DAMAGE` multiplier, which defaults to 1.0F
+(`Modifier`'s third constructor argument is `defaultBuffManagerValue`). Damage
+goes through `owner.setHealth(health - damage, attacker)` — so it ignores
+armour, is scaled by `difficulty.damageTakenModifier` for players, sets
+`lastCombatTime`, and is skipped entirely when `canTakeDamage()` is false.
+Vanilla routes "harmed by the dead" through the POISON channel:
+`HauntedBuff`, `SpiritCorruptedBuff` and `DryadPossessedBuff` all use it.
+
+### An unattributed DOT kill reads "was too buffed"
+
+If `ActiveBuff.getAttacker()` is null the DOT loop substitutes
+`Mob.TOO_BUFFED_ATTACKER` (BuffManager.java:307, Mob.java:147), whose death
+table is `oneOf("toobuffed")` → *"&lt;victim&gt; was too buffed"*. An
+environmental killer therefore needs its own `Attacker` with a
+`DeathMessageTable`; `getFirstAttackOwner()` returning null is fine and credits
+the kill to nobody. Message keys live in the `deaths` locale category with
+`<victim>` and `<attacker>` placeholders, and a mod's own `.lang` merges into
+that vanilla category exactly as it already does into `misc`.
+
+### `setMinModifier` / `setMaxModifier` beat immunity gear
+
+`ModifierManager.updateModifiers` (ModifierManager.java:42-83) rebuilds both
+the modifier values AND the limit table from scratch each pass, over
+`getModifierContainers()` — which for a mob is `buffManager.buffs.values()`. So
+a floor or ceiling set on an `ActiveBuff` disappears the moment that buff is
+removed, and while it is there it is combined by priority. `StarvingBuff` uses
+priority 10000 to force `SLOW` up and `HEALTH_REGEN`/`COMBAT_HEALTH_REGEN` down
+to zero; `QuicksandStacksBuff` uses 1000000 for its slow. Capping the
+MULTIPLIER at zero is what actually stops regen, because
+`Mob.getRegen` (Mob.java:3926) is
+`(flat + HEALTH_REGEN_FLAT) * HEALTH_REGEN`.
+
+`BuffModifiers.BLINDNESS` is the vision-reduction modifier and it is read once,
+in `MainGame` (MainGame.java:492), which eases the screen toward it — so a buff
+only has to set it. `SwampSporesBuff` caps its own at 0.75.
+
+### A mod's buff icon can be a vanilla one, safely, on a headless server
+
+`Buff.loadTextures()` (Buff.java:181) reads `buffs/<stringID>` and falls back to
+`buffs/unknown`. Overriding it to `GameTexture.fromFileRaw("buffs/<a vanilla
+buff id>")` borrows vanilla art with no copy in the mod. It is safe on a
+dedicated server because the only caller is `GameResources` (GameResources.java
+:861), which the server never builds — the same reason `Buff.clientTick` may
+touch `GameResources.fogParticles` while `Buff.serverTick` may not.
+`BuffManager` keeps the two apart: `serverTick()` calls only `ab.serverTick()`
+(BuffManager.java:220) and `clientTick()` only `ab.clientTick()` (:257).
+
+## A `WorldData` is the mod's only per-tick view of every online player (2026-09-02, VERIFIED [jar])
+
+`WorldEntity.serverTick` calls `data.tick()` on every registered `WorldData`
+(WorldEntity.java:584-586), and `clientTick` does the same (:555-557) — so
+every `tick()` body needs an `isServer()` guard. That makes a `WorldData` the
+one hook a mod can take that sees `server.getClients()` every tick without
+owning a level, a mob or an object, which is what a check against a world
+REGION rather than against a tile needs.
+
+**It is created lazily, on first access.** `WorldEntity.addWorldData`
+(:1176-1183) is only called when something asks, so a record nothing reads is
+never created and never ticks. Both `surface/SkyfallWorldData` and
+`veil/VeilWorldData` are therefore bootstrapped from a `ServerStartEvent`
+listener, which fires from `Server.markWorldInitialized` — after `world.init()`
+has loaded the world entity, so the record either comes back from the save or
+is created empty and saved from then on. Forgetting that listener produces a
+feature that compiles, registers, and silently never runs.
