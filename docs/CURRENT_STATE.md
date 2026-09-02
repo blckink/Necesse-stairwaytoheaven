@@ -4,16 +4,19 @@ Short, current, and rewritten as things change. History belongs in
 `CHANGELOG.md` and `docs/PLAYTEST_LOG.md`, not here.
 
 **Version:** 0.6.0 (+ unreleased) · **Game:** Necesse 1.3.2
-**Branch:** `claude/aktueller-stand-offene-themen-k4ztas`
-**Updated:** 2026-08-31 — the Beetle Outlands landed; the direction changed to
-ONE world (see "Direction change" below)
+**Branch:** `codex/realms-integration` (destined for `master`)
+**Updated:** 2026-09-02 — Veil gate, four settlers, Crooked Beyond and the
+Ghost Realm integrated; Eden and Steinfeld remain isolated WIP branches.
 
 ## Architecture in one screen
 
-Two extra dimensions registered through
-`LevelIdentifier.IDENTIFIER_TO_DIMENSION`: **Skyreach** (`skyreach`, +1) and
-**The Veil** (`veil`, −3). Both are `BiomeGeneratorStackLevel`s that stream
-regions, so they are effectively infinite and generate lazily.
+Four extra dimensions are registered through
+`LevelIdentifier.IDENTIFIER_TO_DIMENSION`: **Skyreach** (`skyreach2`, +1),
+**The Veil** (`veil2`, −3), **Ghost Realm** (`ghost2`, +4), and **Crooked
+Beyond** (`crooked2`, +5). All four are `BiomeGeneratorStackLevel`s that stream
+regions, so they are effectively infinite and generate lazily. Ghost and
+Crooked compile and register on a real server; their own generated maps have
+not yet been exercised by the integration command.
 
 The **Stairway is a portal**. Wherever it is built on the Surface it routes to
 one canonical Skyreach origin computed from the world-generation seed
@@ -28,8 +31,9 @@ settler (`mobs/WardenSettlerMob`, registered as settler type
 `settlement/WardenSettler`) on the Surface at the player's stairway and hands
 over the Silver Bell.
 
-Assets are **generated, not hand-drawn**: `tools/asset_generator/` writes every
-PNG in `src/main/resources/`. Editing a PNG directly is always wrong.
+Generated assets are maintained through `tools/asset_generator/`. Player-
+supplied replacement PNGs such as the current splats are authoritative inputs
+and are explicitly excluded from generator output.
 
 ## Green — verified working
 

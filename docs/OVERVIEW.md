@@ -14,7 +14,10 @@ registered but unreachable.
 |---|---|---|---|---|
 | **Skyreach** | `SkyLevel` | `skylevel` / `skyreach2` | +1 | **PLAY** |
 | **Veil** | `VeilLevel` | `veillevel` / `veil2` | −3 | **PLAY** |
-| Eden, Steinfeld, Ghost, Infernal Fringe, Hell | — | — | — | **not built** (only the realm-depth field exists: depth 0 = Skyreach, far end = Hell) |
+| **Ghost Realm** | `GhostLevel` | `ghostlevel` / `ghost2` | +4 | **IN** — registered, three biomes/POIs, seven mobs; dedicated realm generation not yet probed |
+| **Crooked Beyond** | `CrookedLevel` | `crookedlevel` / `crooked2` | +5 | **IN** — registered, three biomes/POIs and paired doors; dedicated realm generation not yet probed |
+| Eden, Steinfeld | WIP branches | not merged | +2 / +3 planned | incomplete |
+| Infernal Fringe, Hell Antechamber, Hell | — | — | — | not built |
 
 ## 2. Biomes and who lives in them
 

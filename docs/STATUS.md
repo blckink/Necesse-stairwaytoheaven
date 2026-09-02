@@ -1,7 +1,7 @@
 # What actually works right now
 
 **The one page that answers "was geht jetzt?".** Everything else is design or
-history. Updated 2026-08-31.
+history. Updated 2026-09-02.
 
 **Verification legend** (from `IMPLEMENTATION_RULES.md` §14):
 `[game]` seen in a real client · `[run]` observed in an automated run ·
@@ -12,7 +12,7 @@ history. Updated 2026-08-31.
 
 ---
 
-## 1. Biomes — 8 registered, all generate
+## 1. Biomes — 14 registered
 
 | biome | realm | ground | status |
 |---|---|---|---|
@@ -24,14 +24,23 @@ history. Updated 2026-08-31.
 | Gloomfen | Ghost (in the Veil dimension) | murkmoss | `[run]` full |
 | Ashen Reach | Ghost (in the Veil dimension) | ashsand | `[run]` full |
 | Beetlefreak Hollows | Ghost (in the Veil dimension) | beetlefreak | `[run]` full |
+| Striped Waste | Crooked Beyond (`crooked2`, +5) | crooked stripe | `[build]` painter, mobs and POIs compiled; realm generation not yet run |
+| Spiral Fields | Crooked Beyond | spiral soil + violet mud | `[build]` |
+| Checkerworks | Crooked Beyond | checker stone | `[build]` |
+| Aftergarden | Ghost Realm (`ghost2`, +4) | haunted grass + black cobble | `[build]` painter, mobs and POIs compiled; realm generation not yet run |
+| Bone Orchard | Ghost Realm | violet dirt + spirit stone | `[build]` |
+| Ectomarsh | Ghost Realm | ghost moss + ectoplasm | `[build]` |
 
-**Not built at all:** Eden, Steinfeld, Infernal Fringe, Hell Antechamber, Hell.
+**Not built at all:** Infernal Fringe, Hell Antechamber, Hell. Eden and
+Steinfeld have substantial code on their dedicated WIP branches but are not
+merged because their level/realm/content families are incomplete.
 Eden's first brick exists as of 2026-09-01: `overgrownedentile` (supplied art)
 + `overgrownedenseed`, plantable on dirt and Cloudturf, found in sky crates,
 self-propagating — `[run]`, `eden check` in the integration test. The realm
 band itself ships with the Eden chapter.
-The `RealmDepth` field already places all six realms by distance, but only
-Skyreach and Crooked Beyond have any content behind them.
+The `RealmDepth` field already describes all six distance bands. The completed
+Crooked and Ghost implementations currently use separate registered dimensions;
+their reconciliation with the one-road world concept remains design work.
 
 **Crate loot exists only in the four Skyreach biomes.** The Veil/Ghost biomes
 have no `getCrateLootTable` and no crate is placed there — the harder realms pay
@@ -47,11 +56,10 @@ out nothing. Highest-value open gap.
 | `swh_anchor` | sky anchor | `[run]` |
 | `swh_beacon` | **registered and never handed out** — dead | `[build]` |
 
-**No boss quest exists.** The Séance Circles stand at fixed sites in the
-Outlands and say so out loud (`misc.seancesilent`); there is nothing behind
-them.
+**No boss quest exists.** A Séance Circle in the Outlands now becomes the
+Crooked entry door; circles elsewhere retain the silent-site response.
 
-## 3. NPCs — 4 recruitable + 2 cats
+## 3. NPCs — 8 recruitable/resolvable + 2 cats
 
 | NPC | role | status |
 |---|---|---|
@@ -60,17 +68,25 @@ them.
 | Halda | cellarer, sells the three stations' goods | `[run]` |
 | Ossian Vane | incursion-tier salvage, stock rotates daily | `[run]` |
 | Siggi & Peanut | unkillable cats, live in a placed Cat Basket | `[run]` |
+| Eveleen | Eden botanist; settlement arrival keyed to Eden grass | `[run]` registration/arrival probe |
+| Mortimer | undertaker; arrival keyed to a graveyard | `[run]` registration/arrival probe |
+| Caspern | spirit smith; arrival keyed to an Aether Forge | `[run]` registration/arrival probe |
+| Eleanor | lost soul with stay/pass-on resolution | `[run]` registration/arrival probe; ending not played |
 
-**Not built:** Caretaker, Seraphine, Aurelius, Pip, Eveleen, Madame Orla,
-the Ferryman, Mortimer, Caspern, Eleanor, Mr. Knott, Clerk 666-B, Brim, Moxie,
+**Not built:** Caretaker, Seraphine, Aurelius, Pip, Madame Orla,
+the Ferryman, Mr. Knott, Clerk 666-B, Brim, Moxie,
 Vex. **The Warden's house-room progression does not exist** — see
 `WORLD_DESIGN.md` Part A2.
 
-## 4. Stations — 3, all settler-workable
+## 4. Stations — 5, all settler-workable by archetype
 
 `windsilkloom` · `aetherforge` · `stormglasskiln` — all `[run]`, all placed by
 worldgen where a player can find them. Halda's Fermentation Vat is designed and
 unbuilt.
+
+`soulloom` and `spiritforge` are registered crafting-station workstations and
+compile with their Ghost recipes — `[build]`; the existing integration command
+does not yet probe those two IDs at runtime.
 
 ## 4b. Play feel — A4.1 shipped 2026-09-01
 
@@ -107,9 +123,9 @@ counts.
 
 ## 7. Travel
 
-**Nothing.** No fast travel, no waypoints, no anchors. `WORLD_DESIGN.md` A2.3
-designs it (the Warden's house as the hub) and none of it is built. This is the
-blocker for building any realm past Ghost.
+No fast-travel hub, waypoints or player anchors exist. Paired realm-entry and
+return objects now exist for Crooked and Ghost (`[build]`), while the Warden's
+house travel network from `WORLD_DESIGN.md` A2.3 remains unbuilt.
 
 ---
 
