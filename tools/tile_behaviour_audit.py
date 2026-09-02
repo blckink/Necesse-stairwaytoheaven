@@ -77,6 +77,17 @@ ROLES = {
     # supplied art (kk-sprites), plantable via its seed.
     "overgrownedentile": TERRAIN,
     "aurorashoaltile": TERRAIN,
+    # Eden. paradisesand and edensoil are natural ground; edenmoss is the
+    # dense carpet under the canopy; edenshallows is the turquoise water the
+    # realm is drawn around, so it answers the LIQUID band the mistsea does;
+    # edenrootfloor reads like a floor but is BUILT as terrain -- isFloor=False,
+    # terrain priority 205 rather than PRIORITY_FLOOR's 400, and no recipe -- so
+    # it is classified as what it is, not as what its name suggests.
+    "paradisesandtile": TERRAIN,
+    "edensoiltile": TERRAIN,
+    "edenmosstile": TERRAIN,
+    "edenshallowstile": LIQUID,
+    "edenrootfloortile": TERRAIN,
     "skystonetile": TERRAIN,
     "stormslatetile": TERRAIN,
     "mistseatile": LIQUID,
@@ -488,7 +499,18 @@ CONVERTED_ART = {"beetlefreak", "skyway",
 #   mistsea: density 617-704 (fine) but mean 31.8-49.7 and 40-48% coherent --
 #   the last loud, non-block-built procedural sheet in the mod. It is the sky's
 #   signature surface, so it wants its own deliberate pass, not a drive-by.
-KNOWN_UNFIXED = {"mistsea_shallow", "mistsea_deep"}
+# Splats whose LOUDNESS is a deliberate authorial choice, not a defect. The 2x2
+# coherence rule is a real engine convention and every one of these obeys it
+# (tools/fix_splat.py, applied 2026-09-02). The density and mean |dRGB| bands
+# are a different matter: they describe how VANILLA paints, and vanilla paints
+# grass in five RGB levels. The player's hand-drawn grounds are painterly, and
+# holding cloudturf to mean |dRGB| <= 14 was measured to need a 90% pull toward
+# the ground tone, which erased its snow caps and grass blades outright. That
+# was tried, looked at, and rejected -- docs/ASSET_PIPELINE.md's rule applies:
+# what the player keeps outranks what the audit measures. Re-open any of these
+# the moment a playtest says a ground reads as noise at 1x.
+KNOWN_UNFIXED = {"mistsea_shallow", "mistsea_deep",
+                 "cloudturf", "aurorashoal", "blackpeat", "ashsand", "charfloor"}
 
 
 def _cell_stats(cell):
