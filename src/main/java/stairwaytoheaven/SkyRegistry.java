@@ -244,4 +244,54 @@ public final class SkyRegistry {
     public static int starfallID;
     public static int skywatchTelescopeID;
     public static int skywatchAstrolabeID;
+
+    // ===== v1.0: Steinfeld / The Quiet Reach =====
+
+    /**
+     * One-world dimension index of Steinfeld: the third layer above the
+     * surface. Skyreach is +1 and the Garden of Eden is reserved at +2, so the
+     * road Skyreach -> Eden -> Steinfeld is the dimension order read upward.
+     * Nothing occupies +2 yet; the number is left free rather than closed up,
+     * because renumbering a dimension after a save exists moves every level a
+     * player has built on.
+     */
+    public static final int STEINFELD_DIMENSION = 3;
+    /** Generation-stamped like the Skyreach and the Veil - see {@link #WORLD_GENERATION}. */
+    public static final LevelIdentifier STEINFELD_IDENTIFIER = new LevelIdentifier("steinfeld2");
+
+    public static stairwaytoheaven.realms.steinfeld.QuietMeadowBiome quietMeadow;
+    public static stairwaytoheaven.realms.steinfeld.SlabFieldsBiome slabFields;
+    public static stairwaytoheaven.realms.steinfeld.GraveHeathBiome graveHeath;
+
+    /** Steinfeld's seven grounds, inner band first. See SteinfeldTerrainPainter. */
+    public static int palegrassID;
+    public static int weatheredstoneID;
+    public static int crackedmarbleID;
+    public static int deadsoilID;
+    public static int ashgrassID;
+    public static int miststoneID;
+    public static int gravesoilID;
+    /** The instance the biomes hand back for under-liquid reclamation. */
+    public static stairwaytoheaven.realms.steinfeld.tiles.PaleGrassTile palegrassTile;
+
+    /** Steinfeld flora and props. */
+    public static int witheredtuftID;
+    public static int palereedID;
+    public static int widowflowerID;
+    public static int deadheavenbloomID;
+    public static int ghostmushroomID;
+    public static int spiritmosspatchID;
+    public static int palestonerockID;
+    public static int gravesaltrockID;
+    public static int steinfeldgravestoneID;
+    public static int mournerstatueID;
+    public static int brokenangelID;
+    public static int chapelcolumnID;
+    public static int heavenslabID;
+    public static int gravefenceID;
+
+    /** The Fallen Gate pair: down from the Skyreach, back up from Steinfeld. */
+    public static stairwaytoheaven.realms.steinfeld.objects.SteinfeldGateObject steinfeldGateDown;
+    public static int steinfeldGateDownID;
+    public static int steinfeldGateUpID;
 }
