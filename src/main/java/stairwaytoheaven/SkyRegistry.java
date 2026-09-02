@@ -182,6 +182,35 @@ public final class SkyRegistry {
     public static int deadtreeID;
     public static int ghostLanternID;
 
+    // ===== Tier 4: Crooked Beyond =====
+
+    /**
+     * One-world dimension index of Crooked Beyond: five layers above the
+     * surface, past the Skyreach.
+     *
+     * <p>The ladder the mod keeps is Skyreach +1, Eden +2, Steinfeld +3, Ghost
+     * +4, Crooked +5. Only +1 and -3 exist as levels today; the numbers between
+     * are reserved so a realm landing later cannot renumber a realm already in
+     * players' saves. The index is only ever read through
+     * {@code LevelIdentifier.IDENTIFIER_TO_DIMENSION}, which decides which way
+     * "up" and "down" point between two levels — it is not a coordinate.
+     */
+    public static final int CROOKED_DIMENSION = 5;
+
+    /** Generation-stamped like the Skyreach and the Veil — see {@link #WORLD_GENERATION}. */
+    public static final LevelIdentifier CROOKED_IDENTIFIER = new LevelIdentifier("crooked2");
+
+    /**
+     * The doorway pair between the Skyreach's Outlands rim and Crooked Beyond.
+     *
+     * <p>Held here rather than in {@code realms.crooked.CrookedRealm} because
+     * {@code SeanceCircleObject} — a Skyreach object — is what turns a ring
+     * into the down-side door, and the Skyreach package must not have to know
+     * the realm package's internals to do it.
+     */
+    public static int crookedDoorDownID;
+    public static int crookedDoorUpID;
+
     // ===== v0.4 "The Living Sky": per-biome fill =====
 
     // Trees + saplings
