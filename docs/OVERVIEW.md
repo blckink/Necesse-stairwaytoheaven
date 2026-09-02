@@ -72,9 +72,10 @@ own — they are found, not assigned.
 
 ```
 FIND SPIRE  →  RECRUIT (pay 30k, the beacon lights)  →  CATS (coax Siggi and
-Peanut home)  →  CATS TURN-IN (reward: cat basket, 2 flickerlight garlands)
-→  ANCHOR (deliver 5 aetheriumbar + 20 skystone; reward: Skywatch banner,
-5 aurora petals)  →  DONE
+Peanut home)  →  CATS TURN-IN (reward: 10 Stormsteel bars, plus the cat basket
+and 2 flickerlight garlands)  →  ANCHOR (deliver 20 aetheriumbar + 80 skystone
++ 8 stormsteelbar; reward: the Stormsteel Vambrace — an EPIC trinket — plus the
+Skywatch banner and 5 aurora petals)  →  DONE
 ```
 
 Map markers: `skyspire`, `skystairs`, `skycat`. Everything survives a restart
