@@ -133,3 +133,10 @@ bestiary icon is now cut out of that sheet by `tools/convert_biome_art.py`
 instead of drawn, because a drawn icon drifts the moment the body changes: this
 one was still a pale four-point star while the mob had become a violet eyed
 crystal.
+
+The Glimmergoat doe followed on 2026-09-02, woolly and shorn, both supplied at
+384x320 on vanilla's exact grid — four direction rows of 64 and the four gib
+cells at y256, the same four `mobs/sheep` fills — so both were copied in
+verbatim. **Nothing supplied is recoloured.** `SkyPelt` stays for the parts of
+the herd that have no drawn sheet yet (the buck and the kid, on vanilla's ram
+and lamb), and each one retires the moment its art arrives.

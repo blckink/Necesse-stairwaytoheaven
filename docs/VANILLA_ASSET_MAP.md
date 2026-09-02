@@ -69,7 +69,6 @@ stand-in and swaps out by shipping a real sheet under the mod's own name.
 
 | vanilla texture | realm | used for |
 |---|---|---|
-| `mobs/sheep`, `mobs/sheep_sheared` | Skyreach | Glimmergoat doe + shorn |
 | `mobs/ram`, `mobs/ram_sheared` | Skyreach | Glimmergoat buck + shorn |
 | `mobs/lamb` | Skyreach | Glimmergoat kid |
 | `mobs/chicken`, `mobs/rooster`, `mobs/chick` | Skyreach | Thunderquill, all ages |
@@ -205,6 +204,7 @@ and the realm cannot be faked without them:
 | `spiritghoul` (mob sheet) | `fenwraith` — `arsenal/FenWraithMob` on `mobs/fenwraith.png`, still a `SpiritGhoulMob` subclass for behaviour, with `addDrawables` ported so only the texture changes. Composed by `tools/resheet_mob.py` from the player's cut frames | 2026-09-02 |
 | `mobs/cow`, `mobs/bull`, `mobs/calf` (sheets, recoloured at load time) | `nimbusyak`, `nimbusyak_bull`, `nimbusyak_calf` — the Nimbus Yak's three ages on the mod's own sheets, `GameTexture.fromFile` instead of `SkyPelt.tintFinal`. Composed by `tools/resheet_mob.py`. The mob is still a `CowMob` for behaviour, and `cow_shadow`/`calf_shadow` are still vanilla's — a shadow is a black blob | 2026-09-02 |
 | `mobs/cryoflake` (sheet) | `auroraflake` — `arsenal/AuroraFlakeMob` on `mobs/auroraflake.png`, still a `CryoFlakeMob` subclass for behaviour (chime, shatter particles, the spinning two-layer draw) with `addDrawables` ported so only the texture changes. Supplied already on format: 64x128, body over pulse, both centred on the rotation pivot | 2026-09-02 |
+| `mobs/sheep`, `mobs/sheep_sheared` (sheets, recoloured at load time) | `glimmergoat`, `glimmergoat_shorn` — the doe's woolly and shorn states on the mod's own sheets, supplied already on vanilla's grid. The BUCK and the KID are still `SkyPelt` recolours of `mobs/ram`, `mobs/ram_sheared` and `mobs/lamb` (§1.3) until those sheets arrive, so the herd is two palettes for the moment | 2026-09-02 |
 | `crystalarmadillo` (mob, by string ID) | `crookedarmadillo` — `mobs/CrookedArmadilloMob` on `mobs/crookedarmadillo.png`, same relationship to `CrystalArmadillo`. One thing did NOT come across: vanilla's second `crystalarmadillo_light` glow pass, because we have one sheet and not two — see the class comment | this pass |
 
 The vanilla sheets stay the format reference for these three and are listed as

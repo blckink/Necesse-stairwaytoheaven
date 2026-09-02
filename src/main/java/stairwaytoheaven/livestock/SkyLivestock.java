@@ -244,12 +244,17 @@ public final class SkyLivestock {
         ThunderquillMob.chickTexture = SkyPelt.tintFinal("mobs/chick", "mobs/thunderquill_chick",
                 0.745F, 0.22F, 0.40F, 1.0F, 0.05F);
 
-        // Glimmergoat: aurora teal. Vanilla already has the sheared frames, for
-        // both sexes, which is most of why the goat is a SheepMob.
-        GlimmergoatMob.doeTexture = SkyPelt.tintFinal("mobs/sheep", "mobs/glimmergoat",
-                0.425F, 0.22F, 0.40F, 1.0F, 0.04F);
-        GlimmergoatMob.doeShornTexture = SkyPelt.tintFinal("mobs/sheep_sheared",
-                "mobs/glimmergoat_shorn", 0.425F, 0.16F, 0.40F, 1.0F, 0.04F);
+        // Glimmergoat. Vanilla already has the sheared frames, for both sexes,
+        // which is most of why the goat is a SheepMob.
+        //
+        // The DOE is ours now, drawn and supplied on vanilla's exact grid (four
+        // direction rows of 64 plus the four gib cells at y256 that SheepMob
+        // reads) -- both the woolly and the shorn state. The BUCK and the KID
+        // are still SkyPelt recolours of vanilla's ram and lamb until their
+        // sheets arrive, so the herd is two palettes for the moment: pink does,
+        // teal buck and kid. That is temporary and visible in game.
+        GlimmergoatMob.doeTexture = GameTexture.fromFile("mobs/glimmergoat").makeFinal();
+        GlimmergoatMob.doeShornTexture = GameTexture.fromFile("mobs/glimmergoat_shorn").makeFinal();
         GlimmergoatMob.buckTexture = SkyPelt.tintFinal("mobs/ram", "mobs/glimmergoat_buck",
                 0.425F, 0.26F, 0.40F, 0.97F, 0.03F);
         GlimmergoatMob.buckShornTexture = SkyPelt.tintFinal("mobs/ram_sheared",

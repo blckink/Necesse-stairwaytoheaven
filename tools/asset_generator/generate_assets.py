@@ -86,6 +86,10 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              # names.
              "mobs/nimbusyak.png", "mobs/nimbusyak_bull.png",
              "mobs/nimbusyak_calf.png",
+             # The Glimmergoat doe, woolly and shorn. Same route; the buck
+             # and the kid are still SkyPelt recolours of vanilla's ram and
+             # lamb until their sheets arrive.
+             "mobs/glimmergoat.png", "mobs/glimmergoat_shorn.png",
              "mobs/crookedgolem.png", "mobs/rarecrookedgolem.png",
              "mobs/crookedarmadillo.png",
              # The Eden ground pair, copied verbatim by convert_biome_art
