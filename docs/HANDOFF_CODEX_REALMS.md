@@ -1,3 +1,21 @@
+> **SUPERSEDED 2026-09-02.** Codex took this handoff and finished it. Eden, the
+> Ghost Realm and Crooked Beyond are built, integrated and green on
+> `claude/aktueller-stand-offene-themen-k4ztas`, as are the Veil fog and the
+> four new settlers; `wip/eden`, `wip/ghost`, `wip/crooked`, `wip/veilfog` and
+> `wip/npcs` are fully absorbed and can be deleted. Only `wip/steinfeld` still
+> holds work that is not on the branch.
+>
+> What is actually built now is in `docs/OVERVIEW.md`, which is written from
+> the code. The art still owed is in `docs/ASSET_REQUESTS.md`. The rules below
+> (no new pixel art, vanilla by literal path, never recolour at load time, a
+> smaller realm that builds beats a bigger one that does not) still hold for
+> every future pass, which is why this file is kept rather than deleted.
+>
+> One correction learned since: run the locale audit as
+> `python3 tools/locale_audit.py --vanilla vanilla-sprites`. Without the dump
+> it cannot see vanilla's own resources and reports every legitimate borrowed
+> texture as missing -- 27 phantom errors on the first green build.
+
 # Handoff to Codex — finish the four realms, the Veil fog and the settlers
 
 **Written 2026-09-02.** Six parallel agents were building this; all six were
