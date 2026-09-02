@@ -67,7 +67,7 @@ final class SkyMobs {
     /** Called from initResources — runs on the client only, never on servers. */
     static void loadTextures() {
         stairwaytoheaven.mobs.MistserpentHead.texture = GameTexture.fromFile("mobs/mistserpent");
-        stairwaytoheaven.mobs.MistserpentHead.headTexture = GameTexture.fromFile("mobs/mistserpenthead");
+        stairwaytoheaven.mobs.MistserpentHead.headTexture = GameTexture.fromFile("mobs/mistserpent_head");
         stairwaytoheaven.mobs.MistserpentHead.shadowTexture = GameTexture.fromFile("mobs/mistserpent_shadow");
         ZephyrRayMob.texture = GameTexture.fromFile("mobs/zephyrray");
         StormWispMob.texture = GameTexture.fromFile("mobs/stormwisp");
