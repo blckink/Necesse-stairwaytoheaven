@@ -57,7 +57,7 @@ public class CrookedMatItem extends SkyMatItem {
     public CrookedMatItem(String vanillaIcon, int stackSize, Item.Rarity rarity) {
         super(stackSize, rarity);
         this.vanillaIcon = vanillaIcon;
-        this.setItemCategory("materials", "other");
+        this.setItemCategory("materials", "mobdrops");
     }
 
     @Override
