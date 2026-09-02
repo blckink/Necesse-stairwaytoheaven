@@ -408,8 +408,20 @@ public class SkyWardenMob extends HumanShop {
             stairwaytoheaven.quest.SkyQuests.removeAllOfType(
                     server, stairwaytoheaven.quest.SpireCatsQuest.class);
             quest.catsRewardGiven = true;
+            // Cat Basket is the ONLY source of the object in the whole mod
+            // (docs/OVERVIEW.md §9) -- it stays, and stays mandatory, but per
+            // the endgame rescale it is no longer the payout by itself.
+            // Flickerlight Garland is the same story (no second source
+            // either) and stays an extra at its original count.
             give(client, "catbasket", 1);
             give(client, "flickerlightgarland", 2);
+            // The real payout: a serious stack of the mod's own endgame bar.
+            // Benchmarked against StormsteelArmor.Helmet's own recipe cost
+            // (SkyItems.registerGearRecipes: stormsteelbar 8) plus a 2-bar
+            // margin -- enough on its own to clear the bar cost of any single
+            // Stormsteel recipe (helmet 8, boots 6, vambrace 6) once the
+            // player has that recipe's other ingredients in hand.
+            give(client, "stormsteelbar", 10);
             say(client, "wardencatsdone");
             chapter = chapterFor(quest, this.isSettler());
         }
@@ -423,8 +435,22 @@ public class SkyWardenMob extends HumanShop {
                 stairwaytoheaven.quest.SkyQuests.removeAllOfType(
                         server, stairwaytoheaven.quest.AnchorDeliveryQuest.class);
                 quest.anchorDone = true;
+                // Skywatch Banner and Aurora Petal are the old reward kept
+                // whole, as decoration and a small material top-up -- extras
+                // now, not the payout. The player's own verdict on these two
+                // being the WHOLE finale reward was "das sind keine endgame
+                // belohnungen tbh", and this is the fix.
                 give(client, "skywatchbanner", 1);
                 give(client, "aurorapetal", 5);
+                // The actual endgame payout for finishing the whole chain:
+                // one of the mod's three EPIC trinkets (SkyItems.registerGear),
+                // handed over outright rather than through its own recipe
+                // (stormsteelbar 6 + skyweave 4 + aetheriumbar 2). Stormsteel
+                // is the name on both the ask this quest just took and the
+                // set the mod's endgame gear is built around, so the vambrace
+                // is the one of the three that closes the loop the chain
+                // opened.
+                give(client, "stormsteelvambrace", 1);
                 say(client, "wardenanchordone");
             }
         }
