@@ -96,9 +96,13 @@ def _gen_sheet(path, frame_fn):
 
 
 def gen_critters(mob_dir):
-    _gen_sheet(f"{mob_dir}/glowmoth.png", _moth_frame)
-    # sparkbeetle.png is supplied art now; _beetle_frame stays as the
-    # record of the generated one, and still feeds the bestiary icon.
+    """Nothing left to write here.
+
+    glowmoth.png and sparkbeetle.png are both supplied art now. _moth_frame
+    and _beetle_frame stay below as the record of the generated pair, and both
+    still feed the bestiary icons in gen_critter_icons.
+    """
+    return
 
 
 def gen_critter_icons(icon_dir):

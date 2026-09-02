@@ -103,7 +103,8 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              # The two spire cats on vanilla's DUCK sheet (384x320), the
              # spark beetle and the cat basket.
              "mobs/spirecatblack.png", "mobs/spirecattabby.png",
-             "mobs/sparkbeetle.png", "objects/catbasket.png",
+             "mobs/sparkbeetle.png", "mobs/glowmoth.png",
+             "objects/catbasket.png",
              "mobs/crookedgolem.png", "mobs/rarecrookedgolem.png",
              "mobs/crookedarmadillo.png",
              # The Eden ground pair, copied verbatim by convert_biome_art
