@@ -50,6 +50,14 @@ public class SeanceCircleObject extends SkyDecoObject {
         // needs a boss mob to exist first; until then this is deliberately an
         // honest dead end rather than a door that contradicts the design.
         if (SkyRegistry.SKYREACH_IDENTIFIER.equals(level.getIdentifier())) {
+            if (level.getBiome(x, y) == SkyRegistry.outlands) {
+                level.setObject(x, y, SkyRegistry.crookedDoorDownID);
+                level.getServer().network.sendToClientsWithTile(
+                        new PacketChangeObject(level, 0, x, y, SkyRegistry.crookedDoorDownID),
+                        level, x, y);
+                client.sendChatMessage(new LocalMessage("misc", "crookeddooropened"));
+                return;
+            }
             client.sendChatMessage(new LocalMessage("misc", "seancesilent"));
             return;
         }

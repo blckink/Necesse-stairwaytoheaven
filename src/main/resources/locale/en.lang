@@ -495,3 +495,58 @@ cloudberrysapling=Cloudberry Sapling
 
 [item]
 cloudberrysapling=Cloudberry Sapling
+[level]
+crooked2=Crooked Beyond
+
+[biome]
+stripedwaste=Striped Waste
+spiralfields=Spiral Fields
+checkerworks=Checkerworks
+
+[tile]
+crookedstripetile=Crooked Stripe
+spiralsoiltile=Spiral Soil
+violetmudtile=Violet Mud
+checkerstonetile=Checker Stone
+wrongwaytile=Wrong-Way Ground
+spilltile=The Spill
+
+[object]
+spiraltree=Spiral Tree
+eyeballshrub=Eyeball Shrub
+screamingflower=Screaming Flower
+stripedmushroom=Striped Mushroom
+bentgrass=Bent Grass
+bentlantern=Bent Lantern
+crookedclock=Crooked Clock
+longchair=Long Chair
+groundwindow=Ground Window
+teethrock=Teeth-Rock
+crookedcrate=Crooked Crate
+crookeddoordown=Crooked Door
+crookeddoorup=Return Door
+crookeddoor=Crooked Door
+
+[item]
+oddwood=Oddwood
+warpresin=Warp Resin
+strangefabric=Strange Fabric
+eyeseed=Eye Seed
+stripedshell=Striped Shell
+realityshard=Reality Shard
+
+[itemtooltip]
+oddwoodtip=A length of wood that grew in the wrong direction.
+warpresintip=Sticky proof that reality can leak.
+strangefabrictip=Cloth whose pattern refuses to stay still.
+eyeseedtip=It watches for somewhere unsuitable to grow.
+stripedshelltip=A hard shell divided into impossible bands.
+realityshardtip=A sharp fragment of a rule the world no longer follows.
+
+[mob]
+doormimic=Door Mimic
+tongueplant=Tongue Plant
+stripebeetle=Stripe Beetle
+
+[misc]
+crookeddooropened=The chalk line rises from the ground. It has become a door.

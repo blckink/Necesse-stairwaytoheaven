@@ -91,6 +91,12 @@ ROLES = {
     "prismfloortile": FLOOR,
     "skywaytile": TERRAIN,
     "beetlefreaktile": TERRAIN,
+    "crookedstripetile": TERRAIN,
+    "spiralsoiltile": TERRAIN,
+    "violetmudtile": TERRAIN,
+    "checkerstonetile": TERRAIN,
+    "wrongwaytile": TERRAIN,
+    "spilltile": LIQUID,
 }
 
 # Vanilla base classes we may build on, and the isFloor value each one passes
@@ -121,7 +127,12 @@ PRIORITY_FLOOR = 400
 # 21% nub), which is also why it needs CheckerFloorTile's Math.floorMod — see
 # that class for the client crash this replaced. Do not "fix" it by adding a
 # `_splat`.
-LEGACY_SPLAT_OK = {"marblechecker"}
+LEGACY_SPLAT_OK = {
+    "marblechecker",
+    # CrookedGroundTile supplies its own position-seeded getTerrainSprite,
+    # so vanilla ascendedgrowth's non-splat fallback cannot index negatively.
+    "ascendedgrowth",
+}
 
 # 32px cell -> (min, max) opaque coverage in percent, for a land sheet.
 # Vanilla measured range is in the comment; the band is widened outward.
@@ -240,6 +251,9 @@ def read_tile_class(name, sources):
         pr = re.search(r"getTerrainPriority\s*\(\s*\)\s*\{\s*return\s+(-?\d+)\s*;", text, re.S)
         if pr:
             priority = int(pr.group(1))
+        elif re.search(r"getTerrainPriority\s*\(\s*\)\s*\{\s*return\s+"
+                       r"TerrainSplatterTile\.PRIORITY_TERRAIN\s*;", text, re.S):
+            priority = 100
         return base, is_floor, priority, textures
     return None, None, None, []
 
@@ -360,7 +374,7 @@ def cell_coverage(px, x0, y0):
     return n / (CELL * CELL) * 100.0
 
 
-def audit_sheets(tiles, problems):
+def audit_sheets(tiles, problems, vanilla_tiles=None):
     checked = 0
     for string_id, (role, textures) in sorted(tiles.items()):
         if not textures:
@@ -369,6 +383,14 @@ def audit_sheets(tiles, problems):
         bands = LIQUID_BANDS if role == LIQUID else LAND_BANDS
         for texture in textures:
             splat = os.path.join(TILES, texture + "_splat.png")
+            if not os.path.exists(splat) and vanilla_tiles is not None:
+                borrowed = os.path.join(vanilla_tiles, texture + "_splat.png")
+                if os.path.exists(borrowed):
+                    # The engine owns and already consumes this sheet. Its
+                    # atlas may use a vanilla-specific multi-frame layout
+                    # (ooze is 1792x416), so our mod-sheet geometry gate must
+                    # not reinterpret it as one of our 224x96 atlases.
+                    continue
             if not os.path.exists(splat):
                 if texture in LEGACY_SPLAT_OK:
                     continue
@@ -581,7 +603,8 @@ def main():
     problems = []
     sources = java_sources()
     tiles = audit_java(sources, problems)
-    cells = audit_sheets(tiles, problems)
+    vanilla_tiles = os.path.join(args.vanilla, "tiles") if args.vanilla else None
+    cells = audit_sheets(tiles, problems, vanilla_tiles)
     textured = audit_texture(tiles, problems)
 
     for p in problems:

@@ -5,6 +5,7 @@ import necesse.engine.registries.ItemRegistry;
 import necesse.engine.registries.MobRegistry;
 import necesse.engine.registries.ObjectRegistry;
 import necesse.engine.registries.TileRegistry;
+import necesse.engine.registries.WorldPresetRegistry;
 import necesse.gfx.gameTexture.GameTexture;
 import necesse.inventory.item.Item;
 import stairwaytoheaven.SkyRegistry;
@@ -131,6 +132,7 @@ public final class CrookedRealm {
         registerItems();
         registerMobs();
         registerDoors();
+        WorldPresetRegistry.registerPreset("swh_crookedrealm", new CrookedWorldPreset());
     }
 
     /**

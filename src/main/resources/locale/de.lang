@@ -496,3 +496,58 @@ cloudberrysapling=Wolkenbeeren-Setzling
 
 [item]
 cloudberrysapling=Wolkenbeeren-Setzling
+[level]
+crooked2=Jenseits der Krümmung
+
+[biome]
+stripedwaste=Gestreifte Öde
+spiralfields=Spiralfelder
+checkerworks=Schachbrettwerke
+
+[tile]
+crookedstripetile=Krummer Streifen
+spiralsoiltile=Spiralboden
+violetmudtile=Violetter Schlamm
+checkerstonetile=Schachbrettstein
+wrongwaytile=Falschweg-Boden
+spilltile=Die Lache
+
+[object]
+spiraltree=Spiralbaum
+eyeballshrub=Augenstrauch
+screamingflower=Schreiende Blume
+stripedmushroom=Gestreifter Pilz
+bentgrass=Gebogenes Gras
+bentlantern=Krumme Laterne
+crookedclock=Krumme Uhr
+longchair=Langer Stuhl
+groundwindow=Bodenfenster
+teethrock=Zahnfelsen
+crookedcrate=Krumme Kiste
+crookeddoordown=Krumme Tür
+crookeddoorup=Rückkehrtür
+crookeddoor=Krumme Tür
+
+[item]
+oddwood=Seltsamholz
+warpresin=Krümmungsharz
+strangefabric=Seltsamer Stoff
+eyeseed=Augensamen
+stripedshell=Gestreifter Panzer
+realityshard=Realitätssplitter
+
+[itemtooltip]
+oddwoodtip=Ein Stück Holz, das in die falsche Richtung gewachsen ist.
+warpresintip=Klebriger Beweis dafür, dass Wirklichkeit auslaufen kann.
+strangefabrictip=Stoff, dessen Muster nicht stillhalten will.
+eyeseedtip=Er beobachtet, wo er besser nicht wachsen sollte.
+stripedshelltip=Ein harter Panzer in unmöglichen Streifen.
+realityshardtip=Ein scharfer Splitter einer Regel, der die Welt nicht mehr folgt.
+
+[mob]
+doormimic=Türmimik
+tongueplant=Zungenpflanze
+stripebeetle=Streifenkäfer
+
+[misc]
+crookeddooropened=Die Kreidelinie erhebt sich vom Boden. Sie ist zu einer Tür geworden.

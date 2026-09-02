@@ -62,6 +62,7 @@ public class StairwayToHeavenMod {
         SkyCloudmarbleSet.register();
         SkyMobs.register();
         SkyItems.register();
+        stairwaytoheaven.realms.crooked.CrookedRealm.register();
         stairwaytoheaven.arsenal.SkyArsenal.register();
         stairwaytoheaven.arsenal.SkyArsenal.registerItems();
         stairwaytoheaven.settlement.SkyProfessions.register();
@@ -109,6 +110,10 @@ public class StairwayToHeavenMod {
         LevelRegistry.registerLevel("skylevel", SkyLevel.class);
         LevelIdentifier.IDENTIFIER_TO_DIMENSION.put(SkyRegistry.VEIL_IDENTIFIER.stringID, SkyRegistry.VEIL_DIMENSION);
         LevelRegistry.registerLevel("veillevel", VeilLevel.class);
+        LevelIdentifier.IDENTIFIER_TO_DIMENSION.put(
+                SkyRegistry.CROOKED_IDENTIFIER.stringID, SkyRegistry.CROOKED_DIMENSION);
+        LevelRegistry.registerLevel("crookedlevel",
+                stairwaytoheaven.realms.crooked.CrookedLevel.class);
     }
 
     private void registerBiomes() {
@@ -189,6 +194,7 @@ public class StairwayToHeavenMod {
         SkyMobs.loadTextures();
         stairwaytoheaven.arsenal.SkyArsenal.loadTextures();
         stairwaytoheaven.livestock.SkyLivestock.loadTextures();
+        stairwaytoheaven.realms.crooked.CrookedRealm.loadTextures();
     }
 
     public void postInit() {

@@ -92,6 +92,7 @@ public final class CrookedObjects {
         // Screaming Flower -- §13's own name. Borrowed sheet: vanilla
         // objects/glowcoral.png (128x32, four 32-wide variants), red spiky
         // fronds. Soft flora: ALL, 1 HP.
+        // It glows faintly red; the Fields are otherwise all violet.
         CrookedRealm.screamingFlowerID = ObjectRegistry.registerObject("screamingflower",
                 new SkyDecoObject("glowcoral", 32, new Color(196, 58, 62), null, CATEGORY) {
                     @Override
@@ -99,8 +100,6 @@ public final class CrookedObjects {
                         return SCREAMING_FLOWER_LOOT;
                     }
                 }.setTool(ToolType.ALL).setObjectHealth(1)
-                        // It glows, faintly and red. §13's palette wants red in
-                        // this realm and the Fields are otherwise all violet.
                         .setLight(55, 0.02F, 0.55F),
                 0.0F, false);
 
