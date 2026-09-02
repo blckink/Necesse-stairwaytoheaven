@@ -219,7 +219,6 @@ them. Anything registered from now on does not get that exemption.
 - `stormcrystal`
 - `stormcrystalr`
 - `stormdisc`
-- `stormdown`
 - `stormglass`
 - `stormglasskiln`
 - `stormscreed`
@@ -237,8 +236,6 @@ them. Anything registered from now on does not get that exemption.
 - `tempestedge`
 - `thunderbloom`
 - `thunderhead`
-- `thunderplume`
-- `thunderquill`
 - `veil2`
 - `veilessence`
 - `veilriftdown`

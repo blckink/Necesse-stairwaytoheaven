@@ -35,10 +35,10 @@ public final class SkyItems {
             "cloudwood", "dewsnail", "fulgurite", "galehowl", "glimmerstrides",
             "nimbusdraught", "nimbusmilk", "nimbuswood", "prismcaller", "prismshard",
             "prismwood", "seraphwood", "silverbell", "skycurd", "skyreave", "skystone",
-            "skywatchhood", "skywatchwhistle", "skyweave", "stormdisc", "stormdown",
+            "skywatchhood", "skywatchwhistle", "skyweave", "stormdisc",
             "stormglass", "stormshard", "stormsteelbar", "stormsteelboots",
             "stormsteelchestplate", "stormsteelhelmet", "stormsteelvambrace",
-            "tempestedge", "thunderhead", "thunderplume", "veilessence", "wardenboots",
+            "tempestedge", "thunderhead", "veilessence", "wardenboots",
             "wardenmantle", "windsilk", "zephyrharness"
     };
 
@@ -424,7 +424,7 @@ public final class SkyItems {
                 Recipes.ingredientsFromScript("{{aurorapetal, 10}, {aurorafleece, 6}, {stormglass, 4}}")));
         Recipes.registerModRecipe(new Recipe(
                 "zephyrharness", 1, RecipeTechRegistry.TUNGSTEN_WORKSTATION,
-                Recipes.ingredientsFromScript("{{windsilk, 12}, {stormdown, 8}, {skyweave, 4}}")));
+                Recipes.ingredientsFromScript("{{windsilk, 12}, {aurorafleece, 8}, {skyweave, 4}}")));
 
         // The Dew Snail was the mod's other dead end: a critter the player can
         // catch with a net whose item nothing wanted. Siggi and Peanut want it.

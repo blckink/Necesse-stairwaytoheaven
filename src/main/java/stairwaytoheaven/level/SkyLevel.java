@@ -191,8 +191,6 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
         // worth more.
         placeHerd(region, stairwaytoheaven.livestock.SkyLivestock.NIMBUS_YAK,
                 SkyRegistry.cloudturfID, YAK_REGION_CHANCE, 0x9E3779B1L);
-        placeHerd(region, stairwaytoheaven.livestock.SkyLivestock.THUNDERQUILL,
-                SkyRegistry.stormslateID, FOWL_REGION_CHANCE, 0x27D4EB2FL);
         placeHerd(region, stairwaytoheaven.livestock.SkyLivestock.GLIMMERGOAT,
                 SkyRegistry.auroraShoalID, GOAT_REGION_CHANCE, 0x165667B1L);
     }
@@ -373,13 +371,12 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
     /** Roughly one flock every four regions -- meadow livestock, not a herd biome. */
     private static final float FLOCK_REGION_CHANCE = 0.25F;
     /**
-     * The three husbandry animals are rarer than the Cloud Lamb, because each
-     * is a production animal rather than scenery: milk, storm down, fleece.
-     * One yak herd per ~12 regions, fowl per ~10, goats per ~14 -- the goat is
-     * rarest because the Aurora Shoals are the rarest ground.
+     * Both husbandry animals are rarer than the Cloud Lamb, because each is a
+     * production animal rather than scenery: milk and fleece. One yak herd per
+     * ~12 regions, goats per ~14 -- the goat is rarest because the Aurora
+     * Shoals are the rarest ground.
      */
     private static final float YAK_REGION_CHANCE = 0.085F;
-    private static final float FOWL_REGION_CHANCE = 0.100F;
     private static final float GOAT_REGION_CHANCE = 0.070F;
 
     @Override

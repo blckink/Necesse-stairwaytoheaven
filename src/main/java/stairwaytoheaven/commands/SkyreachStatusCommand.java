@@ -439,7 +439,7 @@ public class SkyreachStatusCommand extends ModularChatCommand {
      * however correct the rest of it is, so the pairing is measured too.
      */
     private void diagnoseHusbandry(SkyLevel level, CommandLog logs) {
-        for (String mobID : new String[]{"cloudlamb", "nimbusyak", "thunderquill", "glimmergoat"}) {
+        for (String mobID : new String[]{"cloudlamb", "nimbusyak", "glimmergoat"}) {
             necesse.entity.mobs.Mob probe = necesse.engine.registries.MobRegistry.getMob(mobID, level);
             if (!(probe instanceof necesse.entity.mobs.friendly.HusbandryMob)) {
                 logs.add("husbandry check: " + mobID + " is NOT a HusbandryMob");
@@ -770,7 +770,7 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                 // false` and can never be table-spawned, so each of them
                 // implements isValidSpawnLocation itself and the two columns
                 // below are the proof that it took.
-                "nimbusyak", "thunderquill", "glimmergoat",
+                "nimbusyak", "glimmergoat",
                 // The Beetle Outlands' ascended cast. These are OUR classes now
                 // -- they subclass the vanilla mobs the biome used to spawn by
                 // string ID and change only the sheet they draw with -- but the

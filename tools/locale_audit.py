@@ -444,7 +444,6 @@ ITEM_CLASS_DRAWS_ITSELF = {
 ITEM_CLASS_VANILLA_ICON = {
     "LivestockFood": ("arg", 0),
     "LivestockProduce": ("arg", 0),
-    "ThunderplumeCowl": ("fixed", "clothhat"),
     "GlimmerstrideBoots": ("fixed", "clothboots"),
 }
 
@@ -459,7 +458,7 @@ VANILLA = "vanilla:"
 # output, and a typo'd output is exactly what the rest of this audit is for.
 VANILLA_RECIPE_OUTPUTS = {
     # net: vanilla's critter net, ItemRegistry + items/net.png. Ours is an
-    # alternative recipe from Storm Down at a plain workstation, because the
+    # alternative recipe from Aurora Fleece at a plain workstation, because the
     # Skyreach has a netable critter (the Dew Snail) and no sheep.
     "net",
 }

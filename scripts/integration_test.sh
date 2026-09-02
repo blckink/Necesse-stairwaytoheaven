@@ -440,9 +440,6 @@ echo "--- verifying the three farmable sky animals ---"
 grep -qE "husbandry check: nimbusyak shear=NO milk=nimbusmilkx[0-9]+ child=nimbusyak name=Nimbus Yak mate=nimbusyak" "$LOG1" \
     || { echo "FAIL: the Nimbus Yak is not a complete milk animal"; \
          grep -E "husbandry check: nimbusyak" "$LOG1" | tail -1; STATUS=1; }
-grep -qE "husbandry check: thunderquill shear=stormdownx[0-9]+.* child=thunderquill name=Thunderquill Fowl mate=thunderquill" "$LOG1" \
-    || { echo "FAIL: the Thunderquill Fowl is not a complete down animal"; \
-         grep -E "husbandry check: thunderquill" "$LOG1" | tail -1; STATUS=1; }
 grep -qE "husbandry check: glimmergoat shear=aurorafleecex[0-9]+.* child=glimmergoat name=Glimmergoat mate=glimmergoat" "$LOG1" \
     || { echo "FAIL: the Glimmergoat is not a complete fleece animal"; \
          grep -E "husbandry check: glimmergoat" "$LOG1" | tail -1; STATUS=1; }
@@ -452,15 +449,15 @@ grep -qE "husbandry check: glimmergoat shear=aurorafleecex[0-9]+.* child=glimmer
 # own row above reads INHERITS, and why its biome entry did nothing for three
 # releases. A table entry for a mob that answers false is indistinguishable
 # from bad luck, so the override is asserted rather than trusted.
-for animal in nimbusyak thunderquill glimmergoat; do
+for animal in nimbusyak glimmergoat; do
     grep -qE "spawn check: $animal .*validSpawnLocation=implemented" "$LOG1" \
         || { echo "FAIL: $animal inherits Mob's 'return false' and can never be table-spawned"; STATUS=1; }
 done
 # The override also has to ANSWER TRUE somewhere, or it is a check that always
 # says no. All three share one predicate, so one accepting row is the whole bit.
-grep -qE "spawn check: (nimbusyak|thunderquill|glimmergoat) .*accepted lit=[1-9]" "$LOG1" \
+grep -qE "spawn check: (nimbusyak|glimmergoat) .*accepted lit=[1-9]" "$LOG1" \
     || { echo "FAIL: no sky livestock accepted a single probe tile"; \
-         grep -E "spawn check: (nimbusyak|thunderquill|glimmergoat)" "$LOG1" | tail -3; STATUS=1; }
+         grep -E "spawn check: (nimbusyak|glimmergoat)" "$LOG1" | tail -3; STATUS=1; }
 
 echo "--- verifying the Warden's quest chain has no dead ends ---"
 # Every reachable save state must be owed a chapter; only a finished chain may

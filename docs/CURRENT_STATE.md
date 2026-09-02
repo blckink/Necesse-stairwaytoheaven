@@ -724,11 +724,10 @@ Three farmable animals on their real vanilla archetypes, in
 | animal | base | biome | product | taken with |
 |---|---|---|---|---|
 | Nimbus Yak | `CowMob` | Driftlands | Nimbus Milk | bucket |
-| Thunderquill Fowl | `ChickenMob` | Stormveil | Storm Down (+ vanilla eggs) | shears |
 | Glimmergoat | `SheepMob` | Aurora Shoals | Aurora Fleece | shears |
 
 Nine recipes hang off the three products: Skycurd (cheese press), Cloudberry
-Custard (cooking pot), Nimbus Draught (alchemy); Thunderplume Cowl (tungsten
+Custard (cooking pot), Nimbus Draught (alchemy); (tungsten
 anvil), windsilk (inventory), net (workstation); Glimmerstride Boots (tungsten
 anvil), Skywatch Carpet (carpenter), Cloud Puff Treats (inventory).
 

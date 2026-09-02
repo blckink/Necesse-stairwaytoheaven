@@ -398,22 +398,18 @@ stormglasskilntip=Brennt Fulgurit und Himmelsstein zu Sturmglas. Braucht keinen 
 
 [mob]
 nimbusyak=Nimbusyak
-thunderquill=Donnerkielhuhn
 glimmergoat=Schimmerziege
 
 [item]
 nimbusmilk=Nimbusmilch
-stormdown=Sturmflaum
 aurorafleece=Auroravlies
 skycurd=Himmelsquark
 cloudcustard=Wolkenbeeren-Creme
 nimbusdraught=Nimbustrunk
-thunderplume=Donnerfederkapuze
 glimmerstrides=Schimmerschritt-Stiefel
 
 [misc]
 nimbusyaktip=Mit einem Eimer melken - gibt Nimbusmilch. Frisst Wolkenbeeren oder Weizen - aus der Hand oder aus dem Futtertrog.
-thunderquilltip=Schere sie für Sturmflaum, und sie legt Eier wie jede Henne. Frisst Wolkenbeeren oder Weizen - aus der Hand oder aus dem Futtertrog.
 glimmergoattip=Schere sie für Auroravlies. Frisst Wolkenbeeren oder Weizen - aus der Hand oder aus dem Futtertrog.
 // ===== Oberflächen-Fundorte & Weltereignisse (content/worldevents) =====
 // Drei seltene Fundorte, die stairwaytoheaven.surface.SkySurfacePresets über
@@ -474,7 +470,6 @@ prismwoodtip=Holz - von einer Prismenbirke in den Aurora-Untiefen. Die Maserung 
 // -- Kreaturenbeute und Hoferzeugnisse --
 veilessencetip=Kreaturenbeute - das, woraus ein Düsterschemen besteht. Kalt in der Hand, kälter im Verlust.
 dewsnailtip=Kleintier - eine Tauschnecke, lebend mit dem Netz gefangen. Auf ihrem Haus sitzt ein Tropfen Himmelstau.
-stormdowntip=Hoferzeugnis - Federflaum, einem Donnerkielhuhn abgeschoren. Lässt sich zu Windseide spinnen.
 aurorafleecetip=Hoferzeugnis - Vlies, einer Schimmerziege abgeschoren. Warm und im Dunkeln schwach leuchtend.
 nimbusmilktip=Nahrung - einem Nimbusyak mit dem Eimer abgemolken. Trinken oder zu Himmelsquark pressen.
 skycurdtip=Nahrung - Nimbusmilch, in der Käsepresse gepresst. Hält weit länger als die Milch selbst.

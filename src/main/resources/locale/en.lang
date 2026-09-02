@@ -397,22 +397,18 @@ stormglasskilntip=Fires fulgurite and skystone into stormglass. Needs no fuel - 
 
 [mob]
 nimbusyak=Nimbus Yak
-thunderquill=Thunderquill Fowl
 glimmergoat=Glimmergoat
 
 [item]
 nimbusmilk=Nimbus Milk
-stormdown=Storm Down
 aurorafleece=Aurora Fleece
 skycurd=Skycurd
 cloudcustard=Cloudberry Custard
 nimbusdraught=Nimbus Draught
-thunderplume=Thunderplume Cowl
 glimmerstrides=Glimmerstride Boots
 
 [misc]
 nimbusyaktip=Milk her with a bucket for Nimbus Milk. Eats cloudberries or wheat - by hand or from a feeding trough.
-thunderquilltip=Shear for Storm Down, and she lays eggs like any hen. Eats cloudberries or wheat - by hand or from a feeding trough.
 glimmergoattip=Shear for Aurora Fleece. Eats cloudberries or wheat - by hand or from a feeding trough.
 // ===== Surface points of interest & world events (content/worldevents) =====
 // Three rare POIs scattered across the vanilla Surface by
@@ -473,7 +469,6 @@ prismwoodtip=Log - cut from a Prismabirch in the Aurora Shoals. The grain still 
 // -- mob drops and livestock produce --
 veilessencetip=Mob drop - what a Gloom Shade is made of. Cold to hold, colder to lose.
 dewsnailtip=Critter - a Dew Snail, taken alive with a net. It carries a bead of sky dew on its shell.
-stormdowntip=Livestock produce - feather down sheared off a Thunderquill Fowl. Spins into Windsilk.
 aurorafleecetip=Livestock produce - fleece sheared off a Glimmergoat. Warm, and faintly lit in the dark.
 nimbusmilktip=Food - drawn from a Nimbus Yak with a bucket. Drink it, or press it into Skycurd.
 skycurdtip=Food - Nimbus Milk pressed in a cheese press. Keeps far longer than the milk did.

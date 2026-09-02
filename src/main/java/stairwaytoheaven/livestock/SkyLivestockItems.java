@@ -96,7 +96,7 @@ public final class SkyLivestockItems {
      * A raw livestock product: the thing that comes off the animal.
      *
      * <p>Extends {@link stairwaytoheaven.items.SkyMatItem} rather than
-     * {@code MatItem} so Storm Down and Aurora Fleece carry the same
+     * {@code MatItem} so Aurora Fleece carries the same
      * "what is this" line as every other Skyreach material.
      */
     public static class LivestockProduce extends stairwaytoheaven.items.SkyMatItem {
@@ -117,53 +117,6 @@ public final class SkyLivestockItems {
         protected void loadItemTextures() {
             this.itemTexture = SkyPelt.tintFinal("items/" + this.vanillaIcon, "items/" + this.getStringID(),
                     this.hue, this.satFloor, 0.45F, 1.0F, 0.02F);
-        }
-    }
-
-    /**
-     * The Thunderplume Cowl: storm-down over an aetherium band.
-     *
-     * <p>{@code ArmorItem.loadArmorTexture} is protected and the three texture
-     * fields it fills are public (ArmorItem.java:84-86, 496-502), so a mod
-     * helmet can be composed out of vanilla's own body-layer art. The hair mask
-     * is a MASK, not a picture: it is used to cut hair away under the hat, so it
-     * is taken untinted and keeps vanilla's NEAREST blend quality, exactly as
-     * {@code HelmetArmorItem.loadArmorTexture} sets it.
-     */
-    public static class ThunderplumeCowl extends HelmetArmorItem {
-
-        public static final float HUE = 0.745F;
-
-        public ThunderplumeCowl() {
-            // null damage class: HelmetArmorItem only reads it to pick an
-            // upgrade ceiling (null falls to the same 30 melee gets), and this
-            // is a fibre hood, not a class piece.
-            super(10, null, 100, Item.Rarity.UNCOMMON, "thunderplume", null);
-            this.hairDrawOptions = ArmorItem.HairDrawMode.OVER_HAIR;
-            this.facialFeatureDrawOptions = ArmorItem.FacialFeatureDrawMode.OVER_FACIAL_FEATURE;
-        }
-
-        @Override
-        protected void loadItemTextures() {
-            this.itemTexture = SkyPelt.tintFinal("items/clothhat", "items/" + this.getStringID(),
-                    HUE, 0.30F, 0.45F, 0.95F, 0.02F);
-        }
-
-        @Override
-        protected void loadArmorTexture() {
-            this.armorTexture = SkyPelt.tintFinal("player/armor/clothhat",
-                    "player/armor/thunderplume", HUE, 0.30F, 0.45F, 0.95F, 0.02F);
-            this.backArmorTexture = SkyPelt.tintFinal("player/armor/clothhat_back",
-                    "player/armor/thunderplume_back", HUE, 0.30F, 0.45F, 0.95F, 0.02F);
-            this.hairMaskTexture = GameTexture.fromFile("player/armor/clothhat_hairmask");
-            this.hairMaskTexture.setBlendQuality(GameTexture.BlendQuality.NEAREST);
-        }
-
-        @Override
-        public ArmorModifiers getArmorModifiers(InventoryItem item, Mob mob) {
-            return new ArmorModifiers(
-                    new ModifierValue<>(necesse.entity.mobs.buffs.BuffModifiers.RANGED_DAMAGE, 0.05F),
-                    new ModifierValue<>(necesse.entity.mobs.buffs.BuffModifiers.SPEED, 0.04F));
         }
     }
 

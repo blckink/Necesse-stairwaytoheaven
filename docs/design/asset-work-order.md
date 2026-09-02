@@ -140,7 +140,7 @@ normale tier2 (also Schweine etc) dass ihre Produktion steigert."*
   already the cheese-press pattern: settler loads it, walks away, collects.
 - **The feed bonus has to live in the MOB, not the item.** The trough calls
   `mob.onFed(item)` directly (`FeedingTroughObjectEntity:142`). So:
-  - our own animals (NimbusYak, Thunderquill, Glimmergoat, CloudLamb) CAN take
+  - our own animals (NimbusYak, Glimmergoat, CloudLamb) CAN take
     the bonus from a trough, because we own their `onFed`;
   - **vanilla tier-2 animals cannot** — their `onFed` is vanilla's and the mod
     is additive-only. Do not promise it.

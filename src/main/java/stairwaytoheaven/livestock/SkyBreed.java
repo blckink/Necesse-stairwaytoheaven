@@ -110,15 +110,17 @@ public final class SkyBreed {
     /**
      * Give birth to a live young of the mother's own species.
      *
-     * <p>This is {@code HusbandryMob.onImpregnated}'s behaviour, rewritten here
-     * for {@link ThunderquillMob}: {@code ChickenMob} overrides
-     * {@code onImpregnated} to set {@code nextEggIsFertilized} instead, and the
-     * egg path that follows is hardcoded to vanilla — the AI node lays a
-     * {@code new InventoryItem("egg")} and {@code EggNestObject}'s lay handler
-     * does the same, so an {@code EggFoodConsumableItem} hatches
-     * {@code "chicken"} or {@code "rooster"}
-     * ({@code EggFoodConsumableItem.getHatchMobStringID}). A sky fowl bred
-     * through that path would produce vanilla chickens.
+     * <p>This is {@code HusbandryMob.onImpregnated}'s behaviour, written out
+     * here rather than inherited so every sky animal breeds the same way,
+     * whatever its vanilla archetype does. It was originally needed for a sky
+     * fowl -- {@code ChickenMob} overrides {@code onImpregnated} to set
+     * {@code nextEggIsFertilized}, and the egg path that follows is hardcoded
+     * to vanilla: the AI node lays a {@code new InventoryItem("egg")},
+     * {@code EggNestObject}'s lay handler does the same, and
+     * {@code EggFoodConsumableItem.getHatchMobStringID} hatches
+     * {@code "chicken"} or {@code "rooster"}, so a sky fowl bred through that
+     * path would have produced vanilla chickens. That mob is gone; the rule
+     * stays, because it is the one that keeps a yak calf a yak.
      */
     public static void birthLiveYoung(HusbandryMob mother, HusbandryMob father) {
         Mob child = MobRegistry.getMob(mother.getRandomChildMobStringID(father), mother.getLevel());

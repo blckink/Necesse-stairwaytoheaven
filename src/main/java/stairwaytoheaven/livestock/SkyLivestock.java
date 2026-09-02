@@ -12,8 +12,8 @@ import necesse.inventory.recipe.Recipes;
 import necesse.level.maps.levelData.settlementData.settler.Settler;
 
 /**
- * The Skyreach's livestock layer: three farmable animals, three products and
- * the nine recipes that turn the products into something a player wants.
+ * The Skyreach's livestock layer: two farmable animals, two products and the
+ * recipes that turn the products into something a player wants.
  *
  * <h2>Wiring</h2>
  * <pre>
@@ -33,19 +33,17 @@ import necesse.level.maps.levelData.settlementData.settler.Settler;
  * would turn a load-order accident into a recipe that is merely uncraftable
  * rather than into an error.
  *
- * <h2>The three animals</h2>
+ * <h2>The two animals</h2>
  * <table>
  *   <caption>archetype, home and product</caption>
  *   <tr><th>animal</th><th>vanilla base</th><th>biome</th><th>product</th><th>how it is taken</th></tr>
  *   <tr><td>Nimbus Yak</td><td>CowMob</td><td>Driftlands</td><td>Nimbus Milk</td>
  *       <td>bucket — {@code BucketItem} -&gt; {@code canMilk}/{@code onMilk}</td></tr>
- *   <tr><td>Thunderquill Fowl</td><td>ChickenMob</td><td>Stormveil</td><td>Storm Down</td>
- *       <td>shears — {@code ShearsItem} -&gt; {@code canShear}/{@code onShear}; also lays vanilla eggs</td></tr>
  *   <tr><td>Glimmergoat</td><td>SheepMob</td><td>Aurora Shoals</td><td>Aurora Fleece</td>
  *       <td>shears</td></tr>
  * </table>
  *
- * <p>All three are hand-fed and trough-fed by the rule every husbandry animal
+ * <p>Both are hand-fed and trough-fed by the rule every husbandry animal
  * follows — {@code HusbandryMob.canFeed} is
  * {@code item.item instanceof GrainItem} and
  * {@code FeedingTroughObjectEntity}'s inventory filter is the same test — so
@@ -66,41 +64,35 @@ public final class SkyLivestock {
     // ===== IDs other code refers to =====
 
     public static final String NIMBUS_YAK = "nimbusyak";
-    public static final String THUNDERQUILL = "thunderquill";
     public static final String GLIMMERGOAT = "glimmergoat";
 
     public static final String NIMBUS_MILK = "nimbusmilk";
-    public static final String STORM_DOWN = "stormdown";
     public static final String AURORA_FLEECE = "aurorafleece";
 
     // ===== Registry IDs, for anything that needs to compare without a lookup =====
 
     public static int nimbusYakID;
-    public static int thunderquillID;
     public static int glimmergoatID;
 
     public static int nimbusMilkID;
-    public static int stormDownID;
     public static int auroraFleeceID;
     public static int skyCurdID;
     public static int cloudCustardID;
     public static int nimbusDraughtID;
-    public static int thunderplumeID;
     public static int glimmerstridesID;
 
     /**
      * Mobs and items. Called from {@code init()}, while the registries are open.
      *
      * <p>The mobs are registered with the kill-statistic flag off, the way
-     * vanilla registers its cow, sheep and chicken: nobody wants a scoreboard
-     * for slaughtering their own herd.
+     * vanilla registers its cow and sheep: nobody wants a scoreboard for
+     * slaughtering their own herd.
      */
     public static void register() {
         nimbusYakID = MobRegistry.registerMob("nimbusyak", NimbusYakMob.class, false);
-        thunderquillID = MobRegistry.registerMob("thunderquill", ThunderquillMob.class, false);
         glimmergoatID = MobRegistry.registerMob("glimmergoat", GlimmergoatMob.class, false);
 
-        // --- the three products ---
+        // --- the two products ---
         // Vanilla milk is a FoodConsumableItem you can drink, and so is this;
         // the difference is what it presses into.
         nimbusMilkID = ItemRegistry.registerItem("nimbusmilk",
@@ -110,10 +102,6 @@ public final class SkyLivestock {
                         .spoilDuration(240)
                         .setItemCategory("consumable", "rawfood"),
                 4.0F, true);
-        stormDownID = ItemRegistry.registerItem("stormdown",
-                new SkyLivestockItems.LivestockProduce("inefficientfeather", 0.745F, 0.32F, 500,
-                        Item.Rarity.UNCOMMON),
-                14.0F, true);
         auroraFleeceID = ItemRegistry.registerItem("aurorafleece",
                 new SkyLivestockItems.LivestockProduce("wool", 0.425F, 0.26F, 500,
                         Item.Rarity.UNCOMMON),
@@ -142,8 +130,6 @@ public final class SkyLivestock {
                         new ModifierValue<>(BuffModifiers.MAX_RESILIENCE_FLAT, 20))
                         .spoilDuration(720),
                 24.0F, true);
-        thunderplumeID = ItemRegistry.registerItem("thunderplume",
-                new SkyLivestockItems.ThunderplumeCowl(), 90.0F, true);
         glimmerstridesID = ItemRegistry.registerItem("glimmerstrides",
                 new SkyLivestockItems.GlimmerstrideBoots(), 60.0F, true);
     }
@@ -174,25 +160,16 @@ public final class SkyLivestock {
                 "nimbusdraught", 1, RecipeTechRegistry.ALCHEMY,
                 Recipes.ingredientsFromScript("{{nimbusmilk, 2}, {aurorapetal, 1}}")));
 
-        // --- Storm Down: the gear line ---
-        Recipes.registerModRecipe(new Recipe(
-                "thunderplume", 1, RecipeTechRegistry.TUNGSTEN_ANVIL,
-                Recipes.ingredientsFromScript("{{stormdown, 12}, {aetheriumbar, 4}, {stormshard, 3}}")));
-        // Windsilk had exactly two renewable sources: harvested windwheat and a
-        // sheared Cloud Lamb. Down spins into it as well, which is what makes a
-        // Stormveil coop worth keeping.
-        Recipes.registerModRecipe(new Recipe(
-                "windsilk", 2, RecipeTechRegistry.NONE,
-                Recipes.ingredientsFromScript("{{stormdown, 3}}")));
         // Vanilla's net is a Demonic Workstation recipe of 10 logs and 5 wool
         // (jar Recipes.java:1202). The sky has no sheep, and it does have
         // something worth catching with a net — the Dew Snail is a NetableMob.
+        // Aurora fleece stands in for the wool at vanilla's own count.
         // Same shape, sky materials. The output is a VANILLA item: the game
         // names and draws it, which is why tools/locale_audit.py carries it in
         // VANILLA_RECIPE_OUTPUTS rather than looking for a mod icon.
         Recipes.registerModRecipe(new Recipe(
                 "net", 1, RecipeTechRegistry.WORKSTATION,
-                Recipes.ingredientsFromScript("{{stormdown, 5}, {anylog, 10}}")));
+                Recipes.ingredientsFromScript("{{aurorafleece, 5}, {anylog, 10}}")));
 
         // --- Aurora Fleece: the comfort line ---
         Recipes.registerModRecipe(new Recipe(
@@ -231,35 +208,19 @@ public final class SkyLivestock {
         NimbusYakMob.bullTexture = GameTexture.fromFile("mobs/nimbusyak_bull").makeFinal();
         NimbusYakMob.calfTexture = GameTexture.fromFile("mobs/nimbusyak_calf").makeFinal();
 
-        // Thunderquill Fowl: storm violet, plus a washed-out copy for a bird
-        // that has just been plucked (vanilla ships no such frame).
-        ThunderquillMob.henTexture = SkyPelt.tint("mobs/chicken", "mobs/thunderquill",
-                0.745F, 0.28F, 0.40F, 0.94F, 0.02F);
-        ThunderquillMob.henPluckedTexture = SkyPelt.bleach(ThunderquillMob.henTexture,
-                "mobs/thunderquill_plucked", 0.30F, 0.06F);
-        ThunderquillMob.cockTexture = SkyPelt.tint("mobs/rooster", "mobs/thunderquill_cock",
-                0.745F, 0.34F, 0.40F, 0.92F, 0.02F);
-        ThunderquillMob.cockPluckedTexture = SkyPelt.bleach(ThunderquillMob.cockTexture,
-                "mobs/thunderquill_cock_plucked", 0.30F, 0.06F);
-        ThunderquillMob.chickTexture = SkyPelt.tintFinal("mobs/chick", "mobs/thunderquill_chick",
-                0.745F, 0.22F, 0.40F, 1.0F, 0.05F);
 
         // Glimmergoat. Vanilla already has the sheared frames, for both sexes,
         // which is most of why the goat is a SheepMob.
         //
-        // The DOE is ours now, drawn and supplied on vanilla's exact grid (four
-        // direction rows of 64 plus the four gib cells at y256 that SheepMob
-        // reads) -- both the woolly and the shorn state. The BUCK and the KID
-        // are still SkyPelt recolours of vanilla's ram and lamb until their
-        // sheets arrive, so the herd is two palettes for the moment: pink does,
-        // teal buck and kid. That is temporary and visible in game.
-        GlimmergoatMob.doeTexture = GameTexture.fromFile("mobs/glimmergoat").makeFinal();
-        GlimmergoatMob.doeShornTexture = GameTexture.fromFile("mobs/glimmergoat_shorn").makeFinal();
-        GlimmergoatMob.buckTexture = SkyPelt.tintFinal("mobs/ram", "mobs/glimmergoat_buck",
-                0.425F, 0.26F, 0.40F, 0.97F, 0.03F);
-        GlimmergoatMob.buckShornTexture = SkyPelt.tintFinal("mobs/ram_sheared",
-                "mobs/glimmergoat_buck_shorn", 0.425F, 0.18F, 0.40F, 0.97F, 0.03F);
-        GlimmergoatMob.kidTexture = SkyPelt.tintFinal("mobs/lamb", "mobs/glimmergoat_kid",
-                0.425F, 0.18F, 0.40F, 1.0F, 0.06F);
+        // All five are ours now, drawn and supplied on vanilla's exact grid
+        // (four direction rows of 64 plus the four gib cells at y256 that
+        // SheepMob reads). Nothing here is recoloured. The file names are the
+        // player's and are kept verbatim, typo and all -- they are what is in
+        // the repo, and renaming supplied art has already cost one round.
+        GlimmergoatMob.doeTexture = GameTexture.fromFile("mobs/gimmergoat-doe").makeFinal();
+        GlimmergoatMob.doeShornTexture = GameTexture.fromFile("mobs/gimmergoat-doe_shorn").makeFinal();
+        GlimmergoatMob.buckTexture = GameTexture.fromFile("mobs/gimmergoat-ram").makeFinal();
+        GlimmergoatMob.buckShornTexture = GameTexture.fromFile("mobs/gimmergoat-ram_shorn").makeFinal();
+        GlimmergoatMob.kidTexture = GameTexture.fromFile("mobs/glimmergoat-lamb").makeFinal();
     }
 }

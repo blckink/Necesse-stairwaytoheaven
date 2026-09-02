@@ -61,9 +61,9 @@ holding the Silver Bell. Gothic-comedy underworld with the **Gloomfen** and the
   their vanilla counterparts rather than invented.
 - **Three settlement workstations** a settler runs unattended: the Windsilk Loom,
   the Aether Forge (the only source of Stormsteel) and the Stormglass Kiln.
-- **Sky livestock**: Nimbus Yak, Thunderquill Fowl, Glimmergoat and the Cloud
-  Lamb — milked, sheared and bred like vanilla animals, with nine recipes hanging
-  off their products.
+- **Sky livestock**: Nimbus Yak, Glimmergoat and the Cloud Lamb — milked,
+  sheared and bred like vanilla animals, with recipes hanging off their
+  products.
 - **Two building sets** — "Nightfell & Skylight" and Cloudmarble — with walls,
   doors, windows, fences, gates, floors, lighting and furniture.
 

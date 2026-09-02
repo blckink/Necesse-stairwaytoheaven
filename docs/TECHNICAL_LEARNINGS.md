@@ -1660,6 +1660,11 @@ vanilla egg is kept as a bonus. Breeding is fixed by overriding
 `onImpregnated` to give birth live, which is what `HusbandryMob.onImpregnated`
 does for every other animal in the game.
 
+> **Superseded 2026-09-02.** The Thunderquill Fowl, Storm Down and the
+> Thunderplume Cowl were removed from the Skyreach — two husbandry animals
+> are enough and the sky did not need a second egg. The run lines below are
+> kept as the record of what the husbandry probe reported while it existed.
+
 **[run]** `husbandry check: thunderquill shear=stormdownx2 milk=NO
 child=thunderquill name=Thunderquill Fowl mate=thunderquill`.
 
