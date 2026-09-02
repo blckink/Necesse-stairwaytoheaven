@@ -209,6 +209,11 @@ against the real dump in `vanilla-sprites/` (6,121 files, game 1.3.2).
 | `tiles/arcanicfloor`, `arcanicpath` | Crooked architecture floor |
 | `tiles/spidercastlecarpet` | Stripe Carpet ground |
 | `objects/obsidianrock` | teeth-rocks |
+| `tiles/ascendedgrowth`, `ascendedcorruption`, `deepstonetiledfloor`, `ascendedvoid` | Spiral Soil, Violet Mud, Checker Stone and Wrong-Way ground in `realms/crooked` |
+| `objects/burnedbush`, `voidtrap`, `glowcoral`, `mushroom`, `witheredgrass` | Spiral Tree, Eyeball Shrub, Screaming Flower, Striped Mushroom and Bent Grass |
+| `objects/voidflame`, `boneclock`, `bonechair`, `voidcube`, `smallrunestone` | Bent Lantern, Crooked Clock, Long Chair, Ground Window and Teeth-Rock |
+| `mobs/mimic`, `mobs/dryadsentinel`, `mobs/scorpion` | Door Mimic, Tongue Plant and Stripe Beetle bodies |
+| `items/deadwoodlog`, `bioessence`, `clothscraps`, `crystalessence`, `crystallizedskull`, `ascendedshard` | Oddwood, Warp Resin, Strange Fabric, Eye Seed, Striped Shell and Reality Shard icons |
 
 ### 2.5 Infernal Fringe + Hell (Tier 5)
 

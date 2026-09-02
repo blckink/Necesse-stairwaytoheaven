@@ -81,6 +81,43 @@ second configuration rather than a second code path. See
 | `soulexposure` | buff | Soul Exposure: what the Veil's fog does to anyone crossing it without the Veil Mark — one stack per second in the fog, dimming the view, then slowing you, then draining life, then killing you outright at thirteen seconds, and giving a stack back per second once you are out. |
 | `veilfog` | buff | The Veil's fog itself: an invisible marker the server puts on anyone standing past the fog line, which draws the drifting mist on their screen. It stays after the Veil Mark is earned, so the border between Steinfeld and the Ghost Realm remains something you can see rather than something you only remember. |
 
+## Crooked Beyond realm
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `crooked2` | level | The separate Crooked Beyond level reached through its paired wrong-way doors. |
+| `stripedwaste` | biome | The striped outer band, carrying Crooked veterans and sparse broken vegetation. |
+| `spiralfields` | biome | A living spiral field guarded by waking Tongue Plants. |
+| `checkerworks` | biome | The built, checker-patterned band containing authored door-and-table POIs. |
+| `crookedstripetile` | tile | Existing Beetlefreak stripes reused as the realm's outer terrain. |
+| `spiralsoiltile` | tile | Organic purple terrain borrowed from vanilla ascended growth. |
+| `violetmudtile` | tile | Corrupted violet terrain for wet low ground. |
+| `checkerstonetile` | tile | Dark tiled terrain beneath the Checkerworks. |
+| `wrongwaytile` | tile | Near-black ascended-void terrain used where geometry stops making sense. |
+| `spilltile` | tile | The Crooked realm's separating liquid. |
+| `spiraltree` | object | A harvestable black tangle yielding Oddwood and occasional Warp Resin. |
+| `eyeballshrub` | object | Soft eye-like growth and the renewable source of Eye Seeds. |
+| `screamingflower` | object | A faintly glowing plant that yields Warp Resin. |
+| `stripedmushroom` | object | Fibre-like fungus harvested for Strange Fabric. |
+| `bentgrass` | object | Non-paying ground cover that gives the Spiral Fields their broken direction. |
+| `bentlantern` | object | A natural violet light standing in for a lantern grown from the ground. |
+| `crookedclock` | object | Breakable built debris yielding Strange Fabric and occasional Reality Shards. |
+| `longchair` | object | Unsittable authored-set-piece furniture from the Long Table POI. |
+| `groundwindow` | object | A luminous window-like object lying where a floor should be. |
+| `teethrock` | object | The realm's pickaxe node and reliable Reality Shard source. |
+| `crookedcrate` | object | The realm crate whose contents come from the current Crooked biome. |
+| `crookeddoordown` | object | The entry door from the Outlands rim into Crooked Beyond. |
+| `crookeddoorup` | object | The persistent return door created inside Crooked Beyond. |
+| `oddwood` | item | Common Crooked wood and future Reality Stitcher building material. |
+| `warpresin` | item | Resin harvested from living Crooked flora. |
+| `strangefabric` | item | Fibre from fungi and broken Crooked furnishings. |
+| `eyeseed` | item | Seed-like material harvested from watching shrubs. |
+| `stripedshell` | item | The catch reward from a Stripe Beetle. |
+| `realityshard` | item | Rare tier-10 material mined from Teeth-Rocks and guarded sites. |
+| `doormimic` | mob | Elite disguised Crooked guard using vanilla Mimic behaviour at the realm tier. |
+| `tongueplant` | mob | A dormant plant guard that wakes when a player approaches. |
+| `stripebeetle` | mob | Net-catchable Crooked critter dropping a Striped Shell. |
+
 ## Baseline — registered before the ledger existed
 
 These predate the ledger and are described in `CHANGELOG.md`,

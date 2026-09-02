@@ -91,6 +91,15 @@ public final class SkyMobTiers {
     /** Ghost Realm drop value, applied to loot quantities; raw incursion 7 is x2.05. */
     public static final float VEIL_DROP_VALUE = 1.9F;
 
+    /** Crooked Beyond HP: floor x4.00, the summed incursion-10 health curve. */
+    public static final int CROOKED_HP = 4000;
+    /** Crooked Beyond damage: floor x2.15, the summed incursion-10 damage curve rounded to 280. */
+    public static final float CROOKED_DAMAGE = 280.0F;
+    /** Crooked Beyond armour: two deliberate steps above the measured ascended value of 40. */
+    public static final int CROOKED_ARMOR = 60;
+    /** Crooked Beyond drop value: vanilla incursion tier 10 raises loot to x2.50. */
+    public static final float CROOKED_DROP_VALUE = 2.5F;
+
     /** Elite role: x1.40 HP, damage and armour unchanged. */
     public static final int ROLE_ELITE_HP = 140;
     /** Ranged role: x0.70 HP — it never has to stand in melee. */
