@@ -140,6 +140,82 @@ def opaque_bbox(im, box, alpha=40):
     return (min(xs), min(ys), max(xs) + 1, max(ys) + 1)
 
 
+def label_components(im, alpha=40):
+    """Connected components of the opaque pixels -> (labels, count).
+
+    numpy-only iterative flood fill (scipy is not a dependency here). 8-way,
+    because a sprite's outline diagonals must not split it into pieces.
+    """
+    import numpy as np
+    a = np.array(im)[:, :, 3] >= alpha
+    h, w = a.shape
+    labels = np.zeros((h, w), dtype=np.int32)
+    n = 0
+    ys, xs = np.nonzero(a)
+    for sy, sx in zip(ys, xs):
+        if labels[sy, sx]:
+            continue
+        n += 1
+        stack = [(sy, sx)]
+        labels[sy, sx] = n
+        while stack:
+            y, x = stack.pop()
+            for dy in (-1, 0, 1):
+                for dx in (-1, 0, 1):
+                    ny, nx = y + dy, x + dx
+                    if 0 <= ny < h and 0 <= nx < w and a[ny, nx] and not labels[ny, nx]:
+                        labels[ny, nx] = n
+                        stack.append((ny, nx))
+    return labels, n
+
+
+def isolate_rows(im, row_spans, alpha=40):
+    """One image per row band, holding ONLY the blobs that belong to it.
+
+    A generated sheet's rows overlap: the wraith's smoke trails from row 0 hang
+    down into row 1, and row 2's legs poke up into it. A rectangular crop takes
+    the neighbours with it, and the player caught exactly that -- "in zeile 2
+    siehst du, dass dann von zeile 1 und zeile 3 der untere und obere teil mit
+    reinragen, die man entfernen muss eigentlich".
+
+    So a blob is assigned to whichever band holds the MOST of its pixels, and a
+    band's image is drawn from its own blobs alone. A trail that genuinely
+    belongs to its sprite stays attached (it is the same blob); a stray piece
+    from the row above is a separate blob and goes to the row above.
+    """
+    import numpy as np
+    labels, n = label_components(im, alpha)
+    if n == 0:
+        return [im.copy() for _ in row_spans], 0
+    owner = {}
+    for lab in range(1, n + 1):
+        ys = np.nonzero((labels == lab).any(axis=1))[0]
+        if not len(ys):
+            continue
+        best, best_n = 0, -1
+        for ri, (y0, y1) in enumerate(row_spans):
+            c = int(((ys >= y0) & (ys < y1)).sum())
+            if c > best_n:
+                best, best_n = ri, c
+        owner[lab] = best
+    src = np.array(im)
+    outs, moved = [], 0
+    for ri in range(len(row_spans)):
+        mine = np.isin(labels, [l for l, o in owner.items() if o == ri])
+        buf = src.copy()
+        buf[~mine] = 0
+        outs.append(Image.fromarray(buf, "RGBA"))
+        moved += sum(1 for l, o in owner.items()
+                     if o == ri and not _within(labels, l, row_spans[ri]))
+    return outs, moved
+
+
+def _within(labels, lab, span):
+    import numpy as np
+    ys = np.nonzero((labels == lab).any(axis=1))[0]
+    return len(ys) and ys.min() >= span[0] and ys.max() < span[1]
+
+
 def split_even(lo, hi, n):
     """n equal slices of [lo, hi) -> [(start, end)]."""
     step = (hi - lo) / float(n)
@@ -211,7 +287,7 @@ def analyse(im, want_rows=ROWS, cols=COLS, alpha=40):
         notes.append("%d row(s) split into %d even columns" % (even_cols, cols))
     if gib:
         notes.append("%d gib chunk(s) found" % len(gib))
-    return out, "; ".join(notes), gib
+    return out, "; ".join(notes), gib, list(use_rows)
 
 
 def mirror_row(sheet, src_row, dst_row, cell=CELL, cols=COLS):
@@ -240,7 +316,8 @@ def mirror_row(sheet, src_row, dst_row, cell=CELL, cols=COLS):
     return sheet
 
 
-def resheet(im, rows, cell=CELL, cols=COLS, want_rows=ROWS, gib=None):
+def resheet(im, rows, cell=CELL, cols=COLS, want_rows=ROWS, gib=None,
+            row_spans=None, alpha=40, isolate=True):
     """Scale the WHOLE sheet once so its content spans exactly cols*cell, then
     slide each row down into its own band.
 
@@ -268,9 +345,16 @@ def resheet(im, rows, cell=CELL, cols=COLS, want_rows=ROWS, gib=None):
     right = max(b[2] for r in usable for b in r)
     scale = (cols * cell) / float(right - left)
 
+    # Cut the rows apart by BLOB OWNERSHIP before cropping, so a neighbour's
+    # overhang does not ride along in the rectangle.
+    layers = None
+    if isolate and row_spans and len(row_spans) >= want_rows:
+        layers, _ = isolate_rows(im, row_spans[:want_rows], alpha)
+
     sheet = Image.new("RGBA", TARGET, (0, 0, 0, 0))
     strips = []
     for ri, row in enumerate(usable):
+        src = layers[ri] if layers else im
         top = min(b[1] for b in row)
         bot = max(b[3] for b in row)
         # Crop to THIS ROW's own horizontal extent, not the sheet's. A row that
@@ -278,7 +362,7 @@ def resheet(im, rows, cell=CELL, cols=COLS, want_rows=ROWS, gib=None):
         # canvas -- which is exactly what happened on the plain yak's LEFT row.
         rl = min(b[0] for b in row)
         rr = max(b[2] for b in row)
-        strip = im.crop((rl, top, rr, bot))
+        strip = src.crop((rl, top, rr, bot))
         sw = max(1, round((rr - rl) * scale))
         sh = max(1, round((bot - top) * scale))
         strip = strip.resize((sw, sh), Image.LANCZOS)
@@ -293,6 +377,8 @@ def resheet(im, rows, cell=CELL, cols=COLS, want_rows=ROWS, gib=None):
         sheet.alpha_composite(strip, (dx, dy))
 
     note = "one scale %.4f over the full %dpx content width" % (scale, right - left)
+    if layers:
+        note += "; rows isolated by blob ownership"
 
     # The gib strip: 32px cells at y256, up to five of them (FleshParticle
     # reads sprite row 8). Generators put it under the animation rows; it is
@@ -360,6 +446,9 @@ def main():
                     help="report the detected rows and sprites, write nothing")
     ap.add_argument("--tol", type=int, default=42,
                     help="background keying tolerance (default 42)")
+    ap.add_argument("--no-isolate", action="store_true",
+                    help="skip blob-ownership row separation (faster; only "
+                         "safe when the rows genuinely do not overlap)")
     ap.add_argument("--mirror-left", action="store_true",
                     help="build the LEFT row by mirroring RIGHT cell by cell, "
                          "when the two side views did not come out as the same "
@@ -374,7 +463,7 @@ def main():
     print("%s  %dx%d" % (os.path.basename(args.src), im.width, im.height))
     print("  %s" % note)
 
-    rows, how, gib = analyse(keyed, alpha=args.alpha)
+    rows, how, gib, spans = analyse(keyed, alpha=args.alpha)
     print("  %s" % how)
     for i, r in enumerate(rows):
         hs = [b[3] - b[1] for b in r]
@@ -382,7 +471,8 @@ def main():
     if args.inspect:
         return 0
 
-    sheet, msg = resheet(keyed, rows, gib=gib)
+    sheet, msg = resheet(keyed, rows, gib=gib, row_spans=spans,
+                         alpha=args.alpha, isolate=not args.no_isolate)
     print("  %s" % msg)
     if sheet is None:
         return 1

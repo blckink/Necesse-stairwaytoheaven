@@ -38,6 +38,15 @@ The first version was wrong in three ways; all three are fixed in
 3. **The gib strip was dropped entirely.** The five death chunks now land in
    32 px cells at y256, where FleshParticle reads them.
 
+4. **Overlapping rows dragged their neighbours along.** The player, on the
+   wraith: *"in zeile 2 siehst du, dass dann von zeile 1 und zeile 3 der untere
+   und obere teil mit reinragen, die man entfernen muss eigentlich"*. A
+   rectangular crop cannot separate rows that overlap. Rows are now cut apart by
+   BLOB OWNERSHIP — each connected component goes to the band holding most of
+   its pixels — so a trail that belongs to its sprite stays attached while a
+   stray piece from the row above goes back to the row above. `--no-isolate`
+   skips it.
+
 `--mirror-left` was added for the player's other fix: building the LEFT row by
 mirroring RIGHT cell by cell, when a generator drew the two side views as two
 different animals. Cell by cell, never the whole strip — flipping the strip
