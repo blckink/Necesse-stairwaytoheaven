@@ -177,7 +177,13 @@ realm sections say so; the remaining rows are the future shopping list.
 | `objects/spiritbasin.png`, `items/spiritbasin.png` | the Eden Threshold (`edenseedbasin`) — vanilla's Spirit Basin, reused a second time; the Ghost Gate's Soul Basin already borrows it once |
 | this mod's own `objects/skystairwaydown.png`, `objects/skystairwayup.png` | the Eden Gate down/up pair (`edengatedown`/`edengateup`) — the Skyward Stairway's own sheets, reused a second time rather than drawn fresh |
 
-### 2.2 Steinfeld (Tier 2)
+### 2.2 Steinfeld (Tier 2) — in use
+
+The rows above the line are the original exploratory notes, kept for record;
+the realm that actually shipped diverged from several of them (Weathered
+Stone ended up this mod's own `skystone`, not vanilla gravel/rock). The rows
+below are what `SteinfeldRealm` actually registers — see
+`docs/realms/steinfeld.md` for the full table with reasoning per entry.
 
 | vanilla asset | stands in for |
 |---|---|
@@ -188,6 +194,18 @@ realm sections say so; the remaining rows are the future shopping list.
 | `objects/statues` | the broken angel statues |
 | `objects/burnedtree`, `burnedtreestump` | dead trees |
 | `objects/largemossysteppingstone` | stone slabs |
+| --- | --- |
+| `tiles/stonetiledfloor`, `dirt`, `rock` | Cracked Heaven Marble, Dead Soil and Mist Stone (`SteinfeldRealm`) |
+| mod `tiles/cloudturf`, `skystone`; `tiles/murkmoss`, `cryptash` | Pale Grass, Weathered Stone, Ash Grass and Grave Soil (`SteinfeldRealm`) |
+| `objects/witheredgrass` | Withered Tuft |
+| mod `objects/skyreeds`, `cragbloom`, `aurorabloom`, `gloomshroom`, `staticmoss` | Pale Reed, Widow Flower, Dead Heaven Bloom, Ghost Mushroom and Spirit Moss Patch (`SteinfeldRealm`) |
+| mod `objects/skystonerock`, `veilrock` | Pale Stone Rock and Grave Salt Rock, on vanilla's `RockObject` (`SteinfeldRealm`) |
+| `objects/statues/mossymonkstatue`; mod `objects/statues/seraph` | Mourner Statue and Broken Angel, on vanilla's `StatueObject` (`SteinfeldRealm`) |
+| `objects/cryptcolumn` | Chapel Column, on vanilla's `ColumnObject` (`SteinfeldRealm`) |
+| mod `objects/skywatchrubble` | Heaven Slab, on `SkyDecoObject` (`SteinfeldRealm`) |
+| `objects/cryptfence`, `cryptgravestone1` | Grave Fence and (this realm's) Gravestone — read by ID directly, not re-registered (`SteinfeldRealm`) |
+| `items/cryptstone`, `alchemyshard`, `phantomdust`, `pearlescentshard` | Pale Stone, Grave Salt, Spirit Moss and Echo Shard icons (`SteinfeldRealm`) |
+| `mobs/deepcavespirit`, `ancientarmoredskeleton`, `crystalgolem`, `crazedraven` | Lost Pilgrim, Stone Mourner, Hollow Angel and Grave Crow bodies (`SteinfeldRealm`) |
 
 ### 2.3 Ghost Realm (Tier 3) — in use on `codex/ghost`
 

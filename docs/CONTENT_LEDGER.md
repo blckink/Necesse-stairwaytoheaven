@@ -211,6 +211,42 @@ second configuration rather than a second code path. See
 | `soulhound` | mob | Fast melee pursuer used where sightlines are short. |
 | `coffincrawler` | mob | Buried ambusher concentrated in the Ectomarsh. |
 
+## Steinfeld / The Quiet Reach
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `steinfeld2` | level | The infinite Quiet Reach level at dimension +3, between the Garden of Eden and the Ghost Realm on the mod's own ladder. |
+| `quietmeadow` | biome | The inner band: Eden's green grass and bright stone still holding on, a single broken angel and the first buried slab. |
+| `slabfields` | biome | The middle band: pale grass over cracked heaven marble, dead soil opening between the slabs, and the first dead trees. |
+| `graveheath` | biome | The outer band: grey grass, black turned earth, mist stone and standing gravestones, already the Veil's own ground. |
+| `palegrasstile` | tile | The middle band's grass, on the Skyreach's own Cloudturf sheet gone pale. |
+| `weatheredstonetile` | tile | Bright heaven-stone lying in the open, on the Skyreach's own Skystone sheet. |
+| `crackedmarbletile` | tile | The big buried slabs the Slab Fields are named for, on vanilla's stone-tiled-floor sheet, read as terrain rather than floor. |
+| `deadsoiltile` | tile | Bare turned earth where the grass has given up, on vanilla's dirt sheet. |
+| `ashgrasstile` | tile | The outer band's grey-green mat, on the Veil's own Murkmoss sheet. |
+| `miststonetile` | tile | The same stone as Weathered Stone, out where the fog sits on it, on vanilla's plain rock sheet. |
+| `gravesoiltile` | tile | Near-black turned earth, what a grave field is cut into, on the Ghost Realm's own Cryptash sheet. |
+| `witheredtuft` | object | The realm's commonest scatter, pure decoration, on vanilla's own withered-grass sheet. |
+| `palereed` | object | Slab Fields reed-grass, on the Skyreach's own reed sheet. |
+| `widowflower` | object | The Quiet Meadow's single flower near Eden, on the Ghost Realm's own Crag Bloom sheet. |
+| `deadheavenbloom` | object | A dying sky-flower of the Slab Fields, on the Skyreach's own Aurora Bloom sheet. |
+| `ghostmushroom` | object | Pale fungus of the Grave Heath, on the Ghost Realm's own Gloomshroom sheet. |
+| `spiritmosspatch` | object | The realm's séance material growing wild, on the Skyreach's own Static Moss sheet — the only one of the five flora with a real drop. |
+| `palestonerock` | object | The realm's mineable building stone, vanilla's RockObject on the Skyreach's own skystonerock sheet. |
+| `gravesaltrock` | object | The realm's mineable alchemy mineral, vanilla's RockObject on the Veil's own veilrock sheet. |
+| `mournerstatue` | object | A statue that has not woken yet, vanilla's StatueObject on its own Mossy Monk Statue sheet. |
+| `brokenangel` | object | The realm's central image — A3.4's own — vanilla's StatueObject on the Skyreach's own Seraph Statue sheet. |
+| `chapelcolumn` | object | A ruined chapel's colonnade pillar, vanilla's ColumnObject on its own Crypt Column sheet. |
+| `heavenslab` | object | A fallen roof slab scattered through the open country and the two landmark presets, on the Skyreach's own rubble sheet. |
+| `palestone` | item | The realm's common building material — mined from Pale Stone Rock and looted from every crate and gravestone. |
+| `gravesalt` | item | The realm's alchemy mineral, mined from Grave Salt Rock. |
+| `spiritmoss` | item | The later séance material §9 asks for, gathered from the Grave Heath and dropped by ghost apparitions. |
+| `echoshard` | item | A fragment left behind by a ghost apparition, and the séance quest's other ingredient. |
+| `lostpilgrim` | mob | Fast ghost fragment, the Quiet Meadow's own resident and the realm's first named enemy. |
+| `stonemourner` | mob | Standard statue that wakes, the Slab Fields' own resident and the realm's unmodified tier floor. |
+| `hollowangel` | mob | Elite broken heaven guardian, the realm's toughest standing fight and the mod's own measured difficulty floor. |
+| `gravecrow` | mob | Ranged flier working the open ground, the realm's only ranged threat. |
+
 ## Baseline — registered before the ledger existed
 
 These predate the ledger and are described in `CHANGELOG.md`,

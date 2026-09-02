@@ -576,6 +576,10 @@ ITEM_CLASS_VANILLA_ICON = {
     # supplied as constructor argument 0. No recolouring is involved.
     "CrookedMatItem": ("arg", 0),
     "GhostMatItem": ("arg", 0),
+    # Steinfeld realm materials, the same deliberate no-recolouring pointer at
+    # a literal vanilla icon supplied as constructor argument 0 -- see
+    # SteinfeldMatItem's own class doc, which names this exact dict entry.
+    "SteinfeldMatItem": ("arg", 0),
     "SpiritsteelHelmet": ("fixed", "soulseedcrown"),
     "SpiritsteelChestplate": ("fixed", "soulseedchestplate"),
     "SpiritsteelBoots": ("fixed", "soulseedboots"),

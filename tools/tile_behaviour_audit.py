@@ -115,6 +115,17 @@ ROLES = {
     "blackcobbletile": TERRAIN,
     "graveyardsoiltile": TERRAIN,
     "ectoplasmtile": LIQUID,
+    # Steinfeld / The Quiet Reach. All seven are SteinfeldGroundTile ->
+    # SkyGroundTile -> TerrainSplatterTile(isFloor=false, ...), painted by area
+    # in SteinfeldTerrainPainter.paintRegion rather than placed one tile at a
+    # time -- terrain, not floor, exactly like the Skyreach's own four.
+    "palegrasstile": TERRAIN,
+    "weatheredstonetile": TERRAIN,
+    "crackedmarbletile": TERRAIN,
+    "deadsoiltile": TERRAIN,
+    "ashgrasstile": TERRAIN,
+    "miststonetile": TERRAIN,
+    "gravesoiltile": TERRAIN,
 }
 
 # Vanilla base classes we may build on, and the isFloor value each one passes

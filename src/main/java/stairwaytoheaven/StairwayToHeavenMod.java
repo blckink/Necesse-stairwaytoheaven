@@ -63,6 +63,7 @@ public class StairwayToHeavenMod {
         SkyMobs.register();
         SkyItems.register();
         stairwaytoheaven.realms.eden.EdenRealm.register();
+        stairwaytoheaven.realms.steinfeld.SteinfeldRealm.register();
         stairwaytoheaven.realms.crooked.CrookedRealm.register();
         stairwaytoheaven.realms.ghost.GhostRealm.register();
         stairwaytoheaven.arsenal.SkyArsenal.register();
@@ -125,6 +126,9 @@ public class StairwayToHeavenMod {
         LevelIdentifier.IDENTIFIER_TO_DIMENSION.put(
                 SkyRegistry.EDEN_IDENTIFIER.stringID, SkyRegistry.EDEN_DIMENSION);
         LevelRegistry.registerLevel("edenlevel", stairwaytoheaven.realms.eden.EdenLevel.class);
+        LevelIdentifier.IDENTIFIER_TO_DIMENSION.put(
+                SkyRegistry.STEINFELD_IDENTIFIER.stringID, SkyRegistry.STEINFELD_DIMENSION);
+        LevelRegistry.registerLevel("steinfeldlevel", stairwaytoheaven.realms.steinfeld.SteinfeldLevel.class);
         LevelIdentifier.IDENTIFIER_TO_DIMENSION.put(SkyRegistry.VEIL_IDENTIFIER.stringID, SkyRegistry.VEIL_DIMENSION);
         LevelRegistry.registerLevel("veillevel", VeilLevel.class);
         LevelIdentifier.IDENTIFIER_TO_DIMENSION.put(
@@ -215,6 +219,7 @@ public class StairwayToHeavenMod {
         stairwaytoheaven.arsenal.SkyArsenal.loadTextures();
         stairwaytoheaven.livestock.SkyLivestock.loadTextures();
         stairwaytoheaven.realms.eden.EdenRealm.loadTextures();
+        stairwaytoheaven.realms.steinfeld.SteinfeldRealm.loadTextures();
         stairwaytoheaven.realms.crooked.CrookedRealm.loadTextures();
         stairwaytoheaven.realms.ghost.GhostRealm.loadTextures();
     }
@@ -248,6 +253,10 @@ public class StairwayToHeavenMod {
                 }
                 if (levelIdentifier.equals(SkyRegistry.EDEN_IDENTIFIER)) {
                     return new stairwaytoheaven.realms.eden.EdenLevel(
+                            levelIdentifier, 0, 0, server.world.worldEntity, blackboard.getInt("seed"));
+                }
+                if (levelIdentifier.equals(SkyRegistry.STEINFELD_IDENTIFIER)) {
+                    return new stairwaytoheaven.realms.steinfeld.SteinfeldLevel(
                             levelIdentifier, 0, 0, server.world.worldEntity, blackboard.getInt("seed"));
                 }
                 if (levelIdentifier.equals(SkyRegistry.GHOST_IDENTIFIER)) {

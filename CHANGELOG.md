@@ -3,6 +3,41 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [Unreleased] — Steinfeld / The Quiet Reach integrates — 2026-09-02
+
+### Added
+- `SteinfeldRealm` — the registration glue the realm was missing. The three
+  bands (`quietmeadow`, `slabfields`, `graveheath`), the seven grounds, the
+  four residents (`lostpilgrim`, `stonemourner`, `hollowangel`, `gravecrow`)
+  and the twelve new world objects (flora, the two mineable rocks, the two
+  statues, the chapel column and the fallen heaven slab) all reach the
+  registries now; the terrain painter, the pressure field, the two landmark
+  presets and the level class this depends on were already built and
+  untouched. Level `steinfeldlevel`, identifier `steinfeld2`, dimension +3,
+  wired into `StairwayToHeavenMod` beside Eden and the Veil.
+- Four materials — `palestone`, `gravesalt`, `spiritmoss`, `echoshard` — each
+  a vanilla icon by literal path, no recolouring. Spirit Moss and Echo Shard
+  are already spent: §9's séance quest names both.
+- English and German names for every one of the 31 new registered IDs, plus
+  the four materials' `itemtooltip` lines — `tools/locale_audit.py` reports
+  clean.
+- `docs/realms/steinfeld.md` — the realm's borrowed-art table, one row per
+  sprite, with what it stands in for.
+
+### Fixed
+- `tools/tile_behaviour_audit.py`'s `ROLES` table now classifies all seven
+  Steinfeld grounds as TERRAIN (they are — `SteinfeldGroundTile` passes
+  `isFloor=false` and every one sits below the floor priority band).
+- `tools/locale_audit.py`'s `ITEM_CLASS_VANILLA_ICON` now covers
+  `SteinfeldMatItem`, exactly as that class's own header already claimed it
+  would.
+
+### Deferred
+- The world-event ghosts (§7, A3.4), a player-facing entry object (Eden, the
+  realm directly underneath this one, has none either — both stay deferred
+  together), and a crafting-station recipe economy for the four materials.
+  See `docs/realms/steinfeld.md`.
+
 ## [Unreleased] — the Veil closes — 2026-09-02
 
 ### Added

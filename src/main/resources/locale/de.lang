@@ -801,3 +801,46 @@ edenseedbasin=Edenschwelle
 edenbasinalreadyeden=Das Becken ist hier leer. Du stehst bereits in Eden.
 edenbasinneedsseeds=Das Becken braucht 6 Eden-Grassamen.
 edengateopened=Das Becken füllt sich mit grünem Licht und öffnet sich zum Garten Eden.
+// Steinfeld / Die Stille Weite
+[level]
+steinfeld2=Die Stille Weite
+[biome]
+quietmeadow=Stille Wiese
+slabfields=Plattenfelder
+graveheath=Grabheide
+[tile]
+palegrasstile=Blasses Gras
+weatheredstonetile=Verwitterter Stein
+crackedmarbletile=Rissiger Himmelsmarmor
+deadsoiltile=Toter Boden
+ashgrasstile=Aschgras
+miststonetile=Nebelstein
+gravesoiltile=Graberde
+[object]
+witheredtuft=Verdorrtes Büschel
+palereed=Blasses Schilf
+widowflower=Witwenblume
+deadheavenbloom=Tote Himmelsblüte
+ghostmushroom=Totenpilz
+spiritmosspatch=Geistermoosfleck
+palestonerock=Blasser Steinbrocken
+gravesaltrock=Grabsalzbrocken
+mournerstatue=Trauerstatue
+brokenangel=Zerbrochener Engel
+chapelcolumn=Kapellensäule
+heavenslab=Himmelsplatte
+[item]
+palestone=Blasser Stein
+gravesalt=Grabsalz
+spiritmoss=Geistermoos
+echoshard=Echosplitter
+[itemtooltip]
+palestonetip=Heller Baustein - das eigene Material des Himmels, das hier noch immer herumliegt.
+gravesalttip=Eine bittere Mineralkruste, geschätzt in der Alchemie.
+spiritmosstip=Moos, das weiterwächst, obwohl der Boden darunter längst nicht mehr lebt. Wonach eine Séance verlangt.
+echoshardtip=Ein Splitter einer Stimme, die die Weite noch nicht zu Ende gehört hat.
+[mob]
+lostpilgrim=Verlorener Pilger
+stonemourner=Steinerner Trauernder
+hollowangel=Hohler Engel
+gravecrow=Grabkrähe
