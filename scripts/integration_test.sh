@@ -353,8 +353,8 @@ grep -qE "pressure check: .* guarded=[1-9][0-9]*" "$LOG1" \
 
 # The LOUD half: a real site must actually have guards standing on it. This is
 # the assertion that catches the whole class of "placed by nothing" bugs this
-# mod has shipped before -- the Cloud Lamb, the three workstations, the three
-# sky oddities were all registered, correct and never put in the world.
+# mod has shipped before -- the workstations and the sky oddities were all
+# registered, correct and never put in the world.
 grep -qE "guard check: site=NONE FOUND" "$LOG1" \
     && { echo "FAIL: no guarded site within 900 tiles of the spire"; STATUS=1; }
 grep -qE "guard check: .* atSite=[1-9][0-9]*" "$LOG1" \
@@ -408,20 +408,18 @@ grep -qF "makes=NOTHING" "$LOG1" \
 grep -qF "TECH_MISSING" "$LOG1" \
     && { echo "FAIL: a workstation's recipe tech was never registered"; STATUS=1; }
 
-echo "--- verifying the Cloud Lamb is a coherent husbandry animal ---"
-# Three player questions, three measured values: what shearing yields, what the
-# offspring is (vanilla SheepMob breeds a 50% chance of a plain `ram`), and what
-# the feeding trough accepts (FeedingTroughObjectEntity filters on
+echo "--- verifying what the sky's animals will eat ---"
+# The feeding trough is the trap: FeedingTroughObjectEntity filters on
 # `instanceof GrainItem` and nothing else, so a berry that is not one can never
-# go in the trough no matter what canFeed says).
+# go in the trough no matter what canFeed says.
 grep -qF "cloudberry=hand:true/trough:true" "$LOG1" \
-    || { echo "FAIL: cloudberries are not accepted as Cloud Lamb feed"; STATUS=1; }
+    || { echo "FAIL: cloudberries are not accepted as livestock feed"; STATUS=1; }
 grep -qF "wheat=hand:true/trough:true" "$LOG1" \
     || { echo "FAIL: vanilla wheat stopped working as feed"; STATUS=1; }
 grep -qF "skystone=hand:false/trough:false" "$LOG1" \
     || { echo "FAIL: the feed check accepts things that are not food"; STATUS=1; }
 
-echo "--- verifying the three farmable sky animals ---"
+echo "--- verifying the two farmable sky animals ---"
 # One line per animal, every value read off the mob the engine built.
 #
 # `mate=` is the one that cannot be inferred from the class hierarchy.
@@ -440,7 +438,7 @@ grep -qE "husbandry check: glimmergoat shear=aurorafleecex[0-9]+.* child=glimmer
          grep -E "husbandry check: glimmergoat" "$LOG1" | tail -1; STATUS=1; }
 # ...and each of them must be placeable by a biome spawn table, which a
 # HusbandryMob is NOT by default: Mob.isValidSpawnLocation is `return false`
-# and nothing in the husbandry chain overrides it. That is why the Cloud Lamb's
+# and nothing in the husbandry chain overrides it. That is why sky livestock's
 # own row above reads INHERITS, and why its biome entry did nothing for three
 # releases. A table entry for a mob that answers false is indistinguishable
 # from bad luck, so the override is asserted rather than trusted.
