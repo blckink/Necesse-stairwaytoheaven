@@ -66,6 +66,26 @@ public final class SkyRegistry {
 
     public static final LevelIdentifier SKYREACH_IDENTIFIER = new LevelIdentifier("skyreach2");
 
+    /**
+     * One-world dimension index of the Garden of Eden: one layer ABOVE the
+     * Skyreach, i.e. two above the surface.
+     *
+     * <p>The vertical stack is now
+     * {@code veil(-3) < deepcave(-2) < cave(-1) < surface(0) < skyreach(+1) <
+     * eden(+2)}. Tier 1 of {@code docs/WORLD_DESIGN.md} is reached by climbing
+     * further, not by digging — the mod is called Stairway to Heaven, and Eden
+     * is the first floor past the Skywatch.
+     */
+    public static final int EDEN_DIMENSION = 2;
+
+    /**
+     * Level identifier of the Garden of Eden, generation-stamped exactly like
+     * the two dimensions above — see {@link #WORLD_GENERATION}. The literal
+     * stays a literal so {@code tools/locale_audit.py} can find the {@code
+     * [level]} key it needs.
+     */
+    public static final LevelIdentifier EDEN_IDENTIFIER = new LevelIdentifier("eden2");
+
     // ===== Biomes =====
 
     public static DriftlandsBiome driftlands;
