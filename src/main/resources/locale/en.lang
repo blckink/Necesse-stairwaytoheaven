@@ -747,3 +747,47 @@ bloommaw=Bloom Maw
 jealousvine=Jealous Vine
 goldenhornet=Golden Hornet
 forbiddenserpent=Forbidden Serpent
+
+// Steinfeld / The Quiet Reach
+[level]
+steinfeld2=The Quiet Reach
+[biome]
+quietmeadow=Quiet Meadow
+slabfields=Slab Fields
+graveheath=Grave Heath
+[tile]
+palegrasstile=Pale Grass
+weatheredstonetile=Weathered Stone
+crackedmarbletile=Cracked Heaven Marble
+deadsoiltile=Dead Soil
+ashgrasstile=Ash Grass
+miststonetile=Mist Stone
+gravesoiltile=Grave Soil
+[object]
+witheredtuft=Withered Tuft
+palereed=Pale Reed
+widowflower=Widow Flower
+deadheavenbloom=Dead Heaven Bloom
+ghostmushroom=Ghost Mushroom
+spiritmosspatch=Spirit Moss Patch
+palestonerock=Pale Stone Rock
+gravesaltrock=Grave Salt Rock
+mournerstatue=Mourner Statue
+brokenangel=Broken Angel
+chapelcolumn=Chapel Column
+heavenslab=Heaven Slab
+[item]
+palestone=Pale Stone
+gravesalt=Grave Salt
+spiritmoss=Spirit Moss
+echoshard=Echo Shard
+[itemtooltip]
+palestonetip=Bright building stone - the sky's own material, still lying about up here.
+gravesalttip=A bitter mineral crust, prized in alchemy.
+spiritmosstip=Moss that kept growing after the ground beneath it stopped living. What a seance asks for.
+echoshardtip=A splinter of a voice the Reach has not finished hearing.
+[mob]
+lostpilgrim=Lost Pilgrim
+stonemourner=Stone Mourner
+hollowangel=Hollow Angel
+gravecrow=Grave Crow
