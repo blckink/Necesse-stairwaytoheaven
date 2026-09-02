@@ -50,6 +50,53 @@ chapter; the ground is real now.
 | `overgrownedentile` | tile | Eden grass: deep lush ground that sprouts grass tufts on its own, spreads to dirt, and seeds itself back at 4% when mined — the Garden of Eden's first ground, plantable today. |
 | `overgrownedenseed` | item | Eden grass seeds: plant on dirt or Cloudturf to start an Eden patch; found rarely in sky crates, then self-renewing. |
 
+## Ghost Realm / Aftergarden
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `ghost2` | level | The persistent dimension-4 Aftergarden generated from three dead sub-biomes. |
+| `aftergarden` | biome | Poison-green common ground with mixed ghost pressure and dead groves. |
+| `boneorchard` | biome | Violet resource ground where bonewood and Spectral Ore concentrate. |
+| `ectomarsh` | biome | Turquoise wetland dominated by ambushers and glowing ectoplasm. |
+| `hauntedgrasstile` | tile | Organic Aftergarden terrain borrowing the existing Murkmoss sheet. |
+| `ghostmosstile` | tile | Organic marsh terrain borrowing vanilla swamp grass. |
+| `violetdirttile` | tile | Violet orchard terrain borrowing vanilla crypt ash. |
+| `spiritstonetile` | tile | Petrol hard ground borrowing vanilla stone-brick floor art. |
+| `blackcobbletile` | tile | Cold dark hard ground borrowing vanilla Raven floor art. |
+| `graveyardsoiltile` | tile | Wet cemetery ground borrowing vanilla swamp-rock terrain. |
+| `ectoplasmtile` | tile | Swimmable turquoise liquid using vanilla swamp-water atlases. |
+| `crookeddeadtree` | object | Unobtainable dead scenery yielding Bonewood. |
+| `bonewoodtree` | object | The orchard's renewable Bonewood source. |
+| `spiritwillow` | object | A cold willow yielding Bonewood. |
+| `lanterntree` | object | A luminous grove tree yielding Bonewood and occasional Ectoplasm. |
+| `ghostlily` | object | Soft pale flora yielding Soul Thread. |
+| `mourningrose` | object | Violet soft flora yielding Soul Thread. |
+| `ectoplasmfern` | object | Turquoise marsh flora yielding Ectoplasm. |
+| `widowvine` | object | Dark soft flora yielding Soul Thread. |
+| `spiritmushroom` | object | Glowing soft fungus yielding Ectoplasm. |
+| `ghostrock` | object | Breakable dead stone with a small Bonewood salvage drop. |
+| `spectralorerock` | object | The realm's mineable source of Spectral Ore. |
+| `ghostgravestone` | object | Unobtainable cemetery scenery used by worldgen and POIs. |
+| `soulbasin` | object | Craftable gate focus that consumes twelve Ectoplasm to open the Ghost Gate. |
+| `soulloom` | object | Settler-compatible station that spins Soul Thread. |
+| `spiritforge` | object | Settler-compatible station that smelts and forges Spiritsteel without fuel. |
+| `ghostgatedown` | object | Unobtainable living-side portal created by an activated Soul Basin. |
+| `ghostgateup` | object | Persistent return portal automatically placed in the Aftergarden. |
+| `bonewood` | item | Common realm timber and authored POI loot. |
+| `soulthread` | item | Ghost textile spun from Ectoplasm and Aurora Fleece. |
+| `spectralore` | item | Rare ore mined in the Bone Orchard. |
+| `spiritsteelbar` | item | Forged Ghost-tier bar consumed by the Spiritsteel set. |
+| `spiritsteelhelmet` | item | Tier-7 melee crown and head of the Spiritsteel set. |
+| `spiritsteelchestplate` | item | Tier-7 Spiritsteel chest armour. |
+| `spiritsteelboots` | item | Tier-7 Spiritsteel greaves. |
+| `drifter` | mob | Flying standard ghost using the realm's common pressure table. |
+| `headlessbutler` | mob | Melee manor servant with persistent authored-site use. |
+| `lanternwidow` | mob | Ranged Ghost-tier caster concentrated in the Bone Orchard. |
+| `mourningbride` | mob | Elite anchor for all three authored-site guard packs. |
+| `possessedchair` | mob | Mimic-style furniture ambusher used in marsh guard packs. |
+| `soulhound` | mob | Fast melee pursuer used where sightlines are short. |
+| `coffincrawler` | mob | Buried ambusher concentrated in the Ectomarsh. |
+
 ## Baseline — registered before the ledger existed
 
 These predate the ledger and are described in `CHANGELOG.md`,

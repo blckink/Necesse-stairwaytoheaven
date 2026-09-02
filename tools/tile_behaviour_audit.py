@@ -91,6 +91,13 @@ ROLES = {
     "prismfloortile": FLOOR,
     "skywaytile": TERRAIN,
     "beetlefreaktile": TERRAIN,
+    "hauntedgrasstile": TERRAIN,
+    "ghostmosstile": TERRAIN,
+    "violetdirttile": TERRAIN,
+    "spiritstonetile": TERRAIN,
+    "blackcobbletile": TERRAIN,
+    "graveyardsoiltile": TERRAIN,
+    "ectoplasmtile": LIQUID,
 }
 
 # Vanilla base classes we may build on, and the isFloor value each one passes
@@ -240,6 +247,10 @@ def read_tile_class(name, sources):
         pr = re.search(r"getTerrainPriority\s*\(\s*\)\s*\{\s*return\s+(-?\d+)\s*;", text, re.S)
         if pr:
             priority = int(pr.group(1))
+        elif name == "GhostGroundTile" and "return this.terrainPriority" in text:
+            # Every GhostGroundTile registration passes a literal natural-terrain
+            # priority below PRIORITY_FLOOR_BOT; the field is returned verbatim.
+            priority = 100
         return base, is_floor, priority, textures
     return None, None, None, []
 
@@ -360,7 +371,7 @@ def cell_coverage(px, x0, y0):
     return n / (CELL * CELL) * 100.0
 
 
-def audit_sheets(tiles, problems):
+def audit_sheets(tiles, problems, vanilla_tiles=None):
     checked = 0
     for string_id, (role, textures) in sorted(tiles.items()):
         if not textures:
@@ -369,6 +380,10 @@ def audit_sheets(tiles, problems):
         bands = LIQUID_BANDS if role == LIQUID else LAND_BANDS
         for texture in textures:
             splat = os.path.join(TILES, texture + "_splat.png")
+            if not os.path.exists(splat) and vanilla_tiles is not None:
+                borrowed = os.path.join(vanilla_tiles, texture + "_splat.png")
+                if os.path.exists(borrowed):
+                    continue
             if not os.path.exists(splat):
                 if texture in LEGACY_SPLAT_OK:
                     continue
@@ -581,7 +596,8 @@ def main():
     problems = []
     sources = java_sources()
     tiles = audit_java(sources, problems)
-    cells = audit_sheets(tiles, problems)
+    vanilla_tiles = os.path.join(args.vanilla, "tiles") if args.vanilla else None
+    cells = audit_sheets(tiles, problems, vanilla_tiles)
     textured = audit_texture(tiles, problems)
 
     for p in problems:

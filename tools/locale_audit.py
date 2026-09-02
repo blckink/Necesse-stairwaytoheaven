@@ -92,6 +92,8 @@ MULTI_OBJECT_REGISTRARS = {
 LOCAL_REGISTRARS = {
     "registerPickable": "object",     # SkyObjects: pickable flowers
     "registerMeadowGrass": "object",  # SkyObjects: walk-through carpet grass
+    "natural": "object",              # GhostRealm: borrowed solid scenery
+    "plant": "object",                # GhostRealm: borrowed soft flora
 }
 
 # Registry calls whose ID argument is legitimately a variable, keyed by the
@@ -121,6 +123,8 @@ HUMAN_BASES = ("HumanMob", "HumanShop")
 # index of the constructor argument that names it). Every class not listed here
 # falls through to the engine default, items/<stringID>.png.
 ITEM_TEXTURE_BY_CLASS = {
+    "GhostDecoObject": ("items", 1),
+    "GhostStationObject": ("items", 1),
     # RockObject.generateItemTexture -> items/<rockTexture>, the first
     # constructor argument, which is NOT the registered string ID.
     "RockObject": ("items", 0),
@@ -199,6 +203,7 @@ MULTI_OBJECT_HELD_SUFFIXES = {
 # reported rather than skipped, for the same reason the item-icon table does it.
 OBJECT_TEXTURE_BY_CLASS = {
     "SkyDecoObject": ("objects", 0),
+    "GhostStationObject": ("objects", 0),
 }
 
 
@@ -446,6 +451,10 @@ ITEM_CLASS_VANILLA_ICON = {
     "LivestockProduce": ("arg", 0),
     "ThunderplumeCowl": ("fixed", "clothhat"),
     "GlimmerstrideBoots": ("fixed", "clothboots"),
+    "GhostMatItem": ("arg", 0),
+    "SpiritsteelHelmet": ("fixed", "soulseedcrown"),
+    "SpiritsteelChestplate": ("fixed", "soulseedchestplate"),
+    "SpiritsteelBoots": ("fixed", "soulseedboots"),
 }
 
 # Marker prefix on a wanted-icon path that lives in the vanilla resource file
@@ -771,7 +780,7 @@ def texture_load_sites():
             else:
                 literals.append((match.group(1), spot))
     return literals, dynamic
-def check_world_textures():
+def check_world_textures(vanilla_dump=None):
     """The sheet each registered object DRAWS ITSELF from must exist.
 
     Walks every registerObject call, resolves the class it constructs and the
@@ -811,6 +820,9 @@ def check_world_textures():
             checked += 1
             wanted = "%s/%s.png" % (directory, texture)
             if os.path.exists(os.path.join(RESOURCES, *wanted.split("/"))):
+                continue
+            if vanilla_dump is not None and os.path.exists(
+                    os.path.join(vanilla_dump, *wanted.split("/"))):
                 continue
             print("!! the object registered at %s (%s) draws %s in the world, which "
                   "does not exist -- GameTexture.fromFile hands back the engine's ERR "
@@ -1103,6 +1115,11 @@ def main(vanilla_dump=None):
         if any(os.path.exists(os.path.join(RESOURCES, *path.split("/")))
                for path in wanted):
             continue
+        if vanilla_dump is not None and any(
+                os.path.exists(os.path.join(vanilla_dump, *path.split("/")))
+                for path in wanted):
+            borrowed += 1
+            continue
         print("!! %s %s (%s, registered at %s) has no %s -- the player can hold "
               "it and the inventory would draw the engine's ERR texture"
               % (kind, string_id, class_name, spot, " or ".join(wanted)))
@@ -1117,7 +1134,7 @@ def main(vanilla_dump=None):
     #    the other side of the same registration, and it stayed invisible only
     #    as long as every object's sheet happened to be named after its own ID.
     #    See OBJECT_TEXTURE_BY_CLASS.
-    world_problems, world_sheets = check_world_textures()
+    world_problems, world_sheets = check_world_textures(vanilla_dump)
     problems += world_problems
 
     # 8. And nothing may register an ID behind this audit's back.

@@ -62,6 +62,7 @@ public class StairwayToHeavenMod {
         SkyCloudmarbleSet.register();
         SkyMobs.register();
         SkyItems.register();
+        stairwaytoheaven.realms.ghost.GhostRealm.register();
         stairwaytoheaven.arsenal.SkyArsenal.register();
         stairwaytoheaven.arsenal.SkyArsenal.registerItems();
         stairwaytoheaven.settlement.SkyProfessions.register();
@@ -109,6 +110,9 @@ public class StairwayToHeavenMod {
         LevelRegistry.registerLevel("skylevel", SkyLevel.class);
         LevelIdentifier.IDENTIFIER_TO_DIMENSION.put(SkyRegistry.VEIL_IDENTIFIER.stringID, SkyRegistry.VEIL_DIMENSION);
         LevelRegistry.registerLevel("veillevel", VeilLevel.class);
+        LevelIdentifier.IDENTIFIER_TO_DIMENSION.put(
+                SkyRegistry.GHOST_IDENTIFIER.stringID, SkyRegistry.GHOST_DIMENSION);
+        LevelRegistry.registerLevel("ghostlevel", stairwaytoheaven.realms.ghost.GhostLevel.class);
     }
 
     private void registerBiomes() {
@@ -189,10 +193,12 @@ public class StairwayToHeavenMod {
         SkyMobs.loadTextures();
         stairwaytoheaven.arsenal.SkyArsenal.loadTextures();
         stairwaytoheaven.livestock.SkyLivestock.loadTextures();
+        stairwaytoheaven.realms.ghost.GhostRealm.loadTextures();
     }
 
     public void postInit() {
         SkyItems.registerRecipes();
+        stairwaytoheaven.realms.ghost.GhostRealm.registerRecipes();
         stairwaytoheaven.livestock.SkyLivestock.registerItems();
         SkyBuildingSet.registerRecipes();
         SkyFurnitureSet.registerRecipes();
@@ -214,6 +220,10 @@ public class StairwayToHeavenMod {
                 }
                 if (levelIdentifier.equals(SkyRegistry.VEIL_IDENTIFIER)) {
                     return new VeilLevel(levelIdentifier, 0, 0, server.world.worldEntity, blackboard.getInt("seed"));
+                }
+                if (levelIdentifier.equals(SkyRegistry.GHOST_IDENTIFIER)) {
+                    return new stairwaytoheaven.realms.ghost.GhostLevel(
+                            levelIdentifier, 0, 0, server.world.worldEntity, blackboard.getInt("seed"));
                 }
                 return null;
             }

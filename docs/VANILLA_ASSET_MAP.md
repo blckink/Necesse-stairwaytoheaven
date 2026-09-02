@@ -133,7 +133,7 @@ against the real dump in `vanilla-sprites/` (6,121 files, game 1.3.2).
 | `objects/burnedtree`, `burnedtreestump` | dead trees |
 | `objects/largemossysteppingstone` | stone slabs |
 
-### 2.3 Ghost Realm (Tier 3) — partly built already
+### 2.3 Ghost Realm (Tier 3) — in use on `codex/ghost`
 
 | vanilla asset | stands in for |
 |---|---|
@@ -148,6 +148,15 @@ against the real dump in `vanilla-sprites/` (6,121 files, game 1.3.2).
 | `objects/deadwoodcandles`, `waterlantern`, `swampcandlestand` | floating candles, lanterns |
 | the whole `bone*` furniture family (bed, bench, bookshelf, clock, chest, …) | Bonewood furniture — a complete set already exists |
 | `objects/cryptorerock_nightsteelore` | Spectral Ore |
+| `tiles/swampgrass`, `swamprock`, `swampfreshwater_shallow`, `swampfreshwater_deep` | Ghost Moss, Graveyard Soil and the two Ectoplasm liquid sheets (`GhostRealm`) |
+| `tiles/stonebrickfloor`, `ravenfloor`; mod `tiles/murkmoss` | Spirit Stone, Black Cobble and Haunted Grass (`GhostRealm`) |
+| `objects/deadtree`, `deadwood`, `willowtree`; mod `objects/gloomwillow` | Crooked Dead Tree, Bonewood Tree, Spirit Willow and Lantern Tree (`GhostRealm`) |
+| `objects/aurorabloom`, `cragbloom`, `gloomshroom`, `withershrub` | the five soft Ghost plants (`GhostRealm`) |
+| `objects/veilrock`, `cryptgravestone1`, `spiritbasin` | Ghost Rock, world gravestone and Soul Basin (`GhostRealm`) |
+| mod `objects/windsilkloom`, `aetherforge`; `items/caveglowalchemytable`, `forge` | Soul Loom and Spirit Forge world sheets and icons (`GhostRealm`) |
+| `items/deadwoodlog`, `clothscraps`, `nightsteelore`, `nightsteelbar` | Bonewood, Soul Thread, Spectral Ore and Spiritsteel Bar (`GhostRealm`) |
+| `items/soulseedcrown`, `soulseedchestplate`, `soulseedboots`; matching `player/armor/soulseed*` | complete Spiritsteel armour stand-ins |
+| mod `objects/veilriftdown`, `veilriftup` | Ghost Gate pair |
 
 ### 2.4 Crooked Beyond (Tier 4) — partly built already
 
