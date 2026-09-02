@@ -1,5 +1,7 @@
 package stairwaytoheaven.arsenal;
 
+import java.util.List;
+
 import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
 import necesse.engine.util.GameRandom;
@@ -8,6 +10,17 @@ import necesse.entity.mobs.GameDamage;
 import necesse.entity.mobs.MaxHealthGetter;
 import necesse.entity.mobs.ai.behaviourTree.BehaviourTreeAI;
 import necesse.entity.mobs.ai.behaviourTree.trees.ConfusedCollisionPlayerChaserWandererAI;
+import necesse.entity.mobs.PlayerMob;
+import necesse.gfx.camera.GameCamera;
+import necesse.gfx.drawOptions.DrawOptions;
+import necesse.gfx.drawables.OrderableDrawables;
+import necesse.gfx.gameTexture.GameTexture;
+import necesse.entity.mobs.MobDrawable;
+import necesse.engine.gameLoop.tickManager.TickManager;
+import necesse.entity.mobs.MaskShaderOptions;
+import necesse.level.maps.Level;
+import necesse.level.maps.light.GameLight;
+import java.awt.Point;
 import necesse.entity.mobs.hostile.SpiritGhoulMob;
 import necesse.inventory.lootTable.LootTable;
 import necesse.inventory.lootTable.lootItem.ChanceLootItemList;
@@ -53,8 +66,72 @@ import stairwaytoheaven.mobs.SkySpawnRules;
  *
  * <p>Vanilla's loot table is surface-cave loot (coins, amber, dryad saplings);
  * ours is replaced with Veil materials.
+ *
+ * <h2>Our own art, on vanilla's body</h2>
+ * As of 2026-09-02 this no longer wears {@code mobs/spiritghoul}. The player
+ * supplied a Spirit Wraith sheet as CUT FRAMES and
+ * {@code tools/resheet_mob.py} composed it onto the 384x320 grid; it ships as
+ * {@code mobs/fenwraith.png} and {@link #addDrawables} samples it.
+ *
+ * <p>The override exists because {@code SpiritGhoulMob.addDrawables} reads its
+ * texture from the static {@code MobRegistry.Textures.spiritGhoul} inline, and
+ * {@code Mob} exposes no per-instance texture hook (VERIFIED [jar]). Assigning
+ * into that static would repaint vanilla's own ghouls in vanilla's own caves,
+ * so the draw is ported instead — same offsets (-32 / -36), same animation
+ * frame, same bobbing, same sinking amount, same swim mask, same glow options
+ * and enemy tracker. Only the {@link GameTexture} is ours.
+ *
+ * <p>It deliberately does NOT call {@code super.addDrawables}: that IS vanilla's
+ * body draw and would put the ghoul's sprite back on top of ours. Nothing is
+ * lost — the {@code super} call at the top of vanilla's own version reaches
+ * {@code Mob.addDrawables}, whose body is empty; health and status bars are
+ * added by {@code Mob.addDrawablesLoop} around it (VERIFIED [jar], the same
+ * reasoning written out in {@code mobs/CrookedGolemMob}).
  */
 public class FenWraithMob extends SpiritGhoulMob {
+
+    /**
+     * Our sheet, filled by {@code SkyMobs.loadTextures} on the client only.
+     * It stays null on a dedicated server, which never draws, hence the guard.
+     */
+    public static GameTexture texture;
+
+    /**
+     * Vanilla's {@code SpiritGhoulMob.addDrawables}, ported line for line with
+     * our sheet in place of {@code MobRegistry.Textures.spiritGhoul}.
+     */
+    @Override
+    public void addDrawables(List<MobDrawable> list, OrderableDrawables tileList,
+            OrderableDrawables topList, Level level, int x, int y,
+            TickManager tickManager, GameCamera camera, PlayerMob perspective) {
+        if (texture == null) {
+            return;
+        }
+        GameLight light = level.getLightLevel(getTileCoordinate(x), getTileCoordinate(y));
+        int drawX = camera.getDrawX(x) - 32;
+        int drawY = camera.getDrawY(y) - 36;
+        Point sprite = this.getAnimSprite(x, y, this.getDir());
+        drawY += this.getBobbing(x, y);
+        drawY += level.getTile(getTileCoordinate(x), getTileCoordinate(y))
+                .getMobSinkingAmount(this);
+        final MaskShaderOptions swimMask =
+                this.getSwimMaskShaderOptions(this.inLiquidFloat(x, y));
+        final DrawOptions body = texture.initDraw()
+                .sprite(sprite.x, sprite.y, 64)
+                .addMaskShader(swimMask)
+                .startGlowOptions(level, (long) this.getID())
+                .light(light)
+                .applyEnemyTracker(this, perspective)
+                .pos(drawX, drawY);
+        list.add(new MobDrawable() {
+            @Override
+            public void draw(TickManager tickManager) {
+                swimMask.use();
+                body.draw();
+                swimMask.stop();
+            }
+        });
+    }
 
     /**
      * Ghost Realm rung (incursion tier 7) = 1000 x 2.80 = <b>2800 HP</b> on

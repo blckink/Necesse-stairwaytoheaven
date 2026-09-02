@@ -87,6 +87,8 @@ final class SkyMobs {
         stairwaytoheaven.mobs.DawnpiercerMob.texture = GameTexture.fromFile("mobs/dawnpiercer");
         SkyCritterMob.finchTexture = GameTexture.fromFile("mobs/zephyrfinch");
         SkyCritterMob.snailTexture = GameTexture.fromFile("mobs/dewsnail");
+        stairwaytoheaven.arsenal.FenWraithMob.texture = GameTexture.fromFile("mobs/fenwraith");
+        stairwaytoheaven.arsenal.AuroraFlakeMob.texture = GameTexture.fromFile("mobs/auroraflake");
         stairwaytoheaven.mobs.CrookedGolemMob.texture = GameTexture.fromFile("mobs/crookedgolem");
         stairwaytoheaven.mobs.RareCrookedGolemMob.texture = GameTexture.fromFile("mobs/rarecrookedgolem");
         stairwaytoheaven.mobs.CrookedArmadilloMob.texture = GameTexture.fromFile("mobs/crookedarmadillo");

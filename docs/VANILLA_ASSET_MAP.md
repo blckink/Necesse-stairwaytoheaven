@@ -53,13 +53,12 @@ behaviour, but no vanilla art reaches the screen through them.)
 
 | vanilla base | mod mob | realm | why that base |
 |---|---|---|---|
-| `SpiritGhoulMob` | Fen Wraith | Ghost Realm *(currently Veil)* | slow armoured chaser that swims and leaves burning pools |
 | `AncientSkeletonMageMob` | Cinder Cantor | Ghost Realm | ranged caster |
 | `FrostSentryMob` | Rime Sentry | Skyreach (Stormveil variant) | immobile turret |
-| `CryoFlakeMob` | Aurora Flake | Skyreach (Aurora variant) | drifting cold hazard |
+| `CryoFlakeMob` | Aurora Flake | Skyreach (Aurora variant) | drifting cold hazard — sheet swapped 2026-09-02, see §4 |
 | `CryoFlakeFollowingMob` | Watch Mote | Skyreach | summon behaviour |
 | `SheepMob` | Glimmergoat | Skyreach (Aurora variant) | husbandry: shears, breeding |
-| `CowMob` | Nimbus Yak | Skyreach (Driftlands variant) | husbandry: bucket |
+| `CowMob` | Nimbus Yak | Skyreach (Driftlands variant) | husbandry: bucket — sheet swapped 2026-09-02, see §4 |
 | `ChickenMob` | Thunderquill Fowl | Skyreach (Stormveil variant) | husbandry: eggs + shears |
 
 ### 1.3 Vanilla textures loaded by literal path (recolours)
@@ -70,8 +69,6 @@ stand-in and swaps out by shipping a real sheet under the mod's own name.
 
 | vanilla texture | realm | used for |
 |---|---|---|
-| `mobs/cow`, `mobs/bull`, `mobs/calf` | Skyreach | Nimbus Yak, all three ages |
-| `mobs/sheep`, `mobs/sheep_sheared` | Skyreach | Glimmergoat doe + shorn |
 | `mobs/ram`, `mobs/ram_sheared` | Skyreach | Glimmergoat buck + shorn |
 | `mobs/lamb` | Skyreach | Glimmergoat kid |
 | `mobs/chicken`, `mobs/rooster`, `mobs/chick` | Skyreach | Thunderquill, all ages |
@@ -204,6 +201,10 @@ and the realm cannot be faked without them:
 |---|---|---|
 | `crystalgolem` (mob, by string ID) | `crookedgolem` — `mobs/CrookedGolemMob` on `mobs/crookedgolem.png`, a subclass of `CrystalGolemMob` that inherits every number and behaviour and overrides only `addDrawables` (and the sheet the death gibs are cut from) | this pass |
 | `ascendedgolem` (mob, by string ID) | `rarecrookedgolem` — `mobs/RareCrookedGolemMob` on `mobs/rarecrookedgolem.png`, same relationship to `AscendedGolemMob` | this pass |
+| `spiritghoul` (mob sheet) | `fenwraith` — `arsenal/FenWraithMob` on `mobs/fenwraith.png`, still a `SpiritGhoulMob` subclass for behaviour, with `addDrawables` ported so only the texture changes. Composed by `tools/resheet_mob.py` from the player's cut frames | 2026-09-02 |
+| `mobs/cow`, `mobs/bull`, `mobs/calf` (sheets, recoloured at load time) | `nimbusyak`, `nimbusyak_bull`, `nimbusyak_calf` — the Nimbus Yak's three ages on the mod's own sheets, `GameTexture.fromFile` instead of `SkyPelt.tintFinal`. Composed by `tools/resheet_mob.py`. The mob is still a `CowMob` for behaviour, and `cow_shadow`/`calf_shadow` are still vanilla's — a shadow is a black blob | 2026-09-02 |
+| `mobs/cryoflake` (sheet) | `auroraflake` — `arsenal/AuroraFlakeMob` on `mobs/auroraflake.png`, still a `CryoFlakeMob` subclass for behaviour (chime, shatter particles, the spinning two-layer draw) with `addDrawables` ported so only the texture changes. Supplied already on format: 64x128, body over pulse, both centred on the rotation pivot | 2026-09-02 |
+| `mobs/sheep`, `mobs/sheep_sheared` (sheets, recoloured at load time) | `glimmergoat`, `glimmergoat_shorn` — the doe's woolly and shorn states on the mod's own sheets, supplied already on vanilla's grid. The BUCK and the KID are still `SkyPelt` recolours of `mobs/ram`, `mobs/ram_sheared` and `mobs/lamb` (§1.3) until those sheets arrive, so the herd is two palettes for the moment | 2026-09-02 |
 | `crystalarmadillo` (mob, by string ID) | `crookedarmadillo` — `mobs/CrookedArmadilloMob` on `mobs/crookedarmadillo.png`, same relationship to `CrystalArmadillo`. One thing did NOT come across: vanilla's second `crystalarmadillo_light` glow pass, because we have one sheet and not two — see the class comment | this pass |
 
 The vanilla sheets stay the format reference for these three and are listed as

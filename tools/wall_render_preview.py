@@ -171,12 +171,24 @@ class WallRenderer:
         self.seq += 1
 
     # --- WallObject.addWallDrawOptions (protected 11-arg overload) ----------
-    def wall_cells(self, adj, force_draw_top, force_remove_bot):
+    def wall_cells(self, adj, force_draw_top, force_remove_bot, is_wall=None):
         """Return [(col, row, dx, dy)] exactly as the engine emits them.
 
-        adj is the 8-boolean neighbour array; the public overload passes it as
-        adj, sameWall AND isWall, so isWall[n] == adj[n] here (see module doc).
+        `adj` is the CONNECTED-wall array (vanilla's `sameWall`). `is_wall` is
+        the separate "there is a wall here at all" array the protected overload
+        takes; vanilla's own public path passes sameWall for all three, so it
+        defaults to adj and the six cells that depend on the difference stay
+        unreached THROUGH THAT PATH.
+
+        They are NOT dead art. `isWall[n] && !sameWall[n]` is the format's way
+        of saying "the neighbouring wall is a DIFFERENT wall material", and
+        every vanilla sheet paints all six cells fully opaque (measured: 256/256
+        px on stonewall, woodwall and brickwall). Pass a real `is_wall` to reach
+        them; leave them out of a sheet and two abutting wall sets punch holes
+        in each other.
         """
+        if is_wall is None:
+            is_wall = adj
         out = []
         top, left, right = adj[T], adj[L], adj[R]
         bot_left, bot, bot_right = adj[BL], adj[B], adj[BR]
@@ -212,7 +224,8 @@ class WallRenderer:
                     if not force_remove_bot:
                         out.append((1, 1, 0, 16))
                 else:
-                    out.append((0, 5, 0, 0))        # isWall[5] branch is dead
+                    # isWall[5]: below-left is a wall of ANOTHER material
+                    out.append((3, 7, 0, 0) if is_wall[BL] else (0, 5, 0, 0))
                     if not force_remove_bot:
                         out.append((0, 6, 0, 16))
             elif bot_left:
@@ -230,7 +243,8 @@ class WallRenderer:
                     if not force_remove_bot:
                         out.append((2, 1, 16, 16))
                 else:
-                    out.append((1, 5, 16, 0))       # isWall[7] branch is dead
+                    # isWall[7]: below-right is a wall of ANOTHER material
+                    out.append((2, 7, 16, 0) if is_wall[BR] else (1, 5, 16, 0))
                     if not force_remove_bot:
                         out.append((1, 6, 16, 16))
             elif bot_right:
@@ -242,17 +256,29 @@ class WallRenderer:
                 if not force_remove_bot:
                     out.append((3, 1, 16, 16))
         else:
-            # botWall = isWall[6] == adj[B] == False here, so the (2,5) (3,5)
-            # (2,6) (3,6) branches are unreachable.
+            # botWall = isWall[6]: the tile below IS a wall but not one of
+            # ours. Then this tile shows no front face at all -- it shows the
+            # short connector cells that meet the other wall's roof.
+            bot_wall = is_wall[B]
             if left:
-                out.append((2, 3, 0, 0))
-                out.append((2, 4, 0, 16))
+                if bot_wall:
+                    out.append((3, 5, 0, 0))
+                else:
+                    out.append((2, 3, 0, 0))
+                    out.append((2, 4, 0, 16))
+            elif bot_wall:
+                out.append((2, 5, 0, 0))
             else:
                 out.append((0, 3, 0, 0))
                 out.append((0, 4, 0, 16))
             if right:
-                out.append((1, 3, 16, 0))
-                out.append((1, 4, 16, 16))
+                if bot_wall:
+                    out.append((2, 6, 16, 0))
+                else:
+                    out.append((1, 3, 16, 0))
+                    out.append((1, 4, 16, 16))
+            elif bot_wall:
+                out.append((3, 6, 16, 0))
             else:
                 out.append((3, 3, 16, 0))
                 out.append((3, 4, 16, 16))

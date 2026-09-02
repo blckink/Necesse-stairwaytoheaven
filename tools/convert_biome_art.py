@@ -29,6 +29,7 @@ REFS = os.path.join(ROOT, "docs/references")
 REFS_KK = os.path.join(ROOT, "src/main/resources/kk-sprites")
 OBJECTS = os.path.join(ROOT, "src/main/resources/objects")
 ITEMS = os.path.join(ROOT, "src/main/resources/items")
+MOBS = os.path.join(ROOT, "src/main/resources/mobs")
 
 
 def strip(im, drop_marker=True):
@@ -145,6 +146,40 @@ def icon_from(cell, out_path, box=(2, 2, 28, 28)):
     keyed = strip(small, drop_marker=False)
     icon = Image.new("RGBA", (32, 32))
     icon.paste(keyed, ((32 - nw) // 2, box[3] - nh), keyed)
+    icon.save(out_path)
+    return icon
+
+
+def mob_icon_from(sheet_path, out_path, cell=None):
+    """The 32x32 bestiary icon for a mob, taken from the mob's own sheet.
+
+    A generated icon and a supplied sheet drift apart the moment the sheet is
+    replaced: the Aurora Flake shipped as a violet eyed crystal while its icon
+    was still the pale four-point star the generator drew. Deriving the icon
+    from the body cell keeps the bestiary honest by construction.
+
+    `cell` is the body cell as (x0, y0, x1, y1); it defaults to the sheet's
+    first square, which is right for the 64x128 spinner layout and for the
+    top-left frame of a 384x320 walking sheet alike. Unlike `icon_from` this
+    CENTRES the subject rather than sitting it on the box floor -- a bestiary
+    portrait has no ground, and a flier least of all -- and it fits to 30 of the
+    32 rather than 28: an inventory icon sits among others and wants the margin,
+    a bestiary portrait stands alone and reads better filling the box. That also
+    keeps a lacy silhouette above tools/size_audit.py's mass floor, which
+    compares against vanilla icons that are mostly solid blobs.
+    """
+    sheet = Image.open(sheet_path).convert("RGBA")
+    side = min(sheet.width, sheet.height)
+    body = sheet.crop(cell or (0, 0, side, side))
+    bbox = body.getbbox()
+    sub = body.crop(bbox)
+    scale = min(30 / sub.width, 30 / sub.height)
+    nw, nh = max(1, round(sub.width * scale)), max(1, round(sub.height * scale))
+    rgb = Image.new("RGB", sub.size, (0, 0, 0))
+    rgb.paste(sub.convert("RGB"), (0, 0), sub)
+    keyed = strip(modal_downsample(rgb, nw, nh), drop_marker=False)
+    icon = Image.new("RGBA", (32, 32))
+    icon.paste(keyed, ((32 - nw) // 2, (32 - nh) // 2), keyed)
     icon.save(out_path)
     return icon
 
@@ -373,6 +408,16 @@ def main():
             ("overgrowngrassseed-overgrownedenseed.png", ITEMS, "overgrownedenseed.png")):
         path, im = copy_kk(src, out_dir, out)
         print(f"{path}  {im.size}")
+
+    # The Aurora Flake's bestiary icon, cut from the sheet the player supplied
+    # rather than drawn a second time. mobs/auroraflake.png itself is a verbatim
+    # copy (64x128, already on CryoFlakeMob's spinner format) and is not written
+    # by any tool.
+    flake = os.path.join(MOBS, "auroraflake.png")
+    if os.path.exists(flake):
+        icon = mob_icon_from(flake, os.path.join(MOBS, "icons", "auroraflake.png"))
+        print(f"{os.path.join(MOBS, 'icons', 'auroraflake.png')}  32x32  "
+              f"opaque {sum(1 for p in icon.get_flattened_data() if p[3] > 0)}")
 
     path, sheet = repack_kk_tree("birchtree-new-cloudtree.png", "cloudtree.png")
     print(f"{path}  {sheet.size}  "

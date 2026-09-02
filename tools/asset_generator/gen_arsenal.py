@@ -664,7 +664,13 @@ def generate(out):
     gen_shadow_from(f"{out}/projectiles/stormdisc.png", f"{out}/projectiles/stormdisc_shadow.png")
 
     gen_rimesentry_icon(f"{out}/mobs/icons/rimesentry.png")
-    gen_auroraflake_icon(f"{out}/mobs/icons/auroraflake.png")
+    # mobs/icons/auroraflake.png is NOT generated any more. The Aurora Flake
+    # wears the player's own sheet, and a drawn icon drifts from a supplied
+    # body the moment the body changes -- this one was still a pale
+    # four-point star while the mob had become a violet eyed crystal.
+    # tools/convert_biome_art.py cuts the icon out of mobs/auroraflake.png
+    # instead. gen_auroraflake_icon stays below as the record of what the
+    # generated one was.
     gen_fenwraith_icon(f"{out}/mobs/icons/fenwraith.png")
     gen_cindercantor_icon(f"{out}/mobs/icons/cindercantor.png")
     gen_watchmote_icon(f"{out}/mobs/icons/watchmote.png")

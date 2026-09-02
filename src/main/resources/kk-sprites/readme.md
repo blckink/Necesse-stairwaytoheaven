@@ -48,6 +48,23 @@ path in its `converted` guard, which fails loudly if anything writes it again.
 The piece's companions (sapling, leaves, log icon) stay generated — only the
 supplied sheet changes hands.
 
+## Drawing a wall set? Two tools exist for exactly that
+
+* **`docs/references/wall-template-map.png`** — the annotated 352×128 template:
+  every cell labeled with its HALF (L/R), its screen BAND (abv/top/bot) and its
+  role, plus both window views and all eight door cells. Draw over it.
+  **Nothing on the sheet is unused** — cols 2–3 of rows 5–7 only appear where
+  your wall abuts a wall of a *different* material, and vanilla paints all six
+  solid; leaving them empty punches holes wherever two wall sets meet.
+* **`python3 tools/conform_wall_sheet.py your.png`** — measures the sheet
+  against five vanilla walls: size, region alpha, door extents, EVERY seam the
+  engine can compose (tolerance = vanilla's own contrast at the same join),
+  and the roof-slot test. `--fix` snaps integer upscales, fills alpha holes,
+  shifts door leaves into the visible box and blends failing seam edges;
+  `--fix --rebuild-roof-slot` rebuilds the N-S window with the shared
+  construction, tones sampled from your sheet. Writes 4× compare sheets next
+  to vanilla into `build/qa/`.
+
 ## The exception: a supplied sheet is only adopted if it is drawn ON the format
 
 Two files here are **design sources only** and are deliberately not shipped,
@@ -72,3 +89,54 @@ A drawn wall sheet in this mod carries **19–38** distinct colours. Four figure
 means an illustration, and an illustration of a wall is not a wall sheet. The
 supplied file stays the source of record for the set's *identity* — palette,
 motifs, mood — which is what the generator draws from.
+
+## Cut frames beat a flat sheet
+
+A mob supplied as `row-N/sprite-M.png` — every frame already free of its
+neighbours — needs none of the guessing a flat sheet forces (overlapping rows,
+touching sprites, a bottom strip that may be gibs or extra poses):
+
+```sh
+python3 tools/resheet_mob.py path/to/folder -o mobs/<id>.png
+```
+
+The spirit wraith arrived that way on 2026-09-02 and became `mobs/fenwraith.png`
+in one command.
+
+The three Nimbus Yak sheets arrived as flat images the same day and went in
+through the flat-sheet path — `mobs/nimbusyak`, `_bull` and `_calf`, replacing
+the recolours `livestock/SkyPelt` used to make of vanilla's `mobs/cow`,
+`mobs/bull` and `mobs/calf`. Which file was which needed no guessing: the cow
+wears a flower crown, the bull has the horn spread (42px across the up-view
+against the cow's 35, exactly vanilla's own 42-vs-32 split) and the calf is the
+small one.
+
+## Not every mob is drawn on the walking grid
+
+`CryoFlakeMob` and its kin are **64x128**: one column, two rows — a rotating
+body over a pulse layer, both spun about the cell's centre. The cell size is
+read off the texture's own WIDTH (`getWidth()`, jar CryoFlakeMob.java:133), so a
+sheet supplied at the wrong width makes the engine cut the wrong cells out of
+it. Use:
+
+```sh
+python3 tools/resheet_mob.py IN.png --layout spinner -o mobs/<id>.png
+```
+
+Anything off the pivot orbits instead of spinning, so both layers are centred;
+one shared scale keeps the glow's sparkles on the body's arm tips.
+
+The Aurora Flake arrived on 2026-09-02 already at 64x128 and already centred —
+body span 52x54, glow 50x50, both on (30.5, 30.5), the same centre vanilla's own
+flake uses — so it was copied in verbatim and needed no resheet at all. Its
+bestiary icon is now cut out of that sheet by `tools/convert_biome_art.py`
+instead of drawn, because a drawn icon drifts the moment the body changes: this
+one was still a pale four-point star while the mob had become a violet eyed
+crystal.
+
+The Glimmergoat doe followed on 2026-09-02, woolly and shorn, both supplied at
+384x320 on vanilla's exact grid — four direction rows of 64 and the four gib
+cells at y256, the same four `mobs/sheep` fills — so both were copied in
+verbatim. **Nothing supplied is recoloured.** `SkyPelt` stays for the parts of
+the herd that have no drawn sheet yet (the buck and the kid, on vanilla's ram
+and lamb), and each one retires the moment its art arrives.

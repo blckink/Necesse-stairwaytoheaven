@@ -72,6 +72,24 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              # are not the shipped sheets.
              # Our own art for the three Outland mobs, which used to wear
              # vanilla's sheets by string ID.
+             # Fen Wraith's body, composed by tools/resheet_mob.py from the
+             # player's cut frames. Its bestiary ICON is still generated.
+             "mobs/fenwraith.png",
+             # The Aurora Flake's 64x128 spinner sheet, supplied already on
+             # format, and the bestiary icon convert_biome_art now cuts
+             # OUT of it -- see gen_arsenal, where the drawn one was.
+             "mobs/auroraflake.png", "mobs/icons/auroraflake.png",
+             # The Nimbus Yak's three ages, same route. These used to be
+             # vanilla's mobs/cow, mobs/bull and mobs/calf recoloured at load
+             # time by livestock/SkyPelt; nothing generated them either, so the
+             # guard is what stops a future generator module from claiming the
+             # names.
+             "mobs/nimbusyak.png", "mobs/nimbusyak_bull.png",
+             "mobs/nimbusyak_calf.png",
+             # The Glimmergoat doe, woolly and shorn. Same route; the buck
+             # and the kid are still SkyPelt recolours of vanilla's ram and
+             # lamb until their sheets arrive.
+             "mobs/glimmergoat.png", "mobs/glimmergoat_shorn.png",
              "mobs/crookedgolem.png", "mobs/rarecrookedgolem.png",
              "mobs/crookedarmadillo.png",
              # The Eden ground pair, copied verbatim by convert_biome_art
