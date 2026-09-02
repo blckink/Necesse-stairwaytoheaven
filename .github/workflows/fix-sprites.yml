@@ -1,0 +1,102 @@
+name: Fix sprites
+
+# Two ways in, both usable from a phone:
+#   * upload a PNG into art-inbox/ from the GitHub app -- the push runs this
+#   * Actions -> Fix sprites -> Run workflow
+#
+# It fits every file in art-inbox/ to the sprite it replaces, then opens a pull
+# request with the result. Nothing lands on a branch you use without review.
+on:
+  push:
+    paths:
+      - 'art-inbox/**.png'
+  workflow_dispatch:
+    inputs:
+      colours:
+        description: 'Palette size (shipped sheets carry 19-38)'
+        required: false
+        default: '32'
+      apply:
+        description: 'Write over the sprites, not just report'
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  fit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Pillow
+        run: python -m pip install --quiet Pillow
+
+      - name: Fit everything in art-inbox/
+        id: fit
+        run: |
+          set -o pipefail
+          APPLY=""
+          if [ "${{ github.event_name }}" = "push" ] || [ "${{ inputs.apply }}" = "true" ]; then
+            APPLY="--apply"
+          fi
+          python3 tools/inbox_fix.py $APPLY \
+            --colours "${{ inputs.colours || '32' }}" 2>&1 | tee /tmp/fit.log
+          echo "exit=$?" >> "$GITHUB_OUTPUT"
+        continue-on-error: true
+
+      - name: Summary
+        run: |
+          {
+            echo '## Sprite fit'
+            echo '```'
+            cat /tmp/fit.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Keep the previews
+        uses: actions/upload-artifact@v4
+        with:
+          name: fitted-sprites
+          path: build/qa/inbox/
+          if-no-files-found: ignore
+
+      # The inbox is a drop box, not storage: once a file has been fitted and
+      # applied it would be re-fitted on every later run, so it is cleared here
+      # and the fitted result lives in the sprite it replaced.
+      - name: Clear the inbox
+        run: git rm -q --ignore-unmatch 'art-inbox/*.png' || true
+
+      - name: Open a pull request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: sprites/auto-fit
+          delete-branch: true
+          title: 'Fit the sprites dropped in art-inbox/'
+          commit-message: |
+            Fit the sprites dropped in art-inbox/
+
+            tools/inbox_fix.py resolved each file to the sprite it replaces by
+            name, fitted it to that sprite's exact size, cut the palette to
+            vanilla's range and hardened the alpha. Ground splats were also put
+            on 2x2 blocks; mob sheets deliberately were not, because that would
+            soften a silhouette.
+
+            Run log is in the workflow summary; the before/after previews are
+            attached to the run as an artifact.
+          body: |
+            Opened automatically by **Fix sprites**.
+
+            Check the `fitted-sprites` artifact on
+            [the run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            before merging — the numbers can be right while the art is wrong,
+            and the 1x view is the honest one.
+
+            The full log is in the run summary.
