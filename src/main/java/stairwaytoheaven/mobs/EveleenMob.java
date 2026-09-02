@@ -122,13 +122,30 @@ public class EveleenMob extends SkySettlerMob {
     /**
      * Hands out and turns in {@link EdenArrivalQuest}/{@link EdenPlantsQuest}
      * before opening her shop/recruit page, the same shape
-     * {@code EleanorMob.interact} uses for the Ghost chain. Runs only while she
-     * is neither a settler nor a visitor — once she has moved in the chain is
-     * either already finished or moot.
+     * {@code EleanorMob.interact} uses for the Ghost chain.
+     *
+     * <p>Deliberately NOT gated on {@code !isSettler() && !isVisitor()}: her
+     * recruit fee is only waived once {@link SkywatchWorldData#edenPlantsGiven}
+     * is set, which means a player is always free to pay the ordinary fee and
+     * recruit her BEFORE ever delivering the three plants — the recruit page is
+     * right there on the same first meeting that hands out
+     * {@code EdenPlantsQuest}, one bubble line above it. An earlier version of
+     * this method assumed the chain was "already finished or moot" by the time
+     * she moved in, which is false in exactly that case: once she is a settler
+     * the assumption made this branch unreachable forever, so a delivered-late
+     * {@code EdenPlantsQuest} could never be turned in and its reward could
+     * never be paid — a permanent dead end of the kind
+     * {@code docs/CONTENT_LEDGER.md}'s own {@code swh_beacon} already is.
+     * {@code advanceEdenChain} is idempotent by its own two guards
+     * ({@code edenPlantsGiven} and {@code findHeld}), so running it on every
+     * interaction, settler or not, costs nothing and closes that gap: a player
+     * who recruited her early and comes back later with the fruit still
+     * completes the quest and is still paid, just without the free-recruit
+     * perk she can no longer offer.
      */
     @Override
     public void interact(PlayerMob player) {
-        if (this.isServer() && player.isServerClient() && !this.isSettler() && !this.isVisitor()) {
+        if (this.isServer() && player.isServerClient()) {
             Level level = this.getLevel();
             Server server = level == null ? null : level.getServer();
             if (server != null) {

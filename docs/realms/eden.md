@@ -27,10 +27,21 @@ renderer, tool response and drops stay intact. Eden item icons borrow literal
 vanilla item paths; the five hostile bodies borrow `crocodile`, `stabbybush`,
 `dryadsentinel`, `bee` and `dragonwhelp`.
 
+## Settler and quest chain
+
+Eveleen the Eden Botanist (`eveleensettler`) stands beside a Knowledge Tree,
+one per world, and also travels to a settlement once Eden grass grows in it
+(`SkyArrivals.EDEN_PATCH`). `EdenArrivalQuest` (handed out on first use of the
+Eden Gate) and `EdenPlantsQuest` (an Eden Berry, a Moon Melon and a Sun Grape,
+handed to Eveleen) are her two-step chain; completing it waives her recruit
+fee and pays out Knowledge Cuttings plus Stormsteel bars. See
+`docs/settlers.md` and `docs/quests.md`.
+
 ## Deliberately still open
 
 The three POI lattices are described by the terrain/pressure code but no Eden
-presets are registered yet. There is no player-facing Skyreach↔Eden gate,
-Eden Press, farming family, livestock, fishing, Keeper boss or Eden quest
-chapter yet. Those are not hidden behind a `[run]` label: they remain future
-content even though the realm itself now generates.
+presets are registered yet. The Eden Gate now exists — an `EdenSeedBasinObject`
+(the Eden Threshold) seeded with 6 Eden Grass Seeds grows into it, the same
+shape the Ghost Gate uses — but the Eden Press, farming family, livestock,
+fishing and Keeper boss remain future content even though the realm itself now
+generates.

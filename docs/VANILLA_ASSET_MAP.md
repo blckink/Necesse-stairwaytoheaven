@@ -83,7 +83,7 @@ engine would look for by default.
 
 ### 1.3b Vanilla art worn or shown by the mod's settlers (NO recolour)
 
-The four new settlers add **zero PNGs**. A `HumanShop` settler is drawn as a
+The five new settlers add **zero PNGs**. A `HumanShop` settler is drawn as a
 plain human body wearing real clothing ITEMS — the way vanilla dresses its Elder
 in `elderhat`/`eldershirt`/`eldershoes` — plus one 32px face icon for the
 settlement screen. So each new person costs three vanilla item IDs and one
@@ -103,6 +103,8 @@ deliberately not used by any of this.
 | Caspern | `nightsteelveil`, `smithingapron`, `smithingshoes` (worn items) | the Spirit Smith's veil and apron |
 | Eleanor | `mobs/icons/stylisthuman` (icon) | her settlement-screen face |
 | Eleanor | `snowhood`, `snowcloak`, `clothboots` (worn items) | the Lost Soul's pale, cold clothes |
+| Mr. Knott | `mobs/icons/exoticmerchanthuman` (icon) | his settlement-screen face — a merchant who deals in stranger things |
+| Mr. Knott | `jesterhat`, `labcoat`, `jesterboots` (worn items) | the Doorman's jester hat and lab coat — a showman testing whether a door leads anywhere |
 
 Note that the icon only shows where no mob is available:
 `Settler.getSettlerFaceDrawOptions` draws the settler's own human face from the
@@ -172,6 +174,8 @@ realm sections say so; the remaining rows are the future shopping list.
 | the whole `palm*` furniture family (bed, chair, table, chest, wall, …) | Eden architecture — a complete set already exists |
 | `mobs/crocodile`, `stabbybush`, `dryadsentinel`, `bee`, `dragonwhelp` | Eden Serpent, Bloom Maw, Jealous Vine, Golden Hornet and Forbidden Serpent bodies |
 | `items/palmlog`, `dryadbranch`, `apple`, `sharkscales`, `fangoftheprotector`, `honey`, `dryadsapling`, `coconut`, `blueberry`, `frozenberry`, `raspberry`, `ivyore`, `ivybar` | Eden's first material and fruit icons |
+| `objects/spiritbasin.png`, `items/spiritbasin.png` | the Eden Threshold (`edenseedbasin`) — vanilla's Spirit Basin, reused a second time; the Ghost Gate's Soul Basin already borrows it once |
+| this mod's own `objects/skystairwaydown.png`, `objects/skystairwayup.png` | the Eden Gate down/up pair (`edengatedown`/`edengateup`) — the Skyward Stairway's own sheets, reused a second time rather than drawn fresh |
 
 ### 2.2 Steinfeld (Tier 2)
 

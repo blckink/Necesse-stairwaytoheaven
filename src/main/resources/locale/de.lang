@@ -526,16 +526,19 @@ eveleensettlername=Eveleen <name>, Botanikerin von Eden
 mortimersettlername=Mortimer <name>, Bestatter
 caspernsettlername=Caspern <name>, Geisterschmied
 eleanorsettlername=Eleanor <name>, die noch immer hier ist
+knottsettler=Mr. Knott
+knottsettlername=Mr. Knott <name>, der Türsteher
 
 [misc]
 // --- Herkunft jedes Siedlers (Hinweis im Siedlungsfenster) ---
 magpiesettlertip=In der Himmelsweite zu finden, an einer verlassenen Skywatch-Werkstatt.
 haldasettlertip=In der Himmelsweite zu finden, an einer verlassenen Skywatch-Werkstatt.
 ossiansettlertip=In der Himmelsweite zu finden, an einer verlassenen Skywatch-Werkstatt.
-eveleensettlertip=Aus dem Garten Eden. Sie kommt in eine Siedlung, in der Eden-Gras wächst. Arbeitet in Ackerbau, Forstwirtschaft und Düngen.
-mortimersettlertip=Aus dem Schleier. Er kommt in eine Siedlung, die einen Friedhof gebaut hat. Arbeitet in Transport, Handwerk und Jagd.
-caspernsettlertip=Aus dem Schleier. Er kommt in eine Siedlung, die eine Ätherschmiede gebaut hat. Arbeitet in Handwerk und Transport - und nichts im Freien.
-eleanorsettlertip=Im Schleier zu finden, bei den Knochenhaufen. Sie kommt nie zu dir - du entscheidest, ob sie bleibt. Arbeitet in der Tierhaltung.
+eveleensettlertip=Im Garten Eden zu finden, bei einem Baum der Erkenntnis. Sie kommt außerdem in eine Siedlung, in der Eden-Gras wächst. Arbeitet in Ackerbau, Forstwirtschaft und Düngen.
+mortimersettlertip=Im Nachgarten zu finden, bei einem Grabstein. Er kommt außerdem in eine Siedlung, die einen Friedhof gebaut hat. Arbeitet in Transport, Handwerk und Jagd.
+caspernsettlertip=Im Nachgarten zu finden, bei einem Grabstein. Er kommt außerdem in eine Siedlung, die eine Ätherschmiede gebaut hat. Arbeitet in Handwerk und Transport - und nichts im Freien.
+eleanorsettlertip=Im Nachgarten zu finden, bei einem Grabstein. Sie kommt nie zu dir - du entscheidest, ob sie bleibt. Arbeitet in der Tierhaltung.
+knottsettlertip=Im Jenseits der Krümmung zu finden, auf dem Türhof. Er kommt nicht von selbst in eine Siedlung. Arbeitet im Handel, und nichts im Freien.
 
 // --- Eveleen ---
 eveleentalkpitch=Ich bin den weiten Weg heraufgekommen, auf der Suche nach einem Garten, der angeblich noch wächst. Gefunden habe ich ihn nicht. Aber du hast Boden, und ich habe Samen, die dir hier oben sonst niemand verkauft.
@@ -543,6 +546,9 @@ eveleentalk1=Alles wächst, wenn man in der richtigen Reihenfolge geduldig und u
 eveleentalk2=Dieses Beet hat Durst. Nein, nicht gießen. Es hat auf etwas anderes Durst.
 eveleentalk3=Ich habe drei Samen, die ich nie gepflanzt habe. Ich wüsste gern, was sie sind, bevor ich es herausfinde.
 eveleentalk4=Ein Garten ist keine Dekoration. Ein Garten ist ein Streit, den du mit dem Boden führst.
+eveleenasksplants=Bring mir von jedem eins: eine Edenbeere, eine Mondmelone, eine Sonnentraube. Beweise mir, dass es dort draußen noch wächst.
+eveleenplantsdone=Also. Es wächst noch, dort draußen. Gut.
+edenplantsdone=Der Baum der Erkenntnis neigt sich Eveleen entgegen, als sie die Frucht nimmt. Ein Steckling löst sich mühelos, als hätte er es immer so gemeint.
 
 // --- Mortimer ---
 mortimertalkpitch=Du hast Tote zu verwahren und keinen Ort dafür. Ich habe einen Spaten, einen Hut und keine besondere Eile. Wir können einander helfen.
@@ -568,6 +574,42 @@ eleanorneedessence=Noch nicht genug von mir.
 eleanorneedessencecount=Eleanor braucht <need> Schleieressenz in deiner Hand, bevor sie loslassen kann. Du hältst <have>.
 eleanorfarewell=Oh. Oh, das war also alles.
 eleanorpassedon=Eleanor verweht wie Atem auf kaltem Glas. Wo sie stand, liegt eine kleine Laterne, noch warm.
+eleanorstaydone=Eleanor bleibt, still, so wie ein Zimmer beschließt, eine Lampe noch ein wenig länger brennen zu lassen.
+
+// --- Knott ---
+knotttalkpitch=Jede Tür auf diesem Hof ist überzeugt, irgendwohin zu führen. Ich glaube ihnen das schon länger, als vernünftig ist. Du siehst aus wie jemand, der einen von uns beiden recht behalten lassen könnte.
+knotttalk1=Gehst du irgendwohin?
+knotttalk2=Eine Tür, die sich zu nichts hin öffnet, ist immer noch eine Tür. Sie hat nur Manieren.
+knotttalk3=Ich verkaufe keine Schlüssel zu Türen, die ich nicht getestet habe. Testet man genug davon, braucht man irgendwann keine Schlüssel mehr.
+knotttalk4=Irgendjemand muss weiter fragen, wohin sie führen. Dann kann es auch ich sein.
+knottasksdoor=Wenn du wirklich glaubst, dass eine davon irgendwohin führt, beweise es. Bring mir, was eine solche Tür brauchen würde.
+knottdoordone=Mr. Knott dreht das Material zweimal in den Händen und nickt langsam, wie jemand, der gerade einen Streit gewonnen hat, von dem sonst niemand wusste, dass er ihn führte.
+
+[quests]
+// --- Eveleen, die Eden-Kette ---
+swhedenreachtitle=Hinein in den Garten
+swhedenreachdesc=Irgendwo über den Wolken wächst noch Grün, üppiger als alles in der Himmelsweite. Jemand pflegt es noch.
+swhedenreachobj=Finde, wer den Garten Eden noch pflegt - halte Ausschau nach einem Baum der Erkenntnis.
+swhspeaktoeveleen=Sprich mit Eveleen.
+swhedenplantstitle=Ein Geschmack von Eden
+swhedenplantsdesc=Eveleen will einen Beweis, dass der Garten echt ist: eine Edenbeere, eine Mondmelone und eine Sonnentraube.
+swhedenplantsreward=3x Wissenssteckling + 10x Sturmstahlbarren
+
+// --- Eleanor ---
+swheleanortitle=Warum sie blieb
+swheleanordesc=Etwas hält Eleanor hier, nachdem alle anderen weitergezogen sind. Sie weiß nicht, warum. Vielleicht kannst du ihr helfen, sich zu entscheiden.
+swheleanorobj=Sprich mit Eleanor. Halte Schleieressenz in der Hand, um ihr beim Loslassen zu helfen, oder komm mit leeren Händen und bitte sie zu bleiben.
+swheleanorreward=Loslassen: Irrlichtlaterne + 14x Geisterstahlbarren. Bleiben: sie zieht in deine Siedlung ein + 14x Geisterstahlbarren.
+swhspeaktoeleanor=Sprich mit Eleanor.
+
+// --- Mr. Knott, die Krumme Kette ---
+swhcrookedarrivaltitle=Eine Tür, die irgendwohin führt
+swhcrookedarrivaldesc=Türen stehen hier reihenweise, verschlossen vor dem Nichts. Jemand glaubt noch, dass eine von ihnen funktioniert.
+swhcrookedarrivalobj=Finde, wer den Türhof noch hütet - halte Ausschau nach einer roten Tür, die für sich allein steht.
+swhspeaktoknott=Sprich mit Mr. Knott.
+swhcrookeddoortitle=Überzeug die Tür
+swhcrookeddoordesc=Mr. Knott glaubt schon länger als jeder andere, dass sich eine dieser Türen überzeugen lässt, irgendwohin zu führen. Bring ihm, was eine solche Tür brauchen würde.
+swhcrookeddoorreward=Zephyr-Gurtzeug + 12x Sturmstahlbarren + 6x Realitätssplitter
 
 // ============================================================
 // Das Krumme Jenseits
@@ -748,3 +790,14 @@ bloommaw=Blütenrachen
 jealousvine=Eifersüchtige Ranke
 goldenhornet=Goldhornisse
 forbiddenserpent=Verbotene Schlange
+
+[object]
+edengatedown=Edentor
+edengateup=Rückkehrtor
+edengate=Edentor
+edenseedbasin=Edenschwelle
+
+[misc]
+edenbasinalreadyeden=Das Becken ist hier leer. Du stehst bereits in Eden.
+edenbasinneedsseeds=Das Becken braucht 6 Eden-Grassamen.
+edengateopened=Das Becken füllt sich mit grünem Licht und öffnet sich zum Garten Eden.

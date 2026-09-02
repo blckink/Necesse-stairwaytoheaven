@@ -39,7 +39,18 @@ icon — **no new art**; every borrowed path has a row in
 | `eveleensettler` | mob | Eveleen the Eden Botanist: the settlement's **farmer** — the only settler who can fertilise — and the only shop in the game that sells Eden grass seed, alongside vanilla seeds, saplings and a queen bee. Travels to a settlement once Eden grass grows in it. |
 | `mortimersettler` | mob | Mortimer the Undertaker: the settlement's **hunter**, who will haul and craft and refuses to farm or chop, and the only vendor of gravestones, the sarcophagus, black candles and the whole Bonewood furniture family. Travels to a settlement that has built a graveyard. |
 | `caspernsettler` | mob | Caspern the Spirit Smith: a dedicated **crafter** who never leaves the forge, and the only source of Spiritsteel, Soul Thread and the spectral line. Travels to a settlement that has built an Aether Forge. |
-| `eleanorsettler` | mob | Eleanor the Lost Soul: found in the Veil beside the bone piles, with two endings — hire her and she becomes the settlement's **husbandry** settler, or hold twelve Veil Essence out to her and she lets go, leaving a wisp lantern behind. She never travels to a town; the choice is yours to go and make. |
+| `eleanorsettler` | mob | Eleanor the Lost Soul: found in the Ghost Realm / Aftergarden beside a gravestone, with two endings — hire her and she becomes the settlement's **husbandry** settler, or hold twelve Veil Essence out to her and she lets go, leaving a Will-o'-Wisp Lantern behind. She never travels to a town; the choice is yours to go and make. |
+
+## Mr. Knott, the Doorman
+
+Crooked Beyond's own settler — found once per world at the Door Yard, and,
+unlike the four above, no `SkyArrivals` gate makes him walk to a settlement:
+`docs/WORLD_DESIGN.md` §15 names no such condition. See
+`stairwaytoheaven/mobs/KnottMob.java` and `settlement/CrookedResidents`.
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `knottsettler` | mob | Mr. Knott the Doorman: a **trading** settler who refuses farming and forestry, and the only vendor of Crooked Beyond's weird furniture and cosmetic masks, buying Warp Resin, Eye Seed and Reality Shard in turn. Found once per world at the Door Yard; does not travel to a settlement on its own. |
 
 ## The Beetle Outlands — the sky's wrong ground
 
@@ -98,6 +109,9 @@ chapter; the ground is real now.
 | `jealousvine` | mob | Slow, heavy canopy predator emerging from vegetation. |
 | `goldenhornet` | mob | Fast Eden flier, tightly capped by biome spawn rules. |
 | `forbiddenserpent` | mob | Persistent elite associated with Knowledge Trees. |
+| `edenseedbasin` | object | Craftable gate focus that consumes six Eden Grass Seeds to open the Eden Gate. |
+| `edengatedown` | object | Unobtainable living-side portal created by an activated Eden Threshold. |
+| `edengateup` | object | Persistent return portal automatically placed in the Garden of Eden. |
 
 ## The Veil — Geisternebel, and the gate it is
 

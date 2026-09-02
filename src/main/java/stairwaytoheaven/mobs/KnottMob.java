@@ -99,11 +99,22 @@ public class KnottMob extends SkySettlerMob {
      * <p>Not a recruitment gate: unlike Eveleen's chain, finding him already
      * makes him recruitable (he is a {@code SkySettlerMob}, so
      * {@code startInRecruitForm} needs nothing else), so this only ever adds a
-     * reward on top — never withholds one.
+     * reward on top — never withholds one. That is also why this is
+     * deliberately NOT gated on {@code !isSettler() && !isVisitor()}: a player
+     * who recruits him on the very first meeting — the one that already handed
+     * out {@code CrookedDoorQuest} — before ever delivering the three
+     * materials must still be able to turn it in later. Gating this on settler
+     * state would make {@code advanceDoorChain} permanently unreachable the
+     * moment he moves in, which is exactly the dead end
+     * {@code docs/CONTENT_LEDGER.md}'s own {@code swh_beacon} already is:
+     * a quest registered, handed out, and then unfinishable forever.
+     * {@code advanceDoorChain} is idempotent by its own two guards
+     * ({@code crookedDoorwayOpened} and {@code findHeld}), so calling it on
+     * every interaction — settler or not — costs nothing.
      */
     @Override
     public void interact(PlayerMob player) {
-        if (this.isServer() && player.isServerClient() && !this.isSettler() && !this.isVisitor()) {
+        if (this.isServer() && player.isServerClient()) {
             Level level = this.getLevel();
             Server server = level == null ? null : level.getServer();
             if (server != null) {

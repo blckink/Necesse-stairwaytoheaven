@@ -525,6 +525,8 @@ eveleensettlername=Eveleen <name>, Eden Botanist
 mortimersettlername=Mortimer <name>, Undertaker
 caspernsettlername=Caspern <name>, Spirit Smith
 eleanorsettlername=Eleanor <name>, who is still here
+knottsettler=Mr. Knott
+knottsettlername=Mr. Knott <name>, the Doorman
 
 [misc]
 // --- where each settler comes from (settlement screen "acquire" tip) ---
@@ -543,6 +545,9 @@ eveleentalk1=Everything grows if you are patient and ruthless in the right order
 eveleentalk2=That patch is thirsty. No, do not water it. It is thirsty for something else.
 eveleentalk3=I keep three seeds I have never planted. I would like to know what they are before I find out.
 eveleentalk4=A garden is not decoration. A garden is an argument you are having with the ground.
+eveleenasksplants=Bring me one of each: an Eden Berry, a Moon Melon, a Sun Grape. Prove to me it still grows.
+eveleenplantsdone=So. It still grows out there. Good.
+edenplantsdone=The Knowledge Tree bends toward Eveleen as she takes the fruit. A cutting comes away easily, like it always meant to.
 
 // --- Mortimer ---
 mortimertalkpitch=You have dead to keep and nowhere to keep them. I have a spade, a hat, and no particular hurry. We can help each other.
@@ -568,6 +573,42 @@ eleanorneedessence=Not enough of me yet.
 eleanorneedessencecount=Eleanor needs <need> Veil Essence in your hand before she can let go. You are holding <have>.
 eleanorfarewell=Oh. Oh, so that was all it was.
 eleanorpassedon=Eleanor thins out like breath on cold glass. Where she stood there is a small lantern, still warm.
+eleanorstaydone=Eleanor decides to stay, quietly, the way a room decides to keep a lamp lit a little longer.
+
+// --- Knott ---
+knotttalkpitch=Every door in this yard is convinced it leads somewhere. I have believed them for longer than is reasonable. You look like someone who might prove one of us right.
+knotttalk1=Going somewhere?
+knotttalk2=A door that opens onto nothing is still a door. It just has manners.
+knotttalk3=I do not sell keys to doors I have not tested. Test enough of them and you stop needing keys.
+knotttalk4=Somebody has to keep asking where they lead. Might as well be me.
+knottasksdoor=If you truly think one of these leads somewhere, prove it. Bring me what a door like that would need.
+knottdoordone=Mr. Knott turns the materials over twice, then nods slowly, like a man who has just won an argument nobody else knew he was having.
+
+[quests]
+// --- Eveleen, the Eden chain ---
+swhedenreachtitle=Into the Garden
+swhedenreachdesc=Green still grows somewhere above the clouds, richer than anything in the Skyreach. Someone still tends it.
+swhedenreachobj=Find whoever still tends the Garden of Eden - look for a Knowledge Tree.
+swhspeaktoeveleen=Speak with Eveleen.
+swhedenplantstitle=A Taste of Eden
+swhedenplantsdesc=Eveleen wants proof the garden is real: an Eden Berry, a Moon Melon, and a Sun Grape.
+swhedenplantsreward=3x Knowledge Cutting + 10x Stormsteel Bar
+
+// --- Eleanor ---
+swheleanortitle=Why She Stayed
+swheleanordesc=Something keeps Eleanor here after everyone else has gone on. She does not know why. Maybe you can help her decide what to do about it.
+swheleanorobj=Speak with Eleanor. Hold Veil Essence to help her pass on, or come empty-handed to ask her to stay.
+swheleanorreward=Pass on: Will-o'-Wisp Lantern + 14x Spiritsteel Bar. Stay: she joins your settlement + 14x Spiritsteel Bar.
+swhspeaktoeleanor=Speak with Eleanor.
+
+// --- Mr. Knott, the Crooked chain ---
+swhcrookedarrivaltitle=A Door That Goes Somewhere
+swhcrookedarrivaldesc=Doors stand in rows here, closed on nothing. Someone still believes one of them works.
+swhcrookedarrivalobj=Find whoever keeps the Door Yard - look for a red door that stands alone.
+swhspeaktoknott=Speak with Mr. Knott.
+swhcrookeddoortitle=Convince the Door
+swhcrookeddoordesc=Mr. Knott has spent longer than anyone believing one of these doors can be convinced to lead somewhere. Bring him what a door like that would need.
+swhcrookeddoorreward=Zephyr Harness + 12x Stormsteel Bar + 6x Reality Shard
 
 // ============================================================
 // Crooked Beyond
@@ -748,3 +789,14 @@ bloommaw=Bloom Maw
 jealousvine=Jealous Vine
 goldenhornet=Golden Hornet
 forbiddenserpent=Forbidden Serpent
+
+[object]
+edengatedown=Eden Gate
+edengateup=Return Gate
+edengate=Eden Gate
+edenseedbasin=Eden Threshold
+
+[misc]
+edenbasinalreadyeden=The basin is empty here. You are already standing in Eden.
+edenbasinneedsseeds=The basin needs 6 Eden Grass Seeds.
+edengateopened=The basin fills with green light and opens into the Garden of Eden.
