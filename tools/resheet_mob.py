@@ -223,7 +223,7 @@ def split_even(lo, hi, n):
             for i in range(n)]
 
 
-def analyse(im, want_rows=ROWS, cols=COLS, alpha=40):
+def analyse(im, want_rows=ROWS, cols=COLS, alpha=40, force_rows=None):
     """-> ([[bbox per cell] per row], note).
 
     Detection first, EVEN SPLIT as the fallback -- and the fallback is the
@@ -236,30 +236,75 @@ def analyse(im, want_rows=ROWS, cols=COLS, alpha=40):
     notes = []
     rows_mask, _ = projections(im, alpha=alpha)
     row_bands = bands(rows_mask, im.height, gap_min=4, run_min=8)
-    # drop the gib strip and anything else short: the animation rows are the
-    # tall ones, and there are want_rows of them.
-    tall = [b for b in row_bands if (b[1] - b[0]) >= 0.5 * max(
-        (x[1] - x[0]) for x in row_bands)] if row_bands else []
-    if len(tall) == want_rows:
-        use_rows = tall
-        notes.append("rows detected")
-    else:
-        bb = opaque_bbox(im, (0, 0, im.width, im.height), alpha)
-        if bb is None:
-            return [], "nothing opaque"
-        top = tall[0][0] if tall else bb[1]
-        # the animation block ends where the short strip begins, if there is one
-        short = [b for b in row_bands if b not in tall and b[0] > top]
-        bottom = short[0][0] if short else bb[3]
-        use_rows = split_even(top, bottom, want_rows)
-        notes.append("rows split evenly (%d bands found, wanted %d)"
-                     % (len(row_bands), want_rows))
+    if force_rows:
+        # The escape hatch, and some sheets need it. Detection assumes the four
+        # animation rows are the tall bands and anything below them is the gib
+        # strip. A sheet whose bottom row holds EXTRA POSES (the blue yak ships
+        # sleeping and lying frames down there, at full size) breaks that
+        # assumption: the tall-band test counts five, the even split then spans
+        # the wrong range and folds two directions into one band. Rather than
+        # guess harder, --rows takes the boundaries from whoever can see them.
+        use_rows = [(force_rows[i], force_rows[i + 1])
+                    for i in range(len(force_rows) - 1)][:want_rows]
+        notes.append("rows given explicitly")
+    elif True:
+        # drop the gib strip and anything else short: the animation rows are
+        # the tall ones, and there are want_rows of them.
+        # 0.6, not 0.5: the blue yak's bottom strip is 220px because it holds
+        # extra poses at full size, against 432px animation bands. At 0.5 that
+        # strip counted as an animation row and the split came out 3+1 instead
+        # of 2+2. 0.6 keeps it out while still admitting a genuinely short
+        # direction row.
+        tall = [b for b in row_bands if (b[1] - b[0]) >= 0.6 * max(
+            (x[1] - x[0]) for x in row_bands)] if row_bands else []
+        if len(tall) == want_rows:
+            use_rows = tall
+            notes.append("rows detected")
+        else:
+            bb = opaque_bbox(im, (0, 0, im.width, im.height), alpha)
+            if bb is None:
+                return [], "nothing opaque", [], []
+            # Split each TALL BAND by its own height, not the whole block
+            # evenly. Two directions whose art touches read as one band twice
+            # the height of a single row, and splitting the block evenly then
+            # folds a direction into its neighbour -- measured on the blue yak,
+            # whose two bands are 432 and 416 px against a 212 px mean row.
+            # Dividing each band by that mean recovers 2 + 2 exactly.
+            if tall and len(tall) < want_rows:
+                total = sum(b[1] - b[0] for b in tall)
+                mean = total / float(want_rows)
+                use_rows, left_over = [], want_rows
+                for i, b in enumerate(tall):
+                    n = (left_over if i == len(tall) - 1
+                         else max(1, min(left_over - (len(tall) - 1 - i),
+                                         int(round((b[1] - b[0]) / mean)))))
+                    use_rows += split_even(b[0], b[1], n)
+                    left_over -= n
+                use_rows = use_rows[:want_rows]
+                notes.append("%d band(s) split by height into %d rows"
+                             % (len(tall), len(use_rows)))
+            else:
+                top = tall[0][0] if tall else bb[1]
+                short = [b for b in row_bands if b not in tall and b[0] > top]
+                bottom = short[0][0] if short else bb[3]
+                use_rows = split_even(top, bottom, want_rows)
+                notes.append("rows split evenly (%d bands found, wanted %d) -- "
+                             "if a direction looks folded into another, pass "
+                             "--rows" % (len(row_bands), want_rows))
 
     out = []
     even_cols = 0
     for (ry0, ry1) in use_rows:
         _, cols_mask = projections(im, (0, ry0, im.width, ry1), alpha)
         col_bands = bands(cols_mask, im.width, gap_min=3, run_min=6)
+        # A band far wider than its siblings is not one sprite, it is two that
+        # touch. Measured on the blue yak: one "frame" came out 419 px against
+        # the row's ~216 median, i.e. two fused, which then blew the scale.
+        if len(col_bands) == cols:
+            widths = sorted(b[1] - b[0] for b in col_bands)
+            median = widths[len(widths) // 2]
+            if widths[-1] > 1.5 * median:
+                col_bands = []
         if len(col_bands) != cols:
             bb = opaque_bbox(im, (0, ry0, im.width, ry1), alpha)
             if bb is None:
@@ -268,8 +313,11 @@ def analyse(im, want_rows=ROWS, cols=COLS, alpha=40):
             even_cols += 1
         cells = []
         for (cx0, cx1) in col_bands[:cols]:
-            cells.append(opaque_bbox(im, (cx0, ry0, cx1, ry1), alpha)
-                         or (cx0, ry0, cx1, ry1))
+            bb = opaque_bbox(im, (cx0, ry0, cx1, ry1), alpha) or (cx0, ry0, cx1, ry1)
+            # opaque_bbox already searches inside the column, so this only
+            # documents the invariant the scale depends on: a cell is never
+            # wider than its column.
+            cells.append((max(bb[0], cx0), bb[1], min(bb[2], cx1), bb[3]))
         out.append(cells)
     # The gib strip: the SHORT band below the animation rows, which the row
     # pass deliberately excluded. Its chunks are small and well separated, so
@@ -321,20 +369,28 @@ def resheet(im, rows, cell=CELL, cols=COLS, want_rows=ROWS, gib=None,
     """Scale the WHOLE sheet once so its content spans exactly cols*cell, then
     slide each row down into its own band.
 
-    This is the player's own method, and it is right where the first version
-    was wrong. That one cropped every sprite and re-centred it in its cell,
-    which destroys two things at once: the sprites come out ~20% too large
-    (measured 0.353 against the correct 0.288 on the plain yak), and every
-    sprite's HORIZONTAL OFFSET is thrown away -- but a walk cycle is built out
-    of those offsets. A hoof planted slightly forward on frame 2 is the
-    animation; centring each frame irons the walk flat.
+    Two separate decisions, and the player corrected me on both in turn.
 
-    So: one scale for the whole image, taken from the full content width, and
-    the only per-row freedom is a VERTICAL slide, because the rows are what
-    generators get wrong. Measured on the plain yak, the four rows individually
-    want 0.2995 / 0.2927 / 0.3048 / 0.2931 and the whole image wants 0.2876 --
-    close enough that one number serves, and using one is what keeps the four
-    directions the same animal.
+    SCALE is global: one factor from the full content width, never per sprite.
+    My first version fitted each sprite to its cell and came out ~20% too large
+    (0.353 against the correct 0.288 on the calf). One factor is also what keeps
+    the four directions the same animal. Measured on the calf, the four rows
+    individually want 0.2995 / 0.2927 / 0.3048 / 0.2931 against the whole
+    image's 0.2876 -- close enough that one number serves.
+
+    PLACEMENT is per frame: "du musst eigentlich jeden einzelnen frame
+    ausschneiden und dann einfach ausrichten horizontal und vertikal im
+    jeweiligen 64x64px ausschnitt". My second version placed the whole row as
+    one strip to preserve each frame's offset, on the theory that those offsets
+    are the walk cycle. On hand-drawn art they would be; on a generated sheet
+    they are the generator's spacing accidents, and keeping them leaves frames
+    straddling cell borders. So each frame is cut out and centred in its own
+    cell.
+
+    Vertical is NOT per frame, and that is the one thing not to simplify: every
+    frame keeps its height above the ROW's floor line. Snapping each frame to
+    its own cell floor would drop a lifted hoof back to the ground and kill the
+    step.
     """
     usable = rows[:want_rows]
     if len(usable) < want_rows:
@@ -343,7 +399,18 @@ def resheet(im, rows, cell=CELL, cols=COLS, want_rows=ROWS, gib=None,
 
     left = min(b[0] for r in usable for b in r)
     right = max(b[2] for r in usable for b in r)
-    scale = (cols * cell) / float(right - left)
+    span_scale = (cols * cell) / float(right - left)
+
+    # The span rule alone does NOT guarantee a frame fits its cell, and a frame
+    # that does not fit is not merely cropped in the preview -- the engine draws
+    # sprite(col, row, 64), so anything past the cell edge is not on the sheet
+    # at all. Measured at the span scale: calf 47px (fine), wraith 70px,
+    # flowers 64x66, blue yak 115px. So the widest and tallest frame cap it.
+    wmax = max(b[2] - b[0] for r in usable for b in r)
+    hmax = max(b[3] - b[1] for r in usable for b in r)
+    fit_scale = min(cell / float(wmax), cell / float(hmax))
+    scale = min(span_scale, fit_scale)
+    capped = scale < span_scale - 1e-6
 
     # Cut the rows apart by BLOB OWNERSHIP before cropping, so a neighbour's
     # overhang does not ride along in the rectangle.
@@ -352,31 +419,30 @@ def resheet(im, rows, cell=CELL, cols=COLS, want_rows=ROWS, gib=None,
         layers, _ = isolate_rows(im, row_spans[:want_rows], alpha)
 
     sheet = Image.new("RGBA", TARGET, (0, 0, 0, 0))
-    strips = []
     for ri, row in enumerate(usable):
         src = layers[ri] if layers else im
-        top = min(b[1] for b in row)
-        bot = max(b[3] for b in row)
-        # Crop to THIS ROW's own horizontal extent, not the sheet's. A row that
-        # sits further left than the others would otherwise be dragged off the
-        # canvas -- which is exactly what happened on the plain yak's LEFT row.
-        rl = min(b[0] for b in row)
-        rr = max(b[2] for b in row)
-        strip = src.crop((rl, top, rr, bot))
-        sw = max(1, round((rr - rl) * scale))
-        sh = max(1, round((bot - top) * scale))
-        strip = strip.resize((sw, sh), Image.LANCZOS)
-        strips.append(strip)
+        # The row's own floor: every frame keeps its height ABOVE this line, so
+        # a lifted hoof stays lifted instead of dropping to the cell floor.
+        floor = max(b[3] for b in row)
+        for ci, bb in enumerate(row[:cols]):
+            frame = src.crop(bb)
+            nw = max(1, round(frame.width * scale))
+            nh = max(1, round(frame.height * scale))
+            frame = frame.resize((nw, nh), Image.LANCZOS)
+            # Horizontal: centred in its OWN cell -- the player's instruction,
+            # and right for a generated sheet, where the gaps between frames are
+            # accidents of the generator rather than animation.
+            dx = ci * cell + (cell - nw) // 2
+            # Vertical: the frame's distance from the row's floor, preserved.
+            lift = round((floor - bb[3]) * scale)
+            dy = ri * cell + cell - nh - lift
+            dy = max(ri * cell, min(dy, ri * cell + cell - nh))
+            sheet.alpha_composite(frame, (dx, dy))
 
-    for ri, strip in enumerate(strips):
-        # Vertical: feet on the band's floor. Horizontal: the row is centred on
-        # the sheet, so only the row's DRIFT is corrected -- every sprite keeps
-        # its offset within the row, and those offsets are the walk cycle.
-        dy = ri * cell + (cell - strip.height)
-        dx = (cols * cell - strip.width) // 2
-        sheet.alpha_composite(strip, (dx, dy))
-
-    note = "one scale %.4f over the full %dpx content width" % (scale, right - left)
+    note = "scale %.4f" % scale
+    note += (" (capped so the widest %dpx frame fits a %dpx cell; the span rule "
+             "wanted %.4f)" % (wmax, cell, span_scale)) if capped else (
+             " from the full %dpx content width" % (right - left))
     if layers:
         note += "; rows isolated by blob ownership"
 
@@ -446,6 +512,10 @@ def main():
                     help="report the detected rows and sprites, write nothing")
     ap.add_argument("--tol", type=int, default=42,
                     help="background keying tolerance (default 42)")
+    ap.add_argument("--rows", default=None,
+                    help="explicit row boundaries as y0,y1,y2,y3,y4 (5 numbers "
+                         "for 4 rows). Use when --inspect shows a direction "
+                         "folded into another band.")
     ap.add_argument("--no-isolate", action="store_true",
                     help="skip blob-ownership row separation (faster; only "
                          "safe when the rows genuinely do not overlap)")
@@ -463,7 +533,8 @@ def main():
     print("%s  %dx%d" % (os.path.basename(args.src), im.width, im.height))
     print("  %s" % note)
 
-    rows, how, gib, spans = analyse(keyed, alpha=args.alpha)
+    force = [int(v) for v in args.rows.split(",")] if args.rows else None
+    rows, how, gib, spans = analyse(keyed, alpha=args.alpha, force_rows=force)
     print("  %s" % how)
     for i, r in enumerate(rows):
         hs = [b[3] - b[1] for b in r]

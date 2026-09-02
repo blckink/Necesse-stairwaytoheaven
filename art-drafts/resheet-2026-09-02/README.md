@@ -47,6 +47,24 @@ The first version was wrong in three ways; all three are fixed in
    stray piece from the row above goes back to the row above. `--no-isolate`
    skips it.
 
+5. **Frames were placed as a row strip, not one by one.** *"du musst
+   eigentlich jeden einzelnen frame ausschneiden und dann einfach ausrichten
+   horizontal und vertikal im jeweiligen 64x64px ausschnitt"*. Each frame is now
+   cut out and centred in its own cell. Vertical is still measured from the
+   ROW's floor, not the frame's own — snapping each frame to its cell floor
+   would drop a lifted hoof back to the ground and kill the step.
+6. **Nothing guaranteed a frame FIT its cell.** The engine draws
+   `sprite(col, row, 64)`, so anything past the cell edge is not on the sheet at
+   all. At the span scale the frames measured: calf 47 px (fine), wraith 70,
+   flowers 64×66, blue yak **115**. The scale is now capped by the widest and
+   tallest frame.
+7. **Fused columns and folded rows.** The blue yak had a 419 px "frame" (two
+   sprites touching, against a 216 px median) and only two row bands for four
+   directions. A column band far wider than its siblings now forces an even
+   split, and a tall band is divided by its own height — 432 and 416 px against
+   a 212 px mean row recovers 2 + 2 exactly. `--rows y0,y1,y2,y3,y4` remains as
+   the escape hatch.
+
 `--mirror-left` was added for the player's other fix: building the LEFT row by
 mirroring RIGHT cell by cell, when a generator drew the two side views as two
 different animals. Cell by cell, never the whole strip — flipping the strip
