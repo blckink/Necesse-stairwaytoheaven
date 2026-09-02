@@ -98,8 +98,6 @@ def _gen_sheet(path, frame_fn):
 def gen_critters(mob_dir):
     _gen_sheet(f"{mob_dir}/glowmoth.png", _moth_frame)
     _gen_sheet(f"{mob_dir}/sparkbeetle.png", _beetle_frame)
-    gen_cloudlamb(f"{mob_dir}/cloudlamb.png", sheared=False)
-    gen_cloudlamb(f"{mob_dir}/cloudlamb_sheared.png", sheared=True)
 
 
 def gen_critter_icons(icon_dir):
@@ -116,7 +114,6 @@ def gen_critter_icons(icon_dir):
     c.outline(palette.OUTLINE)
     c.put(14, 17, L["face_dark"])
     c.put(18, 17, L["face_dark"])
-    c.save(f"{icon_dir}/cloudlamb.png")
 
     # moth: spread wings
     c = Canvas(32, 32)

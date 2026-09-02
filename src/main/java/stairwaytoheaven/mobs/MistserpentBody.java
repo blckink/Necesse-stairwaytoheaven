@@ -24,9 +24,10 @@ import necesse.level.maps.light.GameLight;
  * (SandwormBody is the same shape) so the segments follow the head through the
  * cloud sea on the engine's own worm mathematics.
  *
- * <p>The sheet is drawn top-down and rotated to the segment's heading, so it
- * holds one orientation only: row 0 is the head, rows 1-4 are body coils and
- * row 5 is the tail. {@code sprite} selects which coil this segment shows.
+ * <p>The sheet is the Crystal Dragon's: 320x1792, read as eight 224px rows
+ * drawn top-down and rotated to the segment's heading. Row 0 is the head, row 1
+ * the shoulder the head carries, and rows 1-7 the seven coils.
+ * {@code sprite} selects which coil this segment shows.
  *
  * <p><b>This class owns no balance.</b> A worm's health and armour live on the
  * head — VERIFIED [jar], see the note on {@link MistserpentHead}. The values
@@ -76,41 +77,53 @@ public class MistserpentBody extends HostileWormMobBody<MistserpentHead, Mistser
         return MistserpentHead.BODY_COLLISION;
     }
 
+    /**
+     * The Crystal Dragon's body draw, ported: {@code sprite(0, spriteY, 224)}
+     * at 130px from {@code camX - 112}, angled toward the NEXT segment, with
+     * the shadow sheet 40px lower and the body lit through
+     * {@code minLevelCopy(100)} (VERIFIED [jar], CrystalDragonBody.java:152-180).
+     * A coil with nothing in front of it has no heading and is not drawn --
+     * vanilla's own guard.
+     */
     @Override
     public void addDrawables(List<MobDrawable> list, OrderableDrawables tileList, OrderableDrawables topList,
             Level level, int x, int y, TickManager tickManager, GameCamera camera, PlayerMob perspective) {
         super.addDrawables(list, tileList, topList, level, x, y, tickManager, camera, perspective);
-        if (MistserpentHead.texture == null || !this.isVisible()) {
+        if (MistserpentHead.texture == null || !this.isVisible() || this.next == null) {
             return;
         }
         GameLight light = level.getLightLevel(this);
-        // Body coils use the unangled draw: the worm chain already orients each
-        // segment through its own position, so only the HEAD is rotated to its
-        // heading. Vanilla's SandwormBody does exactly this.
-        necesse.entity.mobs.WormMobHead.addDrawable(
+        int drawX = camera.getDrawX(x) - MistserpentHead.DRAW_OFFSET;
+        int drawY = camera.getDrawY(y);
+        float angle = necesse.engine.util.GameMath.fixAngle(necesse.engine.util.GameMath.getAngle(
+                new java.awt.geom.Point2D.Float(this.next.x - x,
+                        this.next.y - this.next.height - (y - this.height))));
+        necesse.entity.mobs.WormMobHead.addAngledDrawable(
                 list, this,
-                new GameSprite(MistserpentHead.texture, this.sprite.x, this.sprite.y, 64),
-                MistserpentHead.maskTexture, light, (int) this.height,
-                camera.getDrawX(x) - 32, camera.getDrawY(y), 64, perspective);
-        this.addShadowDrawables(tileList, level, x, y, light, camera);
-    }
-
-    @Override
-    protected TextureDrawOptions getShadowDrawOptions(Level level, int x, int y, GameLight light, GameCamera camera) {
-        GameTexture shadow = MistserpentHead.shadowTexture;
-        if (shadow == null) {
-            return null;
+                new GameSprite(MistserpentHead.texture, this.sprite.x, this.sprite.y,
+                        MistserpentHead.SHEET_CELL),
+                null, light.minLevelCopy(100.0F), (int) this.height, angle,
+                drawX, drawY, MistserpentHead.DRAW_SIZE, perspective);
+        if (MistserpentHead.shadowTexture != null) {
+            final MobDrawable shadow = necesse.entity.mobs.WormMobHead.getAngledDrawable(
+                    this,
+                    new GameSprite(MistserpentHead.shadowTexture, this.sprite.x, this.sprite.y,
+                            MistserpentHead.SHEET_CELL),
+                    null, light, (int) this.height, angle,
+                    drawX, drawY + MistserpentHead.SHADOW_DROP, MistserpentHead.DRAW_SIZE, perspective);
+            tileList.add(shadow::draw);
         }
-        return shadow.initDraw().light(light)
-                .pos(camera.getDrawX(x) - shadow.getWidth() / 2,
-                     camera.getDrawY(y) - shadow.getHeight() / 2 + this.getBobbing(x, y));
     }
 
-    /** The last coil: the sheet's tail cell, and no segment follows it. */
+    /**
+     * The last coil. On this sheet the tail is simply the last body row, which
+     * {@code createNewBodyPart} already assigns, so this subclass exists only
+     * to give the chain's end its own registered mob ID.
+     */
     public static class Tail extends MistserpentBody {
         public Tail() {
             super(MistserpentHead.MAX_HEALTH);
-            this.sprite = new Point(0, 5);
+            this.sprite = new Point(0, MistserpentHead.TOTAL_BODY_PARTS);
         }
     }
 }

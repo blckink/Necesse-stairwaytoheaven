@@ -7,6 +7,10 @@ import java.util.List;
 import necesse.engine.gameLoop.tickManager.TickManager;
 import necesse.engine.network.server.ServerClient;
 import necesse.engine.util.GameMath;
+import necesse.entity.mobs.WormMobHead;
+import necesse.entity.mobs.WormMoveLine;
+import necesse.engine.util.GameLinkedList;
+import necesse.engine.util.ComputedObjectValue;
 import necesse.entity.mobs.GameDamage;
 import necesse.entity.mobs.Mob;
 import necesse.entity.mobs.MobDrawable;
@@ -82,7 +86,8 @@ import necesse.level.maps.light.GameLight;
 public class MistserpentHead extends HostileWormMobHead<MistserpentBody, MistserpentHead> {
 
     public static GameTexture texture;
-    public static GameTexture maskTexture;
+    /** The 68x68 map marker, vanilla's crystaldragonhead in shape. */
+    public static GameTexture headTexture;
     public static GameTexture shadowTexture;
 
     /**
@@ -98,11 +103,29 @@ public class MistserpentHead extends HostileWormMobHead<MistserpentBody, Mistser
             LootItem.between("stormshard", 2, 5),
             LootItem.between("aetheriumore", 1, 3));
 
-    /** Segment spacing in pixels — vanilla's sandworm uses 20 for 20 coils. */
-    public static final float LENGTH_PER_BODY_PART = 22.0F;
+    /**
+     * Segment spacing, wave length and segment count are the Crystal Dragon's,
+     * because the sheet is: {@code CrystalDragonHead}'s constructor is
+     * {@code super(100, waveLength, 100.0F, 7, 0.0F, -5.0F)} and its
+     * {@code createNewBodyPart} sets {@code spriteY = index + 1} (VERIFIED
+     * [jar], CrystalDragonHead.java:117 and 197-201). Seven coils against eight
+     * sheet rows is not an off-by-one: row 0 is the head, row 1 is the SHOULDER
+     * the head draws for itself, and the seven coils take rows 1..7 — so row 1
+     * is drawn twice, once by the head and once by the first coil, which is
+     * what makes the neck read as continuous.
+     */
+    public static final float LENGTH_PER_BODY_PART = 100.0F;
     /** How far the body wave travels; larger reads as a longer, lazier coil. */
     public static final float WAVE_LENGTH = 380.0F;
-    public static final int TOTAL_BODY_PARTS = 14;
+    public static final int TOTAL_BODY_PARTS = 7;
+
+    /** The Crystal Dragon's own cell size and draw size (jar, 224 -> 130). */
+    public static final int SHEET_CELL = 224;
+    public static final int DRAW_SIZE = 130;
+    /** Half of {@link #DRAW_SIZE}'s source cell: the sheet's own draw offset. */
+    public static final int DRAW_OFFSET = 112;
+    /** How far below the body its shadow is laid down (jar, drawY + 40). */
+    public static final int SHADOW_DROP = 40;
 
     /**
      * 1400 = the mod's 1000 HP floor x 1.4 for an elite.
@@ -232,9 +255,9 @@ public class MistserpentHead extends HostileWormMobHead<MistserpentBody, Mistser
         // swing cannot rake the whole length for full damage on every segment.
         part.sharesHitCooldownWithNext = index % 3 < 2;
         part.relaysBuffsToNext = index % 3 < 2;
-        if (!(part instanceof MistserpentBody.Tail)) {
-            part.sprite = new Point(0, 1 + index % 4);
-        }
+        // spriteY = index + 1, the Crystal Dragon's own mapping. The tail is
+        // the last row rather than a special cell.
+        part.sprite = new Point(0, index + 1);
         return part;
     }
 
@@ -273,6 +296,18 @@ public class MistserpentHead extends HostileWormMobHead<MistserpentBody, Mistser
         return lootTable;
     }
 
+    /**
+     * The Crystal Dragon's draw, ported. It is not the sandworm's: this sheet
+     * is 320x1792 read as {@code sprite(0, row, 224)} and drawn at 130px from
+     * {@code camX - 112}, with the shadow sheet laid 40px lower, and the body
+     * lit through {@code light.minLevelCopy(100)} so a crystal serpent glows in
+     * its own right rather than going black over a dark sea (VERIFIED [jar],
+     * CrystalDragonHead.java:315-401, CrystalDragonBody.java:152-180).
+     *
+     * <p>The head draws TWO cells: its own (row 0) and the shoulder (row 1), the
+     * shoulder placed 70px back along the move line and angled from the head
+     * toward it. No mask is passed — vanilla passes null.
+     */
     @Override
     public void addDrawables(List<MobDrawable> list, OrderableDrawables tileList, OrderableDrawables topList,
             Level level, int x, int y, TickManager tickManager, GameCamera camera, PlayerMob perspective) {
@@ -281,21 +316,85 @@ public class MistserpentHead extends HostileWormMobHead<MistserpentBody, Mistser
             return;
         }
         GameLight light = level.getLightLevel(this);
+        int drawX = camera.getDrawX(this.x) - DRAW_OFFSET;
+        int drawY = camera.getDrawY(this.y);
         float headAngle = GameMath.fixAngle(GameMath.getAngle(
                 new java.awt.geom.Point2D.Float(this.dx, this.dy)));
-        addAngledDrawable(list, this, new GameSprite(texture, 0, 0, 64), maskTexture,
-                light, (int) this.height, headAngle,
-                camera.getDrawX(x) - 32, camera.getDrawY(y), 64, perspective);
-        this.addShadowDrawables(tileList, level, x, y, light, camera);
+
+        addAngledDrawable(list, this, new GameSprite(texture, 0, 0, SHEET_CELL), null,
+                light.minLevelCopy(100.0F), (int) this.height, headAngle,
+                drawX, drawY, DRAW_SIZE, perspective);
+        if (shadowTexture != null) {
+            final MobDrawable shadow = WormMobHead.getAngledDrawable(
+                    this, new GameSprite(shadowTexture, 0, 0, SHEET_CELL), null,
+                    light, (int) this.height, headAngle,
+                    drawX, drawY + SHADOW_DROP, DRAW_SIZE, perspective);
+            tileList.add(shadow::draw);
+        }
+        drawShoulder(list, tileList, level, camera, perspective);
+    }
+
+    /**
+     * Row 1, the shoulder: one cell of body the head carries so the neck is not
+     * a gap. Position comes from {@code WormMobHead.moveDistance} 70px back
+     * along the head's own move line, exactly as the Crystal Dragon does it.
+     */
+    private void drawShoulder(List<MobDrawable> list, OrderableDrawables tileList, Level level,
+            GameCamera camera, PlayerMob perspective) {
+        ComputedObjectValue<GameLinkedList<WormMoveLine>.Element, Double> shoulderLine =
+                WormMobHead.moveDistance(this.moveLines.getFirstElement(), 70.0);
+        if (shoulderLine.object == null) {
+            return;
+        }
+        java.awt.geom.Point2D.Double pos = WormMobHead.linePos(shoulderLine);
+        GameLight shoulderLight = level.getLightLevel(
+                getTileCoordinate(pos.x), getTileCoordinate(pos.y));
+        int sx = camera.getDrawX((float) pos.x) - DRAW_OFFSET;
+        int sy = camera.getDrawY((float) pos.y);
+        float shoulderHeight = this.getWaveHeight(
+                shoulderLine.object.object.movedDist + shoulderLine.get().floatValue());
+        float shoulderAngle = GameMath.fixAngle((float) GameMath.getAngle(
+                new java.awt.geom.Point2D.Double(this.x - pos.x,
+                        (this.y - this.height) - (pos.y - shoulderHeight))));
+        addAngledDrawable(list, this, new GameSprite(texture, 0, 1, SHEET_CELL), null,
+                shoulderLight.minLevelCopy(100.0F), (int) shoulderHeight, shoulderAngle,
+                sx, sy, DRAW_SIZE, perspective);
+        if (shadowTexture != null) {
+            final MobDrawable shadow = WormMobHead.getAngledDrawable(
+                    this, new GameSprite(shadowTexture, 0, 1, SHEET_CELL), null,
+                    shoulderLight, (int) shoulderHeight, shoulderAngle,
+                    sx, sy + SHADOW_DROP, DRAW_SIZE, perspective);
+            tileList.add(shadow::draw);
+        }
+    }
+
+    /**
+     * The map marker. {@code CrystalDragonHead.drawOnMap} rotates a separate
+     * 68x68 head sheet to the heading and draws it at 48x48 around (24, 24)
+     * (VERIFIED [jar], CrystalDragonHead.java:361-365). Without this a serpent
+     * is a dot on the map, which for the sky's one roaming threat is the wrong
+     * amount of warning.
+     */
+    @Override
+    public void drawOnMap(TickManager tickManager, necesse.engine.network.client.Client client,
+            int x, int y, double tileScale, java.awt.Rectangle drawBounds, boolean isMinimap) {
+        super.drawOnMap(tickManager, client, x, y, tileScale, drawBounds, isMinimap);
+        if (headTexture == null) {
+            return;
+        }
+        float headAngle = GameMath.fixAngle(GameMath.getAngle(
+                new java.awt.geom.Point2D.Float(this.dx, this.dy)));
+        headTexture.initDraw().sprite(0, 0, headTexture.getWidth() * 2)
+                .rotate(headAngle - 90.0F, 24, 24).size(48, 48).draw(x - 24, y - 24);
     }
 
     @Override
-    protected TextureDrawOptions getShadowDrawOptions(Level level, int x, int y, GameLight light, GameCamera camera) {
-        if (shadowTexture == null) {
-            return null;
-        }
-        return shadowTexture.initDraw().light(light)
-                .pos(camera.getDrawX(x) - shadowTexture.getWidth() / 2,
-                     camera.getDrawY(y) - shadowTexture.getHeight() / 2 + this.getBobbing(x, y));
+    public boolean shouldDrawOnMap() {
+        return this.isVisible();
+    }
+
+    @Override
+    public java.awt.Rectangle drawOnMapBox(double tileScale, boolean isMinimap) {
+        return new java.awt.Rectangle(-15, -15, 30, 30);
     }
 }

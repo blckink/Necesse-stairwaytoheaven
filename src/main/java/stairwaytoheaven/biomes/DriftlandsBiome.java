@@ -52,25 +52,23 @@ public class DriftlandsBiome extends SkyBiome {
             // stays three — now measured over eight tiles, so it is ONE pack
             // rather than a pack every 2.5 tiles.
             .addLimited(45, "galehound", 3, RANGE_STANDARD)
-            // The cloud sea between the islands is not empty travelling ground
-            // — but it was the one piece of it with no cap at all, on the mod's
-            // heaviest mob. VERIFIED [jar] each of the serpent's fourteen
-            // segments is a hostile of its own (HostileWormMobBody sets
-            // isHostile = true), so one serpent already spends the engine's
-            // four-hostiles-per-eight-tiles budget wherever it swims, and two
-            // surfacing together is not a harder fight, it is an impassable
-            // sea. One at a time now, the way vanilla caps its own giant worms
-            // (see SkyBiome.mistseaSerpent). The weight is untouched: the cap
-            // is the right lever, tickets never were.
-            .add(28, mistseaSerpent(1), "mistserpent");
+            // The cloud sea between the islands is not empty travelling ground.
+            //
+            // Weight 28 -> 300, and this is not a difficulty change: it is what
+            // makes the serpent appear AT ALL. MobSpawnTable.getRandomMob
+            // filters by the entry predicate FIRST and only then draws by
+            // weight (VERIFIED [jar], MobSpawnTable.java:131-138). The serpent
+            // carries IN_MISTSEA, so it can never be drawn on land whatever its
+            // weight; the land entries carry no terrain predicate, so on a sea
+            // tile they all stay in the draw and then fail the liquid check
+            // afterwards. At 28 against a table of ~223-328 that meant roughly
+            // nine draws in ten over the sea were spent on a mob that could not
+            // stand there, which is why the sky's one roaming threat was never
+            // seen. At 300 a sea draw lands on the serpent about half the time.
+            // The cap of one per spawn ring is what keeps it occasional rather
+            // than everywhere -- see DriftlandsBiome for why it is capped at all.
+            .add(300, mistseaSerpent(1), "mistserpent");
 
-    // NOTE: no "cloudlamb" here, deliberately. A sheep cannot be placed by a
-    // spawn table at all -- MobChance.spawnMob calls isValidSpawnLocation and
-    // nothing in SheepMob -> HusbandryMob -> FriendlyRopableMob -> AttackAnimMob
-    // overrides Mob's `return false`. This table asked for one for three
-    // releases and silently got nothing. Vanilla has the same constraint and
-    // places its sheep, rams, cows and bulls from the island generator instead;
-    // ours are placed in SkyLevel.placeCloudLambFlock at region generation.
     public static final MobSpawnTable critters = new MobSpawnTable()
             .addLimited(70, "zephyrfinch", 4, RANGE_STANDARD);
 

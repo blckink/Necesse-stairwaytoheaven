@@ -588,9 +588,14 @@ def gen_icon(path):
 
 def gen_mistserpent(mobs_dir, icons_dir):
     """Entry point: writes all four Mist Serpent files."""
-    glow = gen_sheet(os.path.join(mobs_dir, "mistserpent.png"))
-    gen_mask(os.path.join(mobs_dir, "mistserpent_mask.png"), glow)
-    gen_shadow(os.path.join(mobs_dir, "mistserpent_shadow.png"))
+    # The body sheet, its mask and its shadow are NO LONGER generated. The
+    # player supplied all three on vanilla's CrystalDragonHead format -- 320x1792
+    # read as eight 224px rows, plus a 68x68 map marker -- and the mod's serpent
+    # is drawn that way now (see MistserpentHead.addDrawables). The mask is gone
+    # entirely: vanilla's crystal dragon passes null for it.
+    #
+    # gen_sheet, gen_mask and gen_shadow stay below as the record of what the
+    # generated serpent was. Only the bestiary icon is still drawn here.
     gen_icon(os.path.join(icons_dir, "mistserpent.png"))
 
 

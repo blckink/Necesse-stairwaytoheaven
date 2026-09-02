@@ -439,7 +439,7 @@ public class SkyreachStatusCommand extends ModularChatCommand {
      * however correct the rest of it is, so the pairing is measured too.
      */
     private void diagnoseHusbandry(SkyLevel level, CommandLog logs) {
-        for (String mobID : new String[]{"cloudlamb", "nimbusyak", "glimmergoat"}) {
+        for (String mobID : new String[]{"nimbusyak", "glimmergoat"}) {
             necesse.entity.mobs.Mob probe = necesse.engine.registries.MobRegistry.getMob(mobID, level);
             if (!(probe instanceof necesse.entity.mobs.friendly.HusbandryMob)) {
                 logs.add("husbandry check: " + mobID + " is NOT a HusbandryMob");
@@ -763,7 +763,7 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         // cannot ship without its accepted-lit/dark counts being measured, and
         // this command never has to learn the names.
         String[] coreProbeMobs = {"zephyrray", "skystonegolem", "stormwisp", "galehound",
-                "dawnpiercer", "gloomshade", "cloudlamb", "glowmoth", "sparkbeetle",
+                "dawnpiercer", "gloomshade", "glowmoth", "sparkbeetle",
                 "zephyrfinch", "dewsnail",
                 // v1.0 livestock. These three are the counter-example to the
                 // Cloud Lamb's row: a HusbandryMob inherits Mob's `return

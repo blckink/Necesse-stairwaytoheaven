@@ -414,11 +414,6 @@ echo "--- verifying the Cloud Lamb is a coherent husbandry animal ---"
 # the feeding trough accepts (FeedingTroughObjectEntity filters on
 # `instanceof GrainItem` and nothing else, so a berry that is not one can never
 # go in the trough no matter what canFeed says).
-grep -qE "husbandry check: cloudlamb shear=windsilkx[0-9]+" "$LOG1" \
-    || { echo "FAIL: shearing a Cloud Lamb does not yield windsilk"; \
-         grep -E "husbandry check:" "$LOG1" | tail -1; STATUS=1; }
-grep -qF "child=cloudlamb" "$LOG1" \
-    || { echo "FAIL: Cloud Lambs do not breed true (vanilla SheepMob rolls a ram)"; STATUS=1; }
 grep -qF "cloudberry=hand:true/trough:true" "$LOG1" \
     || { echo "FAIL: cloudberries are not accepted as Cloud Lamb feed"; STATUS=1; }
 grep -qF "wheat=hand:true/trough:true" "$LOG1" \

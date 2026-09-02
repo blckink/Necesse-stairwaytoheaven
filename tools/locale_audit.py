@@ -364,7 +364,7 @@ def class_supers():
 
 
 def class_ref(raw):
-    """"stairwaytoheaven.mobs.CloudLambMob" -> "CloudLambMob";
+    """"stairwaytoheaven.mobs.GalehoundMob" -> "GalehoundMob";
     "SpireCatMob.Black" stays whole (package parts are lower case)."""
     parts = raw.split(".")
     while parts and parts[0][:1].islower():
@@ -1130,7 +1130,7 @@ def main(vanilla_dump=None):
     # 8. Every texture our source names by a literal path has to exist -- in
     #    OUR resources, or in the game's. There is one flat resource map keyed
     #    by path (ResourceEncoder.java:75-86) with the mod's files merged into
-    #    it, so "mobs/cloudlamb" and "mobs/cow" are looked up exactly alike;
+    #    it, so "mobs/gloomshade" and "mobs/cow" are looked up exactly alike;
     #    which repository a path belongs to is a fact about where to check, not
     #    about how it fails. Both fail as the red ERR tile.
     texture_literals, texture_dynamic = texture_load_sites()

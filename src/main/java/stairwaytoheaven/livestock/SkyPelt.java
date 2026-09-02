@@ -13,7 +13,7 @@ import necesse.gfx.gameTexture.GameTexture;
  * {@code ResourceEncoder.getResourceBytes(path)} — ONE flat
  * {@code resources.files} map keyed by path (jar 1.3.2,
  * GameTexture.java:167-199 and ResourceEncoder.java:75-86). Mod resources are
- * merged into that map, which is how {@code mobs/cloudlamb} resolves; the same
+ * merged into that map, which is how {@code mobs/gloomshade} resolves; the same
  * call therefore resolves {@code mobs/cow} from mod code. So the Skyreach's
  * livestock can be drawn on vanilla's own farm-animal sheets, with the frame
  * layout, the matching shadow sheets and the flesh-particle cells the

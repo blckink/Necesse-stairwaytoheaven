@@ -40,9 +40,21 @@ public class AuroraShoalsBiome extends SkyBiome {
             // you lose without meeting it.
             .addLimited(35, "auroraflake", 2, RANGE_RANGED)
             // The cloud sea between the islands is not empty travelling ground.
-            // Capped at one for the reason spelled out in DriftlandsBiome:
-            // fourteen isHostile segments, and it had no cap at all.
-            .add(28, mistseaSerpent(1), "mistserpent");
+            //
+            // Weight 28 -> 300, and this is not a difficulty change: it is what
+            // makes the serpent appear AT ALL. MobSpawnTable.getRandomMob
+            // filters by the entry predicate FIRST and only then draws by
+            // weight (VERIFIED [jar], MobSpawnTable.java:131-138). The serpent
+            // carries IN_MISTSEA, so it can never be drawn on land whatever its
+            // weight; the land entries carry no terrain predicate, so on a sea
+            // tile they all stay in the draw and then fail the liquid check
+            // afterwards. At 28 against a table of ~223-328 that meant roughly
+            // nine draws in ten over the sea were spent on a mob that could not
+            // stand there, which is why the sky's one roaming threat was never
+            // seen. At 300 a sea draw lands on the serpent about half the time.
+            // The cap of one per spawn ring is what keeps it occasional rather
+            // than everywhere -- see DriftlandsBiome for why it is capped at all.
+            .add(300, mistseaSerpent(1), "mistserpent");
 
     public static final MobSpawnTable critters = new MobSpawnTable()
             .addLimited(80, "glowmoth", 5, RANGE_STANDARD)

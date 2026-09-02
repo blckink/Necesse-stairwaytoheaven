@@ -64,7 +64,7 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
     public void onRegionGenerated(Region region, boolean skipGenerateForced) {
         super.onRegionGenerated(region, skipGenerateForced);
         region.checkGenerationValid();
-        placeCloudLambFlock(region);
+        placeLivestockHerds(region);
         placeResident(region);
         placeGuardPacks(region);
     }
@@ -75,10 +75,10 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
      * WHY: {@code MobChance.spawnMob} calls {@code mob.isValidSpawnLocation},
      * and {@code Mob}'s own implementation is {@code return false}. Nothing in
      * SheepMob -> HusbandryMob -> FriendlyRopableMob -> AttackAnimMob overrides
-     * it, so a sheep can never be placed by a spawn table at all. Our
-     * DriftlandsBiome critter table asked for `cloudlamb` for three releases
-     * and the entry did nothing, which is why the player never saw one.
-     * Measured: {@code /skyreachstatus} reports cloudlamb at
+     * it, so a sheep can never be placed by a spawn table at all. A critter
+     * table that asks for one gets nothing, silently -- which it did here for
+     * three releases, and is why the player never saw the animal. Measured at
+     * the time: {@code /skyreachstatus} reported
      * `validSpawnLocation=INHERITS Mob's false accepted lit=0/6 dark=0/6`.
      *
      * Vanilla has the same constraint and solves it the same way: sheep, rams,
@@ -178,17 +178,14 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
     /** Rare: a workshop with somebody still at it is the exception. */
     private static final float RESIDENT_REGION_CHANCE = 0.16F;
 
-    private void placeCloudLambFlock(Region region) {
-        // Cloudturf meadows: the Driftlands' own flock.
-        placeHerd(region, "cloudlamb", SkyRegistry.cloudturfID, FLOCK_REGION_CHANCE, 0x85EBCA77L);
-        // The three husbandry animals used to ride the CRITTER SPAWN TABLES,
+    private void placeLivestockHerds(Region region) {
+        // The husbandry animals used to ride the CRITTER SPAWN TABLES,
         // which is a per-tile roll and put them on every corner of the sky.
         // Vanilla never does that with livestock: GenerationTools.spawnMobHerds
         // drops 25-50 sheep on a WHOLE ISLAND, in clumps of 2-6 within 5 tiles
         // of a point (PlainsSurfaceLevel:234). The player's own words:
         // "wertvolle Tiere nicht an jeder Ecke". So they are herds now, each on
-        // its own ground, and each rarer than the Cloud Lamb because each is
-        // worth more.
+        // its own ground and each rare, because each is worth something.
         placeHerd(region, stairwaytoheaven.livestock.SkyLivestock.NIMBUS_YAK,
                 SkyRegistry.cloudturfID, YAK_REGION_CHANCE, 0x9E3779B1L);
         placeHerd(region, stairwaytoheaven.livestock.SkyLivestock.GLIMMERGOAT,
@@ -368,8 +365,6 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
         }
     }
 
-    /** Roughly one flock every four regions -- meadow livestock, not a herd biome. */
-    private static final float FLOCK_REGION_CHANCE = 0.25F;
     /**
      * Both husbandry animals are rarer than the Cloud Lamb, because each is a
      * production animal rather than scenery: milk and fleece. One yak herd per

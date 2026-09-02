@@ -93,10 +93,17 @@ public final class SkyPressure {
      * The Mistsea. Low rather than zero because the sea is 61% of the sky and
      * the {@link stairwaytoheaven.mobs.MistserpentHead} is the only thing that
      * spawns on it: at the default 100 the sea's sheer area would win most
-     * draws and starve the guarded sites, and every one of those draws would be
-     * a wasted tick for a land mob that cannot stand on liquid.
+     * draws and starve the guarded sites.
+     *
+     * <p>8 -&gt; 16. Against the wilds' 45 the sea still draws roughly a third as
+     * often per tile, which over 61% of the map is about half the sky's ambient
+     * pressure by area — but almost none of it used to reach the serpent,
+     * because the biome tables let land mobs into a sea draw and they lose it
+     * afterwards on the liquid check. That half is fixed in the tables (see any
+     * biome's {@code mistseaSerpent} entry); this is the other half, and the
+     * one-per-spawn-ring cap is what keeps the result occasional.
      */
-    public static final int MISTSEA_TICKETS = 8;
+    public static final int MISTSEA_TICKETS = 16;
 
     /** Tiles from a site centre that count as the site's own ground. */
     public static final float GUARD_RADIUS = 7.0F;

@@ -89,7 +89,17 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              # The Glimmergoat doe, woolly and shorn. Same route; the buck
              # and the kid are still SkyPelt recolours of vanilla's ram and
              # lamb until their sheets arrive.
-             "mobs/glimmergoat.png", "mobs/glimmergoat_shorn.png",
+             # The Glimmergoat's five states and the Mistserpent's crystal-
+             # dragon sheets, all supplied on vanilla formats. The serpent's
+             # shard projectile is here too: it is delivered art with no
+             # projectile behind it yet, and the guard is what stops a future
+             # generator module claiming the name.
+             "mobs/gimmergoat-doe.png", "mobs/gimmergoat-doe_shorn.png",
+             "mobs/gimmergoat-ram.png", "mobs/gimmergoat-ram_shorn.png",
+             "mobs/glimmergoat-lamb.png",
+             "mobs/mistserpent.png", "mobs/mistserpent_shadow.png",
+             "mobs/mistserpenthead.png", "mobs/gloomshade.png",
+             "projectiles/mistserpentshard.png",
              "mobs/crookedgolem.png", "mobs/rarecrookedgolem.png",
              "mobs/crookedarmadillo.png",
              # The Eden ground pair, copied verbatim by convert_biome_art
@@ -256,7 +266,9 @@ def main():
     gen_npcs.gen_resident_icons(f"{out}/mobs/icons")
     gen_critters.gen_critters(f"{out}/mobs")
     gen_critters.gen_critter_icons(f"{out}/mobs/icons")
-    gen_veil.gen_gloomshade(f"{out}/mobs/gloomshade.png")
+    # mobs/gloomshade.png is NOT generated any more: the player supplied a
+    # drawn sheet on the same 384x256 layout. gen_veil.gen_gloomshade stays
+    # as the record of what the generated one was.
     gen_veil.gen_shade_icon(f"{out}/mobs/icons/gloomshade.png")
 
     # Item icons

@@ -2,7 +2,6 @@ package stairwaytoheaven;
 
 import necesse.engine.registries.MobRegistry;
 import necesse.gfx.gameTexture.GameTexture;
-import stairwaytoheaven.mobs.CloudLambMob;
 import stairwaytoheaven.mobs.SkyCritterMob;
 import stairwaytoheaven.mobs.SkyWardenMob;
 import stairwaytoheaven.mobs.SkystoneGolemMob;
@@ -41,7 +40,6 @@ final class SkyMobs {
         // a mob without a registered Settler can never move in.
         stairwaytoheaven.settlement.SkySettlers.register();
         // ambient critters, one per sub-biome
-        MobRegistry.registerMob("cloudlamb", stairwaytoheaven.mobs.CloudLambMob.class, false);
         MobRegistry.registerMob("glowmoth", SkyCritterMob.GlowMoth.class, false);
         MobRegistry.registerMob("sparkbeetle", SkyCritterMob.SparkBeetle.class, false);
         // v0.3: the Veil
@@ -69,7 +67,7 @@ final class SkyMobs {
     /** Called from initResources — runs on the client only, never on servers. */
     static void loadTextures() {
         stairwaytoheaven.mobs.MistserpentHead.texture = GameTexture.fromFile("mobs/mistserpent");
-        stairwaytoheaven.mobs.MistserpentHead.maskTexture = GameTexture.fromFile("mobs/mistserpent_mask");
+        stairwaytoheaven.mobs.MistserpentHead.headTexture = GameTexture.fromFile("mobs/mistserpenthead");
         stairwaytoheaven.mobs.MistserpentHead.shadowTexture = GameTexture.fromFile("mobs/mistserpent_shadow");
         ZephyrRayMob.texture = GameTexture.fromFile("mobs/zephyrray");
         StormWispMob.texture = GameTexture.fromFile("mobs/stormwisp");
@@ -78,8 +76,6 @@ final class SkyMobs {
         // renderer composes him from the body layers plus his armor items.
         SpireCatMob.blackTexture = GameTexture.fromFile("mobs/spirecatblack");
         SpireCatMob.tabbyTexture = GameTexture.fromFile("mobs/spirecattabby");
-        stairwaytoheaven.mobs.CloudLambMob.texture = GameTexture.fromFile("mobs/cloudlamb");
-        stairwaytoheaven.mobs.CloudLambMob.shearedTexture = GameTexture.fromFile("mobs/cloudlamb_sheared");
         SkyCritterMob.mothTexture = GameTexture.fromFile("mobs/glowmoth");
         SkyCritterMob.beetleTexture = GameTexture.fromFile("mobs/sparkbeetle");
         stairwaytoheaven.mobs.GloomShadeMob.texture = GameTexture.fromFile("mobs/gloomshade");

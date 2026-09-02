@@ -169,9 +169,9 @@ on the next generator run. The exceptions are the supplied files listed in
 | `galehound.png` | 384x256 |
 | `gloomshade.png` | 384x256 |
 | `glowmoth.png` | 192x128 |
-| `mistserpent.png` | 128x384 |
-| `mistserpent_mask.png` | 64x64 |
-| `mistserpent_shadow.png` | 44x24 |
+| `mistserpent.png` | 320x1792 |
+| `mistserpent_shadow.png` | 320x1792 |
+| `mistserpenthead.png` | 68x68 |
 | `rarecrookedgolem.png` | 384x320 |
 | `skystonegolem.png` | 384x256 |
 | `skywarden.png` | 384x256 |
