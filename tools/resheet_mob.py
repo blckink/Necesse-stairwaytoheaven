@@ -515,7 +515,8 @@ def load_folder(root, cols=COLS, want_rows=ROWS):
     return out, gib, "; ".join(notes) or "%d row folder(s)" % len(out)
 
 
-def resheet_frames(rows, gib=None, cell=CELL, cols=COLS, want_rows=ROWS):
+def resheet_frames(rows, gib=None, cell=CELL, cols=COLS, want_rows=ROWS,
+                   anchor="center"):
     """Compose already-cut frames onto the 384x320 grid.
 
     The same two rules the sheet path settled on, for the same reasons: ONE
@@ -524,11 +525,17 @@ def resheet_frames(rows, gib=None, cell=CELL, cols=COLS, want_rows=ROWS):
     sprite(col, row, 64) and anything past the cell edge is not on the sheet at
     all; and each frame centred in its own cell, sitting on the cell floor.
 
-    Bottom-aligning is right HERE and would be wrong on a flat sheet: an
-    exported frame is cropped to its own content, so a lifted hoof has already
-    become a shorter frame, and putting its bottom on the floor keeps the lift.
-    On a sheet the frames share one crop, which is why that path measures from
-    the row's floor instead.
+    Frames are CENTRED in their cell, not bottom-aligned, and that was the last
+    thing wrong with the wraith. Bottom-aligning assumes a frame's lower edge
+    means something -- true when a crop shares its baseline with its siblings,
+    false for frames each cropped to their own content. Measured on the
+    supplied wraith: its five UP frames are 264, 231, 259, 235 and 261 px tall
+    with their centroids all at 0.45-0.51 of their own height, so their bottoms
+    disagree by 33 px while their bodies do not disagree at all. Bottom-aligned
+    they bob; centred they hold still.
+
+    `anchor="bottom"` restores the old behaviour for a ground animal whose
+    frames really were cut on a shared baseline.
     """
     if len(rows) < want_rows:
         return None, "only %d row(s), need %d" % (len(rows), want_rows)
@@ -543,10 +550,11 @@ def resheet_frames(rows, gib=None, cell=CELL, cols=COLS, want_rows=ROWS):
             nh = max(1, round(frame.height * scale))
             small = frame.resize((nw, nh), Image.LANCZOS)
             dx = ci * cell + (cell - nw) // 2
-            dy = ri * cell + cell - nh
+            dy = (ri * cell + cell - nh if anchor == "bottom"
+                  else ri * cell + (cell - nh) // 2)
             sheet.alpha_composite(small, (dx, max(ri * cell, dy)))
-    note = "scale %.4f (widest %dpx, tallest %dpx -> %dpx cell)" % (
-        scale, wmax, hmax, cell)
+    note = "scale %.4f (widest %dpx, tallest %dpx -> %dpx cell), %s-anchored" % (
+        scale, wmax, hmax, cell, anchor)
     if gib:
         gs = min(32.0 / max(im.width for im in gib),
                  32.0 / max(im.height for im in gib))
@@ -606,6 +614,11 @@ def main():
                     help="report the detected rows and sprites, write nothing")
     ap.add_argument("--tol", type=int, default=42,
                     help="background keying tolerance (default 42)")
+    ap.add_argument("--anchor", choices=("center", "bottom"), default="center",
+                    help="folder mode: where a frame sits in its cell. center "
+                         "(default) holds a body still across frames of "
+                         "differing height; bottom suits a ground animal whose "
+                         "frames were cut on a shared baseline.")
     ap.add_argument("--rows", default=None,
                     help="explicit row boundaries as y0,y1,y2,y3,y4 (5 numbers "
                          "for 4 rows). Use when --inspect shows a direction "
@@ -633,7 +646,7 @@ def main():
                   % (i, len(r), max(x.width for x in r), max(x.height for x in r)))
         if args.inspect:
             return 0
-        sheet, msg = resheet_frames(rows, gib)
+        sheet, msg = resheet_frames(rows, gib, anchor=args.anchor)
         print("  %s" % msg)
         if sheet is None:
             return 1
