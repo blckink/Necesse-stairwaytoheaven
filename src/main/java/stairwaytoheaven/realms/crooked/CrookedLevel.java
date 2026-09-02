@@ -103,6 +103,7 @@ public class CrookedLevel extends BiomeGeneratorStackLevel {
         super.onRegionGenerated(region, skipGenerateForced);
         region.checkGenerationValid();
         this.placeGuardPacks(region);
+        stairwaytoheaven.settlement.CrookedResidents.place(this, region, this.getWorldGenSeed());
     }
 
     @Override

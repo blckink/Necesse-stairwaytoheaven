@@ -64,22 +64,16 @@ public class VeilLevel extends BiomeGeneratorStackLevel {
         }
     }
 
-    // ==== settler residents (owner: settlement/VeilResidents) ==============
-    /**
-     * Mortimer, Caspern and Eleanor stand somewhere in the Veil.
-     *
-     * All of the rules live in {@code settlement/VeilResidents} rather than
-     * here: this level file is shared with the Ghost Realm work, and one call
-     * is the smallest hook that can put people in it. See that class for why
-     * the Veil is their home today and what happens when the Ghost Realm
-     * arrives.
-     */
-    @Override
-    public void onRegionGenerated(Region region, boolean skipGenerateForced) {
-        super.onRegionGenerated(region, skipGenerateForced);
-        stairwaytoheaven.settlement.VeilResidents.place(this, region, this.getWorldGenSeed());
-    }
-    // ==== end settler residents ============================================
+    // Mortimer, Caspern and Eleanor used to be placed here (an onRegionGenerated
+    // override calling settlement.VeilResidents.place) while the Ghost Realm
+    // was still being built — see that class's own doc comment. The Ghost
+    // Realm has since shipped and is now their one home
+    // (realms.ghost.GhostLevel.onRegionGenerated), so the override was removed
+    // rather than left as a no-op: a resident who might be behind either of two
+    // different portals is a resident the player cannot reliably go looking
+    // for, and the Ghost Realm needing "a reason to go there" is the entire
+    // point of that move. veil2 keeps generating everything else
+    // (VeilTerrainPainter's ground, its own Gloom Shades) exactly as before.
 
     @Override
     public boolean canRain() {

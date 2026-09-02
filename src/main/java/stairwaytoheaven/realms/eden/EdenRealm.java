@@ -54,12 +54,18 @@ public final class EdenRealm {
     public static int edenShellsID;
     public static int knowledgeTreeID;
 
+    // The Eden Gate — see EdenSeedBasinObject for why it is three objects.
+    public static int edenSeedBasinID;
+    public static int edenGateDownID;
+    public static int edenGateUpID;
+
     public static void register() {
         registerBiomes();
         registerTiles();
         registerItems();
         registerObjects();
         registerMobs();
+        registerGate();
     }
 
     private static void registerBiomes() {
@@ -152,9 +158,32 @@ public final class EdenRealm {
         MobRegistry.registerMob("forbiddenserpent", ForbiddenSerpentMob.class, false);
     }
 
+    /**
+     * The Eden Gate — the only way into this realm today. See
+     * {@link EdenSeedBasinObject} for the full reasoning; in short: the down
+     * and up gate objects are {@code LadderDownObject}/its return half and are
+     * registered unobtainable, exactly like the Ghost Gate and the Veil rift,
+     * because a door into another dimension is opened at a place rather than
+     * carried in a backpack. The basin that grows into the down gate IS
+     * obtainable — it is the thing a player actually crafts.
+     */
+    private static void registerGate() {
+        edenSeedBasinID = ObjectRegistry.registerObject("edenseedbasin", new EdenSeedBasinObject(), 20.0F, true);
+        edenGateDownID = ObjectRegistry.registerObject("edengatedown", new EdenGateObject(), 0.0F, false);
+        edenGateUpID = ObjectRegistry.registerObject("edengateup", new EdenSideGateObject(), 0.0F, false);
+        ((EdenGateObject) ObjectRegistry.getObject(edenGateDownID)).ladderUpObjectID = edenGateUpID;
+    }
+
     public static void registerRecipes() {
         Recipes.registerModRecipe(new Recipe("edenbronzebar", 1, RecipeTechRegistry.TUNGSTEN_WORKSTATION,
                 Recipes.ingredientsFromScript("{{edencopperore, 3}, {edensap, 1}}")));
+        // The Eden Threshold: aetherium proves the player has worked the
+        // Aether Forge, skystone and windwheat are the sky's own common stone
+        // and grain -- the recipe is Skyreach materials, matching how the
+        // FIRST stairway (tungstenbar + quartz, deep-cave materials) is built
+        // on the Surface out of the tier below it rather than the tier ahead.
+        Recipes.registerModRecipe(new Recipe("edenseedbasin", 1, RecipeTechRegistry.TUNGSTEN_WORKSTATION,
+                Recipes.ingredientsFromScript("{{aetheriumbar, 4}, {skystone, 10}, {windwheat, 8}}")));
     }
 
     /** Client-only vanilla stand-ins; the dedicated server never calls this. */

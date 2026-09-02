@@ -93,6 +93,30 @@ public class SkywatchWorldData extends WorldData {
     public boolean eleanorPassedOn = false;
 
     /**
+     * Has this world already paid Eveleen's price and had her join?
+     *
+     * WORLD_DESIGN.md §5: she is "unlocked by discovering an Eden island +
+     * collecting three Eden plants". {@link stairwaytoheaven.quest.EdenPlantsQuest}
+     * is that ask made concrete, and this is its one-time payout record: once a
+     * player has handed her the three plants, she never asks again and — see
+     * {@code EveleenMob.getRecruitItems} — she stops asking for the settlement
+     * fee too. A WorldData rather than a flag on the mob itself for the same
+     * reason {@link #eleanorPassedOn} is: the choice is made wherever Eveleen is
+     * standing, and the consequence has to hold everywhere she might ever stand,
+     * including a settlement on the surface a dimension away.
+     */
+    public boolean edenPlantsGiven = false;
+
+    /**
+     * Has this world's Doorman already proven a Crooked door can lead
+     * somewhere? {@link stairwaytoheaven.quest.CrookedDoorQuest}'s one-time
+     * payout record, for the same reason {@link #edenPlantsGiven} is one: the
+     * delivery happens wherever Mr. Knott is standing, and "already paid" has
+     * to be a fact about the world, not about one Crooked region.
+     */
+    public boolean crookedDoorwayOpened = false;
+
+    /**
      * Mob string IDs of the mod's NAMED residents this world has already
      * produced — placed by worldgen, or moved into a settlement.
      *
@@ -126,6 +150,8 @@ public class SkywatchWorldData extends WorldData {
         save.addBoolean("blackHome", this.blackHome);
         save.addBoolean("tabbyHome", this.tabbyHome);
         save.addBoolean("eleanorPassedOn", this.eleanorPassedOn);
+        save.addBoolean("edenPlantsGiven", this.edenPlantsGiven);
+        save.addBoolean("crookedDoorwayOpened", this.crookedDoorwayOpened);
         save.addStringArray("residentsClaimed",
                 this.residentsClaimed.toArray(new String[0]));
         save.addBoolean("catHomeSet", this.catHomeSet);
@@ -142,6 +168,8 @@ public class SkywatchWorldData extends WorldData {
         this.blackHome = save.getBoolean("blackHome", this.blackHome, false);
         this.tabbyHome = save.getBoolean("tabbyHome", this.tabbyHome, false);
         this.eleanorPassedOn = save.getBoolean("eleanorPassedOn", this.eleanorPassedOn, false);
+        this.edenPlantsGiven = save.getBoolean("edenPlantsGiven", this.edenPlantsGiven, false);
+        this.crookedDoorwayOpened = save.getBoolean("crookedDoorwayOpened", this.crookedDoorwayOpened, false);
         this.residentsClaimed.clear();
         for (String claimed : save.getStringArray("residentsClaimed", new String[0], false)) {
             if (claimed != null && !claimed.isEmpty()) {
@@ -271,6 +299,34 @@ public class SkywatchWorldData extends WorldData {
         SkywatchWorldData data = get(server);
         if (data != null) {
             data.eleanorPassedOn = true;
+        }
+    }
+
+    /** Has this world already given Eveleen her three Eden plants? */
+    public static boolean edenPlantsGiven(Server server) {
+        SkywatchWorldData data = get(server);
+        return data != null && data.edenPlantsGiven;
+    }
+
+    /** Records the Eden Plants delivery. Idempotent. */
+    public static void markEdenPlantsGiven(Server server) {
+        SkywatchWorldData data = get(server);
+        if (data != null) {
+            data.edenPlantsGiven = true;
+        }
+    }
+
+    /** Has this world already proven a Crooked doorway open for Mr. Knott? */
+    public static boolean crookedDoorwayOpened(Server server) {
+        SkywatchWorldData data = get(server);
+        return data != null && data.crookedDoorwayOpened;
+    }
+
+    /** Records the Crooked Door delivery. Idempotent. */
+    public static void markCrookedDoorwayOpened(Server server) {
+        SkywatchWorldData data = get(server);
+        if (data != null) {
+            data.crookedDoorwayOpened = true;
         }
     }
 

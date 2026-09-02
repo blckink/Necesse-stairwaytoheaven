@@ -40,10 +40,11 @@ import stairwaytoheaven.quest.SkywatchWorldData;
  * <tr><td>Magpie</td><td>trading missions</td><td>Skyreach workshop</td><td>no</td></tr>
  * <tr><td>Halda</td><td>fishing</td><td>Skyreach workshop</td><td>no</td></tr>
  * <tr><td>Ossian</td><td>crafting only</td><td>Skyreach workshop</td><td>no</td></tr>
- * <tr><td>Eveleen</td><td>fertilising (farmer)</td><td>—</td><td>Eden grass in the settlement</td></tr>
- * <tr><td>Mortimer</td><td>hunting</td><td>Veil bone piles</td><td>a graveyard in the settlement</td></tr>
- * <tr><td>Caspern</td><td>crafting only</td><td>Veil bone piles</td><td>an Aether Forge in the settlement</td></tr>
- * <tr><td>Eleanor</td><td>husbandry</td><td>Veil bone piles</td><td>no — she is an ending, not a visitor</td></tr>
+ * <tr><td>Eveleen</td><td>fertilising (farmer)</td><td>Eden, beside a Knowledge Tree</td><td>Eden grass in the settlement</td></tr>
+ * <tr><td>Mortimer</td><td>hunting</td><td>Ghost Realm gravestones</td><td>a graveyard in the settlement</td></tr>
+ * <tr><td>Caspern</td><td>crafting only</td><td>Ghost Realm gravestones</td><td>an Aether Forge in the settlement</td></tr>
+ * <tr><td>Eleanor</td><td>husbandry</td><td>Ghost Realm gravestones</td><td>no — she is an ending, not a visitor</td></tr>
+ * <tr><td>Mr. Knott</td><td>trading missions</td><td>Crooked Beyond Door Yard</td><td>no — §15 names no condition</td></tr>
  * </table>
  *
  * "Travels to a town" is {@link SkyArrivals}: the vanilla route by which a
@@ -67,14 +68,15 @@ public final class SkySettlers {
     public static final String MORTIMER = "mortimersettler";
     public static final String CASPERN = "caspernsettler";
     public static final String ELEANOR = "eleanorsettler";
+    public static final String KNOTT = "knottsettler";
 
     /** The Skyreach's own three: placed beside a derelict workshop. */
     public static final String[] SKY_RESIDENTS = {MAGPIE, HALDA, OSSIAN};
 
     /**
-     * The Veil's three. WORLD_DESIGN §11 files them under the Ghost Realm,
-     * which is not built; the Veil is the layer that realm grows out of and is
-     * the home the mod can give them today.
+     * The Ghost Realm's three, named "Veil" for the class that still places
+     * them ({@code VeilResidents} — see its own doc for why the name outlived
+     * the level).
      */
     public static final String[] VEIL_RESIDENTS = {MORTIMER, CASPERN, ELEANOR};
 
@@ -96,6 +98,7 @@ public final class SkySettlers {
         MobRegistry.registerMob("mortimersettler", stairwaytoheaven.mobs.MortimerMob.class, false);
         MobRegistry.registerMob("caspernsettler", stairwaytoheaven.mobs.CaspernMob.class, false);
         MobRegistry.registerMob("eleanorsettler", stairwaytoheaven.mobs.EleanorMob.class, false);
+        MobRegistry.registerMob("knottsettler", stairwaytoheaven.mobs.KnottMob.class, false);
 
         // The three found in the Skyreach. No arrival ticket: see the class
         // note above.
@@ -131,6 +134,15 @@ public final class SkySettlers {
                 new SkyResident("eleanorsettler", () -> GameTexture.fromFile("mobs/icons/stylisthuman"),
                         "eleanorsettlertip", null, 0));
 
+        // Crooked Beyond's own: found at the Door Yard and nowhere else. He
+        // does not travel to a settlement on his own — no SkyArrivals gate
+        // fits a character §15 gives no unlock condition for, and Crooked
+        // Beyond is deep enough into the climb that "found in the realm" is
+        // already the honest story, the same call VEIL_RESIDENTS/Eleanor make.
+        SettlerRegistry.registerSettler("knottsettler",
+                new SkyResident("knottsettler", () -> GameTexture.fromFile("mobs/icons/exoticmerchanthuman"),
+                        "knottsettlertip", null, 0));
+
         assertWired();
     }
 
@@ -145,7 +157,7 @@ public final class SkySettlers {
      */
     private static void assertWired() {
         for (String[] group : new String[][]{SKY_RESIDENTS, VEIL_RESIDENTS,
-                {EVELEEN, MAGPIE, HALDA, OSSIAN, MORTIMER, CASPERN, ELEANOR}}) {
+                {EVELEEN, MAGPIE, HALDA, OSSIAN, MORTIMER, CASPERN, ELEANOR, KNOTT}}) {
             for (String id : group) {
                 if (MobRegistry.getMobID(id) < 0) {
                     throw new IllegalStateException(

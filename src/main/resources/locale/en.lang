@@ -531,10 +531,11 @@ eleanorsettlername=Eleanor <name>, who is still here
 magpiesettlertip=Found in the Skyreach, at a derelict Skywatch workshop.
 haldasettlertip=Found in the Skyreach, at a derelict Skywatch workshop.
 ossiansettlertip=Found in the Skyreach, at a derelict Skywatch workshop.
-eveleensettlertip=From the Garden of Eden. She travels to a settlement once Eden grass grows in it. Works Farming, Forestry and Fertilising.
-mortimersettlertip=From the Veil. He travels to a settlement that has built a graveyard. Works Hauling, Crafting and Hunting.
-caspernsettlertip=From the Veil. He travels to a settlement that has built an Aether Forge. Works Crafting and Hauling, and nothing outdoors.
-eleanorsettlertip=Found in the Veil, beside the bone piles. She never comes to you - you decide whether she stays. Works Husbandry.
+eveleensettlertip=Found in the Garden of Eden, beside a Knowledge Tree. She also travels to a settlement once Eden grass grows in it. Works Farming, Forestry and Fertilising.
+mortimersettlertip=Found in the Aftergarden, beside a gravestone. He also travels to a settlement that has built a graveyard. Works Hauling, Crafting and Hunting.
+caspernsettlertip=Found in the Aftergarden, beside a gravestone. He also travels to a settlement that has built an Aether Forge. Works Crafting and Hauling, and nothing outdoors.
+eleanorsettlertip=Found in the Aftergarden, beside a gravestone. She never comes to you - you decide whether she stays. Works Husbandry.
+knottsettlertip=Found in Crooked Beyond, at the Door Yard. He does not travel to a settlement on his own. Works Trading, and nothing outdoors.
 
 // --- Eveleen ---
 eveleentalkpitch=I came up the long way, looking for a garden somebody told me was still growing. I have not found it. But you have soil, and I have seeds nobody else up here will sell you.
