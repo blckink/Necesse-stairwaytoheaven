@@ -53,7 +53,6 @@ behaviour, but no vanilla art reaches the screen through them.)
 
 | vanilla base | mod mob | realm | why that base |
 |---|---|---|---|
-| `SpiritGhoulMob` | Fen Wraith | Ghost Realm *(currently Veil)* | slow armoured chaser that swims and leaves burning pools |
 | `AncientSkeletonMageMob` | Cinder Cantor | Ghost Realm | ranged caster |
 | `FrostSentryMob` | Rime Sentry | Skyreach (Stormveil variant) | immobile turret |
 | `CryoFlakeMob` | Aurora Flake | Skyreach (Aurora variant) | drifting cold hazard |
@@ -204,6 +203,7 @@ and the realm cannot be faked without them:
 |---|---|---|
 | `crystalgolem` (mob, by string ID) | `crookedgolem` — `mobs/CrookedGolemMob` on `mobs/crookedgolem.png`, a subclass of `CrystalGolemMob` that inherits every number and behaviour and overrides only `addDrawables` (and the sheet the death gibs are cut from) | this pass |
 | `ascendedgolem` (mob, by string ID) | `rarecrookedgolem` — `mobs/RareCrookedGolemMob` on `mobs/rarecrookedgolem.png`, same relationship to `AscendedGolemMob` | this pass |
+| `spiritghoul` (mob sheet) | `fenwraith` — `arsenal/FenWraithMob` on `mobs/fenwraith.png`, still a `SpiritGhoulMob` subclass for behaviour, with `addDrawables` ported so only the texture changes. Composed by `tools/resheet_mob.py` from the player's cut frames | 2026-09-02 |
 | `crystalarmadillo` (mob, by string ID) | `crookedarmadillo` — `mobs/CrookedArmadilloMob` on `mobs/crookedarmadillo.png`, same relationship to `CrystalArmadillo`. One thing did NOT come across: vanilla's second `crystalarmadillo_light` glow pass, because we have one sheet and not two — see the class comment | this pass |
 
 The vanilla sheets stay the format reference for these three and are listed as

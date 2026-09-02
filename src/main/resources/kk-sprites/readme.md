@@ -89,3 +89,16 @@ A drawn wall sheet in this mod carries **19–38** distinct colours. Four figure
 means an illustration, and an illustration of a wall is not a wall sheet. The
 supplied file stays the source of record for the set's *identity* — palette,
 motifs, mood — which is what the generator draws from.
+
+## Cut frames beat a flat sheet
+
+A mob supplied as `row-N/sprite-M.png` — every frame already free of its
+neighbours — needs none of the guessing a flat sheet forces (overlapping rows,
+touching sprites, a bottom strip that may be gibs or extra poses):
+
+```sh
+python3 tools/resheet_mob.py path/to/folder -o mobs/<id>.png
+```
+
+The spirit wraith arrived that way on 2026-09-02 and became `mobs/fenwraith.png`
+in one command.

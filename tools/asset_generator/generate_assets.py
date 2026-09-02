@@ -72,6 +72,9 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              # are not the shipped sheets.
              # Our own art for the three Outland mobs, which used to wear
              # vanilla's sheets by string ID.
+             # Fen Wraith's body, composed by tools/resheet_mob.py from the
+             # player's cut frames. Its bestiary ICON is still generated.
+             "mobs/fenwraith.png",
              "mobs/crookedgolem.png", "mobs/rarecrookedgolem.png",
              "mobs/crookedarmadillo.png",
              # The Eden ground pair, copied verbatim by convert_biome_art
