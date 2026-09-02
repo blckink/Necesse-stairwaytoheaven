@@ -125,3 +125,11 @@ python3 tools/resheet_mob.py IN.png --layout spinner -o mobs/<id>.png
 
 Anything off the pivot orbits instead of spinning, so both layers are centred;
 one shared scale keeps the glow's sparkles on the body's arm tips.
+
+The Aurora Flake arrived on 2026-09-02 already at 64x128 and already centred —
+body span 52x54, glow 50x50, both on (30.5, 30.5), the same centre vanilla's own
+flake uses — so it was copied in verbatim and needed no resheet at all. Its
+bestiary icon is now cut out of that sheet by `tools/convert_biome_art.py`
+instead of drawn, because a drawn icon drifts the moment the body changes: this
+one was still a pale four-point star while the mob had become a violet eyed
+crystal.

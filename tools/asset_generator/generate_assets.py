@@ -75,6 +75,10 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              # Fen Wraith's body, composed by tools/resheet_mob.py from the
              # player's cut frames. Its bestiary ICON is still generated.
              "mobs/fenwraith.png",
+             # The Aurora Flake's 64x128 spinner sheet, supplied already on
+             # format, and the bestiary icon convert_biome_art now cuts
+             # OUT of it -- see gen_arsenal, where the drawn one was.
+             "mobs/auroraflake.png", "mobs/icons/auroraflake.png",
              # The Nimbus Yak's three ages, same route. These used to be
              # vanilla's mobs/cow, mobs/bull and mobs/calf recoloured at load
              # time by livestock/SkyPelt; nothing generated them either, so the

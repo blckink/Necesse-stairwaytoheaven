@@ -1,30 +1,51 @@
 package stairwaytoheaven.arsenal;
 
+import java.util.List;
+
+import necesse.engine.gameLoop.tickManager.TickManager;
 import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
 import necesse.entity.mobs.GameDamage;
 import necesse.entity.mobs.MaxHealthGetter;
+import necesse.engine.util.GameUtils;
 import necesse.entity.mobs.Mob;
+import necesse.entity.mobs.MobDrawable;
+import necesse.entity.mobs.PlayerMob;
 import necesse.entity.mobs.ai.behaviourTree.BehaviourTreeAI;
 import necesse.entity.mobs.ai.behaviourTree.leaves.CooldownAttackTargetAINode;
 import necesse.entity.mobs.ai.behaviourTree.trees.CollisionShooterPlayerChaserWandererAI;
 import necesse.entity.mobs.ai.behaviourTree.util.FlyingAIMover;
 import necesse.entity.mobs.hostile.CryoFlakeMob;
 import necesse.entity.projectile.CryoMissileProjectile;
+import necesse.gfx.camera.GameCamera;
+import necesse.gfx.drawOptions.DrawOptions;
+import necesse.gfx.drawables.OrderableDrawables;
+import necesse.gfx.gameTexture.GameTexture;
 import necesse.inventory.lootTable.LootTable;
 import necesse.inventory.lootTable.lootItem.ChanceLootItemList;
 import necesse.inventory.lootTable.lootItem.LootItem;
+import necesse.level.maps.Level;
+import necesse.level.maps.light.GameLight;
 import stairwaytoheaven.mobs.SkySpawnRules;
 
 /**
  * Aurora Flake — a drifting crystal that hangs over the shoals and throws
  * shards at whatever crosses the mist bank.
  *
- * <p><b>Vanilla base:</b> {@link CryoFlakeMob}, art {@code mobs/cryoflake}
- * (a blue-violet six-point crystal with its own glow row at sprite y=1; it
- * sits inside the Aurora Shoals' cold-dawn palette as drawn and needs no
- * colour shift). The spinning two-layer draw, the chime sounds and the shatter
- * particles are all inherited untouched.
+ * <p><b>Vanilla base:</b> {@link CryoFlakeMob} for BEHAVIOUR only — the chime
+ * sounds, the shatter particles and the spinning two-layer draw. The art is
+ * ours: {@code mobs/auroraflake.png}, sampled by {@link #addDrawables}.
+ *
+ * <p><b>The sheet format.</b> {@code CryoFlakeMob.addDrawables} reads
+ * {@code int res = texture.getWidth()} and then draws {@code sprite(0, 0, res)}
+ * over {@code sprite(0, 1, res)} (VERIFIED [jar], CryoFlakeMob.java:133-157).
+ * So this is not the 384x320 walking grid: it is <b>64x128 — ONE column, TWO
+ * cells</b>, a body over a pulse layer, and the cell size is the texture's own
+ * width. Both are rotated about {@code (res/2, res/2)}, so anything not centred
+ * on that pivot orbits instead of spinning; vanilla's own flake and ours are
+ * both centred on (30.5, 30.5) with the pulse layer's 32 sparkles on the arm
+ * tips. {@code tools/resheet_mob.py --layout spinner} is what conforms a
+ * supplied file to it.
  *
  * <h2>Tier</h2>
  * The ladder and the incursion measurement behind it are written out once, in
@@ -89,6 +110,72 @@ public class AuroraFlakeMob extends CryoFlakeMob {
      * wears 40 (VERIFIED [jar]). Vanilla's flake wears 20.
      */
     public static final int ARMOR = 40;
+
+    /**
+     * Our sheet, filled by {@code SkyMobs.loadTextures} on the client only. It
+     * stays null on a dedicated server, which never draws, hence the guard in
+     * {@link #addDrawables}.
+     */
+    public static GameTexture texture;
+
+    /**
+     * Vanilla's {@code CryoFlakeMob.addDrawables}, ported line for line with
+     * our sheet in place of {@code MobRegistry.Textures.cryoFlake}.
+     *
+     * <p>The override exists for the same reason the Fen Wraith's does: vanilla
+     * reads its texture from a static inline and {@code Mob} exposes no
+     * per-instance texture hook, so the only way to change the art without
+     * repainting every real Cryo Flake in the world is to redraw the mob
+     * ourselves (VERIFIED [jar]).
+     *
+     * <p>It deliberately does NOT call {@code super.addDrawables}: that IS
+     * vanilla's draw, and calling it would put the blue Cryo Flake underneath
+     * ours. Nothing is lost by dropping it. {@code CryoFlakeMob}'s own first
+     * line is {@code super.addDrawables(...)}, and nothing between it and
+     * {@code Mob} overrides the method — {@code FlyingHostileMob},
+     * {@code FlyingTargetMob} and {@code AttackAnimMob} all inherit it
+     * untouched, and {@code Mob.addDrawables} has an empty body (VERIFIED
+     * [jar], Mob.java:1734-1745). Health and status bars come from
+     * {@code Mob.addDrawablesLoop} around this call, not from inside it, so
+     * they are unaffected — the same finding the Fen Wraith's override rests
+     * on.
+     */
+    @Override
+    protected void addDrawables(List<MobDrawable> list, OrderableDrawables tileList,
+            OrderableDrawables topList, Level level, int x, int y,
+            TickManager tickManager, GameCamera camera, PlayerMob perspective) {
+        if (texture == null) {
+            return;
+        }
+        GameLight light = level.getLightLevel(getTileCoordinate(x), getTileCoordinate(y));
+        int res = texture.getWidth();
+        int resHalf = res / 2;
+        int drawX = camera.getDrawX(x) - resHalf;
+        int drawY = camera.getDrawY(y) - resHalf;
+        long time = level.getWorldEntity().getTime();
+        float rotation = GameUtils.getTimeRotation(time, 4);
+        float glowLight = GameUtils.getAnimFloatContinuous(time, 1000) / 1.5F;
+        DrawOptions body = texture.initDraw()
+                .sprite(0, 0, res)
+                .rotate(rotation * (float) (this.dx < 0.0F ? -1 : 1), resHalf, resHalf)
+                .startGlowOptions(this, (long) this.getID())
+                .light(light)
+                .applyEnemyTracker(this, perspective)
+                .pos(drawX, drawY);
+        GameLight glowLightLevel = light.copy();
+        glowLightLevel.setLevel((float) ((int) (glowLight * 150.0F)));
+        DrawOptions glow = texture.initDraw()
+                .sprite(0, 1, res)
+                .rotate(rotation * (float) (this.dx < 0.0F ? -1 : 1), resHalf, resHalf)
+                .startGlowOptions(this, (long) this.getID())
+                .light(glowLightLevel)
+                .applyEnemyTracker(this, perspective)
+                .pos(drawX, drawY);
+        topList.add(tm -> {
+            body.draw();
+            glow.draw();
+        });
+    }
 
     /**
      * The Prismcaller is built out of prismshards, and this is the mob that

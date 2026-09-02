@@ -55,7 +55,7 @@ behaviour, but no vanilla art reaches the screen through them.)
 |---|---|---|---|
 | `AncientSkeletonMageMob` | Cinder Cantor | Ghost Realm | ranged caster |
 | `FrostSentryMob` | Rime Sentry | Skyreach (Stormveil variant) | immobile turret |
-| `CryoFlakeMob` | Aurora Flake | Skyreach (Aurora variant) | drifting cold hazard |
+| `CryoFlakeMob` | Aurora Flake | Skyreach (Aurora variant) | drifting cold hazard — sheet swapped 2026-09-02, see §4 |
 | `CryoFlakeFollowingMob` | Watch Mote | Skyreach | summon behaviour |
 | `SheepMob` | Glimmergoat | Skyreach (Aurora variant) | husbandry: shears, breeding |
 | `CowMob` | Nimbus Yak | Skyreach (Driftlands variant) | husbandry: bucket — sheet swapped 2026-09-02, see §4 |
@@ -204,6 +204,7 @@ and the realm cannot be faked without them:
 | `ascendedgolem` (mob, by string ID) | `rarecrookedgolem` — `mobs/RareCrookedGolemMob` on `mobs/rarecrookedgolem.png`, same relationship to `AscendedGolemMob` | this pass |
 | `spiritghoul` (mob sheet) | `fenwraith` — `arsenal/FenWraithMob` on `mobs/fenwraith.png`, still a `SpiritGhoulMob` subclass for behaviour, with `addDrawables` ported so only the texture changes. Composed by `tools/resheet_mob.py` from the player's cut frames | 2026-09-02 |
 | `mobs/cow`, `mobs/bull`, `mobs/calf` (sheets, recoloured at load time) | `nimbusyak`, `nimbusyak_bull`, `nimbusyak_calf` — the Nimbus Yak's three ages on the mod's own sheets, `GameTexture.fromFile` instead of `SkyPelt.tintFinal`. Composed by `tools/resheet_mob.py`. The mob is still a `CowMob` for behaviour, and `cow_shadow`/`calf_shadow` are still vanilla's — a shadow is a black blob | 2026-09-02 |
+| `mobs/cryoflake` (sheet) | `auroraflake` — `arsenal/AuroraFlakeMob` on `mobs/auroraflake.png`, still a `CryoFlakeMob` subclass for behaviour (chime, shatter particles, the spinning two-layer draw) with `addDrawables` ported so only the texture changes. Supplied already on format: 64x128, body over pulse, both centred on the rotation pivot | 2026-09-02 |
 | `crystalarmadillo` (mob, by string ID) | `crookedarmadillo` — `mobs/CrookedArmadilloMob` on `mobs/crookedarmadillo.png`, same relationship to `CrystalArmadillo`. One thing did NOT come across: vanilla's second `crystalarmadillo_light` glow pass, because we have one sheet and not two — see the class comment | this pass |
 
 The vanilla sheets stay the format reference for these three and are listed as
