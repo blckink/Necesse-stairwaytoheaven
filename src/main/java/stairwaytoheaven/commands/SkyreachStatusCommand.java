@@ -681,7 +681,8 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         // an empty shop is a person with nothing to say, which is how a
         // profession quietly becomes decoration.
         for (String mobID : new String[]{"skywarden", "wardensettler",
-                "magpiesettler", "haldasettler", "ossiansettler"}) {
+                "magpiesettler", "haldasettler", "ossiansettler",
+                "eveleensettler", "mortimersettler", "caspernsettler", "eleanorsettler"}) {
             necesse.entity.mobs.Mob probe = necesse.engine.registries.MobRegistry.getMob(mobID, level);
             String settlerName = "NOT A HUMAN";
             String recruitPrice = "n/a";
@@ -710,6 +711,64 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                     : "shop=n/a";
             logs.add("recruit check: " + mobID + " settler=" + settlerName
                     + " price=" + recruitPrice + " " + stock);
+
+            // ---- and what he will actually WORK AT --------------------
+            // A settler's profession is not a field or a class: it is which
+            // JobTypeHandler.TypePriority entries have disabledBySettler
+            // false. Four job types are on for everybody (hauling, crafting,
+            // forestry, farming) and five are withheld until a settler's own
+            // constructor grants one (fertilize, husbandry, fishing, hunting,
+            // tradingmission) -- see mobs/SkySettlerMob. So this line is the
+            // only way to prove from a running server that "Eveleen is the
+            // farmer" is true of the mob and not just of the documentation.
+            if (probe instanceof necesse.entity.mobs.friendly.human.HumanMob) {
+                necesse.entity.mobs.job.JobTypeHandler handler =
+                        ((necesse.entity.mobs.friendly.human.HumanMob) probe).jobTypeHandler;
+                java.util.List<String> enabled = new java.util.ArrayList<>();
+                for (necesse.entity.mobs.job.JobTypeHandler.TypePriority p
+                        : handler.getTypePriorities()) {
+                    if (!p.disabledBySettler && p.type.displayName != null) {
+                        enabled.add(p.type.getStringID());
+                    }
+                }
+                java.util.Collections.sort(enabled);
+                logs.add("profession check: " + mobID + " jobs="
+                        + (enabled.isEmpty() ? "NONE (works at nothing)"
+                                : String.join(",", enabled)));
+            }
+        }
+        // ---- can any of them actually TRAVEL to a settlement? --------------
+        // Settler.addNewRecruitSettler is the ONLY route by which a settler
+        // walks into a town and asks to join, and the base class implementation
+        // is empty -- which is why no settler of this mod had ever arrived.
+        // Asking each registered settler for its tickets against a null
+        // settlement is not possible (it reads the level), so what is asserted
+        // here is the thing that silently regresses: that the override exists
+        // on our type at all.
+        for (String settlerID : new String[]{"wardensettler",
+                "magpiesettler", "haldasettler", "ossiansettler",
+                "eveleensettler", "mortimersettler", "caspernsettler", "eleanorsettler"}) {
+            necesse.level.maps.levelData.settlementData.settler.Settler s =
+                    necesse.engine.registries.SettlerRegistry.getSettler(settlerID);
+            String arrival;
+            if (s == null) {
+                arrival = "NOT REGISTERED";
+            } else {
+                boolean overrides;
+                try {
+                    overrides = !s.getClass()
+                            .getMethod("addNewRecruitSettler",
+                                    necesse.level.maps.levelData.settlementData.ServerSettlementData.class,
+                                    boolean.class,
+                                    necesse.engine.util.TicketSystemList.class)
+                            .getDeclaringClass()
+                            .equals(necesse.level.maps.levelData.settlementData.settler.Settler.class);
+                } catch (NoSuchMethodException e) {
+                    overrides = false;
+                }
+                arrival = overrides ? "has arrival override" : "inherits empty base (never arrives)";
+            }
+            logs.add("arrival check: " + settlerID + " " + arrival);
         }
         // ---- why nothing spawns -----------------------------------------
         // MobChance.spawnMob calls mob.isValidSpawnLocation and drops the mob

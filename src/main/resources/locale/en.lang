@@ -495,3 +495,59 @@ cloudberrysapling=Cloudberry Sapling
 
 [item]
 cloudberrysapling=Cloudberry Sapling
+
+// ============================================================
+// Settler professions and the four new settlers (chapter: settlers)
+// ============================================================
+
+[mob]
+eveleensettler=Eveleen
+mortimersettler=Mortimer
+caspernsettler=Caspern
+eleanorsettler=Eleanor
+eveleensettlername=Eveleen <name>, Eden Botanist
+mortimersettlername=Mortimer <name>, Undertaker
+caspernsettlername=Caspern <name>, Spirit Smith
+eleanorsettlername=Eleanor <name>, who is still here
+
+[misc]
+// --- where each settler comes from (settlement screen "acquire" tip) ---
+magpiesettlertip=Found in the Skyreach, at a derelict Skywatch workshop.
+haldasettlertip=Found in the Skyreach, at a derelict Skywatch workshop.
+ossiansettlertip=Found in the Skyreach, at a derelict Skywatch workshop.
+eveleensettlertip=From the Garden of Eden. She travels to a settlement once Eden grass grows in it. Works Farming, Forestry and Fertilising.
+mortimersettlertip=From the Veil. He travels to a settlement that has built a graveyard. Works Hauling, Crafting and Hunting.
+caspernsettlertip=From the Veil. He travels to a settlement that has built an Aether Forge. Works Crafting and Hauling, and nothing outdoors.
+eleanorsettlertip=Found in the Veil, beside the bone piles. She never comes to you - you decide whether she stays. Works Husbandry.
+
+// --- Eveleen ---
+eveleentalkpitch=I came up the long way, looking for a garden somebody told me was still growing. I have not found it. But you have soil, and I have seeds nobody else up here will sell you.
+eveleentalk1=Everything grows if you are patient and ruthless in the right order.
+eveleentalk2=That patch is thirsty. No, do not water it. It is thirsty for something else.
+eveleentalk3=I keep three seeds I have never planted. I would like to know what they are before I find out.
+eveleentalk4=A garden is not decoration. A garden is an argument you are having with the ground.
+
+// --- Mortimer ---
+mortimertalkpitch=You have dead to keep and nowhere to keep them. I have a spade, a hat, and no particular hurry. We can help each other.
+mortimertalk1=A settlement without a graveyard is a settlement that has not been honest yet.
+mortimertalk2=I hunt as well. Somebody has to bring things in, and I am already dressed for it.
+mortimertalk3=Do not thank me. Thank me later. Much later, ideally.
+mortimertalk4=Every stone I sell is blank. What you write on it is your business.
+
+// --- Caspern ---
+casperntalkpitch=I work metal that remembers. It is not a trick and it is not cheap. Build me a forge and I will show you what a bar is supposed to sound like.
+casperntalk1=Cold iron forgets. This does not.
+casperntalk2=No, I will not go outside. The fire is in here.
+casperntalk3=Every bar I draw has somebody's patience in it. Usually mine.
+casperntalk4=Bring me ore. Bring me dust. Do not bring me questions about where the dust came from.
+
+// --- Eleanor ---
+eleanortalkpitch=I do not know why I am still here. I thought I did. If you would rather I stayed, I will stay - I am good with animals, and they do not mind what I am.
+eleanortalk1=I remember a kitchen. I do not remember whose.
+eleanortalk2=The goats are not frightened of me. That is worth a great deal.
+eleanortalk3=Do not be sad on my account. I am not sure I can be.
+eleanortalk4=Sometimes I catch myself waiting. I have stopped asking for what.
+eleanorneedessence=Not enough of me yet.
+eleanorneedessencecount=Eleanor needs <need> Veil Essence in your hand before she can let go. You are holding <have>.
+eleanorfarewell=Oh. Oh, so that was all it was.
+eleanorpassedon=Eleanor thins out like breath on cold glass. Where she stood there is a small lantern, still warm.

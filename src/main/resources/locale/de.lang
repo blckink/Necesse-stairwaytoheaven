@@ -496,3 +496,59 @@ cloudberrysapling=Wolkenbeeren-Setzling
 
 [item]
 cloudberrysapling=Wolkenbeeren-Setzling
+
+// ============================================================
+// Siedler-Berufe und die vier neuen Siedler (Kapitel: Siedler)
+// ============================================================
+
+[mob]
+eveleensettler=Eveleen
+mortimersettler=Mortimer
+caspernsettler=Caspern
+eleanorsettler=Eleanor
+eveleensettlername=Eveleen <name>, Botanikerin von Eden
+mortimersettlername=Mortimer <name>, Bestatter
+caspernsettlername=Caspern <name>, Geisterschmied
+eleanorsettlername=Eleanor <name>, die noch immer hier ist
+
+[misc]
+// --- Herkunft jedes Siedlers (Hinweis im Siedlungsfenster) ---
+magpiesettlertip=In der Himmelsweite zu finden, an einer verlassenen Skywatch-Werkstatt.
+haldasettlertip=In der Himmelsweite zu finden, an einer verlassenen Skywatch-Werkstatt.
+ossiansettlertip=In der Himmelsweite zu finden, an einer verlassenen Skywatch-Werkstatt.
+eveleensettlertip=Aus dem Garten Eden. Sie kommt in eine Siedlung, in der Eden-Gras wächst. Arbeitet in Ackerbau, Forstwirtschaft und Düngen.
+mortimersettlertip=Aus dem Schleier. Er kommt in eine Siedlung, die einen Friedhof gebaut hat. Arbeitet in Transport, Handwerk und Jagd.
+caspernsettlertip=Aus dem Schleier. Er kommt in eine Siedlung, die eine Ätherschmiede gebaut hat. Arbeitet in Handwerk und Transport - und nichts im Freien.
+eleanorsettlertip=Im Schleier zu finden, bei den Knochenhaufen. Sie kommt nie zu dir - du entscheidest, ob sie bleibt. Arbeitet in der Tierhaltung.
+
+// --- Eveleen ---
+eveleentalkpitch=Ich bin den weiten Weg heraufgekommen, auf der Suche nach einem Garten, der angeblich noch wächst. Gefunden habe ich ihn nicht. Aber du hast Boden, und ich habe Samen, die dir hier oben sonst niemand verkauft.
+eveleentalk1=Alles wächst, wenn man in der richtigen Reihenfolge geduldig und unbarmherzig ist.
+eveleentalk2=Dieses Beet hat Durst. Nein, nicht gießen. Es hat auf etwas anderes Durst.
+eveleentalk3=Ich habe drei Samen, die ich nie gepflanzt habe. Ich wüsste gern, was sie sind, bevor ich es herausfinde.
+eveleentalk4=Ein Garten ist keine Dekoration. Ein Garten ist ein Streit, den du mit dem Boden führst.
+
+// --- Mortimer ---
+mortimertalkpitch=Du hast Tote zu verwahren und keinen Ort dafür. Ich habe einen Spaten, einen Hut und keine besondere Eile. Wir können einander helfen.
+mortimertalk1=Eine Siedlung ohne Friedhof ist eine Siedlung, die noch nicht ehrlich war.
+mortimertalk2=Ich jage auch. Irgendjemand muss etwas hereinbringen, und ich bin ohnehin passend gekleidet.
+mortimertalk3=Bedanke dich nicht. Bedanke dich später. Am besten viel später.
+mortimertalk4=Jeder Stein, den ich verkaufe, ist leer. Was du darauf schreibst, ist deine Sache.
+
+// --- Caspern ---
+casperntalkpitch=Ich bearbeite Metall, das sich erinnert. Das ist kein Trick und es ist nicht billig. Bau mir eine Schmiede, und ich zeige dir, wie ein Barren klingen soll.
+casperntalk1=Kaltes Eisen vergisst. Dieses hier nicht.
+casperntalk2=Nein, ich gehe nicht nach draußen. Das Feuer ist hier drinnen.
+casperntalk3=In jedem Barren, den ich ziehe, steckt jemandes Geduld. Meistens meine.
+casperntalk4=Bring mir Erz. Bring mir Staub. Bring mir keine Fragen, woher der Staub kommt.
+
+// --- Eleanor ---
+eleanortalkpitch=Ich weiß nicht, warum ich noch hier bin. Ich dachte, ich wüsste es. Wenn du möchtest, dass ich bleibe, bleibe ich - ich kann gut mit Tieren, und ihnen ist egal, was ich bin.
+eleanortalk1=Ich erinnere mich an eine Küche. An wessen, weiß ich nicht mehr.
+eleanortalk2=Die Ziegen fürchten sich nicht vor mir. Das ist sehr viel wert.
+eleanortalk3=Sei meinetwegen nicht traurig. Ich bin nicht sicher, ob ich es kann.
+eleanortalk4=Manchmal ertappe ich mich beim Warten. Ich frage schon lange nicht mehr, worauf.
+eleanorneedessence=Noch nicht genug von mir.
+eleanorneedessencecount=Eleanor braucht <need> Schleieressenz in deiner Hand, bevor sie loslassen kann. Du hältst <have>.
+eleanorfarewell=Oh. Oh, das war also alles.
+eleanorpassedon=Eleanor verweht wie Atem auf kaltem Glas. Wo sie stand, liegt eine kleine Laterne, noch warm.

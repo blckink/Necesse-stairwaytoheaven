@@ -77,6 +77,42 @@ public class SkywatchWorldData extends WorldData {
      * basket. The tile is meaningless without the level, which is why the two
      * are always written, read and cleared together.
      */
+    /**
+     * Eleanor's ending, once a player has chosen one.
+     *
+     * WORLD_DESIGN.md §11 gives the Lost Soul two: PASS ON (she goes, and
+     * leaves a trinket) or STAY (she is recruited and becomes a settler). Only
+     * the first one needs recording -- staying is written down by the
+     * settlement itself, which now holds her -- and it has to be recorded
+     * somewhere no dimension owns, because the choice is made in the Veil and
+     * the consequence ("never place another Eleanor, never let one travel to a
+     * town") has to hold on every level and across a generation bump. That is
+     * this class's whole reason for existing, so it lives here rather than in
+     * a second WorldData.
+     */
+    public boolean eleanorPassedOn = false;
+
+    /**
+     * Mob string IDs of the mod's NAMED residents this world has already
+     * produced — placed by worldgen, or moved into a settlement.
+     *
+     * WHY IT EXISTS. Each of these people is an individual, not a settler type:
+     * one Magpie, one Halda, one Eveleen per world. They can now be produced by
+     * two independent routes — worldgen stands them beside a workshop or a bone
+     * pile, and {@code SkyArrivals} lets them travel to a settlement and ask to
+     * join — and neither route can see the other. Worldgen runs on a region of
+     * the Skyreach or the Veil that a settlement's visitor roll knows nothing
+     * about, and the visitor roll runs on a level that may be a thousand tiles
+     * and one dimension away from any generated region. Without a shared record
+     * a world can hold two Magpies.
+     *
+     * So both routes claim the name here first and both refuse a name already
+     * claimed. It is a WorldData for the same reason {@code wardenRecruited} is:
+     * it is a fact about the WORLD, not about any level, and it has to survive a
+     * generation bump that starts a fresh Skyreach.
+     */
+    public final java.util.HashSet<String> residentsClaimed = new java.util.HashSet<>();
+
     public boolean catHomeSet = false;
     public int catHomeX = 0;
     public int catHomeY = 0;
@@ -89,6 +125,9 @@ public class SkywatchWorldData extends WorldData {
         save.addLong("wardenAuth", this.wardenAuth);
         save.addBoolean("blackHome", this.blackHome);
         save.addBoolean("tabbyHome", this.tabbyHome);
+        save.addBoolean("eleanorPassedOn", this.eleanorPassedOn);
+        save.addStringArray("residentsClaimed",
+                this.residentsClaimed.toArray(new String[0]));
         save.addBoolean("catHomeSet", this.catHomeSet);
         save.addInt("catHomeX", this.catHomeX);
         save.addInt("catHomeY", this.catHomeY);
@@ -102,6 +141,13 @@ public class SkywatchWorldData extends WorldData {
         this.wardenAuth = save.getLong("wardenAuth", this.wardenAuth, false);
         this.blackHome = save.getBoolean("blackHome", this.blackHome, false);
         this.tabbyHome = save.getBoolean("tabbyHome", this.tabbyHome, false);
+        this.eleanorPassedOn = save.getBoolean("eleanorPassedOn", this.eleanorPassedOn, false);
+        this.residentsClaimed.clear();
+        for (String claimed : save.getStringArray("residentsClaimed", new String[0], false)) {
+            if (claimed != null && !claimed.isEmpty()) {
+                this.residentsClaimed.add(claimed);
+            }
+        }
         this.catHomeSet = save.getBoolean("catHomeSet", this.catHomeSet, false);
         this.catHomeX = save.getInt("catHomeX", this.catHomeX, false);
         this.catHomeY = save.getInt("catHomeY", this.catHomeY, false);
@@ -208,5 +254,43 @@ public class SkywatchWorldData extends WorldData {
     public static boolean hasWarden(Server server) {
         SkywatchWorldData data = get(server);
         return data != null && data.wardenRecruited;
+    }
+
+    /**
+     * Has Eleanor already been let go in this world? Never un-records: an
+     * ending is an ending, and a second Eleanor would make the first one mean
+     * nothing.
+     */
+    public static boolean eleanorGone(Server server) {
+        SkywatchWorldData data = get(server);
+        return data != null && data.eleanorPassedOn;
+    }
+
+    /** Records Eleanor's PASS ON ending. Idempotent. */
+    public static void markEleanorPassedOn(Server server) {
+        SkywatchWorldData data = get(server);
+        if (data != null) {
+            data.eleanorPassedOn = true;
+        }
+    }
+
+    /**
+     * Has this world already produced this named resident, by either route?
+     *
+     * Answers TRUE when the record cannot be read at all, because the safe
+     * failure is "do not make another one": a missing person is a bug the
+     * player can work around, two of the same person is one they cannot.
+     */
+    public static boolean residentClaimed(Server server, String mobStringID) {
+        SkywatchWorldData data = get(server);
+        return data == null || data.residentsClaimed.contains(mobStringID);
+    }
+
+    /** Claims a named resident for whichever route produced them. Idempotent. */
+    public static void claimResident(Server server, String mobStringID) {
+        SkywatchWorldData data = get(server);
+        if (data != null) {
+            data.residentsClaimed.add(mobStringID);
+        }
     }
 }

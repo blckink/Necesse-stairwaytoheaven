@@ -74,6 +74,48 @@ stand-in and swaps out by shipping a real sheet under the mod's own name.
 | `mobs/chicken`, `mobs/rooster`, `mobs/chick` | Skyreach | Thunderquill, all ages |
 | `items/clothhat`, `items/clothboots` | Skyreach | Thunderplume Cowl, Glimmerstride Boots |
 
+### 1.3b Vanilla art worn or shown by the mod's settlers (NO recolour)
+
+The four new settlers add **zero PNGs**. A `HumanShop` settler is drawn as a
+plain human body wearing real clothing ITEMS — the way vanilla dresses its Elder
+in `elderhat`/`eldershirt`/`eldershoes` — plus one 32px face icon for the
+settlement screen. So each new person costs three vanilla item IDs and one
+vanilla icon path, both read straight out of the game's resources.
+
+**These are used AS THEY ARE. Nothing here is tinted at load time** — the player
+forbade load-time recolouring for new content, so §1.3's `SkyPelt` technique is
+deliberately not used by any of this.
+
+| who | source path / item ID | what it stands in for |
+|---|---|---|
+| Eveleen | `mobs/icons/farmerhuman` (icon) | her settlement-screen face — she is the farming settler |
+| Eveleen | `dryadhat`, `dryadchestplate`, `dryadboots` (worn items) | the Eden Botanist's leaf-and-bark clothes |
+| Mortimer | `mobs/icons/pawnbrokerhuman` (icon) | his settlement-screen face |
+| Mortimer | `tophat`, `thiefscloak`, `dressshoes` (worn items) | the Undertaker's top hat and black coat |
+| Caspern | `mobs/icons/blacksmithhuman` (icon) | his settlement-screen face — he is the smith |
+| Caspern | `nightsteelveil`, `smithingapron`, `smithingshoes` (worn items) | the Spirit Smith's veil and apron |
+| Eleanor | `mobs/icons/stylisthuman` (icon) | her settlement-screen face |
+| Eleanor | `snowhood`, `snowcloak`, `clothboots` (worn items) | the Lost Soul's pale, cold clothes |
+
+Note that the icon only shows where no mob is available:
+`Settler.getSettlerFaceDrawOptions` draws the settler's own human face from the
+live mob whenever there is one, so in practice the borrowed icon is a fallback.
+
+### 1.3c Vanilla items standing in for named mod materials (shop goods)
+
+`WORLD_DESIGN.md` §11 names three Ghost-Realm materials that do not exist and
+are not this pass's to invent. Each is sold under its vanilla nearest neighbour
+until the Ghost Realm ships its own, at which point only the shop line changes.
+
+| named in the design | vanilla stand-in | sold by |
+|---|---|---|
+| Spiritsteel | `nightsteelbar`, `nightsteelore` | Caspern |
+| Soul Thread | `phantomdust` | Caspern |
+| spectral weapons | `bonearrow`, `bonehilt`, `nightsteelveil` | Caspern |
+| Bonewood furniture, coffin, urns, black candles (§11) | `bonechair`, `bonemodulartable`, `bonebookshelf`, `bonedresser`, `boneclock`, `bonechest`, `sarcophagus`, `spiritbasin`, `bonecandelabra`, `deadwoodcandles`, `candle`, `skull`, `gravestone1/2`, `cryptgravestone1/2` | Mortimer |
+| Bee Hive (§5) | `queenbee` — vanilla's `beehive` object is registered NOT obtainable | Eveleen |
+| Eleanor's "strong trinket" (§11) | `willowisplantern` | her PASS ON ending |
+
 ### 1.4 Vanilla items used as drops
 
 | vanilla item | realm | dropped by |

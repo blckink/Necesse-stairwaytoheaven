@@ -64,6 +64,23 @@ public class VeilLevel extends BiomeGeneratorStackLevel {
         }
     }
 
+    // ==== settler residents (owner: settlement/VeilResidents) ==============
+    /**
+     * Mortimer, Caspern and Eleanor stand somewhere in the Veil.
+     *
+     * All of the rules live in {@code settlement/VeilResidents} rather than
+     * here: this level file is shared with the Ghost Realm work, and one call
+     * is the smallest hook that can put people in it. See that class for why
+     * the Veil is their home today and what happens when the Ghost Realm
+     * arrives.
+     */
+    @Override
+    public void onRegionGenerated(Region region, boolean skipGenerateForced) {
+        super.onRegionGenerated(region, skipGenerateForced);
+        stairwaytoheaven.settlement.VeilResidents.place(this, region, this.getWorldGenSeed());
+    }
+    // ==== end settler residents ============================================
+
     @Override
     public boolean canRain() {
         return false;

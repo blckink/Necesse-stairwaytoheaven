@@ -30,6 +30,15 @@ public class OssianMob extends SkySettlerMob {
     public OssianMob() {
         super("ossiansettler");
 
+        // --- his PROFESSION: crafting, and nothing outdoors ------------------
+        // He has no specialism to grant: the archivist's work IS crafting, the
+        // job every settler already has. What makes him a scholar rather than a
+        // farmhand is the other half of the mechanism, the one vanilla uses on
+        // its Guard (GuardHumanMob.java:31-34): the field jobs come OFF. He
+        // hauls, he works a station, and he is never found in a field.
+        refuseJob("farming");
+        refuseJob("forestry");
+
         // --- THE EXCLUSIVE STOCK, and it rotates every day ------------------
         // The player's ask: "Ossian soll exklusiv items aus den incursionen
         // anbieten da die sonst nirgends kaufbar sind. Jeden Tag wechselnd."
