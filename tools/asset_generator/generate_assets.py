@@ -46,6 +46,11 @@ import gen_outlands  # noqa: E402
 # reference art. Two producers writing the same path meant whichever ran last
 # won, silently; the guard at the end of main() fails loudly instead.
 CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
+             # Supplied splats. beetlefreak_splat came back repainted on the
+             # SAME alpha mask, so it is a straight overwrite; beetleground
+             # is new and shares overgrowneden's mask exactly (83,428 opaque
+             # pixels in both), so it is ready for whatever ground claims it.
+             "tiles/beetlefreak_splat.png", "tiles/beetleground_splat.png",
              "objects/skyseraphtree.png", "items/skyseraphtree.png",
              "objects/statues/seraph.png", "items/seraphstatue.png",
              "objects/cloudtree.png", "items/cloudtree.png",

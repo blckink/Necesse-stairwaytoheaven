@@ -242,10 +242,8 @@ def build_skyway_ground():
     tiles = os.path.join(ROOT, "src/main/resources/tiles")
     gen_splats.build_splat(os.path.join(tiles, "skyway_splat.png"), material,
                            variants=4, salt=0x5CA9)
-    # the flat base tile the engine falls back to
-    base = Canvas(32, 32)
-    material(base, 0, 0, 0x5CA9)
-    base.save(os.path.join(tiles, "skyway.png"))
+    # tiles/skyway.png -- the flat base tile the engine falls back to -- is
+    # SUPPLIED art now and is no longer written here. The splat above still is.
     return os.path.join(tiles, "skyway_splat.png")
 
 
