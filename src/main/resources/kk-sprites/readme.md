@@ -102,3 +102,26 @@ python3 tools/resheet_mob.py path/to/folder -o mobs/<id>.png
 
 The spirit wraith arrived that way on 2026-09-02 and became `mobs/fenwraith.png`
 in one command.
+
+The three Nimbus Yak sheets arrived as flat images the same day and went in
+through the flat-sheet path — `mobs/nimbusyak`, `_bull` and `_calf`, replacing
+the recolours `livestock/SkyPelt` used to make of vanilla's `mobs/cow`,
+`mobs/bull` and `mobs/calf`. Which file was which needed no guessing: the cow
+wears a flower crown, the bull has the horn spread (42px across the up-view
+against the cow's 35, exactly vanilla's own 42-vs-32 split) and the calf is the
+small one.
+
+## Not every mob is drawn on the walking grid
+
+`CryoFlakeMob` and its kin are **64x128**: one column, two rows — a rotating
+body over a pulse layer, both spun about the cell's centre. The cell size is
+read off the texture's own WIDTH (`getWidth()`, jar CryoFlakeMob.java:133), so a
+sheet supplied at the wrong width makes the engine cut the wrong cells out of
+it. Use:
+
+```sh
+python3 tools/resheet_mob.py IN.png --layout spinner -o mobs/<id>.png
+```
+
+Anything off the pivot orbits instead of spinning, so both layers are centred;
+one shared scale keeps the glow's sparkles on the body's arm tips.

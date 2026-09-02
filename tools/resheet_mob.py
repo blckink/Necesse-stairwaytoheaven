@@ -28,6 +28,13 @@ makes a walk cycle wobble: the mob appears to breathe as it steps.
     python3 tools/resheet_mob.py IN.png -o mobs/nimbusyak.png
     python3 tools/resheet_mob.py IN.png --inspect     # report rows/cols, write nothing
 
+Not every mob is drawn on the walking grid. `--layout spinner` writes the OTHER
+sheet the engine reads, the 64x128 two-layer rotating sprite CryoFlakeMob uses
+-- see resheet_spinner for what makes it different and why the cell size is the
+texture's own width:
+
+    python3 tools/resheet_mob.py IN.png --layout spinner -o mobs/auroraflake.png
+
 Verify the result with the preview it writes, then ship it through
 `tools/asset_intake.py`.
 """
@@ -339,6 +346,80 @@ def analyse(im, want_rows=ROWS, cols=COLS, alpha=40, force_rows=None):
     return out, "; ".join(notes), gib, list(use_rows)
 
 
+
+# ---------------------------------------------------------------------------
+# The SPINNER layout: CryoFlakeMob and everything else drawn as one rotating
+# 64x64 body with a second 64x64 pulse layer stacked under it.
+#
+#   int res = MobRegistry.Textures.cryoFlake.getWidth();      // 64
+#   .sprite(0, 0, res)  .rotate(rotation, res/2, res/2)       // body
+#   .sprite(0, 1, res)  .rotate(rotation, res/2, res/2)       // glow
+#                                        (jar CryoFlakeMob.java:133-157)
+#
+# So the sheet is 64x128 -- ONE column, TWO rows -- and `res` is read off the
+# texture's WIDTH, which is the whole trap in this format: a sheet that is
+# 128 wide would make the engine read 128px cells out of a 128-tall file and
+# find one and a half frames. The width IS the cell size.
+#
+# The pivot is (res/2, res/2), so anything not centred on it ORBITS instead of
+# spinning. Vanilla's own flake puts both layers concentric -- body bbox
+# x/y 4..57, glow bbox 6..55, both centred on (30.5, 30.5) -- and that is the
+# rule enforced here: one shared scale for the two layers, each centred on its
+# own bounding box, so a glow drawn wider than its body stays wider.
+SPINNER_SPAN = 54          # vanilla cryoflake's body spans 54 of its 64px cell
+
+
+def resheet_spinner(im, cell=64, alpha=40, span=SPINNER_SPAN):
+    """Repack a two-layer rotating sprite onto its cell x 2*cell sheet.
+
+    Returns (sheet, message). The bottom cell is left empty, and the message
+    says so, when the source carries only one content band -- a body with no
+    pulse layer is a legal sheet, it simply never twinkles.
+    """
+    rows, _ = projections(im, alpha=alpha)
+    layers = bands(rows, im.height, gap_min=2, run_min=2)
+    if not layers:
+        return None, "no opaque content at all"
+    if len(layers) > 2:
+        # Sparse glow dots break into several bands of their own. Everything
+        # after the first band belongs to the pulse layer: the body is one
+        # solid crystal, the glow is by nature scattered.
+        layers = [layers[0], (layers[1][0], layers[-1][1])]
+
+    boxes = []
+    for (y0, y1) in layers:
+        b = opaque_bbox(im, (0, y0, im.width, y1), alpha=alpha)
+        if b is None:
+            return None, "a detected band held no opaque pixels"
+        boxes.append(b)
+
+    bw, bh = boxes[0][2] - boxes[0][0], boxes[0][3] - boxes[0][1]
+    scale = span / float(max(bw, bh))
+    # Never let the pulse layer, which may reach past the body, leave the cell:
+    # a pixel outside the cell is not on the sheet at all.
+    for b in boxes:
+        w, h = b[2] - b[0], b[3] - b[1]
+        scale = min(scale, cell / float(max(w, h)))
+
+    sheet = Image.new("RGBA", (cell, cell * 2), (0, 0, 0, 0))
+    parts = []
+    for i, b in enumerate(boxes):
+        crop = im.crop(b)
+        w = max(1, int(round((b[2] - b[0]) * scale)))
+        h = max(1, int(round((b[3] - b[1]) * scale)))
+        crop = crop.resize((w, h), Image.LANCZOS)
+        sheet.alpha_composite(crop, ((cell - w) // 2, i * cell + (cell - h) // 2))
+        parts.append("%dx%d" % (w, h))
+
+    msg = ("scale %.4f (body %dx%d -> %s)" % (scale, bw, bh, parts[0]))
+    if len(boxes) == 1:
+        msg += "; NO pulse layer found -- bottom cell left empty"
+    else:
+        msg += ", glow -> %s, both centred on the (%d,%d) pivot" % (
+            parts[1], cell // 2, cell // 2)
+    return sheet, msg
+
+
 def mirror_row(sheet, src_row, dst_row, cell=CELL, cols=COLS):
     """Copy one direction row onto another, flipping each CELL on its own.
 
@@ -633,7 +714,48 @@ def main():
     ap.add_argument("--alpha", type=int, default=40,
                     help="alpha above which a pixel counts as art (default 40; "
                          "raise it for art painted over a soft glow)")
+    ap.add_argument("--layout", choices=("mob", "spinner"), default="mob",
+                    help="mob (default): the 384x320 walking grid, 6 columns x "
+                         "4 direction rows plus the gib strip. spinner: the "
+                         "64x128 two-layer rotating sprite CryoFlakeMob draws "
+                         "-- body over pulse, both centred on the rotation "
+                         "pivot (see resheet_spinner)")
+    ap.add_argument("--cell", type=int, default=64,
+                    help="spinner only: the cell size, which the engine reads "
+                         "off the texture WIDTH (default 64)")
     args = ap.parse_args()
+
+    if args.layout == "spinner":
+        if os.path.isdir(args.src):
+            print("spinner layout takes a single image, not a folder")
+            return 1
+        im = Image.open(args.src).convert("RGBA")
+        keyed, note = key_background(im, args.tol)
+        print("%s  %dx%d  -> spinner %dx%d"
+              % (os.path.basename(args.src), im.width, im.height,
+                 args.cell, args.cell * 2))
+        print("  %s" % note)
+        sheet, msg = resheet_spinner(keyed, cell=args.cell, alpha=args.alpha)
+        print("  %s" % msg)
+        if sheet is None:
+            return 1
+        if args.inspect:
+            return 0
+        sheet = harden_alpha(sheet)
+        qa = os.path.join(REPO, "build", "qa", "resheet")
+        os.makedirs(qa, exist_ok=True)
+        stem = os.path.splitext(os.path.basename(args.src))[0]
+        print("  preview %s" % os.path.relpath(
+            preview(sheet, stem, os.path.join(qa, stem + "_preview.png")), REPO))
+        if args.out:
+            dest = (args.out if os.path.isabs(args.out)
+                    else os.path.join(REPO, "src", "main", "resources", args.out))
+        else:
+            dest = os.path.join(qa, "%s_%dx%d.png" % (stem, args.cell, args.cell * 2))
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
+        sheet.save(dest)
+        print("  wrote %s" % os.path.relpath(dest, REPO))
+        return 0
 
     if os.path.isdir(args.src):
         rows, gib, note = load_folder(args.src)

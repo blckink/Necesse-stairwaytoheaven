@@ -8,6 +8,8 @@ batch does not need the same hand pass.
 | file | what it is |
 |---|---|
 | `SOURCE_calf.png` | the plain yak — it is the CALF, not the cow (player) |
+| `SOURCE_cow.png` | the flower-crowned one: the COW |
+| `SOURCE_bull.png` | the horned one: the BULL |
 | `SOURCE_*.png` | exactly what was supplied, untouched |
 | `*_384x320.png` | what the tool made of it — the file to correct |
 | `PREVIEW_*.png` | the same at 3× on dark and light with the 64px grid drawn over it |
@@ -34,9 +36,9 @@ creature through the flat-sheet path, kept for comparison.
 ## How each was produced
 
 ```sh
-python3 tools/resheet_mob.py SOURCE_yak-plain.png     # rows detected
-python3 tools/resheet_mob.py SOURCE_yak-flowers.png   # 2 rows split evenly
-python3 tools/resheet_mob.py SOURCE_yak-blue.png      # rows + 2 rows split evenly
+python3 tools/resheet_mob.py SOURCE_calf.png   # rows detected
+python3 tools/resheet_mob.py SOURCE_cow.png    # 2 rows split evenly
+python3 tools/resheet_mob.py SOURCE_bull.png   # rows + 2 rows split evenly
 python3 tools/resheet_mob.py SOURCE_wraith.png --alpha 120
 ```
 
@@ -94,3 +96,10 @@ light direction, which is a real cost worth checking.
 
 384×320: 6 cols × 4 rows of 64 px (Up / Right / Down / Left), then the 32 px gib
 strip at y256, then 32 px of padding. See `docs/references/template-mob.png`.
+
+## Shipped 2026-09-02
+
+All four went in. `spiritwraith_384x320.png` -> `mobs/fenwraith.png`;
+`cow`/`bull`/`calf` -> `mobs/nimbusyak{,_bull,_calf}.png`, which replaces the
+`SkyPelt` recolour of vanilla's cow, bull and calf. The files here stay as the
+before/after record and as the regression input for `tools/resheet_mob.py`.

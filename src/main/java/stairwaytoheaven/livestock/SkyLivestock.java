@@ -5,6 +5,7 @@ import necesse.engine.registries.ItemRegistry;
 import necesse.engine.registries.MobRegistry;
 import necesse.engine.registries.RecipeTechRegistry;
 import necesse.entity.mobs.buffs.BuffModifiers;
+import necesse.gfx.gameTexture.GameTexture;
 import necesse.inventory.item.Item;
 import necesse.inventory.recipe.Recipe;
 import necesse.inventory.recipe.Recipes;
@@ -214,18 +215,21 @@ public final class SkyLivestock {
      * dedicated server never calls that method, and this is the only place in
      * the package a {@code GameTexture} is touched.
      *
-     * <p>Every sheet is a recoloured vanilla farm-animal sheet, so the frame
-     * grid, the 32px flesh-particle cells and the matching shadow sheets are
-     * all vanilla's and all already correct. See {@link SkyPelt}.
+     * <p>The yak wears its own three sheets; the fowl and the goat are still
+     * recoloured vanilla farm-animal sheets (see {@link SkyPelt}). Either way
+     * the frame grid is vanilla's — 6 columns x 4 direction rows of 64 plus the
+     * 32px flesh-particle cells at y256 — and the shadow sheets stay vanilla's
+     * for all three, because a shadow is a black blob and recolouring one would
+     * do nothing.
      */
     public static void loadTextures() {
-        // Nimbus Yak: pale storm blue over the cow's own shading.
-        NimbusYakMob.cowTexture = SkyPelt.tintFinal("mobs/cow", "mobs/nimbusyak",
-                0.555F, 0.16F, 0.35F, 1.0F, 0.05F);
-        NimbusYakMob.bullTexture = SkyPelt.tintFinal("mobs/bull", "mobs/nimbusyak_bull",
-                0.555F, 0.20F, 0.35F, 0.95F, 0.03F);
-        NimbusYakMob.calfTexture = SkyPelt.tintFinal("mobs/calf", "mobs/nimbusyak_calf",
-                0.555F, 0.14F, 0.35F, 1.0F, 0.07F);
+        // Nimbus Yak: the mod's own three sheets, drawn on vanilla's grid —
+        // 6 columns x 4 direction rows of 64, then the five 32px gib cells at
+        // y256 that CowMob's FleshParticle reads (spriteX 0..4, spriteY 8,
+        // size 32; jar CowMob.java:96). No recolour: these ARE the yak.
+        NimbusYakMob.cowTexture = GameTexture.fromFile("mobs/nimbusyak").makeFinal();
+        NimbusYakMob.bullTexture = GameTexture.fromFile("mobs/nimbusyak_bull").makeFinal();
+        NimbusYakMob.calfTexture = GameTexture.fromFile("mobs/nimbusyak_calf").makeFinal();
 
         // Thunderquill Fowl: storm violet, plus a washed-out copy for a bird
         // that has just been plucked (vanilla ships no such frame).

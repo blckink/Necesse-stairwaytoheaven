@@ -58,7 +58,7 @@ behaviour, but no vanilla art reaches the screen through them.)
 | `CryoFlakeMob` | Aurora Flake | Skyreach (Aurora variant) | drifting cold hazard |
 | `CryoFlakeFollowingMob` | Watch Mote | Skyreach | summon behaviour |
 | `SheepMob` | Glimmergoat | Skyreach (Aurora variant) | husbandry: shears, breeding |
-| `CowMob` | Nimbus Yak | Skyreach (Driftlands variant) | husbandry: bucket |
+| `CowMob` | Nimbus Yak | Skyreach (Driftlands variant) | husbandry: bucket — sheet swapped 2026-09-02, see §4 |
 | `ChickenMob` | Thunderquill Fowl | Skyreach (Stormveil variant) | husbandry: eggs + shears |
 
 ### 1.3 Vanilla textures loaded by literal path (recolours)
@@ -69,7 +69,6 @@ stand-in and swaps out by shipping a real sheet under the mod's own name.
 
 | vanilla texture | realm | used for |
 |---|---|---|
-| `mobs/cow`, `mobs/bull`, `mobs/calf` | Skyreach | Nimbus Yak, all three ages |
 | `mobs/sheep`, `mobs/sheep_sheared` | Skyreach | Glimmergoat doe + shorn |
 | `mobs/ram`, `mobs/ram_sheared` | Skyreach | Glimmergoat buck + shorn |
 | `mobs/lamb` | Skyreach | Glimmergoat kid |
@@ -204,6 +203,7 @@ and the realm cannot be faked without them:
 | `crystalgolem` (mob, by string ID) | `crookedgolem` — `mobs/CrookedGolemMob` on `mobs/crookedgolem.png`, a subclass of `CrystalGolemMob` that inherits every number and behaviour and overrides only `addDrawables` (and the sheet the death gibs are cut from) | this pass |
 | `ascendedgolem` (mob, by string ID) | `rarecrookedgolem` — `mobs/RareCrookedGolemMob` on `mobs/rarecrookedgolem.png`, same relationship to `AscendedGolemMob` | this pass |
 | `spiritghoul` (mob sheet) | `fenwraith` — `arsenal/FenWraithMob` on `mobs/fenwraith.png`, still a `SpiritGhoulMob` subclass for behaviour, with `addDrawables` ported so only the texture changes. Composed by `tools/resheet_mob.py` from the player's cut frames | 2026-09-02 |
+| `mobs/cow`, `mobs/bull`, `mobs/calf` (sheets, recoloured at load time) | `nimbusyak`, `nimbusyak_bull`, `nimbusyak_calf` — the Nimbus Yak's three ages on the mod's own sheets, `GameTexture.fromFile` instead of `SkyPelt.tintFinal`. Composed by `tools/resheet_mob.py`. The mob is still a `CowMob` for behaviour, and `cow_shadow`/`calf_shadow` are still vanilla's — a shadow is a black blob | 2026-09-02 |
 | `crystalarmadillo` (mob, by string ID) | `crookedarmadillo` — `mobs/CrookedArmadilloMob` on `mobs/crookedarmadillo.png`, same relationship to `CrystalArmadillo`. One thing did NOT come across: vanilla's second `crystalarmadillo_light` glow pass, because we have one sheet and not two — see the class comment | this pass |
 
 The vanilla sheets stay the format reference for these three and are listed as
