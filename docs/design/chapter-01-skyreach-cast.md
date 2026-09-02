@@ -29,6 +29,18 @@ register that belongs above the Skyway.
 
 ## 1. The three settler types
 
+> **Note, 2026-09-02 — a simplified version of these three shipped.** The
+> claim below ("exactly one settler today") is no longer true: `magpiesettler`,
+> `haldasettler` and `ossiansettler` are built, with these names and this
+> flavour, as plain coin-recruit `HumanShop`s at 12,000 / 9,000 / 18,000
+> (`docs/CONTENT_LEDGER.md`, "Chapter 01 — the Skyreach residents"). What
+> shipped is the vendor shell only: no POI, no boss fight, no unique
+> recruit-key item, no new station. Everything below — the Tollwright, the
+> Sourvat Bloom, Prototype Nine, the Fermentation Vat, the Drafting Table, the
+> Kite Rack, the eight unique rewards — is still unbuilt and still describes
+> real work, not history; it just is not describing three settlers who don't
+> exist yet any more. Left as written per `docs/design/README.md`.
+
 The mod registers exactly one settler today (`wardensettler`). These are the next
 three. Each is a **named individual found at one POI**, recruited through
 **vanilla's own recruit page** — the price is `getRecruitItems`, vanilla takes it
@@ -129,11 +141,12 @@ you cannot craft), with the Blacksmith's workbench relationship.
 - **Talks:** precise, over-qualified, allergic to the word weapon. *"It is a
   demonstrator. That it removes a golem is incidental to the demonstration."*
 
-*Flag, not a change:* `DESIGN_DECISIONS.md` records the Warden's recruitment at
-100,000 coins; `SkyWardenMob.RECRUIT_COST` is 30,000. These three should sit an
-order of magnitude below whichever is true (roughly 5,000 / 8,000 / 15,000), so
-the Warden stays the largest NPC purchase in the mod. Somebody who owns that
-decision should reconcile the two numbers; I am not touching either.
+*Flag, not a change, and resolved since:* `DESIGN_DECISIONS.md` used to record
+the Warden's recruitment at 100,000 coins against `SkyWardenMob.RECRUIT_COST`'s
+30,000; `DESIGN_DECISIONS.md` now says the code was right and the record is
+corrected to 30,000. The three built settlers (see the note above) landed at
+12,000 / 9,000 / 18,000 — the same "an order of magnitude below the Warden"
+shape this paragraph asked for, just not the exact guessed numbers.
 
 ---
 
@@ -231,5 +244,5 @@ One sentence per place, meaning only — layouts belong to the POI dossier:
 
 Layouts, footprints and object lists (POI architect). Sprites, sheets and palettes
 (art agents). Class names, registry categories, numbers on buffs and exact prices
-(integrator). Whether the Warden's recruitment cost is 30,000 or 100,000 — flagged
-above, owned by whoever owns `DESIGN_DECISIONS.md`.
+(integrator). The Warden's recruitment cost question above is resolved (30,000 —
+see the note in §1); it no longer needs deciding.

@@ -49,9 +49,11 @@ PNG in `src/main/resources/`. Editing a PNG directly is always wrong.
 - `python3 tools/size_audit.py` reports 0 flags.
 - Marble Checker floor no longer crashes clients (`ca2ddad`); `scripts/tile_sprite_check.sh`
   proves it headlessly.
-- `python3 tools/locale_audit.py` reports 129 registered IDs and 42 literal
-  keys named in both locales, and fails if a new registration helper appears
-  that it does not know how to see through.
+- `python3 tools/locale_audit.py` reports 213 registered IDs and 70 literal
+  keys named in both locales (re-measured 2026-09-02; was 129/42 when this
+  line was written — the count grows every content pass, so treat any number
+  here as a snapshot, not a target), and fails if a new registration helper
+  appears that it does not know how to see through.
 - `python3 tools/tile_behaviour_audit.py` reports 13 tiles (5 floors, 6
   terrain, 2 liquid) matching their declared role and 949 splat cells inside
   the bands measured off vanilla's own sheets.
@@ -133,9 +135,13 @@ spread, the gear ladder and a re-derivation recipe are all in `docs/BALANCE.md`.
 **This supersedes the deep-cave calibration described in the two sections
 below.** Sky Arsenal weapons are calibrated against deep-cave vanilla weapons
 and Stormsteel is documented as sitting under glacial (25/26/16, enchant 1300,
-UNCOMMON); those statements are now historical. Stormsteel's target is
-Arcanic's 29 / 1900 / EPIC. Until the classes are retuned, `docs/BALANCE.md` is
-a **target, not a record** — read the classes for what is actually shipped.
+UNCOMMON); those statements are now historical — **Stormsteel itself was
+retuned the same day** (commit `c18c2f1`, "Stormsteel, the trinkets and the two
+blades move up to the incursion tier") to 26/29/19 at enchant 1900, EPIC,
+matching `docs/BALANCE.md` §7's gear ladder rather than merely targeting it.
+`docs/BALANCE.md` remains a **target, not a record** in general — it is vanilla
+arithmetic, not a changelog — but for Stormsteel specifically the target and
+the shipped class now agree; read the class for what is actually shipped.
 
 ## Sky Arsenal (content/arsenal) — IMPLEMENTED, awaiting player confirmation
 
@@ -184,11 +190,24 @@ minerals → **misc/questitems** (vanilla's own bin for a quest key).
 
 **Stormsteel is no longer a dead end.** It was the Aether Forge's headline
 product and nothing in the game consumed it. Four consumers now: the
-**Stormsteel set** — helm 25 / cuirass 26 / greaves 16 armour at enchant cost
-1300, `Item.Rarity.UNCOMMON`, calibrated against vanilla's tungsten set
-(24/25/15, 1300, UNCOMMON) and deliberately under glacial (24/24/16, 1450), at
-the Tungsten Anvil beside tungsten's own armour — and the **Stormsteel
-Vambrace**. A `SimpleSetBonusBuff` gives the set +15 max resilience and +5%
+**Stormsteel set** and the **Stormsteel Vambrace**, at the Tungsten Anvil
+beside tungsten's own armour.
+
+> **The numbers below are from launch (this section) and were superseded the
+> same day by the endgame rebalance above.** Stormsteel is now **helm 26 /
+> chest 29 / greaves 19** at enchant cost **1900**, `Item.Rarity.EPIC`
+> (`StormsteelArmor.java`, commit `c18c2f1`) — measured against **Nightsteel**,
+> the melee set of the incursion tier (28/29/17), not tungsten. The
+> "deliberately under glacial" framing is retired along with the deep-cave
+> calibration; `docs/BALANCE.md` §7's gear ladder is no longer just a target
+> for this set, it is what shipped. The set-bonus buff and its numbers below
+> were not touched by that commit and are believed still current.
+
+<!-- Numbers as they launched, kept for the delta above: helm 25 / cuirass 26
+     / greaves 16 at enchant cost 1300, UNCOMMON, calibrated against vanilla's
+     tungsten set (24/25/15, 1300, UNCOMMON) and deliberately under glacial
+     (24/24/16, 1450). -->
+A `SimpleSetBonusBuff` gives the set +15 max resilience and +5%
 movement speed, under `GlacialHelmetBonusBuff`'s +20 / +20%.
 
 **Three accessories**, real `TrinketItem`s on `SimpleTrinketBuff`s with no
@@ -245,7 +264,7 @@ Art produced by Codex under brief (`codex exec`, see TECHNICAL_LEARNINGS);
 reviewed, gated and integrated here. **Nobody has seen any of it in the real
 client.**
 
-### Follow-up: 35 icons still below the thinnest vanilla icon
+### Follow-up: 34 icons still below the thinnest vanilla icon
 
 Measured, uncovered by the audit, and deliberately NOT in this batch — one
 coherent set per pass, per the bounded-art rule in `AGENTS.md`. Worst first:
@@ -253,11 +272,17 @@ coherent set per pass, per the bounded-art rule in `AGENTS.md`. Worst first:
 `prismshard` 141, `stormcrystal` 141, `skyballoon` 146, `auroralily` 148,
 `cloudberry` 149, `gloomwillow` 149, `cloudpufftreat` 157, `silverbell` 161,
 `skywatchastrolabe` 166, `cinderpearl` 178, `aetheriumore` 181, `aetheriumbar`
-184, `catbasket` 186, `cloudberrybush` 186, `skystone` 189, `windsilk` 198,
+184, `cloudberrybush` 186, `skystone` 189, `windsilk` 198,
 `starfall` 203, `skytulip` 207, `skyreeds` 210, `mistglasslantern` 213,
 `charwood`/`nimbuswood`/`prismwood` 225, `staticmoss` 230, `stormscreed` 239,
 `skystonerock` 245, `seraphstatue` 247, `seancecircle` 251, `windwheat` 255,
 `skywatchchalice` 267, `skyparcel` 283.
+
+*(`catbasket` was on this list at 186px when it was written; re-measured
+2026-09-02 at 344px — over the >= 300 target — so it has since been redrawn
+and is dropped from the list. `docs/design/asset-work-order.md` batch E had
+independently drifted to a different stale number, 277, for the same icon;
+both are corrected.)*
 
 `aurorabloom` (141) is the one to take first: the redrawn `aurorapetal` (461)
 now sits beside it in the inventory, and the flower should not read thinner than
@@ -560,10 +585,16 @@ Ordered by the player's own priority. Full detail in `docs/PLAYTEST_LOG.md`.
   cross-dimension read no longer gives up when the Skyreach happens to be
   unloaded, which is what made the earlier hand-out fix unreachable in the
   ordinary case.
-- The Cloud Lamb is a coherent husbandry animal: shears for Windsilk, breeds
+- ~~The Cloud Lamb is a coherent husbandry animal: shears for Windsilk, breeds
   true, is named Cloudlamb at every age, and eats cloudberries (a `GrainItem`
   now) as well as vanilla wheat — hand-fed or from a feeding trough. All four
-  values are measured by `/skyreachstatus` and asserted by the test.
+  values are measured by `/skyreachstatus` and asserted by the test.~~
+  **Contradicted by this file's own livestock section below, and now moot
+  either way: the Cloud Lamb never actually bred (`mate=NONE` — no male of its
+  species existed) and was removed 2026-09-01/02.** The Glimmergoat replaces
+  it as a husbandry animal that does breed. Left here, struck through, so the
+  contradiction between this row and the livestock section is visible rather
+  than silently resolved by deleting one side.
 - v0.6 sprint (list above): rock variants + shadows, Storm Shards, tree
   volume, Cloudberry, Warden visuals, Spire hero kit, Stormveil/Aurora props,
   oddity seeds.
@@ -717,7 +748,13 @@ the kiln's lit sheet; `size_audit` carries 23 new rows;
 its Tech actually makes. Nothing here has been seen in the real client.
 ## The sky livestock layer (`content/livestock`, IMPLEMENTED — not player-confirmed)
 
-Three farmable animals on their real vanilla archetypes, in
+> **Rewritten 2026-09-02 — this section described the layer as it shipped on
+> 2026-08-28 and had gone stale in three ways: it launched with three animals,
+> not two; its art was "zero new PNGs, all recoloured" and no longer is; and
+> the Cloud Lamb it kept comparing against is gone. See `docs/OVERVIEW.md` §3,
+> which is read off the code and is the reference for this layer now.**
+
+Two farmable animals on their real vanilla archetypes, in
 `src/main/java/stairwaytoheaven/livestock/` behind one registration class
 (`SkyLivestock.register` / `registerItems` / `loadTextures`):
 
@@ -726,25 +763,33 @@ Three farmable animals on their real vanilla archetypes, in
 | Nimbus Yak | `CowMob` | Driftlands | Nimbus Milk | bucket |
 | Glimmergoat | `SheepMob` | Aurora Shoals | Aurora Fleece | shears |
 
-Nine recipes hang off the three products: Skycurd (cheese press), Cloudberry
-Custard (cooking pot), Nimbus Draught (alchemy); (tungsten
-anvil), windsilk (inventory), net (workstation); Glimmerstride Boots (tungsten
-anvil), Skywatch Carpet (carpenter), Cloud Puff Treats (inventory).
+The layer shipped with a third animal, the **Thunderquill Fowl** (`ChickenMob`,
+Stormveil, Storm Down) — removed since ("a third animal was one too many",
+`docs/OVERVIEW.md` §3). The **Cloud Lamb**, a separate and older husbandry mob
+that predates this whole package, is also gone: it reported `mate=NONE` (no
+male of its species existed, and vanilla's ram only accepts the string
+`"sheep"`) and still inherited `Mob`'s `return false`, so its Driftlands
+spawn-table entry was permanently inert. The Glimmergoat is its replacement —
+it breeds (see `SkyBreed`) and its `validSpawnLocation` is implemented.
 
-**Zero new PNGs.** Every sheet and icon is a vanilla texture recoloured at load
-time (`livestock/SkyPelt`), including both sexes, the young and the
-sheared/plucked states; `tools/locale_audit.py` grew a check that resolves
-every literal texture path against our resources or the vanilla dump.
+Seven recipes now hang off the two products (down from nine — the Fowl's
+Thunderplume Cowl line went with it): **Nimbus Milk** — Skycurd (cheese
+press), Cloudberry Custard (cooking pot), Nimbus Draught (alchemy); **Aurora
+Fleece** — Glimmerstride Boots (tungsten anvil), Skywatch Carpet (carpenter),
+Cloud Puff Treats (inventory), and vanilla's own `net` (workstation, aurora
+fleece standing in for wool at vanilla's count — see the class comment on
+`SkyLivestock.registerItems`).
+
+**Zero new PNGs was true at launch and stopped being true on 2026-09-02.**
+Both animals now wear dedicated drawn sheets, `GameTexture.fromFile`, nothing
+recoloured: the Glimmergoat has all five of its states (`gimmergoat-doe[_shorn]`,
+`gimmergoat-ram[_shorn]`, `glimmergoat-lamb`) and the Nimbus Yak its three ages
+(`nimbusyak`, `_bull`, `_calf`) — see `docs/VANILLA_ASSET_MAP.md` §4. Only the
+shadow sheets stay vanilla's, because a shadow is a black blob.
 
 Measured every integration-test run (`/skyreachstatus`): each animal's product,
-offspring, display name at every age, mate, feed and — the thing the Cloud Lamb
-still fails — `validSpawnLocation=implemented`.
+offspring, display name at every age, mate, feed and `validSpawnLocation`.
 
-**Two things this exposed rather than fixed:** the Cloud Lamb reports
-`mate=NONE` and cannot actually breed (no male of its species exists, and
-vanilla's ram only accepts the string `"sheep"`), and it still inherits `Mob`'s
-`return false` so its Driftlands table entry is inert. Both are one small
-override away; see `docs/TECHNICAL_LEARNINGS.md`.
-
-Nothing here has been seen in a real client: the recolours, the armour on a
-player body and the plucked-bird sprite are all server-invisible.
+Nothing here has been seen in a real client: the armour on a player body is
+server-invisible, and nobody has watched a Yak or a Glimmergoat move in a
+window yet either.

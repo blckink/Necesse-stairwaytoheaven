@@ -73,7 +73,8 @@ vanilla entries modified, additive registrations only.
 
 ## Biomes, mobs, items
 
-- **`SkyBiome`** base + three subclasses provide `MobSpawnTable`s (ticket-based, vanilla
+- **`SkyBiome`** base + five subclasses (Driftlands, Stormveil, Aurora Shoals, Skyway
+  Passages, the Outlands) provide `MobSpawnTable`s (ticket-based, vanilla
   class), disable rain, and make tile placement over the Mistsea reclaim Cloudturf
   (`getUnderLiquidTile`).
 - Mobs use vanilla AI trees only: `ConfusedCollisionPlayerChaserWandererAI` for melee

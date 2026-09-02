@@ -86,6 +86,13 @@ world seed; no vanilla surface-biome coupling):
 
 ### 3.2 Sub-biomes
 
+> **A fourth sub-biome, Skyway Passages, was built later and is not in the
+> table below** (checked 2026-09-02) — a paved biome bordering Stormveil,
+> carrying Cloudmarble balustrades, Seraph statues and its own spawn table.
+> See `docs/PLAYER_JOURNEY.md` §3b and `docs/OVERVIEW.md` §2. The Outlands (a
+> fifth, distance-gated sub-biome past 900 tiles) came later still. Nothing
+> below is wrong, it is just no longer the whole map.
+
 | | **Driftlands** (common) | **Stormveil** (uncommon) | **Aurora Shoals** (rare) |
 |---|---|---|---|
 | Mood | Silver-green isles, calm wind | Charcoal slate, static charge | Cold dawn light over shallow mist |
@@ -233,6 +240,15 @@ Tone: dry, melancholic, a little gothic, never silly. The story is told through 
 dialogue lines, item descriptions and the spire itself changing as you help him.
 
 ## 12. Quest chain (4 stages, save-persistent, multiplayer-safe)
+
+> **Stage 2 as shipped differs from the design below (checked against the code
+> 2026-09-02).** The built chain does not ask for a Storm Shard/Windsilk
+> delivery to light the beacon — the beacon lights when the player **recruits
+> the Warden for 30,000 coins** (`SkyWardenMob.onRecruited`). A
+> `swh_beacon` quest matching this section's delivery does exist in the
+> registry but no code path ever hands it out — it is a dead registration, not
+> the live stage 2. See `docs/OVERVIEW.md` §5 for the chain as built and §9 for
+> `swh_beacon`'s DEAD status. Stages 1, 3 and 4 below match what shipped.
 
 Progress is stored server-side on the spire (one shared world state, like vanilla world
 events); rewards are granted to the delivering player. Turn-ins validate and consume

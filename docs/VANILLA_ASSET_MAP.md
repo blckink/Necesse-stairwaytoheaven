@@ -90,6 +90,7 @@ vanilla's, so the vanilla file is the format reference and must stay findable.
 | `mobs/crystalgolem.png` | `mobs/crookedgolem.png` | walking-mob sheet, 384x320: 6 cols (idle, walk x4, in-liquid) x 4 dir rows at 64px, plus the 32px gib strip at row 8 cols 0-3 that `FleshParticle` cuts death chunks from |
 | `mobs/ascendedgolem.png` | `mobs/rarecrookedgolem.png` | same 384x320 layout |
 | `mobs/crystalarmadillo.png` | `mobs/crookedarmadillo.png` | same layout at 512x320 — 8 cols, because columns 6 and 7 are the two rolled-up ball frames |
+| `mobs/crystaldragon.png` + `mobs/crystaldragonhead.png` | `mobs/mistserpent.png` + `mobs/mistserpent_shadow.png` + `mobs/mistserpenthead.png` | worm-chain sheet: body/shadow at 320x1792 (pixel-identical to the vanilla dragon's), head at 68x68. Behaviour is NOT borrowed from `CrystalDragonHead` — `MistserpentHead`/`MistserpentBody` extend the generic `HostileWormMobHead`/`Body`, the same non-boss base `SandwormHead` uses; only the sheet geometry is the dragon's, added 2026-09-02 |
 
 ---
 

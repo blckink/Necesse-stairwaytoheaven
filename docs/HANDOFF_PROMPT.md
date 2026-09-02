@@ -1,5 +1,15 @@
 # Handoff — where this is, and what to pick up
 
+> **SUPERSEDED 2026-09-02 — read `docs/OVERVIEW.md` for the current state
+> first.** This file is a point-in-time handoff from 2026-08-31, written right
+> after the Beetle Outlands landed; a good deal has shipped since (the
+> Mistserpent's crystal-dragon resheet, the Cloud Lamb's removal, the
+> livestock art pass, `docs/OVERVIEW.md` itself). §5's "fork the player has not
+> answered" was in fact answered — see the note inline below. The rest of this
+> file (the six commits, the gate results, the container setup, §6's two
+> traps) is left as written; it is still an accurate record of that pass, just
+> not of today.
+
 **Rewritten 2026-08-31.** The previous version briefed a session on Skyreach
 walls and buildings; that work is done or superseded. What follows is the state
 after the Beetle Outlands landed.
@@ -105,7 +115,15 @@ running game, so a probe must compare biome CLASSES and call
 
 ## 5. What to pick up, in the order that makes sense
 
-### The fork the player has not answered
+### The fork the player has not answered — ANSWERED 2026-08-31, later the same day
+
+> Resolved: option 2 below. `docs/CURRENT_STATE.md`'s "Endgame rebalance"
+> section and `docs/BALANCE.md` record it, and `StormsteelArmor.java` (commit
+> `c18c2f1`) shipped it: Stormsteel now sits at the incursion tier (26/29/19,
+> enchant 1900, EPIC), not under Glacial. Option 1 — a boss behind the Seance
+> Circle portals — is still undone; the circles still say `misc.seancesilent`
+> (`docs/OVERVIEW.md` §9). Left below as written for the record of what the
+> fork looked like when it was open.
 
 The mod now has a gradient pointing the wrong way: **the Outlands hit at
 ascended tier, but the sky's own gear is calibrated at deep-cave tier**

@@ -13,9 +13,13 @@ written by `tools/asset_generator/`. Editing a PNG by hand is silently reverted
 on the next generator run. The exceptions are the supplied files listed in
 `generate_assets.py`'s `CONVERTED` guard, which are copied in as-is.
 
+`src/main/resources/kk-sprites/` (supplied reference art, not itself a shipped
+sprite sheet) is excluded from the counts below; see `docs/VANILLA_ASSET_MAP.md`
+and `docs/ART_DIRECTION.md` for what it holds.
 
-**323 sprites** across 13 folders.
-
+**334 sprites** across 13 folders. *(Regenerated 2026-09-02 — the previous count
+of 323 predated the Mistserpent resheet, the livestock art pass and the Eden
+tiles; `cloudlamb.png`/`cloudlamb_sheared.png` are gone with the mob.)*
 
 ## `./` — 1 file(s)
 
@@ -23,7 +27,7 @@ on the next generator run. The exceptions are the supplied files listed in
 |---|---|
 | `preview.png` | 268x268 |
 
-## `items/` — 128 file(s)
+## `items/` — 129 file(s)
 
 | file | size |
 |---|---|
@@ -77,6 +81,7 @@ on the next generator run. The exceptions are the supplied files listed in
 | `nimbussapling.png` | 32x32 |
 | `nimbuswillow.png` | 32x32 |
 | `nimbuswood.png` | 32x32 |
+| `overgrownedenseed.png` | 32x32 |
 | `pottedcloudberry.png` | 32x32 |
 | `prismabirch.png` | 32x32 |
 | `prismasapling.png` | 32x32 |
@@ -156,39 +161,47 @@ on the next generator run. The exceptions are the supplied files listed in
 | `withershrub.png` | 32x32 |
 | `zephyrharness.png` | 32x32 |
 
-## `mobs/` — 21 file(s)
+## `mobs/` — 30 file(s)
 
 | file | size |
 |---|---|
-| `cloudlamb.png` | 384x320 |
-| `cloudlamb_sheared.png` | 384x320 |
+| `auroraflake.png` | 64x128 |
 | `crookedarmadillo.png` | 512x320 |
 | `crookedgolem.png` | 384x320 |
 | `dawnpiercer.png` | 384x256 |
 | `dewsnail.png` | 192x128 |
+| `fenwraith.png` | 384x320 |
 | `galehound.png` | 384x256 |
+| `gimmergoat-doe.png` | 384x320 |
+| `gimmergoat-doe_shorn.png` | 384x320 |
+| `gimmergoat-ram.png` | 384x320 |
+| `gimmergoat-ram_shorn.png` | 384x320 |
+| `glimmergoat-lamb.png` | 384x320 |
 | `gloomshade.png` | 384x256 |
 | `glowmoth.png` | 192x128 |
 | `mistserpent.png` | 320x1792 |
+| `mistserpent_mask.png` | 64x64 |
 | `mistserpent_shadow.png` | 320x1792 |
 | `mistserpenthead.png` | 68x68 |
+| `nimbusyak.png` | 384x320 |
+| `nimbusyak_bull.png` | 384x320 |
+| `nimbusyak_calf.png` | 384x320 |
 | `rarecrookedgolem.png` | 384x320 |
 | `skystonegolem.png` | 384x256 |
 | `skywarden.png` | 384x256 |
 | `sparkbeetle.png` | 192x128 |
-| `spirecatblack.png` | 192x128 |
-| `spirecattabby.png` | 192x128 |
+| `spirecatblack.png` | 384x320 |
+| `spirecattabby.png` | 384x320 |
 | `stormwisp.png` | 128x256 |
 | `zephyrfinch.png` | 192x128 |
 | `zephyrray.png` | 384x256 |
 
-## `mobs/icons/` — 27 file(s)
+## `mobs/icons/` — 26 file(s)
 
 | file | size |
 |---|---|
 | `auroraflake.png` | 32x32 |
 | `cindercantor.png` | 32x32 |
-| `cloudlamb.png` | 32x32 |
 | `crookedarmadillo.png` | 32x32 |
 | `crookedgolem.png` | 32x32 |
 | `dawnpiercer.png` | 32x32 |
@@ -365,15 +378,16 @@ on the next generator run. The exceptions are the supplied files listed in
 | `tempestedge.png` | 32x32 |
 | `thunderhead.png` | 24x64 |
 
-## `projectiles/` — 3 file(s)
+## `projectiles/` — 4 file(s)
 
 | file | size |
 |---|---|
+| `mistserpentshard.png` | 18x32 |
 | `prismbolt.png` | 18x18 |
 | `stormdisc.png` | 32x32 |
 | `stormdisc_shadow.png` | 32x32 |
 
-## `tiles/` — 19 file(s)
+## `tiles/` — 20 file(s)
 
 | file | size |
 |---|---|
@@ -391,6 +405,7 @@ on the next generator run. The exceptions are the supplied files listed in
 | `murkwater_deep_splat.png` | 1792x96 |
 | `murkwater_shallow_splat.png` | 1792x96 |
 | `nimbusfloor_splat.png` | 224x192 |
+| `overgrowneden_splat.png` | 224x576 |
 | `prismfloor_splat.png` | 224x192 |
 | `skystone_splat.png` | 224x480 |
 | `skyway.png` | 32x32 |

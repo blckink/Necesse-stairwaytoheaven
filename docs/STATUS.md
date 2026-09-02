@@ -115,12 +115,21 @@ blocker for building any realm past Ghost.
 
 ## Sprites, for rework
 
-- **`docs/SPRITE_INVENTORY.md`** — all **323** PNGs this mod ships, by folder,
-  with dimensions. This is the rework list.
+- **`docs/SPRITE_INVENTORY.md`** — all **334** PNGs this mod ships (regenerated
+  2026-09-02; was 323 — the Mistserpent resheet, the livestock art pass and the
+  Eden tiles landed since), by folder, with dimensions. This is the rework
+  list.
 - **`docs/VANILLA_ASSET_MAP.md`** — every vanilla asset borrowed, per realm:
   **0** mobs by string ID (the Outlands' last three were replaced on
-  2026-09-01), 8 vanilla mobs subclassed for behaviour AND sheet, 12 textures
-  recoloured at load, 2 items dropped, 6 sheets used as a format template.
+  2026-09-01), 6 vanilla mobs subclassed for behaviour (down from 8: the
+  Thunderquill Fowl was removed and the Fen Wraith's sheet swap moved it to
+  "replaced"; of the 6 left, only Cinder Cantor, Rime Sentry and the Watch Mote
+  still wear the vanilla sheet too — the Aurora Flake, Glimmergoat and Nimbus
+  Yak kept the borrowed behaviour but swapped to their own sheets on
+  2026-09-02), 1 texture recoloured at load (down from 12 — the livestock pass
+  moved the Yak and the Glimmergoat off `SkyPelt` recolours onto drawn
+  sheets), 2 items dropped, 7 sheets used as a format template (the
+  Mistserpent's crystal-dragon-format sheet joined this count 2026-09-02).
   Replacing these means drawing something new, not reworking a file.
 
 **Before touching any PNG:** they are all written by `tools/asset_generator/`.

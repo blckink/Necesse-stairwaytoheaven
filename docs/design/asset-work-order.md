@@ -196,21 +196,17 @@ them. A PNG-only change produces a mob drawn from the wrong rectangle.
 Note for the worker: `CELL = 64` in `gen_mobs.py` is module-wide and used by
 every other mob. The golem needs its own constant, not a change to that one.
 
-### 2. Cloud Lamb — a sheep with different wool has no reason to exist
-- [ ] **`mobs/cloudlamb.png`**, `mobs/cloudlamb_sheared.png`,
-      `mobs/icons/cloudlamb.png`
-
-The player: *"Schafe sollten eher in Furby Richtung gehen oder sowas da es ja
-schon Schafe gibt."* Currently 734px at 38x27 against vanilla `sheep` 1180px at
-46x40 — smaller than the animal it is meant to be an alternative to, and built
-on the same silhouette.
-
-Target: mass >= 950, bbox >= 44x34. **Its own silhouette**: rounder and
-squatter than a sheep, an oversized head low on a fat body, big forward-facing
-eyes, tiny feet under the mass, tufted ears. The style guide's "cute roundness"
-taken further than anywhere else in the mod. Keep the Driftlands palette so it
-still belongs to the biome. The sheared sheet must read as the same creature,
-deflated — that is where the joke lands.
+### 2. ~~Cloud Lamb — a sheep with different wool has no reason to exist~~ RESOLVED (removed, 2026-09-01/02)
+- [x] The player's own diagnosis (*"Schafe sollten eher in Furby Richtung
+      gehen oder sowas da es ja schon Schafe gibt"*) was answered by removing
+      the Cloud Lamb rather than redrawing it: it shipped `mate=NONE` (no male
+      of its species, so it could never breed) and `validSpawnLocation` was
+      never implemented, so the Driftlands entry was inert. The **Glimmergoat**
+      (`livestock/GlimmergoatMob`, five of its own drawn sheets, real
+      breeding via `SkyBreed`) replaces it as the sky's fibre animal — see
+      `docs/OVERVIEW.md` §3 and `docs/VANILLA_ASSET_MAP.md` §4. `mobs/cloudlamb.png`,
+      `mobs/cloudlamb_sheared.png` and `mobs/icons/cloudlamb.png` no longer
+      exist; do not resurrect this item.
 
 ### 3. The Mistsea — the last loud, non-block-built surface
 - [ ] **`tiles/mistsea_shallow_splat.png`**, **`tiles/mistsea_deep_splat.png`**
@@ -240,7 +236,10 @@ This is the sky's signature surface: one candidate, then stop for review.
       `mistglasslantern` 213, `charwood`/`nimbuswood`/`prismwood` 225
 - [ ] batch E: `staticmoss` 230, `stormscreed` 239, `skystonerock` 245,
       `seraphstatue` 247, `seancecircle` 251, `windwheat` 255,
-      `skywatchchalice` 267, `catbasket` 277, `skyparcel` 283
+      `skywatchchalice` 267, `skyparcel` 283
+- [x] `catbasket` — redrawn since this row was written: **344px** measured
+      2026-09-02 (was 277 here / 186 in `CURRENT_STATE.md` — the two records
+      had already drifted apart), clears the >= 300 target
 
 Every vanilla 32x32 item icon in the dump carries **288-712 opaque px, median
 440**, in a bbox of at least 16x20 and usually 24x26. Target **>= 300 px, bbox

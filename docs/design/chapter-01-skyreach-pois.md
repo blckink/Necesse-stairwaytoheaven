@@ -401,6 +401,16 @@ back (the Warden's own P1 bug, not repeated). Four to six **Cloud Lambs** and on
 **Nimbus Yak** graze the fold; the flock is placed the way
 `SkyLevel.placeCloudLambFlock` already places one.
 
+> **Note, 2026-09-02 — the Cloud Lamb this POI is written around is gone.**
+> The mob was removed (it could never breed and its spawn table entry was
+> inert — see `docs/OVERVIEW.md` §3); the **Glimmergoat** is the sky's fibre
+> animal now. `SkyLevel` no longer has a `placeCloudLambFlock` method — the
+> current pattern is the generic `placeHerd(region, mobID, groundID, chance,
+> salt)`, already called for `SkyLivestock.NIMBUS_YAK` and
+> `SkyLivestock.GLIMMERGOAT`. If this POI is built, read the fold as
+> Glimmergoats (or reuse both existing herds) rather than resurrecting the
+> Cloud Lamb; the brief below is left as written per `docs/design/README.md`.
+
 **What the player does, and leaves with.**
 
 1. **A shop that sells what the sky cannot otherwise buy:** `cloudsapling` and

@@ -106,9 +106,11 @@ the only place the bell comes from.
 
 ## What is fully integrated
 
-Counts from the registries: **61 objects, 24 items, 15 tiles, 18 mobs, 8 biomes,
-5 journal quests**, 163 IDs named in **both** locales with the two in sync, and
-120 holdable IDs with a real icon file.
+Counts from the registries (`python3 tools/locale_audit.py`, re-measured
+2026-09-02 — the figures below are stale for anyone reading an older copy of
+this file): **108 objects, 45 items, 17 tiles, 30 mobs, 8 biomes,
+5 journal quests**, 213 registered IDs plus 70 literal keys named in **both**
+locales with the two in sync, and 152 holdable IDs with a real icon file.
 
 All five gates pass together — `furniture`, `locale`, `sheet_format`,
 `tile_behaviour`, `size` — and the dedicated server boots, generates and
@@ -123,11 +125,19 @@ painter oracle: tileMismatches=0 (scan radius 64, spire footprint excluded)
 skyway: ground=skywaytile tiles=2520 seraphtrees=18 cloudtrees=17 rails=70
 entrance check: door=cloudmarbledoor isDoor=true approach=[air air air air] clear=true
 recruit check: skywarden settler=WardenSettler price=coinx30000
-npc check: wardens=1 cats=2 cloudlambs=48
+npc check: wardens=1 cats=2
 cat home check: ... STILL_WILD -> ... AT_BASKET   (both cats, across a restart)
-husbandry check: cloudlamb shear=windsilkx1 child=cloudlamb
+husbandry check: nimbusyak/glimmergoat shear-or-milk=... child=...
                  feed: cloudberry=hand:true/trough:true wheat=hand:true/trough:true
 ```
+
+> **This transcript predates the Cloud Lamb's removal.** The mob (and its
+> `cloudlambs=` counter, and its `husbandry check: cloudlamb ...` line) is
+> gone — it could never breed and its Driftlands spawn-table entry was inert,
+> so the Glimmergoat replaced it. `SkyreachStatusCommand` now runs the
+> husbandry check over `{"nimbusyak", "glimmergoat"}`; the lines above are
+> reshaped to match rather than re-pasted from a run, because that run has not
+> been repeated since the change. See `docs/OVERVIEW.md` §3.
 
 ### The four Skyreach biomes generate
 
@@ -142,7 +152,9 @@ Terrain and flora for every biome; the Skyway's paving, cloudmarble railings
 with real gates where a road crosses, Seraph statues at junctions, and both
 tree species alternating along planted avenues; rock and ore formations;
 Skystone Lichen, Cragbloom and Sky Scree on the bare plate; the Warden's Spire
-at one canonical origin; cloud lamb flocks.
+at one canonical origin; Nimbus Yak herds on the Driftlands and Glimmergoat
+herds on the Aurora Shoals (`SkyLevel.placeHerd`) — the Cloud Lamb this line
+used to name is gone; see `docs/OVERVIEW.md` §3.
 
 ### The Spire is furnished
 
@@ -161,9 +173,12 @@ wreck, sky parcel, ghost lantern) are player-built or quest-given on purpose.
 
 ## Not placed anywhere yet
 
-- **Beetlefreak ground** (`beetlefreaktile`) and the **Beetlefreak wall set** —
-  registered, craftable and passing every gate, but no Veil worldgen rule puts
-  them anywhere. They need a home in `VeilTerrainPainter`.
-- The four furniture pieces the Spire's reference plan wants and we do not have:
-  `skywatchbookshelf`, `skywatchcabinet`, `skywatchclock`, `skywatchdisplay`.
-  Dresser and desk stand in for them today.
+> **2026-09-02 — both items formerly listed here are now placed; see
+> `docs/OVERVIEW.md` §9 for the current honest gaps list instead of trusting a
+> second copy here.** Beetlefreak ground (`beetlefreaktile`) grows in both
+> `BeetlefreakHollowBiome` (the Veil) and `OutlandsBiome` (the sky's Beetle
+> Outlands), and the Beetlefreak wall set is placed by `CrookedHousePreset` in
+> both places too. The four furniture pieces this section used to call
+> missing — `skywatchbookshelf`, `skywatchcabinet`, `skywatchclock`,
+> `skywatchdisplay` — are built (`SkyFurnitureSet`) and are in the 17-piece
+> Skywatch furniture line in `docs/OVERVIEW.md` §7.
