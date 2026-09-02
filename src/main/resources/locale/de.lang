@@ -627,3 +627,76 @@ stripebeetle=Streifenkäfer
 
 [misc]
 crookeddooropened=Die Kreidelinie erhebt sich vom Boden. Sie ist zu einer Tür geworden.
+
+// Geisterreich / Nachgarten
+[level]
+ghost2=Der Nachgarten
+[biome]
+aftergarden=Nachgarten
+boneorchard=Knochenhain
+ectomarsh=Ektoplasmasumpf
+[tile]
+hauntedgrasstile=Heimgesuchtes Gras
+ghostmosstile=Geistermoos
+violetdirttile=Violette Erde
+spiritstonetile=Geisterstein
+blackcobbletile=Schwarzes Pflaster
+graveyardsoiltile=Friedhofserde
+ectoplasmtile=Ektoplasma
+[object]
+crookeddeadtree=Krummer toter Baum
+bonewoodtree=Knochenholzbaum
+spiritwillow=Geisterweide
+lanterntree=Laternenbaum
+ghostlily=Geisterlilie
+mourningrose=Trauerrose
+ectoplasmfern=Ektoplasmafarn
+widowvine=Witwenranke
+spiritmushroom=Geisterpilz
+ghostrock=Geisterfelsen
+spectralorerock=Spektraler Erzbrocken
+ghostgravestone=Geistergrabstein
+soulbasin=Seelenbecken
+soulloom=Seelenwebstuhl
+spiritforge=Geisterschmiede
+ghostgatedown=Geistertor
+ghostgateup=Rückkehrtor
+ghostgate=Geistertor
+[item]
+bonewood=Knochenholz
+soulthread=Seelenfaden
+spectralore=Spektralerz
+spiritsteelbar=Geisterstahlbarren
+spiritsteelhelmet=Geisterstahlkrone
+spiritsteelchestplate=Geisterstahlplatte
+spiritsteelboots=Geisterstahlbeinschienen
+[itemtooltip]
+bonewoodtip=Holz von einem Baum, der seinen Garten überlebt hat.
+soulthreadtip=Kalte Faser, aus Ektoplasma und Vlies gesponnen.
+spectraloretip=Erz, das mehr Erinnerung als Stein ist.
+spiritsteelbartip=Ein Barren, ohne Flamme geschmiedet.
+spiritsteelhelmettip=Kopfrüstung - eine kalte Krone aus Geisterstahl.
+spiritsteelchestplatetip=Brustrüstung - schwere Platte aus Geisterstahl.
+spiritsteelbootstip=Beinrüstung - Schienen, die auf Stein kaum ein Geräusch machen.
+soulloomtip=Werkstation - spinnt Seelenfaden für Siedler und Spieler.
+spiritforgetip=Werkstation - verhüttet Spektralerz und schmiedet Geisterstahl ohne Feuer.
+[mob]
+drifter=Treiber
+headlessbutler=Kopfloser Butler
+lanternwidow=Laternenwitwe
+mourningbride=Trauerbraut
+possessedchair=Besessener Stuhl
+soulhound=Seelenhund
+coffincrawler=Sargkriecher
+[tech]
+soulloom=Seelenwebstuhl
+spiritforge=Geisterschmiede
+[misc]
+butlerlastwords1=Unhöflich.
+butlerlastwords2=Das Haus wird davon erfahren.
+butlerlastwords3=Ich war mit der Runde fast fertig.
+bridelastwords=Du kommst zu spät.
+chairlastwords=Endlich saß jemand still.
+basinalreadyghost=Das Becken schweigt hier. Du bist bereits bei den Toten.
+basinneedsectoplasm=Das Becken braucht zwölf Ektoplasma.
+ghostgateopened=Das Becken füllt sich mit kaltem Licht und öffnet sich zum Nachgarten.

@@ -92,6 +92,8 @@ MULTI_OBJECT_REGISTRARS = {
 LOCAL_REGISTRARS = {
     "registerPickable": "object",     # SkyObjects: pickable flowers
     "registerMeadowGrass": "object",  # SkyObjects: walk-through carpet grass
+    "natural": "object",              # GhostRealm: borrowed solid scenery
+    "plant": "object",                # GhostRealm: borrowed soft flora
 }
 
 # Registry calls whose ID argument is legitimately a variable, keyed by the
@@ -141,6 +143,8 @@ VANILLA_INVISIBLE_BUFFS = ("SimpleTrinketBuff", "SimpleSetBonusBuff")
 # index of the constructor argument that names it). Every class not listed here
 # falls through to the engine default, items/<stringID>.png.
 ITEM_TEXTURE_BY_CLASS = {
+    "GhostDecoObject": ("items", 1),
+    "GhostStationObject": ("items", 1),
     # RockObject.generateItemTexture -> items/<rockTexture>, the first
     # constructor argument, which is NOT the registered string ID.
     "RockObject": ("items", 0),
@@ -219,6 +223,7 @@ MULTI_OBJECT_HELD_SUFFIXES = {
 # reported rather than skipped, for the same reason the item-icon table does it.
 OBJECT_TEXTURE_BY_CLASS = {
     "SkyDecoObject": ("objects", 0),
+    "GhostStationObject": ("objects", 0),
 }
 
 
@@ -570,6 +575,10 @@ ITEM_CLASS_VANILLA_ICON = {
     # Crooked realm materials deliberately point at a literal vanilla icon
     # supplied as constructor argument 0. No recolouring is involved.
     "CrookedMatItem": ("arg", 0),
+    "GhostMatItem": ("arg", 0),
+    "SpiritsteelHelmet": ("fixed", "soulseedcrown"),
+    "SpiritsteelChestplate": ("fixed", "soulseedchestplate"),
+    "SpiritsteelBoots": ("fixed", "soulseedboots"),
 }
 
 # Marker prefix on a wanted-icon path that lives in the vanilla resource file

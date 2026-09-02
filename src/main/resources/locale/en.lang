@@ -626,3 +626,76 @@ stripebeetle=Stripe Beetle
 
 [misc]
 crookeddooropened=The chalk line rises from the ground. It has become a door.
+
+// Ghost Realm / Aftergarden
+[level]
+ghost2=The Aftergarden
+[biome]
+aftergarden=Aftergarden
+boneorchard=Bone Orchard
+ectomarsh=Ectomarsh
+[tile]
+hauntedgrasstile=Haunted Grass
+ghostmosstile=Ghost Moss
+violetdirttile=Violet Dirt
+spiritstonetile=Spirit Stone
+blackcobbletile=Black Cobble
+graveyardsoiltile=Graveyard Soil
+ectoplasmtile=Ectoplasm
+[object]
+crookeddeadtree=Crooked Dead Tree
+bonewoodtree=Bonewood Tree
+spiritwillow=Spirit Willow
+lanterntree=Lantern Tree
+ghostlily=Ghost Lily
+mourningrose=Mourning Rose
+ectoplasmfern=Ectoplasm Fern
+widowvine=Widow Vine
+spiritmushroom=Spirit Mushroom
+ghostrock=Ghost Rock
+spectralorerock=Spectral Ore Rock
+ghostgravestone=Ghost Gravestone
+soulbasin=Soul Basin
+soulloom=Soul Loom
+spiritforge=Spirit Forge
+ghostgatedown=Ghost Gate
+ghostgateup=Return Gate
+ghostgate=Ghost Gate
+[item]
+bonewood=Bonewood
+soulthread=Soul Thread
+spectralore=Spectral Ore
+spiritsteelbar=Spiritsteel Bar
+spiritsteelhelmet=Spiritsteel Crown
+spiritsteelchestplate=Spiritsteel Plate
+spiritsteelboots=Spiritsteel Greaves
+[itemtooltip]
+bonewoodtip=Wood from a tree that outlived its garden.
+soulthreadtip=Cold fibre spun from ectoplasm and fleece.
+spectraloretip=Ore that is more memory than stone.
+spiritsteelbartip=A bar forged without flame.
+spiritsteelhelmettip=Head armour - a cold crown forged from Spiritsteel.
+spiritsteelchestplatetip=Chest armour - heavy Spiritsteel plate.
+spiritsteelbootstip=Foot armour - greaves that barely sound against stone.
+soulloomtip=Crafting station - spins Soul Thread for settlement workers and players.
+spiritforgetip=Crafting station - smelts Spectral Ore and forges Spiritsteel without fire.
+[mob]
+drifter=Drifter
+headlessbutler=Headless Butler
+lanternwidow=Lantern Widow
+mourningbride=Mourning Bride
+possessedchair=Possessed Chair
+soulhound=Soul Hound
+coffincrawler=Coffin Crawler
+[tech]
+soulloom=Soul Loom
+spiritforge=Spirit Forge
+[misc]
+butlerlastwords1=Rude.
+butlerlastwords2=The house will hear of this.
+butlerlastwords3=I had nearly finished the rounds.
+bridelastwords=You came too late.
+chairlastwords=At last, somebody sat still.
+basinalreadyghost=The basin is quiet here. You are already among the dead.
+basinneedsectoplasm=The basin needs twelve Ectoplasm.
+ghostgateopened=The basin fills with cold light and opens into the Aftergarden.

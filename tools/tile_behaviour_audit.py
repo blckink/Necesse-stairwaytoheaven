@@ -97,6 +97,13 @@ ROLES = {
     "checkerstonetile": TERRAIN,
     "wrongwaytile": TERRAIN,
     "spilltile": LIQUID,
+    "hauntedgrasstile": TERRAIN,
+    "ghostmosstile": TERRAIN,
+    "violetdirttile": TERRAIN,
+    "spiritstonetile": TERRAIN,
+    "blackcobbletile": TERRAIN,
+    "graveyardsoiltile": TERRAIN,
+    "ectoplasmtile": LIQUID,
 }
 
 # Vanilla base classes we may build on, and the isFloor value each one passes
@@ -253,6 +260,10 @@ def read_tile_class(name, sources):
             priority = int(pr.group(1))
         elif re.search(r"getTerrainPriority\s*\(\s*\)\s*\{\s*return\s+"
                        r"TerrainSplatterTile\.PRIORITY_TERRAIN\s*;", text, re.S):
+            priority = 100
+        elif name == "GhostGroundTile" and "return this.terrainPriority" in text:
+            # Every GhostGroundTile registration passes a literal natural-terrain
+            # priority below PRIORITY_FLOOR_BOT; the field is returned verbatim.
             priority = 100
         return base, is_floor, priority, textures
     return None, None, None, []

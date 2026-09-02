@@ -273,4 +273,24 @@ public final class SkyRegistry {
     public static int starfallID;
     public static int skywatchTelescopeID;
     public static int skywatchAstrolabeID;
+
+    // ===== v0.10: the Ghost Realm / Aftergarden =====
+
+    /**
+     * One-world dimension index of the Ghost Realm: the fourth rung of the
+     * stairway (Skyreach +1, Eden +2, Steinfeld +3, Aftergarden +4).
+     *
+     * <p>It sits ABOVE the living world rather than below it on purpose. The
+     * Veil (-3) is the mist you pass through; the Aftergarden is where the dead
+     * actually live, and the mod's whole geography is a climb.
+     */
+    public static final int GHOST_DIMENSION = 4;
+
+    /**
+     * Generation-stamped like the Skyreach and the Veil -- see
+     * {@link #WORLD_GENERATION}. The literal has to stay a literal: the locale
+     * audit finds level names by matching a LevelIdentifier constructor call
+     * with a quoted argument.
+     */
+    public static final LevelIdentifier GHOST_IDENTIFIER = new LevelIdentifier("ghost2");
 }
