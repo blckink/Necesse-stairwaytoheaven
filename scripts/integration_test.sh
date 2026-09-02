@@ -342,7 +342,7 @@ grep -qE "outlands check: .* biome=NOT REGISTERED" "$LOG1" \
 # under 60% and the drizzle the player complained about is back ("es nervt aber
 # wenn die alle 2 Sekunden ueberall angreifen"), over 95% and the world is a
 # museum. Measured 81-82% across runs.
-grep -qE "pressure check: land=[1-9][0-9]* calm=[0-9]+\((6[0-9]|7[0-9]|8[0-9]|9[0-4])\.[0-9]%\)" "$LOG1" \
+grep -qE "pressure check: land=[1-9][0-9]* calm=[0-9]+\((6[0-9]|7[0-9]|8[0-9]|9[0-4])[.,][0-9]%\)" "$LOG1" \
     || { echo "FAIL: calm share of the sky is outside 60-95% -- see the pressure check line"; STATUS=1; }
 # ...and the wilds must not be empty, or "calm" has quietly become "dead".
 grep -qE "pressure check: .* wilds=[1-9][0-9]*\(" "$LOG1" \

@@ -3089,3 +3089,11 @@ listener, which fires from `Server.markWorldInitialized` — after `world.init()
 has loaded the world entity, so the record either comes back from the save or
 is created empty and saved from then on. Forgetting that listener produces a
 feature that compiles, registers, and silently never runs.
+
+## Server diagnostics follow the process locale (2026-09-02, VERIFIED [server])
+
+The dedicated server formats decimal percentages with the host locale:
+`SkyreachStatusCommand` printed `calm=17802(82,6%)` on a German host. Integration
+checks that parse diagnostic numbers must therefore accept both `.` and `,` as
+the decimal separator. The observed calm share was inside its required band;
+the former dot-only regex was the failure.
