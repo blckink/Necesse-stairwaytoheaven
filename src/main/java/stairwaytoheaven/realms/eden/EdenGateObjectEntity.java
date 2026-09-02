@@ -1,4 +1,4 @@
-package stairwaytoheaven.realms.crooked;
+package stairwaytoheaven.realms.eden;
 
 import necesse.engine.localization.message.GameMessage;
 import necesse.engine.network.packet.PacketChangeObject;
@@ -10,28 +10,25 @@ import necesse.entity.objectEntity.PortalObjectEntity;
 import necesse.level.gameObject.GameObject;
 import necesse.level.maps.Level;
 import stairwaytoheaven.SkyRegistry;
+import stairwaytoheaven.quest.SkyQuests;
+import stairwaytoheaven.quest.SkywatchWorldData;
 
 /**
- * Portal entity of the Skyreach-side Crooked Door.
+ * Portal entity of the living-world side of the Eden Gate.
  *
- * <p>The same proven flow the sky stairway and the Veil rift both use —
- * blocked-exit check, lazy level generation, counterpart placement, mob clearing
- * — with one thing that has to be different: <b>where you land</b>.
- *
- * <p>A door is opened at an arbitrary tile of the Outlands and its far side is
- * placed at the SAME coordinates, because that is how {@code PortalObjectEntity}
- * works. Crooked Beyond is mostly Spill
- * ({@link CrookedTerrainPainter#ISLAND_THRESHOLD}), so those coordinates are
- * very often open liquid. {@link #clearAndPlaceCrookedLanding} therefore does
- * what {@code VeilRiftObjectEntity} does for the marsh: it clears the 3x3
- * arrival area, places the return door, and turns any liquid in that square into
- * the realm's own ground so the player steps out onto stripes rather than into
- * green.
+ * <p>The same proven flow the Ghost Gate, the Veil rift and the sky stairway
+ * all use: check the far side is not blocked, generate it lazily, place the
+ * return gate, clear the mobs standing on the arrival tile. It adds one thing
+ * of its own — turning any liquid in the arrival square into Eden's own soil
+ * rather than the Aftergarden's grass — and one piece of quest wiring: a
+ * player's first step through this gate is also the first line of
+ * {@link stairwaytoheaven.quest.EdenArrivalQuest}, exactly as a player's first
+ * ascent of the Skyward Stairway hands {@code FindSpireQuest}.
  */
-public class CrookedDoorObjectEntity extends PortalObjectEntity {
+public class EdenGateObjectEntity extends PortalObjectEntity {
 
-    public CrookedDoorObjectEntity(Level level, int x, int y) {
-        super(level, "crookeddoordown", x, y, SkyRegistry.CROOKED_IDENTIFIER, x, y);
+    public EdenGateObjectEntity(Level level, int x, int y) {
+        super(level, "edengatedown", x, y, SkyRegistry.EDEN_IDENTIFIER, x, y);
         this.saveDestination = false;
     }
 
@@ -40,7 +37,7 @@ public class CrookedDoorObjectEntity extends PortalObjectEntity {
         ComputedFunction<Level, GameMessage> isBlockingExit = new ComputedFunction<>(level -> {
             level.regionManager.ensureTilesAreLoaded(this.destinationTileX, this.destinationTileY,
                     this.destinationTileX, this.destinationTileY);
-            return level.getObjectID(this.destinationTileX, this.destinationTileY) != SkyRegistry.crookedDoorUpID
+            return level.getObjectID(this.destinationTileX, this.destinationTileY) != EdenRealm.edenGateUpID
                     ? level.preventsLadderPlacement(this.destinationTileX, this.destinationTileY)
                     : null;
         });
@@ -63,35 +60,36 @@ public class CrookedDoorObjectEntity extends PortalObjectEntity {
             }
 
             level.regionManager.ensureTileIsLoaded(this.destinationTileX, this.destinationTileY);
-            if (level.getObjectID(this.destinationTileX, this.destinationTileY) != SkyRegistry.crookedDoorUpID) {
-                clearAndPlaceCrookedLanding(server, level, this.destinationTileX, this.destinationTileY,
-                        SkyRegistry.crookedDoorUpID);
+            if (level.getObjectID(this.destinationTileX, this.destinationTileY) != EdenRealm.edenGateUpID) {
+                clearAndPlaceEdenLanding(server, level, this.destinationTileX, this.destinationTileY,
+                        EdenRealm.edenGateUpID);
             }
 
             client.newStats.ladders_used.increment(1);
             this.runClearMobs(level, this.destinationTileX, this.destinationTileY);
 
-            // First line of the Crooked chain, mirroring how the Skyward
-            // Stairway hands FindSpireQuest on a player's first ascent. Guarded
-            // on the world record, not on "does the client hold one": a player
-            // who already paid Mr. Knott his three materials must not be handed
-            // the signpost again on their next walk through a door.
-            if (!stairwaytoheaven.quest.SkywatchWorldData.crookedDoorwayOpened(server)) {
-                stairwaytoheaven.quest.SkyQuests.giveOnce(server, client,
-                        new stairwaytoheaven.quest.CrookedArrivalQuest());
+            // First line of the chain. Guarded on the world record rather than
+            // on "does the client hold one": a player who already delivered the
+            // three plants and steps back through the gate must not be handed
+            // the signpost again — the chain is shared world progression, the
+            // same trade-off SkywardStairwayObjectEntity makes for FindSpireQuest.
+            if (!SkywatchWorldData.edenPlantsGiven(server)) {
+                SkyQuests.giveOnce(server, client, new stairwaytoheaven.quest.EdenArrivalQuest());
             }
             return true;
         }, true);
     }
 
     /**
-     * Crooked-side variant of {@code LadderDownObjectEntity.clearAndPlaceLadder}:
-     * clears the 3x3 arrival area, places the return door, and reclaims any Spill
-     * in that square as {@link CrookedLevel#landingTileID()}.
+     * Eden-side variant of {@code LadderDownObjectEntity.clearAndPlaceLadder}:
+     * clears the 3x3 arrival area, places the return gate, and turns any liquid
+     * in it into Rich Eden Soil — Eden's shallow lagoons are common enough at
+     * the coast that a gate whose far end lands in one would routinely drop the
+     * player in the water.
      */
-    public static void clearAndPlaceCrookedLanding(Server server, Level level, int tileX, int tileY,
-            int doorObjectID) {
-        GameObject doorObject = ObjectRegistry.getObject(doorObjectID);
+    public static void clearAndPlaceEdenLanding(Server server, Level level, int tileX, int tileY,
+            int gateObjectID) {
+        GameObject gateObject = ObjectRegistry.getObject(gateObjectID);
 
         for (int i = -1; i <= 1; i++) {
             int currentTileX = tileX + i;
@@ -106,13 +104,13 @@ public class CrookedDoorObjectEntity extends PortalObjectEntity {
                         level.entityManager.destroyObjectOverride(0, currentTileX, currentTileY);
                     }
 
-                    doorObject.placeObject(level, currentTileX, currentTileY, 0, false);
+                    gateObject.placeObject(level, currentTileX, currentTileY, 0, false);
                     if (level.getTile(currentTileX, currentTileY).isLiquid) {
-                        level.setTile(currentTileX, currentTileY, CrookedLevel.landingTileID());
+                        level.setTile(currentTileX, currentTileY, EdenRealm.edenSoilID);
                     }
 
                     server.network.sendToClientsWithTile(
-                            new PacketChangeObject(level, 0, currentTileX, currentTileY, doorObjectID),
+                            new PacketChangeObject(level, 0, currentTileX, currentTileY, gateObjectID),
                             level, currentTileX, currentTileY);
                 } else {
                     if (shouldClearObject && obj.preventsLadderPlacement(level, currentTileX, currentTileY) == null) {
@@ -123,8 +121,7 @@ public class CrookedDoorObjectEntity extends PortalObjectEntity {
                     }
 
                     if (level.getTile(currentTileX, currentTileY).isLiquid) {
-                        level.sendTileChangePacket(server, currentTileX, currentTileY,
-                                CrookedLevel.landingTileID());
+                        level.sendTileChangePacket(server, currentTileX, currentTileY, EdenRealm.edenSoilID);
                     }
                 }
             }

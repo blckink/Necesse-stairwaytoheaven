@@ -1,10 +1,22 @@
 package stairwaytoheaven.mobs;
 
 import java.awt.Color;
+import java.util.Collections;
+import java.util.List;
 
+import necesse.engine.localization.message.LocalMessage;
+import necesse.engine.network.server.Server;
+import necesse.engine.network.server.ServerClient;
+import necesse.entity.mobs.PlayerMob;
 import necesse.entity.mobs.friendly.human.humanShop.BuyingShopItem;
 import necesse.entity.mobs.friendly.human.humanShop.SellingShopItem;
 import necesse.gfx.HumanGender;
+import necesse.inventory.InventoryItem;
+import necesse.level.maps.Level;
+import stairwaytoheaven.quest.EdenArrivalQuest;
+import stairwaytoheaven.quest.EdenPlantsQuest;
+import stairwaytoheaven.quest.SkyQuests;
+import stairwaytoheaven.quest.SkywatchWorldData;
 
 /**
  * Eveleen, the Eden Botanist — {@code docs/WORLD_DESIGN.md} §5 and §27.
@@ -33,9 +45,19 @@ import necesse.gfx.HumanGender;
  *
  * <h2>Home region</h2>
  *
- * The Garden of Eden (§5). That realm is not built yet, so she has no worldgen
- * home today and reaches the player the other way: she travels to a settlement
- * that already has Eden grass growing in it. See {@code SkyArrivals.EDEN_PATCH}.
+ * The Garden of Eden (§5) — found beside a Knowledge Tree, one per world; see
+ * {@code EdenLevel.placeResident}. She can also still reach a settlement that
+ * already has Eden grass growing in it without the player ever visiting Eden
+ * ({@code SkyArrivals.EDEN_PATCH}); both routes share one claim, so the world
+ * only ever grows one Eveleen.
+ *
+ * <h2>The chain she hands out</h2>
+ *
+ * {@link stairwaytoheaven.quest.EdenArrivalQuest} then
+ * {@link stairwaytoheaven.quest.EdenPlantsQuest} — see {@link #interact}.
+ * Completing it makes her join for free: her recruit fee is normally
+ * {@link #recruitCost()}, and {@link #getRecruitItems} waives it once
+ * {@code SkywatchWorldData.edenPlantsGiven} is true.
  */
 public class EveleenMob extends SkySettlerMob {
 
@@ -95,6 +117,98 @@ public class EveleenMob extends SkySettlerMob {
                 .setPriceBasedOnHappiness(10, 2, 2);
         this.shop.addBuyingItem("sunflower", new BuyingShopItem())
                 .setPriceBasedOnHappiness(12, 3, 3);
+    }
+
+    /**
+     * Hands out and turns in {@link EdenArrivalQuest}/{@link EdenPlantsQuest}
+     * before opening her shop/recruit page, the same shape
+     * {@code EleanorMob.interact} uses for the Ghost chain.
+     *
+     * <p>Deliberately NOT gated on {@code !isSettler() && !isVisitor()}: her
+     * recruit fee is only waived once {@link SkywatchWorldData#edenPlantsGiven}
+     * is set, which means a player is always free to pay the ordinary fee and
+     * recruit her BEFORE ever delivering the three plants — the recruit page is
+     * right there on the same first meeting that hands out
+     * {@code EdenPlantsQuest}, one bubble line above it. An earlier version of
+     * this method assumed the chain was "already finished or moot" by the time
+     * she moved in, which is false in exactly that case: once she is a settler
+     * the assumption made this branch unreachable forever, so a delivered-late
+     * {@code EdenPlantsQuest} could never be turned in and its reward could
+     * never be paid — a permanent dead end of the kind
+     * {@code docs/CONTENT_LEDGER.md}'s own {@code swh_beacon} already is.
+     * {@code advanceEdenChain} is idempotent by its own two guards
+     * ({@code edenPlantsGiven} and {@code findHeld}), so running it on every
+     * interaction, settler or not, costs nothing and closes that gap: a player
+     * who recruited her early and comes back later with the fruit still
+     * completes the quest and is still paid, just without the free-recruit
+     * perk she can no longer offer.
+     */
+    @Override
+    public void interact(PlayerMob player) {
+        if (this.isServer() && player.isServerClient()) {
+            Level level = this.getLevel();
+            Server server = level == null ? null : level.getServer();
+            if (server != null) {
+                advanceEdenChain(server, player.getServerClient());
+            }
+        }
+        super.interact(player);
+    }
+
+    private void advanceEdenChain(Server server, ServerClient client) {
+        if (SkywatchWorldData.edenPlantsGiven(server)) {
+            return;
+        }
+        EdenPlantsQuest quest = SkyQuests.findHeld(client, EdenPlantsQuest.class);
+        if (quest == null) {
+            // First meeting: the signpost that led here is done, the ask begins.
+            SkyQuests.removeAllOfType(server, EdenArrivalQuest.class);
+            SkyQuests.giveOnce(server, client, new EdenPlantsQuest());
+            this.bubble("eveleenasksplants");
+            return;
+        }
+        if (!quest.canComplete(client)) {
+            return;
+        }
+        quest.complete(client); // DeliverItemsQuest.complete removes the delivered items itself.
+        SkyQuests.removeAllOfType(server, EdenPlantsQuest.class);
+        SkywatchWorldData.markEdenPlantsGiven(server);
+        // The Knowledge Cutting closes the loop the chain opened with "find
+        // the Knowledge Tree"; the bar stack is the endgame payout benchmarked
+        // against the Skyreach finale (docs/BALANCE.md), same as every other
+        // chain this pass adds.
+        give(client, "knowledgecutting", 3);
+        give(client, "stormsteelbar", 10);
+        this.bubble("eveleenplantsdone");
+        client.sendChatMessage(new LocalMessage("misc", "edenplantsdone"));
+    }
+
+    /** Reward hand-off; anything that does not fit drops at the player's feet. */
+    private void give(ServerClient client, String itemStringID, int amount) {
+        PlayerMob player = client.playerMob;
+        Level level = player.getLevel();
+        InventoryItem item = new InventoryItem(itemStringID, amount);
+        boolean added = player.getInv().main.addItem(level, player, item, "eveleen", null);
+        if (!added && item.getAmount() > 0) {
+            level.entityManager.pickups.add(
+                    new necesse.entity.pickup.ItemPickupEntity(level, item, player.x, player.y, 0.0F, 0.0F));
+        }
+    }
+
+    /**
+     * The price, stated by vanilla's own recruit page — waived once she has
+     * her three plants. {@code SkySettlerMob}'s own doc is explicit that this
+     * IS the payment mechanism and must never be hand-rolled in
+     * {@code interact()}; an empty list is exactly what a free recruit is.
+     */
+    @Override
+    public List<InventoryItem> getRecruitItems(ServerClient client) {
+        Level level = this.getLevel();
+        Server server = level == null ? null : level.getServer();
+        if (server != null && SkywatchWorldData.edenPlantsGiven(server)) {
+            return Collections.emptyList();
+        }
+        return super.getRecruitItems(client);
     }
 
     @Override protected int lookSeed() { return 0xE0E1EE; }

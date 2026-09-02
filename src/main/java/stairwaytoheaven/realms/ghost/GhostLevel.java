@@ -22,7 +22,7 @@ import stairwaytoheaven.worldgen.SkyNoise;
  * spirit mushrooms and the ectoplasm itself. "Life is gone" is not a mood note;
  * it is why there is no sun.
  *
- * <h2>Two things this does that VeilLevel does not</h2>
+ * <h2>Things this does that VeilLevel does not</h2>
  * <ol>
  * <li>{@link #placeGuardPacks} — the half of {@code WORLD_DESIGN} A4.1 that
  *     {@link GhostPressure} cannot buy. The pressure field makes open ground
@@ -30,10 +30,12 @@ import stairwaytoheaven.worldgen.SkyNoise;
  *     over the loot at generation. The mechanism is
  *     {@code SkyLevel.placeGuardPacks}, ported to this realm's own three
  *     lattices.</li>
- * <li>Nothing else. There is no resident placement and no herd placement here:
- *     the three Ghost NPCs ({@code WORLD_DESIGN} §11) and the five Ghost
- *     animals (§12) are a separate job and are deferred — see
- *     {@code docs/realms/ghost.md}.</li>
+ * <li>{@link #placeResidents} — Mortimer, Caspern and Eleanor
+ *     ({@code WORLD_DESIGN} §11), beside a gravestone. This realm is their
+ *     canonical home now that it exists; see
+ *     {@code settlement.VeilResidents}'s own doc for the move from the Veil.
+ *     The five Ghost animals (§12) remain a separate job and are still
+ *     deferred — see {@code docs/realms/ghost.md}.</li>
  * </ol>
  */
 public class GhostLevel extends BiomeGeneratorStackLevel {
@@ -101,11 +103,22 @@ public class GhostLevel extends BiomeGeneratorStackLevel {
         super.onRegionGenerated(region, skipGenerateForced);
         region.checkGenerationValid();
         placeGuardPacks(region);
+        placeResidents(region);
     }
 
     @Override
     public boolean canRain() {
         return false;
+    }
+
+    /**
+     * Mortimer, Caspern and Eleanor, beside a gravestone. All of the rules
+     * (rarity, the shared one-per-world claim, Eleanor's ending being final)
+     * live in {@code settlement.VeilResidents} — this is the one-call hook that
+     * class asks every one of its host levels for.
+     */
+    private void placeResidents(Region region) {
+        stairwaytoheaven.settlement.VeilResidents.placeInGhost(this, region, this.getWorldGenSeed());
     }
 
     // ---- Guarded places ---------------------------------------------------

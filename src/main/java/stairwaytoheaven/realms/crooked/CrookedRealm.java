@@ -53,9 +53,12 @@ import stairwaytoheaven.SkyRegistry;
  *
  * <h2>Deferred, and named rather than quietly missing</h2>
  * <ul>
- * <li><b>The Doorman (§15)</b> and <b>The Architect (§16)</b> — an NPC pass and a
- *     boss chapter, both out of scope here by instruction. The Long Table POI is
- *     the Architect's arena, built ahead of him.</li>
+ * <li><b>The Doorman (§15)</b> — was out of scope for this realm-building pass
+ *     "by instruction"; a later pass built him ({@code mobs.KnottMob}, placed by
+ *     {@code settlement.CrookedResidents} at the Door Yard) along with a short
+ *     quest chain ({@code quest.CrookedDoorQuest}). <b>The Architect (§16)</b> — a
+ *     boss chapter, still out of scope. The Long Table POI is his arena, built
+ *     ahead of him.</li>
  * <li><b>The Reality Stitcher (§13)</b> — the realm's crafting station, and with
  *     it every placeable Crooked wall, floor and piece of furniture. Nothing here
  *     is obtainable for that reason; see {@link CrookedObjects}.</li>

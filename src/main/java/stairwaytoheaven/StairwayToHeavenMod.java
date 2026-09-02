@@ -95,6 +95,13 @@ public class StairwayToHeavenMod {
         necesse.engine.registries.QuestRegistry.registerQuest("swh_beacon", stairwaytoheaven.quest.BeaconDeliveryQuest.class);
         necesse.engine.registries.QuestRegistry.registerQuest("swh_cats", stairwaytoheaven.quest.SpireCatsQuest.class);
         necesse.engine.registries.QuestRegistry.registerQuest("swh_anchor", stairwaytoheaven.quest.AnchorDeliveryQuest.class);
+        // One short chain per new realm (Eden, Ghost, Crooked Beyond) — see
+        // each quest class's own doc for the story and the reward.
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_edenreach", stairwaytoheaven.quest.EdenArrivalQuest.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_edenplants", stairwaytoheaven.quest.EdenPlantsQuest.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_eleanor", stairwaytoheaven.quest.EleanorQuest.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_crookedarrival", stairwaytoheaven.quest.CrookedArrivalQuest.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_crookeddoor", stairwaytoheaven.quest.CrookedDoorQuest.class);
         // World-map icons for the auto-placed markers (spire + return
         // stairway). Textures load client-side via GameResources; the
         // registration itself is texture-free and server-safe.

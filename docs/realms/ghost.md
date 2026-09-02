@@ -36,8 +36,19 @@ paths and are also recorded in `docs/VANILLA_ASSET_MAP.md`.
 | Spiritsteel armour | `items/soulseedcrown`, `items/soulseedchestplate`, `items/soulseedboots` and matching `player/armor/soulseed*` sheets |
 | Portal pair | existing mod sheets `objects/veilriftdown`, `objects/veilriftup` |
 
+## Settlers and quest
+
+The three named Ghost NPCs now stand beside a gravestone, one per world:
+Mortimer the Undertaker (`mortimersettler`, hunter), Caspern the Spirit Smith
+(`caspernsettler`, dedicated crafter) and Eleanor the Lost Soul
+(`eleanorsettler`, husbandry). Mortimer and Caspern also travel to a
+settlement once it has built a graveyard or an Aether Forge, respectively;
+Eleanor never travels — `EleanorQuest` wraps her two endings (PASS ON for a
+Will-o'-Wisp Lantern plus Spiritsteel bars, or STAY as a settler) in one
+journal entry. See `docs/settlers.md` and `docs/quests.md`.
+
 ## Deferred
 
-The named Ghost NPCs, animals, quest chapter, spectral weapon family and the
-realm-wide walking-ghost event are separate content families. They are not
-claimed by this implementation.
+The five Ghost animals (§12), the spectral weapon family and the realm-wide
+walking-ghost event are separate content families. They are not claimed by
+this implementation.

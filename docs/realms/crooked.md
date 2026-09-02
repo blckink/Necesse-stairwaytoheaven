@@ -28,9 +28,19 @@ art and literal vanilla-resource paths only; no new pixel art was generated.
 | doorway | existing mod `objects/veilrift`, `objects/veilriftup` | the two Crooked travel doors |
 | stripe ground | existing mod `tiles/beetlefreak` | Crooked Stripe terrain |
 
+## Settler and quest chain
+
+Mr. Knott, the Doorman (`knottsettler`), stands at the Door Yard, one per
+world (`settlement.CrookedResidents`); he does not travel to a settlement on
+his own — §15 names no such condition. `CrookedArrivalQuest` (handed out on
+first use of a Crooked Door) and `CrookedDoorQuest` (5 Reality Shards, 8 Warp
+Resin, 8 Strange Fabric, handed to Knott) are his two-step chain, paying a
+Zephyr Harness, 12 Stormsteel bars and 6 Reality Shards back. See
+`docs/settlers.md` and `docs/quests.md`.
+
 ## Deferred
 
-- Mr. Knott and the Architect: NPC/boss chapters need their own gameplay pass.
+- The Architect: the boss chapter needs its own gameplay pass.
 - Reality Stitcher and the placeable Crooked building family: no suitable complete
   borrowed station family is wired yet.
 - Long-Legged Chicken and Crooked Goat: explicitly excluded by the handoff's

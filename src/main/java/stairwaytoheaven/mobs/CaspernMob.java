@@ -38,9 +38,10 @@ import necesse.gfx.HumanGender;
  *
  * <h2>Home region</h2>
  *
- * Ghost Realm / Aftergarden (§10-§11) when it exists; the VEIL today. He
- * travels to a settlement once it has a forge — §11's "build the Spirit Forge",
- * answered with the forge the mod actually has. See {@code SkyArrivals.FORGE}.
+ * Ghost Realm / Aftergarden (§10-§11), beside a gravestone; see
+ * {@code settlement/VeilResidents}. He also travels to a settlement once it has
+ * a forge — §11's "build the Spirit Forge", answered with the forge the mod
+ * actually has. See {@code SkyArrivals.FORGE}.
  */
 public class CaspernMob extends SkySettlerMob {
 

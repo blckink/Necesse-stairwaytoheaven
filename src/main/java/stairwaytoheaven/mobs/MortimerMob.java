@@ -36,9 +36,9 @@ import necesse.gfx.HumanGender;
  *
  * <h2>Home region</h2>
  *
- * Ghost Realm / Aftergarden (§10-§11) when it exists. Today he stands in the
- * VEIL, which is the layer that realm will grow out of, beside the bone piles.
- * See {@code settlement/VeilResidents}.
+ * Ghost Realm / Aftergarden (§10-§11), beside a gravestone; see
+ * {@code settlement/VeilResidents} for the placement rules and for why that
+ * class still carries the Veil's name.
  */
 public class MortimerMob extends SkySettlerMob {
 

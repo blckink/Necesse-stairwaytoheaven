@@ -3,6 +3,7 @@ package stairwaytoheaven.mobs;
 import java.awt.Color;
 
 import necesse.engine.localization.message.LocalMessage;
+import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
 import necesse.engine.registries.ItemRegistry;
 import necesse.entity.pickup.ItemPickupEntity;
@@ -12,6 +13,10 @@ import necesse.entity.mobs.friendly.human.humanShop.SellingShopItem;
 import necesse.gfx.HumanGender;
 import necesse.inventory.InventoryItem;
 import necesse.level.maps.Level;
+import necesse.level.maps.levelData.settlementData.LevelSettler;
+import necesse.level.maps.levelData.settlementData.ServerSettlementData;
+import stairwaytoheaven.quest.EleanorQuest;
+import stairwaytoheaven.quest.SkyQuests;
 import stairwaytoheaven.quest.SkywatchWorldData;
 
 /**
@@ -57,10 +62,16 @@ import stairwaytoheaven.quest.SkywatchWorldData;
  *
  * <h2>Home region</h2>
  *
- * Ghost Realm / Aftergarden (§10-§11) when it exists; the VEIL today. She never
- * travels to a settlement on her own — that is what {@code Settler
- * .addNewRecruitSettler} adding no ticket means, and it is deliberate: an
- * ending you can be handed by a visitor timer is not an ending.
+ * Ghost Realm / Aftergarden (§10-§11), beside a gravestone; see
+ * {@code settlement.VeilResidents}. She never travels to a settlement on her
+ * own — that is what {@code Settler.addNewRecruitSettler} adding no ticket
+ * means, and it is deliberate: an ending you can be handed by a visitor timer
+ * is not an ending.
+ *
+ * <h2>Her quest</h2>
+ *
+ * {@link stairwaytoheaven.quest.EleanorQuest} wraps both endings in one journal
+ * entry — see that class and {@link #onRecruited}.
  */
 public class EleanorMob extends SkySettlerMob {
 
@@ -77,6 +88,17 @@ public class EleanorMob extends SkySettlerMob {
      * swaps for a mod trinket when the Ghost Realm ships one.
      */
     public static final String PASS_ON_REWARD = "willowisplantern";
+
+    /**
+     * Spiritsteel bars handed over on EITHER ending (see {@link #interact}'s
+     * PASS ON branch and {@link #onRecruited}) — the endgame material payout
+     * §11 itself does not name a number for. 14 rather than the Anchor's 10:
+     * Spiritsteel is one tier above Stormsteel on {@code docs/BALANCE.md}'s own
+     * gear ladder (34 chest armour / 2400 enchant vs. 29 / 1900), so "at or
+     * above" the Anchor's reward means more of the mod's own harder bar, not
+     * merely matching the count of an easier one.
+     */
+    public static final int PASS_ON_BAR_BONUS = 14;
 
     public EleanorMob() {
         super("eleanorsettler");
@@ -121,6 +143,14 @@ public class EleanorMob extends SkySettlerMob {
         ServerClient client = player.getServerClient();
         Level level = this.getLevel();
 
+        // The journal entry for "there is a choice here" — handed the first
+        // time she is found and neither ending has happened yet. Both endings
+        // below remove it; see EleanorQuest's own doc.
+        Server server = level == null ? null : level.getServer();
+        if (server != null) {
+            SkyQuests.giveOnce(server, client, new EleanorQuest());
+        }
+
         InventoryItem held = player.getSelectedItem();
         boolean offering = held != null && held.item != null
                 && "veilessence".equals(held.item.getStringID());
@@ -146,10 +176,37 @@ public class EleanorMob extends SkySettlerMob {
         this.bubble("eleanorfarewell");
         client.sendChatMessage(new LocalMessage("misc", "eleanorpassedon"));
         give(client, PASS_ON_REWARD, 1);
-        if (level.getServer() != null) {
-            SkywatchWorldData.markEleanorPassedOn(level.getServer());
+        // The endgame payout on top of the trinket §11 names: benchmarked the
+        // same way every other chain this pass adds is, against the Skyreach
+        // finale's own 10 Stormsteel bars (docs/BALANCE.md) — Ghost Realm's own
+        // bar, and more of it, since she is made of what it is smelted from.
+        give(client, "spiritsteelbar", PASS_ON_BAR_BONUS);
+        if (server != null) {
+            SkywatchWorldData.markEleanorPassedOn(server);
+            SkyQuests.removeAllOfType(server, EleanorQuest.class);
         }
         this.remove();
+    }
+
+    /**
+     * The STAY ending: {@code startInRecruitForm} (true while she is not a
+     * settler) already sent the player to vanilla's own recruit page and
+     * {@code ShopContainer.payForRecruit} already took the coins — this only
+     * closes the journal entry and hands the same material bonus the PASS ON
+     * branch gets, so neither ending reads as the materially poorer choice.
+     */
+    @Override
+    public void onRecruited(ServerClient client, ServerSettlementData data, LevelSettler settler) {
+        super.onRecruited(client, data, settler);
+        if (client == null) {
+            return;
+        }
+        Server server = client.getServer();
+        if (server != null) {
+            SkyQuests.removeAllOfType(server, EleanorQuest.class);
+        }
+        give(client, "spiritsteelbar", PASS_ON_BAR_BONUS);
+        client.sendChatMessage(new LocalMessage("misc", "eleanorstaydone"));
     }
 
     /** Reward hand-off; anything that does not fit drops at the player's feet. */
