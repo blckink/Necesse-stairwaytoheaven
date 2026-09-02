@@ -103,7 +103,7 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              # The two spire cats on vanilla's DUCK sheet (384x320), the
              # spark beetle and the cat basket.
              "mobs/spirecatblack.png", "mobs/spirecattabby.png",
-             "mobs/sparkbeetle.png", "mobs/glowmoth.png",
+             "mobs/sparkbeetle.png", "mobs/glowmoth.png", "mobs/stormwisp.png",
              "objects/catbasket.png",
              "mobs/crookedgolem.png", "mobs/rarecrookedgolem.png",
              "mobs/crookedarmadillo.png",
@@ -258,7 +258,8 @@ def main():
 
     # Mobs + bestiary icons
     gen_mobs.gen_zephyrray(f"{out}/mobs/zephyrray.png")
-    gen_mobs.gen_stormwisp(f"{out}/mobs/stormwisp.png")
+    # mobs/stormwisp.png is supplied art now; gen_mobs.gen_stormwisp stays as
+    # the record of the generated one. Its bestiary icon is still drawn.
     gen_mobs.gen_skystonegolem(f"{out}/mobs/skystonegolem.png")
     gen_mobs.gen_icons(f"{out}/mobs/icons")
     # The Mistserpent: worm sheet, dive mask, shadow and bestiary icon.

@@ -41,7 +41,7 @@ come in packs around loot and leave the rest of the sky quiet.
 
 | id | role | art |
 |---|---|---|
-| `skystonegolem`, `zephyrray`, `stormwisp`, `galehound`, `dawnpiercer` | Sky hostiles | ours (generated) |
+| `skystonegolem`, `zephyrray`, `stormwisp`, `galehound`, `dawnpiercer` | Sky hostiles | **stormwisp = your sheet**, rest generated |
 | `rimesentry`, `auroraflake` | Sky hostiles (arsenal tier) | **auroraflake = your sheet**, rimesentry generated |
 | `mistserpent` (+ body, tail) | the sky's roaming worm, mistsea only | **your sheets**, drawn on vanilla's Crystal Dragon format |
 | `crookedgolem`, `rarecrookedgolem`, `crookedarmadillo` | Outlands | ours |
