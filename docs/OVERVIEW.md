@@ -16,7 +16,8 @@ registered but unreachable.
 | **Veil** | `VeilLevel` | `veillevel` / `veil2` | −3 | **PLAY** |
 | **Ghost Realm** | `GhostLevel` | `ghostlevel` / `ghost2` | +4 | **IN** — registered, three biomes/POIs, seven mobs; dedicated realm generation not yet probed |
 | **Crooked Beyond** | `CrookedLevel` | `crookedlevel` / `crooked2` | +5 | **IN** — registered, three biomes/POIs and paired doors; dedicated realm generation not yet probed |
-| Eden, Steinfeld | WIP branches | not merged | +2 / +3 planned | incomplete |
+| **Eden** | `EdenLevel` | `edenlevel` / `eden2` | +2 | **DEAD** — generated and restart-tested, but no player-facing gate yet |
+| Steinfeld | isolated WIP | not merged | +3 planned | incomplete |
 | Infernal Fringe, Hell Antechamber, Hell | — | — | — | not built |
 
 ## 2. Biomes and who lives in them
@@ -31,6 +32,9 @@ registered but unreachable.
 | `gloomfen` | Veil | gloomshade 90/3, fenwraith 55/2, cindercantor 30/2 | — | wraith / 2 shades + cantor, 4–6 |
 | `ashenreach` | Veil | gloomshade 55/2, cindercantor 70/2, fenwraith 35/2 | — | wraith + cantor / shade + cantor, 4–6 |
 | `beetlefreakhollow` | Veil | gloomshade 100/3, fenwraith 40/2, cindercantor 35/2 | — | wraith / 3 shades + cantor, 5–7 |
+| `edengarden` | Eden | edenserpent, bloommaw, jealousvine, goldenhornet | native vegetation aliases | POIs not built |
+| `edencanopy` | Eden | bloommaw, jealousvine, goldenhornet, forbiddenserpent | native vegetation aliases | POIs not built |
+| `edenshallows` | Eden | edenserpent, goldenhornet | native vegetation aliases | POIs not built |
 
 **Mistsea** (the cloud sea between the islands, 61 % of the sky) carries the
 **Mistserpent** in all four sky biomes at weight 300, capped at one per spawn

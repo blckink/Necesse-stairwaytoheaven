@@ -3106,3 +3106,11 @@ server does not load `GameResources`. The supplied Mistserpent map marker is
 and survived a server boot but would have drawn the client ERR texture. The
 literal-path pass in `tools/locale_audit.py` caught it. Keep supplied filenames
 and `GameTexture.fromFile` literals in lockstep, including underscores.
+
+## A vanilla object's registry ID can differ from its texture name (2026-09-02, VERIFIED [jar] [server])
+
+The native ivy ore object is registered as `ivyoreswamp`, while its
+`RockOreObject` texture argument is `ivyore`. `javap` against the 1.3.2 server
+jar established the registration, and the Eden integration run then loaded and
+generated the object successfully. Never infer an object registry ID from its
+sprite filename; inspect the actual registration first.

@@ -15,7 +15,6 @@ import necesse.gfx.gameTexture.GameTexture;
 import necesse.inventory.lootTable.LootTable;
 import necesse.inventory.lootTable.lootItem.ChanceLootItemList;
 import necesse.inventory.lootTable.lootItem.LootItem;
-import necesse.level.maps.Level;
 
 /**
  * Forbidden Serpent — the elite, and the thing that lives near the Knowledge
@@ -85,6 +84,7 @@ public class ForbiddenSerpentMob extends EdenHostileMob {
     @Override
     public void init() {
         super.init();
+        this.canDespawn = false;
         this.ai = new BehaviourTreeAI<>(this,
                 new ConfusedCollisionPlayerChaserWandererAI<ForbiddenSerpentMob>(null, 640, DAMAGE, 150, 40000) {
                     @Override
@@ -147,19 +147,4 @@ public class ForbiddenSerpentMob extends EdenHostileMob {
         }
     }
 
-    /**
-     * Elites do not fade out of the world.
-     *
-     * <p>VERIFIED [jar] {@code EntityManager.tickMobSpawning} counts only
-     * {@code isHostile && canDespawn} against a player's spawn cap, so a
-     * persistent elite costs the ambient budget nothing — and one that despawns
-     * turns a place the player decided to come back to into an empty clearing.
-     * The placed guards are pinned the same way in
-     * {@link EdenLevel#onRegionGenerated}; this covers the ambient rolls too.
-     */
-    @Override
-    public void init(Level level) {
-        super.init(level);
-        this.canDespawn = false;
-    }
 }

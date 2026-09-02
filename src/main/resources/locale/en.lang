@@ -699,3 +699,51 @@ chairlastwords=At last, somebody sat still.
 basinalreadyghost=The basin is quiet here. You are already among the dead.
 basinneedsectoplasm=The basin needs twelve Ectoplasm.
 ghostgateopened=The basin fills with cold light and opens into the Aftergarden.
+
+// Garden of Eden
+[level]
+eden2=Garden of Eden
+[biome]
+edengarden=Eden Garden
+edencanopy=Eden Canopy
+edenshallows=Eden Shallows
+[tile]
+paradisesandtile=Paradise Sand
+edenshallowstile=Eden Shallows
+edenmosstile=Eden Moss
+edensoiltile=Rich Eden Soil
+edenrootfloortile=Root Floor
+[item]
+edenwood=Eden Wood
+edensap=Eden Sap
+paradiseapple=Paradise Apple
+serpentscale=Serpent Scale
+venomfang=Venom Fang
+goldenpollen=Golden Pollen
+knowledgecutting=Knowledge Cutting
+paradisecoconut=Paradise Coconut
+edenberry=Eden Berry
+moonmelon=Moon Melon
+sungrape=Sun Grape
+edencopperore=Eden Copper Ore
+edenbronzebar=Eden Bronze Bar
+[itemtooltip]
+edenwoodtip=Warm wood harvested in an impossibly fertile garden.
+edensaptip=Living resin from Eden's aggressive plants.
+paradiseappletip=Fruit from a garden that grows too well.
+serpentscaletip=A hard scale shed by Eden's serpents.
+venomfangtip=A fang still wet with garden venom.
+goldenpollentip=Bright pollen carried by Golden Hornets.
+knowledgecuttingtip=A living cutting from a Knowledge Tree.
+paradisecoconuttip=A heavy coconut from Eden's lagoon shore.
+edenberrytip=A jewel-bright berry grown in Eden.
+moonmelontip=A cool fruit that seems brighter after sunset.
+sungrapetip=A warm grape intended for pressing.
+edencopperoretip=Verdant copper ore from beneath Eden's roots.
+edenbronzebartip=A bar of Eden Bronze, smelted with living sap.
+[mob]
+edenserpent=Eden Serpent
+bloommaw=Bloom Maw
+jealousvine=Jealous Vine
+goldenhornet=Golden Hornet
+forbiddenserpent=Forbidden Serpent

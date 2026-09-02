@@ -67,6 +67,38 @@ chapter; the ground is real now.
 | `overgrownedentile` | tile | Eden grass: deep lush ground that sprouts grass tufts on its own, spreads to dirt, and seeds itself back at 4% when mined — the Garden of Eden's first ground, plantable today. |
 | `overgrownedenseed` | item | Eden grass seeds: plant on dirt or Cloudturf to start an Eden patch; found rarely in sky crates, then self-renewing. |
 
+## The Garden of Eden — generated core
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `eden2` | level | The infinite Garden of Eden level at dimension +2. |
+| `edengarden` | biome | Eden's dense common garden of fruit, flowers and concealed predators. |
+| `edencanopy` | biome | Rooted deep growth around Knowledge Trees and Eden Copper. |
+| `edenshallows` | biome | White beaches and quiet shallow lagoons. |
+| `paradisesandtile` | tile | White lagoon sand borrowed from vanilla's native sand terrain. |
+| `edenshallowstile` | tile | Eden's shallow lagoon liquid. |
+| `edenmosstile` | tile | Thin organic green between patches of supplied Eden Grass. |
+| `edensoiltile` | tile | Rich organic soil beneath the canopy. |
+| `edenrootfloortile` | tile | Ancient-root ground under Eden's largest trees. |
+| `edenwood` | item | Common wood material recovered from Eden vegetation and enemies. |
+| `edensap` | item | Living plant resin used in Eden metalworking. |
+| `paradiseapple` | item | Eden fruit dropped by Bloom Maws and garden caches. |
+| `serpentscale` | item | Common combat material from Eden's serpents. |
+| `venomfang` | item | Rare poison material from Eden's serpents and hornets. |
+| `goldenpollen` | item | Bright material carried by Golden Hornets. |
+| `knowledgecutting` | item | Rare living cutting recovered near Knowledge Trees. |
+| `paradisecoconut` | item | Lagoon-shore fruit and cache reward. |
+| `edenberry` | item | Common Eden berry and cache reward. |
+| `moonmelon` | item | Cool garden fruit and cache reward. |
+| `sungrape` | item | Warm shore fruit intended for the future Eden Press. |
+| `edencopperore` | item | Verdant ore mined beneath Eden's canopy. |
+| `edenbronzebar` | item | Eden's first combat metal, made from ore and living sap. |
+| `edenserpent` | mob | Standard poisonous ground predator hidden in dense growth. |
+| `bloommaw` | mob | Stationary carnivorous flower guarding garden caches. |
+| `jealousvine` | mob | Slow, heavy canopy predator emerging from vegetation. |
+| `goldenhornet` | mob | Fast Eden flier, tightly capped by biome spawn rules. |
+| `forbiddenserpent` | mob | Persistent elite associated with Knowledge Trees. |
+
 ## The Veil — Geisternebel, and the gate it is
 
 `docs/WORLD_DESIGN.md` §8: past a defined realm depth a permanent fog stands,

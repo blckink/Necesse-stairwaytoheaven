@@ -700,3 +700,51 @@ chairlastwords=Endlich saß jemand still.
 basinalreadyghost=Das Becken schweigt hier. Du bist bereits bei den Toten.
 basinneedsectoplasm=Das Becken braucht zwölf Ektoplasma.
 ghostgateopened=Das Becken füllt sich mit kaltem Licht und öffnet sich zum Nachgarten.
+
+// Garten Eden
+[level]
+eden2=Garten Eden
+[biome]
+edengarden=Garten Eden
+edencanopy=Eden-Baumkronen
+edenshallows=Eden-Ufer
+[tile]
+paradisesandtile=Paradiessand
+edenshallowstile=Eden-Flachwasser
+edenmosstile=Edenmoos
+edensoiltile=Reiche Edenerde
+edenrootfloortile=Wurzelboden
+[item]
+edenwood=Edenholz
+edensap=Edensaft
+paradiseapple=Paradiesapfel
+serpentscale=Schlangenschuppe
+venomfang=Giftzahn
+goldenpollen=Goldener Pollen
+knowledgecutting=Wissenssteckling
+paradisecoconut=Paradieskokosnuss
+edenberry=Edenbeere
+moonmelon=Mondmelone
+sungrape=Sonnentraube
+edencopperore=Edenkupfererz
+edenbronzebar=Edenbronzebarren
+[itemtooltip]
+edenwoodtip=Warmes Holz aus einem unmöglich fruchtbaren Garten.
+edensaptip=Lebendes Harz aus Edens angriffslustigen Pflanzen.
+paradiseappletip=Frucht aus einem Garten, der zu gut wächst.
+serpentscaletip=Eine harte Schuppe von Edens Schlangen.
+venomfangtip=Ein Zahn, noch feucht von Gartengift.
+goldenpollentip=Leuchtender Pollen, getragen von Goldhornissen.
+knowledgecuttingtip=Ein lebender Steckling vom Baum der Erkenntnis.
+paradisecoconuttip=Eine schwere Kokosnuss von Edens Lagunenrand.
+edenberrytip=Eine juwelenhelle Beere aus Eden.
+moonmelontip=Eine kühle Frucht, die nach Sonnenuntergang heller wirkt.
+sungrapetip=Eine warme Traube, die gepresst werden will.
+edencopperoretip=Grünes Kupfererz unter Edens Wurzeln.
+edenbronzebartip=Ein mit lebendem Harz verhütteter Edenbronzebarren.
+[mob]
+edenserpent=Edenschlange
+bloommaw=Blütenrachen
+jealousvine=Eifersüchtige Ranke
+goldenhornet=Goldhornisse
+forbiddenserpent=Verbotene Schlange

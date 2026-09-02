@@ -147,13 +147,13 @@ vanilla's, so the vanilla file is the format reference and must stay findable.
 
 ---
 
-## 2. Proposed stand-ins for the realms not yet built
+## 2. Stand-ins for the later realms
 
-**Nothing below is in the code yet.** This is the shopping list, so the player
-can see in advance what the style swap will cover. Every entry was checked
-against the real dump in `vanilla-sprites/` (6,121 files, game 1.3.2).
+Every entry was checked against the real dump in `vanilla-sprites/` (6,121
+files, game 1.3.2). Eden, Ghost and Crooked entries are now in use where their
+realm sections say so; the remaining rows are the future shopping list.
 
-### 2.1 Garden of Eden (Tier 1)
+### 2.1 Garden of Eden (Tier 1) — generated core in use
 
 | vanilla asset | stands in for |
 |---|---|
@@ -170,6 +170,8 @@ against the real dump in `vanilla-sprites/` (6,121 files, game 1.3.2).
 | `objects/blueflowerpatch` | Blue Paradise Flower |
 | `objects/ivyore` | Eden Copper / Verdant Ore |
 | the whole `palm*` furniture family (bed, chair, table, chest, wall, …) | Eden architecture — a complete set already exists |
+| `mobs/crocodile`, `stabbybush`, `dryadsentinel`, `bee`, `dragonwhelp` | Eden Serpent, Bloom Maw, Jealous Vine, Golden Hornet and Forbidden Serpent bodies |
+| `items/palmlog`, `dryadbranch`, `apple`, `sharkscales`, `fangoftheprotector`, `honey`, `dryadsapling`, `coconut`, `blueberry`, `frozenberry`, `raspberry`, `ivyore`, `ivybar` | Eden's first material and fruit icons |
 
 ### 2.2 Steinfeld (Tier 2)
 

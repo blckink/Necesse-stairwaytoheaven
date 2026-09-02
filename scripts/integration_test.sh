@@ -175,6 +175,10 @@ echo "Running veilstatus..."
 echo "veilstatus" >&3
 wait_for "VEIL_STATUS_DONE" 180
 
+echo "Running edenstatus..."
+echo "edenstatus" >&3
+wait_for "EDEN_STATUS_DONE" 240
+
 # Surface pass. The Surface POIs are placed by vanilla's own world-preset
 # machinery, which means "the preset compiles" and "the preset lands in a world"
 # are two completely different claims. `stamp` measures both: it reads the queue
@@ -252,6 +256,14 @@ STATUS=0
 LOG="$LOG1"
 grep -qE "Skyreach OK: class=SkyLevel" "$LOG1" || { echo "FAIL: SkyLevel was not instantiated"; STATUS=1; }
 grep -qE "tile (cloudturftile|mistseatile)" "$LOG1" || { echo "FAIL: sky terrain did not generate"; STATUS=1; }
+grep -qE "Eden OK: class=EdenLevel.*dimension=2.*isCave=false" "$LOG1" \
+    || { echo "FAIL: EdenLevel was not generated in dimension +2"; STATUS=1; }
+grep -qE "eden biome (edengarden|edencanopy|edenshallows)" "$LOG1" \
+    || { echo "FAIL: Eden biomes did not paint"; STATUS=1; }
+grep -qE "eden tile (overgrownedentile|edenshallowstile|paradisesandtile)" "$LOG1" \
+    || { echo "FAIL: Eden terrain did not generate"; STATUS=1; }
+grep -qE "eden registry: bronze=[0-9]+ serpent=[0-9]+ forbidden=[0-9]+" "$LOG1" \
+    || { echo "FAIL: Eden items or mobs were not registered"; STATUS=1; }
 grep -qE "biome (driftlands|stormveil|aurorashoals|skyway)" "$LOG1" || { echo "FAIL: sky biomes did not paint"; STATUS=1; }
 grep -qE "spirePlaced=true" "$LOG1" || { echo "FAIL: Warden's Spire was not stamped"; STATUS=1; }
 grep -qE "beaconObject=wardenbeaconoff" "$LOG1" || { echo "FAIL: spire beacon object missing"; STATUS=1; }

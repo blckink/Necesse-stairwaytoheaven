@@ -12,7 +12,7 @@ history. Updated 2026-09-02.
 
 ---
 
-## 1. Biomes — 14 registered
+## 1. Biomes — 17 registered
 
 | biome | realm | ground | status |
 |---|---|---|---|
@@ -24,6 +24,9 @@ history. Updated 2026-09-02.
 | Gloomfen | Ghost (in the Veil dimension) | murkmoss | `[run]` full |
 | Ashen Reach | Ghost (in the Veil dimension) | ashsand | `[run]` full |
 | Beetlefreak Hollows | Ghost (in the Veil dimension) | beetlefreak | `[run]` full |
+| Eden Garden | Eden (`eden2`, +2) | Eden grass + moss | `[run]` generated core; vegetation aliases use native vanilla objects |
+| Eden Canopy | Eden | root floor + rich soil | `[run]` generated core; Knowledge Tree and copper stand-ins |
+| Eden Shallows | Eden | Paradise Sand + shallow lagoon | `[run]` generated core |
 | Striped Waste | Crooked Beyond (`crooked2`, +5) | crooked stripe | `[build]` painter, mobs and POIs compiled; realm generation not yet run |
 | Spiral Fields | Crooked Beyond | spiral soil + violet mud | `[build]` |
 | Checkerworks | Crooked Beyond | checker stone | `[build]` |
@@ -31,20 +34,17 @@ history. Updated 2026-09-02.
 | Bone Orchard | Ghost Realm | violet dirt + spirit stone | `[build]` |
 | Ectomarsh | Ghost Realm | ghost moss + ectoplasm | `[build]` |
 
-**Not built at all:** Infernal Fringe, Hell Antechamber, Hell. Eden and
-Steinfeld have substantial code on their dedicated WIP branches but are not
-merged because their level/realm/content families are incomplete.
-Eden's first brick exists as of 2026-09-01: `overgrownedentile` (supplied art)
-+ `overgrownedenseed`, plantable on dirt and Cloudturf, found in sky crates,
-self-propagating — `[run]`, `eden check` in the integration test. The realm
-band itself ships with the Eden chapter.
+**Not built at all:** Infernal Fringe, Hell Antechamber, Hell. Steinfeld still
+has substantial isolated WIP code. Eden's generated realm core now exists, but
+its player-facing gate, POI presets, farming/livestock, Press, fishing, quest
+chapter and Keeper boss remain unbuilt; see `docs/realms/eden.md`.
 The `RealmDepth` field already describes all six distance bands. The completed
 Crooked and Ghost implementations currently use separate registered dimensions;
 their reconciliation with the one-road world concept remains design work.
 
-**Crate loot exists only in the four Skyreach biomes.** The Veil/Ghost biomes
-have no `getCrateLootTable` and no crate is placed there — the harder realms pay
-out nothing. Highest-value open gap.
+The four Skyreach biomes and all three Eden biomes define crate loot. Eden's
+painter places the native `skycache` alias; Veil/Ghost still have no
+`getCrateLootTable` and place no crates, so those harder realms pay out nothing.
 
 ## 2. Quests — 5 registered
 
