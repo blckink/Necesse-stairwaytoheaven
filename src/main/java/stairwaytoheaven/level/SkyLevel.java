@@ -123,11 +123,23 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
             return;
         }
         String who = RESIDENTS[random.nextInt(RESIDENTS.length)];
-        // One of each per world. The level's own entity list is the record:
-        // asking it is cheaper than a world flag and cannot drift out of sync
-        // with what is actually standing there.
+        // One of each per world. The level's own entity list is the first
+        // record: asking it is cheap and cannot drift out of sync with what is
+        // actually standing there.
         for (Mob existing : this.entityManager.mobs) {
             if (who.equals(existing.getStringID())) {
+                return;
+            }
+        }
+        // ...and the WORLD record is the second, which the entity list cannot
+        // replace. A resident can now also reach the player by moving into a
+        // settlement (settlement/SkyArrivals), and that happens on the SURFACE
+        // — a level this scan will never see. Without the shared claim a world
+        // could stand up a second Magpie beside a workshop while the first one
+        // is asleep in the player's town. See SkywatchWorldData.residentsClaimed.
+        necesse.engine.network.server.Server server = this.getServer();
+        if (server != null) {
+            if (stairwaytoheaven.quest.SkywatchWorldData.residentClaimed(server, who)) {
                 return;
             }
         }
@@ -151,6 +163,9 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
             }
             mob.canDespawn = false;
             this.entityManager.addMob(mob, tileX * 32 + 16, tileY * 32 + 16);
+            if (server != null) {
+                stairwaytoheaven.quest.SkywatchWorldData.claimResident(server, who);
+            }
             return;
         }
     }

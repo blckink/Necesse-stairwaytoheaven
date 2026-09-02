@@ -24,6 +24,23 @@ standing at a derelict workshop in the Skyreach.
 | `haldasettler` | mob | Halda the Cellarer: sells the worked goods of the three stations (skyweave, stormglass, stormsteel) and buys the raw end of every sky gathering loop. |
 | `ossiansettler` | mob | Ossian Vane, the last reader: the only source of incursion-tier salvage without an incursion, and the Aether Forge's customer for high-tier bars. |
 
+## Settlers with professions — the four who travel
+
+The mod's first settlers that arrive at a settlement on their own, the way every
+vanilla settler does, and the first that hold a real vanilla **profession** (the
+`defaultDisabledBySettler` job types — see `settlement/SkyArrivals` and
+`mobs/SkySettlerMob`). Each is a `HumanShop` with a registered `Settler`, wears
+vanilla clothing items, and borrows a vanilla settler face for its settlement
+icon — **no new art**; every borrowed path has a row in
+`docs/VANILLA_ASSET_MAP.md`.
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `eveleensettler` | mob | Eveleen the Eden Botanist: the settlement's **farmer** — the only settler who can fertilise — and the only shop in the game that sells Eden grass seed, alongside vanilla seeds, saplings and a queen bee. Travels to a settlement once Eden grass grows in it. |
+| `mortimersettler` | mob | Mortimer the Undertaker: the settlement's **hunter**, who will haul and craft and refuses to farm or chop, and the only vendor of gravestones, the sarcophagus, black candles and the whole Bonewood furniture family. Travels to a settlement that has built a graveyard. |
+| `caspernsettler` | mob | Caspern the Spirit Smith: a dedicated **crafter** who never leaves the forge, and the only source of Spiritsteel, Soul Thread and the spectral line. Travels to a settlement that has built an Aether Forge. |
+| `eleanorsettler` | mob | Eleanor the Lost Soul: found in the Veil beside the bone piles, with two endings — hire her and she becomes the settlement's **husbandry** settler, or hold twelve Veil Essence out to her and she lets go, leaving a wisp lantern behind. She never travels to a town; the choice is yours to go and make. |
+
 ## The Beetle Outlands — the sky's wrong ground
 
 The contrast the bright Skyreach was missing, gated by distance from the spire

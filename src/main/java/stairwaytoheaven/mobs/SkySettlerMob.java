@@ -14,6 +14,7 @@ import necesse.entity.mobs.ai.behaviourTree.trees.HumanAI;
 import necesse.entity.mobs.ai.behaviourTree.util.AIMover;
 import necesse.entity.mobs.friendly.human.HumanMob;
 import necesse.entity.mobs.friendly.human.humanShop.HumanShop;
+import necesse.entity.mobs.job.JobTypeHandler;
 import necesse.gfx.HumanGender;
 import necesse.gfx.HumanLook;
 import necesse.gfx.GameHair;
@@ -61,6 +62,80 @@ public abstract class SkySettlerMob extends HumanShop {
         super.init();
         this.ai = new BehaviourTreeAI<>(this, new HumanAI<>(320, true, false, 25000),
                 new AIMover(HumanMob.humanPathIterations));
+    }
+
+    // --- professions ----------------------------------------------------
+    //
+    // WHAT A PROFESSION IS IN THE JOB SYSTEM, read out of 1.3.2.
+    //
+    // JobTypeRegistry.registerCore (JobTypeRegistry.java:20-32) registers each
+    // job type as `new JobType(canChangePriority, defaultDisabledBySettler,
+    // name, tip)`. The SECOND flag is the whole profession mechanism:
+    //
+    //   hauling, crafting, forestry, farming   -> false: EVERY settler does them
+    //   fertilize, husbandry, fishing, hunting,
+    //   tradingmission                         -> true: nobody does them...
+    //
+    // ...unless their mob turns the flag off for itself. JobTypeHandler's
+    // constructor copies `type.defaultDisabledBySettler` into a per-mob
+    // TypePriority (JobTypeHandler.java:132-135), and JobTypeHandler.streamJobs
+    // drops every job whose TypePriority is `disabledBySettler`
+    // (JobTypeHandler.java:88-91). So vanilla's professions are literally one
+    // line each in the mob's constructor:
+    //
+    //   FarmerHumanMob:       getPriority("fertilize").disabledBySettler = false
+    //   AnimalKeeperHumanMob: getPriority("husbandry").disabledBySettler = false
+    //   AnglerHumanMob:       getPriority("fishing").disabledBySettler   = false
+    //   HunterHumanMob:       getPriority("hunting").disabledBySettler   = false
+    //   TraderHumanMob:       getPriority("tradingmission")...           = false
+    //
+    // and the opposite direction is a profession too: GuardHumanMob switches
+    // crafting, forestry and farming OFF (GuardHumanMob.java:31-34) because a
+    // guard guards. That is the pair of verbs below.
+    //
+    // The job handlers these touch are created inside the HumanMob constructor
+    // (`LevelJobRegistry.addHandlers`, HumanMob.java:514), so a subclass
+    // constructor is the correct and only place to call them - which is exactly
+    // where vanilla calls them. TypePriority.loadSaveData restores `priority`
+    // and `disabledByPlayer` and never `disabledBySettler`
+    // (JobTypeHandler.java:137-140), so what is set here survives every load.
+
+    /**
+     * Grant this settler a job vanilla withholds from settlers by default -
+     * i.e. give them a specialist profession.
+     *
+     * @param jobType one of {@code fertilize}, {@code husbandry},
+     *                {@code fishing}, {@code hunting}, {@code tradingmission}
+     */
+    protected final void enableProfession(String jobType) {
+        JobTypeHandler.TypePriority priority = this.jobTypeHandler.getPriority(jobType);
+        if (priority != null) {
+            priority.disabledBySettler = false;
+        }
+    }
+
+    /**
+     * Take a job away that vanilla grants to every settler, because this
+     * character would not do it. The Guard's own move.
+     *
+     * @param jobType one of {@code hauling}, {@code crafting}, {@code forestry},
+     *                {@code farming}
+     */
+    protected final void refuseJob(String jobType) {
+        JobTypeHandler.TypePriority priority = this.jobTypeHandler.getPriority(jobType);
+        if (priority != null) {
+            priority.disabledBySettler = true;
+        }
+    }
+
+    /** Speech bubble over their head, seen by everyone nearby. */
+    protected void bubble(String miscKey) {
+        if (this.getLevel() == null || this.getLevel().getServer() == null) {
+            return;
+        }
+        this.getLevel().getServer().network.sendToClientsWithEntity(
+                new necesse.engine.network.packet.PacketMobChat(
+                        this.getUniqueID(), new LocalMessage("misc", miscKey)), this);
     }
 
     /** A fixed face, so the same person is the same person in every world. */

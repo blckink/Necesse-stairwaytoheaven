@@ -26,6 +26,15 @@ public class MagpieMob extends SkySettlerMob {
     public MagpieMob() {
         super("magpiesettler");
 
+        // --- her PROFESSION: trading missions ------------------------------
+        // The one job in the game that means "goes away and comes back with
+        // goods", and vanilla grants it to exactly one settler type
+        // (TraderHumanMob.java:29). It is withheld from every other settler by
+        // default, so a settlement with Magpie in it can run trading missions
+        // and one without her cannot. For a courier this is not decoration: it
+        // is the same verb her whole character is written around.
+        enableProfession("tradingmission");
+
         // --- what she sells: goods from elsewhere, at a courier's markup ---
         this.shop.addSellingItem("wormbait", new SellingShopItem(120, 12))
                 .setStaticPriceBasedOnHappiness(9, 22, 5);

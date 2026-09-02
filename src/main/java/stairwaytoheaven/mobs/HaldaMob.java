@@ -27,6 +27,16 @@ public class HaldaMob extends SkySettlerMob {
     public HaldaMob() {
         super("haldasettler");
 
+        // --- her PROFESSION: fishing ---------------------------------------
+        // The cellarer stocks the larder. Fishing is one of the five jobs
+        // vanilla withholds from settlers until one of them is qualified
+        // (AnglerHumanMob.java:33 is the only place vanilla grants it), so a
+        // settlement with Halda feeds itself off its own water and one without
+        // her does not. Fertilising is deliberately NOT hers: that is Eveleen's
+        // profession, and two settlers with the same specialism would make one
+        // of them redundant.
+        enableProfession("fishing");
+
         // --- the worked goods, so a settlement can build before it produces ---
         this.shop.addSellingItem("skyweave", new SellingShopItem(20, 2))
                 .setStaticPriceBasedOnHappiness(150, 300, 30);
