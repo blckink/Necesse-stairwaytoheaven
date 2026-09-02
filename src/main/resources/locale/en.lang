@@ -488,3 +488,27 @@ cloudberrysapling=Cloudberry Sapling
 
 [item]
 cloudberrysapling=Cloudberry Sapling
+
+// ===========================================================================
+// The Veil — Geisternebel (WORLD_DESIGN.md sections 8 and 9)
+// ===========================================================================
+
+[buff]
+soulexposure=Soul Exposure
+
+[bufftooltip]
+soulexposuretip=The Veil is weighing you. Turn back before it finishes.
+soulexposureband1=Sight failing - the fog is closing in
+soulexposureband2=Sight failing, limbs slowing
+soulexposureband3=Sight failing, limbs slowing, life draining
+soulexposureband4=The Veil has your measure. Leave, or die here.
+
+[misc]
+veilexposurewarning=Cold pours in from every side. The fog has begun to weigh you - go back.
+veilmarkcrossing=The fog opens a pace ahead of you and closes behind. The Mark holds.
+
+[deaths]
+swhveilname=the Veil
+swhveil1=<victim> was weighed by <attacker> and found wanting
+swhveil2=<victim> walked too far into <attacker>
+swhveil3=<attacker> kept <victim>

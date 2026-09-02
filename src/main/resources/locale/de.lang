@@ -489,3 +489,27 @@ cloudberrysapling=Wolkenbeeren-Setzling
 
 [item]
 cloudberrysapling=Wolkenbeeren-Setzling
+
+// ===========================================================================
+// Der Schleier — Geisternebel (WORLD_DESIGN.md Abschnitte 8 und 9)
+// ===========================================================================
+
+[buff]
+soulexposure=Seelenblöße
+
+[bufftooltip]
+soulexposuretip=Der Schleier wiegt dich. Kehr um, bevor er fertig ist.
+soulexposureband1=Die Sicht schwindet - der Nebel rückt heran
+soulexposureband2=Die Sicht schwindet, die Glieder werden schwer
+soulexposureband3=Die Sicht schwindet, die Glieder werden schwer, das Leben rinnt weg
+soulexposureband4=Der Schleier hat dein Maß. Geh, oder bleib hier.
+
+[misc]
+veilexposurewarning=Von allen Seiten strömt Kälte herein. Der Nebel hat begonnen, dich zu wiegen - geh zurück.
+veilmarkcrossing=Der Nebel öffnet sich einen Schritt vor dir und schließt sich hinter dir. Das Mal hält.
+
+[deaths]
+swhveilname=der Schleier
+swhveil1=<victim> wurde von <attacker> gewogen und zu leicht befunden
+swhveil2=<victim> ging zu weit in <attacker> hinein
+swhveil3=<attacker> hat <victim> behalten

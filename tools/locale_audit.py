@@ -105,6 +105,26 @@ KNOWN_INDIRECT_METHODS = set(LOCAL_REGISTRARS)
 HUMAN_BASES = ("HumanMob", "HumanShop")
 
 # --------------------------------------------------------------------------
+# buffs
+#
+# BuffRegistry.registerBuff(id, buff) is a registration this audit did not see
+# until Soul Exposure needed one, and it is exactly the shape the audit exists
+# for: Buff.updateLocalDisplayName (jar 1.3.2, Buff.java:68) builds a VISIBLE
+# buff's name as new LocalMessage("buff", stringID), so an unnamed one prints
+# "buff.soulexposure" in the HUD next to its icon, forever, and nothing else
+# would have caught it.
+#
+# An INVISIBLE buff takes the other branch of that same line - a StaticMessage
+# of the raw ID, which is never drawn - so it needs no key and demanding one
+# would be noise. Two ways a buff is known to be invisible:
+#
+#   * a vanilla base that sets isVisible = false. ArmorBuff (ArmorBuff.java:18)
+#     does, which covers every trinket and set-bonus buff the mod registers;
+#   * one of OUR classes that sets it itself, found by reading the source
+#     rather than by keeping a list here that would go stale.
+VANILLA_INVISIBLE_BUFFS = ("SimpleTrinketBuff", "SimpleSetBonusBuff")
+
+# --------------------------------------------------------------------------
 # where an item icon really comes from
 #
 # ObjectItem/TileItem/Item all ask their content for a texture, and only the
@@ -341,7 +361,109 @@ def registered_ids(text):
         name = literal(args[0]) if args else None
         if name is not None and len(args) <= 2:
             found["tech"].add(name)
+
+    # BuffRegistry.registerBuff -> [buff], but only for buffs the player can
+    # actually see a name for. See VANILLA_INVISIBLE_BUFFS above.
+    found["buff"] = {i for i, visible, _cls in registered_buffs(text)
+                     if visible and i is not None}
     return found
+
+
+def our_invisible_buff_classes():
+    """Our own Buff subclasses that set isVisible = false in their constructor.
+
+    Read out of the source rather than listed: a list here would be one more
+    thing to remember, and the field assignment IS the fact - Buff.isVisible is
+    protected and set in the constructor, which is how every vanilla buff does
+    it too.
+    """
+    out = set()
+    decl = re.compile(r'\bclass\s+(\w+)(?:<[^>]*>)?\s+extends\s+[\w.]+')
+    for path in source_files():
+        text = strip_comments(open(path, encoding="utf-8").read())
+        if "isVisible" not in text:
+            continue
+        # Attribute the assignment to the class it sits in, not to the file:
+        # one file may hold a visible buff and an invisible one.
+        starts = [(m.group(1), m.start()) for m in decl.finditer(text)]
+        for index, (name, start) in enumerate(starts):
+            end = starts[index + 1][1] if index + 1 < len(starts) else len(text)
+            if re.search(r'\bisVisible\s*=\s*false\b', text[start:end]):
+                out.add(name)
+    return out
+
+
+def string_constants():
+    """{"Class.NAME": value} for every `static final String NAME = "..."` we
+    declare.
+
+    A registration that names its ID through a constant -
+    `registerBuff(SoulExposureBuff.ID, ...)` - registers exactly the ID a
+    literal would, so the audit has to follow the constant or the key it
+    creates goes unchecked. Keeping the ID next to the class that owns it is
+    also the pattern that stops the string drifting between the registration
+    and the code that looks the buff up, so it should not cost coverage.
+    """
+    out = {}
+    decl = re.compile(r'\b(?:class|interface|enum)\s+(\w+)')
+    field = re.compile(r'static\s+final\s+String\s+(\w+)\s*=\s*"([^"]*)"')
+    for path in source_files():
+        text = strip_comments(open(path, encoding="utf-8").read())
+        starts = [(m.group(1), m.start()) for m in decl.finditer(text)]
+        for index, (owner, start) in enumerate(starts):
+            end = starts[index + 1][1] if index + 1 < len(starts) else len(text)
+            for match in field.finditer(text[start:end]):
+                out["%s.%s" % (owner, match.group(1))] = match.group(2)
+    return out
+
+
+def buff_is_invisible(cls, invisible_own):
+    return cls in VANILLA_INVISIBLE_BUFFS or cls in invisible_own
+
+
+def registered_id_argument(expression, constants):
+    """The ID a registration argument names: a literal, or a constant we own."""
+    direct = literal(expression)
+    if direct is not None:
+        return direct
+    return constants.get((expression or "").strip())
+
+
+def registered_buffs(text, invisible_own=None, constants=None):
+    """[(id or None, is it visible, class simple name)] for every registerBuff."""
+    if invisible_own is None:
+        invisible_own = our_invisible_buff_classes()
+    if constants is None:
+        constants = string_constants()
+    out = []
+    for _offset, args in call_sites(text, "registerBuff"):
+        if len(args) < 2:
+            continue
+        cls = construction(args[1], text)[0]
+        out.append((registered_id_argument(args[0], constants),
+                    not buff_is_invisible(cls, invisible_own), cls))
+    return out
+
+
+def check_buff_registrations():
+    """A VISIBLE buff whose ID is not a literal is a name this audit cannot
+    check, and check 1 would silently pass it. Say so instead."""
+    count = 0
+    invisible_own = our_invisible_buff_classes()
+    constants = string_constants()
+    for path in source_files():
+        file_text = strip_comments(open(path, encoding="utf-8").read())
+        for offset, args in call_sites(file_text, "registerBuff"):
+            if len(args) < 2 or registered_id_argument(args[0], constants) is not None:
+                continue
+            if buff_is_invisible(construction(args[1], file_text)[0], invisible_own):
+                continue  # invisible: no [buff] key is ever asked for
+            print("!! %s registers a visible buff under a computed ID -- this "
+                  "audit cannot check its [buff] name, and an unnamed visible "
+                  "buff prints \"buff.<id>\" in the HUD"
+                  % where(path, file_text, offset))
+            count += 1
+    return count
 
 
 def class_supers():
@@ -1121,6 +1243,7 @@ def main(vanilla_dump=None):
 
     # 8. And nothing may register an ID behind this audit's back.
     problems += check_registration_wrappers()
+    problems += check_buff_registrations()
 
     # 8b. Every item whose class prints a description line must have one.
     described_problems, described_items, described_classes = \
