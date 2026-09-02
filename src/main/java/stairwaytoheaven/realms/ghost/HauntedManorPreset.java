@@ -1,6 +1,7 @@
 package stairwaytoheaven.realms.ghost;
 
 import necesse.engine.registries.ObjectRegistry;
+import stairwaytoheaven.SkyRegistry;
 import necesse.engine.util.GameRandom;
 import necesse.inventory.lootTable.LootTable;
 import necesse.inventory.lootTable.lootItem.ChanceLootItem;
@@ -14,8 +15,15 @@ public class HauntedManorPreset extends Preset {
 
     public HauntedManorPreset(GameRandom random) {
         super(WIDTH, HEIGHT);
-        int wall = ObjectRegistry.getObjectID("deadwoodwall");
-        int door = ObjectRegistry.getObjectID("deadwooddoor");
+        // Vanilla has NO deadwood wall or door: its deadwood set covers
+        // furniture only, and a wall's door is cut from the wall's own 352x128
+        // sheet rather than shipped as a separate object, so `deadwoodwall` and
+        // `deadwooddoor` were both ObjectRegistry misses returning -1. The
+        // manor was stamping id -1 around its whole perimeter and for its door,
+        // which is a house with no walls. Nightfell is the mod's own dark
+        // building set and is exactly what a haunted manor wants.
+        int wall = SkyRegistry.nightfellWallID;
+        int door = SkyRegistry.nightfellDoorID;
         int chest = ObjectRegistry.getObjectID("bonechest");
         int chair = ObjectRegistry.getObjectID("deadwoodchair");
         int table = ObjectRegistry.getObjectID("deadwoodmodulartable");

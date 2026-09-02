@@ -35,6 +35,12 @@ registered but unreachable.
 | `edengarden` | Eden | edenserpent, bloommaw, jealousvine, goldenhornet | native vegetation aliases | POIs not built |
 | `edencanopy` | Eden | bloommaw, jealousvine, goldenhornet, forbiddenserpent | native vegetation aliases | POIs not built |
 | `edenshallows` | Eden | edenserpent, goldenhornet | native vegetation aliases | POIs not built |
+| `aftergarden` | Ghost | drifter 90/3, headlessbutler 45/2, lanternwidow 40/2, soulhound 30/2 | — | bride + butler/drifter/hound, 5–7 |
+| `boneorchard` | Ghost | lanternwidow 75/2, headlessbutler 55/3, drifter 40/2, mourningbride 20/1 | — | bride or widow + butler/widow/crawler, 5–7 |
+| `ectomarsh` | Ghost | drifter 80/3, soulhound 50/3, coffincrawler 45/2, mourningbride 25/1 | — | bride or crawler + drifter/hound/chair, 5–7 |
+| `stripedwaste` | Crooked | crookedgolem 55/2, crookedarmadillo 45/2, rarecrookedgolem 20/1 | stripebeetle 100/3 | rare golem or mimic + 2 golems + armadillo, 5–7 |
+| `spiralfields` | Crooked | tongueplant 70/3, crookedarmadillo 40/2 | — | 2 plants + plant/armadillo/golem, 5–7 |
+| `checkerworks` | Crooked | crookedgolem 50/2, doormimic 45/2, crookedarmadillo 35/2, rarecrookedgolem 30/2 | — | rare golem, mimic or golem + golem/armadillo/mimic, 6–8 |
 
 **Mistsea** (the cloud sea between the islands, 61 % of the sky) carries the
 **Mistserpent** in all four sky biomes at weight 300, capped at one per spawn
@@ -59,6 +65,10 @@ come in packs around loot and leave the rest of the sky quiet.
 | `nimbusyak` | livestock, milk | **your sheets** (cow/bull/calf) |
 | `glimmergoat` | livestock, shear | **your sheets** (doe/doe shorn/ram/ram shorn/lamb) |
 | `watchmote` | player summon (Skywatch Whistle) | vanilla pet flake |
+| `edenserpent`, `bloommaw`, `jealousvine`, `goldenhornet`, `forbiddenserpent` | Eden hostiles | all borrowed — see `docs/ASSET_REQUESTS.md` |
+| `drifter`, `headlessbutler`, `lanternwidow`, `mourningbride`, `possessedchair`, `soulhound`, `coffincrawler` | Ghost hostiles | all borrowed — see `docs/ASSET_REQUESTS.md` |
+| `doormimic`, `tongueplant` | Crooked hostiles | borrowed — see `docs/ASSET_REQUESTS.md` |
+| `stripebeetle` | Crooked critter, netable | borrowed — see `docs/ASSET_REQUESTS.md` |
 
 Removed: **Thunderquill Fowl** (a third animal was one too many) and the
 **Cloud Lamb** (the Glimmergoat is the sky's sheep now).
@@ -153,6 +163,7 @@ All five arsenal weapons are tested to register with a name and a recipe.
 | `skywatchhood`, `wardenmantle`, `wardenboots` | player-unobtainable by design; they exist to dress the Warden's sprite |
 | `catbasket`, `flickerlightgarland` | only obtainable from the cats chapter — no second source |
 | `skywaytile` | mined only; the other floors all have recipes |
-| Eden, Steinfeld, Ghost, Infernal Fringe, Hell | designed, not built |
+| Steinfeld, Infernal Fringe, Hell | designed, not built |
+| Eden, Ghost Realm, Crooked Beyond | registered and generating (§1) — none has a player-facing gate from the rest of the world yet |
 | four shipped wall sets | 4–20 marginal corner seams each |
 | `projectiles/mistserpentshard.png` | delivered art, no projectile behind it yet |

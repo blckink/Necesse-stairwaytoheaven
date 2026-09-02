@@ -143,6 +143,7 @@ public final class SkyRegistry {
 
     public static int skystoneBrickWallID;
     public static int nightfellWallID;
+    public static int nightfellDoorID;
     /** Veil: the Beetlefreak wall set, from supplied art. */
     public static int beetleWallID;
     /** Closed and open halves of the Beetlefreak door, and its window. */

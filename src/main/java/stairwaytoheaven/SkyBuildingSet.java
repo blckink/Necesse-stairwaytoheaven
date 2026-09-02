@@ -61,6 +61,9 @@ final class SkyBuildingSet {
         int[] nightfellWall = WallObject.registerWallObjects(
                 "nightfell", "nightfellwall", 2.0F, new Color(52, 48, 66), -0.25F, -1.0F);
         SkyRegistry.nightfellWallID = nightfellWall[0];
+        // registerWallObjects returns {wall, doorClosed, doorOpen, window};
+        // the Ghost Realm's Haunted Manor needs the door as well as the wall.
+        SkyRegistry.nightfellDoorID = nightfellWall[1];
 
         // Beetlefreak masonry: the Veil's loud, wrong-coloured building set,
         // from supplied art. Same one-sheet-three-readers deal as the others.
