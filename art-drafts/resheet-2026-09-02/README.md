@@ -12,6 +12,25 @@ batch does not need the same hand pass.
 | `*_384x320.png` | what the tool made of it — the file to correct |
 | `PREVIEW_*.png` | the same at 3× on dark and light with the 64px grid drawn over it |
 
+## The best input is a FOLDER of cut frames
+
+The player supplied the spirit wraith that way — `row-N/sprite-M.png`, every
+frame already free of its neighbours — and it skips every hard part at once.
+All the detection in this tool exists only because a flat sheet hides where one
+frame ends and the next begins: rows that overlap, sprites that touch, a bottom
+strip that may be gibs or may be extra poses. A folder answers all of it.
+
+```sh
+python3 tools/resheet_mob.py path/to/folder -o mobs/<id>.png
+```
+
+Folder name = row, file name = column, last folder = the gib strip when there
+are more folders than directions. Crumbs left by the export (row-1 carried an
+8×11 speck after its six real frames) are dropped by area.
+
+`spiritwraith_384x320.png` is that path; the `wraith_*` files are the same
+creature through the flat-sheet path, kept for comparison.
+
 ## How each was produced
 
 ```sh

@@ -33,6 +33,7 @@ Verify the result with the preview it writes, then ship it through
 """
 import argparse
 import collections
+import re
 import os
 import sys
 
@@ -466,6 +467,99 @@ def resheet(im, rows, cell=CELL, cols=COLS, want_rows=ROWS, gib=None,
     return sheet, note
 
 
+def load_folder(root, cols=COLS, want_rows=ROWS):
+    """Read a folder of already-cut frames: row-N/sprite-M.png.
+
+    This is the best input the tool can get, and it skips every hard part.
+    Detection exists only because a flat sheet hides where one frame ends and
+    the next begins -- rows that overlap, sprites that touch, a bottom strip
+    that may be gibs or may be extra poses. A folder answers all of it up
+    front: the folder name is the row, the file name is the column, and the
+    frames are already free of their neighbours.
+
+    Two things still get filtered, because an export leaves them behind:
+      * crumbs -- a fragment far smaller than the row's own frames (the
+        supplied wraith's row-1 carries an 8x11 speck after its six frames);
+      * columns past the sixth.
+
+    The LAST row folder is the gib strip when there are more folders than
+    directions, which is what an export of a 5-band sheet looks like.
+    """
+    rows = sorted(d for d in os.listdir(root)
+                  if os.path.isdir(os.path.join(root, d)) and d.startswith("row"))
+    if not rows:
+        return None, None, "no row-* folders in %s" % root
+    out, notes = [], []
+    for d in rows:
+        files = sorted(
+            (f for f in os.listdir(os.path.join(root, d)) if f.endswith(".png")),
+            key=lambda f: [int(t) if t.isdigit() else t
+                           for t in re.split(r"(\d+)", f)])
+        frames = [Image.open(os.path.join(root, d, f)).convert("RGBA")
+                  for f in files]
+        if not frames:
+            continue
+        areas = sorted(im.width * im.height for im in frames)
+        median = areas[len(areas) // 2]
+        keep = [im for im in frames if im.width * im.height >= 0.08 * median]
+        if len(keep) < len(frames):
+            notes.append("%s: dropped %d crumb(s)" % (d, len(frames) - len(keep)))
+        if len(keep) > cols:
+            notes.append("%s: %d frames, using the first %d" % (d, len(keep), cols))
+        out.append(keep[:cols])
+    gib = None
+    if len(out) > want_rows:
+        gib = out[want_rows]
+        out = out[:want_rows]
+        notes.append("last row folder taken as the gib strip")
+    return out, gib, "; ".join(notes) or "%d row folder(s)" % len(out)
+
+
+def resheet_frames(rows, gib=None, cell=CELL, cols=COLS, want_rows=ROWS):
+    """Compose already-cut frames onto the 384x320 grid.
+
+    The same two rules the sheet path settled on, for the same reasons: ONE
+    scale for every frame, so the four directions stay the same animal, capped
+    by the widest AND tallest frame because the engine draws
+    sprite(col, row, 64) and anything past the cell edge is not on the sheet at
+    all; and each frame centred in its own cell, sitting on the cell floor.
+
+    Bottom-aligning is right HERE and would be wrong on a flat sheet: an
+    exported frame is cropped to its own content, so a lifted hoof has already
+    become a shorter frame, and putting its bottom on the floor keeps the lift.
+    On a sheet the frames share one crop, which is why that path measures from
+    the row's floor instead.
+    """
+    if len(rows) < want_rows:
+        return None, "only %d row(s), need %d" % (len(rows), want_rows)
+    wmax = max(im.width for r in rows for im in r)
+    hmax = max(im.height for r in rows for im in r)
+    scale = min(cell / float(wmax), cell / float(hmax))
+
+    sheet = Image.new("RGBA", TARGET, (0, 0, 0, 0))
+    for ri, row in enumerate(rows[:want_rows]):
+        for ci, frame in enumerate(row[:cols]):
+            nw = max(1, round(frame.width * scale))
+            nh = max(1, round(frame.height * scale))
+            small = frame.resize((nw, nh), Image.LANCZOS)
+            dx = ci * cell + (cell - nw) // 2
+            dy = ri * cell + cell - nh
+            sheet.alpha_composite(small, (dx, max(ri * cell, dy)))
+    note = "scale %.4f (widest %dpx, tallest %dpx -> %dpx cell)" % (
+        scale, wmax, hmax, cell)
+    if gib:
+        gs = min(32.0 / max(im.width for im in gib),
+                 32.0 / max(im.height for im in gib))
+        for i, chunk in enumerate(gib[:5]):
+            nw = max(1, round(chunk.width * gs))
+            nh = max(1, round(chunk.height * gs))
+            small = chunk.resize((nw, nh), Image.LANCZOS)
+            sheet.alpha_composite(small, (i * 32 + (32 - nw) // 2,
+                                          256 + (32 - nh) // 2))
+        note += "; %d gib chunk(s)" % len(gib[:5])
+    return sheet, note
+
+
 def harden_alpha(im, threshold=110):
     """Necesse sprites use hard 0/255 alpha; a soft edge reads as a halo."""
     px = im.load()
@@ -506,7 +600,7 @@ def preview(im, label, path, zoom=3):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("src")
+    ap.add_argument("src", help="a sheet PNG, or a FOLDER laid out as row-N/sprite-M.png -- the folder is much the better input")
     ap.add_argument("-o", "--out", help="write the 384x320 sheet here")
     ap.add_argument("--inspect", action="store_true",
                     help="report the detected rows and sprites, write nothing")
@@ -527,6 +621,40 @@ def main():
                     help="alpha above which a pixel counts as art (default 40; "
                          "raise it for art painted over a soft glow)")
     args = ap.parse_args()
+
+    if os.path.isdir(args.src):
+        rows, gib, note = load_folder(args.src)
+        print("%s  (folder of cut frames)" % os.path.basename(args.src.rstrip("/")))
+        print("  %s" % note)
+        if rows is None:
+            return 1
+        for i, r in enumerate(rows):
+            print("  row %d: %d frames, up to %dx%d"
+                  % (i, len(r), max(x.width for x in r), max(x.height for x in r)))
+        if args.inspect:
+            return 0
+        sheet, msg = resheet_frames(rows, gib)
+        print("  %s" % msg)
+        if sheet is None:
+            return 1
+        if args.mirror_left:
+            sheet = mirror_row(sheet, 1, 3)
+            print("  LEFT row rebuilt by mirroring RIGHT, cell by cell")
+        sheet = harden_alpha(sheet)
+        qa = os.path.join(REPO, "build", "qa", "resheet")
+        os.makedirs(qa, exist_ok=True)
+        stem = os.path.basename(args.src.rstrip("/"))
+        print("  preview %s" % os.path.relpath(
+            preview(sheet, stem, os.path.join(qa, stem + "_preview.png")), REPO))
+        if args.out:
+            dest = (args.out if os.path.isabs(args.out)
+                    else os.path.join(REPO, "src", "main", "resources", args.out))
+        else:
+            dest = os.path.join(qa, stem + "_384x320.png")
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
+        sheet.save(dest)
+        print("  wrote %s" % os.path.relpath(dest, REPO))
+        return 0
 
     im = Image.open(args.src).convert("RGBA")
     keyed, note = key_background(im, args.tol)
