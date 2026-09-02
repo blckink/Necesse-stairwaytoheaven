@@ -358,14 +358,21 @@ public abstract class SpireCatMob extends CritterMob {
             return;
         }
         GameLight light = level.getLightLevel(getTileCoordinate(x), getTileCoordinate(y));
-        int drawX = camera.getDrawX(x) - 16;
-        int drawY = camera.getDrawY(y) - 26;
+        // The cats are drawn on vanilla's DUCK sheet shape now -- 384x320, six
+        // 64px columns over four direction rows -- not the 32px critter grid the
+        // rest of SkyCritterMob uses. Offsets and the bobbing call are DuckMob's
+        // own (VERIFIED [jar], DuckMob.java:108-118): a 64px cell centred on a
+        // mob needs -30/-48, not -16/-26, or the cat stands a half tile
+        // north-west of its own shadow.
+        int drawX = camera.getDrawX(x) - 30;
+        int drawY = camera.getDrawY(y) - 48;
         int dir = this.getDir();
         Point sprite = this.getAnimSprite(x, y, dir);
+        drawY += this.getBobbing(x, y);
         drawY += level.getTile(getTileCoordinate(x), getTileCoordinate(y)).getMobSinkingAmount(this);
         final TextureDrawOptionsEnd drawOptions = texture
                 .initDraw()
-                .sprite(sprite.x, sprite.y, 32)
+                .sprite(sprite.x, sprite.y, 64)
                 .light(light)
                 .pos(drawX, drawY);
         list.add(new MobDrawable() {

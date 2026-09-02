@@ -100,6 +100,10 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              "mobs/mistserpent.png", "mobs/mistserpent_shadow.png",
              "mobs/mistserpenthead.png", "mobs/gloomshade.png",
              "projectiles/mistserpentshard.png",
+             # The two spire cats on vanilla's DUCK sheet (384x320), the
+             # spark beetle and the cat basket.
+             "mobs/spirecatblack.png", "mobs/spirecattabby.png",
+             "mobs/sparkbeetle.png", "objects/catbasket.png",
              "mobs/crookedgolem.png", "mobs/rarecrookedgolem.png",
              "mobs/crookedarmadillo.png",
              # The Eden ground pair, copied verbatim by convert_biome_art
@@ -261,7 +265,10 @@ def main():
 
     # NPCs: the Sky Warden and the spire cats
     gen_npcs.gen_warden(f"{out}/mobs/skywarden.png")
-    gen_npcs.gen_cats(f"{out}/mobs/spirecatblack.png", f"{out}/mobs/spirecattabby.png")
+    # The two spire cats are supplied art now, on vanilla's DUCK sheet
+    # (384x320) rather than the 32px critter grid they used to use.
+    # gen_npcs.gen_cats stays as the record of the generated pair; only
+    # their bestiary icons are still drawn (gen_npc_icons).
     gen_npcs.gen_npc_icons(f"{out}/mobs/icons")
     gen_npcs.gen_resident_icons(f"{out}/mobs/icons")
     gen_critters.gen_critters(f"{out}/mobs")
@@ -318,7 +325,9 @@ def main():
     # is the player's. items/gloomravenstatue.png is cropped off disk by
     # gen_furniture.gen_icons, so the icon follows the supplied statue.
     gen_furniture.gen_gloomwillow(f"{out}/objects/gloomwillow.png")
-    gen_furniture.gen_catbasket(f"{out}/objects/catbasket.png")
+    # objects/catbasket.png is supplied art now; gen_furniture.gen_catbasket
+    # stays as the record of the generated one. Its ITEM icon is still
+    # derived from the world sheet by mini_from, so it follows the new art.
     gen_furniture.gen_banner_painting(f"{out}/objects/skywatchbanner.png")
     gen_furniture.gen_beacon(f"{out}/objects/wardenbeaconoff.png", False)
     gen_furniture.gen_beacon(f"{out}/objects/wardenbeaconon.png", True)

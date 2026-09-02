@@ -47,8 +47,8 @@ come in packs around loot and leave the rest of the sky quiet.
 | `crookedgolem`, `rarecrookedgolem`, `crookedarmadillo` | Outlands | ours |
 | `gloomshade` | Veil | **your sheet** |
 | `fenwraith`, `cindercantor` | Veil | **fenwraith = your sheet** |
-| `glowmoth`, `sparkbeetle`, `zephyrfinch`, `dewsnail` | critters (dewsnail is netable) | ours |
-| `spirecatblack`, `spirecattabby` | the two quest cats | ours |
+| `glowmoth`, `sparkbeetle`, `zephyrfinch`, `dewsnail` | critters (dewsnail is netable) | **sparkbeetle = your sheet**, rest generated |
+| `spirecatblack`, `spirecattabby` | the two quest cats | **your sheets**, on vanilla's duck layout (384x320) |
 | `nimbusyak` | livestock, milk | **your sheets** (cow/bull/calf) |
 | `glimmergoat` | livestock, shear | **your sheets** (doe/doe shorn/ram/ram shorn/lamb) |
 | `watchmote` | player summon (Skywatch Whistle) | vanilla pet flake |

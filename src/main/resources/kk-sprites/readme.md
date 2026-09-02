@@ -140,3 +140,10 @@ cells at y256, the same four `mobs/sheep` fills — so both were copied in
 verbatim. **Nothing supplied is recoloured.** `SkyPelt` stays for the parts of
 the herd that have no drawn sheet yet (the buck and the kid, on vanilla's ram
 and lamb), and each one retires the moment its art arrives.
+
+The two spire cats arrived on vanilla's **duck** sheet (384x320, six 64px
+columns over four direction rows) rather than the 32px critter grid they used to
+wear, so `SpireCatMob.addDrawables` moved to `DuckMob`'s own offsets -- -30/-48
+with the bobbing call, not -16/-26. A 64px cell drawn at the 32px offsets puts
+the cat half a tile north-west of its own shadow, which is the whole failure
+mode and it is silent.
