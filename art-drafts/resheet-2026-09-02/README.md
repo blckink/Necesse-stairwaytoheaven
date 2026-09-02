@@ -7,6 +7,7 @@ batch does not need the same hand pass.
 
 | file | what it is |
 |---|---|
+| `SOURCE_calf.png` | the plain yak — it is the CALF, not the cow (player) |
 | `SOURCE_*.png` | exactly what was supplied, untouched |
 | `*_384x320.png` | what the tool made of it — the file to correct |
 | `PREVIEW_*.png` | the same at 3× on dark and light with the 64px grid drawn over it |
@@ -20,16 +21,28 @@ python3 tools/resheet_mob.py SOURCE_yak-blue.png      # rows + 2 rows split even
 python3 tools/resheet_mob.py SOURCE_wraith.png --alpha 120
 ```
 
-## What the tool decided, so a correction can name the wrong decision
+## Corrected 2026-09-02 after the player's hand pass
 
-- **One shared scale** for all 24 sprites, from the largest source cell. Per-cell
-  scaling makes a walk cycle breathe, so this is deliberate — but it does mean a
-  row with wide side views shrinks the front views. `wraith` is the clearest case
-  (side views 272 px wide against 209 tall).
-- **Bottom-anchored**: feet 2 px above the cell floor, centred horizontally.
-- **Even split fallback** where sprites touch or rows overlap; the boundaries are
-  then arithmetic, not measured, so a sprite can be clipped or off-centre.
-- **Hard alpha** at threshold 110 — soft edges become fully opaque or gone.
+The first version was wrong in three ways; all three are fixed in
+`tools/resheet_mob.py` and these files are regenerated.
+
+1. **Scale.** It cropped every sprite and re-fitted it to its cell, which came
+   out ~20% too large (0.353 against the correct 0.288 on the calf). The player's
+   method is right: scale the WHOLE sheet once so its content spans 384, then
+   only slide rows. Measured, the four rows individually want 0.2995 / 0.2927 /
+   0.3048 / 0.2931 and the whole image wants 0.2876 — one number serves.
+2. **Horizontal offsets were destroyed.** Centring each sprite in its cell irons
+   the walk cycle flat; a hoof planted slightly forward on frame 2 IS the
+   animation. Now only the row's drift is corrected, never the sprite's place
+   within the row.
+3. **The gib strip was dropped entirely.** The five death chunks now land in
+   32 px cells at y256, where FleshParticle reads them.
+
+`--mirror-left` was added for the player's other fix: building the LEFT row by
+mirroring RIGHT cell by cell, when a generator drew the two side views as two
+different animals. Cell by cell, never the whole strip — flipping the strip
+would reverse the column order and put the idle pose in column 5. It flips the
+light direction, which is a real cost worth checking.
 
 ## Target when corrected
 

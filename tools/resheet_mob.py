@@ -195,40 +195,123 @@ def analyse(im, want_rows=ROWS, cols=COLS, alpha=40):
             cells.append(opaque_bbox(im, (cx0, ry0, cx1, ry1), alpha)
                          or (cx0, ry0, cx1, ry1))
         out.append(cells)
+    # The gib strip: the SHORT band below the animation rows, which the row
+    # pass deliberately excluded. Its chunks are small and well separated, so
+    # plain detection is enough.
+    gib = []
+    if use_rows:
+        after = max(r[1] for r in use_rows)
+        for (gy0, gy1) in [b for b in row_bands if b[0] >= after]:
+            _, gm = projections(im, (0, gy0, im.width, gy1), alpha)
+            for (gx0, gx1) in bands(gm, im.width, gap_min=3, run_min=4):
+                bb = opaque_bbox(im, (gx0, gy0, gx1, gy1), alpha)
+                if bb:
+                    gib.append(bb)
     if even_cols:
         notes.append("%d row(s) split into %d even columns" % (even_cols, cols))
-    return out, "; ".join(notes)
+    if gib:
+        notes.append("%d gib chunk(s) found" % len(gib))
+    return out, "; ".join(notes), gib
 
 
-def resheet(im, rows, cell=CELL, cols=COLS, want_rows=ROWS, headroom=0.92):
-    """Place the first `want_rows` x `cols` sprites into the target grid.
+def mirror_row(sheet, src_row, dst_row, cell=CELL, cols=COLS):
+    """Copy one direction row onto another, flipping each CELL on its own.
 
-    ONE scale factor for every sprite, derived from the largest one, so the
-    four directions stay the same animal and the walk cycle does not breathe.
-    Centred horizontally, feet on a common baseline near the bottom of the cell.
+    The player's own fix: "ich habe die 4. zeile von der 2. einfach kopiert und
+    gespiegelt, da die andere nicht einheitlich war sonst". A generator draws
+    the two side views independently and they come out as two different animals
+    -- different bell, different leg timing -- which reads as a glitch in game
+    because the player sees them one after the other when they turn around.
+
+    Each cell is flipped separately, never the whole strip: flipping the strip
+    would also reverse the COLUMN order, putting the idle pose in column 5.
+
+    The cost is real and worth naming: a mirrored row has its light coming from
+    the wrong side. Vanilla accepts that on plenty of mobs; if the shading is
+    strong enough to notice, draw the row instead.
+    """
+    band = sheet.crop((0, src_row * cell, cols * cell, src_row * cell + cell))
+    out = Image.new("RGBA", (cols * cell, cell), (0, 0, 0, 0))
+    for c in range(cols):
+        one = band.crop((c * cell, 0, c * cell + cell, cell))
+        out.alpha_composite(one.transpose(Image.FLIP_LEFT_RIGHT), (c * cell, 0))
+    sheet.paste((0, 0, 0, 0), (0, dst_row * cell, cols * cell, dst_row * cell + cell))
+    sheet.alpha_composite(out, (0, dst_row * cell))
+    return sheet
+
+
+def resheet(im, rows, cell=CELL, cols=COLS, want_rows=ROWS, gib=None):
+    """Scale the WHOLE sheet once so its content spans exactly cols*cell, then
+    slide each row down into its own band.
+
+    This is the player's own method, and it is right where the first version
+    was wrong. That one cropped every sprite and re-centred it in its cell,
+    which destroys two things at once: the sprites come out ~20% too large
+    (measured 0.353 against the correct 0.288 on the plain yak), and every
+    sprite's HORIZONTAL OFFSET is thrown away -- but a walk cycle is built out
+    of those offsets. A hoof planted slightly forward on frame 2 is the
+    animation; centring each frame irons the walk flat.
+
+    So: one scale for the whole image, taken from the full content width, and
+    the only per-row freedom is a VERTICAL slide, because the rows are what
+    generators get wrong. Measured on the plain yak, the four rows individually
+    want 0.2995 / 0.2927 / 0.3048 / 0.2931 and the whole image wants 0.2876 --
+    close enough that one number serves, and using one is what keeps the four
+    directions the same animal.
     """
     usable = rows[:want_rows]
     if len(usable) < want_rows:
         return None, ("found %d rows, need %d -- check --inspect"
                       % (len(usable), want_rows))
-    widest = max(b[2] - b[0] for r in usable for b in r[:cols])
-    tallest = max(b[3] - b[1] for r in usable for b in r[:cols])
-    scale = min(cell * headroom / widest, cell * headroom / tallest)
+
+    left = min(b[0] for r in usable for b in r)
+    right = max(b[2] for r in usable for b in r)
+    scale = (cols * cell) / float(right - left)
 
     sheet = Image.new("RGBA", TARGET, (0, 0, 0, 0))
-    placed = 0
+    strips = []
     for ri, row in enumerate(usable):
-        for ci, bb in enumerate(row[:cols]):
-            sprite = im.crop(bb)
-            nw = max(1, round(sprite.width * scale))
-            nh = max(1, round(sprite.height * scale))
-            sprite = sprite.resize((nw, nh), Image.LANCZOS)
-            dx = ci * cell + (cell - nw) // 2
-            dy = ri * cell + (cell - nh) - 2        # feet near the cell's floor
-            sheet.alpha_composite(sprite, (dx, max(ri * cell, dy)))
-            placed += 1
-    return sheet, ("placed %d sprites, one shared scale %.3f (source cells up "
-                   "to %dx%d)" % (placed, scale, widest, tallest))
+        top = min(b[1] for b in row)
+        bot = max(b[3] for b in row)
+        # Crop to THIS ROW's own horizontal extent, not the sheet's. A row that
+        # sits further left than the others would otherwise be dragged off the
+        # canvas -- which is exactly what happened on the plain yak's LEFT row.
+        rl = min(b[0] for b in row)
+        rr = max(b[2] for b in row)
+        strip = im.crop((rl, top, rr, bot))
+        sw = max(1, round((rr - rl) * scale))
+        sh = max(1, round((bot - top) * scale))
+        strip = strip.resize((sw, sh), Image.LANCZOS)
+        strips.append(strip)
+
+    for ri, strip in enumerate(strips):
+        # Vertical: feet on the band's floor. Horizontal: the row is centred on
+        # the sheet, so only the row's DRIFT is corrected -- every sprite keeps
+        # its offset within the row, and those offsets are the walk cycle.
+        dy = ri * cell + (cell - strip.height)
+        dx = (cols * cell - strip.width) // 2
+        sheet.alpha_composite(strip, (dx, dy))
+
+    note = "one scale %.4f over the full %dpx content width" % (scale, right - left)
+
+    # The gib strip: 32px cells at y256, up to five of them (FleshParticle
+    # reads sprite row 8). Generators put it under the animation rows; it is
+    # placed at its own scale because it is not part of the walk.
+    if gib:
+        gleft = min(b[0] for b in gib)
+        gtop = min(b[1] for b in gib)
+        gbot = max(b[3] for b in gib)
+        gscale = min(32.0 / max(1, gbot - gtop),
+                     32.0 / max(b[2] - b[0] for b in gib))
+        for i, bb in enumerate(gib[:5]):
+            chunk = im.crop(bb)
+            nw = max(1, round(chunk.width * gscale))
+            nh = max(1, round(chunk.height * gscale))
+            chunk = chunk.resize((nw, nh), Image.LANCZOS)
+            sheet.alpha_composite(chunk, (i * 32 + (32 - nw) // 2,
+                                          256 + (32 - nh) // 2))
+        note += "; %d gib chunk(s) at y256" % len(gib[:5])
+    return sheet, note
 
 
 def harden_alpha(im, threshold=110):
@@ -277,6 +360,10 @@ def main():
                     help="report the detected rows and sprites, write nothing")
     ap.add_argument("--tol", type=int, default=42,
                     help="background keying tolerance (default 42)")
+    ap.add_argument("--mirror-left", action="store_true",
+                    help="build the LEFT row by mirroring RIGHT cell by cell, "
+                         "when the two side views did not come out as the same "
+                         "animal (flips the light direction -- see mirror_row)")
     ap.add_argument("--alpha", type=int, default=40,
                     help="alpha above which a pixel counts as art (default 40; "
                          "raise it for art painted over a soft glow)")
@@ -287,7 +374,7 @@ def main():
     print("%s  %dx%d" % (os.path.basename(args.src), im.width, im.height))
     print("  %s" % note)
 
-    rows, how = analyse(keyed, alpha=args.alpha)
+    rows, how, gib = analyse(keyed, alpha=args.alpha)
     print("  %s" % how)
     for i, r in enumerate(rows):
         hs = [b[3] - b[1] for b in r]
@@ -295,10 +382,13 @@ def main():
     if args.inspect:
         return 0
 
-    sheet, msg = resheet(keyed, rows)
+    sheet, msg = resheet(keyed, rows, gib=gib)
     print("  %s" % msg)
     if sheet is None:
         return 1
+    if args.mirror_left:
+        sheet = mirror_row(sheet, 1, 3)
+        print("  LEFT row rebuilt by mirroring RIGHT, cell by cell")
     sheet = harden_alpha(sheet)
 
     qa = os.path.join(REPO, "build", "qa", "resheet")
