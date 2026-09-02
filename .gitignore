@@ -35,3 +35,9 @@ vanilla-sprites/
 
 # Agent worktrees: separate checkouts of this repo, never content of it.
 .claude/worktrees/
+
+# The vanilla sprite dump: a local reference, never repo content. Several
+# audits take --vanilla vanilla-sprites and resolve the game own textures
+# through it. It was once committed as a symlink pointing at ITSELF, which
+# blinded every audit that reads it.
+vanilla-sprites
