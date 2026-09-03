@@ -83,7 +83,14 @@ WINDOW_EW = [(c, r, dx, dy) for (c, r, dx, dy) in wrp.WallRenderer(None).window_
 # to DRAW two views x open/closed and let --pair-doors fill the partners in.
 DOOR_LABELS = ["rot0 zu  E-W", "rot0 auf E-W", "rot1 zu  N-S", "rot1 auf N-S",
                "rot2 zu  E-W", "rot2 auf E-W", "rot3 zu  N-S", "rot3 auf N-S"]
-DOOR_PAIR = {4: 0, 5: 1, 6: 2, 7: 3}   # slot -> the slot it is copied from
+# Measured, not assumed. Slot -> (source slot, mirror?) for the ones a wall can
+# derive. Against our own Cloudmarble and vanilla's stonewall, rot0 and rot2
+# differ by 92-161 pixels of 4096 -- in Cloudmarble's closed door that
+# difference IS the handle, at (10,99)-(22,114). rot1 and rot3 do NOT pair:
+# closed differ by 405 mirrored, open by 1671. So two slots are derived and six
+# are painted.
+DOOR_DERIVE = {4: (0, True), 5: (1, True)}   # rot2 zu/auf <- rot0 zu/auf, mirrored
+DOOR_NOTE = {4: "<- rot0, gespiegelt", 5: "<- rot0, gespiegelt"}
 
 
 def foreign_cells(rows):
@@ -150,9 +157,7 @@ def main():
                     help="fill the canvas from an existing 352x128 sheet, so you "
                          "paint OVER a working wall instead of from nothing")
     ap.add_argument("-o", "--out", help="where the 352x128 sheet goes")
-    ap.add_argument("--pair-doors", action="store_true",
-                    help="after slicing, copy rot0->rot2 and rot1->rot3 so you only "
-                         "have to paint two viewpoints instead of four")
+
     ap.add_argument("--selftest", action="store_true",
                     help="seed a canvas from every wall sheet we have, slice it "
                          "straight back, and assert the result is byte-identical")
@@ -263,8 +268,14 @@ def main():
                fill=(255, 220, 110), font=font)
         for i, lab in enumerate(DOOR_LABELS):
             bx = PAD + i * DOOR_PITCH
-            d.rectangle([bx, door_y, bx + 31, door_y + 127], outline=(200, 170, 70))
-            d.text((bx, door_y + 130), lab, fill=(230, 200, 120), font=font)
+            derived = i in DOOR_DERIVE
+            d.rectangle([bx, door_y, bx + 31, door_y + 127],
+                        outline=(90, 90, 100) if derived else (200, 170, 70))
+            d.text((bx, door_y + 130), lab,
+                   fill=(130, 130, 145) if derived else (230, 200, 120), font=font)
+            if derived:
+                d.text((bx, door_y + 144), DOOR_NOTE[i], fill=(120, 120, 135), font=font)
+                d.text((bx + 4, door_y + 56), "LEER", fill=(110, 110, 125), font=font)
 
         d.text((win_x, win_y - 34), "WINDOW -- the LAST block. Two narrow columns, "
                "nothing else lives down here.", fill=(220, 140, 255), font=font)
@@ -323,12 +334,19 @@ def main():
             sheet.paste(src.crop((bx + dx, by, bx + dx + 16, by + 16)),
                         (col * 16, row * 16))
 
-    if args.pair_doors:
-        for dst, src_slot in DOOR_PAIR.items():
-            sheet.paste(sheet.crop(((3 + src_slot) * 32, 0, (4 + src_slot) * 32, 128)),
-                        ((3 + dst) * 32, 0))
-        print("paired doors: rot2 copied from rot0, rot3 from rot1 "
-              "(repaint them later if the two sides should differ)")
+    # A derived door slot left empty is filled from its partner. Painting it
+    # anyway wins -- the derivation is a shortcut, never an override.
+    for dst, (src_slot, mirror) in DOOR_DERIVE.items():
+        cell = sheet.crop(((3 + dst) * 32, 0, (4 + dst) * 32, 128))
+        if cell.getbbox() is not None:
+            continue
+        part = sheet.crop(((3 + src_slot) * 32, 0, (4 + src_slot) * 32, 128))
+        if mirror:
+            part = part.transpose(Image.FLIP_LEFT_RIGHT)
+        sheet.paste(part, ((3 + dst) * 32, 0))
+        print("door slot %d was empty -> mirrored from slot %d "
+              "(they differ by ~100-160px of 4096 in every wall measured; "
+              "repaint it if this one's handle side matters)" % (dst, src_slot))
 
     if clashes:
         print("%d cell(s) painted DIFFERENTLY by two shapes -- that is a seam that "
