@@ -1151,6 +1151,7 @@ public class SkyreachStatusCommand extends ModularChatCommand {
             // 0/3 says "three sites and not one carries a portal" -- which is a
             // real failure, and the whole point.
             int portalSites = 0;
+            int portalDrowned = 0;
             final int cell = stairwaytoheaven.worldgen.SkyOutlands.PORTAL_CELL;
             for (int cx = -3; cx <= 3 && portalSites < 8; cx++) {
                 for (int cy = -3; cy <= 3 && portalSites < 8; cy++) {
@@ -1168,7 +1169,17 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                             portalSites++;
                             long d = stairwaytoheaven.worldgen.SkyTerrainPainter.describeTile(
                                     outSeed, tx, ty, outOrigin.x, outOrigin.y);
-                            if (crookedPortalID != 0
+                            // Split the misses. A hashed site that lands in the
+                            // sea can never carry anything -- describeBand
+                            // returns spill one branch before the Outlands
+                            // block is reached -- and that is a loss the lattice
+                            // simply takes. A site on LAND with no portal is a
+                            // bug, and is the number worth watching.
+                            if (necesse.engine.registries.TileRegistry.getTile(
+                                    stairwaytoheaven.worldgen.SkyTerrainPainter.descTile(d))
+                                    .isLiquid) {
+                                portalDrowned++;
+                            } else if (crookedPortalID != 0
                                     && stairwaytoheaven.worldgen.SkyTerrainPainter.descObject(d)
                                         == crookedPortalID) {
                                 portalSeen++;
@@ -1179,7 +1190,9 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                 }
             }
             ramp.append(" evilwall=").append(wallSeen)
-                .append(" portals=").append(portalSeen).append("/").append(portalSites);
+                .append(" portals=").append(portalSeen)
+                .append("/").append(portalSites - portalDrowned)
+                .append(" onland (").append(portalDrowned).append(" drowned)");
             ramp.append(" biome=").append(SkyRegistry.outlands != null
                     ? necesse.engine.localization.Localization.translate("biome", "outlands")
                     : "NOT REGISTERED");
