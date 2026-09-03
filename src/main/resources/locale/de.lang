@@ -259,11 +259,8 @@ seanceneedbell=Der Kreis wartet. Er will das Silberglöckchen hören.
 seancealreadyveil=Der Schleier ist bereits überall um dich herum.
 seancesilent=Du läutest. Die Kreide schluckt den Klang, und nichts unter diesem Himmel antwortet - noch nicht.
 riftopened=Die Glocke schlägt einmal an - und etwas auf der anderen Seite antwortet. Der Kreis reißt auf.
-wardenchatformat=<name>: <line>
 spiremarker=Wardens Turm
 stairsmarker=Deine Treppe
-markersadded=Neue Markierungen auf deiner Weltkarte (M): Wardens Turm und deine Treppe gehen nicht mehr verloren.
-skyreachhint=Etwas flackert über dem Nebel im <dir>, weit über den Wolken. Jemand hält dort oben noch ein Licht.
 dirnorth=Norden
 dirnortheast=Nordosten
 direast=Osten
@@ -272,7 +269,6 @@ dirsouth=Süden
 dirsouthwest=Südwesten
 dirwest=Westen
 dirnorthwest=Nordwesten
-wardenname=Der Himmelswächter
 wardenintro1=Hm. Die Treppe. Lange hat niemand mehr die Treppe genommen.
 wardenintro2=Ich bin der Wächter. Der letzte, wenn du mitzählst. Ich hüte das Licht. Hütete, besser gesagt. Es erlosch mit dem Sturm.
 wardenintro3=Nimm diese Windseide. Du bist den ganzen Weg geklettert; mit leeren Taschen schicke ich dich nicht fort.
@@ -286,31 +282,29 @@ wardenrecruitnohome=Du bist in meinen Himmel geklettert, ohne eine Treppe hinter
 wardengivesbell=Noch etwas. Nimm die alte Glocke - sie öffnet Türen, die keine Türen sind. Du wirst es merken.
 wardensettlertip=Über den Wolken angeworben, für ein Vermögen in Münzen.
 wardenfarewell=Der Turm ist still jetzt. Mein neuer Posten steht mir besser.
-gatenobinding=Das Tor summt schlafend. Es hat noch nirgendwohin zu führen - steig erst von deiner eigenen Treppe auf.
+gatenobinding=Das Tor summt schlafend.\nEs hat noch nirgendwohin zu führen - steig erst von deiner eigenen Treppe auf.
 wardenshopclosed=Meine Regale sind dunkel, wie alles hier. Entzünde erst das Leuchtfeuer.
 wardencatfound1=Mrrp?
-wardencattreat=Die Katze schnappt sich das Leckerli und verschwindet in einem Wölkchen - direkt in den Korb im Turm des Wardens, <dist> Felder <dir> von hier.
+wardencattreat=Die Katze schnappt sich das Leckerli und verschwindet in einem Wölkchen -\ndirekt in den Korb im Turm des Wardens, <dist> Felder <dir> von hier.
 wardencatpurr=Prrrrt.
-wardencatathome=Diese Katze ist endgültig eingezogen. Sie schläft jetzt im Korb im Turm des Wardens.
-wardencatathomebasket=Diese Katze ist endgültig eingezogen. Ihr Korb steht bei <x>, <y> - das ist jetzt ihr Zuhause.
-wardencattreatbasket=Die Katze schnappt sich das Leckerli und verschwindet in einem Wölkchen - direkt in den Korb, den du bei <x>, <y> aufgestellt hast (<level>).
-catbasketready=Der Korb steht bereit, und leer. Siggi und Peanut sind noch oben in der Himmelsweite - finde sie und gib ihnen ein Wolkenpuff-Leckerli, dann ziehen sie hier ein.
-catbasketmovedin=Katzen erkennen einen guten Korb: <count> Katze(n) sind gerade bei <x>, <y> eingezogen.
-catbasketmoved=Der neueste Korb gewinnt: <count> Katze(n) haben den alten verlassen und sind bei <x>, <y> eingezogen.
-catbasketremoved=Der Korb ist weg, also sind die Katzen zurück in den Korb im Turm des Wardens gegangen. Stell einen neuen auf, dann kommen sie dorthin.
-wardencatnotreat=Die Katze beäugt dich misstrauisch. Sie erwartet eindeutig einen Snack.
+wardencatathome=Diese Katze ist endgültig eingezogen.\nSie schläft jetzt im Korb im Turm des Wardens.
+wardencatathomebasket=Diese Katze ist endgültig eingezogen.\nIhr Korb steht bei <x>, <y> - das ist jetzt ihr Zuhause.
+wardencattreatbasket=Die Katze schnappt sich das Leckerli und verschwindet in einem Wölkchen -\ndirekt in den Korb, den du bei <x>, <y> aufgestellt hast (<level>).
+catbasketready=Der Korb steht bereit, und leer.\nSiggi und Peanut sind noch oben in der Himmelsweite - finde sie und gib ihnen ein Wolkenpuff-Leckerli,\ndann ziehen sie hier ein.
+catbasketmovedin=Katzen erkennen einen guten Korb:\n<count> Katze(n) sind gerade bei <x>, <y> eingezogen.
+catbasketmoved=Der neueste Korb gewinnt:\n<count> Katze(n) haben den alten verlassen und sind bei <x>, <y> eingezogen.
+catbasketremoved=Der Korb ist weg, also sind die Katzen zurück in den Korb im Turm des Wardens gegangen.\nStell einen neuen auf, dann kommen sie dorthin.
+wardencatnotreat=Die Katze beäugt dich misstrauisch.\nSie erwartet eindeutig einen Snack.
 wardentalk1=Der Wind hier oben hat keine Manieren. Man gewöhnt sich daran.
 wardentalk2=Vierhundert Jahre hat die Himmelswacht diesen Himmel gehütet. Jetzt hütet sie mich.
 wardentalk3=Jede Lampe in diesem Turm habe ich selbst angezündet. Manche Nächte zweimal.
 wardentalk4=Die Katzen kamen mit dem Turm. Oder der Turm mit den Katzen. Schwer zu sagen.
 wardentalk5=Unten habt ihr Wetter. Hier oben haben wir Launen.
 wardentalk6=Ich habe vieles fallen sehen. Nur wenig davon kam wieder herauf.
-wardenmovedin=<settlement> hat einen neuen Bewohner - der Warden wartet dort. Gib ihm ein Bett, dann bleibt er.
 wardencatsdone=Beide. Unter einem Dach. Damit ist der Turm ordentlich geschlossen - nimm den Korb, sie kennen ihn.
 wardenanchordone=Metall und Stein, und die alte Insel hört auf zu wandern. Sie wird da sein, wo du sie verlassen hast. Das zählt, später.
 catmarkerblack=Siggis Lager
 catmarkertabby=Peanuts Lager
-catmarkersadded=Zwei weitere Marker auf deiner Weltkarte (M): Der Warden weiß, wo seine Katzen schlafen.
 
 [quests]
 swhfindspiretitle=Der Ruf des Wardens
@@ -421,10 +415,12 @@ skyfallshard=Gefallene Himmelsscherbe
 swhshrinesign=...und die Treppe steht, wo der Himmel am dünnsten ist,\nund der Hüter zählt, was herunterkommt.\n\n- der Rest ist verwittert -
 // Die Notiz im Lager des gestrandeten Luftschiffers.
 swhaeronautsign=Ballon runter. Fracht größtenteils heil.\nGehe nach Osten. Wer das hier findet: Die Kisten gehören dir.\nVorsicht bei denen, die noch warm sind.
-// Ansagen zum Sternenfall. Der Farbcode entspricht den Ereigniszeilen des
-// Grundspiels (raidapproaching und bossapproaching sind beide §b).
-swhskyfallstart=§bDer Himmel bricht auf - Scherben fallen.
-swhskyfallend=§aDer Sternenfall ist vorüber.
+// Ansagen zum Sternenfall. Sie schweben ueber den Fuessen jedes Spielers
+// an der Oberflaeche, sind also keine Chatzeilen und tragen KEINEN
+// GameColor-Code: FloatTextFade zeichnet ueber StringDrawOptions, und ein
+// §-Code wuerde dort als eigene Zeichen erscheinen.
+swhskyfallstart=Der Himmel bricht auf - Scherben fallen.
+swhskyfallend=Der Sternenfall ist vorüber.
 
 // ===== Gegenstands-Feinschliff (content/itempolish) =====
 // Eine Zeile je Material, die sagt, WAS es ist und WOHER es kommt - die Engine
@@ -504,8 +500,8 @@ soulexposureband3=Die Sicht schwindet, die Glieder werden schwer, das Leben rinn
 soulexposureband4=Der Schleier hat dein Maß. Geh, oder bleib hier.
 
 [misc]
-veilexposurewarning=Von allen Seiten strömt Kälte herein. Der Nebel hat begonnen, dich zu wiegen - geh zurück.
-veilmarkcrossing=Der Nebel öffnet sich einen Schritt vor dir und schließt sich hinter dir. Das Mal hält.
+veilexposurewarning=Von allen Seiten strömt Kälte herein.\nDer Nebel hat begonnen, dich zu wiegen - geh zurück.
+veilmarkcrossing=Der Nebel öffnet sich einen Schritt vor dir und schließt sich hinter dir.\nDas Mal hält.
 
 [deaths]
 swhveilname=der Schleier
@@ -548,7 +544,6 @@ eveleentalk3=Ich habe drei Samen, die ich nie gepflanzt habe. Ich wüsste gern, 
 eveleentalk4=Ein Garten ist keine Dekoration. Ein Garten ist ein Streit, den du mit dem Boden führst.
 eveleenasksplants=Bring mir von jedem eins: eine Edenbeere, eine Mondmelone, eine Sonnentraube. Beweise mir, dass es dort draußen noch wächst.
 eveleenplantsdone=Also. Es wächst noch, dort draußen. Gut.
-edenplantsdone=Der Baum der Erkenntnis neigt sich Eveleen entgegen, als sie die Frucht nimmt. Ein Steckling löst sich mühelos, als hätte er es immer so gemeint.
 
 // --- Mortimer ---
 mortimertalkpitch=Du hast Tote zu verwahren und keinen Ort dafür. Ich habe einen Spaten, einen Hut und keine besondere Eile. Wir können einander helfen.
@@ -570,11 +565,9 @@ eleanortalk1=Ich erinnere mich an eine Küche. An wessen, weiß ich nicht mehr.
 eleanortalk2=Die Ziegen fürchten sich nicht vor mir. Das ist sehr viel wert.
 eleanortalk3=Sei meinetwegen nicht traurig. Ich bin nicht sicher, ob ich es kann.
 eleanortalk4=Manchmal ertappe ich mich beim Warten. Ich frage schon lange nicht mehr, worauf.
-eleanorneedessence=Noch nicht genug von mir.
-eleanorneedessencecount=Eleanor braucht <need> Schleieressenz in deiner Hand, bevor sie loslassen kann. Du hältst <have>.
+eleanorneedessence=Noch nicht genug von mir. <have> von <need>.
 eleanorfarewell=Oh. Oh, das war also alles.
-eleanorpassedon=Eleanor verweht wie Atem auf kaltem Glas. Wo sie stand, liegt eine kleine Laterne, noch warm.
-eleanorstaydone=Eleanor bleibt, still, so wie ein Zimmer beschließt, eine Lampe noch ein wenig länger brennen zu lassen.
+eleanorpassedon=Eleanor verweht wie Atem auf kaltem Glas.\nWo sie stand, liegt eine kleine Laterne, noch warm.
 
 // --- Knott ---
 knotttalkpitch=Jede Tür auf diesem Hof ist überzeugt, irgendwohin zu führen. Ich glaube ihnen das schon länger, als vernünftig ist. Du siehst aus wie jemand, der einen von uns beiden recht behalten lassen könnte.
@@ -583,7 +576,7 @@ knotttalk2=Eine Tür, die sich zu nichts hin öffnet, ist immer noch eine Tür. 
 knotttalk3=Ich verkaufe keine Schlüssel zu Türen, die ich nicht getestet habe. Testet man genug davon, braucht man irgendwann keine Schlüssel mehr.
 knotttalk4=Irgendjemand muss weiter fragen, wohin sie führen. Dann kann es auch ich sein.
 knottasksdoor=Wenn du wirklich glaubst, dass eine davon irgendwohin führt, beweise es. Bring mir, was eine solche Tür brauchen würde.
-knottdoordone=Mr. Knott dreht das Material zweimal in den Händen und nickt langsam, wie jemand, der gerade einen Streit gewonnen hat, von dem sonst niemand wusste, dass er ihn führte.
+knottdoordone=Ha! Sie führt also doch irgendwohin. Hier - das hast du dir erstritten.
 
 [quests]
 // --- Eveleen, die Eden-Kette ---
@@ -739,7 +732,7 @@ butlerlastwords2=Das Haus wird davon erfahren.
 butlerlastwords3=Ich war mit der Runde fast fertig.
 bridelastwords=Du kommst zu spät.
 chairlastwords=Endlich saß jemand still.
-basinalreadyghost=Das Becken schweigt hier. Du bist bereits bei den Toten.
+basinalreadyghost=Das Becken schweigt hier.\nDu bist bereits bei den Toten.
 basinneedsectoplasm=Das Becken braucht zwölf Ektoplasma.
 ghostgateopened=Das Becken füllt sich mit kaltem Licht und öffnet sich zum Nachgarten.
 
@@ -798,7 +791,7 @@ edengate=Edentor
 edenseedbasin=Edenschwelle
 
 [misc]
-edenbasinalreadyeden=Das Becken ist hier leer. Du stehst bereits in Eden.
+edenbasinalreadyeden=Das Becken ist hier leer.\nDu stehst bereits in Eden.
 edenbasinneedsseeds=Das Becken braucht 6 Eden-Grassamen.
 edengateopened=Das Becken füllt sich mit grünem Licht und öffnet sich zum Garten Eden.
 // Steinfeld / Die Stille Weite
@@ -857,9 +850,9 @@ bossportalcrookedbeyond=Rufstein der Krümmung
 [buff]
 incursionpressure=Inkursionsdruck
 [misc]
-bossportallocked=Der Stein bleibt kalt. Bau das Schlüsselstück dieses Reiches daheim auf, dann antwortet er.
-bossportalbusy=Sein Wächter ist bereits erwacht. Beende erst diesen Kampf.
-bossportalsilent=Nichts antwortet. Was hier schlief, hat noch keinen Namen.
+bossportallocked=Der Stein bleibt kalt.\nBau das Schlüsselstück dieses Reiches daheim auf, dann antwortet er.
+bossportalbusy=Sein Wächter ist bereits erwacht.\nBeende erst diesen Kampf.
+bossportalsilent=Nichts antwortet.\nWas hier schlief, hat noch keinen Namen.
 bossportalawoke=Der Stein öffnet sich. <name> ist erwacht!
 // Der Nebelschlüssel: Geisterkreide, der Séance-Zirkel und der Geisterführer
 // (docs/FOGKEY_AND_BOSSPORTALS.md Teil A)
@@ -878,8 +871,7 @@ ghostguidename=<name>, der Geisterführer
 seanceneedsettlement=Kreide hält nur dort, wo Menschen wohnen. Zeichne sie in deiner Siedlung.
 seanceguidehere=Dein Führer ist bereits hier.
 seanceguidearrives=Die Kreide raucht, und <name> tritt heraus.
-ghostguideunlock1=Atme aus. So. Jetzt kennt dich der Nebel.
-ghostguideunlock2=Der Geisterführer zeichnet dich. Die Seelenzehrung des Geisterbandes berührt dich nicht mehr.
+ghostguideunlock1=Atme aus. So. Jetzt kennt dich der Nebel - die Seelenblöße rührt dich nicht mehr an.
 ghostguideintro=Mit Münzen kann ich nichts anfangen. Zeig mir, was du trägst.
 ghostguidenohire=Die Toten ziehen nicht ein. Komm wieder, wenn du etwas brauchst.
 ghostguidetalk1=Alle stellen dieselbe erste Frage, und keinem gefällt die Antwort.
@@ -887,7 +879,7 @@ ghostguidetalk2=Vorsicht mit dem Nebel weiter draußen. Der gehört nicht mir.
 ghostguidetalk3=Ich war Landvermesser. Ich zähle immer noch Dinge. Das beruhigt.
 ghostguidetalk4=Bring mir irgendwann ein gutes Essen. Essen kann ich es nicht. Riechen würde ich es gern.
 wardengiveschalk=Du warst also draußen im Nebel. Nimm das - Kreide, aus Grabsalz gemahlen. Zeichne zu Hause einen Kreis, dann antwortet jemand.
-seancenobodyanswers=Die Kreide hier ist alt und kalt. Nichts antwortet darauf.
+seancenobodyanswers=Die Kreide hier ist alt und kalt.\nNichts antwortet darauf.
 
 // ============================================================
 // Die Regionsschlüssel (docs/FOGKEY_AND_BOSSPORTALS.md Abschnitte B1-B2)
@@ -916,8 +908,7 @@ swhkeycrookedbeyonddesc=Jede Tür in der Krümmung führt irgendwohin, wo sie ni
 swhkeycrookedbeyondreward=Knotts Krumme Tür + 12x Geisterstahlbarren
 [misc]
 regionkeyneedsettlement=Ein Schlüsselstück hält nur dort, wo Menschen wohnen. Stell es in deiner Siedlung auf.
-regionkeyunlocked=Die <key> setzt sich in den Boden, und weit draußen wird ein kalter Stein warm.
-regionkeyearned=Stell es in einer Siedlung auf, dann antworten dir die Rufsteine dieses Reiches.
+regionkeyunlocked=Die <key> setzt sich in den Boden,\nund weit draußen wird ein kalter Stein warm.
 wardenkeyaskskyreach=Es gibt einen Weg, das zu rufen, was da draußen schläft - aber es antwortet nur seinesgleichen. Bring mir den Sturm, dann baue ich dir ein Wachfeuer.
 wardenkeydoneskyreach=Das brennt. Stell es daheim ab, wo die Mauern dir gehören.
 wardenkeyaskeden=Dann also Eden. Saft und Pollen, und beides wird dir niemand reichen.

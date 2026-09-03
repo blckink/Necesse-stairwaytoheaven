@@ -256,7 +256,7 @@ items server-side on interact — no trust in the client.
 
 | # | Quest | Type | Player does | Reward / world change |
 |---|---|---|---|---|
-| 1 | **A Light over the Mist** | find someone | On first ascent, a journal/chat hint points to a flicker over the mist. Find the spire, talk to the Warden. | Windsilk bundle; spire location pinned on map; stage 2 opens |
+| 1 | **A Light over the Mist** | find someone | On first ascent, the journal entry plus a world-map marker point to the spire. Find it, talk to the Warden. | Windsilk bundle; spire location pinned on map; stage 2 opens |
 | 2 | **The Dark Lighthouse** | collect & deliver | Bring **12 Storm Shards + 8 Windsilk** so he can rekindle the beacon. | The spire's **Wardenlight ignites** (visible object swap); his **shop opens** (building set); Flickerlight Garlands as a gift |
 | 3 | **Where the Cats Wander** | find + item use | His cats fled: **Siggi** (black, hides in the Stormveil) and **Peanut** (white-tabby, chases glowmoths in the Aurora Shoals). Craft **Cloudpuff Treats**, find each cat, offer a treat. | Each cat travels home and stays as a resident of the spire; both home → **Cat Basket** deco + **Silver Bell** trophy |
 | 4 | **Anchor of the Sky** | collect & deliver | Bring **5 Aetherium Bars + 20 Skystone** — he reforges a spire anchor. | **Skywatch Banner** deco + reward bundle; the anchor appears at the spire; closing dialogue teases the Storm Sovereign (v0.5 boss) |
@@ -402,8 +402,10 @@ built on the same level-event pattern vanilla uses for its surface events):
 - **Mist Surge** — the Mistsea "rises": fog particles, reduced sight range, mist
   creatures surface near shores. Fishing improves.
 
-Weather states announce themselves with a short localized chat line and a palette/
-particle shift, never with a UI popup. (A sandstorm-style event stays a surface
+Weather states announce themselves with a short localized line of FLOATING TEXT
+over the player and a palette/particle shift, never with a chat line and never
+with a UI popup. (The mod posts nothing into chat at all — see
+`stairwaytoheaven.util.TileText`.) (A sandstorm-style event stays a surface
 concept — in the sky its equivalent is the Tempest.)
 
 ## 23. Ties to the world below

@@ -27,10 +27,11 @@ Placing and using the stairway runs `SkywardStairwayObjectEntity`:
 3. The stairway is bound to the player's authentication as their way home
    (`quest.setReturnStairway`). The **Skywatch Gate** at the spire reads that
    binding back; without it the gate answers `gatenobinding`.
-4. On the **first** ascent in a world (`quest.stage == 0`):
-   - a chat line, `skyreachhint`, naming a compass direction toward the spire —
-     *"Etwas flackert über dem Nebel im &lt;dir&gt;…"*
-   - the journal quest **FindSpireQuest**
+4. On the **first** ascent in a world (`quest.stage == 0`): the journal quest
+   **FindSpireQuest**. There is no chat line any more — `skyreachhint`, which
+   named a compass direction, was deleted with the rest of the chat log, and
+   the spire map marker in step 5 says the same thing exactly instead of
+   approximately.
 5. `SkyMapMarkers.onAscent` puts two permanent markers on the world map: the
    spire and the player's own stairway.
 

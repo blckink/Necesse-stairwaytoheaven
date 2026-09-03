@@ -7,7 +7,6 @@ import necesse.engine.localization.message.GameMessage;
 import necesse.engine.localization.message.LocalMessage;
 import necesse.engine.network.PacketReader;
 import necesse.engine.network.PacketWriter;
-import necesse.engine.network.packet.PacketChatMessage;
 import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
 import necesse.engine.registries.ObjectLayerRegistry;
@@ -344,19 +343,33 @@ public class SkyfallWorldEvent extends WorldEvent {
     }
 
     /**
-     * Announces to everyone on the Surface, the way vanilla announces its own
-     * events: a server-side {@code PacketChatMessage} carrying a
-     * {@link LocalMessage}, sent to the clients at that level, so each player
-     * reads it in their own language.
-     * {@code IncursionLevelEvent:522} is exactly this call, and
-     * {@code ApproachSettlementRaidStage} does the per-client equivalent.
+     * Announces to everyone on the Surface — as floating text over each
+     * player's own feet, one line each, not as a chat message.
+     *
+     * <p>This used to be the vanilla idiom for a world event: one
+     * {@code PacketChatMessage} sent {@code sendToClientsAtEntireLevel}
+     * ({@code IncursionLevelEvent:522} is the same call). The chat log is gone
+     * — the player: <i>"und keine chat nachrichten! generell.. die sind total
+     * kacke lesbar"</i> — and a level-wide event has no tile of its own to
+     * float over, so the tile each player is standing on is used instead. The
+     * message is still sent unresolved, so each player reads it in their own
+     * language.
      */
     private void announce(GameMessage message) {
         Server server = this.getServer();
         if (server == null) {
             return;
         }
-        server.network.sendToClientsAtEntireLevel(new PacketChatMessage(message), LevelIdentifier.SURFACE_IDENTIFIER);
+        for (ServerClient client : server.getClients()) {
+            if (client == null || !client.isSamePlace(LevelIdentifier.SURFACE_IDENTIFIER)) {
+                continue;
+            }
+            PlayerMob player = client.playerMob;
+            if (player == null || player.removed()) {
+                continue;
+            }
+            stairwaytoheaven.util.TileText.at(client, player.getTileX(), player.getTileY(), message);
+        }
     }
 
     /** Live shard count, for the probe. */

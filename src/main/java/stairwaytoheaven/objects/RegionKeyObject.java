@@ -5,7 +5,6 @@ import java.awt.Rectangle;
 
 import necesse.engine.localization.Localization;
 import necesse.engine.localization.message.LocalMessage;
-import necesse.engine.network.packet.PacketChatMessage;
 import necesse.engine.registries.ObjectRegistry;
 import necesse.engine.world.worldData.SettlementsWorldData;
 import necesse.entity.mobs.PlayerMob;
@@ -15,6 +14,7 @@ import necesse.level.maps.Level;
 import necesse.level.maps.hudManager.floatText.ChatBubbleText;
 import stairwaytoheaven.quest.SkywatchWorldData;
 import stairwaytoheaven.worldgen.RealmDepth;
+import stairwaytoheaven.util.TileText;
 
 /**
  * A region key piece — the thing the player stands up at home to wake one
@@ -313,9 +313,10 @@ public class RegionKeyObject extends SkyDecoObject {
             return; // already earned; a second statue is decoration.
         }
         SkywatchWorldData.unlockBossPortals(level.getServer(), this.realm);
-        level.getServer().network.sendToClientsWithTile(
-                new PacketChatMessage(new LocalMessage("misc", "regionkeyunlocked",
-                        "key", this.getDisplayName())),
-                level, x, y);
+        // Over the piece that was just stood up, not in a chat log -- the same
+        // place onPlaceFail above already answers from, and the same mechanism
+        // vanilla's own EggNestObject uses (see stairwaytoheaven.util.TileText).
+        TileText.atAll(level.getServer(), level, x, y,
+                new LocalMessage("misc", "regionkeyunlocked", "key", this.getDisplayName()));
     }
 }

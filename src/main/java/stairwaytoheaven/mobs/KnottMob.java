@@ -2,7 +2,6 @@ package stairwaytoheaven.mobs;
 
 import java.awt.Color;
 
-import necesse.engine.localization.message.LocalMessage;
 import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
 import necesse.entity.mobs.PlayerMob;
@@ -144,7 +143,11 @@ public class KnottMob extends SkySettlerMob {
         give(client, "zephyrharness", 1);
         give(client, "stormsteelbar", 12);
         give(client, "realityshard", 6);
-        client.sendChatMessage(new LocalMessage("misc", "knottdoordone"));
+        // His own voice over his own head, not a chat line. The bubble is the
+        // LAST thing said in this method for a reason: ChatBubbleText.init
+        // (ChatBubbleText.java:67-76, VERIFIED [jar]) removes any bubble the
+        // same mob already has, so two in a row would show only the second.
+        this.bubble("knottdoordone");
     }
 
     /** Reward hand-off; anything that does not fit drops at the player's feet. */

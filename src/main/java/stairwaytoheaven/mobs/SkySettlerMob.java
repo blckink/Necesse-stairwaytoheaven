@@ -128,14 +128,39 @@ public abstract class SkySettlerMob extends HumanShop {
         }
     }
 
-    /** Speech bubble over their head, seen by everyone nearby. */
+    /**
+     * Speech bubble over their head, seen by everyone nearby.
+     *
+     * <p>This is the mod's ONLY way for a person to say something — the chat
+     * log is gone (the player: <i>"und keine chat nachrichten! generell.. die
+     * sind total kacke lesbar"</i>). Two rules come with it, both from
+     * {@code ChatBubbleText} (VERIFIED [jar]):
+     *
+     * <ul>
+     *   <li>{@code init} (ChatBubbleText.java:67-76) removes any bubble the
+     *       same mob already has, so <b>only the last call in a method is
+     *       ever seen</b>. Say one thing, or build one message.</li>
+     *   <li>the text wraps at {@code maxWidth} 200px and honours {@code \n}
+     *       (FairType.java:262), so a line that needs a break can have one —
+     *       but a paragraph in a bubble is unreadable and belongs nowhere.</li>
+     * </ul>
+     */
     protected void bubble(String miscKey) {
-        if (this.getLevel() == null || this.getLevel().getServer() == null) {
+        this.bubble(new LocalMessage("misc", miscKey));
+    }
+
+    /**
+     * The same bubble, for a line that carries replacements — a count, a name,
+     * a position. The message is sent unresolved so every player reads it in
+     * their own language.
+     */
+    protected void bubble(necesse.engine.localization.message.GameMessage message) {
+        if (message == null || this.getLevel() == null || this.getLevel().getServer() == null) {
             return;
         }
         this.getLevel().getServer().network.sendToClientsWithEntity(
                 new necesse.engine.network.packet.PacketMobChat(
-                        this.getUniqueID(), new LocalMessage("misc", miscKey)), this);
+                        this.getUniqueID(), message), this);
     }
 
     /** A fixed face, so the same person is the same person in every world. */

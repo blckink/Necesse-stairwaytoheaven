@@ -15,6 +15,7 @@ import stairwaytoheaven.SkyRegistry;
 import stairwaytoheaven.worldgen.RealmDepth;
 import stairwaytoheaven.worldgen.RealmLanding;
 import stairwaytoheaven.worldgen.SkyOrigin;
+import stairwaytoheaven.util.TileText;
 
 /**
  * Portal entity of the seance rift: same proven flow as the sky stairway
@@ -56,7 +57,7 @@ public class VeilRiftObjectEntity extends PortalObjectEntity {
             Level level = server.world.getLevel(this.getDestinationIdentifier());
             GameMessage error = isBlockingExit.get(level);
             if (error != null) {
-                client.sendChatMessage(error);
+                TileText.at(client, this.tileX, this.tileY, error);
                 return;
             }
         }
@@ -65,7 +66,7 @@ public class VeilRiftObjectEntity extends PortalObjectEntity {
             if (!isBlockingExit.isComputed()) {
                 GameMessage error = isBlockingExit.get(level);
                 if (error != null) {
-                    client.sendChatMessage(error);
+                    TileText.at(client, this.tileX, this.tileY, error);
                     return false;
                 }
             }

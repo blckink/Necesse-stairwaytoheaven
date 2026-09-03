@@ -206,8 +206,15 @@ public class GhostGuideMob extends HumanShop {
         ServerClient client = player.getServerClient();
         VeilWorldData veil = VeilWorldData.get(client.getServer());
         if (veil != null && veil.grantMark(client.authentication)) {
+            // ONE bubble, and it has to carry the whole unlock. It used to be a
+            // bubble plus a chat line ("misc.ghostguideunlock2") explaining
+            // that Soul Exposure no longer touches the player; with the chat
+            // log gone that sentence was folded into "misc.ghostguideunlock1"
+            // rather than sent as a second bubble, because ChatBubbleText.init
+            // (ChatBubbleText.java:67-76, VERIFIED [jar]) removes the bubble a
+            // mob already has and the second would simply have deleted the
+            // first.
             this.bubble("ghostguideunlock1");
-            client.sendChatMessage(new LocalMessage("misc", "ghostguideunlock2"));
             return;
         }
         super.interact(player);

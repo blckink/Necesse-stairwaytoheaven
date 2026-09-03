@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.util.Collections;
 import java.util.List;
 
-import necesse.engine.localization.message.LocalMessage;
 import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
 import necesse.entity.mobs.PlayerMob;
@@ -179,8 +178,15 @@ public class EveleenMob extends SkySettlerMob {
         // chain this pass adds.
         give(client, "knowledgecutting", 3);
         give(client, "stormsteelbar", 10);
+        // Her own voice, and nothing else. The narration that used to follow
+        // it in chat ("misc.edenplantsdone", describing the cutting coming
+        // away from the Knowledge Tree) is gone with the chat log; the two
+        // gifts above land in the player's inventory, which is where a reward
+        // announces itself. A second bubble was never an option:
+        // ChatBubbleText.init (ChatBubbleText.java:67-76, VERIFIED [jar])
+        // deletes the bubble a mob already has, so it would have eaten this
+        // one.
         this.bubble("eveleenplantsdone");
-        client.sendChatMessage(new LocalMessage("misc", "edenplantsdone"));
     }
 
     /** Reward hand-off; anything that does not fit drops at the player's feet. */

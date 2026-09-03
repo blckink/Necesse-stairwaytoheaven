@@ -9,6 +9,7 @@ import necesse.engine.registries.ItemRegistry;
 import necesse.entity.mobs.PlayerMob;
 import necesse.level.maps.Level;
 import stairwaytoheaven.SkyRegistry;
+import stairwaytoheaven.util.TileText;
 
 /**
  * The Soul Basin: a standing bowl of cold fire that opens the way into the
@@ -77,13 +78,13 @@ public class SoulBasinObject extends GhostDecoObject {
         // which level you stand on: docs/PLAN_ONE_PLANE.md retired the realm
         // dimensions, so the band under your feet is what answers it.
         if (inRealm(level, x, y, stairwaytoheaven.worldgen.RealmDepth.REALM_GHOST)) {
-            client.sendChatMessage(new LocalMessage("misc", "basinalreadyghost"));
+            TileText.at(client, x, y, new LocalMessage("misc", "basinalreadyghost"));
             return;
         }
         int ectoplasm = player.getInv().main.getAmount(level, player,
                 ItemRegistry.getItem("ectoplasm"), "soulbasin");
         if (ectoplasm < ECTOPLASM_COST) {
-            client.sendChatMessage(new LocalMessage("misc", "basinneedsectoplasm"));
+            TileText.at(client, x, y, new LocalMessage("misc", "basinneedsectoplasm"));
             return;
         }
         player.getInv().main.removeItems(level, player, ItemRegistry.getItem("ectoplasm"),
@@ -91,6 +92,6 @@ public class SoulBasinObject extends GhostDecoObject {
         level.setObject(x, y, GhostRealm.gateDownID);
         level.getServer().network.sendToClientsWithTile(
                 new PacketChangeObject(level, 0, x, y, GhostRealm.gateDownID), level, x, y);
-        client.sendChatMessage(new LocalMessage("misc", "ghostgateopened"));
+        TileText.at(client, x, y, new LocalMessage("misc", "ghostgateopened"));
     }
 }

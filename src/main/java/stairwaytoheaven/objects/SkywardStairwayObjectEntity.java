@@ -1,7 +1,6 @@
 package stairwaytoheaven.objects;
 
 import necesse.engine.localization.message.GameMessage;
-import necesse.engine.localization.message.LocalMessage;
 import necesse.engine.network.packet.PacketChangeObject;
 import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
@@ -11,6 +10,7 @@ import necesse.level.maps.Level;
 import stairwaytoheaven.SkyRegistry;
 import stairwaytoheaven.quest.SkyMapMarkers;
 import stairwaytoheaven.quest.SkywatchQuestData;
+import stairwaytoheaven.util.TileText;
 import stairwaytoheaven.worldgen.SkyOrigin;
 
 import java.awt.Point;
@@ -56,7 +56,7 @@ public class SkywardStairwayObjectEntity extends PortalObjectEntity {
             Level level = server.world.getLevel(this.getDestinationIdentifier());
             GameMessage error = isBlockingExit.get(level);
             if (error != null) {
-                client.sendChatMessage(error);
+                TileText.at(client, this.tileX, this.tileY, error);
                 return;
             }
         }
@@ -65,7 +65,7 @@ public class SkywardStairwayObjectEntity extends PortalObjectEntity {
             if (!isBlockingExit.isComputed()) {
                 GameMessage error = isBlockingExit.get(level);
                 if (error != null) {
-                    client.sendChatMessage(error);
+                    TileText.at(client, this.tileX, this.tileY, error);
                     return false;
                 }
             }
@@ -85,14 +85,15 @@ public class SkywardStairwayObjectEntity extends PortalObjectEntity {
             // at the spire reads this back).
             quest.setReturnStairway(client.authentication, this.tileX, this.tileY);
             if (quest.stage == 0) {
-                // First quest hook: a flicker over the mist points toward the
-                // Warden.
-                String directionWord = new LocalMessage("misc",
-                        SkywatchQuestData.directionKey(arrivalX, arrivalY, quest.spireX, quest.spireY)).translate();
-                client.sendChatMessage(new LocalMessage(
-                        "misc", "skyreachhint", "dir", directionWord));
                 // Journal entry "find the spire" — completed by the Warden's
-                // first dialogue.
+                // first dialogue. It used to be introduced by a chat line
+                // ("misc.skyreachhint") naming a compass direction; that line
+                // is gone with the rest of the chat log, and nothing was lost
+                // with it. SkyMapMarkers.onAscent below puts the spire itself
+                // on the world map one statement later, which is the exact
+                // position rather than a word for it, and the journal
+                // objective ("quests.swhfindspireobj") already says to follow
+                // the flicker over the mist.
                 stairwaytoheaven.quest.SkyQuests.giveOnce(server, client, new stairwaytoheaven.quest.FindSpireQuest());
             }
             SkyMapMarkers.onAscent(client, quest, arrivalX, arrivalY);

@@ -24,6 +24,7 @@ import necesse.gfx.gameTexture.GameTexture;
 import necesse.level.maps.Level;
 import necesse.level.maps.light.GameLight;
 import stairwaytoheaven.quest.SkywatchQuestData;
+import stairwaytoheaven.util.TileText;
 
 /**
  * The Warden's runaway spire cats. Each world has exactly two — the black
@@ -170,7 +171,10 @@ public abstract class SpireCatMob extends CritterMob {
             this.bubble("wardencatpurr");
             stairwaytoheaven.quest.CatHome.Spot home = stairwaytoheaven.quest.CatHome
                     .placed(level.getServer());
-            client.sendChatMessage(home == null
+            // The address floats over the cat itself, not into a chat log.
+            // A cat says "Prrrrt"; the coordinates are the game answering for
+            // it, so they go where the player is already looking.
+            TileText.at(client, this.getTileX(), this.getTileY(), home == null
                     ? new LocalMessage("misc", "wardencatathome")
                     : new LocalMessage("misc", "wardencatathomebasket",
                             "x", String.valueOf(home.tileX), "y", String.valueOf(home.tileY)));
@@ -189,7 +193,8 @@ public abstract class SpireCatMob extends CritterMob {
         int treats = player.getInv().main.getAmount(level, player, ItemRegistry.getItem("cloudpufftreat"), "skywatch");
         if (treats <= 0) {
             this.bubble("wardencatfound1");
-            client.sendChatMessage(new LocalMessage("misc", "wardencatnotreat"));
+            TileText.at(client, this.getTileX(), this.getTileY(),
+                    new LocalMessage("misc", "wardencatnotreat"));
             return;
         }
         player.getInv().main.removeItems(level, player, ItemRegistry.getItem("cloudpufftreat"), 1, "skywatch");
@@ -221,15 +226,17 @@ public abstract class SpireCatMob extends CritterMob {
             // to the wrong dimension to look. The level name goes in as a
             // GameMessage, not a translated String -- a String would be resolved
             // HERE, in the server's language, for every player.
-            client.sendChatMessage(new LocalMessage("misc", "wardencattreatbasket",
-                    "x", String.valueOf(home.tileX), "y", String.valueOf(home.tileY))
-                    .addReplacement("level", home.level.getDisplayName()));
+            TileText.at(client, this.getTileX(), this.getTileY(),
+                    new LocalMessage("misc", "wardencattreatbasket",
+                            "x", String.valueOf(home.tileX), "y", String.valueOf(home.tileY))
+                            .addReplacement("level", home.level.getDisplayName()));
         } else {
-            client.sendChatMessage(new LocalMessage("misc", "wardencattreat",
-                    "dir", new LocalMessage("misc", SkywatchQuestData.directionKey(
-                            this.getTileX(), this.getTileY(), quest.spireX, quest.spireY)).translate(),
-                    "dist", String.valueOf(tileDistance(this.getTileX(), this.getTileY(),
-                            quest.spireX, quest.spireY))));
+            TileText.at(client, this.getTileX(), this.getTileY(),
+                    new LocalMessage("misc", "wardencattreat",
+                            "dir", new LocalMessage("misc", SkywatchQuestData.directionKey(
+                                    this.getTileX(), this.getTileY(), quest.spireX, quest.spireY)).translate(),
+                            "dist", String.valueOf(tileDistance(this.getTileX(), this.getTileY(),
+                                    quest.spireX, quest.spireY))));
         }
         stairwaytoheaven.quest.SkyMapMarkers.onLocator(client, quest);
         this.bubble("wardencatfound1");

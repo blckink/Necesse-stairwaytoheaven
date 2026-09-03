@@ -258,11 +258,8 @@ seanceneedbell=The circle waits. It wants to hear the Silver Bell.
 seancealreadyveil=The Veil is already all around you.
 seancesilent=You ring the bell. The chalk drinks the sound, and nothing under the sky answers - yet.
 riftopened=The bell rings once - and something on the other side answers. The circle tears open.
-wardenchatformat=<name>: <line>
 spiremarker=Warden's Spire
 stairsmarker=Your stairway
-markersadded=New markers on your world map (M): the Warden's Spire and your stairway won't get lost again.
-skyreachhint=Something flickers over the mist to the <dir>, far above the clouds. Someone still keeps a light up there.
 dirnorth=north
 dirnortheast=north-east
 direast=east
@@ -271,7 +268,6 @@ dirsouth=south
 dirsouthwest=south-west
 dirwest=west
 dirnorthwest=north-west
-wardenname=The Sky Warden
 wardenintro1=Hm. Stairs. Nobody has taken the stairs in a long, long while.
 wardenintro2=I am the Warden. The last one, if you keep count. I keep the light. Kept, rather. It went out with the storm.
 wardenintro3=Take this windsilk. You climbed all this way; it would be rude to send you off with empty pockets.
@@ -285,31 +281,29 @@ wardenrecruitnohome=You climbed into my sky without leaving a stairway behind yo
 wardengivesbell=One more thing. Take the old bell - it opens doors that are not doors. You will know when.
 wardensettlertip=Recruited above the clouds, for a fortune in coin.
 wardenfarewell=The tower is quiet now. My new post suits me better.
-gatenobinding=The gate hums, dormant. It has nowhere to take you yet - ascend from your own stairway first.
+gatenobinding=The gate hums, dormant.\nIt has nowhere to take you yet - ascend from your own stairway first.
 wardenshopclosed=My shelves are dark, like everything else here. Light the beacon first.
 wardencatfound1=Mrrp?
-wardencattreat=The cat snatches the treat and vanishes in a puff of cloud - straight to the basket in the Warden's Spire, <dist> tiles <dir> of here.
-wardencatnotreat=The cat eyes you warily. It clearly expects a snack.
+wardencattreat=The cat snatches the treat and vanishes in a puff of cloud -\nstraight to the basket in the Warden's Spire, <dist> tiles <dir> of here.
+wardencatnotreat=The cat eyes you warily.\nIt clearly expects a snack.
 wardencatpurr=Prrrrt.
-wardencatathome=This one has moved in for good. It sleeps in the basket in the Warden's Spire now.
-wardencatathomebasket=This one has moved in for good. Its basket is at <x>, <y> - that is home now.
-wardencattreatbasket=The cat snatches the treat and vanishes in a puff of cloud - straight to the basket you set out at <x>, <y> in the <level>.
-catbasketready=The basket is ready, and empty. Siggi and Peanut are still up in the Skyreach - find them and offer a Cloudpuff Treat, and they will move in here.
-catbasketmovedin=The cats know a good basket when they see one: <count> cat(s) just moved in at <x>, <y>.
-catbasketmoved=The newest basket wins: <count> cat(s) left the old one and moved into this one at <x>, <y>.
-catbasketremoved=The basket is gone, so the cats went back to the basket in the Warden's Spire. Put another one down and they will come to it.
+wardencatathome=This one has moved in for good.\nIt sleeps in the basket in the Warden's Spire now.
+wardencatathomebasket=This one has moved in for good.\nIts basket is at <x>, <y> - that is home now.
+wardencattreatbasket=The cat snatches the treat and vanishes in a puff of cloud -\nstraight to the basket you set out at <x>, <y> in the <level>.
+catbasketready=The basket is ready, and empty.\nSiggi and Peanut are still up in the Skyreach - find them and offer a Cloudpuff Treat,\nand they will move in here.
+catbasketmovedin=The cats know a good basket when they see one:\n<count> cat(s) just moved in at <x>, <y>.
+catbasketmoved=The newest basket wins:\n<count> cat(s) left the old one and moved into this one at <x>, <y>.
+catbasketremoved=The basket is gone, so the cats went back to the basket in the Warden's Spire.\nPut another one down and they will come to it.
 wardentalk1=The wind up here has no manners. You get used to it.
 wardentalk2=Four hundred years the Skywatch kept this sky. Now it keeps me.
 wardentalk3=Every lamp in that tower, I lit myself. Twice, some nights.
 wardentalk4=The cats came with the tower. Or the tower came with the cats. Hard to say now.
 wardentalk5=Down there you have weather. Up here we have moods.
 wardentalk6=I have watched a great many things fall. Very few of them came back up.
-wardenmovedin=<settlement> has a new resident - the Warden is waiting there. Give him a bed and he will stay.
 wardencatsdone=Both of them. Under one roof. That is the tower closed properly - take the basket, they know it.
 wardenanchordone=Metal and stone, and the old island stops wandering. It will be where you left it. That matters, later.
 catmarkerblack=Siggi's lair
 catmarkertabby=Peanut's lair
-catmarkersadded=Two more markers on your world map (M): the Warden knows where his cats sleep.
 
 [quests]
 swhfindspiretitle=The Warden's Call
@@ -420,10 +414,12 @@ skyfallshard=Fallen Skyshard
 swhshrinesign=...and the stair shall stand where the sky is thinnest,\nand the keeper shall count what comes down.\n\n- the rest has weathered away -
 // The note left at the stranded aeronaut's camp.
 swhaeronautsign=Balloon down. Cargo mostly intact.\nWalking east. If you find this, the crates are yours.\nMind the ones that are still warm.
-// Skyfall announcements. The colour code matches vanilla's own event lines
-// (raidapproaching and bossapproaching are both §b).
-swhskyfallstart=§bThe sky is coming apart - shards are falling.
-swhskyfallend=§aThe skyfall has passed.
+// Skyfall announcements. These are floating text over each Surface
+// player's own feet, not chat lines, so they carry NO GameColor code:
+// FloatTextFade draws its lines through StringDrawOptions, which prints
+// a § code as its own characters instead of colouring the text.
+swhskyfallstart=The sky is coming apart - shards are falling.
+swhskyfallend=The skyfall has passed.
 
 // ===== Item polish (content/itempolish) =====
 // One line per material saying WHAT IT IS and WHERE IT COMES FROM, because
@@ -503,8 +499,8 @@ soulexposureband3=Sight failing, limbs slowing, life draining
 soulexposureband4=The Veil has your measure. Leave, or die here.
 
 [misc]
-veilexposurewarning=Cold pours in from every side. The fog has begun to weigh you - go back.
-veilmarkcrossing=The fog opens a pace ahead of you and closes behind. The Mark holds.
+veilexposurewarning=Cold pours in from every side.\nThe fog has begun to weigh you - go back.
+veilmarkcrossing=The fog opens a pace ahead of you and closes behind.\nThe Mark holds.
 
 [deaths]
 swhveilname=the Veil
@@ -547,7 +543,6 @@ eveleentalk3=I keep three seeds I have never planted. I would like to know what 
 eveleentalk4=A garden is not decoration. A garden is an argument you are having with the ground.
 eveleenasksplants=Bring me one of each: an Eden Berry, a Moon Melon, a Sun Grape. Prove to me it still grows.
 eveleenplantsdone=So. It still grows out there. Good.
-edenplantsdone=The Knowledge Tree bends toward Eveleen as she takes the fruit. A cutting comes away easily, like it always meant to.
 
 // --- Mortimer ---
 mortimertalkpitch=You have dead to keep and nowhere to keep them. I have a spade, a hat, and no particular hurry. We can help each other.
@@ -569,11 +564,9 @@ eleanortalk1=I remember a kitchen. I do not remember whose.
 eleanortalk2=The goats are not frightened of me. That is worth a great deal.
 eleanortalk3=Do not be sad on my account. I am not sure I can be.
 eleanortalk4=Sometimes I catch myself waiting. I have stopped asking for what.
-eleanorneedessence=Not enough of me yet.
-eleanorneedessencecount=Eleanor needs <need> Veil Essence in your hand before she can let go. You are holding <have>.
+eleanorneedessence=Not enough of me yet. <have> of <need>.
 eleanorfarewell=Oh. Oh, so that was all it was.
-eleanorpassedon=Eleanor thins out like breath on cold glass. Where she stood there is a small lantern, still warm.
-eleanorstaydone=Eleanor decides to stay, quietly, the way a room decides to keep a lamp lit a little longer.
+eleanorpassedon=Eleanor thins out like breath on cold glass.\nWhere she stood there is a small lantern, still warm.
 
 // --- Knott ---
 knotttalkpitch=Every door in this yard is convinced it leads somewhere. I have believed them for longer than is reasonable. You look like someone who might prove one of us right.
@@ -582,7 +575,7 @@ knotttalk2=A door that opens onto nothing is still a door. It just has manners.
 knotttalk3=I do not sell keys to doors I have not tested. Test enough of them and you stop needing keys.
 knotttalk4=Somebody has to keep asking where they lead. Might as well be me.
 knottasksdoor=If you truly think one of these leads somewhere, prove it. Bring me what a door like that would need.
-knottdoordone=Mr. Knott turns the materials over twice, then nods slowly, like a man who has just won an argument nobody else knew he was having.
+knottdoordone=Ha! So it does lead somewhere. Take this - you argued it out of me.
 
 [quests]
 // --- Eveleen, the Eden chain ---
@@ -738,7 +731,7 @@ butlerlastwords2=The house will hear of this.
 butlerlastwords3=I had nearly finished the rounds.
 bridelastwords=You came too late.
 chairlastwords=At last, somebody sat still.
-basinalreadyghost=The basin is quiet here. You are already among the dead.
+basinalreadyghost=The basin is quiet here.\nYou are already among the dead.
 basinneedsectoplasm=The basin needs twelve Ectoplasm.
 ghostgateopened=The basin fills with cold light and opens into the Aftergarden.
 
@@ -797,7 +790,7 @@ edengate=Eden Gate
 edenseedbasin=Eden Threshold
 
 [misc]
-edenbasinalreadyeden=The basin is empty here. You are already standing in Eden.
+edenbasinalreadyeden=The basin is empty here.\nYou are already standing in Eden.
 edenbasinneedsseeds=The basin needs 6 Eden Grass Seeds.
 edengateopened=The basin fills with green light and opens into the Garden of Eden.
 // Steinfeld / The Quiet Reach
@@ -856,9 +849,9 @@ bossportalcrookedbeyond=Crooked Summoning Stone
 [buff]
 incursionpressure=Incursion Pressure
 [misc]
-bossportallocked=The stone is cold. Build this realm's key piece at home, and it will answer.
-bossportalbusy=Its guardian is already awake. Finish that fight first.
-bossportalsilent=Nothing answers. Whatever slept here has not been named yet.
+bossportallocked=The stone is cold.\nBuild this realm's key piece at home, and it will answer.
+bossportalbusy=Its guardian is already awake.\nFinish that fight first.
+bossportalsilent=Nothing answers.\nWhatever slept here has not been named yet.
 bossportalawoke=The stone opens. <name> has awoken!
 // The Fog Key: Ghost Chalk, the Seance Circle and the Ghost Guide
 // (docs/FOGKEY_AND_BOSSPORTALS.md Part A)
@@ -877,8 +870,7 @@ ghostguidename=<name>, the Ghost Guide
 seanceneedsettlement=Chalk only holds where people live. Draw it inside your settlement.
 seanceguidehere=Your guide is already here.
 seanceguidearrives=The chalk smokes, and <name> steps out of it.
-ghostguideunlock1=Breathe out. There. Now the mist knows you.
-ghostguideunlock2=The Ghost Guide marks you. The Soul Exposure of the Ghost band no longer touches you.
+ghostguideunlock1=Breathe out. There. Now the mist knows you - Soul Exposure will not touch you again.
 ghostguideintro=I have no use for coin. Show me what you carry.
 ghostguidenohire=The dead do not move in. Come back when you need something.
 ghostguidetalk1=Everyone asks the same first question, and none of them like the answer.
@@ -886,7 +878,7 @@ ghostguidetalk2=Careful with the mist further out. It is not mine.
 ghostguidetalk3=I was a surveyor. I still count things. It is restful.
 ghostguidetalk4=Bring me a good dinner sometime. I cannot eat it. I would like to smell it.
 wardengiveschalk=You have been out to the mist, then. Take this - chalk, ground from grave salt. Draw a circle at home and someone will answer.
-seancenobodyanswers=The chalk here is old and cold. Nothing answers it.
+seancenobodyanswers=The chalk here is old and cold.\nNothing answers it.
 
 // ============================================================
 // The region keys (docs/FOGKEY_AND_BOSSPORTALS.md sections B1-B2)
@@ -915,8 +907,7 @@ swhkeycrookedbeyonddesc=Every door in the Crooked Beyond leads somewhere it shou
 swhkeycrookedbeyondreward=Knott's Crooked Door + 12x Spiritsteel Bar
 [misc]
 regionkeyneedsettlement=A key piece only holds where people live. Stand it up inside your settlement.
-regionkeyunlocked=The <key> settles into the ground, and somewhere far out a cold stone warms.
-regionkeyearned=Stand it up inside a settlement and that realm's summoning stones will answer you.
+regionkeyunlocked=The <key> settles into the ground,\nand somewhere far out a cold stone warms.
 wardenkeyaskskyreach=There is a way to call the things that sleep out there - but they only answer their own kind. Bring me the storm and I will build you a watchfire.
 wardenkeydoneskyreach=That will burn. Set it down at home, where the walls are yours.
 wardenkeyaskeden=Eden next, then. Sap and pollen, and neither will be handed to you.

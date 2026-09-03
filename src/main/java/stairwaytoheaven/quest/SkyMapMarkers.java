@@ -12,6 +12,16 @@ import stairwaytoheaven.SkyRegistry;
  * file, so a single send is permanent; the per-player sent-sets persist with
  * the quest data so nobody gets duplicates — and a player who deletes a
  * marker on purpose is not spammed with it again.
+ *
+ * <p><b>Nothing here announces itself.</b> Each of these three methods used to
+ * follow its markers with a chat line ("misc.markersadded",
+ * "misc.catmarkersadded") saying that markers had been added. Those keys are
+ * gone: the marker IS the notification, it carries its own name
+ * ("misc.spiremarker", "misc.stairsmarker", "misc.catmarkerblack",
+ * "misc.catmarkertabby") on the world map, and it stays there permanently
+ * instead of scrolling past once. Both lines were also sent from inside a
+ * level-change callback, where the client is on the loading screen — the worst
+ * possible moment to tell somebody anything.
  */
 public final class SkyMapMarkers {
 
@@ -20,15 +30,11 @@ public final class SkyMapMarkers {
 
     /** On ascent both positions are known: deliver spire + stairway markers. */
     public static void onAscent(ServerClient client, SkywatchQuestData quest, int stairsTileX, int stairsTileY) {
-        boolean any = sendSpire(client, quest);
+        sendSpire(client, quest);
         if (client != null && quest.stairsMarkerAuths.add(client.authentication)) {
             client.sendPacket(new PacketAddMapMarker(MapIconRegistry.getIcon("skystairs"),
                     new LocalMessage("misc", "stairsmarker"),
                     SkyRegistry.SKYREACH_IDENTIFIER, stairsTileX, stairsTileY));
-            any = true;
-        }
-        if (any) {
-            client.sendChatMessage(new LocalMessage("misc", "markersadded"));
         }
     }
 
@@ -38,9 +44,7 @@ public final class SkyMapMarkers {
      * arrives on the player's next ascent).
      */
     public static void onLocator(ServerClient client, SkywatchQuestData quest) {
-        if (sendSpire(client, quest)) {
-            client.sendChatMessage(new LocalMessage("misc", "markersadded"));
-        }
+        sendSpire(client, quest);
     }
 
     /**
@@ -59,7 +63,6 @@ public final class SkyMapMarkers {
         client.sendPacket(new PacketAddMapMarker(MapIconRegistry.getIcon("skycat"),
                 new LocalMessage("misc", "catmarkertabby"),
                 SkyRegistry.SKYREACH_IDENTIFIER, quest.tabbyLairX, quest.tabbyLairY));
-        client.sendChatMessage(new LocalMessage("misc", "catmarkersadded"));
     }
 
     private static boolean sendSpire(ServerClient client, SkywatchQuestData quest) {

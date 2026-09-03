@@ -10,6 +10,7 @@ import necesse.entity.mobs.PlayerMob;
 import necesse.level.maps.Level;
 import stairwaytoheaven.SkyRegistry;
 import stairwaytoheaven.realms.ghost.GhostDecoObject;
+import stairwaytoheaven.util.TileText;
 
 /**
  * The Eden Threshold: a standing bowl the player seeds to grow a way into the
@@ -86,13 +87,13 @@ public class EdenSeedBasinObject extends GhostDecoObject {
         // dimensions, so the band under your feet is what answers it.
         if (stairwaytoheaven.realms.ghost.SoulBasinObject.inRealm(level, x, y,
                 stairwaytoheaven.worldgen.RealmDepth.REALM_EDEN)) {
-            client.sendChatMessage(new LocalMessage("misc", "edenbasinalreadyeden"));
+            TileText.at(client, x, y, new LocalMessage("misc", "edenbasinalreadyeden"));
             return;
         }
         int seeds = player.getInv().main.getAmount(level, player,
                 ItemRegistry.getItem("overgrownedenseed"), "edenseedbasin");
         if (seeds < SEED_COST) {
-            client.sendChatMessage(new LocalMessage("misc", "edenbasinneedsseeds"));
+            TileText.at(client, x, y, new LocalMessage("misc", "edenbasinneedsseeds"));
             return;
         }
         player.getInv().main.removeItems(level, player, ItemRegistry.getItem("overgrownedenseed"),
@@ -100,6 +101,6 @@ public class EdenSeedBasinObject extends GhostDecoObject {
         level.setObject(x, y, EdenRealm.edenGateDownID);
         level.getServer().network.sendToClientsWithTile(
                 new PacketChangeObject(level, 0, x, y, EdenRealm.edenGateDownID), level, x, y);
-        client.sendChatMessage(new LocalMessage("misc", "edengateopened"));
+        TileText.at(client, x, y, new LocalMessage("misc", "edengateopened"));
     }
 }

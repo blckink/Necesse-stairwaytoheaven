@@ -14,6 +14,7 @@ import necesse.entity.mobs.PlayerMob;
 import necesse.entity.mobs.buffs.ActiveBuff;
 import necesse.entity.mobs.buffs.staticBuffs.Buff;
 import necesse.level.maps.Level;
+import stairwaytoheaven.util.TileText;
 
 /**
  * The Veil's clock and its ledger of who may cross.
@@ -323,7 +324,12 @@ public class VeilWorldData extends WorldData {
         if (this.hasMark(client.authentication)) {
             if (!player.isOnGenericCooldown(COOLDOWN_PARTED)) {
                 player.startGenericCooldown(COOLDOWN_PARTED, MESSAGE_COOLDOWN_MS);
-                client.sendChatMessage(new LocalMessage("misc", "veilmarkcrossing"));
+                // Over the tile the player is standing on: the fog is what is
+                // speaking, and the fog is right there. UniqueFloatText's
+                // "inspect" type means the next one replaces this one instead
+                // of stacking (UniqueFloatText.java:24-33, VERIFIED [jar]).
+                TileText.at(client, player.getTileX(), player.getTileY(),
+                        new LocalMessage("misc", "veilmarkcrossing"));
             }
             return;
         }
@@ -335,7 +341,8 @@ public class VeilWorldData extends WorldData {
             // what is happening the second it starts, before the first stack
             // does anything worse than dim the view.
             player.startGenericCooldown(COOLDOWN_WARNED, MESSAGE_COOLDOWN_MS);
-            client.sendChatMessage(new LocalMessage("misc", "veilexposurewarning"));
+            TileText.at(client, player.getTileX(), player.getTileY(),
+                    new LocalMessage("misc", "veilexposurewarning"));
         }
     }
 

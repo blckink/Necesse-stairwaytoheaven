@@ -5,7 +5,6 @@ import java.awt.Color;
 import necesse.engine.localization.Localization;
 import necesse.engine.localization.message.GameMessage;
 import necesse.engine.localization.message.LocalMessage;
-import necesse.engine.network.packet.PacketChatMessage;
 import necesse.engine.network.server.ServerClient;
 import necesse.engine.registries.MobRegistry;
 import necesse.engine.util.GameUtils;
@@ -18,6 +17,7 @@ import necesse.inventory.lootTable.lootItem.LootItem;
 import necesse.level.maps.Level;
 import necesse.level.maps.hudManager.floatText.ChatBubbleText;
 import stairwaytoheaven.mobs.GhostGuideMob;
+import stairwaytoheaven.util.TileText;
 
 /**
  * The Séance Circle — a chalk ring you draw at home, and the only way to call
@@ -198,12 +198,12 @@ public class SeanceCircleObject extends SkyDecoObject {
         // and placed. Whoever builds them inherits the sites.
         SettlementsWorldData settlements = SettlementsWorldData.getSettlementsData(level);
         if (settlements == null || !settlements.hasSettlementAtTile(level, x, y)) {
-            client.sendChatMessage(new LocalMessage("misc", "seancenobodyanswers"));
+            TileText.at(client, x, y, new LocalMessage("misc", "seancenobodyanswers"));
             return;
         }
 
         if (findGuide(level, centreX, centreY) != null) {
-            client.sendChatMessage(new LocalMessage("misc", "seanceguidehere"));
+            TileText.at(client, x, y, new LocalMessage("misc", "seanceguidehere"));
             return;
         }
 
@@ -214,7 +214,7 @@ public class SeanceCircleObject extends SkyDecoObject {
         level.entityManager.addMob(guide, centreX, centreY - SUMMON_OFFSET);
         GameMessage arrival = new LocalMessage("misc", "seanceguidearrives",
                 "name", guide.getLocalization());
-        level.getServer().network.sendToClientsWithEntity(new PacketChatMessage(arrival), guide);
+        TileText.atAll(level.getServer(), level, x, y, arrival);
     }
 
     /** The guide this circle already called, or null. */

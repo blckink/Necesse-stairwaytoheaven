@@ -77,6 +77,12 @@ public class SkyWardenMob extends HumanShop {
      */
     private boolean stampedWorldRecord = false;
 
+    /**
+     * What he has said so far this conversation, waiting for {@link #flushSay}.
+     * Never read outside the server thread that ran {@code interact}.
+     */
+    private final java.util.ArrayList<GameMessage> pendingSay = new java.util.ArrayList<>();
+
     /** What a replacement Silver Bell costs at the Warden, in coins. */
     public static final int SPARE_BELL_PRICE = 5000;
 
@@ -272,6 +278,11 @@ public class SkyWardenMob extends HumanShop {
                 // small talk and his recruitment pitch instead. The third line
                 // stays because it explains the windsilk; an item that appears
                 // in the inventory unannounced is worse than one more sentence.
+                //
+                // These are collected, not sent: flushSay below puts all three
+                // in ONE bubble, because a bubble replaces the last one
+                // (ChatBubbleText.java:67-76, VERIFIED [jar]) and only the
+                // third would otherwise survive.
                 say(client, "wardenintro1");
                 say(client, "wardenintro2");
                 say(client, "wardenintro3");
@@ -283,6 +294,8 @@ public class SkyWardenMob extends HumanShop {
             advanceChain(player.getServerClient());
             advanceRegionKeys(player.getServerClient());
         }
+        // Everything the three calls above wanted to say, as one bubble.
+        this.flushSay();
 
         // HumanShop.interact turns him to face the player, updates happiness
         // and opens the shop/recruit container.
@@ -578,8 +591,13 @@ public class SkyWardenMob extends HumanShop {
             SkywatchWorldData.markRegionKeyEarned(server, step.realm);
             give(client, step.keyItemID, 1);
             give(client, step.barItemID, step.bars);
+            // His doneKey line already tells the player where the piece goes
+            // ("Set it down at home, where the walls are yours"), and
+            // RegionKeyObject.onPlaceFail answers the same question again, in
+            // a bubble, at the moment a player tries to stand one up outside a
+            // settlement ("misc.regionkeyneedsettlement"). The extra chat line
+            // "misc.regionkeyearned" said it a third time and is gone.
             say(client, step.doneKey);
-            client.sendChatMessage(new LocalMessage("misc", "regionkeyearned"));
             return; // one hand-over per conversation; the next ask waits for the next hello.
         }
 
@@ -767,11 +785,15 @@ public class SkyWardenMob extends HumanShop {
         // is gone this is its only source — without it the Veil is unreachable.
         give(client, "silverbell", 1);
         say(client, "wardengivesbell");
-        // Say where he went. Vanilla's own "joined settlement" line is sent by
-        // the recruit packet, but a player who bought him in another dimension
-        // deserves to be told he is already home and waiting for a bed.
-        client.sendChatMessage(new LocalMessage("misc", "wardenmovedin",
-                "settlement", data.networkData.getSettlementName()));
+        this.flushSay();
+        // The old "misc.wardenmovedin" chat line named the settlement he had
+        // just joined. It is gone, and its own comment said why it could go:
+        // vanilla's recruit packet already sends the joined-settlement line,
+        // and vanilla's settlement UI is what tells a player which of their
+        // settlers still needs a bed. A bubble was not an option either -- it
+        // would have replaced the Silver Bell line above (ChatBubbleText.init,
+        // ChatBubbleText.java:67-76, VERIFIED [jar]), and the bell is the item
+        // that unlocks the Veil.
     }
 
     private void igniteBeacon(Level level, SkywatchQuestData quest) {
@@ -813,13 +835,65 @@ public class SkyWardenMob extends HumanShop {
         WardenIdentity.dress(drawOptions);
     }
 
-    /** Speech bubble for everyone nearby + chat line for the interacting player. */
+    /**
+     * One line of what he says this conversation. Buffered, not sent —
+     * {@link #flushSay} puts the whole conversation in ONE speech bubble.
+     *
+     * <p><b>Why it is buffered.</b> It used to send its bubble immediately and
+     * ALSO post the same sentence into the interacting player's chat log,
+     * formatted {@code "The Sky Warden: <line>"} through
+     * {@code misc.wardenchatformat}. Both that key and {@code misc.wardenname}
+     * are gone with the chat log itself — but the chat half was quietly load
+     * bearing, because {@code ChatBubbleText.init} (ChatBubbleText.java:67-76,
+     * VERIFIED [jar]) removes any bubble the same mob already has. His first
+     * contact says three lines in a row and his conversations can add the
+     * chalk line and a region-key line on top of those; with immediate sends
+     * only the LAST of them would ever be seen, and the other four would be
+     * deleted a frame after they appeared. The chat log was the only place
+     * they survived, so deleting it without this buffer would have silently
+     * deleted them too.
+     *
+     * <p>{@code client} is kept in the signature: every caller has one, they
+     * all read as "tell THIS player", and dropping it would make a per-player
+     * line impossible to add back without touching nine call sites.
+     */
     protected void say(ServerClient client, String miscKey) {
-        GameMessage message = new LocalMessage("misc", miscKey);
-        this.getLevel().getServer().network.sendToClientsWithEntity(
-                new necesse.engine.network.packet.PacketMobChat(this.getUniqueID(), message), this);
-        client.sendChatMessage(new LocalMessage("misc", "wardenchatformat", "name",
-                new LocalMessage("misc", "wardenname").translate(), "line", message.translate()));
+        this.pendingSay.add(new LocalMessage("misc", miscKey));
+    }
+
+    /**
+     * Everything {@link #say} collected, as one bubble over his head, seen by
+     * everyone nearby.
+     *
+     * <p>The lines are joined with {@code \n} inside a
+     * {@code GameMessageBuilder} rather than translated here, so every player
+     * reads them in their own language — the same reason
+     * {@code AbstractBeeHiveObjectEntity} builds its inspect text that way
+     * (AbstractBeeHiveObjectEntity.java:590-611, VERIFIED [jar]).
+     * {@code FairType} treats {@code \n} as a line break and wraps the rest at
+     * {@code ChatBubbleText.maxWidth} (FairType.java:262, VERIFIED [jar]).
+     */
+    protected void flushSay() {
+        if (this.pendingSay.isEmpty()) {
+            return;
+        }
+        Level level = this.getLevel();
+        Server server = level == null ? null : level.getServer();
+        if (server == null) {
+            this.pendingSay.clear();
+            return;
+        }
+        necesse.engine.localization.message.GameMessageBuilder speech =
+                new necesse.engine.localization.message.GameMessageBuilder();
+        for (int i = 0; i < this.pendingSay.size(); i++) {
+            if (i > 0) {
+                speech.append("\n");
+            }
+            speech.append(this.pendingSay.get(i));
+        }
+        this.pendingSay.clear();
+        server.network.sendToClientsWithEntity(
+                new necesse.engine.network.packet.PacketMobChat(this.getUniqueID(), speech), this);
     }
 
     /** Give items to the player; anything that does not fit drops at their feet. */

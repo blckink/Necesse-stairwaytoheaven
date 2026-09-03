@@ -5,7 +5,6 @@ import java.util.List;
 
 import necesse.engine.localization.message.GameMessage;
 import necesse.engine.localization.message.LocalMessage;
-import necesse.engine.network.packet.PacketChatMessage;
 import necesse.engine.network.server.Server;
 import necesse.engine.util.LevelIdentifier;
 import necesse.entity.mobs.Mob;
@@ -213,7 +212,7 @@ public final class CatHome {
         }
         int moved = sendCoaxedCatsHome(server, new Spot(level.getIdentifier(), tileX, tileY, true));
         if (moved > 0) {
-            broadcast(server, level, new LocalMessage("misc", "catbasketremoved"));
+            broadcast(server, level, tileX, tileY, new LocalMessage("misc", "catbasketremoved"));
         }
     }
 
@@ -329,18 +328,23 @@ public final class CatHome {
                     "count", String.valueOf(moved),
                     "x", String.valueOf(tileX), "y", String.valueOf(tileY));
         }
-        broadcast(server, level, message);
+        broadcast(server, level, tileX, tileY, message);
     }
 
     /**
-     * Vanilla's own way of announcing a world event: a server-side
-     * {@code PacketChatMessage} carrying a {@code LocalMessage}, sent to the
-     * clients on that level so each player reads it in their own language.
+     * Over the basket, for everyone who can see it.
+     *
+     * <p>It used to be a level-wide {@code PacketChatMessage}. The chat log is
+     * gone (the player: <i>"und keine chat nachrichten! generell.. die sind
+     * total kacke lesbar"</i>), and a basket announcing itself to a player two
+     * thousand tiles away never earned its place anyway — whoever put it down
+     * is standing on it. The message is still sent unresolved, so each player
+     * reads it in their own language.
      */
-    private static void broadcast(Server server, Level level, GameMessage message) {
-        if (server == null || server.network == null || level.getIdentifier() == null) {
+    private static void broadcast(Server server, Level level, int tileX, int tileY, GameMessage message) {
+        if (level == null || level.getIdentifier() == null) {
             return;
         }
-        server.network.sendToClientsAtEntireLevel(new PacketChatMessage(message), level.getIdentifier());
+        stairwaytoheaven.util.TileText.atAll(server, level, tileX, tileY, message);
     }
 }

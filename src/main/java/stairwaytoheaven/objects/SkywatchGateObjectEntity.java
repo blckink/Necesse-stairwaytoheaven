@@ -13,6 +13,7 @@ import necesse.level.gameObject.GameObject;
 import necesse.level.maps.Level;
 import stairwaytoheaven.SkyRegistry;
 import stairwaytoheaven.quest.SkywatchQuestData;
+import stairwaytoheaven.util.TileText;
 
 /**
  * The Skywatch Gate: the permanent return portal at the Old Warden Spire.
@@ -25,7 +26,8 @@ import stairwaytoheaven.quest.SkywatchQuestData;
  * player can never strand themselves in the sky by mining their own base
  * entrance. A player with no binding at all (never ascended from the surface —
  * e.g. teleported in by an admin) gets a polite refusal instead of a random
- * destination.
+ * destination — floating over the gate itself, the way vanilla's own
+ * {@code EggNestObject} answers a player who pokes it (see {@link TileText}).
  */
 public class SkywatchGateObjectEntity extends PortalObjectEntity {
 
@@ -42,7 +44,7 @@ public class SkywatchGateObjectEntity extends PortalObjectEntity {
         SkywatchQuestData quest = SkywatchQuestData.get(skyLevel);
         long[] returnTile = quest.getReturnStairway(client.authentication);
         if (returnTile == null) {
-            client.sendChatMessage(new LocalMessage("misc", "gatenobinding"));
+            TileText.at(client, this.tileX, this.tileY, new LocalMessage("misc", "gatenobinding"));
             return;
         }
         int targetX = (int) returnTile[0];
@@ -60,7 +62,7 @@ public class SkywatchGateObjectEntity extends PortalObjectEntity {
             Level surface = server.world.getLevel(this.getDestinationIdentifier());
             GameMessage error = isBlockingExit.get(surface);
             if (error != null) {
-                client.sendChatMessage(error);
+                TileText.at(client, this.tileX, this.tileY, error);
                 return;
             }
         }
@@ -80,7 +82,7 @@ public class SkywatchGateObjectEntity extends PortalObjectEntity {
             if (!isBlockingExit.isComputed()) {
                 GameMessage error = isBlockingExit.get(level);
                 if (error != null) {
-                    client.sendChatMessage(error);
+                    TileText.at(client, this.tileX, this.tileY, error);
                     return false;
                 }
             }

@@ -3114,3 +3114,58 @@ The native ivy ore object is registered as `ivyoreswamp`, while its
 jar established the registration, and the Eden integration run then loaded and
 generated the object successfully. Never infer an object registry ID from its
 sprite filename; inspect the actual registration first.
+
+## Telling a player something without the chat log (2026-09-03, VERIFIED [jar])
+
+The chat log is off limits — the player: *"und keine chat nachrichten!
+generell.. die sind total kacke lesbar"*. Everything below was read out of the
+decompiled 1.3.2 sources while replacing all 49 of the mod's chat lines. Nothing
+here has been watched in a running client yet.
+
+**An object speaks over its own tile.** `ServerClient.sendUniqueFloatText(int
+levelX, int levelY, GameMessage, String uniqueType, int hoverTime)`
+(ServerClient.java:1906) sends `PacketUniqueFloatText`, whose `processClient`
+adds a `UniqueFloatText` to `client.getLevel().hudManager`. Vanilla's own
+example is `EggNestObject.interact`, and its offsets are worth copying exactly:
+`textX = x * 32 + 16`, `textY = y * 32 + 32`, type `"inspect"`, hover `6000`
+(EggNestObject.java:113-114 and :145). `stairwaytoheaven.util.TileText` is that
+call and nothing else.
+
+* `UniqueFloatText.init` (UniqueFloatText.java:24-33) removes every other
+  floating text carrying the SAME `uniqueType`. Sharing `"inspect"` across the
+  mod is therefore a feature: a player mashing a locked portal reads one
+  sentence, not a stack.
+* `PacketUniqueFloatText.processClient` needs `client.getLevel() != null`, and
+  it drops the text on the level the client is on WHEN THE PACKET ARRIVES. Do
+  not send one from inside a `changeLevelCheck` callback: the client is on
+  `MainMenu` doing a level load (PacketPlayerLevelChange.processClient), and
+  `ServerClient.changeLevelCheck` runs that callback BEFORE
+  `PacketPlayerLevelChange` when the destination level is already loaded
+  (ServerClient.java:1451-1473).
+
+**A person speaks in a bubble, and only one at a time.**
+`ChatBubbleText.init` (ChatBubbleText.java:67-76) removes every other
+`ChatBubbleText` belonging to the same mob. Two `PacketMobChat` sends in one
+method therefore show only the second — the first is deleted a frame after it
+appears. This was invisible while every bubble had a duplicate chat line
+carrying the same text; deleting the chat log exposed it, and it silently ate
+two of the Sky Warden's three intro lines until `SkyWardenMob.say` was changed
+to buffer a conversation and `flushSay` to send it as one message.
+
+**Multi-line text.** A literal `\n` in a `.lang` entry becomes a real newline
+when the file is read (Translation.java:181). From there:
+
+* `FloatTextFade.setText` (FloatTextFade.java:100-101) does `text.split("\\n")`
+  and centres each line, and draws each through `StringDrawOptions` — so float
+  text NEVER wraps on its own (a long sentence is one very wide line) and a
+  `§` GameColor code is printed as its own characters rather than colouring
+  anything. Break float-text lines by hand, and give them no colour codes.
+* `ChatBubbleText` builds a `FairType` at `maxWidth` 200px, which both wraps and
+  honours `\n` (FairType.java:262), and `PacketMobChat.processClient` strips
+  colour codes for you (`GameColor.stripCodes`).
+
+**Several localized lines in one message.** `GameMessageBuilder`
+(`necesse.engine.localization.message`) appends `GameMessage`s and raw strings
+and resolves them client-side, so joined lines still reach each player in their
+own language — `AbstractBeeHiveObjectEntity` builds its inspect text this way
+(AbstractBeeHiveObjectEntity.java:590-611).

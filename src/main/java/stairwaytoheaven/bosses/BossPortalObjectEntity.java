@@ -1,8 +1,6 @@
 package stairwaytoheaven.bosses;
 
-import necesse.engine.localization.message.GameMessage;
 import necesse.engine.localization.message.LocalMessage;
-import necesse.engine.network.packet.PacketChatMessage;
 import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
 import necesse.engine.registries.MobRegistry;
@@ -13,6 +11,7 @@ import necesse.entity.mobs.Mob;
 import necesse.entity.objectEntity.ObjectEntity;
 import necesse.level.maps.Level;
 import stairwaytoheaven.quest.SkywatchWorldData;
+import stairwaytoheaven.util.TileText;
 
 /**
  * What one boss portal remembers: whether its guardian is already out.
@@ -115,28 +114,28 @@ public class BossPortalObjectEntity extends ObjectEntity {
             // Reserved realm (Hell). No portal is registered for one, so this
             // is defensive only -- but a silent click is a bug report, and a
             // sentence is not.
-            client.sendChatMessage(new LocalMessage("misc", "bossportalsilent"));
+            TileText.at(client, this.tileX, this.tileY, new LocalMessage("misc", "bossportalsilent"));
             return;
         }
         SkywatchWorldData world = SkywatchWorldData.get(server);
         if (world == null || !world.bossPortalsUnlocked(this.realm)) {
-            client.sendChatMessage(new LocalMessage("misc", "bossportallocked"));
+            TileText.at(client, this.tileX, this.tileY, new LocalMessage("misc", "bossportallocked"));
             return;
         }
         if (this.guardianAwake(level, boss)) {
-            client.sendChatMessage(new LocalMessage("misc", "bossportalbusy"));
+            TileText.at(client, this.tileX, this.tileY, new LocalMessage("misc", "bossportalbusy"));
             return;
         }
         Mob mob = this.summon(level, boss);
         if (mob == null) {
-            client.sendChatMessage(new LocalMessage("misc", "bossportalsilent"));
+            TileText.at(client, this.tileX, this.tileY, new LocalMessage("misc", "bossportalsilent"));
             return;
         }
         this.bossUniqueID = mob.getUniqueID();
-        server.network.sendToClientsWithEntity(
-                new PacketChatMessage((GameMessage) new LocalMessage(
-                        "misc", "bossportalawoke", "name", mob.getLocalization())),
-                mob);
+        // Everyone who can see the portal is told, over the portal, rather
+        // than in a chat log nobody reads.
+        TileText.atAll(server, level, this.tileX, this.tileY,
+                new LocalMessage("misc", "bossportalawoke", "name", mob.getLocalization()));
     }
 
     /** Is the boss this portal woke still out there? */

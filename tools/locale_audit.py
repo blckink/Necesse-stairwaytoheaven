@@ -903,8 +903,8 @@ def local_message_refs():
     """Every (category, key, file:line) our source asks for by literal.
 
     A key we type by hand is exactly as likely to be missing as one a registry
-    derives, and it fails the same way: SkywardStairwayObjectEntity would post
-    "misc.skyreachhint" into chat.
+    derives, and it fails the same way: SkywatchGateObjectEntity would float
+    the literal text "misc.gatenobinding" over the gate.
     """
     call = re.compile(
         r'(?:new\s+LocalMessage|Localization\s*\.\s*translate)\s*\(\s*'

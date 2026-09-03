@@ -161,10 +161,14 @@ public class EleanorMob extends SkySettlerMob {
         int have = player.getInv().main.getAmount(level, player,
                 ItemRegistry.getItem("veilessence"), "eleanor");
         if (have < PASS_ON_COUNT) {
-            // She says what she is short of. Without this the offering branch
-            // would be invisible to a player holding eleven.
-            this.bubble("eleanorneedessence");
-            client.sendChatMessage(new LocalMessage("misc", "eleanorneedessencecount",
+            // She says what she is short of, and how short, in ONE bubble.
+            // The count used to be a separate chat line
+            // ("misc.eleanorneedessencecount"); it is now a replacement inside
+            // her own line, because a second bubble would have deleted the
+            // first (ChatBubbleText.java:67-76, VERIFIED [jar]) and the count
+            // is the whole reason this branch says anything at all -- without
+            // it the offering is invisible to a player holding eleven.
+            this.bubble(new LocalMessage("misc", "eleanorneedessence",
                     "have", String.valueOf(have), "need", String.valueOf(PASS_ON_COUNT)));
             super.interact(player);
             return;
@@ -174,7 +178,13 @@ public class EleanorMob extends SkySettlerMob {
         player.getInv().main.removeItems(level, player,
                 ItemRegistry.getItem("veilessence"), PASS_ON_COUNT, "eleanor");
         this.bubble("eleanorfarewell");
-        client.sendChatMessage(new LocalMessage("misc", "eleanorpassedon"));
+        // What is left where she stood, floating on the spot she is about to
+        // vanish from. It cannot be a second bubble -- that would delete her
+        // farewell (ChatBubbleText.java:67-76, VERIFIED [jar]) -- and the mob
+        // is removed at the end of this method, so the tile is the only thing
+        // still there to say it.
+        stairwaytoheaven.util.TileText.at(client, this.getTileX(), this.getTileY(),
+                new LocalMessage("misc", "eleanorpassedon"));
         give(client, PASS_ON_REWARD, 1);
         // The endgame payout on top of the trinket §11 names: benchmarked the
         // same way every other chain this pass adds is, against the Skyreach
@@ -206,7 +216,12 @@ public class EleanorMob extends SkySettlerMob {
             SkyQuests.removeAllOfType(server, EleanorQuest.class);
         }
         give(client, "spiritsteelbar", PASS_ON_BAR_BONUS);
-        client.sendChatMessage(new LocalMessage("misc", "eleanorstaydone"));
+        // No line of our own for the STAY ending. It used to post
+        // "misc.eleanorstaydone" into chat; vanilla's own recruit packet
+        // already announces that she joined the settlement, the bars land in
+        // the inventory, and by the time this runs vanilla has moved her into
+        // the settlement, so a bubble here would be drawn for whoever is
+        // standing THERE rather than for the player who paid.
     }
 
     /** Reward hand-off; anything that does not fit drops at the player's feet. */

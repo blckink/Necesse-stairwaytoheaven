@@ -17,6 +17,7 @@ import stairwaytoheaven.quest.SkywatchWorldData;
 import stairwaytoheaven.worldgen.RealmDepth;
 import stairwaytoheaven.worldgen.RealmLanding;
 import stairwaytoheaven.worldgen.SkyOrigin;
+import stairwaytoheaven.util.TileText;
 
 /**
  * A DOOR BETWEEN BANDS, not a level teleport.
@@ -72,7 +73,7 @@ public class EdenGateObjectEntity extends PortalObjectEntity {
             Level level = server.world.getLevel(this.getDestinationIdentifier());
             GameMessage error = isBlockingExit.get(level);
             if (error != null) {
-                client.sendChatMessage(error);
+                TileText.at(client, this.tileX, this.tileY, error);
                 return;
             }
         }
@@ -81,7 +82,7 @@ public class EdenGateObjectEntity extends PortalObjectEntity {
             if (!isBlockingExit.isComputed()) {
                 GameMessage error = isBlockingExit.get(level);
                 if (error != null) {
-                    client.sendChatMessage(error);
+                    TileText.at(client, this.tileX, this.tileY, error);
                     return false;
                 }
             }
