@@ -87,14 +87,28 @@ OTHER_WALL_CELLS = {(2, 5), (3, 5), (2, 6), (3, 6), (2, 7), (3, 7)}
 BAND_NAME = {-16: "abv", 0: "top", 16: "bot"}   # abv = the 16px band ABOVE the tile
 
 ROW_LABEL = {
-    0: "row 0  TOP CAP (north rim). 4 variants by neighbour: W end / continuing / E end",
-    1: "row 1  cols 0,3 = band under a window or a foreign wall; cols 1,2 = inner corners",
-    2: "row 2  ROOF band, drawn on the tile's own upper 16px when a wall stands below",
-    3: "row 3  FRONT FACE, upper half (the wall seen head-on)",
-    4: "row 4  FRONT FACE, lower half (foot; meets the ground)",
-    5: "row 5  cols 0,1 = outer bottom corners; cols 2,3 = face against a FOREIGN wall",
-    6: "row 6  cols 0,1 = those corners' feet; cols 2,3 = face against a FOREIGN wall",
-    7: "row 7  cols 0,1 = diagonal hooks; cols 2,3 = roof against a FOREIGN wall",
+    # Every line below is read off WallObject.addWallDrawOptions, VERIFIED [jar].
+    # L/R is which HALF of the tile the cell is drawn at (drawX vs drawX+16);
+    # abv/top/bot is which 16px BAND of screen (drawY-16 / drawY / drawY+16).
+    # Six cells serve TWO different bands and are marked so -- that is the thing
+    # this map got asked about: they are not "bottom" pieces.
+    0: "row 0  ABV band, nothing above. 0=L no-left(W end) 1=R has-right "
+       "2=L has-left 3=R no-right(E end)",
+    1: "row 1  TWO BANDS. abv: 0=L,3=R under a FOREIGN wall above; "
+       "1=L,2=R inner corner where the run turns. "
+       "bot: 1=L,2=R diagonal filled; 0=L,3=R diagonal empty",
+    2: "row 2  TOP band, a wall stands below. 0=L no-left 1=L has-left+diag "
+       "2=R has-right+diag 3=R no-right",
+    3: "row 3  FRONT FACE upper, NO wall below. 0=L no-left 2=L has-left "
+       "1=R has-right 3=R no-right",
+    4: "row 4  FRONT FACE lower (meets the ground). Same four as row 3",
+    5: "row 5  TOP band. 0=L,1=R wall below but the diagonal is empty and NOT "
+       "a wall. 2=L,3=L no wall below but a FOREIGN wall below (2 no-left, 3 has-left)",
+    6: "row 6  0=L,1=R are the BOT band feet of row 5's 0,1. "
+       "2=R,3=R are TOP band, foreign wall below (2 has-right, 3 no-right)",
+    7: "row 7  TWO BANDS. abv: 0=L,1=R foreign wall above with the diagonal "
+       "missing. bot: 0=L,1=R wall below, diagonal filled, no side neighbour. "
+       "2=R,3=L are TOP band against a FOREIGN wall diagonally below",
 }
 
 
@@ -261,12 +275,22 @@ def main():
     ly += 10
     d.text((lx, ly), "DOORS: 8 cells of 32x128 at 32-col 3..10.", fill=CO_DOOR, font=font)
     ly += 20
-    for line in ("Drawn at drawY-96, so the WHOLE 128px shows:",
-                 "the door rises three tiles above its own tile",
-                 "(yellow box). rot0/rot2 sit in E-W walls and are",
-                 "MIRRORED when the next tile is a door too, so the",
-                 "leaf must read both ways. rot1/rot3 sit in N-S",
-                 "walls and are never mirrored."):
+    for line in ("There is NO separate cell for a jamb, a hinge side or a",
+                 "swing direction. The eight cells are 4 ROTATIONS x",
+                 "(closed, open), alternating: 3=rot0 closed, 4=rot0 open,",
+                 "5=rot1 closed, 6=rot1 open, 7=rot2, 9=rot3 ... and the",
+                 "closed and open leaf are two SEPARATE objects that swap",
+                 "(WallDoorObject / WallDoorObject.WallDoorOpenObject).",
+                 "",
+                 "Which side the leaf hangs on is not art, it is MIRRORING",
+                 "at draw time: shouldMirror is true when the NEXT TILE",
+                 "along the wall is also a door. Only rot0 and rot2 apply",
+                 "it -- rot1/rot3 compute it and ignore it. So one leaf",
+                 "must read correctly both ways round.",
+                 "",
+                 "Drawn at drawY-96 with a 128px sprite, so the door's OWN",
+                 "tile is the BOTTOM 32px (yellow box) and it rises three",
+                 "tiles above that."):
         d.text((lx, ly), line, fill=(255, 245, 190), font=font_sm)
         ly += 18
 
