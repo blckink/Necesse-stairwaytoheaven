@@ -91,6 +91,24 @@ deleted: this is a change of HOSTING, not of content.
   the picks — visible where Crooked overlaps Hell past 5400 tiles. Pre-existing
   and invisible today, because that band paints as Crooked anyway.
 
+### Repository
+- **Six documents deleted**, all self-marked superseded or written for a job
+  that is finished: `HANDOFF_CODEX_REALMS.md`, `HANDOFF_PROMPT.md`,
+  `HANDOFF_LOCAL_PIPELINE.md`, `REVIEW-2026-08-24.md` (a review of v0.4.0),
+  and both `STATUS.md` and `CURRENT_STATE.md`. Three files each claiming to be
+  the current state is how an agent ends up building against a stale one;
+  `docs/OVERVIEW.md` is the only one now.
+- `PLAN_ONE_PLANE.md` keeps its name (~35 source files cite it) but is rewritten
+  from a migration plan into the standing architecture law. 185 lines to 82.
+- The one-plane rule and the Soul-Exposure rule are recorded in
+  `DESIGN_DECISIONS.md`, the file an agent reads to learn what it must not
+  silently reverse. This mistake was made once already.
+- `art-drafts/` deleted and gitignored: 46 files, 9.5 MB of resheet
+  intermediates. `art-inbox/` stays tracked — the phone route needs a PNG
+  dropped there to be committable.
+- Sixteen doc lines naming the five deleted `*Level` classes now point at
+  `SkyLevel` and the band that replaced them.
+
 ## [Unreleased] — Steinfeld / The Quiet Reach integrates — 2026-09-02
 
 ### Added
