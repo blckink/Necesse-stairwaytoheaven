@@ -43,6 +43,7 @@ os.environ.setdefault("NECESSE_SPRITES", os.path.join(REPO, "vanilla-sprites"))
 import wall_render_preview as wrp  # noqa: E402
 
 OUT = os.path.join(REPO, "build", "qa", "wallpaint")
+DOOR_PITCH = 76   # 32px slot + room for the label under it
 RES_OBJ = os.path.join(REPO, "src", "main", "resources", "objects")
 T = 32                      # a tile is 32x32 of screen
 PAD = 48                    # room around a shape for the bands it reaches into
@@ -54,19 +55,15 @@ GAP = 40                    # between shapes
 # body cells -- the tool asserts that, so a shape cannot quietly stop covering
 # something.
 SHAPES = [
-    ("block", "A solid run: the cap, the roof band and the front face.",
-     ["####",
-      "####",
-      "####"]),
-    ("notch", "A plus. Inner corners, and every step where the diagonal is empty.",
+    ("notch", "A plus. The cap, the roof band, the front face, the inner",
      [".##.",
       "####",
       ".##."]),
-    ("stub", "A single tile and a lone column: every end at once.",
-     ["#.#",
-      "..#",
-      "..#"]),
-    ("junction", "Our wall against a DIFFERENT material (X), beside and below it.",
+    ("column", "One tile wide: a run with a wall above AND below, no side",
+     ["#",
+      "#",
+      "#"]),
+    ("junction", "Against a DIFFERENT material (greyed) -- not yours to paint",
      ["#####",
       "X###X",
       "#####"]),
@@ -79,8 +76,35 @@ SHAPES = [
 WINDOW_NS = [(4, 0, 0, -16), (5, 0, 16, -16), (4, 1, 0, 0), (5, 1, 16, 0)]
 WINDOW_EW = [(c, r, dx, dy) for (c, r, dx, dy) in wrp.WallRenderer(None).window_cells(
     [False] * 8)]
-DOOR_LABELS = ["rot0 closed", "rot0 open", "rot1 closed", "rot1 open",
-               "rot2 closed", "rot2 open", "rot3 closed", "rot3 open"]
+# Eight slots, but only TWO viewpoints. rot0/rot2 are an E-W wall seen from its
+# north and south side; rot1/rot3 are an N-S wall seen from its left and right.
+# Vanilla draws all eight distinct (checked across stonewall, woodwall and our
+# own cloudmarble: no duplicates, no mirrors, none empty) -- but you only have
+# to DRAW two views x open/closed and let --pair-doors fill the partners in.
+DOOR_LABELS = ["rot0 zu  E-W", "rot0 auf E-W", "rot1 zu  N-S", "rot1 auf N-S",
+               "rot2 zu  E-W", "rot2 auf E-W", "rot3 zu  N-S", "rot3 auf N-S"]
+DOOR_PAIR = {4: 0, 5: 1, 6: 2, 7: 3}   # slot -> the slot it is copied from
+
+
+def foreign_cells(rows):
+    """Same as scene_cells but for the 'X' tiles -- the DIFFERENT material.
+
+    Without these the junction shape is a wall with two holes in it, and the
+    tiles beside the holes read as broken. They are drawn into the GUIDE only,
+    greyed, from a vanilla sheet: they are what your wall butts against, never
+    yours to paint. The paint canvas leaves them empty on purpose.
+    """
+    scene = wrp.Scene("s", [r.replace("#", ".").replace("X", "#") for r in rows])
+    r = wrp.WallRenderer(None)
+    out = []
+    for ty in range(scene.h):
+        for tx in range(scene.w):
+            if scene.at(tx, ty) != "#":
+                continue
+            adj = [scene.is_wall(tx + dx, ty + dy) for dx, dy in wrp.ADJ]
+            for col, row, dx, dy in r.wall_cells(adj, False, False, list(adj)):
+                out.append((col, row, tx * T + dx, ty * T + dy))
+    return out
 
 
 def scene_cells(rows):
@@ -126,6 +150,9 @@ def main():
                     help="fill the canvas from an existing 352x128 sheet, so you "
                          "paint OVER a working wall instead of from nothing")
     ap.add_argument("-o", "--out", help="where the 352x128 sheet goes")
+    ap.add_argument("--pair-doors", action="store_true",
+                    help="after slicing, copy rot0->rot2 and rot1->rot3 so you only "
+                         "have to paint two viewpoints instead of four")
     ap.add_argument("--selftest", action="store_true",
                     help="seed a canvas from every wall sheet we have, slice it "
                          "straight back, and assert the result is byte-identical")
@@ -135,7 +162,7 @@ def main():
     door_y = PAD + max(p["h"] for p in placed) + GAP + 24
     win_x = PAD
     win_y = door_y + 128 + GAP + 24
-    canvas_w = max(canvas_w, PAD + 8 * (32 + 12), 900)
+    canvas_w = max(canvas_w, PAD + 8 * DOOR_PITCH, 900)
     canvas_h = win_y + 128 + PAD
 
     covered = collections.Counter()
@@ -193,7 +220,7 @@ def main():
                                 (p2["ox"] + sx, p2["oy"] + sy))
             for i in range(8):
                 paint.paste(seed.crop(((3 + i) * 32, 0, (4 + i) * 32, 128)),
-                            (PAD + i * (32 + 12), door_y))
+                            (PAD + i * DOOR_PITCH, door_y))
             for j, cells in enumerate((WINDOW_NS, WINDOW_EW)):
                 bx = win_x + j * (32 + 40)
                 for col, row, dx, dy in cells:
@@ -205,6 +232,23 @@ def main():
             font = ImageFont.truetype("DejaVuSansMono.ttf", 11)
         except OSError:
             font = ImageFont.load_default()
+
+        # The foreign material, greyed, so a junction reads as a junction and
+        # not as a wall with holes punched in it.
+        ref_path = os.path.join(REPO, "vanilla-sprites", "objects", "stonewall.png")
+        ref = Image.open(ref_path).convert("RGBA") if os.path.exists(ref_path) else None
+        if ref is not None:
+            for p in placed:
+                for col, row, sx, sy in foreign_cells(p["rows"]):
+                    cell = ref.crop((col * 16, row * 16, col * 16 + 16, row * 16 + 16))
+                    px = cell.load()
+                    for yy in range(16):
+                        for xx in range(16):
+                            r0, g0, b0, a0 = px[xx, yy]
+                            if a0:
+                                v = (r0 * 30 + g0 * 59 + b0 * 11) // 100
+                                px[xx, yy] = (v // 2 + 30, v // 2 + 30, v // 2 + 38, 150)
+                    guide.alpha_composite(cell, (p["ox"] + sx, p["oy"] + sy))
 
         for p in placed:
             d.text((p["ox"] + shape_box(p["cells"])[0], PAD - 26),
@@ -218,13 +262,15 @@ def main():
                "door; rot0/rot2 get MIRRORED, so they must read both ways.",
                fill=(255, 220, 110), font=font)
         for i, lab in enumerate(DOOR_LABELS):
-            bx = PAD + i * (32 + 12)
+            bx = PAD + i * DOOR_PITCH
             d.rectangle([bx, door_y, bx + 31, door_y + 127], outline=(200, 170, 70))
             d.text((bx, door_y + 130), lab, fill=(230, 200, 120), font=font)
 
-        d.text((win_x, win_y - 20), "WINDOW -- left column: N-S wall (top surface seen "
-               "from ABOVE). right column: E-W wall (96px opening seen head-on).",
-               fill=(220, 140, 255), font=font)
+        d.text((win_x, win_y - 34), "WINDOW -- the LAST block. Two narrow columns, "
+               "nothing else lives down here.", fill=(220, 140, 255), font=font)
+        d.text((win_x, win_y - 20), "left = N-S wall, the wall's TOP SURFACE seen from "
+               "ABOVE with the opening cut along it.  right = E-W wall, the 96px "
+               "opening seen HEAD-ON.", fill=(190, 130, 220), font=font)
         for j, cells in enumerate((WINDOW_NS, WINDOW_EW)):
             bx = win_x + j * (32 + 40)
             for col, row, dx, dy in cells:
@@ -268,7 +314,7 @@ def main():
             sheet.paste(cell, (col * 16, row * 16))
 
     for i in range(8):
-        bx = PAD + i * (32 + 12)
+        bx = PAD + i * DOOR_PITCH
         sheet.paste(src.crop((bx, door_y, bx + 32, door_y + 128)), ((3 + i) * 32, 0))
     for j, cells in enumerate((WINDOW_NS, WINDOW_EW)):
         bx = win_x + j * (32 + 40)
@@ -276,6 +322,13 @@ def main():
             by = win_y + 64 + dy
             sheet.paste(src.crop((bx + dx, by, bx + dx + 16, by + 16)),
                         (col * 16, row * 16))
+
+    if args.pair_doors:
+        for dst, src_slot in DOOR_PAIR.items():
+            sheet.paste(sheet.crop(((3 + src_slot) * 32, 0, (4 + src_slot) * 32, 128)),
+                        ((3 + dst) * 32, 0))
+        print("paired doors: rot2 copied from rot0, rot3 from rot1 "
+              "(repaint them later if the two sides should differ)")
 
     if clashes:
         print("%d cell(s) painted DIFFERENTLY by two shapes -- that is a seam that "
