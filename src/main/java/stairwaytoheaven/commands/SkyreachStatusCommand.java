@@ -895,6 +895,8 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                     .append((int) stairwaytoheaven.worldgen.SkyOutlands.WRONG_START);
             int wallSeen = 0;
             int portalSeen = 0;
+            final int crookedPortalID = stairwaytoheaven.bosses.BossPortalObject.portalID(
+                    stairwaytoheaven.worldgen.RealmDepth.REALM_CROOKED);
 
             // The floor, tested as the promise itself rather than through a
             // proxy: sweep the WHOLE disc inside WRONG_START and count wrong
@@ -963,7 +965,13 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                             if (obj == SkyRegistry.evilwallID) {
                                 wallSeen++;
                             }
-                            if (obj == SkyRegistry.seanceCircleID) {
+                            // Counts the CROOKED BOSS PORTAL, not the Seance
+                            // Circle. The Outlands portal sites used to carry a
+                            // circle; they carry the boss portal since the chalk
+                            // made the circle settlement-only. Left pointing at
+                            // seanceCircleID this check would read 0 forever and
+                            // never catch the sites going empty again.
+                            if (crookedPortalID != 0 && obj == crookedPortalID) {
                                 portalSeen++;
                             }
                         }
