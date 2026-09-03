@@ -65,6 +65,13 @@ public class StairwayToHeavenMod {
         stairwaytoheaven.realms.steinfeld.SteinfeldRealm.register();
         stairwaytoheaven.realms.crooked.CrookedRealm.register();
         stairwaytoheaven.realms.ghost.GhostRealm.register();
+        // Dense, road-connected settlements and civic POIs across all six
+        // realm bands. They are one WorldPreset catalogue on the one plane,
+        // not extra levels; placement shares vanilla's "villages" collision
+        // board with every older structure.
+        necesse.engine.registries.WorldPresetRegistry.registerPreset(
+                stairwaytoheaven.worldgen.pois.RealmPoiWorldPreset.STRING_ID,
+                new stairwaytoheaven.worldgen.pois.RealmPoiWorldPreset());
         stairwaytoheaven.arsenal.SkyArsenal.register();
         stairwaytoheaven.arsenal.SkyArsenal.registerItems();
         stairwaytoheaven.settlement.SkyProfessions.register();
