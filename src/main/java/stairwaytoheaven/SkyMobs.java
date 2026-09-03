@@ -1,6 +1,7 @@
 package stairwaytoheaven;
 
 import necesse.engine.registries.MobRegistry;
+import necesse.entity.mobs.HumanTexture;
 import necesse.gfx.gameTexture.GameTexture;
 import stairwaytoheaven.mobs.SkyCritterMob;
 import stairwaytoheaven.mobs.SkyWardenMob;
@@ -98,6 +99,25 @@ final class SkyMobs {
         SkyCritterMob.snailTexture = GameTexture.fromFile("mobs/dewsnail");
         stairwaytoheaven.arsenal.FenWraithMob.texture = GameTexture.fromFile("mobs/fenwraith");
         stairwaytoheaven.arsenal.AuroraFlakeMob.texture = GameTexture.fromFile("mobs/auroraflake");
+        stairwaytoheaven.arsenal.RimeSentryMob.texture = GameTexture.fromFile("mobs/rimesentry");
+        // The Cinder Cantor is drawn through HumanDrawOptions, which needs a
+        // HumanTexture -- THREE sheets, not one: body, left arms, right arms
+        // (VERIFIED [jar], MobRegistry.humanTexture at MobRegistry.java:1830-1836).
+        // Only the body was drawn for us, so this composes OUR body over
+        // VANILLA's two arm sheets. Replacing the two paths below with
+        // "mobs/cindercantorarms_left"/"_right" is the whole of what finishing
+        // the mob takes; CinderCantorMob's class comment says so too.
+        //
+        // Naming vanilla's sheets by path rather than reaching into
+        // MobRegistry.Textures.ancientSkeletonMage costs nothing: fromFile is
+        // cache-keyed by path (VERIFIED [jar], GameTexture.java:177-185), so
+        // these hand back the very instances vanilla already loaded --
+        // GameResources.loadTextures() runs before the mods' initResources()
+        // loop (VERIFIED [jar], GlobalData.java:427 then :438).
+        stairwaytoheaven.arsenal.CinderCantorMob.texture = new HumanTexture(
+                GameTexture.fromFile("mobs/cindercantor"),
+                GameTexture.fromFile("mobs/ancientskeletonmagearms_left"),
+                GameTexture.fromFile("mobs/ancientskeletonmagearms_right"));
         stairwaytoheaven.mobs.CrookedGolemMob.texture = GameTexture.fromFile("mobs/crookedgolem");
         stairwaytoheaven.mobs.RareCrookedGolemMob.texture = GameTexture.fromFile("mobs/rarecrookedgolem");
         stairwaytoheaven.mobs.CrookedArmadilloMob.texture = GameTexture.fromFile("mobs/crookedarmadillo");

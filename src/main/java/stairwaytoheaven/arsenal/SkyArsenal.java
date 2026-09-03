@@ -82,11 +82,16 @@ public final class SkyArsenal {
      * Mobs and projectiles. Runs from {@code init()}; both registries close
      * right after the mod loop.
      *
-     * <p>The four hostiles are subclasses of vanilla mobs and wear vanilla body
-     * sheets: {@code MobRegistry.Textures} is a compiled vanilla class loaded
-     * once by {@code GameResources.loadTextures()}, and an unoverridden
-     * {@code addDrawables} reads those fields directly. That is why
-     * {@link #loadTextures()} has nothing to load for them.
+     * <p>The four hostiles are subclasses of vanilla mobs for BEHAVIOUR only;
+     * all four now draw their own sheets. Vanilla resolves a mob's art from a
+     * static field on {@code MobRegistry.Textures} read inline inside
+     * {@code addDrawables}, and {@code Mob} exposes no per-instance texture
+     * hook, so each of the four overrides {@code addDrawables} (and, where the
+     * gibs are cut out of the same sheet, {@code spawnDeathParticles}) and
+     * samples a {@code public static} texture of its own. Those fields are
+     * filled by {@code SkyMobs.loadTextures}, alongside every other mob sheet
+     * the mod ships — see {@link #loadTextures()} for why they are not filled
+     * here.
      */
     public static void register() {
         // Projectiles first: the boomerang resolves "stormdisc" by stringID.
@@ -156,11 +161,15 @@ public final class SkyArsenal {
      * stringID convention ({@code items/<id>.png},
      * {@code player/weapons/<id>.png}); projectile sprites load through
      * {@code ProjectileRegistry.Textures.load()}; bestiary icons through
-     * {@code MobRegistry.loadMobIcons()}; and the four enemies plus the Watch
-     * Mote draw from {@code MobRegistry.Textures}, which vanilla fills in the
-     * same boot step. The method exists so the hook in
-     * {@code StairwayToHeavenMod.initResources} stays stable if a future
-     * arsenal mob ever does need its own sheet.
+     * {@code MobRegistry.loadMobIcons()}; and the Watch Mote draws from
+     * {@code MobRegistry.Textures}, which vanilla fills in the same boot step.
+     *
+     * <p>The four hostiles DO each own a sheet, but those are loaded in
+     * {@code SkyMobs.loadTextures} with every other mob sheet in the mod rather
+     * than split across two lists — one place to look for "which mob draws
+     * what". This method exists so the hook in
+     * {@code StairwayToHeavenMod.initResources} stays stable if that ever
+     * changes.
      */
     public static void loadTextures() {
     }

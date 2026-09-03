@@ -1,20 +1,37 @@
 package stairwaytoheaven.arsenal;
 
+import java.awt.Point;
+import java.util.List;
+
+import necesse.engine.gameLoop.tickManager.TickManager;
 import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
 import necesse.engine.util.GameRandom;
 import necesse.entity.mobs.GameDamage;
+import necesse.entity.mobs.HumanTexture;
+import necesse.entity.mobs.MaskShaderOptions;
 import necesse.entity.mobs.MaxHealthGetter;
 import necesse.entity.mobs.Mob;
+import necesse.entity.mobs.MobDrawable;
+import necesse.entity.mobs.PlayerMob;
 import necesse.entity.mobs.ai.behaviourTree.BehaviourTreeAI;
 import necesse.entity.mobs.ai.behaviourTree.decorators.FailerAINode;
 import necesse.entity.mobs.ai.behaviourTree.leaves.TeleportOnProjectileHitAINode;
 import necesse.entity.mobs.ai.behaviourTree.trees.ConfusedPlayerChaserWandererAI;
 import necesse.entity.mobs.hostile.AncientSkeletonMageMob;
+import necesse.entity.particle.FleshParticle;
+import necesse.entity.particle.Particle;
 import necesse.entity.projectile.AncientSkeletonMageProjectile;
+import necesse.gfx.camera.GameCamera;
+import necesse.gfx.drawOptions.DrawOptions;
+import necesse.gfx.drawOptions.human.HumanDrawOptions;
+import necesse.gfx.drawOptions.itemAttack.ItemAttackDrawOptions;
+import necesse.gfx.drawables.OrderableDrawables;
 import necesse.inventory.lootTable.LootTable;
 import necesse.inventory.lootTable.lootItem.ChanceLootItemList;
 import necesse.inventory.lootTable.lootItem.LootItem;
+import necesse.level.maps.Level;
+import necesse.level.maps.light.GameLight;
 import stairwaytoheaven.mobs.SkySpawnRules;
 
 /**
@@ -22,15 +39,63 @@ import stairwaytoheaven.mobs.SkySpawnRules;
  * Ashen Reach's first real inhabitant: until now only stray Gloom Shades
  * wandered in from the fen.
  *
- * <p><b>Vanilla base:</b> {@link AncientSkeletonMageMob}, art
- * {@code mobs/ancientskeletonmage} plus its two arm sheets, composed through
- * {@code HumanDrawOptions} (a bone-and-ash robed figure with a crimson-trimmed
- * mantle — already the Ashen Reach's palette, no colour shift needed).
+ * <p><b>Vanilla base:</b> {@link AncientSkeletonMageMob} for BEHAVIOUR.
  * Subclassing keeps its whole character: a caster that shoots
  * {@code AncientSkeletonMageProjectile} at range 640 AND owns a
  * {@code TeleportOnProjectileHitAINode} — get hit by one of ITS bolts and it
  * blinks away in a puff of smoke, which is what makes it a different fight
  * from anything else in the mod.
+ *
+ * <h2>The art — and the two sheets that are still vanilla's</h2>
+ * The BODY is ours: {@code mobs/cindercantor.png}, 448x320, drawn on the same
+ * grid vanilla's {@code mobs/ancientskeletonmage} uses — eight 32px rows of
+ * walk frames, the gib strip on row 8 and the staff sprite on row 9.
+ * {@link #addDrawables} and {@link #spawnDeathParticles} sample it, and nothing
+ * is recoloured at load time: the sheet is drawn as it was supplied.
+ *
+ * <p><b>A {@code HumanTexture} is THREE sheets, not one, and only the body was
+ * supplied.</b> {@code MobRegistry.Textures.humanTexture(path)} expands to
+ * {@code new HumanTexture(fromFile(path), fromFile(path + "arms_left"),
+ * fromFile(path + "arms_right"))} (VERIFIED [jar],
+ * MobRegistry.java:1830-1836), and {@code HumanDrawOptions} composes the mob out
+ * of all three (HumanDrawOptions.java:131-136). {@link #texture} is therefore
+ * built as OUR body over VANILLA's
+ * {@code mobs/ancientskeletonmagearms_left} and
+ * {@code mobs/ancientskeletonmagearms_right} (both 448x320). <b>This is visible
+ * in game:</b> the Cinder Cantor walks in a robe of its own with the Ancient
+ * Skeleton Mage's bare bone arms, and the arm it swings mid-cast is vanilla's
+ * too.
+ *
+ * <p>Exactly two more sheets would finish it, both 448x320 and both on the same
+ * grid as the body:
+ * <ul>
+ *   <li>{@code src/main/resources/mobs/cindercantorarms_left.png}</li>
+ *   <li>{@code src/main/resources/mobs/cindercantorarms_right.png}</li>
+ * </ul>
+ * When they land, the two {@code GameTexture.fromFile} calls in
+ * {@code SkyMobs.loadTextures} that currently name vanilla's
+ * {@code ancientskeletonmagearms_left} and {@code ancientskeletonmagearms_right}
+ * are re-pointed at the two files above, and nothing else changes. (The paths
+ * are deliberately not written out as a literal {@code fromFile} call here:
+ * {@code tools/locale_audit.py} scans comments too and would read a
+ * not-yet-drawn path as a missing sheet.)
+ *
+ * <p><b>Why {@link #addDrawables} and {@link #spawnDeathParticles} are
+ * overridden.</b> Vanilla reads the static
+ * {@code MobRegistry.Textures.ancientSkeletonMage} inline in both — three times
+ * in the draw (the {@code HumanDrawOptions} plus the item and arm sprites of the
+ * attack animation) and once in the gibs — and {@code Mob} exposes no
+ * per-instance texture hook (VERIFIED [jar], AncientSkeletonMageMob.java:172,
+ * :209, :218, :221). Writing to that static would repaint every real Ancient
+ * Skeleton Mage in every ruin in the world, so the mob is redrawn here instead.
+ * {@code addDrawables} deliberately does NOT call {@code super}: that IS
+ * vanilla's draw, and calling it would put the bone mage underneath ours.
+ * Nothing is lost — vanilla's own first line is {@code super.addDrawables(...)},
+ * which reaches {@code Mob.addDrawables}, whose body is EMPTY (VERIFIED [jar],
+ * Mob.java:1734-1745); health and status bars come from
+ * {@code Mob.addDrawablesLoop} around the call. The shadow is left alone: it
+ * comes from {@code Mob.getShadowDrawOptions}'s shared
+ * {@code MobRegistry.Textures.human_shadow}, which is not the mob's own art.
  *
  * <h2>Tier</h2>
  * The ladder and the incursion measurement behind it are written out once, in
@@ -88,6 +153,93 @@ public class CinderCantorMob extends AncientSkeletonMageMob {
      * wears 25.
      */
     public static final int ARMOR = 55;
+
+    /**
+     * Our body over vanilla's two arm sheets, composed by
+     * {@code SkyMobs.loadTextures} on the client only — see the class comment
+     * for the two files that would make the arms ours as well. It stays null on
+     * a dedicated server, which never draws, hence the guards in
+     * {@link #addDrawables} and {@link #spawnDeathParticles}.
+     */
+    public static HumanTexture texture;
+
+    /**
+     * Vanilla's {@code AncientSkeletonMageMob.addDrawables}, ported line for
+     * line with our {@link HumanTexture} in all three places it reads
+     * {@code MobRegistry.Textures.ancientSkeletonMage}: the same -32 / -51 draw
+     * offsets, the same walk frame, the same swim mask, the same enemy tracker,
+     * the same row-9 staff on a (4,4) pivot swung against
+     * {@code getAttackAnimProgress} over the row-8 arm, and the same shadow
+     * pass.
+     *
+     * <p>Declared {@code public} because {@code AncientSkeletonMageMob} declares
+     * it public; {@code Mob.addDrawables} itself is {@code protected} (VERIFIED
+     * [jar]), and an override may widen but never narrow.
+     */
+    @Override
+    public void addDrawables(List<MobDrawable> list, OrderableDrawables tileList,
+            OrderableDrawables topList, Level level, int x, int y,
+            TickManager tickManager, GameCamera camera, PlayerMob perspective) {
+        if (texture == null) {
+            return;
+        }
+        GameLight light = level.getLightLevel(getTileCoordinate(x), getTileCoordinate(y));
+        int drawX = camera.getDrawX(x) - 22 - 10;
+        int drawY = camera.getDrawY(y) - 44 - 7;
+        int dir = this.getDir();
+        Point sprite = this.getAnimSprite(x, y, dir);
+        drawY += this.getBobbing(x, y);
+        drawY += level.getTile(getTileCoordinate(x), getTileCoordinate(y)).getMobSinkingAmount(this);
+        MaskShaderOptions swimMask = this.getSwimMaskShaderOptions(this.inLiquidFloat(x, y));
+        HumanDrawOptions humanDrawOptions = new HumanDrawOptions(level, texture)
+                .sprite(sprite)
+                .dir(dir)
+                .mask(swimMask)
+                .light(light)
+                .applyEnemyTracker(this, perspective);
+        float animProgress = this.getAttackAnimProgress();
+        if (this.isAttacking) {
+            ItemAttackDrawOptions attackOptions = ItemAttackDrawOptions.start(dir)
+                    .itemSprite(texture.body, 0, 9, 32)
+                    .itemRotatePoint(4, 4)
+                    .itemEnd()
+                    .armSprite(texture.body, 0, 8, 32)
+                    .swingRotation(animProgress);
+            humanDrawOptions.attackAnim(attackOptions, animProgress);
+        }
+
+        final DrawOptions drawOptions = humanDrawOptions.pos(drawX, drawY);
+        list.add(new MobDrawable() {
+            @Override
+            public void draw(TickManager tickManager) {
+                drawOptions.draw();
+            }
+        });
+        this.addShadowDrawables(tileList, level, x, y, light, camera);
+    }
+
+    /**
+     * Vanilla's {@code AncientSkeletonMageMob.spawnDeathParticles}, verbatim,
+     * with our body sheet in place of
+     * {@code MobRegistry.Textures.ancientSkeletonMage.body}. The gibs are cut
+     * out of the mob's own sheet — without this a Cinder Cantor would shatter
+     * into vanilla's bone chips — and the sprite indices are unchanged:
+     * {@code nextInt(5)} over row 8 at 32px, the same strip on our sheet as on
+     * vanilla's.
+     */
+    @Override
+    public void spawnDeathParticles(float knockbackX, float knockbackY) {
+        if (texture == null) {
+            return;
+        }
+        for (int i = 0; i < 4; i++) {
+            this.getLevel().entityManager.addParticle(
+                    new FleshParticle(this.getLevel(), texture.body,
+                            GameRandom.globalRandom.nextInt(5), 8, 32,
+                            this.x, this.y, 20.0F, knockbackX, knockbackY),
+                    Particle.GType.IMPORTANT_COSMETIC);
+        }
+    }
 
     /**
      * Quantities are the Skyreach baseline x the Ghost Realm's drop-value

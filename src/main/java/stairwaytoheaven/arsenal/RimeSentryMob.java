@@ -1,30 +1,79 @@
 package stairwaytoheaven.arsenal;
 
+import java.util.List;
+
+import necesse.engine.gameLoop.tickManager.TickManager;
 import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
+import necesse.engine.util.GameMath;
+import necesse.engine.util.GameRandom;
 import necesse.entity.mobs.GameDamage;
 import necesse.entity.mobs.MaxHealthGetter;
 import necesse.entity.mobs.Mob;
+import necesse.entity.mobs.MobDrawable;
+import necesse.entity.mobs.PlayerMob;
 import necesse.entity.mobs.ai.behaviourTree.BehaviourTreeAI;
 import necesse.entity.mobs.ai.behaviourTree.trees.StationaryPlayerShooterAI;
 import necesse.entity.mobs.hostile.FrostSentryMob;
+import necesse.entity.particle.FleshParticle;
+import necesse.entity.particle.Particle;
 import necesse.entity.projectile.FrostSentryProjectile;
+import necesse.gfx.camera.GameCamera;
+import necesse.gfx.drawOptions.DrawOptions;
+import necesse.gfx.drawables.OrderableDrawables;
+import necesse.gfx.gameTexture.GameTexture;
 import necesse.inventory.lootTable.LootTable;
 import necesse.inventory.lootTable.lootItem.ChanceLootItemList;
 import necesse.inventory.lootTable.lootItem.LootItem;
+import necesse.level.maps.Level;
+import necesse.level.maps.light.GameLight;
 import stairwaytoheaven.mobs.SkySpawnRules;
 
 /**
  * Rime Sentry — a piece of Skywatch frost machinery still standing on the
  * causeways, still firing at anything that walks past.
  *
- * <p><b>Vanilla base:</b> {@link FrostSentryMob}, whose art is
- * {@code mobs/frostsentry} (a pale ice-blue crystal bud, verified against the
- * sprite dump — it needs no colour shift to sit in the Skyreach palette). The
- * class is subclassed rather than copied, so the rendering, the wobble
- * animation, the human shadow, the death particles, {@code canBePushed = false}
- * and the ground-pillar trail its projectile leaves all come from vanilla
- * unchanged.
+ * <p><b>Vanilla base:</b> {@link FrostSentryMob} for BEHAVIOUR — the wobble
+ * animation, the human shadow, {@code canBePushed = false} and the ground-pillar
+ * trail its projectile leaves all come from vanilla unchanged. The ART is ours:
+ * {@code mobs/rimesentry.png}, 192x32 — the same six 32px cells vanilla's
+ * {@code mobs/frostsentry} is, cell 0 the standing sentry and cells 1-5 the
+ * pillar frames. {@link #addDrawables} and {@link #spawnDeathParticles} sample
+ * it; nothing is recoloured at load time, the sheet is drawn as it was supplied.
+ *
+ * <p><b>Why those two are overridden.</b> Vanilla reads its sheet from the
+ * static {@code MobRegistry.Textures.frostSentry} inline in both methods and
+ * {@code Mob} exposes no per-instance texture hook (VERIFIED [jar],
+ * FrostSentryMob.java:109 and :156), so the only way to put our art on the mob
+ * without repainting every real Frost Sentry in every snow deep cave is to
+ * redraw it ourselves. The shadow's own texture is deliberately left alone:
+ * {@code FrostSentryMob.getShadowDrawOptions} returns
+ * {@code MobRegistry.Textures.human_shadow} (FrostSentryMob.java:179), a shared
+ * blob that is not the sentry's own art, so that method is inherited untouched
+ * and {@link #addDrawables} still ends on the same {@code addShadowDrawables}
+ * call vanilla ends on.
+ *
+ * <p>{@link #addDrawables} deliberately does NOT call {@code super}: that IS
+ * vanilla's draw, and calling it would put the blue Frost Sentry underneath
+ * ours. Nothing is lost by dropping it — {@code FrostSentryMob}'s own first
+ * line is {@code super.addDrawables(...)}, which reaches
+ * {@code Mob.addDrawables}, whose body is EMPTY (VERIFIED [jar],
+ * Mob.java:1734-1745); health and status bars are added by
+ * {@code Mob.addDrawablesLoop} around this call, not from inside it. Same
+ * finding the Aurora Flake's and Fen Wraith's overrides rest on.
+ *
+ * <p><b>Known gap: the pillar trail is still vanilla's.</b> Cells 1-5 of our
+ * sheet are drawn but never reached, so the frost pillars the projectile lays
+ * down stay the vanilla ice-blue. This is not fixable from here:
+ * {@code FrostSentryProjectile.onMoveTick} constructs
+ * {@code FrostSentryMob.FrostPillar} directly (VERIFIED [jar],
+ * FrostSentryProjectile.java:82-86) and that constructor hard-codes
+ * {@code MobRegistry.Textures.frostSentry} sprites 1-5
+ * (FrostSentryMob.java:207-211). A projectile subclass could not reach it
+ * either — the list the pillar handler reads is
+ * {@code private final GroundPillarList<FrostSentryMob.FrostPillar> pillars}
+ * (FrostSentryProjectile.java:27), so nothing outside that class can add to it.
+ * Left alone rather than half-wired.
  *
  * <h2>The tier ladder, and where its floor is measured</h2>
  * This is the canonical copy: {@link AuroraFlakeMob}, {@link FenWraithMob} and
@@ -107,6 +156,91 @@ public class RimeSentryMob extends FrostSentryMob {
      * wears 40 (VERIFIED [jar]). Vanilla's Frost Sentry wears 5.
      */
     public static final int ARMOR = 40;
+
+    /**
+     * Our sheet, filled by {@code SkyMobs.loadTextures} on the client only. It
+     * stays null on a dedicated server, which never draws, hence the guards in
+     * {@link #addDrawables} and {@link #spawnDeathParticles}.
+     */
+    public static GameTexture texture;
+
+    /**
+     * Vanilla's {@code FrostSentryMob.addDrawables}, ported line for line with
+     * our sheet in place of {@code MobRegistry.Textures.frostSentry}: the same
+     * -15 / -26 draw offsets, the same bobbing and sinking, the same 10px lift
+     * in liquid, the same triangle-wave squash off {@code getAttackAnimProgress}
+     * and the same shadow pass. Only the {@link GameTexture} is ours.
+     *
+     * <p>Declared {@code public} because {@code FrostSentryMob} declares it
+     * public; {@code Mob.addDrawables} itself is {@code protected} (VERIFIED
+     * [jar]), and an override may widen but never narrow.
+     */
+    @Override
+    public void addDrawables(List<MobDrawable> list, OrderableDrawables tileList,
+            OrderableDrawables topList, Level level, int x, int y,
+            TickManager tickManager, GameCamera camera, PlayerMob perspective) {
+        if (texture == null) {
+            return;
+        }
+        GameLight light = level.getLightLevel(getTileCoordinate(x), getTileCoordinate(y));
+        int drawX = camera.getDrawX(x) - 15;
+        int drawY = camera.getDrawY(y) - 26;
+        drawY += this.getBobbing(x, y);
+        drawY += level.getTile(getTileCoordinate(x), getTileCoordinate(y)).getMobSinkingAmount(this);
+        if (this.inLiquid(x, y)) {
+            drawY -= 10;
+        }
+
+        float animProgress = GameMath.limit(this.getAttackAnimProgress(), 0.0F, 1.0F);
+        float wiggle;
+        if (animProgress < 0.5F) {
+            wiggle = animProgress * 2.0F;
+        } else {
+            wiggle = Math.abs((animProgress - 0.5F) * 2.0F - 1.0F);
+        }
+
+        int pixelChange = (int) (wiggle * 5.0F);
+        final DrawOptions body = texture.initDraw()
+                .sprite(0, 0, 32)
+                .size(32 - pixelChange * 2, 32 - pixelChange)
+                .startGlowOptions(this, (long) this.getID())
+                .light(light)
+                .applyEnemyTracker(this, perspective)
+                .pos(drawX + pixelChange, drawY + pixelChange);
+        list.add(new MobDrawable() {
+            @Override
+            public void draw(TickManager tickManager) {
+                body.draw();
+            }
+        });
+        if (this.inLiquid(x, y)) {
+            y -= 10;
+        }
+
+        this.addShadowDrawables(tileList, level, x, y, light, camera);
+    }
+
+    /**
+     * Vanilla's {@code FrostSentryMob.spawnDeathParticles}, verbatim, with our
+     * sheet in place of {@code MobRegistry.Textures.frostSentry}. The gibs are
+     * cut out of the mob's own sheet — without this a Rime Sentry would shatter
+     * into vanilla's ice-blue shards — and the sprite indices are unchanged:
+     * {@code 1 + nextInt(5)} is cells 1-5 at 32px, which on our sheet is the
+     * same strip it is on vanilla's.
+     */
+    @Override
+    public void spawnDeathParticles(float knockbackX, float knockbackY) {
+        if (texture == null) {
+            return;
+        }
+        for (int i = 0; i < 4; i++) {
+            this.getLevel().entityManager.addParticle(
+                    new FleshParticle(this.getLevel(), texture,
+                            1 + GameRandom.globalRandom.nextInt(5), 0, 32,
+                            this.x, this.y, 20.0F, knockbackX, knockbackY),
+                    Particle.GType.IMPORTANT_COSMETIC);
+        }
+    }
 
     /**
      * Fulgurite is what the Skyreave and the Thunderhead are banded with, and
