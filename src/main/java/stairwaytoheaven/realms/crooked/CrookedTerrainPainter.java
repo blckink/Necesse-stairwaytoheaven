@@ -164,6 +164,39 @@ public final class CrookedTerrainPainter {
      * @param island    the plane's shared island field at this tile
      * @param waterline the plane's blended waterline at this depth
      */
+    /**
+     * Is this solid tile part of a formation big enough to READ as a wall?
+     *
+     * <p>The player, from a test run: <i>"da waren dauernd einfach halbe
+     * texturen gestabelt was echt scheiße aus sah btw und wie ein bug nicht wie
+     * eine crazy welt"</i>. That is this, and it is only ever the Crooked band:
+     * {@code SkyTerrainPainter} hands a solid outcrop to {@code
+     * rollOutcropObject} and paints bare floor when it declines, so the Skyreach
+     * never stamps a wall for one. This painter stamped {@code evilwall}
+     * unconditionally.
+     *
+     * <p>The formations are small. {@code outcropAt} rolls
+     * {@code radius = 0.9 + h} with {@code elongation = 1.0 + 1.4h}, so the
+     * smallest solid core is about 2.5 tiles and only 13% of sites get the
+     * {@code isLarge} 2.1x. A Necesse wall draws in THREE 16px bands -- the cap
+     * above, the roof, the front face -- so a two-tile wall is a cap and a face
+     * with nothing to join: two half tiles stacked. It reads as a rendering
+     * fault, which is exactly what it was reported as.
+     *
+     * <p>A wall needs a body. This asks whether the four orthogonal neighbours
+     * are solid too; a stub fails and falls through to ordinary ground. It costs
+     * four extra {@code outcropAt} calls, and only on tiles that are already
+     * solid, which is rare. Crazy has to look deliberate, not broken.
+     */
+    private static boolean hasWallBody(int seed, int tileX, int tileY) {
+        int n = 0;
+        if ((SkyTerrainPainter.outcropAt(seed, tileX - 1, tileY) & SkyTerrainPainter.OUTCROP_SOLID) != 0) n++;
+        if ((SkyTerrainPainter.outcropAt(seed, tileX + 1, tileY) & SkyTerrainPainter.OUTCROP_SOLID) != 0) n++;
+        if ((SkyTerrainPainter.outcropAt(seed, tileX, tileY - 1) & SkyTerrainPainter.OUTCROP_SOLID) != 0) n++;
+        if ((SkyTerrainPainter.outcropAt(seed, tileX, tileY + 1) & SkyTerrainPainter.OUTCROP_SOLID) != 0) n++;
+        return n >= 3;
+    }
+
     public static long describeBand(int seed, int tileX, int tileY,
             float island, float waterline, float depth, float distortion) {
         float hubDist = depth * RealmDepth.DEPTH_SCALE;
@@ -219,7 +252,7 @@ public final class CrookedTerrainPainter {
             // and short veins with real gaps, so a solid-wall object cannot turn
             // the region into a maze. Only the SOLID core becomes wall.
             int massif = SkyTerrainPainter.outcropAt(seed, tileX, tileY);
-            if ((massif & SkyTerrainPainter.OUTCROP_SOLID) != 0) {
+            if ((massif & SkyTerrainPainter.OUTCROP_SOLID) != 0 && hasWallBody(seed, tileX, tileY)) {
                 return SkyTerrainPainter.pack(ground, SkyRegistry.evilwallID, biomeClass, false);
             }
             if (SkyNoise.tileRoll(seed, tileX, tileY, SkyTerrainPainter.SALT_CRATE)
