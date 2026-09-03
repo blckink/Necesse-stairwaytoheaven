@@ -65,11 +65,11 @@ None is orphaned: every `Preset` subclass has a live call site.
 
 | preset | realm | contains | furnished? |
 |---|---|---|---|
-| `WardenSpirePreset` | Skyreach hub | 4 tables, 4 chairs + bench, 2 beds, 2 desks, 2 dressers, 9 lights, banner, statues, carpet, beacon | **richest POI in the mod** |
+| `WardenSpirePreset` | Skyreach hub | 3 tables (2 + 1 dining), 11 chairs + 4 benches, 1 bed, 2 desks, 2 dressers, **15 lights**, 10 banners, 5 railings, statues, carpet, chalice, tome, beacon | **richest POI in the mod** |
 | `HauntedManorPreset` | Ghost | 2 tables, 4 chairs, 2 candelabra, bone chest | table + chair + light |
 | `InvertedHousePreset` | Crooked | 4 long chairs, 2 lanterns, clock, window, barrel | chair + light |
 | `LongTablePreset` | Crooked | **34 chairs**, 4 lanterns, 2 clocks — and **zero actual tables** | chair + light |
-| `DoorYardPreset` | Crooked | 11 free-standing doors, 2 bent lanterns, clock | light only |
+| `DoorYardPreset` | Crooked | 8 free-standing doors, 4 bent lanterns, clock, 2 ground windows | light only |
 | `MausoleumPreset` | Ghost | 4 columns, coffin, 4 candles, 2 urns, 4 gravestones | light only |
 | `CrookedHousePreset` | Beetlefreak Hollow | 3 ghost lanterns, 2 raven statues, rubble | light only |
 | `AeronautCampPreset` | **Surface** | wreck, balloon, 4 tents, campfire, chest, lantern | light only |
@@ -291,7 +291,10 @@ is `docs/ASSET_REQUESTS.md`.
    Caspern, Magpie, Halda, Ossian have no `interact()` override.
 9. **`swh_beacon` is a registered dead quest**, kept only for old-save
    deserialization.
-10. **`LongTablePreset` contains no table.** Thirty-four chairs, zero tables.
+10. **`LongTablePreset` contains no table.** Thirty-four chairs, zero tables — its
+    own comment concedes the joke.
+11. **`DoorYardPreset`'s javadoc says eleven doors; its `PLAN` grid stamps eight.**
+    Doc drift inside the same file as the code.
 
 ### Harmless leftovers, recorded so nobody re-discovers them
 
