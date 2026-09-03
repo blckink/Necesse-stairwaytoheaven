@@ -1140,7 +1140,46 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                               + SkyRegistry.driftlands.getGuard().maxSize
                             : "NONE"));
 
-            ramp.append(" evilwall=").append(wallSeen).append(" portals=").append(portalSeen);
+            // The ramp scan CANNOT answer "is the portal there". A portal
+            // site is one tile per 260x260 lattice cell = 1 in 67 600, and the
+            // ramp samples ~677 Outlands tiles, so it finds one 1% of the time
+            // and reads 0 the rest -- a check that cannot fail is worse than no
+            // check. So the sites are probed DIRECTLY: walk the lattice cells
+            // across the Outlands band, ask SkyOutlands.isPortalSite where each
+            // one puts its site, and read what the painter actually paints
+            // there. portals=carried/sites, so 0/0 says "no site in range" and
+            // 0/3 says "three sites and not one carries a portal" -- which is a
+            // real failure, and the whole point.
+            int portalSites = 0;
+            final int cell = stairwaytoheaven.worldgen.SkyOutlands.PORTAL_CELL;
+            for (int cx = -3; cx <= 3 && portalSites < 8; cx++) {
+                for (int cy = -3; cy <= 3 && portalSites < 8; cy++) {
+                    int baseX = outOrigin.x + 5000 + cx * cell;
+                    int baseY = outOrigin.y + cy * cell;
+                    for (int tx = baseX; tx < baseX + cell && portalSites < 8; tx++) {
+                        for (int ty = baseY; ty < baseY + cell; ty++) {
+                            float depth = stairwaytoheaven.worldgen.RealmDepth.depthAt(
+                                    tx, ty, outOrigin.x, outOrigin.y);
+                            float hubDist = depth * stairwaytoheaven.worldgen.RealmDepth.DEPTH_SCALE;
+                            if (!stairwaytoheaven.worldgen.SkyOutlands.isPortalSite(
+                                    outSeed, tx, ty, hubDist)) {
+                                continue;
+                            }
+                            portalSites++;
+                            long d = stairwaytoheaven.worldgen.SkyTerrainPainter.describeTile(
+                                    outSeed, tx, ty, outOrigin.x, outOrigin.y);
+                            if (crookedPortalID != 0
+                                    && stairwaytoheaven.worldgen.SkyTerrainPainter.descObject(d)
+                                        == crookedPortalID) {
+                                portalSeen++;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            ramp.append(" evilwall=").append(wallSeen)
+                .append(" portals=").append(portalSeen).append("/").append(portalSites);
             ramp.append(" biome=").append(SkyRegistry.outlands != null
                     ? necesse.engine.localization.Localization.translate("biome", "outlands")
                     : "NOT REGISTERED");
