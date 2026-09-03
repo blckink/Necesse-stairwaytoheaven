@@ -103,21 +103,12 @@ final class SkyMobs {
         // The Cinder Cantor is drawn through HumanDrawOptions, which needs a
         // HumanTexture -- THREE sheets, not one: body, left arms, right arms
         // (VERIFIED [jar], MobRegistry.humanTexture at MobRegistry.java:1830-1836).
-        // Only the body was drawn for us, so this composes OUR body over
-        // VANILLA's two arm sheets. Replacing the two paths below with
-        // "mobs/cindercantorarms_left"/"_right" is the whole of what finishing
-        // the mob takes; CinderCantorMob's class comment says so too.
-        //
-        // Naming vanilla's sheets by path rather than reaching into
-        // MobRegistry.Textures.ancientSkeletonMage costs nothing: fromFile is
-        // cache-keyed by path (VERIFIED [jar], GameTexture.java:177-185), so
-        // these hand back the very instances vanilla already loaded --
-        // GameResources.loadTextures() runs before the mods' initResources()
-        // loop (VERIFIED [jar], GlobalData.java:427 then :438).
+        // The player supplied all three matched sheets; keep them together so
+        // no vanilla skeleton layer leaks into the Cantor in motion.
         stairwaytoheaven.arsenal.CinderCantorMob.texture = new HumanTexture(
                 GameTexture.fromFile("mobs/cindercantor"),
-                GameTexture.fromFile("mobs/ancientskeletonmagearms_left"),
-                GameTexture.fromFile("mobs/ancientskeletonmagearms_right"));
+                GameTexture.fromFile("mobs/cindercantorarms_left"),
+                GameTexture.fromFile("mobs/cindercantorarms_right"));
         stairwaytoheaven.mobs.CrookedGolemMob.texture = GameTexture.fromFile("mobs/crookedgolem");
         stairwaytoheaven.mobs.RareCrookedGolemMob.texture = GameTexture.fromFile("mobs/rarecrookedgolem");
         stairwaytoheaven.mobs.CrookedArmadilloMob.texture = GameTexture.fromFile("mobs/crookedarmadillo");

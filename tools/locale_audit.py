@@ -599,7 +599,6 @@ ITEM_CLASS_DRAWS_ITSELF = {
 ITEM_CLASS_VANILLA_ICON = {
     "LivestockFood": ("arg", 0),
     "LivestockProduce": ("arg", 0),
-    "GlimmerstrideBoots": ("fixed", "clothboots"),
     # Crooked realm materials deliberately point at a literal vanilla icon
     # supplied as constructor argument 0. No recolouring is involved.
     "CrookedMatItem": ("arg", 0),

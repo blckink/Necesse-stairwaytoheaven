@@ -139,6 +139,7 @@ public final class SkyRegistry {
     public static int auroraBloomID;
     public static int auroraBloomRID;
     public static int skyreedsID;
+    public static int overgrowngrassID;
     public static int windwheatID;
     public static int cloudberryBushID;
     /** The sapling a broken Cloudberry Bush leaves behind — its only drop. */

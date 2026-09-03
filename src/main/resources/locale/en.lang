@@ -20,6 +20,7 @@ gloomwoodfloortile=Gloomwood Floor
 marblecheckertile=Marble Checker Floor
 skywaytile=Skyway Paving
 [object]
+overgrowngrass=Overgrown Eden Grass
 nimbuswillow=Nimbus Willow
 fulgurpine=Fulgur Pine
 prismabirch=Prisma Birch
@@ -164,6 +165,7 @@ windwheat=Windwheat
 cloudberrybush=Cloudberry Bush
 cloudberry=Cloudberry
 overgrownedenseed=Eden Grass Seeds
+overgrowngrass=Overgrown Eden Grass
 cloudberrytip=Plump sky berries - sweet, cold, and faintly like a thunderstorm.
 skystone=Skystone
 aetheriumore=Aetherium Ore

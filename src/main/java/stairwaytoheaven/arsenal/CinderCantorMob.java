@@ -46,39 +46,20 @@ import stairwaytoheaven.mobs.SkySpawnRules;
  * blinks away in a puff of smoke, which is what makes it a different fight
  * from anything else in the mod.
  *
- * <h2>The art — and the two sheets that are still vanilla's</h2>
- * The BODY is ours: {@code mobs/cindercantor.png}, 448x320, drawn on the same
+ * <h2>The art</h2>
+ * The body and both arm layers are ours, drawn on the same
  * grid vanilla's {@code mobs/ancientskeletonmage} uses — eight 32px rows of
  * walk frames, the gib strip on row 8 and the staff sprite on row 9.
  * {@link #addDrawables} and {@link #spawnDeathParticles} sample it, and nothing
  * is recoloured at load time: the sheet is drawn as it was supplied.
  *
- * <p><b>A {@code HumanTexture} is THREE sheets, not one, and only the body was
- * supplied.</b> {@code MobRegistry.Textures.humanTexture(path)} expands to
+ * <p>A {@code HumanTexture} is three sheets. The player supplied the body plus
+ * matched left and right arm layers. {@code MobRegistry.Textures.humanTexture(path)} expands to
  * {@code new HumanTexture(fromFile(path), fromFile(path + "arms_left"),
  * fromFile(path + "arms_right"))} (VERIFIED [jar],
  * MobRegistry.java:1830-1836), and {@code HumanDrawOptions} composes the mob out
  * of all three (HumanDrawOptions.java:131-136). {@link #texture} is therefore
- * built as OUR body over VANILLA's
- * {@code mobs/ancientskeletonmagearms_left} and
- * {@code mobs/ancientskeletonmagearms_right} (both 448x320). <b>This is visible
- * in game:</b> the Cinder Cantor walks in a robe of its own with the Ancient
- * Skeleton Mage's bare bone arms, and the arm it swings mid-cast is vanilla's
- * too.
- *
- * <p>Exactly two more sheets would finish it, both 448x320 and both on the same
- * grid as the body:
- * <ul>
- *   <li>{@code src/main/resources/mobs/cindercantorarms_left.png}</li>
- *   <li>{@code src/main/resources/mobs/cindercantorarms_right.png}</li>
- * </ul>
- * When they land, the two {@code GameTexture.fromFile} calls in
- * {@code SkyMobs.loadTextures} that currently name vanilla's
- * {@code ancientskeletonmagearms_left} and {@code ancientskeletonmagearms_right}
- * are re-pointed at the two files above, and nothing else changes. (The paths
- * are deliberately not written out as a literal {@code fromFile} call here:
- * {@code tools/locale_audit.py} scans comments too and would read a
- * not-yet-drawn path as a missing sheet.)
+ * built entirely from the three Cinder Cantor sheets.
  *
  * <p><b>Why {@link #addDrawables} and {@link #spawnDeathParticles} are
  * overridden.</b> Vanilla reads the static
@@ -155,9 +136,8 @@ public class CinderCantorMob extends AncientSkeletonMageMob {
     public static final int ARMOR = 55;
 
     /**
-     * Our body over vanilla's two arm sheets, composed by
-     * {@code SkyMobs.loadTextures} on the client only — see the class comment
-     * for the two files that would make the arms ours as well. It stays null on
+     * Our body and both matching arm sheets, composed by
+     * {@code SkyMobs.loadTextures} on the client only. It stays null on
      * a dedicated server, which never draws, hence the guards in
      * {@link #addDrawables} and {@link #spawnDeathParticles}.
      */

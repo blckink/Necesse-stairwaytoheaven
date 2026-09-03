@@ -15,8 +15,9 @@ import necesse.level.maps.levelData.settlementData.settler.FoodQuality;
 /**
  * The item classes behind the Skyreach's livestock produce.
  *
- * <p>Every one of them draws itself out of a RECOLOURED VANILLA texture rather
- * than out of a PNG in {@code src/main/resources/items}. The engine's only rule
+ * <p>Most of them draw themselves out of a recoloured vanilla texture; the
+ * Glimmerstride Boots now use the player's dedicated item and armour sheets.
+ * The engine's only rule
  * about an item icon is the one line {@code Item.loadItemTextures} contains —
  * {@code this.itemTexture = GameTexture.fromFile("items/" + getStringID())}
  * (jar 1.3.2, Item.java:562) — and that method is {@code protected}, so an item
@@ -28,8 +29,7 @@ import necesse.level.maps.levelData.settlementData.settler.FoodQuality;
  * is flat and shared, so {@code items/milk} and {@code player/armor/clothhat}
  * resolve from mod code, and recolouring them keeps vanilla's shading,
  * silhouette and — for armour — the body-layer alignment the human renderer
- * expects. Nothing here needs a new PNG, and nothing here can drift out of
- * sync with one.
+ * expects.
  *
  * <p>{@code tools/locale_audit.py} knows these four classes by name: its
  * {@code ITEM_CLASS_DRAWS_ITSELF} set is the list of item classes whose icon is
@@ -123,22 +123,18 @@ public final class SkyLivestockItems {
     /** The Glimmerstride Boots: felted aurora fleece, warm and quick. */
     public static class GlimmerstrideBoots extends BootsArmorItem {
 
-        public static final float HUE = 0.425F;
-
         public GlimmerstrideBoots() {
             super(7, 100, Item.Rarity.UNCOMMON, "glimmerstrides", null);
         }
 
         @Override
         protected void loadItemTextures() {
-            this.itemTexture = SkyPelt.tintFinal("items/clothboots", "items/" + this.getStringID(),
-                    HUE, 0.26F, 0.45F, 1.0F, 0.04F);
+            this.itemTexture = GameTexture.fromFile("items/glimmerstrides");
         }
 
         @Override
         protected void loadArmorTexture() {
-            this.armorTexture = SkyPelt.tintFinal("player/armor/clothboots",
-                    "player/armor/glimmerstrides", HUE, 0.26F, 0.45F, 1.0F, 0.04F);
+            this.armorTexture = GameTexture.fromFile("player/armor/glimmerstrides");
         }
 
         @Override
