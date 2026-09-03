@@ -281,6 +281,7 @@ public class SkyWardenMob extends HumanShop {
         if (this.isServer() && player.isServerClient()) {
             offerChalk(player.getServerClient());
             advanceChain(player.getServerClient());
+            advanceRegionKeys(player.getServerClient());
         }
 
         // HumanShop.interact turns him to face the player, updates happiness
@@ -407,6 +408,193 @@ public class SkyWardenMob extends HumanShop {
             return Chapter.CATS_TURNIN;
         }
         return quest.anchorDone ? Chapter.DONE : Chapter.ANCHOR;
+    }
+
+    // ------------------------------------------------------------------
+    // The region keys (docs/FOGKEY_AND_BOSSPORTALS.md §B1-B2)
+    // ------------------------------------------------------------------
+
+    /**
+     * One realm's key-piece quest: what it asks, what it pays, what it says.
+     *
+     * <p>The order of the constants IS the order the Warden offers them, and it
+     * is §B4's own boss ladder — 57k Cryo Queen, 127k Moonlight Dancer, 158k
+     * Ascended Wizard, 161k Pest Warden, 208k Crystal Dragon — so a player
+     * walking this list is walking that table. Hell has no constant because it
+     * has no boss portal to unlock.
+     *
+     * <p>Each constant carries its quest CLASS (for
+     * {@code SkyQuests.findHeld}) and a factory for a fresh one, because
+     * {@code QuestRegistry} keys quests by class and a shared parameterised
+     * quest would collapse five journal entries into one.
+     */
+    private enum RegionKey {
+        SKYREACH(stairwaytoheaven.worldgen.RealmDepth.REALM_SKYREACH,
+                stairwaytoheaven.quest.SkyreachKeyQuest.class,
+                "regionkeyskyreach", "stormsteelbar", 6,
+                "wardenkeyaskskyreach", "wardenkeydoneskyreach") {
+            @Override
+            stairwaytoheaven.quest.SkyreachKeyQuest newQuest() {
+                return new stairwaytoheaven.quest.SkyreachKeyQuest();
+            }
+        },
+        EDEN(stairwaytoheaven.worldgen.RealmDepth.REALM_EDEN,
+                stairwaytoheaven.quest.EdenKeyQuest.class,
+                "regionkeyeden", "stormsteelbar", 8,
+                "wardenkeyaskeden", "wardenkeydoneeden") {
+            @Override
+            stairwaytoheaven.quest.EdenKeyQuest newQuest() {
+                return new stairwaytoheaven.quest.EdenKeyQuest();
+            }
+        },
+        STEINFELD(stairwaytoheaven.worldgen.RealmDepth.REALM_STEINFELD,
+                stairwaytoheaven.quest.SteinfeldKeyQuest.class,
+                "regionkeysteinfeld", "stormsteelbar", 10,
+                "wardenkeyasksteinfeld", "wardenkeydonesteinfeld") {
+            @Override
+            stairwaytoheaven.quest.SteinfeldKeyQuest newQuest() {
+                return new stairwaytoheaven.quest.SteinfeldKeyQuest();
+            }
+        },
+        GHOST(stairwaytoheaven.worldgen.RealmDepth.REALM_GHOST,
+                stairwaytoheaven.quest.GhostKeyQuest.class,
+                "regionkeyghostrealm", "spiritsteelbar", 10,
+                "wardenkeyaskghostrealm", "wardenkeydoneghostrealm") {
+            @Override
+            stairwaytoheaven.quest.GhostKeyQuest newQuest() {
+                return new stairwaytoheaven.quest.GhostKeyQuest();
+            }
+        },
+        CROOKED(stairwaytoheaven.worldgen.RealmDepth.REALM_CROOKED,
+                stairwaytoheaven.quest.CrookedKeyQuest.class,
+                "regionkeycrookedbeyond", "spiritsteelbar", 12,
+                "wardenkeyaskcrookedbeyond", "wardenkeydonecrookedbeyond") {
+            @Override
+            stairwaytoheaven.quest.CrookedKeyQuest newQuest() {
+                return new stairwaytoheaven.quest.CrookedKeyQuest();
+            }
+        };
+
+        final int realm;
+        final Class<? extends necesse.engine.quest.DeliverItemsQuest> questClass;
+        /** The key piece itself. Same string ID as its object — ObjectRegistry
+         *  .onRegister registers the ObjectItem under the object's own stringID
+         *  (ObjectRegistry.java:2114-2124, VERIFIED [jar]). */
+        final String keyItemID;
+        final String barItemID;
+        final int bars;
+        final String askKey;
+        final String doneKey;
+
+        RegionKey(int realm, Class<? extends necesse.engine.quest.DeliverItemsQuest> questClass,
+                String keyItemID, String barItemID, int bars, String askKey, String doneKey) {
+            this.realm = realm;
+            this.questClass = questClass;
+            this.keyItemID = keyItemID;
+            this.barItemID = barItemID;
+            this.bars = bars;
+            this.askKey = askKey;
+            this.doneKey = doneKey;
+        }
+
+        abstract necesse.engine.quest.DeliverItemsQuest newQuest();
+    }
+
+    /**
+     * Hands out — and takes in — the five region key pieces.
+     *
+     * <h2>Why the Warden and not the Elder</h2>
+     * §B1 asks for <i>"the reward of an Elder quest"</i>, and the vanilla Elder
+     * cannot be given one. {@code ElderHumanMob} overrides the entire
+     * quest-giver seam to nothing: {@code getQuests(ServerClient)} returns null
+     * (ElderHumanMob.java:400-402), {@code completeQuest} returns false (:405-407),
+     * {@code skipQuest} returns false (:410-412) — all VERIFIED [jar] — so the
+     * quests tab {@code ShopContainer} would draw for him is never populated,
+     * and the mob cannot be swapped for a subclass either
+     * ({@code GameRegistry.register} throws on a duplicate stringID,
+     * GameRegistry.java:57-58, and {@code GameRegistry.replaceObj} is
+     * {@code protected final}, :71). His real "quests with unique rewards" are
+     * {@code StoryObjective}s, which a mod CAN register — but
+     * {@code StoryObjectiveManager} only ever shows the first unclaimed
+     * objective in registration order ({@code getCurrentObjective}, :414;
+     * {@code getVisibleObjectives}, :486-494), and a mod's objectives sort after
+     * all 24 of vanilla's, so the ASK would stay invisible until a player had
+     * finished and claimed the whole vanilla story line. A quest nobody can see
+     * is the {@code swh_beacon} failure again, so this pass did not ship it.
+     * The Warden is the fallback the brief names, and he is already this mod's
+     * quest-giver.
+     *
+     * <h2>The shape</h2>
+     * Gated on his own chain being {@link Chapter#DONE}: the keys are what comes
+     * AFTER "The Warden's Call", and a player who has not anchored the island
+     * yet does not need five more journal entries. One key is live at a time,
+     * in {@link RegionKey} order.
+     *
+     * <p>Turn-ins are checked across ALL five before a new one is offered, and
+     * deliberately not only for the quest the player is "supposed" to be on:
+     * the world record is what decides, so a state where somebody else's
+     * turn-in advanced the world cannot strand a held quest. Every branch is
+     * idempotent — {@code regionKeyEarned} guards the payout,
+     * {@code SkyQuests.giveOnce} guards the hand-out — so this runs on every
+     * single conversation, settler or not, exactly like {@code offerChalk}.
+     */
+    private void advanceRegionKeys(ServerClient client) {
+        Server server = client.getServer();
+        Level sky = skyLevel(server);
+        if (sky == null) {
+            return;
+        }
+        if (chapterFor(SkywatchQuestData.get(sky), this.isSettler()) != Chapter.DONE) {
+            return;
+        }
+
+        // 0. Clear anything the world has already moved past. In co-op the
+        //    record is shared, so a second player can be left holding a quest
+        //    for a realm somebody else finished -- and its only turn-in path
+        //    (step 1 below) is guarded on that same record, so it would sit in
+        //    their journal forever with no way to complete it. That is exactly
+        //    the swh_beacon failure docs/quests.md is named after, and it is
+        //    reachable here in a way it is not in a single-player world.
+        for (RegionKey step : RegionKey.values()) {
+            if (SkywatchWorldData.regionKeyEarned(server, step.realm)
+                    && stairwaytoheaven.quest.SkyQuests.findHeld(client, step.questClass) != null) {
+                stairwaytoheaven.quest.SkyQuests.removeAllOfType(server, step.questClass);
+            }
+        }
+
+        // 1. Anything the player is carrying the goods for, in any order.
+        for (RegionKey step : RegionKey.values()) {
+            if (SkywatchWorldData.regionKeyEarned(server, step.realm)) {
+                continue;
+            }
+            necesse.engine.quest.DeliverItemsQuest held =
+                    stairwaytoheaven.quest.SkyQuests.findHeld(client, step.questClass);
+            if (held == null || !held.canComplete(client)) {
+                continue;
+            }
+            // DeliverItemsQuest.complete removes the delivered items itself.
+            held.complete(client);
+            stairwaytoheaven.quest.SkyQuests.removeAllOfType(server, step.questClass);
+            SkywatchWorldData.markRegionKeyEarned(server, step.realm);
+            give(client, step.keyItemID, 1);
+            give(client, step.barItemID, step.bars);
+            say(client, step.doneKey);
+            client.sendChatMessage(new LocalMessage("misc", "regionkeyearned"));
+            return; // one hand-over per conversation; the next ask waits for the next hello.
+        }
+
+        // 2. Otherwise the next key nobody has earned yet.
+        for (RegionKey step : RegionKey.values()) {
+            if (SkywatchWorldData.regionKeyEarned(server, step.realm)) {
+                continue;
+            }
+            if (stairwaytoheaven.quest.SkyQuests.findHeld(client, step.questClass) != null) {
+                return; // already asked, and still owed.
+            }
+            stairwaytoheaven.quest.SkyQuests.giveOnce(server, client, step.newQuest());
+            say(client, step.askKey);
+            return;
+        }
     }
 
     /**

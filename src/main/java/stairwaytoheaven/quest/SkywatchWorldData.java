@@ -167,6 +167,26 @@ public class SkywatchWorldData extends WorldData {
      */
     public final java.util.HashSet<String> bossPortalsUnlocked = new java.util.HashSet<>();
 
+    /**
+     * Which realms' key-piece quests have already been turned in.
+     *
+     * <p>The bookkeeping half of §B1. It is NOT the same fact as
+     * {@link #bossPortalsUnlocked}: this one says the Warden has handed the key
+     * piece over, that one says somebody has stood it up in a settlement. The
+     * two are deliberately separable — a player can carry a key piece around
+     * for a week, drop it in a chest, or build it somewhere that is not a
+     * settlement yet — and collapsing them would either pay the reward twice or
+     * unlock a realm the moment the quest was turned in, which is precisely the
+     * <i>"stand the key piece in your base"</i> beat §B2 exists to create.
+     *
+     * <p>World-scoped, like {@link #bossPortalsUnlocked} and for the same
+     * reason: a key piece is a BUILDING, one per world, and a co-op world
+     * should not be asked to farm five realms once per player. Stored as realm
+     * KEYS ({@code RealmDepth.keyOf}) so a save written before Hell exists still
+     * loads once {@code REALM_COUNT} grows.
+     */
+    public final java.util.HashSet<String> regionKeysEarned = new java.util.HashSet<>();
+
     public boolean catHomeSet = false;
     public int catHomeX = 0;
     public int catHomeY = 0;
@@ -186,6 +206,8 @@ public class SkywatchWorldData extends WorldData {
                 this.residentsClaimed.toArray(new String[0]));
         save.addStringArray("bossPortalsUnlocked",
                 this.bossPortalsUnlocked.toArray(new String[0]));
+        save.addStringArray("regionKeysEarned",
+                this.regionKeysEarned.toArray(new String[0]));
         save.addBoolean("catHomeSet", this.catHomeSet);
         save.addInt("catHomeX", this.catHomeX);
         save.addInt("catHomeY", this.catHomeY);
@@ -212,6 +234,12 @@ public class SkywatchWorldData extends WorldData {
         for (String unlocked : save.getStringArray("bossPortalsUnlocked", new String[0], false)) {
             if (unlocked != null && !unlocked.isEmpty()) {
                 this.bossPortalsUnlocked.add(unlocked);
+            }
+        }
+        this.regionKeysEarned.clear();
+        for (String earned : save.getStringArray("regionKeysEarned", new String[0], false)) {
+            if (earned != null && !earned.isEmpty()) {
+                this.regionKeysEarned.add(earned);
             }
         }
         this.catHomeSet = save.getBoolean("catHomeSet", this.catHomeSet, false);
@@ -435,6 +463,38 @@ public class SkywatchWorldData extends WorldData {
         SkywatchWorldData data = get(server);
         if (data != null) {
             data.unlockBossPortals(realm);
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // The region key quests (docs/FOGKEY_AND_BOSSPORTALS.md §B1)
+    // ------------------------------------------------------------------
+
+    /**
+     * Has this realm's key piece already been handed over?
+     *
+     * <p>Answers TRUE when the record cannot be read at all, the opposite way
+     * round from {@link #bossPortalsUnlocked(int)} and for the same kind of
+     * reason: the safe failure for a REWARD is "already paid". A world whose
+     * record is missing should not be able to farm the Warden for an unlimited
+     * supply of key pieces, and a player who is told "you already have it" once
+     * has lost nothing they cannot recover by breaking and re-placing the one
+     * they built.
+     */
+    public static boolean regionKeyEarned(Server server, int realm) {
+        SkywatchWorldData data = get(server);
+        return data == null || data.regionKeysEarned.contains(RealmDepth.keyOf(realm));
+    }
+
+    /**
+     * Records that a realm's key-piece quest has been turned in and paid.
+     * Idempotent, and it never un-records — progression in this mod only ever
+     * goes forwards, the same as {@link #unlockBossPortals(int)}.
+     */
+    public static void markRegionKeyEarned(Server server, int realm) {
+        SkywatchWorldData data = get(server);
+        if (data != null) {
+            data.regionKeysEarned.add(RealmDepth.keyOf(realm));
         }
     }
 }

@@ -282,6 +282,33 @@ Hell has no stone: §B4 reserves its boss and gives it no tier.
 | `bossportalcrookedbeyond` | object | Crooked summoning stone — wakes the Crystal Dragon at incursion tier 10 (208 000 HP) once Mr. Knott's red door stands at home; never minable. |
 | `incursionpressure` | buff | The permanent, invisible buff a portal puts on the boss it wakes: vanilla's own incursion tier curve as `MAX_HEALTH` and `ALL_DAMAGE` on that one mob, so the rest of the sky plane is untouched. |
 
+## The region key pieces
+
+`docs/FOGKEY_AND_BOSSPORTALS.md` §B1–B2: one buildable object per realm, the
+reward of that realm's key quest, and the thing that wakes its summoning
+stones. Each wears the **same sheet as its own realm's stone**, because §B3
+asks a stone to look like the key piece so a player recognises what they need —
+so the two are one picture, seen in two places. All five are minable furniture,
+placeable only inside a settlement (`RegionKeyObject.canPlace`), and standing
+one up calls `SkywatchWorldData.unlockBossPortals` once
+(`RegionKeyObject.placeObject`, the shape `HomestoneObject.placeObject` uses).
+Mining one afterwards does not re-lock the realm. Hell has none: it has no
+stone to unlock.
+
+The quests that pay them out are `swh_keyskyreach`, `swh_keyeden`,
+`swh_keysteinfeld`, `swh_keyghostrealm` and `swh_keycrookedbeyond`, handed out
+one at a time by `SkyWardenMob.advanceRegionKeys` once "The Warden's Call" is
+finished — see `docs/quests.md` for why the giver is the Warden and not the
+Elder.
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `regionkeyskyreach` | object | Skyreach Watchfire — the Warden's lit beacon, rebuilt at home; unlocks the Skyreach's summoning stones. Paid by `swh_keyskyreach` for 10x Storm Shard + 5x Fulgurite. |
+| `regionkeyeden` | object | Eden Garden Stair — the Eden Gate's own stairway, stood up in the base; unlocks Eden's summoning stones. Paid by `swh_keyeden` for 8x Eden Sap + 6x Golden Pollen. |
+| `regionkeysteinfeld` | object | Steinfeld Mourning Angel — the realm's seraph statue, §B1's own *"a statue for Steinfeld"*; unlocks Steinfeld's summoning stones. Paid by `swh_keysteinfeld` for 8x Echo Shard + 20x Pale Stone. |
+| `regionkeyghostrealm` | object | Aftergarden Raven Perch — the Gloom Raven grave marker; unlocks the Ghost Realm's summoning stones. Paid by `swh_keyghostrealm` for 12x Bonewood + 8x Spectral Ore, which means walking the fog first. |
+| `regionkeycrookedbeyond` | object | Knott's Crooked Door — §B1's *"Mr. Knott's red door for Crooked"*, on the sheet `CrookedDoorObject` already wears; unlocks the Crooked Beyond's summoning stones. Paid by `swh_keycrookedbeyond` for 16x Oddwood + 8x Reality Shard. |
+
 ## Baseline — registered before the ledger existed
 
 These predate the ledger and are described in `CHANGELOG.md`,

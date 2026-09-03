@@ -3,6 +3,62 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [Unreleased] — the region keys — 2026-09-03
+
+`docs/FOGKEY_AND_BOSSPORTALS.md` §B1–B2. The boss portals shipped inert and
+nothing in the mod could wake them, because the key piece §B2 asks you to build
+did not exist. It does now, and so does the quest line that pays for it.
+
+### Added
+- **`objects/RegionKeyObject`** — five buildable key pieces,
+  `regionkeyskyreach` … `regionkeycrookedbeyond`, one per realm that has a boss
+  portal. Placing one **inside a settlement** calls
+  `SkywatchWorldData.unlockBossPortals` for that realm; outside a settlement it
+  will not go down at all, and says why. Minable furniture at vanilla's 100
+  statue health — mining one back up does not re-lock the realm, because the
+  unlock record only ever moves forwards.
+- **Five region key quests** — `swh_keyskyreach`, `swh_keyeden`,
+  `swh_keysteinfeld`, `swh_keyghostrealm`, `swh_keycrookedbeyond`, all
+  `DeliverItemsQuest`s. Each asks for two materials **only its own realm
+  drops** (checked against every drop site and every recipe in the source) and
+  pays the key piece plus bars: 6 / 8 / 10 Stormsteel, then 10 / 12
+  Spiritsteel, a payout curve read straight off §B4's monotone boss ladder.
+- **`SkyWardenMob.advanceRegionKeys`** — hands them out and takes them in, one
+  at a time, in boss-ladder order, once "The Warden's Call" reaches
+  `Chapter.DONE`. Runs on every conversation, settler or not, like
+  `offerChalk`; opens with a sweep that clears any held key quest whose realm
+  the shared world record has already moved past, so a co-op world cannot
+  strand one.
+- **`SkywatchWorldData.regionKeysEarned`** — deliberately a *second* world flag
+  next to `bossPortalsUnlocked`. One says the Warden paid out, the other says
+  somebody stood the piece up; collapsing them would either pay twice or delete
+  §B2's "stand it in your base" beat entirely.
+
+### Design notes
+- **No new art, again.** Every key piece wears its own realm's **boss portal
+  sheet** — that is §B3's rule ("they look like the region's key piece") read
+  as what it is, a statement about two objects that is only true if both point
+  at one file. The five inventory icons are the 32x32 cell (0,0) of an existing
+  file: three of them are icons the mod already ships for the same statue or
+  stairway, and the beacon and the door are cropped from their own world sheets
+  with vanilla's `GameTexture(copy, spriteX, spriteY, spriteRes)` — the same
+  constructor `TerrainSplatterTile` and `RockOreObject` build their icons with.
+  Every one is in `docs/VANILLA_ASSET_MAP.md` §1.6/§1.6b with its pixel size.
+  Nothing is recoloured.
+- **The Elder could not be hooked, and that is written down rather than faked.**
+  `ElderHumanMob` overrides `getQuests` to `null`, `completeQuest` and
+  `skipQuest` to `false` (ElderHumanMob.java:400-402, :405-407, :410-412,
+  VERIFIED [jar]); the mob cannot be replaced (`GameRegistry.register` throws on
+  a duplicate stringID, `replaceObj` is `protected final`); and his real
+  quest system, `StoryObjective`, only ever shows the first unclaimed objective
+  in registration order, which for a mod is after all 24 of vanilla's. The full
+  reasoning, with line numbers, is in `docs/quests.md`. The Warden — already
+  this mod's quest-giver — took the job.
+- **Ectoplasm was rejected as the Aftergarden's ask** even though it looks
+  perfect: it is a vanilla item vanilla's own swamp hands out
+  (ItemRegistry.java:929), so the quest could have been finished without ever
+  entering the realm. Bonewood replaced it.
+
 ## [Unreleased] — the boss portals — 2026-09-03
 
 `docs/FOGKEY_AND_BOSSPORTALS.md` §B3–B5. The realms had enemies and no reason
