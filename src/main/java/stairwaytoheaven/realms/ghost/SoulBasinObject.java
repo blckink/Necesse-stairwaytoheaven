@@ -56,13 +56,27 @@ public class SoulBasinObject extends GhostDecoObject {
         return true;
     }
 
+    /** Is this tile inside the given realm's band of the sky plane? */
+    public static boolean inRealm(Level level, int tileX, int tileY, int realm) {
+        if (!SkyRegistry.SKYREACH_IDENTIFIER.equals(level.getIdentifier())) {
+            return false;
+        }
+        int seed = stairwaytoheaven.worldgen.SkyOrigin.worldGenSeed(level.getWorldEntity());
+        return stairwaytoheaven.worldgen.RealmDepth.realmAt(seed, tileX, tileY,
+                stairwaytoheaven.worldgen.SkyOrigin.originX(seed),
+                stairwaytoheaven.worldgen.SkyOrigin.originY(seed)) == realm;
+    }
+
     @Override
     public void interact(Level level, int x, int y, PlayerMob player) {
         if (!level.isServer() || !player.isServerClient()) {
             return;
         }
         ServerClient client = player.getServerClient();
-        if (SkyRegistry.GHOST_IDENTIFIER.equals(level.getIdentifier())) {
+        // "You are already there" is now a question about the REALM, not about
+        // which level you stand on: docs/PLAN_ONE_PLANE.md retired the realm
+        // dimensions, so the band under your feet is what answers it.
+        if (inRealm(level, x, y, stairwaytoheaven.worldgen.RealmDepth.REALM_GHOST)) {
             client.sendChatMessage(new LocalMessage("misc", "basinalreadyghost"));
             return;
         }

@@ -882,10 +882,12 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         // arrives as you walk out. Both are properties of the distance ramp,
         // so both are read straight off describeTile at real world positions.
         //
-        // The 900-tile floor is the one that matters. It is asserted as an
-        // exact zero, not as "rare": the spire's surroundings being safe is a
-        // fact this mod states out loud, and a fact that holds 99% of the time
-        // is a different fact.
+        // The floor is the one that matters, and it MOVED with the one-plane
+        // refactor: it used to be an interim 900 and is now Crooked Beyond's
+        // own band start, 4200 (docs/PLAN_ONE_PLANE.md, WORLD_DESIGN §41.4).
+        // It is still asserted as an exact zero, not as "rare": the near world
+        // being safe is a fact this mod states out loud, and a fact that holds
+        // 99% of the time is a different fact.
         if (level instanceof SkyLevel) {
             int outSeed = ((SkyLevel) level).getWorldGenSeed();
             java.awt.Point outOrigin = stairwaytoheaven.worldgen.SkyOrigin.compute(outSeed);
@@ -906,8 +908,13 @@ public class SkyreachStatusCommand extends ModularChatCommand {
             int insideLand = 0;
             int insideWrong = 0;
             int floor = (int) stairwaytoheaven.worldgen.SkyOutlands.WRONG_START;
-            for (int dx = -floor; dx <= floor; dx += 10) {
-                for (int dy = -floor; dy <= floor; dy += 10) {
+            // Step 25, not 10: the floor is 4200 tiles now, so a step-10 disc
+            // is half a million describeTile calls in a debug command. The
+            // floor is a hard early return in SkyOutlands.isWrong, so what this
+            // sweep proves -- that the painter agrees with it -- is proved just
+            // as well by 88,000 samples as by 550,000.
+            for (int dx = -floor; dx <= floor; dx += 25) {
+                for (int dy = -floor; dy <= floor; dy += 25) {
                     if ((long) dx * dx + (long) dy * dy > (long) floor * floor) {
                         continue;
                     }
@@ -915,8 +922,11 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                     int ty = outOrigin.y + dy;
                     long desc = stairwaytoheaven.worldgen.SkyTerrainPainter.describeTile(
                             outSeed, tx, ty, outOrigin.x, outOrigin.y);
-                    if (stairwaytoheaven.worldgen.SkyTerrainPainter.descTile(desc)
-                            == SkyRegistry.mistseaID) {
+                    // Every realm has its own liquid now (Eden's shallows, the
+                    // Ghost Realm's ectoplasm, Crooked's Spill), so "not
+                    // Mistsea" stopped meaning "dry". Ask the tile.
+                    if (necesse.engine.registries.TileRegistry.getTile(
+                            stairwaytoheaven.worldgen.SkyTerrainPainter.descTile(desc)).isLiquid) {
                         continue;
                     }
                     insideLand++;
@@ -929,8 +939,10 @@ public class SkyreachStatusCommand extends ModularChatCommand {
             ramp.append(" inside=").append(insideWrong).append("/").append(insideLand);
 
             // ...and the ramp, at radii far enough out that the sampling window
-            // cannot reach back over the floor.
-            for (int radius : new int[]{1200, 2000, 3200}) {
+            // cannot reach back over the floor. All three are inside Crooked
+            // Beyond's band now (4200-5640) rather than in the old 900-3200
+            // interim window, because that is where the wrong ground lives.
+            for (int radius : new int[]{4400, 5000, 5600}) {
                 int land = 0;
                 int wrong = 0;
                 for (int dx = -60; dx <= 60; dx += 2) {
@@ -939,8 +951,8 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                         int ty = outOrigin.y + dy;
                         long desc = stairwaytoheaven.worldgen.SkyTerrainPainter.describeTile(
                                 outSeed, tx, ty, outOrigin.x, outOrigin.y);
-                        if (stairwaytoheaven.worldgen.SkyTerrainPainter.descTile(desc)
-                                == SkyRegistry.mistseaID) {
+                        if (necesse.engine.registries.TileRegistry.getTile(
+                                stairwaytoheaven.worldgen.SkyTerrainPainter.descTile(desc)).isLiquid) {
                             continue;
                         }
                         land++;
@@ -962,11 +974,12 @@ public class SkyreachStatusCommand extends ModularChatCommand {
             // The realm field from WORLD_DESIGN §3, reported so the concept and
             // the code can be compared without reading either.
             //
-            // The gap between the two starts below is the honest part: Crooked
-            // Beyond sits at 900 tiles today and belongs at ~4200. It is early
-            // because Eden, Steinfeld and the Ghost Realm do not exist yet and
-            // moving it out would empty the near world. Printed every run so
-            // the compromise cannot quietly become permanent.
+            // crookedNow and crookedTrue used to disagree -- Crooked Beyond sat
+            // at 900 tiles and belonged at 4200, because Eden, Steinfeld and
+            // the Ghost Realm did not exist and moving it out would have
+            // emptied the near world. They exist, the one-plane refactor made
+            // them bands of this level, and the two numbers now agree. Still
+            // printed every run: if they ever diverge again, something moved.
             StringBuilder realms = new StringBuilder("realm check: scale=")
                     .append((int) stairwaytoheaven.worldgen.RealmDepth.DEPTH_SCALE)
                     .append(" crookedNow=").append((int) stairwaytoheaven.worldgen.SkyOutlands.WRONG_START)
@@ -1003,8 +1016,11 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                     int ty = outOrigin.y + dy;
                     long desc = stairwaytoheaven.worldgen.SkyTerrainPainter.describeTile(
                             outSeed, tx, ty, outOrigin.x, outOrigin.y);
-                    if (stairwaytoheaven.worldgen.SkyTerrainPainter.descTile(desc)
-                            == SkyRegistry.mistseaID) {
+                    // Every realm has its own liquid now (Eden's shallows, the
+                    // Ghost Realm's ectoplasm, Crooked's Spill), so "not
+                    // Mistsea" stopped meaning "dry". Ask the tile.
+                    if (necesse.engine.registries.TileRegistry.getTile(
+                            stairwaytoheaven.worldgen.SkyTerrainPainter.descTile(desc)).isLiquid) {
                         continue;
                     }
                     pressureLand++;
@@ -1074,8 +1090,8 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                                 .hash(outSeed + salt + 2, cx, cy) * cell);
                         long desc = stairwaytoheaven.worldgen.SkyTerrainPainter.describeTile(
                                 outSeed, tx, ty, outOrigin.x, outOrigin.y);
-                        if (stairwaytoheaven.worldgen.SkyTerrainPainter.descTile(desc)
-                                == SkyRegistry.mistseaID) {
+                        if (necesse.engine.registries.TileRegistry.getTile(
+                                stairwaytoheaven.worldgen.SkyTerrainPainter.descTile(desc)).isLiquid) {
                             continue;
                         }
                         float dx = tx - outOrigin.x;

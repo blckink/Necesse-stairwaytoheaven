@@ -87,10 +87,25 @@ public final class SkyOrigin {
      * every existing save. Left as-is deliberately — do not "fix" it.
      */
     public static Point compute(int worldGenSeed) {
-        int h = mix(worldGenSeed);
-        int dx = mix(h ^ 0x9E3779B9) % 385 - 192;
-        int dy = mix(h ^ 0x85EBCA77) % 385 - 192;
-        return new Point(dx, dy);
+        return new Point(originX(worldGenSeed), originY(worldGenSeed));
+    }
+
+    /**
+     * The origin's X, without allocating a {@link Point}.
+     *
+     * <p>Every realm band is defined by its distance from here
+     * ({@link RealmDepth}), so worldgen asks this question once per TILE. The
+     * {@code Point} that {@link #compute} hands back is convenient at a call
+     * site and ruinous in a per-tile loop, which is what these two exist for.
+     * Same arithmetic, same answer, no garbage.
+     */
+    public static int originX(int worldGenSeed) {
+        return mix(mix(worldGenSeed) ^ 0x9E3779B9) % 385 - 192;
+    }
+
+    /** The origin's Y, without allocating a {@link Point}. */
+    public static int originY(int worldGenSeed) {
+        return mix(mix(worldGenSeed) ^ 0x85EBCA77) % 385 - 192;
     }
 
     /** Origin for the world this entity belongs to. */

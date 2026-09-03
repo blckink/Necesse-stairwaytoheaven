@@ -81,7 +81,11 @@ public class EdenSeedBasinObject extends GhostDecoObject {
             return;
         }
         ServerClient client = player.getServerClient();
-        if (SkyRegistry.EDEN_IDENTIFIER.equals(level.getIdentifier())) {
+        // "You are already there" is now a question about the REALM, not about
+        // which level you stand on: docs/PLAN_ONE_PLANE.md retired the realm
+        // dimensions, so the band under your feet is what answers it.
+        if (stairwaytoheaven.realms.ghost.SoulBasinObject.inRealm(level, x, y,
+                stairwaytoheaven.worldgen.RealmDepth.REALM_EDEN)) {
             client.sendChatMessage(new LocalMessage("misc", "edenbasinalreadyeden"));
             return;
         }

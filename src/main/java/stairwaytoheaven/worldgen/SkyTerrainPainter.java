@@ -131,7 +131,8 @@ public final class SkyTerrainPainter {
     public static final int SALT_SOLITARY = 37;
 
     // Packed bits of outcropAt()
-    private static final int OUTCROP_SOLID = 1;
+    /** Public: the Crooked band reuses the formation field for its massifs. */
+    public static final int OUTCROP_SOLID = 1;
     private static final int OUTCROP_APRON_BIT = 2;
     private static final int OUTCROP_RICH_SHIFT = 2;
     private static final int OUTCROP_MINERAL_SHIFT = 10;
@@ -290,6 +291,37 @@ public final class SkyTerrainPainter {
      */
     public static final int BIOME_OUTLANDS = 4;
 
+    // ------------------------------------------------------------------
+    // The other realms' sub-biomes, appended in {@link RealmDepth} order.
+    //
+    // docs/PLAN_ONE_PLANE.md: the world is ONE plane and a realm is a BAND of
+    // it, not a dimension. Every band paints into this same class space so the
+    // region's biome layer, the offline dump and the status oracle all keep
+    // reading one number per tile. Appended, never inserted -- a dump taken
+    // before a realm existed still decodes correctly.
+    // ------------------------------------------------------------------
+
+    public static final int BIOME_EDEN_GARDEN = 5;
+    public static final int BIOME_EDEN_SHALLOWS = 6;
+    public static final int BIOME_EDEN_CANOPY = 7;
+
+    public static final int BIOME_STEINFELD_QUIET = 8;
+    public static final int BIOME_STEINFELD_SLAB = 9;
+    public static final int BIOME_STEINFELD_HEATH = 10;
+
+    public static final int BIOME_GHOST_AFTERGARDEN = 11;
+    public static final int BIOME_GHOST_ORCHARD = 12;
+    public static final int BIOME_GHOST_ECTOMARSH = 13;
+    /** WORLD_DESIGN §41.5: the Veil's fen is the Ghost Realm's wet ground. */
+    public static final int BIOME_GLOOMFEN = 14;
+    public static final int BIOME_ASHEN_REACH = 15;
+
+    public static final int BIOME_CROOKED_WASTE = 16;
+    public static final int BIOME_CROOKED_FIELDS = 17;
+    public static final int BIOME_CROOKED_CHECKER = 18;
+    /** WORLD_DESIGN §41.5: the Hollows are Crooked Beyond's own wrong ground. */
+    public static final int BIOME_BEETLEFREAK_HOLLOW = 19;
+
     /** Sub-biome class -> the registered biome the region layer stores. */
     public static int biomeRegistryID(int biomeClass) {
         switch (biomeClass) {
@@ -301,6 +333,41 @@ public final class SkyTerrainPainter {
                 return SkyRegistry.skyway.getID();
             case BIOME_OUTLANDS:
                 return SkyRegistry.outlands.getID();
+
+            case BIOME_EDEN_GARDEN:
+                return stairwaytoheaven.realms.eden.EdenRealm.garden.getID();
+            case BIOME_EDEN_SHALLOWS:
+                return stairwaytoheaven.realms.eden.EdenRealm.shallows.getID();
+            case BIOME_EDEN_CANOPY:
+                return stairwaytoheaven.realms.eden.EdenRealm.canopy.getID();
+
+            case BIOME_STEINFELD_QUIET:
+                return SkyRegistry.quietMeadow.getID();
+            case BIOME_STEINFELD_SLAB:
+                return SkyRegistry.slabFields.getID();
+            case BIOME_STEINFELD_HEATH:
+                return SkyRegistry.graveHeath.getID();
+
+            case BIOME_GHOST_AFTERGARDEN:
+                return stairwaytoheaven.realms.ghost.GhostRealm.aftergarden.getID();
+            case BIOME_GHOST_ORCHARD:
+                return stairwaytoheaven.realms.ghost.GhostRealm.boneOrchard.getID();
+            case BIOME_GHOST_ECTOMARSH:
+                return stairwaytoheaven.realms.ghost.GhostRealm.ectomarsh.getID();
+            case BIOME_GLOOMFEN:
+                return SkyRegistry.gloomfen.getID();
+            case BIOME_ASHEN_REACH:
+                return SkyRegistry.ashenReach.getID();
+
+            case BIOME_CROOKED_WASTE:
+                return stairwaytoheaven.realms.crooked.CrookedRealm.stripedWaste.getID();
+            case BIOME_CROOKED_FIELDS:
+                return stairwaytoheaven.realms.crooked.CrookedRealm.spiralFields.getID();
+            case BIOME_CROOKED_CHECKER:
+                return stairwaytoheaven.realms.crooked.CrookedRealm.checkerworks.getID();
+            case BIOME_BEETLEFREAK_HOLLOW:
+                return SkyRegistry.beetlefreakHollow.getID();
+
             default:
                 return SkyRegistry.driftlands.getID();
         }
@@ -865,11 +932,148 @@ public final class SkyTerrainPainter {
         return (desc & (1L << 60)) != 0L;
     }
 
-    private static long pack(int tileID, int objectID, int biomeID, boolean built) {
+    /**
+     * Pack one tile's answer. Public because the REALM BAND PAINTERS answer for
+     * their own tiles and hand the result back through {@link #describeTile} —
+     * see {@link #describeRealmTile}. One packing, one decoder, one contract.
+     */
+    public static long pack(int tileID, int objectID, int biomeID, boolean built) {
         return (tileID & 0xFFFFFL)
                 | ((objectID & 0xFFFFFL) << 20)
                 | ((biomeID & 0xFFFFFL) << 40)
                 | (built ? 1L << 60 : 0L);
+    }
+
+    // ------------------------------------------------------------------
+    // ONE PLANE: the realms are bands of this level, not dimensions.
+    //
+    // docs/PLAN_ONE_PLANE.md, obeying docs/WORLD_DESIGN.md §3. The plane's
+    // coastline is ONE field — the island noise below — because a single
+    // connected overworld cannot have a different sea per realm without
+    // producing exactly the hard optical borders §3 exists to dissolve. What
+    // each realm DOES get is its own waterline: the threshold is blended
+    // across the realm weights at this depth, so Eden's land is broad and
+    // lagoon-cut, Steinfeld's is very nearly continuous country, and the
+    // Skyreach stays an archipelago — and because the blend is a function of
+    // DEPTH ALONE it is continuous, so no coastline ever steps at a realm
+    // border the way it would if each band used its own threshold.
+    // ------------------------------------------------------------------
+
+    /**
+     * Each realm's waterline, as a threshold on the shared island field.
+     *
+     * <p>Indexed by {@link RealmDepth}'s realm ordinals. Lower = more land.
+     *
+     * <ul>
+     *   <li><b>Skyreach 0.48</b> — this class's own shipped value, measured:
+     *       about 39% of the field is land.</li>
+     *   <li><b>Eden 0.40</b> — §5 wants "a biological explosion", and A3.3
+     *       lagoons CUT INTO land rather than islands in a sea. Eden's own
+     *       level used 0.36 at a different noise scale; 0.40 on this field is
+     *       the same intent — the greenest and most walkable band — while
+     *       still leaving the lagoons the Shallows biome exists for.</li>
+     *   <li><b>Steinfeld 0.34</b> — §7's Quiet Reach had NO liquid at all as a
+     *       dimension. It cannot keep that on a plane with one sea, so it gets
+     *       the lowest waterline instead: broad continuous country with the
+     *       Mistsea only between its far pieces.</li>
+     *   <li><b>Ghost / Crooked / Hell 0.44</b> — the value both realms already
+     *       shipped with, and the Veil's before them.</li>
+     * </ul>
+     */
+    public static final float[] REALM_WATERLINE = {
+            /* SKYREACH  */ 0.48F,
+            /* EDEN      */ 0.40F,
+            /* STEINFELD */ 0.34F,
+            /* GHOST     */ 0.44F,
+            /* CROOKED   */ 0.44F,
+            /* HELL      */ 0.44F,
+    };
+
+    /**
+     * The waterline at a depth: the realm weights of {@link RealmDepth}, used
+     * as weights.
+     *
+     * <p>A function of DEPTH only — never of the realm the noise picked — which
+     * is what keeps it continuous. Two neighbouring tiles in different realms
+     * share a waterline and therefore share a coastline.
+     */
+    public static float waterlineAt(float depth) {
+        float total = 0.0F;
+        float sum = 0.0F;
+        for (int r = 0; r < RealmDepth.REALM_COUNT; r++) {
+            float w = RealmDepth.weightOf(r, depth);
+            total += w;
+            sum += w * REALM_WATERLINE[r];
+        }
+        return total <= 0.0F ? ISLAND_THRESHOLD : sum / total;
+    }
+
+    /**
+     * Is this tile dry, unbuilt ground on the plane?
+     *
+     * <p>The one land question every realm's band shares. It is the shared
+     * island field against the depth-blended waterline, plus the rim margin
+     * that keeps a coastline walkable — so a caller with no region in hand (a
+     * preset placer, a door looking for somewhere to put the player down, the
+     * offline renderer) gets the same answer the painter will.
+     */
+    public static boolean isOpenGround(int seed, int tileX, int tileY, int originX, int originY) {
+        float depth = RealmDepth.depthAt(tileX, tileY, originX, originY);
+        float island = SkyNoise.fbm(seed, tileX, tileY, ISLAND_SCALE, 3);
+        float hubDx = tileX - originX;
+        float hubDy = tileY - originY;
+        float hubDist = (float) Math.sqrt(hubDx * hubDx + hubDy * hubDy);
+        float waterline = waterlineAt(depth);
+        if (hubDist < SkyOrigin.HUB_RADIUS) {
+            float force = 1.0F - hubDist / SkyOrigin.HUB_RADIUS;
+            island = Math.max(island, waterline + 0.02F + 0.20F * force);
+        }
+        return island > waterline + ISLAND_RIM;
+    }
+
+    /**
+     * One tile of a realm that is not the Skyreach, answered by that realm's
+     * own band painter.
+     *
+     * <p>This is the Outlands pattern ({@code WORLD_DESIGN} §41.4) applied to
+     * every realm: a realm is a distance-gated set of biomes on the sky plane,
+     * painted by its own painter, written into this level's own biome layer.
+     * Nothing here creates a level, and no realm has one.
+     *
+     * <p><b>{@code distortion} is passed and not yet spent.</b> It is §3's
+     * second field — how WRONG an island is inside its own realm, so a Ghost
+     * band can hold both a classic graveyard and floating gravestones at the
+     * same distance — and {@link RealmDepth#distortionAt} computes it. No band
+     * painter reads it yet: choosing each realm's calm and mad variants is
+     * content work, not hosting, and this refactor deliberately changed only
+     * the hosting. The parameter is here so that work has one obvious hook
+     * rather than inventing a seventh field later.
+     *
+     * <p><b>Hell falls through to Crooked Beyond on purpose.</b>
+     * {@code WORLD_DESIGN} §17-23 is not built — there is no Infernal painter
+     * to call — and a band that painted nothing would be a hole in the world at
+     * depth 0.94-1.00. Crooked is its neighbour and its nearest relative, so
+     * the outermost band reads as the far end of Crooked until Hell lands.
+     * Delete this case the day it does.
+     */
+    private static long describeRealmTile(int realm, int seed, int tileX, int tileY,
+            float island, float waterline, float depth, float distortion) {
+        switch (realm) {
+            case RealmDepth.REALM_EDEN:
+                return stairwaytoheaven.realms.eden.EdenTerrainPainter.describeBand(
+                        seed, tileX, tileY, island, waterline, depth, distortion);
+            case RealmDepth.REALM_STEINFELD:
+                return stairwaytoheaven.realms.steinfeld.SteinfeldTerrainPainter.describeBand(
+                        seed, tileX, tileY, island, waterline, depth, distortion);
+            case RealmDepth.REALM_GHOST:
+                return stairwaytoheaven.realms.ghost.GhostTerrainPainter.describeBand(
+                        seed, tileX, tileY, island, waterline, depth, distortion);
+            case RealmDepth.REALM_CROOKED:
+            case RealmDepth.REALM_HELL:
+            default:
+                return stairwaytoheaven.realms.crooked.CrookedTerrainPainter.describeBand(
+                        seed, tileX, tileY, island, waterline, depth, distortion);
+        }
     }
 
     /**
@@ -903,40 +1107,55 @@ public final class SkyTerrainPainter {
             biomeValue = biomeValue + (0.5F - biomeValue) * Math.min(1.0F, force * 1.6F);
         }
 
-        // A CLASS, not a registry ID: describeTile stays callable from the
-        // offline map renderer, which has no biome registry.
-        int biomeID = biomeClassOf(biomeValue);
-
-        // The Outlands cut ACROSS all four bands above rather than being a
-        // fifth one: what decides them is distance from the spire, not the
-        // biome noise. Resolved here, once, so the ground, the props and the
-        // biome layer can never disagree about which world a tile is in.
-        boolean isWrong = SkyOutlands.isWrong(seed, tileX, tileY, hubDist);
-        if (isWrong) {
-            biomeID = BIOME_OUTLANDS;
-        }
-
-        boolean isStormveil = biomeID == BIOME_STORMVEIL;
-        boolean isAurora = biomeID == BIOME_AURORA;
+        // --- which realm this is (docs/PLAN_ONE_PLANE.md, WORLD_DESIGN §3) ---
+        //
+        // Distance -> depth -> a WEIGHTED realm pick, so the bands overlap and
+        // no seed reads as concentric rings. The hub is depth 0 and is always
+        // the Skyreach, by construction rather than by luck.
+        float depth = RealmDepth.depthFor(hubDist);
+        float waterline = waterlineAt(depth);
 
         float islandValue = SkyNoise.fbm(seed, tileX, tileY, ISLAND_SCALE, 3);
         if (hubDist < SkyOrigin.HUB_RADIUS) {
             float force = 1.0F - hubDist / SkyOrigin.HUB_RADIUS;
-            islandValue = Math.max(islandValue, ISLAND_THRESHOLD + 0.02F + 0.20F * force);
+            islandValue = Math.max(islandValue, waterline + 0.02F + 0.20F * force);
         }
-        if (islandValue <= ISLAND_THRESHOLD) {
+
+        int realm = RealmDepth.realmForDepth(seed, tileX, tileY, depth);
+        if (realm != RealmDepth.REALM_SKYREACH) {
+            // A realm answers for its own tiles, exactly as the Outlands
+            // already did. The sky's road network, wrecks, workshops, outcrops
+            // and colonies are the SKYREACH's furniture and stop at its band —
+            // which is §2's "order decays with distance" made literal.
+            return describeRealmTile(realm, seed, tileX, tileY, islandValue, waterline,
+                    depth, RealmDepth.distortionAt(seed, tileX, tileY, depth));
+        }
+
+        // A CLASS, not a registry ID: describeTile stays callable from the
+        // offline map renderer, which has no biome registry.
+        //
+        // §41.3: the Skyreach's four sub-biomes are NOT deleted by the one-plane
+        // move — they are Tier 0's distortion variants, and they are already
+        // exactly that: sub-noise bands of one field inside one realm.
+        int biomeID = biomeClassOf(biomeValue);
+
+        // The Outlands moved OUT of the Skyreach with this change: they are
+        // Crooked Beyond's wrong ground (§41.4) and are now cut by
+        // CrookedTerrainPainter inside the Crooked band. Nothing inside Tier 0
+        // is wrong any more, which is the point — the contrast the Outlands
+        // were invented to supply is now supplied by four realms standing
+        // between the spire and the far sky.
+        boolean isStormveil = biomeID == BIOME_STORMVEIL;
+        boolean isAurora = biomeID == BIOME_AURORA;
+
+        if (islandValue <= waterline) {
             return pack(SkyRegistry.mistseaID, 0, biomeID, false);
         }
 
-        // Bedrock does not surface inside an Outland: the striped ground owns
-        // its region outright, and letting the sky's own grey plateau show
-        // through would read as the nice world leaking back in.
-        boolean isRockPatch = !isWrong
-                && SkyNoise.fbm(seed + SALT_ROCK_PATCH, tileX, tileY, ROCK_PATCH_SCALE, 2) > ROCK_PATCH_THRESHOLD;
+        boolean isRockPatch =
+                SkyNoise.fbm(seed + SALT_ROCK_PATCH, tileX, tileY, ROCK_PATCH_SCALE, 2) > ROCK_PATCH_THRESHOLD;
         int groundID;
-        if (isWrong) {
-            groundID = SkyOutlands.groundTile(seed, tileX, tileY);
-        } else if (isRockPatch) {
+        if (isRockPatch) {
             // Bare bedrock surfaces through every biome's ground, the passages
             // included — that is what SkywayTile's terrain priority of 260 is
             // for: where the paving meets an outcrop it stays on top of the
@@ -955,7 +1174,7 @@ public final class SkyTerrainPainter {
             groundID = SkyRegistry.cloudturfID;
         }
 
-        boolean rimSafe = islandValue > ISLAND_THRESHOLD + ISLAND_RIM;
+        boolean rimSafe = islandValue > waterline + ISLAND_RIM;
 
         // --- the built landscape ---
         int built = SkyLandscape.at(seed, tileX, tileY, originX, originY);
@@ -980,36 +1199,11 @@ public final class SkyTerrainPainter {
 
         int band = SkyOrigin.bandFor(hubDist);
 
-        // --- the Outlands furnish themselves ---
-        //
-        // Everything below this block — outcrops, aurora colonies, wreck
+        // Everything below this point — outcrops, aurora colonies, wreck
         // sites, workshops, meadow carpets, the scree beds — is the BRIGHT
-        // world's furniture. None of it belongs out here, and letting any of
-        // it run would turn a wrong place back into a sky island wearing a
-        // different floor. So the Outlands answer for their own tiles and
-        // return.
-        //
-        // Order inside the block matters the same way it does outside it: the
-        // portal is the rarest thing in the world and must not lose its tile
-        // to a crate or a dead tree.
-        if (isWrong) {
-            if (SkyOutlands.isPortalSite(seed, tileX, tileY, hubDist)) {
-                return pack(groundID, SkyRegistry.seanceCircleID, biomeID, false);
-            }
-            // Crystal massifs. The formation field is reused rather than
-            // reinvented: it already produces knots, ridges and short veins
-            // with real gaps between them, which is what stops a solid-wall
-            // object from turning the region into a maze. Only the SOLID core
-            // becomes wall — the apron is what keeps the massif's foot walkable.
-            int massif = outcropAt(seed, tileX, tileY);
-            if ((massif & OUTCROP_SOLID) != 0) {
-                return pack(groundID, SkyRegistry.evilwallID, biomeID, false);
-            }
-            if (SkyNoise.tileRoll(seed, tileX, tileY, SALT_CRATE) < CRATE_CHANCE_BARREN) {
-                return pack(groundID, SkyRegistry.skyCrateID, biomeID, false);
-            }
-            return pack(groundID, SkyOutlands.rollObject(seed, tileX, tileY), biomeID, false);
-        }
+        // world's furniture, and it now stops where the Skyreach does, because
+        // the realms past it answer for their own tiles before this line is
+        // ever reached (see the realm dispatch above).
 
         // Geology first. Rocks and ore no longer come out of the same per-tile
         // roll as the plants — they belong to formations, and a formation owns

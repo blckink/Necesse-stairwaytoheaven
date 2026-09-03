@@ -102,7 +102,10 @@ public class VeilSideRiftObject extends GameObject {
 
     @Override
     public String canPlace(Level level, int layerID, int x, int y, int rotation, boolean byPlayer, boolean ignoreOtherLayers) {
-        return !level.getIdentifier().equals(SkyRegistry.VEIL_IDENTIFIER)
+        // The sky plane, because the Veil's ground is a band of it now
+        // (docs/PLAN_ONE_PLANE.md). Nothing places this object any more -- the
+        // one-plane rift has no return half -- but the guard stays honest.
+        return !level.getIdentifier().equals(SkyRegistry.SKYREACH_IDENTIFIER)
                 ? "invalidlevel"
                 : super.canPlace(level, layerID, x, y, rotation, byPlayer, ignoreOtherLayers);
     }

@@ -128,8 +128,9 @@ public final class GhostPressure {
         // getWorldGenSeed is declared on GhostLevel, not on Level: the
         // instanceof is what makes the call possible AND what keeps the rule
         // off every other level a ghost ground can end up on.
-        if (level instanceof GhostLevel) {
-            return spawnTickets(((GhostLevel) level).getWorldGenSeed(), tileX, tileY);
+        if (level instanceof stairwaytoheaven.level.SkyLevel) {
+            return spawnTickets(
+                    ((stairwaytoheaven.level.SkyLevel) level).getWorldGenSeed(), tileX, tileY);
         }
         return 100;
     }

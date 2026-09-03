@@ -1,12 +1,23 @@
 package stairwaytoheaven.realms.eden;
 
-import necesse.engine.registries.ObjectLayerRegistry;
-import necesse.level.maps.regionSystem.Region;
 import stairwaytoheaven.SkyRegistry;
+import stairwaytoheaven.worldgen.RealmDepth;
 import stairwaytoheaven.worldgen.SkyNoise;
+import stairwaytoheaven.worldgen.SkyOrigin;
+import stairwaytoheaven.worldgen.SkyTerrainPainter;
 
 /**
- * Per-region terrain painter of the Garden of Eden.
+ * The Garden of Eden as a BAND of the one plane.
+ *
+ * <p><b>This is no longer a level's painter.</b> {@code docs/PLAN_ONE_PLANE.md}
+ * retired the {@code eden2} dimension: Eden is the realm {@link RealmDepth}
+ * gives depth 0.20-0.42, and {@link SkyTerrainPainter#describeTile} calls
+ * {@link #describeBand} for every tile the realm pick lands here -- exactly the
+ * way it already called {@code SkyOutlands} for Crooked's rim
+ * ({@code WORLD_DESIGN} §41.4). Nothing below changed except where the land
+ * comes from: the plane owns ONE island field and ONE waterline, and this
+ * painter reads them instead of cutting its own coastline out of the same noise
+ * at a different scale.
  *
  * <p><b>The shape of the realm.</b> {@code docs/WORLD_DESIGN.md} A3.3 asks for
  * <i>"waterfalls, lagoons, white sand, turquoise water, clearings with absurdly
@@ -14,10 +25,11 @@ import stairwaytoheaven.worldgen.SkyNoise;
  * lush, dense, warm, colourful, alive"</i>. So Eden is not the Skyreach's
  * archipelago with green paint on it: the land is broad and continuous and the
  * WATER is what is cut into it — wide lagoons with white sand beaches around
- * them, the way a tropical island reads from above. The island threshold is
- * therefore low (0.36 against the Skyreach's 0.55), which leaves roughly three
- * quarters of the realm walkable, and the shallows form as basins rather than
- * as an ocean with islands in it.
+ * them, the way a tropical island reads from above. Eden's waterline is
+ * therefore the lowest of any realm but Steinfeld's (0.40 against the
+ * Skyreach's 0.48, see {@code SkyTerrainPainter.REALM_WATERLINE}), which leaves
+ * most of the band walkable and lets the shallows form as basins rather than as
+ * an ocean with islands in it.
  *
  * <p><b>The three zones (§5, three biomes minimum).</b>
  * <ul>
@@ -47,10 +59,20 @@ public final class EdenTerrainPainter {
 
     // ---- the land ---------------------------------------------------------
 
-    /** Big, soft landmasses: lagoons are cut into land, not islands in a sea. */
+    /**
+     * Big, soft landmasses: lagoons are cut into land, not islands in a sea.
+     *
+     * <p>The FIELD is now the plane's own
+     * ({@code SkyTerrainPainter.ISLAND_SCALE}), because one connected overworld
+     * has one coastline. What Eden keeps is its WATERLINE:
+     * {@code SkyTerrainPainter.REALM_WATERLINE[REALM_EDEN]} = 0.40, the lowest
+     * of any realm but Steinfeld, which is what makes this the greenest and
+     * most walkable band. The two constants below are kept for the record and
+     * for the offline harness that measured them.
+     */
     public static final int ISLAND_SCALE = 92;
     public static final float ISLAND_THRESHOLD = 0.36F;
-    /** Below this much above the threshold, the tile is beach rather than garden. */
+    /** Below this much above the waterline, the tile is beach rather than garden. */
     public static final float SHORE_BAND = 0.055F;
 
     /** Which of the three zones a tile belongs to. */
@@ -109,42 +131,62 @@ public final class EdenTerrainPainter {
     private EdenTerrainPainter() {
     }
 
-    public static void paintRegion(Region region, int seed) {
-        int tileWidth = region.tileLayer.region.tileWidth;
-        int tileHeight = region.tileLayer.region.tileHeight;
-        for (int rx = 0; rx < tileWidth; rx++) {
-            for (int ry = 0; ry < tileHeight; ry++) {
-                int tileX = rx + region.tileXOffset;
-                int tileY = ry + region.tileYOffset;
-
-                int biome = biomeAt(seed, tileX, tileY);
-                region.biomeLayer.setBiomeByRegion(rx, ry, biomeID(biome));
-                region.tileLayer.setTileByRegion(rx, ry, tileAt(seed, tileX, tileY, biome));
-
-                float island = SkyNoise.fbm(seed, tileX, tileY, ISLAND_SCALE, 3);
-                if (island <= ISLAND_THRESHOLD + 0.015F) {
-                    continue; // water, and the first walkable ring of beach
-                }
-                int objectID = objectAt(seed, tileX, tileY, biome, island);
-                if (objectID != 0) {
-                    region.objectLayer.setObjectByRegion(
-                            ObjectLayerRegistry.BASE_LAYER, rx, ry, objectID);
-                }
-            }
+    /**
+     * One tile of the Eden band: ground, object and sub-biome, packed the way
+     * {@link SkyTerrainPainter#pack} packs every tile of the plane.
+     *
+     * @param island    the plane's shared island field at this tile
+     * @param waterline the plane's blended waterline at this depth
+     */
+    public static long describeBand(int seed, int tileX, int tileY,
+            float island, float waterline, float depth, float distortion) {
+        int biome = bandBiomeAt(seed, tileX, tileY, island, waterline);
+        int biomeClass = biomeClassOf(biome);
+        int tile = bandTileAt(seed, tileX, tileY, biome, island, waterline);
+        if (island <= waterline + SkyTerrainPainter.ISLAND_RIM) {
+            // Water, and the first walkable ring of beach: nothing stands here
+            // or checkGenerationValid would only sweep it away again.
+            return SkyTerrainPainter.pack(tile, 0, biomeClass, false);
         }
+        return SkyTerrainPainter.pack(tile,
+                objectAt(seed, tileX, tileY, biome, island, waterline), biomeClass, false);
+    }
+
+    /** Zone code -> the plane's biome class (see {@link SkyTerrainPainter}). */
+    public static int biomeClassOf(int biome) {
+        if (biome == BIOME_SHALLOWS) {
+            return SkyTerrainPainter.BIOME_EDEN_SHALLOWS;
+        }
+        return biome == BIOME_CANOPY
+                ? SkyTerrainPainter.BIOME_EDEN_CANOPY
+                : SkyTerrainPainter.BIOME_EDEN_GARDEN;
     }
 
     // ---- pure queries the POI placer and the pressure field share ---------
 
-    /** Is this tile dry land at all? */
+    /**
+     * Is this tile dry Eden ground?
+     *
+     * <p>Asked by the POI placer and the pressure field, neither of which has a
+     * region in hand. It answers against the PLANE's island field and waterline,
+     * so it cannot disagree with what {@link #describeBand} paints later.
+     */
     public static boolean isLand(int seed, int tileX, int tileY) {
-        return SkyNoise.fbm(seed, tileX, tileY, ISLAND_SCALE, 3) > ISLAND_THRESHOLD + 0.02F;
+        float depth = RealmDepth.depthAt(tileX, tileY,
+                SkyOrigin.originX(seed), SkyOrigin.originY(seed));
+        float island = SkyNoise.fbm(seed, tileX, tileY, SkyTerrainPainter.ISLAND_SCALE, 3);
+        return island > SkyTerrainPainter.waterlineAt(depth) + SkyTerrainPainter.ISLAND_RIM;
     }
 
-    /** Which of the three zones, ignoring water. */
-    public static int biomeAt(int seed, int tileX, int tileY) {
-        float island = SkyNoise.fbm(seed, tileX, tileY, ISLAND_SCALE, 3);
-        if (island <= ISLAND_THRESHOLD + SHORE_BAND) {
+    /** Is this tile inside the Eden band at all? */
+    public static boolean isEden(int seed, int tileX, int tileY) {
+        return RealmDepth.realmAt(seed, tileX, tileY,
+                SkyOrigin.originX(seed), SkyOrigin.originY(seed)) == RealmDepth.REALM_EDEN;
+    }
+
+    /** Which of the three zones, given the plane's land field. */
+    public static int bandBiomeAt(int seed, int tileX, int tileY, float island, float waterline) {
+        if (island <= waterline + SHORE_BAND) {
             // The water and the beach around it are one zone: a lagoon is its
             // rim as much as its middle, and a biome that stopped at the
             // waterline would put the sand in the garden's spawn table.
@@ -152,6 +194,14 @@ public final class EdenTerrainPainter {
         }
         float zone = SkyNoise.fbm(seed + SALT_BIOME, tileX, tileY, BIOME_SCALE, 2);
         return zone > CANOPY_ABOVE ? BIOME_CANOPY : BIOME_GARDEN;
+    }
+
+    /** Which of the three zones, for a caller that has only a position. */
+    public static int biomeAt(int seed, int tileX, int tileY) {
+        float depth = RealmDepth.depthAt(tileX, tileY,
+                SkyOrigin.originX(seed), SkyOrigin.originY(seed));
+        float island = SkyNoise.fbm(seed, tileX, tileY, SkyTerrainPainter.ISLAND_SCALE, 3);
+        return bandBiomeAt(seed, tileX, tileY, island, SkyTerrainPainter.waterlineAt(depth));
     }
 
     public static int biomeID(int biome) {
@@ -162,13 +212,13 @@ public final class EdenTerrainPainter {
     }
 
     /** The ground tile at a position, water included. */
-    public static int tileAt(int seed, int tileX, int tileY, int biome) {
-        float island = SkyNoise.fbm(seed, tileX, tileY, ISLAND_SCALE, 3);
-        if (island <= ISLAND_THRESHOLD) {
+    public static int bandTileAt(int seed, int tileX, int tileY, int biome,
+            float island, float waterline) {
+        if (island <= waterline) {
             return EdenRealm.shallowsTileID;
         }
         boolean patch = SkyNoise.fbm(seed + SALT_PATCH, tileX, tileY, PATCH_SCALE, 2) > PATCH_THRESHOLD;
-        if (island <= ISLAND_THRESHOLD + SHORE_BAND) {
+        if (island <= waterline + SHORE_BAND) {
             return EdenRealm.paradiseSandID;
         }
         if (biome == BIOME_CANOPY) {
@@ -176,21 +226,6 @@ public final class EdenTerrainPainter {
         }
         // The garden: the player's own Eden grass, with moss where it thins.
         return patch ? EdenRealm.edenMossID : SkyRegistry.overgrownEdenID;
-    }
-
-    /** The whole terrain answer for one tile, for callers with no level. */
-    public static long describeTile(int seed, int tileX, int tileY) {
-        int biome = biomeAt(seed, tileX, tileY);
-        int tile = tileAt(seed, tileX, tileY, biome);
-        return ((long) biome << 32) | (tile & 0xFFFFFFFFL);
-    }
-
-    public static int descBiome(long description) {
-        return (int) (description >>> 32);
-    }
-
-    public static int descTile(long description) {
-        return (int) (description & 0xFFFFFFFFL);
     }
 
     /** {@link stairwaytoheaven.worldgen.SkyTerrainPainter#nearestSite}, reused verbatim. */
@@ -209,9 +244,10 @@ public final class EdenTerrainPainter {
      * up to a density that can be read off the source instead of measured by
      * running the world.
      */
-    public static int objectAt(int seed, int tileX, int tileY, int biome, float island) {
+    public static int objectAt(int seed, int tileX, int tileY, int biome,
+            float island, float waterline) {
         if (biome == BIOME_SHALLOWS) {
-            return shoreObject(seed, tileX, tileY, island);
+            return shoreObject(seed, tileX, tileY, island, waterline);
         }
         // A Knowledge Tree stands where its lattice put it, before anything
         // else gets a say: it is the realm's landmark, and a landmark that
@@ -219,7 +255,7 @@ public final class EdenTerrainPainter {
         stairwaytoheaven.worldgen.SkyTerrainPainter.Site knowledge = nearestSite(
                 seed, tileX, tileY, KNOWLEDGE_CELL, SALT_KNOWLEDGE, KNOWLEDGE_CHANCE);
         if (knowledge.exists() && knowledge.tileX == tileX && knowledge.tileY == tileY
-                && island > ISLAND_THRESHOLD + 0.10F) {
+                && island > waterline + 0.10F) {
             return EdenRealm.knowledgeTreeID;
         }
         return biome == BIOME_CANOPY
@@ -280,10 +316,10 @@ public final class EdenTerrainPainter {
      * somewhere a player can actually stand and look at it, and the white sand
      * is the only place in Eden that is not shoulder-high in leaves.
      */
-    public static int shoreObject(int seed, int tileX, int tileY, float island) {
+    public static int shoreObject(int seed, int tileX, int tileY, float island, float waterline) {
         float roll = SkyNoise.tileRoll(seed, tileX, tileY, SALT_SHORE_ROLL);
-        boolean waterline = island <= ISLAND_THRESHOLD + 0.030F;
-        if (waterline) {
+        boolean atTheWater = island <= waterline + 0.030F;
+        if (atTheWater) {
             if (roll < 0.070F) return EdenRealm.giantLotusID;
             if (roll < 0.130F) return EdenRealm.paradiseReedsID;
             if (roll < 0.150F) return EdenRealm.edenShellsID;

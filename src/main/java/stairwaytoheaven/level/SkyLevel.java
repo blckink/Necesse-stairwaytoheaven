@@ -11,18 +11,31 @@ import necesse.level.maps.BiomeGeneratorStackLevel;
 import necesse.level.maps.regionSystem.Region;
 import stairwaytoheaven.SkyRegistry;
 import stairwaytoheaven.quest.SkywatchQuestData;
+import stairwaytoheaven.worldgen.RealmDepth;
 import stairwaytoheaven.worldgen.SkyNoise;
 import stairwaytoheaven.worldgen.SkyOrigin;
 import stairwaytoheaven.worldgen.SkyTerrainPainter;
 import stairwaytoheaven.worldgen.WardenSpirePreset;
 
 /**
- * The Skyreach: the persistent one-world dimension one layer above the surface
- * (dimension +1), mirroring how CaveLevel/DeepCaveLevel sit below it.
+ * The one plane: the persistent world one layer above the surface (dimension
+ * +1), mirroring how CaveLevel/DeepCaveLevel sit below it.
  *
- * Infinite, generated region-by-region from the world seed. Not a cave
+ * <p>Infinite, generated region-by-region from the world seed. Not a cave
  * ({@code isCave} stays false), so it follows the world's day/night ambient
  * light like the surface does.
+ *
+ * <h2>Every realm lives here</h2>
+ * {@code docs/PLAN_ONE_PLANE.md}, obeying {@code WORLD_DESIGN} §3: the Skyreach,
+ * Eden, Steinfeld, the Ghost Realm and Crooked Beyond are BANDS of this level,
+ * chosen by {@link RealmDepth} from distance to the Old Warden Spire. There is
+ * no {@code edenlevel}, {@code steinfeldlevel}, {@code ghostlevel},
+ * {@code crookedlevel} or {@code veillevel} any more.
+ *
+ * <p>So everything a realm's own level used to do at generation happens here,
+ * gated on the REGION'S REALM rather than on which level it is:
+ * {@link #placeGuardPacks} walks each realm's POI lattices, and
+ * {@link #placeRealmResidents} stands each realm's people in it.
  */
 public class SkyLevel extends BiomeGeneratorStackLevel {
 
@@ -66,7 +79,29 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
         region.checkGenerationValid();
         placeLivestockHerds(region);
         placeResident(region);
+        placeRealmResidents(region);
         placeGuardPacks(region);
+    }
+
+    // ---- Which realm a place is in ----------------------------------------
+
+    /**
+     * The realm at one tile of this level.
+     *
+     * <p>The single question that replaced "which level am I on". Every rule
+     * that used to be answered by a dimension is answered by this instead —
+     * which is the whole of {@code docs/PLAN_ONE_PLANE.md} in one method.
+     */
+    public int realmAt(int tileX, int tileY) {
+        int seed = this.getWorldGenSeed();
+        return RealmDepth.realmAt(seed, tileX, tileY,
+                SkyOrigin.originX(seed), SkyOrigin.originY(seed));
+    }
+
+    /** The realm at a region's centre — what gates a region-scale placement. */
+    private int realmOfRegion(Region region) {
+        return this.realmAt(region.tileXOffset + region.tileWidth / 2,
+                region.tileYOffset + region.tileHeight / 2);
     }
 
     /**
@@ -274,11 +309,179 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
         if (this.isClient()) {
             return;
         }
-        placePacksOf(region, SkyTerrainPainter.WRECK_CELL, SkyTerrainPainter.SALT_WRECK,
-                SkyTerrainPainter.WRECK_CHANCE, 0x9E3779B1L);
-        placePacksOf(region, SkyTerrainPainter.WORKSHOP_CELL, SkyTerrainPainter.SALT_WORKSHOP,
-                SkyTerrainPainter.WORKSHOP_CHANCE, 0x85EBCA77L);
+        // The Skyreach's own two: the aeronaut wreck and the Skywatch workshop.
+        placePacksOf(region, RealmDepth.REALM_SKYREACH,
+                SkyTerrainPainter.WRECK_CELL, SkyTerrainPainter.SALT_WRECK,
+                SkyTerrainPainter.WRECK_CHANCE, 0x9E3779B1L,
+                stairwaytoheaven.worldgen.SkyPressure.GUARD_RADIUS);
+        placePacksOf(region, RealmDepth.REALM_SKYREACH,
+                SkyTerrainPainter.WORKSHOP_CELL, SkyTerrainPainter.SALT_WORKSHOP,
+                SkyTerrainPainter.WORKSHOP_CHANCE, 0x85EBCA77L,
+                stairwaytoheaven.worldgen.SkyPressure.GUARD_RADIUS);
+
+        // Steinfeld: one organic POI lattice plus the two hand-authored
+        // landmarks. Moved here verbatim from SteinfeldLevel.placeGuardPacks.
+        float steinfeld = stairwaytoheaven.realms.steinfeld.SteinfeldPressure.GUARD_RADIUS;
+        placePacksOf(region, RealmDepth.REALM_STEINFELD,
+                stairwaytoheaven.realms.steinfeld.SteinfeldTerrainPainter.POI_CELL,
+                stairwaytoheaven.realms.steinfeld.SteinfeldTerrainPainter.SALT_POI,
+                stairwaytoheaven.realms.steinfeld.SteinfeldTerrainPainter.POI_CHANCE,
+                0x85EBCA77L, steinfeld);
+        placePacksOf(region, RealmDepth.REALM_STEINFELD,
+                stairwaytoheaven.realms.steinfeld.SteinfeldSites.GRAVEYARD_CELL,
+                stairwaytoheaven.realms.steinfeld.SteinfeldSites.SALT_GRAVEYARD,
+                stairwaytoheaven.realms.steinfeld.SteinfeldSites.GRAVEYARD_CHANCE,
+                0x85EBCA77L, steinfeld);
+        placePacksOf(region, RealmDepth.REALM_STEINFELD,
+                stairwaytoheaven.realms.steinfeld.SteinfeldSites.CHAPEL_CELL,
+                stairwaytoheaven.realms.steinfeld.SteinfeldSites.SALT_CHAPEL,
+                stairwaytoheaven.realms.steinfeld.SteinfeldSites.CHAPEL_CHANCE,
+                0x85EBCA77L, steinfeld);
+
+        // The Ghost Realm's three tombs. From GhostLevel.placeGuardPacks.
+        float ghost = stairwaytoheaven.realms.ghost.GhostPressure.GUARD_RADIUS;
+        placePacksOf(region, RealmDepth.REALM_GHOST,
+                stairwaytoheaven.realms.ghost.GhostTerrainPainter.MAUSOLEUM_CELL,
+                stairwaytoheaven.realms.ghost.GhostTerrainPainter.SALT_MAUSOLEUM,
+                stairwaytoheaven.realms.ghost.GhostTerrainPainter.MAUSOLEUM_CHANCE,
+                0x9E3779B1L, ghost);
+        placePacksOf(region, RealmDepth.REALM_GHOST,
+                stairwaytoheaven.realms.ghost.GhostTerrainPainter.MANOR_CELL,
+                stairwaytoheaven.realms.ghost.GhostTerrainPainter.SALT_MANOR,
+                stairwaytoheaven.realms.ghost.GhostTerrainPainter.MANOR_CHANCE,
+                0x85EBCA77L, ghost);
+        placePacksOf(region, RealmDepth.REALM_GHOST,
+                stairwaytoheaven.realms.ghost.GhostTerrainPainter.GRAVEYARD_CELL,
+                stairwaytoheaven.realms.ghost.GhostTerrainPainter.SALT_GRAVEYARD,
+                stairwaytoheaven.realms.ghost.GhostTerrainPainter.GRAVEYARD_CHANCE,
+                0xC2B2AE3DL, ghost);
+
+        // Crooked Beyond's three houses. From CrookedLevel.placeGuardPacks.
+        float crooked = stairwaytoheaven.realms.crooked.CrookedPressure.GUARD_RADIUS;
+        placePacksOf(region, RealmDepth.REALM_CROOKED,
+                stairwaytoheaven.realms.crooked.CrookedSites.DOORYARD_CELL,
+                stairwaytoheaven.realms.crooked.CrookedSites.SALT_DOORYARD,
+                stairwaytoheaven.realms.crooked.CrookedSites.DOORYARD_CHANCE,
+                0x9E3779B1L, crooked);
+        placePacksOf(region, RealmDepth.REALM_CROOKED,
+                stairwaytoheaven.realms.crooked.CrookedSites.INVERTED_CELL,
+                stairwaytoheaven.realms.crooked.CrookedSites.SALT_INVERTED,
+                stairwaytoheaven.realms.crooked.CrookedSites.INVERTED_CHANCE,
+                0x85EBCA77L, crooked);
+        placePacksOf(region, RealmDepth.REALM_CROOKED,
+                stairwaytoheaven.realms.crooked.CrookedSites.LONGTABLE_CELL,
+                stairwaytoheaven.realms.crooked.CrookedSites.SALT_LONGTABLE,
+                stairwaytoheaven.realms.crooked.CrookedSites.LONGTABLE_CHANCE,
+                0xC2B2AE3DL, crooked);
     }
+
+    /**
+     * Each realm's residents, standing in their own band.
+     *
+     * <p>{@code docs/PLAN_ONE_PLANE.md}: <i>"Settler placement moves from each
+     * realm's level to the sky level, gated on the region's realm rather than
+     * on which level it is."</i> This is that gate, and it is the only thing
+     * that changed about any of them — the rarity, the one-per-world claim
+     * through {@code SkywatchWorldData}, and each person's own landmark rule
+     * are the ones their retired levels shipped with.
+     */
+    private void placeRealmResidents(Region region) {
+        if (this.isClient()) {
+            return;
+        }
+        int seed = this.getWorldGenSeed();
+        switch (this.realmOfRegion(region)) {
+            case RealmDepth.REALM_EDEN:
+                this.placeEveleen(region);
+                break;
+            case RealmDepth.REALM_GHOST:
+                // Mortimer, Caspern and Eleanor, beside a gravestone. All the
+                // rules live in settlement.VeilResidents; this is the one-call
+                // hook that class asks its host level for.
+                stairwaytoheaven.settlement.VeilResidents.placeInGhost(this, region, seed);
+                break;
+            case RealmDepth.REALM_CROOKED:
+            case RealmDepth.REALM_HELL:
+                stairwaytoheaven.settlement.CrookedResidents.place(this, region, seed);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Eveleen, the Eden Botanist, standing wherever a Knowledge Tree grew.
+     *
+     * <p>Moved from {@code EdenLevel.placeResident} unchanged. She is never
+     * near a workstation, because Eden has none, but always near the ONE
+     * landmark this realm has that says "somebody who works this ground would
+     * stand here": the Knowledge Tree {@code EdenTerrainPainter} scatters
+     * through the Canopy. §5's own unlock line — "unlocked by discovering an
+     * Eden island + collecting three Eden plants" — is what {@code
+     * EdenArrivalQuest} and {@code EdenPlantsQuest} turn into a chain; finding
+     * her here is the "discovering an Eden island" half made literal.
+     *
+     * <p>Rarer than the Skyreach's own residents (0.16F): a Knowledge Tree is
+     * itself rare (§5: "rare worldgen object"), so a region has to both roll a
+     * tree AND roll Eveleen.
+     */
+    private void placeEveleen(Region region) {
+        long seed = (this.getWorldGenSeed() * 0x9E3779B97F4A7C15L)
+                ^ ((long) region.regionX * 0x2E4B8F17L)
+                ^ ((long) region.regionY * 0x5A8C3F61L);
+        GameRandom random = new GameRandom(seed);
+        if (!random.getChance(EVELEEN_REGION_CHANCE)) {
+            return;
+        }
+        String who = "eveleensettler";
+        for (Mob existing : this.entityManager.mobs) {
+            if (who.equals(existing.getStringID())) {
+                return;
+            }
+        }
+        necesse.engine.network.server.Server server = this.getServer();
+        if (server != null && stairwaytoheaven.quest.SkywatchWorldData.residentClaimed(server, who)) {
+            return;
+        }
+        for (int attempt = 0; attempt < 40; attempt++) {
+            int tileX = region.tileXOffset + random.getIntBetween(2, region.tileWidth - 3);
+            int tileY = region.tileYOffset + random.getIntBetween(2, region.tileHeight - 3);
+            if (!this.isTileWithinBounds(tileX, tileY) || this.isSolidTile(tileX, tileY)) {
+                continue;
+            }
+            if (this.getObjectID(tileX, tileY) != 0) {
+                continue;
+            }
+            if (!this.hasKnowledgeTreeNear(tileX, tileY)) {
+                continue;
+            }
+            Mob mob = MobRegistry.getMob(who, this);
+            if (mob == null) {
+                return;
+            }
+            mob.canDespawn = false;
+            this.entityManager.addMob(mob, tileX * 32 + 16, tileY * 32 + 16);
+            if (server != null) {
+                stairwaytoheaven.quest.SkywatchWorldData.claimResident(server, who);
+            }
+            return;
+        }
+    }
+
+    /** Is a Knowledge Tree within three tiles? */
+    private boolean hasKnowledgeTreeNear(int tileX, int tileY) {
+        for (int dx = -3; dx <= 3; dx++) {
+            for (int dy = -3; dy <= 3; dy++) {
+                if (this.getObjectID(tileX + dx, tileY + dy)
+                        == stairwaytoheaven.realms.eden.EdenRealm.knowledgeTreeID) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static final float EVELEEN_REGION_CHANCE = 0.35F;
 
     /**
      * Every site of one lattice whose pack reaches into this region.
@@ -293,9 +496,12 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
      * only the members whose tile falls inside it, puts each guard down exactly
      * once no matter which order the regions generate in.
      */
-    private void placePacksOf(Region region, int cell, int salt, float chance, long saltMix) {
+    private void placePacksOf(Region region, int realm, int cell, int salt, float chance,
+            long saltMix, float radius) {
         int seed = this.getWorldGenSeed();
-        int reach = (int) Math.ceil(stairwaytoheaven.worldgen.SkyPressure.GUARD_RADIUS) + 1;
+        int originX = SkyOrigin.originX(seed);
+        int originY = SkyOrigin.originY(seed);
+        int reach = (int) Math.ceil(radius) + 1;
         int minX = region.tileXOffset - reach;
         int minY = region.tileYOffset - reach;
         int maxX = region.tileXOffset + region.tileWidth + reach;
@@ -310,7 +516,17 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
                 if (siteX < minX || siteX > maxX || siteY < minY || siteY > maxY) {
                     continue;
                 }
-                placePackAt(region, siteX, siteY, saltMix);
+                // The lattices are infinite; a realm is not. Without this gate a
+                // Ghost mausoleum's pack would be placed in the Skyreach, where
+                // the mausoleum itself was never stamped -- the exact "guards
+                // standing where the loot is not" bug SkyTerrainPainter.
+                // nearestSite's header records having shipped once already.
+                int siteRealm = RealmDepth.realmAt(seed, siteX, siteY, originX, originY);
+                if (siteRealm != realm
+                        && !(realm == RealmDepth.REALM_CROOKED && siteRealm == RealmDepth.REALM_HELL)) {
+                    continue;
+                }
+                placePackAt(region, siteX, siteY, saltMix, radius);
             }
         }
     }
@@ -325,7 +541,7 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
      * the Mistsea without moving the site: 61% of the sky is sea, so a fixed
      * offset would drown half of every pack.
      */
-    private void placePackAt(Region region, int siteX, int siteY, long saltMix) {
+    private void placePackAt(Region region, int siteX, int siteY, long saltMix, float radius) {
         necesse.level.maps.biomes.Biome biome = this.getBiome(siteX, siteY);
         if (!(biome instanceof stairwaytoheaven.biomes.GuardedBiome)) {
             return;
@@ -340,7 +556,6 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
                 ^ ((long) siteY * 0xC2B2AE3DL);
         GameRandom random = new GameRandom(packSeed);
         int size = random.getIntBetween(guard.minSize, guard.maxSize);
-        float radius = stairwaytoheaven.worldgen.SkyPressure.GUARD_RADIUS;
         for (int i = 0; i < size; i++) {
             String who = guard.memberAt(i, random.nextFloat());
             // Anchors stand close in, rabble spreads to the edge of the ground
@@ -354,7 +569,7 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
                 tileY = siteY + random.getIntBetween(-(int) near, (int) near);
                 found = this.isTileWithinBounds(tileX, tileY)
                         && !this.isSolidTile(tileX, tileY)
-                        && this.getTileID(tileX, tileY) != SkyRegistry.mistseaID
+                        && !this.getTile(tileX, tileY).isLiquid
                         && this.getObjectID(tileX, tileY) == 0;
             }
             if (!found) {

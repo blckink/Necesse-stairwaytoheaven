@@ -21,7 +21,6 @@ import stairwaytoheaven.biomes.AshenReachBiome;
 import stairwaytoheaven.commands.SkyreachStatusCommand;
 import stairwaytoheaven.commands.VeilStatusCommand;
 import stairwaytoheaven.level.SkyLevel;
-import stairwaytoheaven.level.VeilLevel;
 import stairwaytoheaven.objects.SkySideStairwayObject;
 import stairwaytoheaven.objects.SkywardStairwayObject;
 import stairwaytoheaven.objects.SeanceCircleObject;
@@ -83,7 +82,8 @@ public class StairwayToHeavenMod {
                 stairwaytoheaven.quest.SkywatchWorldData.KEY,
                 stairwaytoheaven.quest.SkywatchWorldData.class);
         // The Crooked House, scattered through the Beetlefreak Hollows by
-        // vanilla's own world-preset machinery. VeilLevel.generateRegion
+        // vanilla's own world-preset machinery. The Hollows are now a band of
+        // the sky plane (WORLD_DESIGN §41.5) and SkyLevel.generateRegion
         // already brackets its painting with startPresetGenerationInRegion /
         // runPresetGenerationInRegion, so registering here is all that is left.
         necesse.engine.registries.WorldPresetRegistry.registerPreset("swh_crookedhouse",
@@ -119,25 +119,25 @@ public class StairwayToHeavenMod {
         stairwaytoheaven.veil.VeilGate.register();
     }
 
+    /**
+     * ONE modded level, and it is the whole world this mod adds.
+     *
+     * <p>{@code docs/PLAN_ONE_PLANE.md}: <i>"One level: skylevel / skyreach2.
+     * Everything the player walks to is on it. Realms are BIOME WEIGHT BANDS
+     * over RealmDepth.depthAt."</i> {@code edenlevel}, {@code steinfeldlevel},
+     * {@code ghostlevel}, {@code crookedlevel} and {@code veillevel} were
+     * registered here for one day and are gone: five dimensions is five sets of
+     * hard borders, which is the exact opposite of {@code WORLD_DESIGN} §3's
+     * overlapping weights. Their terrain, biomes, mobs, items, POIs, settlers
+     * and quests all survive as bands of this level — see
+     * {@code worldgen.SkyTerrainPainter.describeRealmTile}.
+     *
+     * <p>Vertical layout: deepcave(-2) &lt; cave(-1) &lt; surface(0) &lt;
+     * skyreach(+1). Nothing of ours sits anywhere else any more.
+     */
     private void registerDimension() {
-        // Vertical layout: veil(-3) < deepcave(-2) < cave(-1) < surface(0) < skyreach(+1)
         LevelIdentifier.IDENTIFIER_TO_DIMENSION.put(SkyRegistry.SKYREACH_IDENTIFIER.stringID, SkyRegistry.SKY_DIMENSION);
         LevelRegistry.registerLevel("skylevel", SkyLevel.class);
-        LevelIdentifier.IDENTIFIER_TO_DIMENSION.put(
-                SkyRegistry.EDEN_IDENTIFIER.stringID, SkyRegistry.EDEN_DIMENSION);
-        LevelRegistry.registerLevel("edenlevel", stairwaytoheaven.realms.eden.EdenLevel.class);
-        LevelIdentifier.IDENTIFIER_TO_DIMENSION.put(
-                SkyRegistry.STEINFELD_IDENTIFIER.stringID, SkyRegistry.STEINFELD_DIMENSION);
-        LevelRegistry.registerLevel("steinfeldlevel", stairwaytoheaven.realms.steinfeld.SteinfeldLevel.class);
-        LevelIdentifier.IDENTIFIER_TO_DIMENSION.put(SkyRegistry.VEIL_IDENTIFIER.stringID, SkyRegistry.VEIL_DIMENSION);
-        LevelRegistry.registerLevel("veillevel", VeilLevel.class);
-        LevelIdentifier.IDENTIFIER_TO_DIMENSION.put(
-                SkyRegistry.CROOKED_IDENTIFIER.stringID, SkyRegistry.CROOKED_DIMENSION);
-        LevelRegistry.registerLevel("crookedlevel",
-                stairwaytoheaven.realms.crooked.CrookedLevel.class);
-        LevelIdentifier.IDENTIFIER_TO_DIMENSION.put(
-                SkyRegistry.GHOST_IDENTIFIER.stringID, SkyRegistry.GHOST_DIMENSION);
-        LevelRegistry.registerLevel("ghostlevel", stairwaytoheaven.realms.ghost.GhostLevel.class);
     }
 
     private void registerBiomes() {
@@ -247,25 +247,6 @@ public class StairwayToHeavenMod {
             public Level getNewLevel(LevelIdentifier levelIdentifier, Server server, GameBlackboard blackboard) {
                 if (levelIdentifier.equals(SkyRegistry.SKYREACH_IDENTIFIER)) {
                     return new SkyLevel(levelIdentifier, 0, 0, server.world.worldEntity, blackboard.getInt("seed"));
-                }
-                if (levelIdentifier.equals(SkyRegistry.VEIL_IDENTIFIER)) {
-                    return new VeilLevel(levelIdentifier, 0, 0, server.world.worldEntity, blackboard.getInt("seed"));
-                }
-                if (levelIdentifier.equals(SkyRegistry.EDEN_IDENTIFIER)) {
-                    return new stairwaytoheaven.realms.eden.EdenLevel(
-                            levelIdentifier, 0, 0, server.world.worldEntity, blackboard.getInt("seed"));
-                }
-                if (levelIdentifier.equals(SkyRegistry.STEINFELD_IDENTIFIER)) {
-                    return new stairwaytoheaven.realms.steinfeld.SteinfeldLevel(
-                            levelIdentifier, 0, 0, server.world.worldEntity, blackboard.getInt("seed"));
-                }
-                if (levelIdentifier.equals(SkyRegistry.GHOST_IDENTIFIER)) {
-                    return new stairwaytoheaven.realms.ghost.GhostLevel(
-                            levelIdentifier, 0, 0, server.world.worldEntity, blackboard.getInt("seed"));
-                }
-                if (levelIdentifier.equals(SkyRegistry.CROOKED_IDENTIFIER)) {
-                    return new stairwaytoheaven.realms.crooked.CrookedLevel(
-                            levelIdentifier, 0, 0, server.world.worldEntity, blackboard.getInt("seed"));
                 }
                 return null;
             }

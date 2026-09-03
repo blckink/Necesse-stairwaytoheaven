@@ -12,14 +12,26 @@ import necesse.engine.network.server.ServerClient;
 import necesse.engine.registries.BiomeRegistry;
 import necesse.engine.registries.TileRegistry;
 import necesse.level.maps.Level;
+import java.awt.Point;
+
 import stairwaytoheaven.SkyRegistry;
-import stairwaytoheaven.level.VeilLevel;
+import stairwaytoheaven.level.SkyLevel;
 import stairwaytoheaven.worldgen.CrookedHousePreset;
+import stairwaytoheaven.worldgen.RealmDepth;
+import stairwaytoheaven.worldgen.RealmLanding;
 
 /**
- * Admin/debug: forces the Veil to generate around the origin and reports
+ * Admin/debug: forces the Veil's ground to generate and reports
  * terrain/biome/object statistics (Level-first lock order, see
  * SkyreachStatusCommand for the deadlock story).
+ *
+ * <p><b>The Veil is not a world any more.</b>
+ * {@code docs/PLAN_ONE_PLANE.md} retired {@code veil2} and
+ * {@code WORLD_DESIGN} §41.5 moved its ground onto the plane: Gloomfen and
+ * Ashen Reach into the GHOST band, the Beetlefreak Hollows into the CROOKED
+ * band. So this command samples two places instead of one origin -- the fen
+ * where the Ghost Realm is deepest, and the Hollows out in Crooked Beyond,
+ * which is also where the Crooked House stamps.
  */
 public class VeilStatusCommand extends ModularChatCommand {
 
@@ -45,20 +57,31 @@ public class VeilStatusCommand extends ModularChatCommand {
 
     @Override
     public void runModular(Client client, Server server, ServerClient serverClient, Object[] args, String[] errors, CommandLog logs) {
-        Level level = server.world.getLevel(SkyRegistry.VEIL_IDENTIFIER);
-        if (!(level instanceof VeilLevel)) {
-            logs.add("FAIL: level for identifier \"" + SkyRegistry.VEIL_IDENTIFIER + "\" is "
-                    + level.getClass().getSimpleName() + " (expected VeilLevel)");
+        Level level = server.world.getLevel(SkyRegistry.SKYREACH_IDENTIFIER);
+        if (!(level instanceof SkyLevel)) {
+            logs.add("FAIL: level for identifier \"" + SkyRegistry.SKYREACH_IDENTIFIER + "\" is "
+                    + (level == null ? "null" : level.getClass().getSimpleName()) + " (expected SkyLevel)");
             return;
         }
+        int seed = ((SkyLevel) level).getWorldGenSeed();
+        // The fen, in the Ghost band (§41.5) -- and it has to be ACTUAL fen.
+        // The band's landing tile is Ghost ground; the fen is about a fifth of
+        // it, so a 97x97 scan centred on the landing finds none on most seeds.
+        // The first run of this command after the one-plane move failed exactly
+        // that way, which is what this search exists to stop.
+        Point fen = findFen(seed, RealmLanding.find(seed, RealmDepth.REALM_GHOST, 0, 0));
+        // The Hollows, out in the Crooked band (§41.5) -- where the house is.
+        // No search needed: the survey below is 513x513, wide enough that the
+        // Hollows' few percent of ground cannot hide in it.
+        Point hollows = RealmLanding.find(seed, RealmDepth.REALM_CROOKED, 0, 0);
         synchronized (level) {
             int r = SCAN_RADIUS_TILES;
-            level.regionManager.ensureTilesAreLoaded(-r, -r, r, r);
+            level.regionManager.ensureTilesAreLoaded(fen.x - r, fen.y - r, fen.x + r, fen.y + r);
             Map<String, Integer> tiles = new HashMap<>();
             Map<String, Integer> biomes = new HashMap<>();
             Map<String, Integer> objects = new HashMap<>();
-            for (int x = -r; x <= r; x++) {
-                for (int y = -r; y <= r; y++) {
+            for (int x = fen.x - r; x <= fen.x + r; x++) {
+                for (int y = fen.y - r; y <= fen.y + r; y++) {
                     tiles.merge(TileRegistry.getTileStringID(level.getTileID(x, y)), 1, Integer::sum);
                     biomes.merge(BiomeRegistry.getBiome(level.getBiomeID(x, y)).getStringID(), 1, Integer::sum);
                     if (level.getObjectID(x, y) != 0) {
@@ -66,10 +89,12 @@ public class VeilStatusCommand extends ModularChatCommand {
                     }
                 }
             }
-            logs.add("Veil OK: class=" + level.getClass().getSimpleName()
+            logs.add("Veil ground OK: class=" + level.getClass().getSimpleName()
                     + " identifier=" + level.getIdentifier()
                     + " dimension=" + level.getIdentifier().getOneWorldDimension()
-                    + " isCave=" + level.isCave);
+                    + " isCave=" + level.isCave
+                    + " fenSampledAt=" + fen.x + "," + fen.y
+                    + " hollowSurveyAt=" + hollows.x + "," + hollows.y);
             tiles.entrySet().stream().sorted((a, b) -> b.getValue() - a.getValue())
                     .forEach(e -> logs.add("  tile " + e.getKey() + " x" + e.getValue()));
             biomes.entrySet().stream().sorted((a, b) -> b.getValue() - a.getValue())
@@ -77,8 +102,45 @@ public class VeilStatusCommand extends ModularChatCommand {
             objects.entrySet().stream().sorted((a, b) -> b.getValue() - a.getValue())
                     .forEach(e -> logs.add("  object " + e.getKey() + " x" + e.getValue()));
         }
-        surveyHollows(server, level, logs);
+        surveyHollows(server, level, hollows, logs);
         logs.add("VEIL_STATUS_DONE");
+    }
+
+    /**
+     * The nearest tile of the Veil's fen to a point in the Ghost band.
+     *
+     * <p>A square spiral in 12-tile steps, capped at ~1200 tiles so the scan
+     * stays inside the Ghost band it started in. Pure noise, no world state, so
+     * it agrees with what the painter wrote. Falls back to the point it was
+     * given, which then reports "no fen here" honestly rather than silently
+     * scanning somewhere else.
+     */
+    private static Point findFen(int seed, Point near) {
+        int originX = stairwaytoheaven.worldgen.SkyOrigin.originX(seed);
+        int originY = stairwaytoheaven.worldgen.SkyOrigin.originY(seed);
+        for (int ring = 0; ring <= 100; ring++) {
+            for (int i = -ring; i <= ring; i++) {
+                for (int j = -ring; j <= ring; j++) {
+                    if (ring > 0 && Math.abs(i) != ring && Math.abs(j) != ring) {
+                        continue; // only the ring's edge
+                    }
+                    int x = near.x + i * 12;
+                    int y = near.y + j * 12;
+                    if (RealmDepth.realmAt(seed, x, y, originX, originY) != RealmDepth.REALM_GHOST) {
+                        continue;
+                    }
+                    if (!stairwaytoheaven.realms.ghost.GhostTerrainPainter.isFen(seed, x, y)) {
+                        continue;
+                    }
+                    if (!stairwaytoheaven.worldgen.SkyTerrainPainter.isOpenGround(
+                            seed, x, y, originX, originY)) {
+                        continue;
+                    }
+                    return new Point(x, y);
+                }
+            }
+        }
+        return near;
     }
 
     /**
@@ -92,7 +154,7 @@ public class VeilStatusCommand extends ModularChatCommand {
      * world preset that is registered but never places -- the exact failure
      * that a compiling, well-formed preset hides.
      */
-    private void surveyHollows(Server server, Level level, CommandLog logs) {
+    private void surveyHollows(Server server, Level level, Point at, CommandLog logs) {
         final int r = SURVEY_RADIUS_TILES;
         final int hollowTile = SkyRegistry.beetlefreakID;
         final int wall = SkyRegistry.beetleWallID;
@@ -109,13 +171,16 @@ public class VeilStatusCommand extends ModularChatCommand {
         synchronized (level) {
             // Loaded in strips: one ensureTilesAreLoaded over the whole square
             // asks the region manager for ~1000 regions at once.
-            for (int y0 = -r; y0 <= r; y0 += 64) {
-                int y1 = Math.min(y0 + 63, r);
-                level.regionManager.ensureTilesAreLoaded(-r, y0, r, y1);
-                for (int x = -r; x <= r; x++) {
+            for (int y0 = at.y - r; y0 <= at.y + r; y0 += 64) {
+                int y1 = Math.min(y0 + 63, at.y + r);
+                level.regionManager.ensureTilesAreLoaded(at.x - r, y0, at.x + r, y1);
+                for (int x = at.x - r; x <= at.x + r; x++) {
                     for (int y = y0; y <= y1; y++) {
                         int tile = level.getTileID(x, y);
-                        if (tile != SkyRegistry.murkwaterID) {
+                        // Crooked Beyond's sea is the Spill; the fen's is
+                        // murkwater. Either one is "not land" out here.
+                        if (tile != SkyRegistry.murkwaterID
+                                && !necesse.engine.registries.TileRegistry.getTile(tile).isLiquid) {
                             land++;
                         }
                         if (tile == hollowTile) {
@@ -157,8 +222,8 @@ public class VeilStatusCommand extends ModularChatCommand {
         // to tell which explanation it was. Anchoring on each door and
         // re-counting its own 15x13 box answers that directly.
         synchronized (level) {
-            for (int y = -r; y <= r; y++) {
-                for (int x = -r; x <= r; x++) {
+            for (int y = at.y - r; y <= at.y + r; y++) {
+                for (int x = at.x - r; x <= at.x + r; x++) {
                     int object = level.getObjectID(x, y);
                     if (object != SkyRegistry.beetleDoorClosedID
                             && object != SkyRegistry.beetleDoorOpenID) {
@@ -167,9 +232,9 @@ public class VeilStatusCommand extends ModularChatCommand {
                     // The door sits at plan (7, 11), so the plan origin is here.
                     int ox = x - DOOR_PLAN_X;
                     int oy = y - DOOR_PLAN_Y;
-                    boolean fullyInside = ox >= -r && oy >= -r
-                            && ox + CrookedHousePreset.WIDTH - 1 <= r
-                            && oy + CrookedHousePreset.HEIGHT - 1 <= r;
+                    boolean fullyInside = ox >= at.x - r && oy >= at.y - r
+                            && ox + CrookedHousePreset.WIDTH - 1 <= at.x + r
+                            && oy + CrookedHousePreset.HEIGHT - 1 <= at.y + r;
                     int w = 0, wi = 0, floor = 0;
                     for (int px = 0; px < CrookedHousePreset.WIDTH; px++) {
                         for (int py = 0; py < CrookedHousePreset.HEIGHT; py++) {

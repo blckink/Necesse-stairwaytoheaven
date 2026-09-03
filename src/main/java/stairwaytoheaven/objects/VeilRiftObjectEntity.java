@@ -9,18 +9,39 @@ import necesse.engine.util.ComputedFunction;
 import necesse.entity.objectEntity.PortalObjectEntity;
 import necesse.level.gameObject.GameObject;
 import necesse.level.maps.Level;
+import java.awt.Point;
+
 import stairwaytoheaven.SkyRegistry;
+import stairwaytoheaven.worldgen.RealmDepth;
+import stairwaytoheaven.worldgen.RealmLanding;
+import stairwaytoheaven.worldgen.SkyOrigin;
 
 /**
- * Portal entity of the surface-side Veil rift: same proven flow as the sky
- * stairway (blocked-exit check, lazy level generation, counterpart placement,
- * mob clearing), landing on reclaimed murkmoss when the far side is water.
+ * Portal entity of the seance rift: same proven flow as the sky stairway
+ * (blocked-exit check, lazy generation, mob clearing), landing on reclaimed
+ * murkmoss when the far side is water.
+ *
+ * <p><b>Its destination is the Ghost band of the one plane</b>, not a Veil
+ * dimension — see {@link VeilRiftObject}'s header and
+ * {@code docs/PLAN_ONE_PLANE.md}. Like the three realm doors it no longer
+ * places a return rift: both halves would stand on the same level, so the
+ * return half would send the player to the tile it is standing on.
  */
 public class VeilRiftObjectEntity extends PortalObjectEntity {
 
     public VeilRiftObjectEntity(Level level, int x, int y) {
-        super(level, "veilriftdown", x, y, SkyRegistry.VEIL_IDENTIFIER, x, y);
+        this(level, x, y, landing(level, x, y));
+    }
+
+    private VeilRiftObjectEntity(Level level, int x, int y, Point landing) {
+        super(level, "veilriftdown", x, y, SkyRegistry.SKYREACH_IDENTIFIER, landing.x, landing.y);
         this.saveDestination = false;
+    }
+
+    /** Where the seance puts the player down inside the Ghost Realm's band. */
+    private static Point landing(Level level, int x, int y) {
+        return RealmLanding.find(SkyOrigin.worldGenSeed(level.getWorldEntity()),
+                RealmDepth.REALM_GHOST, x, y);
     }
 
     @Override
@@ -50,9 +71,7 @@ public class VeilRiftObjectEntity extends PortalObjectEntity {
             }
 
             level.regionManager.ensureTileIsLoaded(this.destinationTileX, this.destinationTileY);
-            if (level.getObjectID(this.destinationTileX, this.destinationTileY) != SkyRegistry.veilRiftUpID) {
-                clearAndPlaceVeilLanding(server, level, this.destinationTileX, this.destinationTileY, SkyRegistry.veilRiftUpID);
-            }
+            clearAndPlaceVeilLanding(server, level, this.destinationTileX, this.destinationTileY, 0);
 
             client.newStats.ladders_used.increment(1);
             this.runClearMobs(level, this.destinationTileX, this.destinationTileY);
@@ -61,12 +80,16 @@ public class VeilRiftObjectEntity extends PortalObjectEntity {
     }
 
     /**
-     * Sky-side variant of LadderDownObjectEntity.clearAndPlaceLadder: clears the
-     * 3x3 arrival area, places the return stairway, and turns any Mistsea tiles
-     * into a Cloudturf landing.
+     * Clears the 3x3 arrival area and turns any liquid in it into a murkmoss
+     * landing, so a rift whose far end falls in the fen does not drop the player
+     * in the water.
+     *
+     * <p>{@code stairwayObjectID} 0 places nothing at the centre, which is what
+     * the one-plane rift passes: there is no return half any more.
      */
     public static void clearAndPlaceVeilLanding(Server server, Level level, int tileX, int tileY, int stairwayObjectID) {
-        GameObject stairwayObject = ObjectRegistry.getObject(stairwayObjectID);
+        GameObject stairwayObject = stairwayObjectID != 0
+                ? ObjectRegistry.getObject(stairwayObjectID) : null;
 
         for (int i = -1; i <= 1; i++) {
             int currentTileX = tileX + i;
@@ -81,7 +104,11 @@ public class VeilRiftObjectEntity extends PortalObjectEntity {
                         level.entityManager.destroyObjectOverride(0, currentTileX, currentTileY);
                     }
 
-                    stairwayObject.placeObject(level, currentTileX, currentTileY, 0, false);
+                    if (stairwayObject != null) {
+                        stairwayObject.placeObject(level, currentTileX, currentTileY, 0, false);
+                    } else {
+                        level.setObject(currentTileX, currentTileY, 0);
+                    }
                     if (level.getTile(currentTileX, currentTileY).isLiquid) {
                         level.setTile(currentTileX, currentTileY, SkyRegistry.murkmossID);
                     }

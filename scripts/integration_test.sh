@@ -256,8 +256,13 @@ STATUS=0
 LOG="$LOG1"
 grep -qE "Skyreach OK: class=SkyLevel" "$LOG1" || { echo "FAIL: SkyLevel was not instantiated"; STATUS=1; }
 grep -qE "tile (cloudturftile|mistseatile)" "$LOG1" || { echo "FAIL: sky terrain did not generate"; STATUS=1; }
-grep -qE "Eden OK: class=EdenLevel.*dimension=2.*isCave=false" "$LOG1" \
-    || { echo "FAIL: EdenLevel was not generated in dimension +2"; STATUS=1; }
+# ONE PLANE (docs/PLAN_ONE_PLANE.md): Eden is a BAND of the sky level, not a
+# dimension, so what has to be true is that the sky level painted Eden's ground
+# at Eden's distance -- which is what edenstatus samples and prints.
+grep -qE "Eden OK: class=SkyLevel.*dimension=1.*isCave=false sampledAt=" "$LOG1" \
+    || { echo "FAIL: Eden was not sampled on the sky plane"; STATUS=1; }
+grep -qE "Eden OK: .* depth=0\.[234]" "$LOG1" \
+    || { echo "FAIL: the Eden sample is not inside Eden's realmDepth band (0.20-0.42)"; STATUS=1; }
 grep -qE "eden biome (edengarden|edencanopy|edenshallows)" "$LOG1" \
     || { echo "FAIL: Eden biomes did not paint"; STATUS=1; }
 grep -qE "eden tile (overgrownedentile|edenshallowstile|paradisesandtile)" "$LOG1" \
@@ -275,9 +280,17 @@ grep -qE "entrance check: .* clear=true" "$LOG1" || { echo "FAIL: something is s
 grep -qE "wardenFloor=marblecheckertile" "$LOG1" || { echo "FAIL: spire interior floor missing"; STATUS=1; }
 grep -qE "npc check: wardens=1 cats=2" "$LOG1" || { echo "FAIL: Warden/cat NPCs not spawned exactly once"; STATUS=1; }
 grep -qE "settler check: wardensettler=WardenSettler" "$LOG1" || { echo "FAIL: the recruited Warden is not a registered settler"; STATUS=1; }
-grep -qE "Veil OK: class=VeilLevel" "$LOG1" || { echo "FAIL: VeilLevel was not instantiated"; STATUS=1; }
+# The Veil is not a world any more (WORLD_DESIGN section 41.5): its ground is
+# the fen inside the Ghost band and the Hollows inside the Crooked band. What
+# still has to be true is that the ground itself survived the move and paints.
+grep -qE "Veil ground OK: class=SkyLevel.*fenSampledAt=" "$LOG1" \
+    || { echo "FAIL: the Veil's ground was not sampled on the sky plane"; STATUS=1; }
 grep -qE "tile (murkmosstile|murkwatertile)" "$LOG1" || { echo "FAIL: Veil terrain did not generate"; STATUS=1; }
 grep -qE "biome (gloomfen|ashenreach)" "$LOG1" || { echo "FAIL: Veil biomes did not paint"; STATUS=1; }
+# ...and the Ghost Realm's own three grounds have to be there beside them, or
+# the fen has quietly eaten the realm it was moved into.
+grep -qE "biome (aftergarden|boneorchard|ectomarsh)" "$LOG1" \
+    || { echo "FAIL: the Ghost Realm's own biomes did not paint in its band"; STATUS=1; }
 
 echo "--- verifying the harvest-tool audit ---"
 # Every custom deco/prop object must report the tool type and HP decided in
@@ -330,18 +343,23 @@ done
 
 # The Outlands' distance ramp, measured in the live world.
 #
-# The floor is asserted as an EXACT zero at 200, 600 and 850 tiles, not as
-# "rare". "The spire's surroundings are safe" is a promise this mod makes out
-# loud, and a promise that holds most of the time is a different promise.
-grep -qE "outlands check: floor=900 " "$LOG1" \
-    || { echo "FAIL: no outlands check line, or the 900-tile floor moved"; STATUS=1; }
+# The floor MOVED with the one-plane refactor (docs/PLAN_ONE_PLANE.md): the
+# Outlands are Crooked Beyond's wrong ground (WORLD_DESIGN section 41.4), so
+# their floor is Crooked's own band start -- 4200 tiles -- and no longer the
+# interim 900 that existed only because Eden, Steinfeld and the Ghost Realm
+# did not. It is still asserted as an EXACT zero, not as "rare": "the near
+# world is safe" is a promise this mod makes out loud, and a promise that
+# holds most of the time is a different promise.
+grep -qE "outlands check: floor=4200 " "$LOG1" \
+    || { echo "FAIL: no outlands check line, or the Crooked band floor moved off 4200"; STATUS=1; }
 # The floor, as the promise itself: zero wrong tiles anywhere in the disc
-# inside 900, out of a land count that proves the sweep actually found ground.
+# inside 4200, out of a land count that proves the sweep actually found ground.
 grep -qE "outlands check: .* inside=0/[1-9][0-9]*" "$LOG1" \
-    || { echo "FAIL: wrong ground appears inside the 900-tile floor (or the sweep found no land)"; STATUS=1; }
+    || { echo "FAIL: wrong ground appears inside the 4200-tile floor (or the sweep found no land)"; STATUS=1; }
 # ...and it must actually arrive further out, or the region is unreachable.
-grep -qE "outlands check: .* r3200=[1-9][0-9]*/" "$LOG1" \
-    || { echo "FAIL: no Outland ground at 3200 tiles -- the ramp never rises"; STATUS=1; }
+# 5600 is past Crooked's peak, where the ramp is at full strength.
+grep -qE "outlands check: .* r5600=[1-9][0-9]*/" "$LOG1" \
+    || { echo "FAIL: no Outland ground at 5600 tiles -- the ramp never rises"; STATUS=1; }
 grep -qE "outlands check: .* biome=NOT REGISTERED" "$LOG1" \
     && { echo "FAIL: the Outlands biome is not registered"; STATUS=1; }
 

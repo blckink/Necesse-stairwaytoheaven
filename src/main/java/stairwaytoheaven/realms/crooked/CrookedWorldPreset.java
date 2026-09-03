@@ -10,7 +10,9 @@ import necesse.engine.world.worldPresets.WorldPreset;
 import necesse.level.maps.Level;
 import necesse.level.maps.presets.Preset;
 import stairwaytoheaven.SkyRegistry;
+import stairwaytoheaven.worldgen.RealmDepth;
 import stairwaytoheaven.worldgen.SkyNoise;
+import stairwaytoheaven.worldgen.SkyOrigin;
 
 /**
  * Stamps Crooked Beyond's three buildings onto the lattice
@@ -56,14 +58,16 @@ public class CrookedWorldPreset extends WorldPreset {
     public boolean shouldAddToRegion(LevelPresetsRegion presetsRegion) {
         // Identifier only. hasAnyOfBiome() would consult the vanilla biome
         // weights, which never know about our painted biomes -- see the class
-        // comment.
-        return presetsRegion.identifier.equals(SkyRegistry.CROOKED_IDENTIFIER);
+        // comment. The identifier is the SKY's now: Crooked Beyond is a band of
+        // the one plane (docs/PLAN_ONE_PLANE.md), and stampLattice gates each
+        // site on the realm pick.
+        return presetsRegion.identifier.equals(SkyRegistry.SKYREACH_IDENTIFIER);
     }
 
     @Override
     public void addToRegion(GameRandom random, final LevelPresetsRegion presetsRegion,
             BiomeGeneratorStack generatorStack, PerformanceTimerManager performanceTimer) {
-        final int seed = CrookedLevel.worldGenSeed(presetsRegion.worldRegion.worldEntity.worldSeed);
+        final int seed = SkyOrigin.worldGenSeed(presetsRegion.worldRegion.worldEntity);
 
         this.stampLattice(presetsRegion, seed, CrookedSites.DOORYARD_CELL, CrookedSites.SALT_DOORYARD,
                 CrookedSites.DOORYARD_CHANCE,
@@ -114,6 +118,9 @@ public class CrookedWorldPreset extends WorldPreset {
                         || tileX + size.width >= endX || tileY + size.height >= endY) {
                     continue;
                 }
+                if (!isCrookedBand(seed, siteX, siteY)) {
+                    continue;
+                }
                 if (!isValidSite(seed, tileX, tileY, size.width, size.height)) {
                     continue;
                 }
@@ -153,6 +160,22 @@ public class CrookedWorldPreset extends WorldPreset {
      * answer when the region is actually painted — no world state, so the
      * decision is stable across a save/load and identical on every client.
      */
+    /**
+     * Only sites the realm pick actually puts in this realm.
+     *
+     * <p>The lattice is infinite and the realm is a BAND
+     * ({@code docs/PLAN_ONE_PLANE.md}); without this a building would stamp
+     * itself into whatever realm the cell happened to land in, and its guards
+     * and its pressure field -- which ask the same question -- would not follow.
+     */
+    public static boolean isCrookedBand(int seed, int siteX, int siteY) {
+        int realm = RealmDepth.realmAt(seed, siteX, siteY,
+                SkyOrigin.originX(seed), SkyOrigin.originY(seed));
+        // Hell counts: its band is painted as the far end of Crooked until
+        // WORLD_DESIGN §17-23 is built, so the buildings belong out there too.
+        return realm == RealmDepth.REALM_CROOKED || realm == RealmDepth.REALM_HELL;
+    }
+
     public static boolean isValidSite(int seed, int tileX, int tileY, int width, int height) {
         int x1 = tileX + width - 1;
         int y1 = tileY + height - 1;

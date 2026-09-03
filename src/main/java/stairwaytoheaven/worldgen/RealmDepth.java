@@ -201,6 +201,45 @@ public final class RealmDepth {
         return blended < 0.0F ? 0.0F : (blended > 1.0F ? 1.0F : blended);
     }
 
+    /** The depth at which a realm's band opens (its trapezoid's left foot). */
+    public static float bandStart(int realm) {
+        return BANDS[realm][0];
+    }
+
+    /** The depth at which a realm's band closes (its trapezoid's right foot). */
+    public static float bandEnd(int realm) {
+        return BANDS[realm][3];
+    }
+
+    /** The depth at which a realm's band reaches full weight. */
+    public static float bandPeakStart(int realm) {
+        return BANDS[realm][1];
+    }
+
+    /** The last depth at which a realm still has full weight. */
+    public static float bandPeakEnd(int realm) {
+        return BANDS[realm][2];
+    }
+
+    /**
+     * How far through its OWN band a depth is: 0 at the band's inner foot, 1 at
+     * its outer one, clamped.
+     *
+     * <p>This is what lets a realm keep an internal gradient — Steinfeld's
+     * "order decays" ramp is the clearest case — without inventing a second
+     * distance system beside this one. A realm asks how deep into ITSELF the
+     * tile is; the plane still answers with one distance from one origin.
+     */
+    public static float localDepth(int realm, float depth) {
+        float[] b = BANDS[realm];
+        float span = b[3] - b[0];
+        if (span <= 0.0F) {
+            return 0.0F;
+        }
+        float local = (depth - b[0]) / span;
+        return local < 0.0F ? 0.0F : (local > 1.0F ? 1.0F : local);
+    }
+
     /** Stable lowercase key per realm — locale, ledger and map dumps share it. */
     public static String keyOf(int realm) {
         switch (realm) {

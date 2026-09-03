@@ -167,22 +167,21 @@ public final class SkyPressure {
     /**
      * Level-facing form, for {@code GameTile.getMobSpawnPositionTickets}.
      *
-     * <p>Only the Skyreach and the Veil are shaped this way. A mod ground can
-     * also end up on a player's own floor in a settlement, on the surface, or
+     * <p>ONE level asks this now. {@code docs/PLAN_ONE_PLANE.md} retired the
+     * realm dimensions, so every realm's ground is painted onto
+     * {@code SkyLevel} and the {@code instanceof} that used to mean "am I in
+     * my own dimension" means "am I on the plane at all". A mod ground can
+     * still end up on a player's own floor in a settlement, on the surface, or
      * inside an incursion, and none of those should inherit a rule written for
-     * open sky — so anything else gets vanilla's default and behaves exactly as
-     * it did before this class existed.
+     * open country — so anything else gets vanilla's default and behaves
+     * exactly as it did before this class existed.
      */
     public static int spawnTickets(Level level, int tileX, int tileY) {
-        // getWorldGenSeed is declared on the two mod levels, not on Level: the
-        // instanceof is what makes the call possible AND what keeps the rule
-        // off every other level a mod ground can end up on.
+        // getWorldGenSeed is declared on SkyLevel, not on Level: the instanceof
+        // is what makes the call possible AND what keeps the rule off every
+        // other level a mod ground can end up on.
         if (level instanceof stairwaytoheaven.level.SkyLevel) {
             return spawnTickets(((stairwaytoheaven.level.SkyLevel) level).getWorldGenSeed(),
-                    tileX, tileY);
-        }
-        if (level instanceof stairwaytoheaven.level.VeilLevel) {
-            return spawnTickets(((stairwaytoheaven.level.VeilLevel) level).getWorldGenSeed(),
                     tileX, tileY);
         }
         return 100;

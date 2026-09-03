@@ -65,7 +65,11 @@ public class SpillTile extends LiquidTile {
      */
     @Override
     public int getMobSpawnPositionTickets(Level level, int tileX, int tileY) {
-        return level instanceof CrookedLevel
+        // SkyLevel, not CrookedLevel: the Crooked band is part of the one
+        // plane now (docs/PLAN_ONE_PLANE.md), so this tile's own level IS the
+        // sky. Anywhere else -- a settlement floor, an incursion -- keeps
+        // vanilla's default.
+        return level instanceof stairwaytoheaven.level.SkyLevel
                 ? 0
                 : super.getMobSpawnPositionTickets(level, tileX, tileY);
     }

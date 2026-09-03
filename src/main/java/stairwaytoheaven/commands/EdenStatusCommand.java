@@ -14,11 +14,23 @@ import necesse.engine.registries.ItemRegistry;
 import necesse.engine.registries.MobRegistry;
 import necesse.engine.registries.TileRegistry;
 import necesse.level.maps.Level;
-import stairwaytoheaven.SkyRegistry;
-import stairwaytoheaven.realms.eden.EdenLevel;
-import stairwaytoheaven.realms.eden.EdenPressure;
+import java.awt.Point;
 
-/** Generates Eden and reports the parts that a successful compile cannot prove. */
+import stairwaytoheaven.SkyRegistry;
+import stairwaytoheaven.level.SkyLevel;
+import stairwaytoheaven.realms.eden.EdenPressure;
+import stairwaytoheaven.worldgen.RealmDepth;
+import stairwaytoheaven.worldgen.RealmLanding;
+
+/**
+ * Generates Eden and reports the parts a successful compile cannot prove.
+ *
+ * <p>{@code docs/PLAN_ONE_PLANE.md}: Eden is a BAND of the sky plane, not a
+ * dimension, so this no longer looks up an {@code eden2} level and no longer
+ * scans the origin -- the origin is the spire, which is Tier 0. It samples
+ * around a point {@link RealmLanding} puts in the middle of Eden's band, which
+ * is the same point Eden's own door lands a player on.
+ */
 public class EdenStatusCommand extends ModularChatCommand {
     private static final int RADIUS = 80;
 
@@ -30,21 +42,24 @@ public class EdenStatusCommand extends ModularChatCommand {
     @Override
     public void runModular(Client client, Server server, ServerClient serverClient,
             Object[] args, String[] errors, CommandLog logs) {
-        Level level = server.world.getLevel(SkyRegistry.EDEN_IDENTIFIER);
-        if (!(level instanceof EdenLevel)) {
-            logs.add("FAIL: level for identifier \"" + SkyRegistry.EDEN_IDENTIFIER + "\" is "
-                    + level.getClass().getSimpleName() + " (expected EdenLevel)");
+        Level level = server.world.getLevel(SkyRegistry.SKYREACH_IDENTIFIER);
+        if (!(level instanceof SkyLevel)) {
+            logs.add("FAIL: level for identifier \"" + SkyRegistry.SKYREACH_IDENTIFIER + "\" is "
+                    + (level == null ? "null" : level.getClass().getSimpleName()) + " (expected SkyLevel)");
             return;
         }
+        int seed = ((SkyLevel) level).getWorldGenSeed();
+        Point at = RealmLanding.find(seed, RealmDepth.REALM_EDEN, 0, 0);
         Map<String, Integer> tiles = new HashMap<>();
         Map<String, Integer> biomes = new HashMap<>();
         Map<String, Integer> objects = new HashMap<>();
         int calm = 0;
         int active = 0;
         synchronized (level) {
-            level.regionManager.ensureTilesAreLoaded(-RADIUS, -RADIUS, RADIUS, RADIUS);
-            for (int x = -RADIUS; x <= RADIUS; x++) {
-                for (int y = -RADIUS; y <= RADIUS; y++) {
+            level.regionManager.ensureTilesAreLoaded(at.x - RADIUS, at.y - RADIUS,
+                    at.x + RADIUS, at.y + RADIUS);
+            for (int x = at.x - RADIUS; x <= at.x + RADIUS; x++) {
+                for (int y = at.y - RADIUS; y <= at.y + RADIUS; y++) {
                     tiles.merge(TileRegistry.getTileStringID(level.getTileID(x, y)), 1, Integer::sum);
                     biomes.merge(BiomeRegistry.getBiome(level.getBiomeID(x, y)).getStringID(), 1, Integer::sum);
                     if (level.getObjectID(x, y) != 0) {
@@ -61,7 +76,11 @@ public class EdenStatusCommand extends ModularChatCommand {
         logs.add("Eden OK: class=" + level.getClass().getSimpleName()
                 + " identifier=" + level.getIdentifier()
                 + " dimension=" + level.getIdentifier().getOneWorldDimension()
-                + " isCave=" + level.isCave);
+                + " isCave=" + level.isCave
+                + " sampledAt=" + at.x + "," + at.y
+                + " depth=" + RealmDepth.depthAt(at.x, at.y,
+                        stairwaytoheaven.worldgen.SkyOrigin.originX(seed),
+                        stairwaytoheaven.worldgen.SkyOrigin.originY(seed)));
         tiles.entrySet().stream().sorted((a, b) -> b.getValue() - a.getValue())
                 .forEach(e -> logs.add("  eden tile " + e.getKey() + " x" + e.getValue()));
         biomes.entrySet().stream().sorted((a, b) -> b.getValue() - a.getValue())

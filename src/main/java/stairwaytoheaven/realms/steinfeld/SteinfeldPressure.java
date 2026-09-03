@@ -115,8 +115,9 @@ public final class SteinfeldPressure {
      * vanilla's default and behave exactly as they did before.
      */
     public static int spawnTickets(Level level, int tileX, int tileY) {
-        if (level instanceof SteinfeldLevel) {
-            return spawnTickets(((SteinfeldLevel) level).getWorldGenSeed(), tileX, tileY);
+        if (level instanceof stairwaytoheaven.level.SkyLevel) {
+            return spawnTickets(
+                    ((stairwaytoheaven.level.SkyLevel) level).getWorldGenSeed(), tileX, tileY);
         }
         return 100;
     }

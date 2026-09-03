@@ -116,7 +116,10 @@ public class CrookedSideDoorObject extends GameObject {
     @Override
     public String canPlace(Level level, int layerID, int x, int y, int rotation, boolean byPlayer,
             boolean ignoreOtherLayers) {
-        return !level.getIdentifier().equals(SkyRegistry.CROOKED_IDENTIFIER)
+        // The sky plane: Crooked Beyond is a band of it now
+        // (docs/PLAN_ONE_PLANE.md). Nothing places this object any more -- the
+        // one-plane door has no return half -- but the guard stays honest.
+        return !level.getIdentifier().equals(SkyRegistry.SKYREACH_IDENTIFIER)
                 ? "invalidlevel"
                 : super.canPlace(level, layerID, x, y, rotation, byPlayer, ignoreOtherLayers);
     }
@@ -173,7 +176,7 @@ public class CrookedSideDoorObject extends GameObject {
                 level,
                 x,
                 y,
-                CrookedLevel.returnIdentifier(),
+                SkyRegistry.SKYREACH_IDENTIFIER,
                 SkyRegistry.crookedDoorDownID,
                 this.texture == null ? null : new GameSprite(this.texture, 0, 0, 32));
     }

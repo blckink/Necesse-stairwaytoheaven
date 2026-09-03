@@ -9,11 +9,19 @@ import necesse.engine.registries.ItemRegistry;
 import necesse.entity.mobs.PlayerMob;
 import necesse.level.maps.Level;
 import stairwaytoheaven.SkyRegistry;
+import stairwaytoheaven.worldgen.RealmDepth;
+import stairwaytoheaven.worldgen.SkyOrigin;
 
 /**
  * The Seance Circle: a chalk ring with candle stubs, craftable and placeable
  * anywhere on the surface. Interacting while carrying the Silver Bell (the
  * Warden's gift — checked, never consumed) tears it open into the Rift.
+ *
+ * <p>{@code docs/PLAN_ONE_PLANE.md} §A2.3: <b>the seance is fast travel to the
+ * GHOST BAND of the one plane.</b> The Rift it opens is the same object it
+ * always was and lands on the same ground it always did — that ground is now
+ * the fen inside the Ghost Realm's band ({@code WORLD_DESIGN} §41.5) instead of
+ * a dimension of its own.
  */
 public class SeanceCircleObject extends SkyDecoObject {
 
@@ -33,10 +41,6 @@ public class SeanceCircleObject extends SkyDecoObject {
             return;
         }
         ServerClient client = player.getServerClient();
-        if (SkyRegistry.VEIL_IDENTIFIER.equals(level.getIdentifier())) {
-            client.sendChatMessage(new LocalMessage("misc", "seancealreadyveil"));
-            return;
-        }
         // In the sky a circle is a SUMMONING ring, not a door.
         //
         // Worldgen stands one at a hashed site inside every Beetle Outland
@@ -56,6 +60,15 @@ public class SeanceCircleObject extends SkyDecoObject {
                         new PacketChangeObject(level, 0, x, y, SkyRegistry.crookedDoorDownID),
                         level, x, y);
                 client.sendChatMessage(new LocalMessage("misc", "crookeddooropened"));
+                return;
+            }
+            // Standing in the world of the dead already: there is nowhere for
+            // a seance to send you. The REALM answers that now, not the level.
+            int seed = SkyOrigin.worldGenSeed(level.getWorldEntity());
+            int realm = RealmDepth.realmAt(seed, x, y,
+                    SkyOrigin.originX(seed), SkyOrigin.originY(seed));
+            if (realm >= RealmDepth.REALM_GHOST) {
+                client.sendChatMessage(new LocalMessage("misc", "seancealreadyveil"));
                 return;
             }
             client.sendChatMessage(new LocalMessage("misc", "seancesilent"));

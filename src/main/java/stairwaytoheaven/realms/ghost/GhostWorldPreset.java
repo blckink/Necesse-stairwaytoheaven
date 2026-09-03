@@ -10,9 +10,15 @@ import necesse.engine.world.worldPresets.WorldPreset;
 import necesse.level.maps.Level;
 import necesse.level.maps.presets.Preset;
 import stairwaytoheaven.SkyRegistry;
+import stairwaytoheaven.worldgen.RealmDepth;
 import stairwaytoheaven.worldgen.SkyNoise;
+import stairwaytoheaven.worldgen.SkyOrigin;
 
-/** Places the three authored Ghost sites on the same lattices as pressure and guards. */
+/**
+ * Places the three authored Ghost sites on the same lattices as pressure and
+ * guards -- inside the Ghost BAND of the one plane
+ * ({@code docs/PLAN_ONE_PLANE.md}), which is the only thing that changed.
+ */
 public class GhostWorldPreset extends WorldPreset {
     private static final String OCCUPIED_BOARD = "villages";
     private static final int MAUSOLEUM = 0;
@@ -21,13 +27,13 @@ public class GhostWorldPreset extends WorldPreset {
 
     @Override
     public boolean shouldAddToRegion(LevelPresetsRegion region) {
-        return region.identifier.equals(SkyRegistry.GHOST_IDENTIFIER);
+        return region.identifier.equals(SkyRegistry.SKYREACH_IDENTIFIER);
     }
 
     @Override
     public void addToRegion(GameRandom random, LevelPresetsRegion region,
             BiomeGeneratorStack generatorStack, PerformanceTimerManager timer) {
-        int seed = GhostLevel.worldGenSeed(region.worldRegion.worldEntity.worldSeed);
+        int seed = SkyOrigin.worldGenSeed(region.worldRegion.worldEntity);
         stamp(region, seed, GhostTerrainPainter.MAUSOLEUM_CELL, GhostTerrainPainter.SALT_MAUSOLEUM,
                 GhostTerrainPainter.MAUSOLEUM_CHANCE,
                 new Dimension(MausoleumPreset.WIDTH, MausoleumPreset.HEIGHT), MAUSOLEUM);
@@ -53,6 +59,7 @@ public class GhostWorldPreset extends WorldPreset {
                 final int x = siteX - size.width / 2;
                 final int y = siteY - size.height / 2;
                 if (x < startX || y < startY || x + size.width >= endX || y + size.height >= endY
+                        || !isGhostBand(seed, siteX, siteY)
                         || !isValidSite(seed, x, y, size.width, size.height)
                         || region.isRectangleOccupied(OCCUPIED_BOARD, x, y, size.width, size.height)) continue;
                 region.addPreset(this, x, y, size, OCCUPIED_BOARD,
@@ -70,6 +77,19 @@ public class GhostWorldPreset extends WorldPreset {
         if (kind == MANOR) return new HauntedManorPreset(random);
         if (kind == GRAVEYARD) return new SunkenGraveyardPreset(random);
         return new MausoleumPreset(random);
+    }
+
+    /**
+     * Only sites the realm pick actually puts in this realm.
+     *
+     * <p>The lattice is infinite and the realm is a BAND
+     * ({@code docs/PLAN_ONE_PLANE.md}); without this a building would stamp
+     * itself into whatever realm the cell happened to land in, and its guards
+     * and its pressure field -- which ask the same question -- would not follow.
+     */
+    public static boolean isGhostBand(int seed, int siteX, int siteY) {
+        return RealmDepth.realmAt(seed, siteX, siteY,
+                SkyOrigin.originX(seed), SkyOrigin.originY(seed)) == RealmDepth.REALM_GHOST;
     }
 
     public static boolean isValidSite(int seed, int x, int y, int width, int height) {

@@ -9,23 +9,47 @@ import necesse.engine.util.ComputedFunction;
 import necesse.entity.objectEntity.PortalObjectEntity;
 import necesse.level.gameObject.GameObject;
 import necesse.level.maps.Level;
+import java.awt.Point;
+
 import stairwaytoheaven.SkyRegistry;
+import stairwaytoheaven.worldgen.RealmDepth;
+import stairwaytoheaven.worldgen.RealmLanding;
+import stairwaytoheaven.worldgen.SkyOrigin;
 
 /**
- * Portal entity of the living-world side of the Ghost Gate.
+ * A DOOR BETWEEN BANDS, not a level teleport.
  *
- * <p>The same proven flow the Veil rift and the sky stairway already use:
- * check the far side is not blocked, generate it lazily, place the return gate,
- * clear the mobs standing on the arrival tile. The one thing it adds is the
- * landing: the Aftergarden is mostly ectoplasm at its coasts, so a gate whose
- * far end lands in liquid would drop the player into the marsh. Any liquid in
- * the 3x3 arrival square is turned into haunted grass first.
+ * <p>{@code docs/PLAN_ONE_PLANE.md} item 6: <i>"The realm gate objects that
+ * were built as level portals become either doors between bands on the plane or
+ * house anchors per §A2.3 -- not level teleports."</i> This is the first kind.
+ * The realm it opens onto is a BAND of the sky plane now, so the destination
+ * identifier is {@code skyreach2} and the destination TILE is a landing inside
+ * that band, computed by {@link RealmLanding} from the world seed and the
+ * door's own position. The door still means "you are arriving somewhere", and
+ * the somewhere is a place the player could also have walked to.
+ *
+ * <p><b>It no longer places a return gate.</b> A ladder pair only makes sense
+ * between two levels; on one plane both halves stand on the same level and the
+ * return half would send the player to the tile it is standing on. The way back
+ * is to walk -- which is what a connected overworld is for -- until §A2.3's
+ * Warden's-house anchors land. The arrival square is still cleared and any
+ * liquid in it still reclaimed, so nobody is dropped into the water.
  */
 public class GhostGateObjectEntity extends PortalObjectEntity {
 
     public GhostGateObjectEntity(Level level, int x, int y) {
-        super(level, "ghostgatedown", x, y, SkyRegistry.GHOST_IDENTIFIER, x, y);
+        this(level, x, y, landing(level, x, y));
+    }
+
+    private GhostGateObjectEntity(Level level, int x, int y, Point landing) {
+        super(level, "ghostgatedown", x, y, SkyRegistry.SKYREACH_IDENTIFIER, landing.x, landing.y);
         this.saveDestination = false;
+    }
+
+    /** Where this door puts the player down inside the Ghost Realm's band. */
+    private static Point landing(Level level, int x, int y) {
+        return RealmLanding.find(SkyOrigin.worldGenSeed(level.getWorldEntity()),
+                RealmDepth.REALM_GHOST, x, y);
     }
 
     @Override
@@ -56,10 +80,7 @@ public class GhostGateObjectEntity extends PortalObjectEntity {
             }
 
             level.regionManager.ensureTileIsLoaded(this.destinationTileX, this.destinationTileY);
-            if (level.getObjectID(this.destinationTileX, this.destinationTileY) != GhostRealm.gateUpID) {
-                clearAndPlaceGhostLanding(server, level, this.destinationTileX, this.destinationTileY,
-                        GhostRealm.gateUpID);
-            }
+            clearAndPlaceGhostLanding(server, level, this.destinationTileX, this.destinationTileY, 0);
 
             client.newStats.ladders_used.increment(1);
             this.runClearMobs(level, this.destinationTileX, this.destinationTileY);
@@ -69,12 +90,15 @@ public class GhostGateObjectEntity extends PortalObjectEntity {
 
     /**
      * Ghost-side variant of {@code LadderDownObjectEntity.clearAndPlaceLadder}:
-     * clears the 3x3 arrival area, places the return gate, and turns any
-     * ectoplasm in it into a haunted-grass landing.
+     * clears the 3x3 arrival area and turns any ectoplasm in it into a
+     * haunted-grass landing.
+     *
+     * <p>{@code gateObjectID} 0 places nothing at the centre, which is what the
+     * one-plane door passes: there is no return half any more.
      */
     public static void clearAndPlaceGhostLanding(Server server, Level level, int tileX, int tileY,
             int gateObjectID) {
-        GameObject gateObject = ObjectRegistry.getObject(gateObjectID);
+        GameObject gateObject = gateObjectID != 0 ? ObjectRegistry.getObject(gateObjectID) : null;
 
         for (int i = -1; i <= 1; i++) {
             int currentTileX = tileX + i;
@@ -89,7 +113,13 @@ public class GhostGateObjectEntity extends PortalObjectEntity {
                         level.entityManager.destroyObjectOverride(0, currentTileX, currentTileY);
                     }
 
-                    gateObject.placeObject(level, currentTileX, currentTileY, 0, false);
+                    // gateObjectID 0 means "place nothing": the one-plane door
+                    // has no return half to stand here (see the class header).
+                    if (gateObject != null) {
+                        gateObject.placeObject(level, currentTileX, currentTileY, 0, false);
+                    } else {
+                        level.setObject(currentTileX, currentTileY, 0);
+                    }
                     if (level.getTile(currentTileX, currentTileY).isLiquid) {
                         level.setTile(currentTileX, currentTileY, GhostRealm.hauntedGrassID);
                     }

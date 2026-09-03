@@ -10,7 +10,9 @@ import necesse.engine.world.worldPresets.WorldPreset;
 import necesse.level.maps.Level;
 import necesse.level.maps.presets.Preset;
 import stairwaytoheaven.SkyRegistry;
+import stairwaytoheaven.worldgen.RealmDepth;
 import stairwaytoheaven.worldgen.SkyNoise;
+import stairwaytoheaven.worldgen.SkyOrigin;
 
 /**
  * Stamps Steinfeld's two hand-authored landmarks onto {@link SteinfeldSites}'
@@ -26,12 +28,14 @@ import stairwaytoheaven.worldgen.SkyNoise;
  * ({@code SpiderNestsWorldPreset}, {@code VampireCryptWorldPreset}) use for
  * the same reason.
  *
- * <h2>No land check</h2>
- * Steinfeld has no liquid at all ({@link SteinfeldPressure}'s own header:
- * "there is no sea, so there is no third case to price"), so every tile in
- * the realm is buildable ground and there is nothing for an {@code isLand}
- * test to rule out — unlike the Veil-adjacent realms, which stamp their
- * buildings over channels and hollows that genuinely can eat a footprint.
+ * <h2>It has a land check now</h2>
+ * As a dimension Steinfeld had no liquid at all ({@link SteinfeldPressure}'s
+ * own header: "there is no sea, so there is no third case to price"), so every
+ * tile was buildable and there was nothing for an {@code isLand} test to rule
+ * out. On the one plane it shares the world's single sea
+ * ({@code docs/PLAN_ONE_PLANE.md}) at the lowest waterline of any realm, so a
+ * footprint CAN now straddle open Mistsea, and the same five-point test the
+ * other realms use is applied here too.
  */
 public class SteinfeldWorldPreset extends WorldPreset {
 
@@ -40,13 +44,16 @@ public class SteinfeldWorldPreset extends WorldPreset {
 
     @Override
     public boolean shouldAddToRegion(LevelPresetsRegion presetsRegion) {
-        return presetsRegion.identifier.equals(SkyRegistry.STEINFELD_IDENTIFIER);
+        // The SKY's identifier: Steinfeld is a band of the one plane
+        // (docs/PLAN_ONE_PLANE.md), and stampLattice gates each site on the
+        // realm pick.
+        return presetsRegion.identifier.equals(SkyRegistry.SKYREACH_IDENTIFIER);
     }
 
     @Override
     public void addToRegion(GameRandom random, LevelPresetsRegion presetsRegion,
             BiomeGeneratorStack generatorStack, PerformanceTimerManager performanceTimer) {
-        int seed = SteinfeldLevel.worldGenSeed(presetsRegion.worldRegion.worldEntity.worldSeed);
+        int seed = SkyOrigin.worldGenSeed(presetsRegion.worldRegion.worldEntity);
 
         this.stampLattice(presetsRegion, seed, SteinfeldSites.GRAVEYARD_CELL, SteinfeldSites.SALT_GRAVEYARD,
                 SteinfeldSites.GRAVEYARD_CHANCE,
@@ -93,6 +100,10 @@ public class SteinfeldWorldPreset extends WorldPreset {
                         || tileX + size.width >= endX || tileY + size.height >= endY) {
                     continue;
                 }
+                if (!isSteinfeldBand(seed, siteX, siteY)
+                        || !isValidSite(seed, tileX, tileY, size.width, size.height)) {
+                    continue;
+                }
                 if (presetsRegion.isRectangleOccupied(OCCUPIED_BOARD, tileX, tileY, size.width, size.height)) {
                     continue;
                 }
@@ -105,6 +116,33 @@ public class SteinfeldWorldPreset extends WorldPreset {
                         });
             }
         }
+    }
+
+    /**
+     * Only sites the realm pick actually puts in this realm.
+     *
+     * <p>The lattice is infinite and the realm is a BAND
+     * ({@code docs/PLAN_ONE_PLANE.md}); without this a building would stamp
+     * itself into whatever realm the cell happened to land in, and its guards
+     * and its pressure field -- which ask the same question -- would not follow.
+     */
+    public static boolean isSteinfeldBand(int seed, int siteX, int siteY) {
+        return RealmDepth.realmAt(seed, siteX, siteY,
+                SkyOrigin.originX(seed), SkyOrigin.originY(seed)) == RealmDepth.REALM_STEINFELD;
+    }
+
+    /**
+     * Four corners plus the centre must be dry land -- the same five-point test
+     * the other realms' presets use, and new here: see the class header.
+     */
+    public static boolean isValidSite(int seed, int tileX, int tileY, int width, int height) {
+        int x1 = tileX + width - 1;
+        int y1 = tileY + height - 1;
+        return SteinfeldTerrainPainter.isLand(seed, tileX, tileY)
+                && SteinfeldTerrainPainter.isLand(seed, x1, tileY)
+                && SteinfeldTerrainPainter.isLand(seed, tileX, y1)
+                && SteinfeldTerrainPainter.isLand(seed, x1, y1)
+                && SteinfeldTerrainPainter.isLand(seed, tileX + width / 2, tileY + height / 2);
     }
 
     /** Which landmark a lattice belongs to. */

@@ -3,6 +3,94 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [Unreleased] — ONE PLANE: the six dimensions collapse — 2026-09-02
+
+`docs/PLAN_ONE_PLANE.md`, obeying `docs/WORLD_DESIGN.md` §3. Nothing was
+deleted: this is a change of HOSTING, not of content.
+
+### Changed
+- **Five modded levels are gone.** `edenlevel`, `steinfeldlevel`,
+  `ghostlevel`, `crookedlevel` and `veillevel` are no longer registered as
+  dimensions, and their `*Level` classes are deleted. `skylevel` /
+  `skyreach2` is the only level this mod adds. Six unconnected dimensions is
+  six sets of hard borders — the exact opposite of §3's overlapping weights,
+  no distortion gradient, and a Veil that was meant to stop being a world.
+- **Every realm is a BAND of the sky plane**, chosen per tile by
+  `worldgen/RealmDepth` from distance to the Old Warden Spire.
+  `SkyTerrainPainter.describeTile` dispatches to each realm's own
+  `*TerrainPainter.describeBand`, the way it already called `SkyOutlands` for
+  the Outlands (`WORLD_DESIGN` §41.4 named that as the pattern). The band
+  table is `RealmDepth.BANDS`, unchanged.
+- **One coastline, per-realm waterlines.** The plane keeps ONE island field,
+  because a connected overworld cannot have a different sea per realm without
+  producing the hard optical borders §3 exists to dissolve. What each realm
+  keeps is its waterline, blended across the realm weights at that depth
+  (`SkyTerrainPainter.REALM_WATERLINE`): Skyreach 0.48, Eden 0.40, Steinfeld
+  0.34, Ghost/Crooked/Hell 0.44. Blending on depth alone keeps it continuous.
+- **Steinfeld's decay gradient is now the plane's own.** It used to be a
+  second distance system — a radial from a fixed gate at (0,0) over 700 tiles.
+  It is now `RealmDepth.localDepth` across Steinfeld's own band, so "green near
+  Eden, grey toward the Ghost Realm" is true of the world rather than of a
+  private coordinate system that happened to agree.
+- **The Veil's ground moved with it** (`WORLD_DESIGN` §41.5): Gloomfen and
+  Ashen Reach are the fen inside the Ghost band, cut by their own coarse field;
+  the Beetlefreak Hollows are Crooked Beyond's own wrong ground.
+  `VeilTerrainPainter` lost `paintRegion` and is now the library both bands
+  read — every measured number in it is unchanged.
+- **The Outlands moved to their true band.** `SkyOutlands.WRONG_START` was an
+  interim 900 tiles whose own comment said *"the day Eden and Steinfeld land,
+  delete this constant and let RealmDepth answer."* They have, so it is now
+  derived from Crooked's band start (4200) and its peak end (5280).
+- **Settlers are placed by `SkyLevel`, gated on the region's realm**, not on
+  which level it is: Eveleen in the Eden band beside a Knowledge Tree,
+  Mortimer/Caspern/Eleanor in the Ghost band beside a gravestone, Mr. Knott in
+  the Crooked band in a Door Yard. Same rarities, same one-per-world claims.
+- **Guard packs and POI presets are realm-gated.** `SkyLevel.placeGuardPacks`
+  now walks all four realms' lattices and skips any site the realm pick does
+  not put in that realm — without which a Ghost mausoleum's pack would stand in
+  the Skyreach, where the mausoleum was never stamped. `GhostWorldPreset`,
+  `CrookedWorldPreset`, `SteinfeldWorldPreset` and `CrookedHouseWorldPreset`
+  all key on `skyreach2` plus the same realm test, and all four now derive
+  their seed from `SkyOrigin.worldGenSeed` — one plane, one terrain seed.
+- **The realm gates are doors between bands, not level teleports**
+  (PLAN item 6). `EdenGateObject`, `GhostGateObject`, `CrookedDoorObject` and
+  the séance's `VeilRiftObject` all target `skyreach2` at a landing computed by
+  the new `worldgen/RealmLanding` — the middle of the target realm's band, in
+  the direction the door was opened from, on open ground. §A2.3's séance is
+  therefore fast travel to the Ghost *band*, which is what the plan asks for.
+  They no longer place a return half: on one plane both halves would stand on
+  the same level. The way back is to walk, until the Warden's-house anchors
+  land.
+- `/edenstatus` and `/veilstatus` sample the sky level inside the relevant
+  band instead of a retired level at the origin. `/skyreachstatus`'s Outlands
+  ramp moved to 4400/5000/5600 and its floor sweep to 4200;
+  `scripts/integration_test.sh` follows.
+- `SkyPressure`, `EdenPressure`, `GhostPressure`, `CrookedPressure`,
+  `SteinfeldPressure`, `MistseaTile`, `EdenShallowsTile`, `EctoplasmTile` and
+  `SpillTile` all ask `instanceof SkyLevel` — every realm's ground is on the
+  plane now, and the check still keeps the rule off settlement floors,
+  the surface and incursions.
+
+### Kept
+- Every tile, object, mob, item, POI preset, settler and quest built for Eden,
+  Steinfeld, the Ghost Realm, Crooked Beyond and the Veil. Nothing under
+  `realms/*/` was deleted for being in the wrong dimension, and the retired
+  identifiers stay as named constants so their dimension indices can never be
+  reused and their `[level]` locale rows are not orphaned.
+- The Skyreach's four sub-biomes, as `WORLD_DESIGN` §41.3 requires: they were
+  already sub-noise variants inside Tier 0 and stay exactly that.
+
+### Known gaps
+- **Hell has no painter** (`WORLD_DESIGN` §17–23 is unbuilt), so the 0.90–1.00
+  band is painted as the far end of Crooked Beyond. An unpainted band would be
+  a hole in the world; the fallback is one `case` to delete.
+- **The three return gates** (`edengateup`, `ghostgateup`, `crookeddoorup`)
+  and `veilriftup` stay registered but nothing places them any more.
+- `RealmDepth.realmForDepth` slices a bell-shaped fBm value by weight, so a
+  realm holding a small weight at some depth gets rather less than its share of
+  the picks — visible where Crooked overlaps Hell past 5400 tiles. Pre-existing
+  and invisible today, because that band paints as Crooked anyway.
+
 ## [Unreleased] — Steinfeld / The Quiet Reach integrates — 2026-09-02
 
 ### Added

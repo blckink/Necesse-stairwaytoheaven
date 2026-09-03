@@ -10,7 +10,6 @@ import necesse.engine.world.worldPresets.LevelPresetsRegion;
 import necesse.engine.world.worldPresets.WorldPreset;
 import necesse.level.maps.Level;
 import stairwaytoheaven.SkyRegistry;
-import stairwaytoheaven.level.VeilLevel;
 
 /**
  * Scatters the {@link CrookedHousePreset} through the Beetlefreak Hollows.
@@ -23,10 +22,10 @@ import stairwaytoheaven.level.VeilLevel;
  * That path weights each entry by {@code LevelPresetsRegion.biomeIDWeights},
  * and those weights are sampled from
  * {@code worldEntity.getGeneratorStack().getLazyBiomeID(...)}
- * (LevelPresetsRegion.java:62-116) — the VANILLA biome generator. Our Veil
- * biomes are painted per tile by {@link VeilTerrainPainter} into the region's
- * biome layer and never pass through that generator, so a preset scoped to
- * {@code beetlefreakHollow} would score a biome weight of 0, be clamped to a
+ * (LevelPresetsRegion.java:62-116) — the VANILLA biome generator. Our wrong-
+ * ground biomes are painted per tile by {@link SkyTerrainPainter} into the
+ * region's biome layer and never pass through that generator, so a preset scoped
+ * to {@code beetlefreakHollow} would score a biome weight of 0, be clamped to a
  * single ticket against the entry's thousands, and effectively never place.
  * Vanilla's own biome-independent structures ({@code SpiderNestsWorldPreset},
  * {@code VampireCryptWorldPreset}) extend {@code WorldPreset} directly for the
@@ -71,12 +70,11 @@ public class CrookedHouseWorldPreset extends WorldPreset {
         // weights, which never know about our painted biomes (see the class
         // comment), so it would always answer false.
         //
-        // The Skyreach joined the Veil here when the Outlands moved the
-        // Hollows' ground into the sky. The house is the only building either
-        // wrong place has, and it was standing in the layer almost nobody
-        // opened; the sky is where a player will actually walk into it.
-        return presetsRegion.identifier.equals(SkyRegistry.VEIL_IDENTIFIER)
-                || presetsRegion.identifier.equals(SkyRegistry.SKYREACH_IDENTIFIER);
+        // One identifier now. docs/PLAN_ONE_PLANE.md retired veil2, and the
+        // Outlands the house stands in are Crooked Beyond's wrong ground on the
+        // sky plane (WORLD_DESIGN §41.4) — so there is exactly one level this
+        // house can be on, and it is the one the player walks.
+        return presetsRegion.identifier.equals(SkyRegistry.SKYREACH_IDENTIFIER);
     }
 
     /**
@@ -84,23 +82,6 @@ public class CrookedHouseWorldPreset extends WorldPreset {
      * Corners alone would happily straddle a channel; the centre alone would
      * let three quarters of the house hang over water.
      */
-    public boolean isValidSite(int seed, int tileX, int tileY, int width, int height) {
-        int x1 = tileX + width - 1;
-        int y1 = tileY + height - 1;
-        int cx = tileX + width / 2;
-        int cy = tileY + height / 2;
-        return good(seed, tileX, tileY)
-                && good(seed, x1, tileY)
-                && good(seed, tileX, y1)
-                && good(seed, x1, y1)
-                && good(seed, cx, cy);
-    }
-
-    private static boolean good(int seed, int tileX, int tileY) {
-        return VeilTerrainPainter.isLand(seed, tileX, tileY)
-                && VeilTerrainPainter.isHollow(seed, tileX, tileY);
-    }
-
     /**
      * The same five-point test for the Skyreach's Outlands.
      *
@@ -126,32 +107,29 @@ public class CrookedHouseWorldPreset extends WorldPreset {
 
     private static boolean goodSky(int seed, int tileX, int tileY, int originX, int originY) {
         long desc = SkyTerrainPainter.describeTile(seed, tileX, tileY, originX, originY);
-        // An Outland's Mistsea keeps the Outlands biome, so "wrong" alone is
-        // not "dry" — the tile has to be checked for water separately.
-        return SkyTerrainPainter.descBiome(desc) == SkyTerrainPainter.BIOME_OUTLANDS
-                && SkyTerrainPainter.descTile(desc) != SkyRegistry.mistseaID
+        // Either wrong ground of the Crooked band: the Outlands' striped patches
+        // or the Beetlefreak Hollows the house was drawn for (WORLD_DESIGN
+        // §41.4/§41.5). A wrong tile can still be liquid -- the Spill keeps its
+        // band's biome -- so dryness is checked separately.
+        int biome = SkyTerrainPainter.descBiome(desc);
+        return (biome == SkyTerrainPainter.BIOME_OUTLANDS
+                        || biome == SkyTerrainPainter.BIOME_BEETLEFREAK_HOLLOW)
+                && SkyTerrainPainter.isOpenGround(seed, tileX, tileY, originX, originY)
                 && !SkyTerrainPainter.descBuilt(desc);
     }
 
     @Override
     public void addToRegion(GameRandom random, final LevelPresetsRegion presetsRegion,
                             BiomeGeneratorStack generatorStack, PerformanceTimerManager performanceTimer) {
-        final boolean inSky = presetsRegion.identifier.equals(SkyRegistry.SKYREACH_IDENTIFIER);
-        // The two layers derive their generation seed differently, and using
-        // the wrong one would place houses against a mask the painter never
-        // draws — every site would look valid here and be open water there.
-        final int seed = inSky
-                ? SkyOrigin.worldGenSeed(presetsRegion.worldRegion.worldEntity)
-                : VeilLevel.worldGenSeed(presetsRegion.worldRegion.worldEntity.worldSeed);
-        final Point origin = inSky ? SkyOrigin.compute(seed) : new Point(0, 0);
+        final int seed = SkyOrigin.worldGenSeed(presetsRegion.worldRegion.worldEntity);
+        final Point origin = SkyOrigin.compute(seed);
         final Dimension size = new Dimension(CrookedHousePreset.WIDTH, CrookedHousePreset.HEIGHT);
         int total = getTotalPoints(random, presetsRegion, HOUSES_PER_REGION);
 
         for (int i = 0; i < total; i++) {
             Point tile = findRandomPresetTile(random, presetsRegion, SITE_ATTEMPTS, size, OCCUPIED_BOARD,
-                    (tileX, tileY) -> inSky
-                            ? isValidSkySite(seed, tileX, tileY, size.width, size.height, origin.x, origin.y)
-                            : isValidSite(seed, tileX, tileY, size.width, size.height));
+                    (tileX, tileY) ->
+                            isValidSkySite(seed, tileX, tileY, size.width, size.height, origin.x, origin.y));
             if (tile == null) {
                 continue;
             }

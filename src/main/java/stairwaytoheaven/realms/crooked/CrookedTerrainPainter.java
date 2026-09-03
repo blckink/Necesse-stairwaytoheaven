@@ -1,11 +1,38 @@
 package stairwaytoheaven.realms.crooked;
 
-import necesse.engine.registries.ObjectLayerRegistry;
-import necesse.level.maps.regionSystem.Region;
+import stairwaytoheaven.SkyRegistry;
+import stairwaytoheaven.worldgen.RealmDepth;
 import stairwaytoheaven.worldgen.SkyNoise;
+import stairwaytoheaven.worldgen.SkyOrigin;
+import stairwaytoheaven.worldgen.SkyOutlands;
+import stairwaytoheaven.worldgen.SkyTerrainPainter;
+import stairwaytoheaven.worldgen.VeilTerrainPainter;
 
 /**
- * Per-region terrain painter of Crooked Beyond.
+ * Crooked Beyond as a BAND of the one plane.
+ *
+ * <p><b>This is no longer a level's painter.</b> {@code docs/PLAN_ONE_PLANE.md}
+ * retired the {@code crooked2} dimension: Crooked Beyond is the realm
+ * {@link RealmDepth} gives depth 0.70-0.88, and
+ * {@link SkyTerrainPainter#describeTile} calls {@link #describeBand} for every
+ * tile the realm pick lands here. The Hell band (0.90-1.00) is routed here too,
+ * because {@code WORLD_DESIGN} §17-23 is not built and an unpainted band would
+ * be a hole in the world; see {@code SkyTerrainPainter.describeRealmTile}.
+ *
+ * <h2>The two wrong grounds this realm absorbed</h2>
+ * <ul>
+ * <li><b>The Beetle Outlands</b> ({@code WORLD_DESIGN} §41.4: <i>"The Beetle
+ *     Outlands ARE Crooked Beyond"</i>). {@link SkyOutlands}' patch field, whose
+ *     900-tile interim floor is now Crooked's own band start, cuts the sky's
+ *     striped ground and its boss-portal lattice into this realm. It carries
+ *     {@code OutlandsBiome}'s ascended-tier roster, which is the hardest fight
+ *     in the mod and had no other home.</li>
+ * <li><b>The Beetlefreak Hollows</b> ({@code WORLD_DESIGN} §41.5). The Veil's
+ *     own compact wrong patches, painted by {@link VeilTerrainPainter}'s
+ *     shipped mix, and the ground the Crooked House preset still looks for.</li>
+ * </ul>
+ * Both are Veil content that would otherwise have been stranded by the level
+ * retirement, and both belong to this realm by the design's own mapping.
  *
  * <p>Built the way {@link stairwaytoheaven.worldgen.SkyTerrainPainter} and
  * {@link stairwaytoheaven.worldgen.VeilTerrainPainter} are built, and it keeps
@@ -47,7 +74,14 @@ public final class CrookedTerrainPainter {
 
     // --- landmasses ---------------------------------------------------------
 
-    /** Island field scale. Larger than the Veil's 56: buildings need room. */
+    /**
+     * Kept for the record: the shape this realm was measured at.
+     *
+     * <p>The FIELD is now the plane's own
+     * ({@code SkyTerrainPainter.ISLAND_SCALE}) because one connected overworld
+     * has one coastline, and 0.44 survived as this realm's WATERLINE in
+     * {@code SkyTerrainPainter.REALM_WATERLINE}.
+     */
     public static final float ISLAND_SCALE = 62.0F;
     public static final float ISLAND_THRESHOLD = 0.44F;
     /** Tiles inside the coastline where nothing is placed (see below). */
@@ -119,32 +153,105 @@ public final class CrookedTerrainPainter {
     private CrookedTerrainPainter() {
     }
 
-    public static void paintRegion(Region region, int seed) {
-        int tileWidth = region.tileLayer.region.tileWidth;
-        int tileHeight = region.tileLayer.region.tileHeight;
-        for (int rx = 0; rx < tileWidth; rx++) {
-            for (int ry = 0; ry < tileHeight; ry++) {
-                int tileX = rx + region.tileXOffset;
-                int tileY = ry + region.tileYOffset;
+    /**
+     * One tile of the Crooked band, packed the way {@link SkyTerrainPainter#pack}
+     * packs every tile of the plane.
+     *
+     * <p>Precedence, highest first: the Spill; the Outlands' wrong ground with
+     * its portal lattice; the Beetlefreak Hollows; then the realm's own three
+     * bands, their paved forecourts and their props.
+     *
+     * @param island    the plane's shared island field at this tile
+     * @param waterline the plane's blended waterline at this depth
+     */
+    public static long describeBand(int seed, int tileX, int tileY,
+            float island, float waterline, float depth, float distortion) {
+        float hubDist = depth * RealmDepth.DEPTH_SCALE;
+        boolean outland = SkyOutlands.isWrong(seed, tileX, tileY, hubDist);
+        boolean hollow = !outland && VeilTerrainPainter.isHollow(seed, tileX, tileY);
 
-                region.biomeLayer.setBiomeByRegion(rx, ry, biomeAt(seed, tileX, tileY));
+        int biomeClass = outland
+                ? SkyTerrainPainter.BIOME_OUTLANDS
+                : (hollow ? SkyTerrainPainter.BIOME_BEETLEFREAK_HOLLOW
+                          : biomeClassAt(seed, tileX, tileY));
 
-                long packed = describeTile(seed, tileX, tileY);
-                region.tileLayer.setTileByRegion(rx, ry, tileOf(packed));
-                int objectID = objectOf(packed);
-                if (objectID != 0) {
-                    region.objectLayer.setObjectByRegion(
-                            ObjectLayerRegistry.BASE_LAYER, rx, ry, objectID);
-                }
-            }
+        if (island <= waterline) {
+            return SkyTerrainPainter.pack(CrookedRealm.spillID, 0, biomeClass, false);
         }
+        boolean plantable = island > waterline + ISLAND_RIM;
+
+        // --- the Outlands: the sky's own wrong ground, now in its right realm ---
+        if (outland) {
+            int ground = SkyOutlands.groundTile(seed, tileX, tileY);
+            if (!plantable) {
+                return SkyTerrainPainter.pack(ground, 0, biomeClass, false);
+            }
+            // The portal is the rarest thing out here and must not lose its tile
+            // to a crate or a dead tree, so it is answered first.
+            if (SkyOutlands.isPortalSite(seed, tileX, tileY, hubDist)) {
+                return SkyTerrainPainter.pack(ground, SkyRegistry.seanceCircleID, biomeClass, false);
+            }
+            // Crystal massifs, off the sky's own formation field: knots, ridges
+            // and short veins with real gaps, so a solid-wall object cannot turn
+            // the region into a maze. Only the SOLID core becomes wall.
+            int massif = SkyTerrainPainter.outcropAt(seed, tileX, tileY);
+            if ((massif & SkyTerrainPainter.OUTCROP_SOLID) != 0) {
+                return SkyTerrainPainter.pack(ground, SkyRegistry.evilwallID, biomeClass, false);
+            }
+            if (SkyNoise.tileRoll(seed, tileX, tileY, SkyTerrainPainter.SALT_CRATE)
+                    < SkyTerrainPainter.CRATE_CHANCE_BARREN) {
+                return SkyTerrainPainter.pack(ground, SkyRegistry.skyCrateID, biomeClass, false);
+            }
+            return SkyTerrainPainter.pack(ground,
+                    SkyOutlands.rollObject(seed, tileX, tileY), biomeClass, false);
+        }
+
+        // --- the Hollows: the Veil's compact wrong patches (§41.5) ---
+        if (hollow) {
+            boolean peat = SkyNoise.fbm(seed + VeilTerrainPainter.SALT_PATCH, tileX, tileY,
+                    VeilTerrainPainter.PATCH_SCALE, 2) > VeilTerrainPainter.PATCH_THRESHOLD;
+            int ground = peat ? SkyRegistry.blackpeatID : SkyRegistry.beetlefreakID;
+            return SkyTerrainPainter.pack(ground,
+                    plantable ? VeilTerrainPainter.rollHollowObject(seed, tileX, tileY) : 0,
+                    biomeClass, false);
+        }
+
+        long packed = describeTile(seed, tileX, tileY, island, waterline);
+        return SkyTerrainPainter.pack(tileOf(packed), objectOf(packed), biomeClass, false);
+    }
+
+    /** The plane's biome class for this tile's Crooked band. */
+    public static int biomeClassAt(int seed, int tileX, int tileY) {
+        if (isChecker(seed, tileX, tileY)) {
+            return SkyTerrainPainter.BIOME_CROOKED_CHECKER;
+        }
+        if (isFields(seed, tileX, tileY)) {
+            return SkyTerrainPainter.BIOME_CROOKED_FIELDS;
+        }
+        return SkyTerrainPainter.BIOME_CROOKED_WASTE;
     }
 
     // ---- the pure functions everything else asks -----------------------------
 
-    /** Is this tile dry land? */
+    /**
+     * Is this tile dry Crooked ground?
+     *
+     * <p>Answered against the PLANE's island field and waterline, so the preset
+     * placer and the pressure field cannot disagree with what
+     * {@link #describeBand} paints later.
+     */
     public static boolean isLand(int seed, int tileX, int tileY) {
-        return SkyNoise.fbm(seed, tileX, tileY, ISLAND_SCALE, 3) > ISLAND_THRESHOLD;
+        float depth = RealmDepth.depthAt(tileX, tileY,
+                SkyOrigin.originX(seed), SkyOrigin.originY(seed));
+        float island = SkyNoise.fbm(seed, tileX, tileY, SkyTerrainPainter.ISLAND_SCALE, 3);
+        return island > SkyTerrainPainter.waterlineAt(depth);
+    }
+
+    /** Is this tile inside the Crooked band at all? */
+    public static boolean isCrooked(int seed, int tileX, int tileY) {
+        int realm = RealmDepth.realmAt(seed, tileX, tileY,
+                SkyOrigin.originX(seed), SkyOrigin.originY(seed));
+        return realm == RealmDepth.REALM_CROOKED || realm == RealmDepth.REALM_HELL;
     }
 
     /**
@@ -159,10 +266,13 @@ public final class CrookedTerrainPainter {
      * {@link CrookedObjects}). Both are kept.
      */
     public static boolean isPlantable(int seed, int tileX, int tileY) {
-        return SkyNoise.fbm(seed, tileX, tileY, ISLAND_SCALE, 3) > ISLAND_THRESHOLD + ISLAND_RIM;
+        float depth = RealmDepth.depthAt(tileX, tileY,
+                SkyOrigin.originX(seed), SkyOrigin.originY(seed));
+        float island = SkyNoise.fbm(seed, tileX, tileY, SkyTerrainPainter.ISLAND_SCALE, 3);
+        return island > SkyTerrainPainter.waterlineAt(depth) + ISLAND_RIM;
     }
 
-    /** Which of the three bands this tile is in. */
+    /** Which of the three bands this tile is in, as a registry biome ID. */
     public static int biomeAt(int seed, int tileX, int tileY) {
         if (isChecker(seed, tileX, tileY)) {
             return CrookedRealm.checkerworks.getID();
@@ -201,8 +311,8 @@ public final class CrookedTerrainPainter {
      * and for the same reason: the placement test, the painter and any offline
      * renderer all want the same answer and must not each re-derive half of it.
      */
-    public static long describeTile(int seed, int tileX, int tileY) {
-        if (!isLand(seed, tileX, tileY)) {
+    public static long describeTile(int seed, int tileX, int tileY, float island, float waterline) {
+        if (island <= waterline) {
             return pack(CrookedRealm.spillID, 0);
         }
 
@@ -232,7 +342,7 @@ public final class CrookedTerrainPainter {
         // Nothing on a paved forecourt (the preset owns those tiles), nothing on
         // a wrong-way run (a run you cannot see is not a run), and nothing on
         // the coastal rim (checkGenerationValid would only sweep it away).
-        if (paved || tileID == CrookedRealm.wrongWayID || !isPlantable(seed, tileX, tileY)) {
+        if (paved || tileID == CrookedRealm.wrongWayID || island <= waterline + ISLAND_RIM) {
             return pack(tileID, 0);
         }
 

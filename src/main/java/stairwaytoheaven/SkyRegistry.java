@@ -32,7 +32,15 @@ public final class SkyRegistry {
 
     // ===== Dimension =====
 
-    /** One-world dimension index of the Skyreach: one layer above the surface. */
+    /**
+     * One-world dimension index of the Skyreach: one layer above the surface,
+     * and <b>the only dimension this mod adds</b>.
+     *
+     * <p>{@code docs/PLAN_ONE_PLANE.md}: every realm is a BAND of this level,
+     * picked by {@code worldgen.RealmDepth} from distance to the Old Warden
+     * Spire, because {@code docs/WORLD_DESIGN.md} §3 asks for overlapping
+     * biome WEIGHTS and a dimension is the one thing that cannot overlap.
+     */
     public static final int SKY_DIMENSION = 1;
 
     /** Level identifier of the Skyreach dimension (compare: "surface", "cave", "deepcave"). */
@@ -67,23 +75,20 @@ public final class SkyRegistry {
     public static final LevelIdentifier SKYREACH_IDENTIFIER = new LevelIdentifier("skyreach2");
 
     /**
-     * One-world dimension index of the Garden of Eden: one layer ABOVE the
-     * Skyreach, i.e. two above the surface.
-     *
-     * <p>The vertical stack is now
-     * {@code veil(-3) < deepcave(-2) < cave(-1) < surface(0) < skyreach(+1) <
-     * eden(+2)}. Tier 1 of {@code docs/WORLD_DESIGN.md} is reached by climbing
-     * further, not by digging — the mod is called Stairway to Heaven, and Eden
-     * is the first floor past the Skywatch.
+     * <b>RETIRED as a dimension.</b> {@code docs/PLAN_ONE_PLANE.md} collapsed
+     * the six modded levels into one plane: the Garden of Eden is a BAND of
+     * {@code skyreach2} chosen by {@code worldgen.RealmDepth}, not a level of
+     * its own, and {@code StairwayToHeavenMod.registerDimension} no longer
+     * registers it. The constant stays for two reasons and no others: the
+     * dimension index must never be reused by a future realm, and
+     * {@code tools/locale_audit.py} finds level names by matching a
+     * {@code LevelIdentifier} constructor call with a quoted argument, so
+     * deleting the identifier would orphan its {@code [level]} row in both
+     * locales. Nothing generates against either any more.
      */
     public static final int EDEN_DIMENSION = 2;
 
-    /**
-     * Level identifier of the Garden of Eden, generation-stamped exactly like
-     * the two dimensions above — see {@link #WORLD_GENERATION}. The literal
-     * stays a literal so {@code tools/locale_audit.py} can find the {@code
-     * [level]} key it needs.
-     */
+    /** @see #EDEN_DIMENSION — retired as a dimension, kept as a name. */
     public static final LevelIdentifier EDEN_IDENTIFIER = new LevelIdentifier("eden2");
 
     // ===== Biomes =====
@@ -166,9 +171,22 @@ public final class SkyRegistry {
 
     // ===== v0.3: The Veil =====
 
-    /** One-world dimension index of the Veil: below the deep caves. */
+    /**
+     * <b>RETIRED as a dimension.</b> {@code docs/PLAN_ONE_PLANE.md} collapsed
+     * the six modded levels into one plane: the Veil's ground (WORLD_DESIGN §41.5: Gloomfen and Ashen Reach
+     * into the Ghost band, the Beetlefreak Hollows into the Crooked band) is a BAND of
+     * {@code skyreach2} chosen by {@code worldgen.RealmDepth}, not a level of
+     * its own, and {@code StairwayToHeavenMod.registerDimension} no longer
+     * registers it. The constant stays for two reasons and no others: the
+     * dimension index must never be reused by a future realm, and
+     * {@code tools/locale_audit.py} finds level names by matching a
+     * {@code LevelIdentifier} constructor call with a quoted argument, so
+     * deleting the identifier would orphan its {@code [level]} row in both
+     * locales. Nothing generates against either any more.
+     */
     public static final int VEIL_DIMENSION = -3;
-    /** Generation-stamped like the Skyreach — see {@link #WORLD_GENERATION}. */
+
+    /** @see #VEIL_DIMENSION — retired as a dimension, kept as a name. */
     public static final LevelIdentifier VEIL_IDENTIFIER = new LevelIdentifier("veil2");
 
     public static GloomfenBiome gloomfen;
@@ -206,19 +224,20 @@ public final class SkyRegistry {
     // ===== Tier 4: Crooked Beyond =====
 
     /**
-     * One-world dimension index of Crooked Beyond: five layers above the
-     * surface, past the Skyreach.
-     *
-     * <p>The ladder the mod keeps is Skyreach +1, Eden +2, Steinfeld +3, Ghost
-     * +4, Crooked +5. Only +1 and -3 exist as levels today; the numbers between
-     * are reserved so a realm landing later cannot renumber a realm already in
-     * players' saves. The index is only ever read through
-     * {@code LevelIdentifier.IDENTIFIER_TO_DIMENSION}, which decides which way
-     * "up" and "down" point between two levels — it is not a coordinate.
+     * <b>RETIRED as a dimension.</b> {@code docs/PLAN_ONE_PLANE.md} collapsed
+     * the six modded levels into one plane: Crooked Beyond is a BAND of
+     * {@code skyreach2} chosen by {@code worldgen.RealmDepth}, not a level of
+     * its own, and {@code StairwayToHeavenMod.registerDimension} no longer
+     * registers it. The constant stays for two reasons and no others: the
+     * dimension index must never be reused by a future realm, and
+     * {@code tools/locale_audit.py} finds level names by matching a
+     * {@code LevelIdentifier} constructor call with a quoted argument, so
+     * deleting the identifier would orphan its {@code [level]} row in both
+     * locales. Nothing generates against either any more.
      */
     public static final int CROOKED_DIMENSION = 5;
 
-    /** Generation-stamped like the Skyreach and the Veil — see {@link #WORLD_GENERATION}. */
+    /** @see #CROOKED_DIMENSION — retired as a dimension, kept as a name. */
     public static final LevelIdentifier CROOKED_IDENTIFIER = new LevelIdentifier("crooked2");
 
     /**
@@ -298,32 +317,39 @@ public final class SkyRegistry {
     // ===== v0.10: the Ghost Realm / Aftergarden =====
 
     /**
-     * One-world dimension index of the Ghost Realm: the fourth rung of the
-     * stairway (Skyreach +1, Eden +2, Steinfeld +3, Aftergarden +4).
-     *
-     * <p>It sits ABOVE the living world rather than below it on purpose. The
-     * Veil (-3) is the mist you pass through; the Aftergarden is where the dead
-     * actually live, and the mod's whole geography is a climb.
+     * <b>RETIRED as a dimension.</b> {@code docs/PLAN_ONE_PLANE.md} collapsed
+     * the six modded levels into one plane: the Ghost Realm is a BAND of
+     * {@code skyreach2} chosen by {@code worldgen.RealmDepth}, not a level of
+     * its own, and {@code StairwayToHeavenMod.registerDimension} no longer
+     * registers it. The constant stays for two reasons and no others: the
+     * dimension index must never be reused by a future realm, and
+     * {@code tools/locale_audit.py} finds level names by matching a
+     * {@code LevelIdentifier} constructor call with a quoted argument, so
+     * deleting the identifier would orphan its {@code [level]} row in both
+     * locales. Nothing generates against either any more.
      */
     public static final int GHOST_DIMENSION = 4;
 
-    /**
-     * Generation-stamped like the Skyreach and the Veil -- see
-     * {@link #WORLD_GENERATION}. The literal has to stay a literal: the locale
-     * audit finds level names by matching a LevelIdentifier constructor call
-     * with a quoted argument.
-     */
+    /** @see #GHOST_DIMENSION — retired as a dimension, kept as a name. */
     public static final LevelIdentifier GHOST_IDENTIFIER = new LevelIdentifier("ghost2");
 
     // ===== v1.0: Steinfeld / The Quiet Reach =====
 
     /**
-     * One-world dimension index of Steinfeld: the third layer above the
-     * surface. Skyreach is +1, Eden is +2, so the road Skyreach -> Eden ->
-     * Steinfeld -> Ghost -> Crooked is the dimension order read upward.
+     * <b>RETIRED as a dimension.</b> {@code docs/PLAN_ONE_PLANE.md} collapsed
+     * the six modded levels into one plane: Steinfeld / The Quiet Reach is a BAND of
+     * {@code skyreach2} chosen by {@code worldgen.RealmDepth}, not a level of
+     * its own, and {@code StairwayToHeavenMod.registerDimension} no longer
+     * registers it. The constant stays for two reasons and no others: the
+     * dimension index must never be reused by a future realm, and
+     * {@code tools/locale_audit.py} finds level names by matching a
+     * {@code LevelIdentifier} constructor call with a quoted argument, so
+     * deleting the identifier would orphan its {@code [level]} row in both
+     * locales. Nothing generates against either any more.
      */
     public static final int STEINFELD_DIMENSION = 3;
-    /** Generation-stamped like the Skyreach and the Veil - see {@link #WORLD_GENERATION}. */
+
+    /** @see #STEINFELD_DIMENSION — retired as a dimension, kept as a name. */
     public static final LevelIdentifier STEINFELD_IDENTIFIER = new LevelIdentifier("steinfeld2");
 
     public static stairwaytoheaven.realms.steinfeld.QuietMeadowBiome quietMeadow;

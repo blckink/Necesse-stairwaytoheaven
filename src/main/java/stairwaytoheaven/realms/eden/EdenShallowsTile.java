@@ -59,7 +59,9 @@ public class EdenShallowsTile extends LiquidTile {
 
     @Override
     public int getMobSpawnPositionTickets(Level level, int tileX, int tileY) {
-        return level instanceof EdenLevel
+        // SkyLevel, not EdenLevel: the Eden band is part of the one plane now
+        // (docs/PLAN_ONE_PLANE.md).
+        return level instanceof stairwaytoheaven.level.SkyLevel
                 ? EdenPressure.SHALLOWS_TICKETS
                 : super.getMobSpawnPositionTickets(level, tileX, tileY);
     }

@@ -20,27 +20,42 @@ history. Updated 2026-09-02.
 | Stormveil | Skyreach | stormslate | `[run]` full |
 | Aurora Shoals | Skyreach | aurorashoal | `[run]` full |
 | Skyway Passages | Skyreach | skyway + cloudmarble | `[run]` full — roads, balustrades, statues |
-| **Beetle Outlands** | Crooked Beyond | beetlefreak + blackpeat | `[run]` **new**, distance-gated past 900 tiles |
-| Gloomfen | Ghost (in the Veil dimension) | murkmoss | `[run]` full |
-| Ashen Reach | Ghost (in the Veil dimension) | ashsand | `[run]` full |
-| Beetlefreak Hollows | Ghost (in the Veil dimension) | beetlefreak | `[run]` full |
-| Eden Garden | Eden (`eden2`, +2) | Eden grass + moss | `[run]` generated core; vegetation aliases use native vanilla objects |
-| Eden Canopy | Eden | root floor + rich soil | `[run]` generated core; Knowledge Tree and copper stand-ins |
-| Eden Shallows | Eden | Paradise Sand + shallow lagoon | `[run]` generated core |
-| Striped Waste | Crooked Beyond (`crooked2`, +5) | crooked stripe | `[build]` painter, mobs and POIs compiled; realm generation not yet run |
-| Spiral Fields | Crooked Beyond | spiral soil + violet mud | `[build]` |
-| Checkerworks | Crooked Beyond | checker stone | `[build]` |
-| Aftergarden | Ghost Realm (`ghost2`, +4) | haunted grass + black cobble | `[build]` painter, mobs and POIs compiled; realm generation not yet run |
-| Bone Orchard | Ghost Realm | violet dirt + spirit stone | `[build]` |
-| Ectomarsh | Ghost Realm | ghost moss + ectoplasm | `[build]` |
+| **Beetle Outlands** | Crooked Beyond band (depth 0.70+, 4200 tiles) | beetlefreak + blackpeat | `[build]` moved out of the Skyreach onto its true band |
+| Gloomfen | Ghost band (WORLD_DESIGN §41.5) | murkmoss | `[build]` the fen inside the Ghost Realm |
+| Ashen Reach | Ghost band (§41.5) | ashsand | `[build]` |
+| Beetlefreak Hollows | Crooked band (§41.5) | beetlefreak | `[build]` |
+| Eden Garden | Eden band (depth 0.20-0.42, 1200-2520 tiles) | Eden grass + moss | `[build]` band painter; vegetation aliases use native vanilla objects |
+| Eden Canopy | Eden band | root floor + rich soil | `[build]` Knowledge Tree and copper stand-ins |
+| Eden Shallows | Eden band | Paradise Sand + shallow lagoon | `[build]` |
+| Quiet Meadow | Steinfeld band (depth 0.42-0.58, 2520-3480) | Eden grass + weathered stone | `[build]` |
+| Slab Fields | Steinfeld band | pale grass + cracked marble | `[build]` |
+| Grave Heath | Steinfeld band | ash grass + grave soil | `[build]` |
+| Striped Waste | Crooked band (depth 0.70-0.88, 4200-5280) | crooked stripe | `[build]` |
+| Spiral Fields | Crooked band | spiral soil + violet mud | `[build]` |
+| Checkerworks | Crooked band | checker stone | `[build]` |
+| Aftergarden | Ghost band (depth 0.60-0.80, 3600-4800) | haunted grass + black cobble | `[build]` |
+| Bone Orchard | Ghost band | violet dirt + spirit stone | `[build]` |
+| Ectomarsh | Ghost band | ghost moss + ectoplasm | `[build]` |
 
-**Not built at all:** Infernal Fringe, Hell Antechamber, Hell. Steinfeld still
-has substantial isolated WIP code. Eden's generated realm core now exists, but
-its player-facing gate, POI presets, farming/livestock, Press, fishing, quest
-chapter and Keeper boss remain unbuilt; see `docs/realms/eden.md`.
-The `RealmDepth` field already describes all six distance bands. The completed
-Crooked and Ghost implementations currently use separate registered dimensions;
-their reconciliation with the one-road world concept remains design work.
+**ONE PLANE, as of 2026-09-02.** `docs/PLAN_ONE_PLANE.md` collapsed the six
+modded dimensions into one. `edenlevel`, `steinfeldlevel`, `ghostlevel`,
+`crookedlevel` and `veillevel` are gone; the only modded level is
+`skylevel` / `skyreach2`, and every realm is a BAND of it chosen by
+`worldgen.RealmDepth` from distance to the Old Warden Spire, exactly as
+`WORLD_DESIGN` §3 specifies. Every realm's biome status above dropped from
+`[run]` to `[build]` for that reason: the content is unchanged, but the run
+that observed it observed it on a level that no longer exists.
+
+Measured offline over three seeds (`describeTile` + `RealmDepth`, ring samples):
+depth 0 is 100% Skyreach; 900 tiles is 72/28 Skyreach/Eden; 1500 is 96% Eden;
+3000 is 100% Steinfeld; 3800 is 23/77 Steinfeld/Ghost; 4400 is 95% Ghost;
+5000 is 88% Crooked; 5600+ is the Hell band, painted as the far end of Crooked
+until §17-23 exists. Land share runs 55% in the Skyreach, 64-78% in Eden,
+80% in Steinfeld and ~60% out past the Ghost Realm.
+
+**Not built at all:** Infernal Fringe, Hell Antechamber, Hell. Eden's
+player-facing farming/livestock, Press, fishing, quest chapter and Keeper boss
+remain unbuilt; see `docs/realms/eden.md`.
 
 The four Skyreach biomes and all three Eden biomes define crate loot. Eden's
 painter places the native `skycache` alias; Veil/Ghost still have no
@@ -56,8 +71,10 @@ painter places the native `skycache` alias; Veil/Ghost still have no
 | `swh_anchor` | sky anchor | `[run]` |
 | `swh_beacon` | **registered and never handed out** — dead | `[build]` |
 
-**No boss quest exists.** A Séance Circle in the Outlands now becomes the
-Crooked entry door; circles elsewhere retain the silent-site response.
+**No boss quest exists.** A Séance Circle standing on Outland ground (now
+inside the Crooked band) still becomes the Crooked door; circles elsewhere on
+the plane retain the silent-site response, except where the tile is already in
+the Ghost band or deeper, which answers "you are already there".
 
 ## 3. NPCs — 8 recruitable/resolvable + 2 cats
 

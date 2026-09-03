@@ -1,12 +1,29 @@
 package stairwaytoheaven.realms.steinfeld;
 
-import necesse.level.maps.regionSystem.Region;
 import stairwaytoheaven.SkyRegistry;
+import stairwaytoheaven.worldgen.RealmDepth;
 import stairwaytoheaven.worldgen.SkyNoise;
+import stairwaytoheaven.worldgen.SkyOrigin;
+import stairwaytoheaven.worldgen.SkyTerrainPainter;
 
 /**
- * Per-region terrain painter of Steinfeld — and the one place the realm's
- * whole idea is actually implemented.
+ * Steinfeld as a BAND of the one plane — and the one place the realm's whole
+ * idea is actually implemented.
+ *
+ * <p><b>This is no longer a level's painter.</b> {@code docs/PLAN_ONE_PLANE.md}
+ * retired the {@code steinfeld2} dimension: Steinfeld is the realm
+ * {@link RealmDepth} gives depth 0.42-0.58, and
+ * {@link SkyTerrainPainter#describeTile} calls {@link #describeBand} for every
+ * tile the realm pick lands here.
+ *
+ * <p><b>And the gradient below is now the plane's own.</b> It used to be a
+ * second distance system: a radial from a fixed gate at (0,0) over 700 tiles.
+ * That was the right shape and the wrong origin — the concept has ONE distance,
+ * from ONE {@code SkyOrigin} (§3), and two of them is how they drift apart. The
+ * three bands are now cut out of {@link RealmDepth#localDepth}, i.e. how far
+ * through Steinfeld's OWN band the tile is, so "green near Eden, grey out
+ * toward the Ghost Realm" is literally true of the plane rather than true of a
+ * private coordinate system that happened to agree.
  *
  * <h2>The idea</h2>
  * The player's line for this realm is <b>"order decays"</b>, and
@@ -65,19 +82,30 @@ public final class SteinfeldTerrainPainter {
     // ---- The gate, and the gradient it is the origin of ---------------------
 
     /**
-     * Steinfeld's canonical arrival point, and the zero of the gradient.
+     * The zero of the gradient: the plane's own origin, the Old Warden Spire.
      *
-     * <p>Fixed rather than seed-derived, for the same reason the Skyreach pins
-     * every ascent to the spire ({@code SkywardStairwayObjectEntity}): a
-     * player who could choose where they land could choose to land at the far
-     * end of the realm and skip the whole difficulty ramp. Every Fallen Gate
-     * anywhere in the sky opens onto this tile.
+     * <p>Kept as named constants because the realm's documentation and its
+     * offline harness both refer to them, but they are no longer a second
+     * origin — {@link #depthAt} asks {@link SkyOrigin} for the real one, and
+     * these two are the fallback the pure-noise harness uses when it has no
+     * seed. WORLD_DESIGN §3 allows exactly one origin and this file used to
+     * hold a second.
      */
     public static final int ORIGIN_X = 0;
     public static final int ORIGIN_Y = 0;
 
-    /** Tiles from the gate to the outer edge of the Grave Heath's onset. */
-    public static final float BAND_SPAN = 700.0F;
+    /**
+     * The span the three bands are cut out of.
+     *
+     * <p>Now Steinfeld's own realmDepth band rather than an invented 700-tile
+     * radius: depth 0.32 to 0.70 at {@link RealmDepth#DEPTH_SCALE} 6000 is
+     * 1920 to 4200 tiles, i.e. a 2280-tile walk from the Eden overlap to the
+     * Ghost overlap. That is the distance the "order decays" ramp now runs
+     * over, and it moves with the world-size dial instead of contradicting it.
+     */
+    public static final float BAND_SPAN =
+            (RealmDepth.bandEnd(RealmDepth.REALM_STEINFELD)
+                    - RealmDepth.bandStart(RealmDepth.REALM_STEINFELD)) * RealmDepth.DEPTH_SCALE;
     /** Low-frequency warp of the band border, as a fraction of BAND_SPAN. */
     public static final float BAND_WARP = 0.27F;
     public static final float BAND_SCALE = 260.0F;
@@ -166,9 +194,22 @@ public final class SteinfeldTerrainPainter {
      * the gradient. Pure, and the only thing every other decision hangs on.
      */
     public static float depthAt(int seed, int tileX, int tileY) {
-        float dx = tileX - ORIGIN_X;
-        float dy = tileY - ORIGIN_Y;
-        float radial = (float) Math.sqrt(dx * dx + dy * dy) / BAND_SPAN;
+        return localDepth(seed, tileX, tileY, RealmDepth.depthAt(tileX, tileY,
+                SkyOrigin.originX(seed), SkyOrigin.originY(seed)));
+    }
+
+    /**
+     * The same gradient for a caller that already has the plane's depth — the
+     * allocation-free hot path the band painter takes.
+     *
+     * <p>The warp is what stops the realm reading as three concentric rings:
+     * the border between two bands wanders by up to
+     * {@code BAND_WARP * BAND_SPAN} = ±616 tiles, so grave soil reaches in
+     * toward Eden along some lines and green grass survives far out along
+     * others. Decay arriving unevenly, which is what decay does.
+     */
+    public static float localDepth(int seed, int tileX, int tileY, float planeDepth) {
+        float radial = RealmDepth.localDepth(RealmDepth.REALM_STEINFELD, planeDepth);
         float warp = (SkyNoise.fbm(seed + SALT_BAND, tileX, tileY, BAND_SCALE, 2) - 0.5F) * 2.0F * BAND_WARP;
         float depth = radial + warp;
         return depth < 0.0F ? 0.0F : depth;
@@ -176,7 +217,11 @@ public final class SteinfeldTerrainPainter {
 
     /** Which of the three bands a tile belongs to. */
     public static int bandAt(int seed, int tileX, int tileY) {
-        float depth = depthAt(seed, tileX, tileY);
+        return bandFor(depthAt(seed, tileX, tileY));
+    }
+
+    /** Which of the three bands a local depth is in. */
+    public static int bandFor(float depth) {
         if (depth < QUIET_BELOW) {
             return BAND_QUIET;
         }
@@ -571,30 +616,69 @@ public final class SteinfeldTerrainPainter {
 
     // ---- Painting -----------------------------------------------------------
 
-    public static void paintRegion(Region region, int seed) {
-        int tileWidth = region.tileLayer.region.tileWidth;
-        int tileHeight = region.tileLayer.region.tileHeight;
-        for (int rx = 0; rx < tileWidth; rx++) {
-            for (int ry = 0; ry < tileHeight; ry++) {
-                int tileX = rx + region.tileXOffset;
-                int tileY = ry + region.tileYOffset;
+    /**
+     * One tile of the Steinfeld band, packed the way
+     * {@link SkyTerrainPainter#pack} packs every tile of the plane.
+     *
+     * <p><b>The Reach has a coast now, and did not before.</b> As a dimension
+     * it had no liquid at all — every tile was buildable ground. One plane has
+     * one sea, so Steinfeld gets the lowest waterline of any realm instead
+     * ({@code SkyTerrainPainter.REALM_WATERLINE[REALM_STEINFELD]} = 0.34, about
+     * four fifths land), and the Mistsea only shows between its far pieces.
+     * That is the one thing about this realm the one-plane move genuinely
+     * changed; the gradient, the grounds, the props and the POIs are untouched.
+     *
+     * @param island    the plane's shared island field at this tile
+     * @param waterline the plane's blended waterline at this depth
+     */
+    public static long describeBand(int seed, int tileX, int tileY,
+            float island, float waterline, float depth, float distortion) {
+        int band = bandFor(localDepth(seed, tileX, tileY, depth));
+        int biomeClass = biomeClassOf(band);
 
-                region.biomeLayer.setBiomeByRegion(rx, ry, biomeIdOf(bandAt(seed, tileX, tileY)));
-
-                int poiSurface = poiSurface(seed, tileX, tileY);
-                int surface = poiSurface >= 0 ? poiSurface : surfaceAt(seed, tileX, tileY);
-                region.tileLayer.setTileByRegion(rx, ry, tileIdOf(surface));
-
-                // Inside a POI the building decides; the open country's own
-                // scatter is suppressed there, so a chapel is a chapel and not
-                // a chapel with shrubs growing through the floor.
-                int prop = poiSurface >= 0 ? poiProp(seed, tileX, tileY) : propAt(seed, tileX, tileY);
-                int objectID = objectIdOf(prop);
-                if (objectID != 0) {
-                    region.objectLayer.setObjectByRegion(
-                            necesse.engine.registries.ObjectLayerRegistry.BASE_LAYER, rx, ry, objectID);
-                }
-            }
+        if (island <= waterline) {
+            return SkyTerrainPainter.pack(SkyRegistry.mistseaID, 0, biomeClass, false);
         }
+
+        int poiSurface = poiSurface(seed, tileX, tileY);
+        int surface = poiSurface >= 0 ? poiSurface : surfaceAt(seed, tileX, tileY);
+        int tileID = tileIdOf(surface);
+
+        if (island <= waterline + SkyTerrainPainter.ISLAND_RIM) {
+            return SkyTerrainPainter.pack(tileID, 0, biomeClass, false); // walkable coast
+        }
+
+        // Inside a POI the building decides; the open country's own scatter is
+        // suppressed there, so a chapel is a chapel and not a chapel with
+        // shrubs growing through the floor.
+        int prop = poiSurface >= 0 ? poiProp(seed, tileX, tileY) : propAt(seed, tileX, tileY);
+        return SkyTerrainPainter.pack(tileID, objectIdOf(prop), biomeClass, false);
+    }
+
+    /** Band -> the plane's biome class (see {@link SkyTerrainPainter}). */
+    public static int biomeClassOf(int band) {
+        if (band == BAND_QUIET) {
+            return SkyTerrainPainter.BIOME_STEINFELD_QUIET;
+        }
+        return band == BAND_SLAB
+                ? SkyTerrainPainter.BIOME_STEINFELD_SLAB
+                : SkyTerrainPainter.BIOME_STEINFELD_HEATH;
+    }
+
+    /**
+     * Is this tile dry Steinfeld ground? Asked by the preset placer and the
+     * pressure field, which have no region in hand.
+     */
+    public static boolean isLand(int seed, int tileX, int tileY) {
+        float depth = RealmDepth.depthAt(tileX, tileY,
+                SkyOrigin.originX(seed), SkyOrigin.originY(seed));
+        float island = SkyNoise.fbm(seed, tileX, tileY, SkyTerrainPainter.ISLAND_SCALE, 3);
+        return island > SkyTerrainPainter.waterlineAt(depth) + SkyTerrainPainter.ISLAND_RIM;
+    }
+
+    /** Is this tile inside the Steinfeld band at all? */
+    public static boolean isSteinfeld(int seed, int tileX, int tileY) {
+        return RealmDepth.realmAt(seed, tileX, tileY,
+                SkyOrigin.originX(seed), SkyOrigin.originY(seed)) == RealmDepth.REALM_STEINFELD;
     }
 }

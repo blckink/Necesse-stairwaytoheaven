@@ -9,30 +9,47 @@ import necesse.engine.util.ComputedFunction;
 import necesse.entity.objectEntity.PortalObjectEntity;
 import necesse.level.gameObject.GameObject;
 import necesse.level.maps.Level;
+import java.awt.Point;
+
 import stairwaytoheaven.SkyRegistry;
+import stairwaytoheaven.worldgen.RealmDepth;
+import stairwaytoheaven.worldgen.RealmLanding;
+import stairwaytoheaven.worldgen.SkyOrigin;
 
 /**
- * Portal entity of the Skyreach-side Crooked Door.
+ * A DOOR BETWEEN BANDS, not a level teleport.
  *
- * <p>The same proven flow the sky stairway and the Veil rift both use —
- * blocked-exit check, lazy level generation, counterpart placement, mob clearing
- * — with one thing that has to be different: <b>where you land</b>.
+ * <p>{@code docs/PLAN_ONE_PLANE.md} item 6: <i>"The realm gate objects that
+ * were built as level portals become either doors between bands on the plane or
+ * house anchors per §A2.3 -- not level teleports."</i> This is the first kind.
+ * The realm it opens onto is a BAND of the sky plane now, so the destination
+ * identifier is {@code skyreach2} and the destination TILE is a landing inside
+ * that band, computed by {@link RealmLanding} from the world seed and the
+ * door's own position. The door still means "you are arriving somewhere", and
+ * the somewhere is a place the player could also have walked to.
  *
- * <p>A door is opened at an arbitrary tile of the Outlands and its far side is
- * placed at the SAME coordinates, because that is how {@code PortalObjectEntity}
- * works. Crooked Beyond is mostly Spill
- * ({@link CrookedTerrainPainter#ISLAND_THRESHOLD}), so those coordinates are
- * very often open liquid. {@link #clearAndPlaceCrookedLanding} therefore does
- * what {@code VeilRiftObjectEntity} does for the marsh: it clears the 3x3
- * arrival area, places the return door, and turns any liquid in that square into
- * the realm's own ground so the player steps out onto stripes rather than into
- * green.
+ * <p><b>It no longer places a return gate.</b> A ladder pair only makes sense
+ * between two levels; on one plane both halves stand on the same level and the
+ * return half would send the player to the tile it is standing on. The way back
+ * is to walk -- which is what a connected overworld is for -- until §A2.3's
+ * Warden's-house anchors land. The arrival square is still cleared and any
+ * liquid in it still reclaimed, so nobody is dropped into the water.
  */
 public class CrookedDoorObjectEntity extends PortalObjectEntity {
 
     public CrookedDoorObjectEntity(Level level, int x, int y) {
-        super(level, "crookeddoordown", x, y, SkyRegistry.CROOKED_IDENTIFIER, x, y);
+        this(level, x, y, landing(level, x, y));
+    }
+
+    private CrookedDoorObjectEntity(Level level, int x, int y, Point landing) {
+        super(level, "crookeddoordown", x, y, SkyRegistry.SKYREACH_IDENTIFIER, landing.x, landing.y);
         this.saveDestination = false;
+    }
+
+    /** Where this door puts the player down inside Crooked Beyond's band. */
+    private static Point landing(Level level, int x, int y) {
+        return RealmLanding.find(SkyOrigin.worldGenSeed(level.getWorldEntity()),
+                RealmDepth.REALM_CROOKED, x, y);
     }
 
     @Override
@@ -63,10 +80,7 @@ public class CrookedDoorObjectEntity extends PortalObjectEntity {
             }
 
             level.regionManager.ensureTileIsLoaded(this.destinationTileX, this.destinationTileY);
-            if (level.getObjectID(this.destinationTileX, this.destinationTileY) != SkyRegistry.crookedDoorUpID) {
-                clearAndPlaceCrookedLanding(server, level, this.destinationTileX, this.destinationTileY,
-                        SkyRegistry.crookedDoorUpID);
-            }
+            clearAndPlaceCrookedLanding(server, level, this.destinationTileX, this.destinationTileY, 0);
 
             client.newStats.ladders_used.increment(1);
             this.runClearMobs(level, this.destinationTileX, this.destinationTileY);
@@ -86,12 +100,15 @@ public class CrookedDoorObjectEntity extends PortalObjectEntity {
 
     /**
      * Crooked-side variant of {@code LadderDownObjectEntity.clearAndPlaceLadder}:
-     * clears the 3x3 arrival area, places the return door, and reclaims any Spill
-     * in that square as {@link CrookedLevel#landingTileID()}.
+     * clears the 3x3 arrival area and reclaims any Spill in that square as the
+     * realm's own striped ground.
+     *
+     * <p>{@code doorObjectID} 0 places nothing at the centre, which is what the
+     * one-plane door passes: there is no return half any more.
      */
     public static void clearAndPlaceCrookedLanding(Server server, Level level, int tileX, int tileY,
             int doorObjectID) {
-        GameObject doorObject = ObjectRegistry.getObject(doorObjectID);
+        GameObject doorObject = doorObjectID != 0 ? ObjectRegistry.getObject(doorObjectID) : null;
 
         for (int i = -1; i <= 1; i++) {
             int currentTileX = tileX + i;
@@ -106,9 +123,15 @@ public class CrookedDoorObjectEntity extends PortalObjectEntity {
                         level.entityManager.destroyObjectOverride(0, currentTileX, currentTileY);
                     }
 
-                    doorObject.placeObject(level, currentTileX, currentTileY, 0, false);
+                    // doorObjectID 0 means "place nothing": the one-plane door
+                    // has no return half to stand here (see the class header).
+                    if (doorObject != null) {
+                        doorObject.placeObject(level, currentTileX, currentTileY, 0, false);
+                    } else {
+                        level.setObject(currentTileX, currentTileY, 0);
+                    }
                     if (level.getTile(currentTileX, currentTileY).isLiquid) {
-                        level.setTile(currentTileX, currentTileY, CrookedLevel.landingTileID());
+                        level.setTile(currentTileX, currentTileY, CrookedRealm.crookedStripeID);
                     }
 
                     server.network.sendToClientsWithTile(
@@ -124,7 +147,7 @@ public class CrookedDoorObjectEntity extends PortalObjectEntity {
 
                     if (level.getTile(currentTileX, currentTileY).isLiquid) {
                         level.sendTileChangePacket(server, currentTileX, currentTileY,
-                                CrookedLevel.landingTileID());
+                                CrookedRealm.crookedStripeID);
                     }
                 }
             }

@@ -3,38 +3,36 @@ package stairwaytoheaven.worldgen;
 import stairwaytoheaven.SkyRegistry;
 
 /**
- * The Outlands: the sky's wrong places, and the rule that keeps them away from
- * the spire.
+ * The Outlands: Crooked Beyond's wrong ground, and the rule that keeps it out
+ * past everything else.
  *
  * <h2>What this is for</h2>
- * The Skyreach reads as one bright, pale, friendly world from horizon to
- * horizon. The player's own words: <i>"das gebiet ist einfach zu weiß und hell
- * und wir brauchen kontrast"</i>. The contrast used to live in a whole second
- * dimension (the Veil, behind a Seance Circle), which meant almost no player
- * ever saw it — a dimension is a door, and a door is a thing you have to be
- * told about.
+ * {@code docs/WORLD_DESIGN.md} §41.4 is blunt about what these are: <i>"The
+ * Beetle Outlands ARE Crooked Beyond ... striped, violet, wrong,
+ * Beetlejuice-based — that is §13 exactly."</i> They were the first realm
+ * expressed the right way — a realm as a distance-gated biome on the sky plane
+ * rather than as a dimension behind a door — which is why
+ * {@code docs/PLAN_ONE_PLANE.md} names this file and {@code OutlandsBiome} as
+ * the pattern every other realm now follows.
  *
- * So the contrast moves into the sky itself, and is gated by DISTANCE instead
- * of by a door. You arrive at the spire, everything is bright and safe, and the
- * further out you walk the more often the world goes wrong. Nothing is thrown
- * away: the ground, the props and the building these regions are made of are
- * the Veil's own, already drawn, already registered.
+ * <h2>The distance ramp, and the interim that is now over</h2>
+ * This class used to start the wrong ground at 900 tiles, and its own comment
+ * recorded why: Crooked Beyond's real band is depth 0.70-0.88, i.e. 4200 tiles
+ * out ({@link RealmDepth}), but Eden, Steinfeld and the Ghost Realm did not
+ * exist, and moving Crooked to its true band would have emptied the world from
+ * 900 to 4200 and brought back the complaint that created this region — <i>"das
+ * gebiet ist einfach zu weiss und hell und wir brauchen kontrast"</i>. That
+ * comment ended with an instruction: <b>"The day Eden and Steinfeld land,
+ * delete this constant and let RealmDepth answer."</b> They have landed, and
+ * as of the one-plane refactor they are bands of this same level, so this is
+ * that deletion. {@link #WRONG_START} and {@link #WRONG_FULL} are now derived
+ * from Crooked's own band and nowhere else.
  *
- * <h2>The distance ramp</h2>
- * Nothing wrong exists inside {@link #WRONG_START} tiles of the origin — that
- * is a hard floor, not a low probability, so the home region can never roll one
- * and the promise "the spire is safe" is a fact about the world rather than a
- * likelihood. Beyond it the patch threshold falls linearly to
- * {@link #WRONG_FULL}, so wrong regions start as an occasional shock and end as
- * the normal state of the far sky.
- *
- * The threshold values are taken from the Veil's own measured sweep
- * ({@link VeilTerrainPainter#HOLLOW_THRESHOLD}, whose comment records the whole
- * curve: 0.660 -> 18.0% of land, 0.700 -> 11.8%, 0.740 -> 6.9%, 0.780 -> 3.6%,
- * 0.820 -> 1.6%). {@link #THRESHOLD_NEAR} 0.82 therefore starts them at about
- * 1.6% of land just past the floor, and {@link #THRESHOLD_FAR} 0.62 ends near
- * 25% in the outer reaches — common enough to define the far sky, never so
- * common that the bright world stops existing.
+ * <h2>Where it is asked</h2>
+ * Only from inside the Crooked band, by
+ * {@code realms.crooked.CrookedTerrainPainter}. The Skyreach no longer has
+ * wrong ground at all: the contrast it needed is now supplied by the four
+ * realms standing between the spire and here.
  *
  * <h2>Everything here is pure noise</h2>
  * Same contract as the rest of worldgen: a function of the seed and the tile
@@ -45,40 +43,35 @@ import stairwaytoheaven.SkyRegistry;
 public final class SkyOutlands {
 
     /**
-     * No wrong ground within this many tiles of the spire, ever.
+     * No wrong ground inside this many tiles of the spire, ever.
      *
-     * <p>The player asked for the change to start "ca 1000m" out from the
-     * tower. A Necesse tile is the world's metre, and the spire's own
-     * guaranteed hub island is {@link SkyOrigin#HUB_RADIUS} = 56, so 900 puts
-     * the first possible wrong ground a real walk away from home.
+     * <p>Crooked Beyond's own band start ({@link RealmDepth#bandStart}, realm
+     * {@link RealmDepth#REALM_CROOKED} = depth 0.70) in tiles: 4200 at
+     * {@link RealmDepth#DEPTH_SCALE} 6000. Derived, never typed — turning the
+     * world-size dial moves this with it, which is the whole reason
+     * {@code RealmDepth} holds one constant instead of nine.
      *
-     * <p><b>INTERIM VALUE — see the note below.</b> Under
-     * {@code docs/WORLD_DESIGN.md} this region is Crooked Beyond, tier 4 of
-     * six, whose band is depth 0.70-0.88 = {@value #CROOKED_TRUE_START} tiles
-     * out ({@link RealmDepth}). It sits at 900 instead because the three realms
-     * that belong between it and the spire -- Eden, Steinfeld and the Ghost
-     * Realm -- <b>do not exist yet</b>, and moving Crooked out to its true band
-     * today would empty the world from 900 to 4200 and bring back the exact
-     * complaint that created this region: "das gebiet ist einfach zu weiss und
-     * hell und wir brauchen kontrast".
-     *
-     * <p>So this is a deliberate, named compromise rather than a disagreement
-     * with the concept. <b>The day Eden and Steinfeld land, delete this
-     * constant and let {@link RealmDepth} answer.</b>
-     * {@link #trueCrookedStart()} already reports where it belongs, and the
-     * status command prints both so the gap stays visible.
+     * <p>It is a hard floor, not a low probability: the realms before Crooked
+     * can never roll one, so "the spire is safe" stays a fact about the world
+     * rather than a likelihood.
      */
-    public static final float WRONG_START = 900.0F;
-
-    /** Distance at which wrong regions reach their full share of the land. */
-    public static final float WRONG_FULL = 3000.0F;
+    public static final float WRONG_START =
+            RealmDepth.bandStart(RealmDepth.REALM_CROOKED) * RealmDepth.DEPTH_SCALE;
 
     /**
-     * Where Crooked Beyond's inner edge belongs once the realms before it
-     * exist: the depth at which {@link RealmDepth} first gives it weight.
-     * Reported, not yet enforced -- see {@link #WRONG_START}.
+     * Distance at which wrong regions reach their full share of the land:
+     * Crooked's peak end (depth 0.88), i.e. 5280 tiles. Past it the realm is
+     * as wrong as it gets, which is also where Hell's band takes over.
      */
-    public static final float CROOKED_TRUE_START = 4200.0F;
+    public static final float WRONG_FULL =
+            RealmDepth.bandPeakEnd(RealmDepth.REALM_CROOKED) * RealmDepth.DEPTH_SCALE;
+
+    /**
+     * Where Crooked Beyond's inner edge belongs, kept as a named alias of
+     * {@link #WRONG_START} so the status oracle can still print both and show
+     * that they now agree.
+     */
+    public static final float CROOKED_TRUE_START = WRONG_START;
 
     /** The band start {@link RealmDepth} actually derives, for the record. */
     public static float trueCrookedStart() {

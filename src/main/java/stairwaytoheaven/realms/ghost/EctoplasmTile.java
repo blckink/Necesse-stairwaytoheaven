@@ -62,7 +62,10 @@ public class EctoplasmTile extends LiquidTile {
      */
     @Override
     public int getMobSpawnPositionTickets(Level level, int tileX, int tileY) {
-        return level instanceof GhostLevel ? GhostPressure.MARSH_TICKETS : 100;
+        // SkyLevel, not GhostLevel: the Ghost band is part of the one plane
+        // now (docs/PLAN_ONE_PLANE.md).
+        return level instanceof stairwaytoheaven.level.SkyLevel
+                ? GhostPressure.MARSH_TICKETS : 100;
     }
 
     @Override

@@ -138,8 +138,9 @@ public final class EdenPressure {
      * default and behaves exactly as it did before this class existed.
      */
     public static int spawnTickets(Level level, int tileX, int tileY) {
-        if (level instanceof EdenLevel) {
-            return spawnTickets(((EdenLevel) level).getWorldGenSeed(), tileX, tileY);
+        if (level instanceof stairwaytoheaven.level.SkyLevel) {
+            return spawnTickets(
+                    ((stairwaytoheaven.level.SkyLevel) level).getWorldGenSeed(), tileX, tileY);
         }
         return 100;
     }

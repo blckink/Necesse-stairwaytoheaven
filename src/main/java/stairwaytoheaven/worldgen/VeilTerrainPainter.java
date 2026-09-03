@@ -1,15 +1,37 @@
 package stairwaytoheaven.worldgen;
 
-import necesse.level.maps.regionSystem.Region;
 import stairwaytoheaven.SkyRegistry;
 
 /**
- * Per-region terrain painter of the Veil: broad marsh landmasses over black
- * murkwater, two sub-biomes (Gloomfen common, Ashen Reach uncommon), calm
- * object density with glowing shrooms as the natural light source.
+ * The Veil's ground, kept whole after the Veil stopped being a world.
+ *
+ * <p>{@code docs/PLAN_ONE_PLANE.md} retired the {@code veil2} dimension and
+ * {@code WORLD_DESIGN} §41.5 says where its ground went:
+ *
+ * <blockquote>Gloomfen and Ashen Reach, with murkwater, blackpeat, murkmoss,
+ * ashsand, deadtree, ashbones, gloomshroom, whisperreeds and the Gloom Shade,
+ * are a Ghost Realm in everything but name (§10). They move from the
+ * {@code veil2} dimension into the one world at the Ghost Realm's realmDepth
+ * band.</blockquote>
+ *
+ * <p>So this class no longer paints a region — there is no level to paint. It
+ * is now the LIBRARY those two bands read:
+ *
+ * <ul>
+ *   <li>{@code realms.ghost.GhostTerrainPainter} calls {@link #rollObject} and
+ *       the biome split below for the fen inside the Ghost band, which is
+ *       Gloomfen and Ashen Reach exactly as they shipped.</li>
+ *   <li>{@code realms.crooked.CrookedTerrainPainter} calls {@link #isHollow}
+ *       and {@link #rollHollowObject} for the Beetlefreak Hollows inside the
+ *       Crooked band, which is where §41.5 puts them.</li>
+ * </ul>
+ *
+ * <p>Every number below is the one that was measured for the Veil. Nothing was
+ * retuned by the move, so both bands read as the place the Veil was.
  */
 public final class VeilTerrainPainter {
 
+    /** Kept for the record: the shape the Veil's own landmasses were measured at. */
     public static final int ISLAND_SCALE = 56;
     public static final float ISLAND_THRESHOLD = 0.44F;
     public static final int BIOME_SCALE = 150;
@@ -43,54 +65,6 @@ public final class VeilTerrainPainter {
     private VeilTerrainPainter() {
     }
 
-    public static void paintRegion(Region region, int seed) {
-        int tileWidth = region.tileLayer.region.tileWidth;
-        int tileHeight = region.tileLayer.region.tileHeight;
-        for (int rx = 0; rx < tileWidth; rx++) {
-            for (int ry = 0; ry < tileHeight; ry++) {
-                int tileX = rx + region.tileXOffset;
-                int tileY = ry + region.tileYOffset;
-
-                float biomeValue = SkyNoise.fbm(seed + SALT_BIOME, tileX, tileY, BIOME_SCALE, 2);
-                boolean isAshen = biomeValue < ASHEN_BELOW;
-                boolean isHollow = isHollow(seed, tileX, tileY);
-                region.biomeLayer.setBiomeByRegion(rx, ry, isHollow
-                        ? SkyRegistry.beetlefreakHollow.getID()
-                        : (isAshen ? SkyRegistry.ashenReach : SkyRegistry.gloomfen).getID());
-
-                float islandValue = SkyNoise.fbm(seed, tileX, tileY, ISLAND_SCALE, 3);
-                if (islandValue <= ISLAND_THRESHOLD) {
-                    region.tileLayer.setTileByRegion(rx, ry, SkyRegistry.murkwaterID);
-                    continue;
-                }
-                boolean isPatch = SkyNoise.fbm(seed + SALT_PATCH, tileX, tileY, PATCH_SCALE, 2) > PATCH_THRESHOLD;
-                int tileID;
-                if (isHollow) {
-                    // Blackpeat still shows through: the striped ground reads
-                    // far louder with something plain interrupting it, and the
-                    // patch noise is what keeps the edge from being a circle.
-                    tileID = isPatch ? SkyRegistry.blackpeatID : SkyRegistry.beetlefreakID;
-                } else if (isAshen) {
-                    tileID = isPatch ? SkyRegistry.blackpeatID : SkyRegistry.ashsandID;
-                } else {
-                    tileID = isPatch ? SkyRegistry.blackpeatID : SkyRegistry.murkmossID;
-                }
-                region.tileLayer.setTileByRegion(rx, ry, tileID);
-
-                if (islandValue <= ISLAND_THRESHOLD + 0.02F) {
-                    continue; // keep shorelines walkable
-                }
-                int objectID = isHollow
-                        ? rollHollowObject(seed, tileX, tileY)
-                        : rollObject(seed, tileX, tileY, isAshen, isPatch);
-                if (objectID != 0) {
-                    region.objectLayer.setObjectByRegion(
-                            necesse.engine.registries.ObjectLayerRegistry.BASE_LAYER, rx, ry, objectID);
-                }
-            }
-        }
-    }
-
     public static int rollObject(int seed, int tileX, int tileY, boolean isAshen, boolean isPatch) {
         float roll = SkyNoise.tileRoll(seed, tileX, tileY, SALT_OBJECT_ROLL);
         if (isAshen) {
@@ -118,9 +92,16 @@ public final class VeilTerrainPainter {
         return SkyNoise.fbm(seed + SALT_HOLLOW, tileX, tileY, HOLLOW_SCALE, 2) > HOLLOW_THRESHOLD;
     }
 
-    /** Is this tile dry land? Same question, same reason. */
+    /**
+     * Is this tile dry land? Same question, same reason — but against the ONE
+     * plane's coastline, because that is the ground the Hollows are painted on
+     * now.
+     */
     public static boolean isLand(int seed, int tileX, int tileY) {
-        return SkyNoise.fbm(seed, tileX, tileY, ISLAND_SCALE, 3) > ISLAND_THRESHOLD + 0.02F;
+        float depth = RealmDepth.depthAt(tileX, tileY,
+                SkyOrigin.originX(seed), SkyOrigin.originY(seed));
+        float island = SkyNoise.fbm(seed, tileX, tileY, SkyTerrainPainter.ISLAND_SCALE, 3);
+        return island > SkyTerrainPainter.waterlineAt(depth) + SkyTerrainPainter.ISLAND_RIM;
     }
 
     /**

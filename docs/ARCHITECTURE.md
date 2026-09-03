@@ -17,6 +17,16 @@ through `Level.getBiome(x, y)`.
 This mod adds `skyreach = +1` using exactly those mechanisms — no bytecode patches, no
 vanilla entries modified, additive registrations only.
 
+**And it adds exactly one.** `docs/PLAN_ONE_PLANE.md` (2026-09-02) retired the five
+other modded levels that briefly existed. Eden, Steinfeld, the Ghost Realm, Crooked
+Beyond and the Veil are **bands of `skyreach2`**, picked per tile by
+`worldgen/RealmDepth` from distance to the Old Warden Spire, because
+`docs/WORLD_DESIGN.md` §3 asks for overlapping biome *weights* and a dimension is the
+one thing that cannot overlap. `SkyTerrainPainter.describeTile` dispatches to each
+realm's band painter; the region's biome layer carries the realm's own sub-biomes, so
+spawn tables, music and crate loot resolve through `Level.getBiome(x, y)` exactly as
+they did per-dimension.
+
 ## Lifecycle (StairwayToHeavenMod)
 
 | Phase | What we do | Why there |
@@ -38,7 +48,20 @@ vanilla entries modified, additive registrations only.
     a per-world seed from `WorldEntity.worldSeed` (persisted with the save), salted so
     the sky never mirrors another layer.
 - **`WorldGenerator` hook** (in the mod entry): returns a `SkyLevel` for the `skyreach`
-  identifier; generators are consulted newest-first, vanilla's fallback handles the rest.
+  identifier and nothing else; generators are consulted newest-first, vanilla's fallback
+  handles the rest.
+- **`RealmDepth`** — distance → `realmDepth` (0 at the spire, 1 at `DEPTH_SCALE` 6000)
+  → a weighted realm pick over six overlapping trapezoid bands, plus the `distortion`
+  field. The single dial for the world's size, and the only place the realm question is
+  answered.
+- **`SkyTerrainPainter.REALM_WATERLINE` / `waterlineAt`** — the plane has ONE island
+  field and ONE coastline, but the waterline is blended across the realm weights at each
+  depth, so Eden is broad and lagoon-cut (0.40), Steinfeld is nearly continuous country
+  (0.34) and the Skyreach stays an archipelago (0.48). Blending on depth alone keeps it
+  continuous, so no coastline steps at a realm border.
+- **`RealmLanding`** — where a door onto a realm puts the player down: the middle of that
+  realm's band, in the direction the door was opened from, on the first open ground. The
+  realm gates and the séance rift are same-plane doors now, not level teleports.
 - **`SkyNoise`** — allocation-free deterministic value noise (hash → bilinear → fBm).
   Pure functions of (seed, tileX, tileY): region borders are seamless by construction.
 - **`SkyTerrainPainter.paintRegion`** — the world-gen core, mirroring

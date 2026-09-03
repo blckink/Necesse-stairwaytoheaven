@@ -1,14 +1,32 @@
 package stairwaytoheaven.realms.ghost;
 
-import necesse.engine.registries.ObjectLayerRegistry;
-import necesse.level.maps.regionSystem.Region;
+import stairwaytoheaven.SkyRegistry;
+import stairwaytoheaven.worldgen.RealmDepth;
 import stairwaytoheaven.worldgen.SkyNoise;
+import stairwaytoheaven.worldgen.SkyOrigin;
 import stairwaytoheaven.worldgen.SkyTerrainPainter;
+import stairwaytoheaven.worldgen.VeilTerrainPainter;
 
 /**
- * Per-region terrain painter of the Ghost Realm: broad dead landmasses over
- * glowing ectoplasm marsh, three sub-biomes, and object density that composes
+ * The Ghost Realm as a BAND of the one plane: broad dead landmasses over
+ * glowing ectoplasm marsh, five sub-biomes, and object density that composes
  * groves and grave-fields rather than sprinkling props one tile at a time.
+ *
+ * <p><b>This is no longer a level's painter.</b> {@code docs/PLAN_ONE_PLANE.md}
+ * retired the {@code ghost2} dimension: the Ghost Realm is the realm
+ * {@link RealmDepth} gives depth 0.60-0.80, and
+ * {@link SkyTerrainPainter#describeTile} calls {@link #describeBand} for every
+ * tile the realm pick lands here.
+ *
+ * <h2>The Veil moved in ({@code WORLD_DESIGN} §41.5)</h2>
+ * <blockquote>Gloomfen and Ashen Reach ... are a Ghost Realm in everything but
+ * name (§10). They move from the {@code veil2} dimension into the one world at
+ * the Ghost Realm's realmDepth band.</blockquote>
+ * They are here, as a fourth and fifth ground cut across the other three by
+ * {@link #FEN_SCALE}'s own field: murkmoss, ash sand and blackpeat under
+ * whisperreeds, gloom shrooms, dead trees and ash bones, painted by
+ * {@link VeilTerrainPainter}'s own shipped mix. The Veil's level is gone; not
+ * one tile of its ground is.
  *
  * <h2>The three grounds</h2>
  * <ul>
@@ -38,10 +56,39 @@ public final class GhostTerrainPainter {
 
     // ---- Landmass ---------------------------------------------------------
 
+    /**
+     * Kept for the record: the shape this realm was measured at.
+     *
+     * <p>The FIELD is now the plane's own
+     * ({@code SkyTerrainPainter.ISLAND_SCALE}) because one connected overworld
+     * has one coastline, and 0.44 survived as this realm's WATERLINE in
+     * {@code SkyTerrainPainter.REALM_WATERLINE} — so the landmasses come out
+     * the same proportion of the ground they always did.
+     */
     public static final int ISLAND_SCALE = 56;
     public static final float ISLAND_THRESHOLD = 0.44F;
     /** Tiles inside the shoreline that stay bare, so a coast is walkable. */
     public static final float ISLAND_RIM = 0.02F;
+
+    // ---- The Veil's fen, §41.5 ---------------------------------------------
+
+    /**
+     * Where the Ghost Realm is the Veil instead.
+     *
+     * <p>A coarse field, cut across the other three grounds rather than tiled
+     * beside them — the construction the Beetlefreak Hollows already used, for
+     * the same reason: the fen has to be a place you arrive IN, not a fourth
+     * stripe of a menu. 0.62 puts it at roughly a fifth of the band, so the
+     * Aftergarden stays the realm's normal state and the fen stays the wet,
+     * black, whispering exception §41.5 describes.
+     *
+     * <p>Inside it, {@link VeilTerrainPainter#ASHEN_BELOW} splits Gloomfen from
+     * Ashen Reach off the Veil's OWN biome field and threshold, so the two
+     * grounds keep the proportions they shipped with.
+     */
+    public static final float FEN_SCALE = 118.0F;
+    public static final float FEN_THRESHOLD = 0.62F;
+    public static final int SALT_FEN = 79;
 
     // ---- Sub-biomes -------------------------------------------------------
 
@@ -106,35 +153,70 @@ public final class GhostTerrainPainter {
 
     // ---- Painting ---------------------------------------------------------
 
-    public static void paintRegion(Region region, int seed) {
-        int tileWidth = region.tileLayer.region.tileWidth;
-        int tileHeight = region.tileLayer.region.tileHeight;
-        for (int rx = 0; rx < tileWidth; rx++) {
-            for (int ry = 0; ry < tileHeight; ry++) {
-                int tileX = rx + region.tileXOffset;
-                int tileY = ry + region.tileYOffset;
+    /**
+     * One tile of the Ghost band, packed the way {@link SkyTerrainPainter#pack}
+     * packs every tile of the plane.
+     *
+     * @param island    the plane's shared island field at this tile
+     * @param waterline the plane's blended waterline at this depth
+     */
+    public static long describeBand(int seed, int tileX, int tileY,
+            float island, float waterline, float depth, float distortion) {
+        boolean fen = isFen(seed, tileX, tileY);
+        boolean ashen = fen && SkyNoise.fbm(seed + VeilTerrainPainter.SALT_BIOME, tileX, tileY,
+                VeilTerrainPainter.BIOME_SCALE, 2) < VeilTerrainPainter.ASHEN_BELOW;
+        int biome = fen ? -1 : biomeAt(seed, tileX, tileY);
+        int biomeClass = fen
+                ? (ashen ? SkyTerrainPainter.BIOME_ASHEN_REACH : SkyTerrainPainter.BIOME_GLOOMFEN)
+                : biomeClassOf(biome);
 
-                int biome = biomeAt(seed, tileX, tileY);
-                region.biomeLayer.setBiomeByRegion(rx, ry, biomeID(biome));
+        if (island <= waterline) {
+            // The fen's water is the Veil's black murkwater; the realm's own is
+            // the ectoplasm that gives the Aftergarden its light.
+            return SkyTerrainPainter.pack(
+                    fen ? SkyRegistry.murkwaterID : GhostRealm.ectoplasmID, 0, biomeClass, false);
+        }
 
-                float island = SkyNoise.fbm(seed, tileX, tileY, ISLAND_SCALE, 3);
-                if (island <= ISLAND_THRESHOLD) {
-                    region.tileLayer.setTileByRegion(rx, ry, GhostRealm.ectoplasmID);
-                    continue;
-                }
-                boolean patch = SkyNoise.fbm(seed + SALT_PATCH, tileX, tileY, PATCH_SCALE, 2)
-                        > PATCH_THRESHOLD;
-                region.tileLayer.setTileByRegion(rx, ry, groundAt(biome, patch));
+        boolean patch = SkyNoise.fbm(seed + SALT_PATCH, tileX, tileY, PATCH_SCALE, 2)
+                > PATCH_THRESHOLD;
+        int tileID = fen ? fenGround(seed, tileX, tileY, ashen) : groundAt(biome, patch);
+        if (island <= waterline + ISLAND_RIM) {
+            return SkyTerrainPainter.pack(tileID, 0, biomeClass, false); // shorelines stay walkable
+        }
+        int objectID = fen
+                ? VeilTerrainPainter.rollObject(seed, tileX, tileY, ashen, isFenPatch(seed, tileX, tileY))
+                : rollObject(seed, tileX, tileY, biome, patch);
+        return SkyTerrainPainter.pack(tileID, objectID, biomeClass, false);
+    }
 
-                if (island <= ISLAND_THRESHOLD + ISLAND_RIM) {
-                    continue; // keep shorelines walkable
-                }
-                int objectID = rollObject(seed, tileX, tileY, biome, patch);
-                if (objectID != 0) {
-                    region.objectLayer.setObjectByRegion(
-                            ObjectLayerRegistry.BASE_LAYER, rx, ry, objectID);
-                }
-            }
+    /** Is this tile the Veil's fen rather than the Aftergarden? (§41.5) */
+    public static boolean isFen(int seed, int tileX, int tileY) {
+        return SkyNoise.fbm(seed + SALT_FEN, tileX, tileY, FEN_SCALE, 2) > FEN_THRESHOLD;
+    }
+
+    /** The Veil's own patch field: what breaks its grounds with blackpeat. */
+    private static boolean isFenPatch(int seed, int tileX, int tileY) {
+        return SkyNoise.fbm(seed + VeilTerrainPainter.SALT_PATCH, tileX, tileY,
+                VeilTerrainPainter.PATCH_SCALE, 2) > VeilTerrainPainter.PATCH_THRESHOLD;
+    }
+
+    /** The fen's ground: the Veil's, unchanged. */
+    private static int fenGround(int seed, int tileX, int tileY, boolean ashen) {
+        if (isFenPatch(seed, tileX, tileY)) {
+            return SkyRegistry.blackpeatID;
+        }
+        return ashen ? SkyRegistry.ashsandID : SkyRegistry.murkmossID;
+    }
+
+    /** Ground code -> the plane's biome class (see {@link SkyTerrainPainter}). */
+    public static int biomeClassOf(int biome) {
+        switch (biome) {
+            case ECTOMARSH:
+                return SkyTerrainPainter.BIOME_GHOST_ECTOMARSH;
+            case BONE_ORCHARD:
+                return SkyTerrainPainter.BIOME_GHOST_ORCHARD;
+            default:
+                return SkyTerrainPainter.BIOME_GHOST_AFTERGARDEN;
         }
     }
 
@@ -153,17 +235,6 @@ public final class GhostTerrainPainter {
         return value > ORCHARD_ABOVE ? BONE_ORCHARD : AFTERGARDEN;
     }
 
-    private static int biomeID(int biome) {
-        switch (biome) {
-            case ECTOMARSH:
-                return GhostRealm.ectomarsh.getID();
-            case BONE_ORCHARD:
-                return GhostRealm.boneOrchard.getID();
-            default:
-                return GhostRealm.aftergarden.getID();
-        }
-    }
-
     /** The ground tile a biome shows, and what its patch noise breaks it with. */
     public static int groundAt(int biome, boolean patch) {
         switch (biome) {
@@ -176,9 +247,24 @@ public final class GhostTerrainPainter {
         }
     }
 
-    /** Is this tile dry land? Asked by the preset placer before a region exists. */
+    /**
+     * Is this tile dry Ghost ground? Asked by the preset placer and the pressure
+     * field, neither of which has a region in hand.
+     *
+     * <p>It answers against the PLANE's island field and waterline, so it cannot
+     * disagree with what {@link #describeBand} paints later.
+     */
     public static boolean isLand(int seed, int tileX, int tileY) {
-        return SkyNoise.fbm(seed, tileX, tileY, ISLAND_SCALE, 3) > ISLAND_THRESHOLD + ISLAND_RIM;
+        float depth = RealmDepth.depthAt(tileX, tileY,
+                SkyOrigin.originX(seed), SkyOrigin.originY(seed));
+        float island = SkyNoise.fbm(seed, tileX, tileY, SkyTerrainPainter.ISLAND_SCALE, 3);
+        return island > SkyTerrainPainter.waterlineAt(depth) + ISLAND_RIM;
+    }
+
+    /** Is this tile inside the Ghost band at all? */
+    public static boolean isGhost(int seed, int tileX, int tileY) {
+        return RealmDepth.realmAt(seed, tileX, tileY,
+                SkyOrigin.originX(seed), SkyOrigin.originY(seed)) == RealmDepth.REALM_GHOST;
     }
 
     /** Is this tile inside a grove — the field that clusters the trees? */
