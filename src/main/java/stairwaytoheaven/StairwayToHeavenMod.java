@@ -211,6 +211,11 @@ public class StairwayToHeavenMod {
         SkyRegistry.veilRiftDown.ladderUpObjectID = SkyRegistry.veilRiftUpID;
         SkyRegistry.seanceCircleID = ObjectRegistry.registerObject("seancecircle", new SeanceCircleObject(), 15.0F, true);
 
+        // One boss portal per realm, plus the per-mob scaling buff they use.
+        // docs/FOGKEY_AND_BOSSPORTALS.md §B3-B5: unbreakable, inert until that
+        // realm's key piece is built, and scattered by SkyLevel's worldgen.
+        stairwaytoheaven.bosses.BossPortalObject.register();
+
         SkyObjects.register();
     }
 
@@ -222,6 +227,7 @@ public class StairwayToHeavenMod {
         stairwaytoheaven.realms.steinfeld.SteinfeldRealm.loadTextures();
         stairwaytoheaven.realms.crooked.CrookedRealm.loadTextures();
         stairwaytoheaven.realms.ghost.GhostRealm.loadTextures();
+        stairwaytoheaven.bosses.BossPortalObject.loadBorrowedSheets();
     }
 
     public void postInit() {

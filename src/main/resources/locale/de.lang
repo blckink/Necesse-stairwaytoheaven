@@ -844,3 +844,20 @@ lostpilgrim=Verlorener Pilger
 stonemourner=Steinerner Trauernder
 hollowangel=Hohler Engel
 gravecrow=Grabkrähe
+
+// ============================================================
+// Die Bosstore (docs/FOGKEY_AND_BOSSPORTALS.md Abschnitte B2-B5)
+// ============================================================
+[object]
+bossportalskyreach=Rufstein der Himmelsweite
+bossportaleden=Rufstein von Eden
+bossportalsteinfeld=Rufstein von Steinfeld
+bossportalghostrealm=Rufstein des Nachgartens
+bossportalcrookedbeyond=Rufstein der Krümmung
+[buff]
+incursionpressure=Inkursionsdruck
+[misc]
+bossportallocked=Der Stein bleibt kalt. Bau das Schlüsselstück dieses Reiches daheim auf, dann antwortet er.
+bossportalbusy=Sein Wächter ist bereits erwacht. Beende erst diesen Kampf.
+bossportalsilent=Nichts antwortet. Was hier schlief, hat noch keinen Namen.
+bossportalawoke=Der Stein öffnet sich. <name> ist erwacht!

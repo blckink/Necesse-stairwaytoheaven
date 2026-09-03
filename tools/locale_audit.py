@@ -94,6 +94,7 @@ LOCAL_REGISTRARS = {
     "registerMeadowGrass": "object",  # SkyObjects: walk-through carpet grass
     "natural": "object",              # GhostRealm: borrowed solid scenery
     "plant": "object",                # GhostRealm: borrowed soft flora
+    "registerPortal": "object",       # BossPortalObject: one per realm
 }
 
 # Registry calls whose ID argument is legitimately a variable, keyed by the

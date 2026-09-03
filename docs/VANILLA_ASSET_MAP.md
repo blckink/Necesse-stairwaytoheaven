@@ -147,6 +147,35 @@ vanilla's, so the vanilla file is the format reference and must stay findable.
 | `mobs/crystalarmadillo.png` | `mobs/crookedarmadillo.png` | same layout at 512x320 — 8 cols, because columns 6 and 7 are the two rolled-up ball frames |
 | `mobs/crystaldragon.png` + `mobs/crystaldragonhead.png` | `mobs/mistserpent.png` + `mobs/mistserpent_shadow.png` + `mobs/mistserpenthead.png` | worm-chain sheet: body/shadow at 320x1792 (pixel-identical to the vanilla dragon's), head at 68x68. Behaviour is NOT borrowed from `CrystalDragonHead` — `MistserpentHead`/`MistserpentBody` extend the generic `HostileWormMobHead`/`Body`, the same non-boss base `SandwormHead` uses; only the sheet geometry is the dragon's, added 2026-09-02 |
 
+### 1.6 MOD sheets reused as stand-ins by a second object
+
+Not vanilla art at all — the mod's own PNGs, worn by a **second** object because
+the thing that object should look like has not been drawn yet. They are listed
+here for the same reason everything else is: the swap pass has to be able to
+find every place a sprite is standing in for something, and "it is our own file"
+does not make it any less a stand-in.
+
+**The boss portals** (`docs/FOGKEY_AND_BOSSPORTALS.md` §B3) are supposed to look
+like their realm's **key piece** — the buildable object §B1 makes an Elder-quest
+reward — so that a player who meets one recognises what they need. Those key
+pieces are §B1's work and do not exist yet. Until they do, each realm's portal
+borrows the closest thing the mod already draws. Each swaps out by changing one
+constant in `bosses/BossPortalObject`; nothing is copied and nothing is
+recoloured.
+
+| mod sheet | size | realm | worn a second time by | why that sheet |
+|---|---|---|---|---|
+| `objects/wardenbeaconon.png` | 32x96 | Skyreach | `bossportalskyreach` (`BossPortalObject.SPRITE_SKYREACH`) | the one thing the Skyreach already draws that reads as "something happens here" — a lit standing marker |
+| `objects/skystairwaydown.png` | 32x96 | Garden of Eden | `bossportaleden` (`SPRITE_EDEN`) | already Eden's doorway: `EdenGateObject` passes `"skystairway"` to `LadderDownObject`, which reads exactly this file |
+| `objects/statues/seraph.png` | 96x192 | Steinfeld | `bossportalsteinfeld` (`SPRITE_STEINFELD`) | §B1 names *"a statue for Steinfeld"*, and the realm already stands this sheet up as its `brokenangel` (`StatueObject("seraph", 32, 1)`) |
+| `objects/statues/gloomraven.png` | 64x96 | Ghost Realm | `bossportalghostrealm` (`SPRITE_GHOST`) | the mod's own grave-marker statue, already scattered by `SkyTerrainPainter` through the realms the Skyway does not reach |
+| `objects/veilriftdown.png` | 32x96 | Crooked Beyond | `bossportalcrookedbeyond` (`SPRITE_CROOKED`) | this file IS Mr. Knott's door in the shipped mod — `CrookedDoorObject` passes `"veilrift"` to `LadderDownObject` — and §B1 names that door as Crooked's key piece |
+
+All five are loaded by literal path from `BossPortalObject.loadBorrowedSheets()`,
+which exists so `tools/locale_audit.py` can see them: the objects themselves must
+load through a field (the path differs per realm), and a path the audit cannot
+read as a literal is a path nothing checks.
+
 ---
 
 ## 2. Stand-ins for the later realms

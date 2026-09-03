@@ -247,6 +247,25 @@ second configuration rather than a second code path. See
 | `hollowangel` | mob | Elite broken heaven guardian, the realm's toughest standing fight and the mod's own measured difficulty floor. |
 | `gravecrow` | mob | Ranged flier working the open ground, the realm's only ranged threat. |
 
+## The boss portals
+
+`docs/FOGKEY_AND_BOSSPORTALS.md` §B3–B5: each realm scatters a handful of
+unbreakable summoning stones through its own band. They are inert until that
+realm's key piece stands in the player's base (§B2, recorded in
+`SkywatchWorldData.bossPortalsUnlocked`), and using an unlocked one wakes that
+realm's vanilla incursion boss at §B4's tier — one at a time per stone. The
+ladder is `bosses/SkyBossLadder`; the per-mob scaling is `bosses/BossScaling`.
+Hell has no stone: §B4 reserves its boss and gives it no tier.
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `bossportalskyreach` | object | Skyreach summoning stone — wakes the Cryo Queen at incursion tier 8 (57 240 HP) once the Skyreach key piece stands at home; never minable. |
+| `bossportaleden` | object | Eden summoning stone — wakes the Moonlight Dancer at incursion tier 8 (127 200 HP) once Eden's key piece stands at home; never minable. |
+| `bossportalsteinfeld` | object | Steinfeld summoning stone — wakes the Ascended Wizard at incursion tier 9 (157 520 HP) once Steinfeld's key piece stands at home; never minable. |
+| `bossportalghostrealm` | object | Aftergarden summoning stone — wakes the Pest Warden at incursion tier 9 (161 100 HP) once the Ghost Realm's key piece stands at home; never minable. |
+| `bossportalcrookedbeyond` | object | Crooked summoning stone — wakes the Crystal Dragon at incursion tier 10 (208 000 HP) once Mr. Knott's red door stands at home; never minable. |
+| `incursionpressure` | buff | The permanent, invisible buff a portal puts on the boss it wakes: vanilla's own incursion tier curve as `MAX_HEALTH` and `ALL_DAMAGE` on that one mob, so the rest of the sky plane is untouched. |
+
 ## Baseline — registered before the ledger existed
 
 These predate the ledger and are described in `CHANGELOG.md`,

@@ -843,3 +843,20 @@ lostpilgrim=Lost Pilgrim
 stonemourner=Stone Mourner
 hollowangel=Hollow Angel
 gravecrow=Grave Crow
+
+// ============================================================
+// The boss portals (docs/FOGKEY_AND_BOSSPORTALS.md sections B2-B5)
+// ============================================================
+[object]
+bossportalskyreach=Skyreach Summoning Stone
+bossportaleden=Eden Summoning Stone
+bossportalsteinfeld=Steinfeld Summoning Stone
+bossportalghostrealm=Aftergarden Summoning Stone
+bossportalcrookedbeyond=Crooked Summoning Stone
+[buff]
+incursionpressure=Incursion Pressure
+[misc]
+bossportallocked=The stone is cold. Build this realm's key piece at home, and it will answer.
+bossportalbusy=Its guardian is already awake. Finish that fight first.
+bossportalsilent=Nothing answers. Whatever slept here has not been named yet.
+bossportalawoke=The stone opens. <name> has awoken!

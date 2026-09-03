@@ -81,6 +81,7 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
         placeResident(region);
         placeRealmResidents(region);
         placeGuardPacks(region);
+        placeBossPortals(region);
     }
 
     // ---- Which realm a place is in ----------------------------------------
@@ -373,6 +374,120 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
                 stairwaytoheaven.realms.crooked.CrookedSites.SALT_LONGTABLE,
                 stairwaytoheaven.realms.crooked.CrookedSites.LONGTABLE_CHANCE,
                 0xC2B2AE3DL, crooked);
+    }
+
+    // ---- Boss portals -----------------------------------------------------
+
+    /**
+     * Each realm's boss portals, scattered through that realm's own band.
+     *
+     * <p>{@code docs/FOGKEY_AND_BOSSPORTALS.md} §B3: <i>"Scattered through
+     * worldgen, in their own region only."</i> Built as one lattice per realm,
+     * the same hashed-site shape {@link #placeGuardPacks} walks and
+     * {@link stairwaytoheaven.worldgen.SkyTerrainPainter#nearestSite}
+     * documents — a cell hash decides whether a cell holds a site, two more
+     * place it inside the cell, and everything is a pure function of the world
+     * seed and the cell coordinates, so the same world always grows the same
+     * portals no matter which order regions generate in.
+     *
+     * <p>The difference from the guard packs is that a portal is ONE TILE, not
+     * a disc. So there is no reach to scan for: a site either lands in this
+     * region and is this region's to place, or it lands in another region and
+     * that region will place it. No portal is ever placed twice and none is
+     * lost at a region border.
+     *
+     * <p>Rarity is in {@link stairwaytoheaven.bosses.BossPortalObject}: it is
+     * a landmark, not scenery, and one lattice cell of 600 tiles at a 0.35
+     * chance puts it well below the rarest thing the sky already scatters.
+     */
+    private void placeBossPortals(Region region) {
+        if (this.isClient()) {
+            return;
+        }
+        for (int realm = 0; realm < RealmDepth.REALM_COUNT; realm++) {
+            int objectID = stairwaytoheaven.bosses.BossPortalObject.portalID(realm);
+            // 0 is the empty object, so a realm with no portal registered --
+            // Hell, today -- simply has nothing to scatter.
+            if (objectID != 0) {
+                placePortalsOf(region, realm, objectID);
+            }
+        }
+    }
+
+    /** One realm's portal lattice, for the sites that fall in this region. */
+    private void placePortalsOf(Region region, int realm, int objectID) {
+        int seed = this.getWorldGenSeed();
+        int originX = SkyOrigin.originX(seed);
+        int originY = SkyOrigin.originY(seed);
+        int cell = stairwaytoheaven.bosses.BossPortalObject.PORTAL_CELL;
+        float chance = stairwaytoheaven.bosses.BossPortalObject.PORTAL_CHANCE;
+        // Each realm walks its own lattice, so two realms whose bands overlap
+        // cannot be handed the same cell and fight over the site in it.
+        int salt = stairwaytoheaven.bosses.BossPortalObject.SALT_PORTAL
+                + realm * stairwaytoheaven.bosses.BossPortalObject.SALT_STRIDE;
+        int minX = region.tileXOffset;
+        int minY = region.tileYOffset;
+        int maxX = region.tileXOffset + region.tileWidth - 1;
+        int maxY = region.tileYOffset + region.tileHeight - 1;
+        for (int cx = Math.floorDiv(minX, cell); cx <= Math.floorDiv(maxX, cell); cx++) {
+            for (int cy = Math.floorDiv(minY, cell); cy <= Math.floorDiv(maxY, cell); cy++) {
+                if (SkyNoise.hash(seed + salt, cx, cy) >= chance) {
+                    continue;
+                }
+                int siteX = Math.round(cx * cell + SkyNoise.hash(seed + salt + 1, cx, cy) * cell);
+                int siteY = Math.round(cy * cell + SkyNoise.hash(seed + salt + 2, cx, cy) * cell);
+                if (siteX < minX || siteX > maxX || siteY < minY || siteY > maxY) {
+                    continue;
+                }
+                // "In their own region only": the lattice is infinite, the realm
+                // is a band. Without this a Ghost portal would stand in the
+                // Skyreach, unlockable by a key piece for a realm the player has
+                // not reached -- the same bug placePacksOf's realm gate exists
+                // to prevent.
+                if (RealmDepth.realmAt(seed, siteX, siteY, originX, originY) != realm) {
+                    continue;
+                }
+                placePortalAt(region, realm, objectID, siteX, siteY);
+            }
+        }
+    }
+
+    /**
+     * Stands one portal at (or beside) its site.
+     *
+     * <p>The site is a hashed point, so it lands in the Mistsea about as often
+     * as the sky is sea. Rather than move the site — which would make the
+     * portal's position depend on the order regions load — the search is a
+     * short deterministic walk seeded from the site itself, and it never leaves
+     * this region, so whichever region owns the site owns every candidate too.
+     */
+    private void placePortalAt(Region region, int realm, int objectID, int siteX, int siteY) {
+        long portalSeed = (this.getWorldGenSeed() * 0x9E3779B97F4A7C15L)
+                ^ ((long) siteX * 0x27D4EB2FL)
+                ^ ((long) siteY * 0x165667B1L)
+                ^ ((long) realm * 0x9E3779B1L);
+        GameRandom random = new GameRandom(portalSeed);
+        for (int attempt = 0; attempt < 16; attempt++) {
+            int tileX = attempt == 0 ? siteX : siteX + random.getIntBetween(-3, 3);
+            int tileY = attempt == 0 ? siteY : siteY + random.getIntBetween(-3, 3);
+            if (tileX < region.tileXOffset || tileX >= region.tileXOffset + region.tileWidth
+                    || tileY < region.tileYOffset || tileY >= region.tileYOffset + region.tileHeight) {
+                continue;
+            }
+            if (!this.isTileWithinBounds(tileX, tileY) || this.isSolidTile(tileX, tileY)) {
+                continue;
+            }
+            if (this.getTile(tileX, tileY).isLiquid || this.getObjectID(tileX, tileY) != 0) {
+                continue;
+            }
+            this.setObject(tileX, tileY, objectID);
+            // setObject alone does NOT build the object entity (Level.java:957);
+            // only placeObject and this do. The portal's entire memory -- which
+            // boss it woke and whether that boss is still out -- lives in that
+            // entity, so a portal without one would summon on every click.
+            this.replaceObjectEntity(tileX, tileY);
+            return;
+        }
     }
 
     /**

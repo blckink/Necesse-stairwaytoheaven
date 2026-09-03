@@ -5,6 +5,7 @@ import necesse.engine.save.LoadData;
 import necesse.engine.save.SaveData;
 import necesse.engine.world.WorldEntity;
 import necesse.engine.world.worldData.WorldData;
+import stairwaytoheaven.worldgen.RealmDepth;
 
 /**
  * The one fact about the Warden that must outlive a dimension.
@@ -137,6 +138,35 @@ public class SkywatchWorldData extends WorldData {
      */
     public final java.util.HashSet<String> residentsClaimed = new java.util.HashSet<>();
 
+    /**
+     * Which realms' boss portals a key piece has already unlocked.
+     *
+     * <p>{@code docs/FOGKEY_AND_BOSSPORTALS.md} §B2: <i>"Stand the key piece in
+     * your base and that region's boss portals unlock. Before that they are
+     * inert."</i> Two facts follow from that one sentence and both point here.
+     *
+     * <p>The key piece stands in the player's BASE and the portals stand in the
+     * realm, so the unlock cannot live on either of them — it is a fact about
+     * the WORLD, exactly like {@link #wardenRecruited} and
+     * {@link #crookedDoorwayOpened}, and for exactly the same reason: a
+     * {@code LevelData} record dies with a generation bump and cannot be read
+     * while its level is unloaded, and the two places involved are frequently
+     * different levels.
+     *
+     * <p>And it is world-scoped rather than per player, unlike the Ghost
+     * chalk's grant: a key piece is a BUILDING. One player builds it, it stands
+     * in a shared settlement, and everyone in that world can then use the
+     * portals. That is what §B1-B2 describe, and it is the only reading that
+     * does not make a co-op world build five statues.
+     *
+     * <p>Stored as realm KEYS ({@code RealmDepth.keyOf}) rather than as a fixed
+     * array of booleans, mirroring {@link #residentsClaimed}: a save written
+     * before Hell exists must still load once {@code REALM_COUNT} grows, and a
+     * set of names cannot be silently shifted by a renumbering the way an array
+     * of flags can.
+     */
+    public final java.util.HashSet<String> bossPortalsUnlocked = new java.util.HashSet<>();
+
     public boolean catHomeSet = false;
     public int catHomeX = 0;
     public int catHomeY = 0;
@@ -154,6 +184,8 @@ public class SkywatchWorldData extends WorldData {
         save.addBoolean("crookedDoorwayOpened", this.crookedDoorwayOpened);
         save.addStringArray("residentsClaimed",
                 this.residentsClaimed.toArray(new String[0]));
+        save.addStringArray("bossPortalsUnlocked",
+                this.bossPortalsUnlocked.toArray(new String[0]));
         save.addBoolean("catHomeSet", this.catHomeSet);
         save.addInt("catHomeX", this.catHomeX);
         save.addInt("catHomeY", this.catHomeY);
@@ -174,6 +206,12 @@ public class SkywatchWorldData extends WorldData {
         for (String claimed : save.getStringArray("residentsClaimed", new String[0], false)) {
             if (claimed != null && !claimed.isEmpty()) {
                 this.residentsClaimed.add(claimed);
+            }
+        }
+        this.bossPortalsUnlocked.clear();
+        for (String unlocked : save.getStringArray("bossPortalsUnlocked", new String[0], false)) {
+            if (unlocked != null && !unlocked.isEmpty()) {
+                this.bossPortalsUnlocked.add(unlocked);
             }
         }
         this.catHomeSet = save.getBoolean("catHomeSet", this.catHomeSet, false);
@@ -347,6 +385,56 @@ public class SkywatchWorldData extends WorldData {
         SkywatchWorldData data = get(server);
         if (data != null) {
             data.residentsClaimed.add(mobStringID);
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // The boss portals (docs/FOGKEY_AND_BOSSPORTALS.md §B2-B3)
+    // ------------------------------------------------------------------
+
+    /**
+     * Are this realm's boss portals live?
+     *
+     * <p>The READ side of §B2. {@code bosses/BossPortalObjectEntity.use} asks
+     * this before it wakes anything; a portal whose realm answers false says so
+     * and does nothing, which is what §B3's <i>"before that they are inert"</i>
+     * means in play.
+     *
+     * <p>Answers FALSE when the record cannot be read at all, the opposite way
+     * round from {@link #residentClaimed}: the safe failure for an unlock is
+     * "still locked". A portal that refuses when the world record is missing
+     * costs a player one confused click; one that summons a tier-10 boss
+     * because it could not find the record costs them the run.
+     */
+    public boolean bossPortalsUnlocked(int realm) {
+        return this.bossPortalsUnlocked.contains(RealmDepth.keyOf(realm));
+    }
+
+    /**
+     * Records that this realm's key piece has been built, and its portals are
+     * live from now on.
+     *
+     * <p>The WRITE side of §B2, and the entry point the Elder-quest / key-piece
+     * work calls. Idempotent, and it never un-records: a key piece the player
+     * later mines up does not re-lock a realm they have already earned, in the
+     * same spirit as {@link #eleanorPassedOn} and {@link #wardenRecruited} —
+     * progression in this mod only ever goes forwards.
+     */
+    public void unlockBossPortals(int realm) {
+        this.bossPortalsUnlocked.add(RealmDepth.keyOf(realm));
+    }
+
+    /** {@link #bossPortalsUnlocked(int)} for a caller that only has a server. */
+    public static boolean bossPortalsUnlocked(Server server, int realm) {
+        SkywatchWorldData data = get(server);
+        return data != null && data.bossPortalsUnlocked(realm);
+    }
+
+    /** {@link #unlockBossPortals(int)} for a caller that only has a server. */
+    public static void unlockBossPortals(Server server, int realm) {
+        SkywatchWorldData data = get(server);
+        if (data != null) {
+            data.unlockBossPortals(realm);
         }
     }
 }

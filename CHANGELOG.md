@@ -3,6 +3,60 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [Unreleased] — the boss portals — 2026-09-03
+
+`docs/FOGKEY_AND_BOSSPORTALS.md` §B3–B5. The realms had enemies and no reason
+to finish one. Each realm now scatters a handful of unbreakable summoning
+stones through its own band; standing that realm's key piece in your base
+wakes them, and using one wakes the realm's boss.
+
+### Added
+- **`stairwaytoheaven.bosses`**, the whole slice.
+  - `SkyBossLadder` — §B4's table as the single source of truth: which vanilla
+    incursion boss belongs to which realm, its CLASSIC base health, and its
+    incursion tier. Every row names the `IncursionBiome` it was read out of and
+    the `MaxHealthGetter` line the number came from. The tier multipliers are
+    vanilla's own cumulative arrays (`BiomeMissionIncursionData`), summed the
+    way vanilla sums them, so the ladder cannot drift from the game's: tier 8 is
+    x3.18 HP / x1.87 damage, tier 9 x3.58 / x2.00, tier 10 x4.00 / x2.15.
+    Cryo Queen 57 240, Moonlight Dancer 127 200, Ascended Wizard 157 520, Pest
+    Warden 161 100, Crystal Dragon 208 000. Hell returns `null`: §B4 reserves
+    the Mutant Hydra and gives it no tier.
+  - `BossScaling` — applies that curve to ONE mob, through a permanent,
+    invisible, network-synced buff carrying `BuffModifiers.MAX_HEALTH` and
+    `ALL_DAMAGE`. Deliberately **not** `LevelModifiers`: the sky plane is the
+    whole world, so a level modifier would hand x3.18 health to every Cloud
+    Lamb in six realms because someone woke one boss.
+  - `BossPortalObject` + `BossPortalObjectEntity` — one object per realm,
+    `bossportalskyreach` … `bossportalcrookedbeyond`, all `ToolType.UNBREAKABLE`
+    and all unobtainable. Locked portals say so; unlocked ones wake the realm's
+    boss with `RoyalEggObject.spawnBoss`'s own pattern, and refuse while that
+    boss is still alive. `BossSpawnPortalMob` is not reusable — it deletes
+    itself off an `IncursionLevel` (BossSpawnPortalMob.java:160-169).
+- **`SkywatchWorldData.bossPortalsUnlocked`** — the world-scoped per-realm
+  unlock set §B2 needs, with `bossPortalsUnlocked(realm)` to read it and
+  `unlockBossPortals(realm)` to set it. World-scoped because the key piece
+  stands in the player's base and the portals stand in the realm, which are
+  frequently different levels; shared rather than per player because a key
+  piece is a building.
+- **Worldgen scatter** in `SkyLevel.placeBossPortals`, one hashed-site lattice
+  per realm, gated on the site's own realm — the same shape the guard packs
+  use. 600-tile cells at a 0.35 chance make a portal about five times rarer
+  than the aeronaut wreck, which was the rarest landmark in the sky.
+
+### Design notes
+- **No new art.** Each portal wears an existing MOD sheet chosen to look like
+  the realm's key piece until §B1 draws one: the Warden's beacon, the stairway
+  the Eden Gate already uses, the seraph statue Steinfeld already stands up as
+  its Broken Angel, the Gloom Raven statue, and the sheet that is already Mr.
+  Knott's door. All five are recorded with their exact pixel sizes in
+  `docs/VANILLA_ASSET_MAP.md` §1.6, and none is recoloured.
+- **Known limitation.** The scaling reaches the boss, not its worm body
+  segments' contact damage or the Ascended Wizard's peripherals; segments are
+  created lazily during the head's tick, so there is nothing to buff at spawn.
+  Health is exact for all five regardless — a worm body delegates `getHealth`
+  and `isHit` to its head — and the error in damage is in the safe direction.
+
 ## [Unreleased] — ONE PLANE: the six dimensions collapse — 2026-09-02
 
 `docs/PLAN_ONE_PLANE.md`, obeying `docs/WORLD_DESIGN.md` §3. Nothing was
