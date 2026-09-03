@@ -268,8 +268,8 @@ is `docs/ASSET_REQUESTS.md`.
 
 ## 8. What is missing — ranked by what it costs the player
 
-**0 — the one that wastes finished art.** The two farm animals spawn nowhere.** `nimbusyak` and `glimmergoat` are
-   registered (`livestock/SkyLivestock.java:92-93`) and fully implemented —
+**0 — the one that wastes finished art. The two farm animals spawn nowhere.**
+   `nimbusyak` and `glimmergoat` are registered (`livestock/SkyLivestock.java:92-93`) and fully implemented —
    breeding, milking, shearing, feeding all work — but the strings
    `"nimbusyak"` and `"glimmergoat"` appear in exactly four places in the whole
    tree: the two registration lines and two diagnostic probes in
