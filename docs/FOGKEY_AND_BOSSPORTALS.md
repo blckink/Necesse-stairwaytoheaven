@@ -107,6 +107,26 @@ Other incursion bosses left unused for now, and why: `reaper` (11 000) and
 `spiderempress`, `sageandgrit`, `nightswarm`, `mutanthydra` are held for Hell
 and for later regions.
 
+### B4a. Coverage, measured
+
+VERIFIED [run], from the headless integration test:
+
+```
+outlands check: ... portals=5/5 onland (2 drowned) biome=Beetle Outlands
+```
+
+Seven hashed portal sites in range, five on land, **all five carrying the
+portal**, two lost to sea. That last number is what the lattice pays for being
+a hash rather than a search: one site per 260x260 cell, and some cells are
+mostly ocean. It is a loss, not a bug.
+
+The check reads `portals=<carried>/<on land> onland (<n> drowned)` for a
+reason. The two kinds of miss used to be one number, and that is how a real
+defect hid: the sites were answered AFTER `describeBand`'s shoreline-rim test,
+so half of them painted nothing, and the count looked plausible. Do not compare
+readings between runs -- each run generates a fresh world, so the sites are
+different places. Only `carried == on land` means anything.
+
 ### B5. Spawning
 
 `RoyalEggObject.spawnBoss` is the vanilla pattern and it is level-agnostic:
