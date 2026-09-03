@@ -5,6 +5,7 @@ import java.awt.Color;
 import necesse.engine.registries.ObjectRegistry;
 import necesse.inventory.item.toolItem.ToolType;
 import necesse.level.gameObject.CrystalClusterObject;
+import necesse.level.gameObject.GameObject;
 import necesse.level.gameObject.FruitBushObject;
 import necesse.level.gameObject.GrassObject;
 import necesse.level.gameObject.RockObject;
@@ -46,6 +47,34 @@ final class SkyObjects {
         CrystalClusterObject.registerCrystalCluster("aurorabloom", new Color(214, 130, 172), 0.90F, "aurorapetal", 30.0F, true, SKY_CATEGORY);
         SkyRegistry.auroraBloomID = ObjectRegistry.getObjectID("aurorabloom");
         SkyRegistry.auroraBloomRID = ObjectRegistry.getObjectID("aurorabloomr");
+
+        // Dim both clusters from vanilla's 150 to 70.
+        //
+        // WHY: CrystalClusterObject hard-codes lightLevel = 150 and
+        // lightSat = 1.0F (VERIFIED [jar], CrystalClusterObject.java:80-82) --
+        // vanilla's brazier and tiki torch are also 150. That is the right
+        // brightness for the object vanilla built it for: a cluster in a DARK
+        // CAVE, where it is the only light there is.
+        //
+        // We scatter them across an OPEN, DAYLIT surface: stormcrystal on 3.5%
+        // of Stormveil tiles (SkyTerrainPainter:1360) and aurorabloom through
+        // the Aurora Shoals colonies. A fully saturated 150 light roughly every
+        // five tiles is a field of streetlamps, and the player saw exactly
+        // that: "das ganze gebiet außenrum ist zu hell ... auch in den rosa
+        // gebieten viel zu heftig" -- the pink areas ARE the aurorabloom
+        // fields, glowing at hue 0.90, saturation 1.0.
+        //
+        // 70 is this mod's own convention for a natural glow that is scenery
+        // rather than a lamp: gloomshroom 70 (SkyObjects:297), aurorashards 70
+        // and starfall 80 (SkyBuildingSet:173,177). Hue and saturation are left
+        // alone -- the colour is the plant, only the reach changes.
+        for (String glowing : new String[]{"stormcrystal", "stormcrystalr",
+                                           "aurorabloom", "aurorabloomr"}) {
+            GameObject cluster = ObjectRegistry.getObject(ObjectRegistry.getObjectID(glowing));
+            if (cluster != null) {
+                cluster.lightLevel = 70;
+            }
+        }
 
         GrassObject skyreeds = new GrassObject("skyreeds", 4);
         skyreeds.mapColor = new Color(168, 184, 178);

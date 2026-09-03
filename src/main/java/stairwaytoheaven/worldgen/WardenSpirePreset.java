@@ -233,10 +233,12 @@ public class WardenSpirePreset extends Preset {
         wallDecor(11, 7, banner, WALL_ABOVE);
         wallDecor(9, 13, banner, WALL_BELOW);
         wallDecor(11, 13, banner, WALL_BELOW);
-        wallDecor(7, 9, lantern, WALL_LEFT);
-        wallDecor(7, 11, lantern, WALL_LEFT);
-        wallDecor(13, 9, lantern, WALL_RIGHT);
-        wallDecor(13, 11, lantern, WALL_RIGHT);
+        // No wall lanterns in here. The beacon is a 180 light (vanilla's
+        // streetlamp is 200, its brazier 150) standing in a 3x3 room that is
+        // already ringed by four candelabra. Adding four 150s to that is how
+        // the chamber ended up brighter than noon -- the integration test's
+        // static-only reading at the spire was 130 of a 150 ambient, i.e.
+        // placed objects alone were nearly full daylight. VERIFIED [run].
 
         // ------------------------------------------- NW pocket: refectory ---
         // A Skywatch dinner table with a chair on every side of it, laid out
@@ -304,18 +306,17 @@ public class WardenSpirePreset extends Preset {
         // reference plan uses. Twelve candelabra in all, the same count the
         // reference layout carries - four in the chamber, four in the side
         // galleries, one in each corner room.
-        this.setObject(4, 9, lamp);
-        this.setObject(4, 11, lamp);
-        this.setObject(16, 9, lamp);
-        this.setObject(16, 11, lamp);
+        // One candelabra a side, not a pair. Vanilla's most-lit preset,
+        // DungeonEntrancePreset, carries FOUR light sources in the whole
+        // structure; most vanilla buildings carry one. This spire had ~30.
+        this.setObject(4, 10, lamp);
+        this.setObject(16, 10, lamp);
         // The north and south galleries take their light off the INNER ring
         // instead, so the outer wall behind the benches stays free for the
         // banners. Without these two pairs the entrance hall is the one dark
         // room in the building.
-        wallDecor(9, 5, lantern, WALL_BELOW);
-        wallDecor(11, 5, lantern, WALL_BELOW);
-        wallDecor(9, 15, lantern, WALL_ABOVE);
-        wallDecor(11, 15, lantern, WALL_ABOVE);
+        wallDecor(10, 5, lantern, WALL_BELOW);
+        wallDecor(10, 15, lantern, WALL_ABOVE);
         // Skywatch heraldry over the benches in the entrance hall.
         wallDecor(8, 16, banner, WALL_BELOW);
         wallDecor(12, 16, banner, WALL_BELOW);
@@ -327,8 +328,10 @@ public class WardenSpirePreset extends Preset {
         // SkyOrigin.ARRIVAL_OFFSET_Y — and walks in through the door.
         wallDecor(9, 18, banner, WALL_ABOVE);
         wallDecor(11, 18, banner, WALL_ABOVE);
-        wallDecor(7, 18, lantern, WALL_ABOVE);
-        wallDecor(13, 18, lantern, WALL_ABOVE);
+        // The entrance keeps its two streetlamps below -- they are what makes
+        // the spire readable at night from a distance, which is its job. The
+        // wall lanterns beside them were lighting the same four tiles twice.
+
         this.setObject(6, 18, raven);
         this.setObject(14, 18, raven);
         this.setObject(8, 19, streetlamp);
