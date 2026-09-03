@@ -78,6 +78,7 @@ engine would look for by default.
 
 | vanilla texture | realm | used for | referenced in |
 |---|---|---|---|
+| `mobs/ancientskeletonmagearms_left`, `mobs/ancientskeletonmagearms_right` (448x320 each) | Ghost / Ashen Reach | the Cinder Cantor's ARMS. Its body is ours (`mobs/cindercantor.png`, landed 2026-09-03) but a HumanTexture is three sheets -- body, arms_left, arms_right (`MobRegistry.java:1830-1836`) -- and only the body arrived, so `SkyMobs.loadTextures` composes ours with vanilla's two arm layers. Swaps out by shipping `mobs/cindercantorarms_left.png` and `_right.png` at 448x320 | `SkyMobs.loadTextures`; two strings to change | 2026-09-03 |
 | `buffs/spirithaunted` | the Veil | the Soul Exposure debuff icon — vanilla's own "the dead have hold of you" icon, 32x32 | `veil/SoulExposureBuff.BORROWED_ICON`; swaps out by adding `buffs/soulexposure.png` and deleting the `loadTextures()` override |
 | `particles/fog` (`GameResources.fogParticles`) | the Veil | the drifting mist the fog is made of — the same sheet `HuginStatueObjectEntity` uses, four 32x16 frames | `veil/VeilFogBuff.clientTick` |
 | `items/necroticgreatsword` (32x32) | Ghost Realm | the Spiritsteel Reaver's inventory icon — vanilla's own necrotic greatsword, the closest two-hander the game has to a blade forged out of the dead | `realms/ghost/SpiritsteelReaver.ART`; swaps out by adding `items/spiritsteelreaver.png` and deleting the `loadItemTextures()` override |

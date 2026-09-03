@@ -103,7 +103,7 @@ biomes spawn (`arsenal/SkyArsenal.java`):
 
 | what | id | current stand-in | size | format notes |
 |---|---|---|---|---|
-| Rime Sentry — immobile ice-crystal turret, subclasses vanilla's `FrostSentryMob` untouched (`arsenal/RimeSentryMob.java`) | `rimesentry` | `mobs/frostsentry.png` | **192×32** | Walking-mob family by convention, but not the four-direction shape: one row, six 32px frames — matches a stationary turret's own vanilla layout. Not auto-snapped either way. |
+| ~~Rime Sentry~~ **DONE 2026-09-03** — the player's sheet landed as `mobs/rimesentry.png` and `RimeSentryMob` now ports vanilla's `addDrawables` to sample it. One thing stays vanilla and cannot be changed from a subclass: the frost-pillar trail, because `FrostSentryProjectile` builds the pillar directly and the list it reads is `private final` | `rimesentry` | ~~`mobs/frostsentry.png`~~ **ours** | **192×32** | Walking-mob family by convention, but not the four-direction shape: one row, six 32px frames — matches a stationary turret's own vanilla layout. Not auto-snapped either way. |
 | Watch Mote — the Skywatch Whistle's summoned companion, subclasses `CryoFlakeFollowingMob` untouched (`arsenal/WatchMoteFollowingMob.java`) | `watchmote` | `mobs/playercryoflake.png` *(inferred from the field name `MobRegistry.Textures.cryoFlakePet` in the class javadoc — the vanilla source itself isn't in this repo to confirm the exact path, so double-check in-engine before drawing)* | **42×42** | Small pet sprite, not the 64×128 "spinner" pair the wild Cryo Flake / Aurora Flake use. |
 
 ---
@@ -191,9 +191,9 @@ in `docs/VANILLA_ASSET_MAP.md` §1.3b:
 
 | what | id | current stand-in | size | format notes |
 |---|---|---|---|---|
-| Cinder Cantor (body) — the Ashen Reach's ranged caster, subclasses vanilla's `AncientSkeletonMageMob` untouched (`arsenal/CinderCantorMob.java`). Spawns in the Veil's Gloomfen/Ashen Reach/Beetlefreak Hollow **and** in Skyreach's distance-gated Outlands — `docs/VANILLA_ASSET_MAP.md` §1.2 mislabels it "Ghost Realm," which is the one factual correction this list makes to that table | `cindercantor` | `mobs/ancientskeletonmage.png` | **448×320** | Composited `HumanDrawOptions` rig, not a plain walking sheet — body sheet plus two arm sheets, all three on the same 448×320 canvas. Redraw as a matched trio (below), or the parts won't line up. |
-| Cinder Cantor (left arm) | `cindercantor` | `mobs/ancientskeletonmagearms_left.png` | **448×320** | Same rig, left-arm layer. |
-| Cinder Cantor (right arm) | `cindercantor` | `mobs/ancientskeletonmagearms_right.png` | **448×320** | Same rig, right-arm layer. |
+| **Cinder Cantor (body) — DONE 2026-09-03**, landed as `mobs/cindercantor.png`; the two ARM sheets below are still owed and are what finishes it. `CinderCantorMob` ports vanilla's `addDrawables` and composes our body with vanilla's arms until they arrive. Spawns in the Veil's Gloomfen/Ashen Reach/Beetlefreak Hollow **and** in Skyreach's distance-gated Outlands — `docs/VANILLA_ASSET_MAP.md` §1.2 mislabels it "Ghost Realm," which is the one factual correction this list makes to that table | `cindercantor` | `mobs/ancientskeletonmage.png` | **448×320** | Composited `HumanDrawOptions` rig, not a plain walking sheet — body sheet plus two arm sheets, all three on the same 448×320 canvas. Redraw as a matched trio (below), or the parts won't line up. |
+| **Cinder Cantor (left arm) — STILL OWED** | `cindercantor` | `mobs/ancientskeletonmagearms_left.png` | **448×320** | Same rig, left-arm layer. Draw as `mobs/cindercantorarms_left.png`; landing it is a two-string edit in `SkyMobs.loadTextures`. |
+| **Cinder Cantor (right arm) — STILL OWED** | `cindercantor` | `mobs/ancientskeletonmagearms_right.png` | **448×320** | Same rig, right-arm layer. Draw as `mobs/cindercantorarms_right.png`. |
 | Soul Exposure debuff icon — the HUD icon for the pre-Veil-Mark fog debuff (`veil/SoulExposureBuff.BORROWED_ICON`) | — | `buffs/spirithaunted.png` | **32×32** | Standard buff icon. |
 | Veil fog particles — what the permanent mist itself is drawn out of (`veil/VeilFogBuff.BORROWED_PARTICLES`, and the same sheet `HuginStatueObjectEntity` uses) | — | `particles/fog.png` | **128×16** | 4 animation frames, 32×16 each, laid out in one row. |
 
