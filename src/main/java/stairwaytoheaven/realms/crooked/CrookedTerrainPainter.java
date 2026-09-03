@@ -183,11 +183,15 @@ public final class CrookedTerrainPainter {
         // --- the Outlands: the sky's own wrong ground, now in its right realm ---
         if (outland) {
             int ground = SkyOutlands.groundTile(seed, tileX, tileY);
-            if (!plantable) {
-                return SkyTerrainPainter.pack(ground, 0, biomeClass, false);
-            }
-            // The portal is the rarest thing out here and must not lose its tile
-            // to a crate or a dead tree, so it is answered first.
+            // The portal is answered BEFORE the shoreline-rim test, not after.
+            // It used to sit below it, and the integration test's new
+            // portals=carried/sites probe caught what that cost: 4 of 8 sites
+            // painted nothing, because !plantable returned first and half the
+            // hashed sites land within ISLAND_RIM of the waterline. The tile is
+            // still LAND there -- water already returned above, at
+            // island <= waterline -- so a portal stands on it perfectly well.
+            // The comment below has always said the portal must not lose its
+            // tile; it just was not answered early enough to be true.
             if (SkyOutlands.isPortalSite(seed, tileX, tileY, hubDist)) {
                 // This used to paint a Seance Circle. That object stopped being
                 // a door when the chalk landed: it is settlement-only now and a
@@ -207,6 +211,9 @@ public final class CrookedTerrainPainter {
                 if (portal != 0) {
                     return SkyTerrainPainter.pack(ground, portal, biomeClass, false);
                 }
+            }
+            if (!plantable) {
+                return SkyTerrainPainter.pack(ground, 0, biomeClass, false);
             }
             // Crystal massifs, off the sky's own formation field: knots, ridges
             // and short veins with real gaps, so a solid-wall object cannot turn
