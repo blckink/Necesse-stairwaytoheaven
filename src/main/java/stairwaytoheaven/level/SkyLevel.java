@@ -421,9 +421,12 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
      * EdenArrivalQuest} and {@code EdenPlantsQuest} turn into a chain; finding
      * her here is the "discovering an Eden island" half made literal.
      *
-     * <p>Rarer than the Skyreach's own residents (0.16F): a Knowledge Tree is
-     * itself rare (§5: "rare worldgen object"), so a region has to both roll a
-     * tree AND roll Eveleen.
+     * <p>Her per-region roll is 0.35F -- HIGHER than the Skyreach trio's
+     * {@code RESIDENT_REGION_CHANCE} of 0.16F, not lower, because the roll is
+     * only half the gate: a Knowledge Tree must also stand nearby, and §5 makes
+     * those a rare worldgen object. It is the CONJUNCTION that is rare, so the
+     * roll itself is set generously. (An earlier version of this comment said
+     * "rarer than 0.16F" and named the wrong number.)
      */
     private void placeEveleen(Region region) {
         long seed = (this.getWorldGenSeed() * 0x9E3779B97F4A7C15L)
