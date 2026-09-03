@@ -1152,6 +1152,7 @@ public class SkyreachStatusCommand extends ModularChatCommand {
             // real failure, and the whole point.
             int portalSites = 0;
             int portalDrowned = 0;
+            int portalOffBand = 0;
             final int cell = stairwaytoheaven.worldgen.SkyOutlands.PORTAL_CELL;
             for (int cx = -3; cx <= 3 && portalSites < 8; cx++) {
                 for (int cy = -3; cy <= 3 && portalSites < 8; cy++) {
@@ -1167,6 +1168,20 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                                 continue;
                             }
                             portalSites++;
+                            // A site can be inside the Outlands MASK and still
+                            // never reach CrookedTerrainPainter: the bands
+                            // overlap by design, so describeTile's
+                            // RealmDepth.realmForDepth may hand this tile to the
+                            // Ghost painter instead, which knows nothing about
+                            // Outlands portals. That is the overlap working, not
+                            // a fault, so it comes out of the denominator too.
+                            int siteRealm = stairwaytoheaven.worldgen.RealmDepth
+                                    .realmForDepth(outSeed, tx, ty, depth);
+                            if (siteRealm != stairwaytoheaven.worldgen.RealmDepth.REALM_CROOKED
+                                    && siteRealm != stairwaytoheaven.worldgen.RealmDepth.REALM_HELL) {
+                                portalOffBand++;
+                                break;
+                            }
                             long d = stairwaytoheaven.worldgen.SkyTerrainPainter.describeTile(
                                     outSeed, tx, ty, outOrigin.x, outOrigin.y);
                             // Split the misses. A hashed site that lands in the
@@ -1191,8 +1206,9 @@ public class SkyreachStatusCommand extends ModularChatCommand {
             }
             ramp.append(" evilwall=").append(wallSeen)
                 .append(" portals=").append(portalSeen)
-                .append("/").append(portalSites - portalDrowned)
-                .append(" onland (").append(portalDrowned).append(" drowned)");
+                .append("/").append(portalSites - portalDrowned - portalOffBand)
+                .append(" paintable (").append(portalDrowned).append(" drowned, ")
+                .append(portalOffBand).append(" off-band)");
             ramp.append(" biome=").append(SkyRegistry.outlands != null
                     ? necesse.engine.localization.Localization.translate("biome", "outlands")
                     : "NOT REGISTERED");
