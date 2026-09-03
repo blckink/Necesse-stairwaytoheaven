@@ -46,11 +46,24 @@ public class HauntedManorPreset extends Preset {
         this.setObject(3, 3, light);
         this.setObject(11, 3, light);
         this.setObject(7, 3, chest);
+        // The realm's two weapons live here as well as on the elite drop table
+        // (GhostLoot.elite) -- docs/FOGKEY_AND_BOSSPORTALS.md A3.3: "the same
+        // ghost weapons also drop randomly in the Ghost region, so a player who
+        // never trades still finds them." A manor chest is the one place in the
+        // Aftergarden where finding a weapon reads as finding a weapon.
+        //
+        // 20% each, against the 30% this same chest already gives a single
+        // Spiritsteel bar: a finished weapon is worth about eight of those bars
+        // (see GhostGuideMob's price list), but there is only one manor and one
+        // chest in it, so the chance is a rung below the bar rather than an
+        // order of magnitude below it the way the repeatable mob table is.
         this.addInventory(new LootTable(
                 LootItem.between("ectoplasm", 10, 18),
                 LootItem.between("soulthread", 5, 10),
                 ChanceLootItem.between(0.65F, "spectralore", 4, 8),
-                ChanceLootItem.between(0.30F, "spiritsteelbar", 1, 3)),
+                ChanceLootItem.between(0.30F, "spiritsteelbar", 1, 3),
+                ChanceLootItem.between(0.20F, "spiritsteelreaver", 1, 1),
+                ChanceLootItem.between(0.20F, "gravewindbow", 1, 1)),
                 random, 7, 3, new Object[0]);
     }
 }

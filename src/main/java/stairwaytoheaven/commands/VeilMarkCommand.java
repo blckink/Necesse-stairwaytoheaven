@@ -86,11 +86,16 @@ public class VeilMarkCommand extends ModularChatCommand {
 
     private static String worldLine(VeilWorldData data) {
         return String.format(
-                "Veil gate: depth>=%.3f of scale %d = %.0f tiles from the spire; marks held=%d",
+                "Veil gate: depth>=%.3f of scale %d = %.0f tiles from the spire; "
+                        + "marks held=%d; characters who have touched the fog=%d",
                 VeilRegion.VEIL_DEPTH,
                 (int) RealmDepth.DEPTH_SCALE,
                 VeilRegion.wallDistanceTiles(),
-                data.markCount());
+                data.markCount(),
+                // The Warden's chalk gift is gated on this and nothing else
+                // (docs/FOGKEY_AND_BOSSPORTALS.md A1), so "why has he not given
+                // me chalk" has a one-line answer here rather than none.
+                data.fogTouchedCount());
     }
 
     private static String playerLine(VeilWorldData data, ServerClient target) {
@@ -107,14 +112,17 @@ public class VeilMarkCommand extends ModularChatCommand {
                     level == null ? "null" : level.getIdentifier().stringID);
         }
         boolean inside = depth >= VeilRegion.VEIL_DEPTH;
+        String chalk = " fogTouched=" + data.hasTouchedFog(target.authentication)
+                + " chalkGiven=" + data.hasBeenGivenChalk(target.authentication);
         ActiveBuff exposure = VeilGate.exposure() == null
                 ? null : player.buffManager.getBuff(VeilGate.exposure());
         int seconds = exposure == null ? 0 : exposure.getStacks();
-        return String.format("%s: mark=%s depth=%.3f realm=%s inFog=%s exposure=%ds band=%s",
+        return String.format("%s: mark=%s depth=%.3f realm=%s inFog=%s exposure=%ds band=%s%s",
                 target.getName(), marked, depth,
                 RealmDepth.keyOf(RealmDepth.realmForDepth(
                         VeilRegion.seedOf(level), player.getTileX(), player.getTileY(), depth)),
                 inside, seconds,
-                seconds == 0 ? "none" : SoulExposureBuff.bandKey(seconds));
+                seconds == 0 ? "none" : SoulExposureBuff.bandKey(seconds),
+                chalk);
     }
 }

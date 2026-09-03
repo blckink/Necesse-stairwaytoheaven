@@ -108,6 +108,19 @@ public final class GhostRealm {
         ItemRegistry.registerItem("spiritsteelhelmet", new SpiritsteelHelmet(), 220.0F, true);
         ItemRegistry.registerItem("spiritsteelchestplate", new SpiritsteelChestplate(), 300.0F, true);
         ItemRegistry.registerItem("spiritsteelboots", new SpiritsteelBoots(), 180.0F, true);
+        // The realm's two WEAPONS (docs/FOGKEY_AND_BOSSPORTALS.md A3). Until
+        // now the Aftergarden's own metal armoured you and nothing more; the
+        // Ghost Guide had nothing to sell and the elite drop table paid only in
+        // materials. Each weapon's own class comment names the vanilla weapon
+        // of its class it is measured against.
+        //
+        // Broker values are hand-set, and pinned just BELOW what the Ghost
+        // Guide charges in materials, exactly as SkyArsenal.registerItems pins
+        // the Skyreach's five: 8 spiritsteelbar at 55.0F is 440, so the Reaver
+        // is 430; 12 veilessence at 34.0F is 408, so the Bow is 400. A weapon
+        // worth more than its price would make the guide a coin press.
+        ItemRegistry.registerItem("spiritsteelreaver", new SpiritsteelReaver(), 430.0F, true);
+        ItemRegistry.registerItem("gravewindbow", new GravewindBow(), 400.0F, true);
         BuffRegistry.registerBuff(SpiritsteelHelmet.SET_BONUS, new SimpleSetBonusBuff(
                 new ModifierValue<>(BuffModifiers.MAX_RESILIENCE_FLAT, 40),
                 new ModifierValue<>(BuffModifiers.SPEED, 0.10F)));

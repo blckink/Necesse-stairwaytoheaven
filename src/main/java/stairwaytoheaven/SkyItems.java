@@ -32,7 +32,7 @@ public final class SkyItems {
     public static final String[] ALL_ITEM_IDS = {
             "aetheriumbar", "aetheriumore", "auroralocket", "aurorafleece", "aurorapetal",
             "charwood", "cinderpearl", "cloudberry", "cloudcustard", "cloudpufftreat",
-            "cloudwood", "dewsnail", "fulgurite", "galehowl", "glimmerstrides",
+            "cloudwood", "dewsnail", "fulgurite", "galehowl", "ghostchalk", "glimmerstrides",
             "nimbusdraught", "nimbusmilk", "nimbuswood", "prismcaller", "prismshard",
             "prismwood", "seraphwood", "silverbell", "skycurd", "skyreave", "skystone",
             "skywatchhood", "skywatchwhistle", "skyweave", "stormdisc",
@@ -206,6 +206,29 @@ public final class SkyItems {
         ItemRegistry.registerItem("prismshard",
                 new SkyMatItem(250, Item.Rarity.UNCOMMON).setItemCategory("materials", "minerals"), 25.0F, true);
 
+        // Ghost Chalk (docs/FOGKEY_AND_BOSSPORTALS.md A1). The Warden's second
+        // gift and the only thing in the game that draws a Seance Circle.
+        //
+        // WHY IT IS REGISTERED HERE. It is an ObjectItem, so its constructor
+        // reads the object's registered ID -- registerObjects() runs before
+        // SkyItems.register() in StairwayToHeavenMod.init(), which is what
+        // makes ObjectRegistry.getObject(seanceCircleID) answer.
+        //
+        // Worth 120.0F. Anchor: the mod's own `silverbell` at 250.0F
+        // (SkyBuildingSet.registerItems), the Warden's OTHER hand-over and the
+        // only comparable thing in the game -- a key you are given rather than
+        // a material you farm, filed in the same misc/questitems category
+        // vanilla keeps all 32 of its QuestItems in (QuestItem.java:29). Half
+        // the bell because the bell is permanent and this is spent on use,
+        // recoverable only by mining the ring back up.
+        //
+        // The icon argument is the mod's OWN items/seancecircle.png -- a chalk
+        // ring is the picture of what the chalk makes. No new art; see
+        // docs/VANILLA_ASSET_MAP.md §1.6.
+        ItemRegistry.registerItem("ghostchalk",
+                new stairwaytoheaven.items.GhostChalkItem("seancecircle", SkyRegistry.seanceCircleID),
+                120.0F, true);
+
         registerGear();
     }
 
@@ -375,11 +398,16 @@ public final class SkyItems {
                 "windsilk", 1, RecipeTechRegistry.NONE,
                 Recipes.ingredientsFromScript("{{windwheat, 3}}")));
 
-        // The way down: chalk, candlewax-silk and petals — the Silver Bell is
-        // the key and stays with the player (checked on use, never consumed)
-        Recipes.registerModRecipe(new Recipe(
-                "seancecircle", 1, RecipeTechRegistry.TUNGSTEN_WORKSTATION,
-                Recipes.ingredientsFromScript("{{stormshard, 6}, {windsilk, 4}, {aurorapetal, 2}}")));
+        // NO seancecircle recipe any more, and no ghostchalk recipe either.
+        //
+        // The circle used to be craftable at the Tungsten Workstation out of
+        // 6 stormshard + 4 windsilk + 2 aurorapetal, back when it was a
+        // teleporter you built. docs/FOGKEY_AND_BOSSPORTALS.md A1 makes the
+        // Warden the source instead — he gives the first piece once that player
+        // has stood in the fog and restocks it in his shop from then on — and a
+        // workbench recipe beside that would delete the one thing the gift is
+        // for: it is the beat where the mentor hands you the way through.
+        // A lost piece is never a dead end, because he sells more.
 
         registerGearRecipes();
     }

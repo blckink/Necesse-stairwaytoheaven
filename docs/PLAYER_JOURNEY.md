@@ -94,15 +94,36 @@ objects per tile**, against Driftlands 0.358, AuroraShoals 0.322 and Stormveil
 measured 0.297 — tying the emptiest ground in the world — before the scatter
 band was widened.
 
-## 4. The Veil
+## 4. The fog, and the way through it
 
-Craft a **Séance Circle** (`6 stormshard + 4 windsilk + 2 aurorapetal`, Tungsten
-Workstation) and use it. `SeanceCircleObject.interact` checks the player is
-**holding the Silver Bell** — it is the key, never the fuel, and is not
-consumed. The circle then becomes a rift down into the Veil.
+The Veil is not a place you travel to any more — it is the band of this one
+plane you cannot yet walk in (`docs/PLAN_ONE_PLANE.md`). Walk far enough out and
+**Soul Exposure** starts stacking. One step over the line is meant to be
+survivable; running through is not.
 
-So the Veil is gated behind finishing the Warden's recruitment, because that is
-the only place the bell comes from.
+That one step is the trigger for everything that follows
+(`docs/FOGKEY_AND_BOSSPORTALS.md` Part A):
+
+1. **The Warden gives you Ghost Chalk**, the next time you talk to him, because
+   *you* have now stood in the fog. The record is per player
+   (`VeilWorldData.hasTouchedFog`, keyed on the client's authentication), so in
+   multiplayer nobody can take anyone else's piece. He sells replacements at
+   1,200 coins from then on, so losing it is never a dead end. There is no
+   recipe: he is the only source.
+2. **Draw a Séance Circle with it, inside your settlement.** It will not hold
+   anywhere else (`SeanceCircleObject.canPlace`), and the chalk is spent doing
+   it. Mining the ring up with a pickaxe gives the chalk back.
+3. **Use the circle: the Ghost Guide answers.** His first conversation grants
+   that player the Veil Mark, and from then on the Ghost band's Soul Exposure
+   does not apply to them.
+4. **Every conversation after is a trade**, and he takes no coin: Ghost-region
+   valuables (ectoplasm, veil essence, spiritsteel) or eight fine cooked dishes.
+   What he sells is the realm's own two weapons, the Spiritsteel Reaver and the
+   Gravewind Bow — which also drop in the Aftergarden, so a player who never
+   trades still finds them.
+
+The Silver Bell is no longer the key to any of this; it stays the Warden's
+recruitment keepsake.
 
 ## What is fully integrated
 

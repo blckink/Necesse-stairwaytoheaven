@@ -209,7 +209,20 @@ public class StairwayToHeavenMod {
         SkyRegistry.veilRiftDownID = ObjectRegistry.registerObject("veilriftdown", SkyRegistry.veilRiftDown, 0.0F, false);
         SkyRegistry.veilRiftUpID = ObjectRegistry.registerObject("veilriftup", SkyRegistry.veilRiftUp, 0.0F, false);
         SkyRegistry.veilRiftDown.ladderUpObjectID = SkyRegistry.veilRiftUpID;
-        SkyRegistry.seanceCircleID = ObjectRegistry.registerObject("seancecircle", new SeanceCircleObject(), 15.0F, true);
+        // The Seance Circle grows NO item of its own any more.
+        // docs/FOGKEY_AND_BOSSPORTALS.md A2 makes the circle "placed from
+        // ghostchalk; the chalk is consumed", so the chalk is the item and this
+        // is only the thing it leaves on the ground. Registering it obtainable
+        // would give the game a second, differently-named item that does the
+        // same job, which is exactly the redundancy the chalk replaced.
+        //
+        // itemObtainable=false, itemCountInStats=false, and the trailing
+        // "ghostchalk" is isObtainedByOtherItemStringIDs -- vanilla's own way
+        // of telling the "how do I get this" UI which item makes it
+        // (ObjectRegistry.java:2150-2175, VERIFIED [jar]). Breaking a placed
+        // circle still returns the chalk; see SeanceCircleObject.getLootTable.
+        SkyRegistry.seanceCircleID = ObjectRegistry.registerObject(
+                "seancecircle", new SeanceCircleObject(), 15.0F, false, false, "ghostchalk");
 
         SkyObjects.register();
     }

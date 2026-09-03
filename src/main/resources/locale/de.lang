@@ -844,3 +844,35 @@ lostpilgrim=Verlorener Pilger
 stonemourner=Steinerner Trauernder
 hollowangel=Hohler Engel
 gravecrow=Grabkrähe
+
+// Der Nebelschlüssel: Geisterkreide, der Séance-Zirkel und der Geisterführer
+// (docs/FOGKEY_AND_BOSSPORTALS.md Teil A)
+[item]
+ghostchalk=Geisterkreide
+spiritsteelreaver=Geisterstahl-Schnitter
+gravewindbow=Grabwind-Bogen
+[itemtooltip]
+ghostchalktip=Aus Grabsalz gemahlen. Reicht für einen Kreis, und nur innerhalb einer Siedlung.
+spiritsteelreavertip=Eine zweihändige Klinge aus Geisterstahl. Sie schwingt, als hielte sie noch jemand anderes.
+gravewindbowtip=Ein Geisterstahl-Bogen, bespannt mit Seelenfaden. Das Spannen ist völlig lautlos.
+[mob]
+ghostguide=Geisterführer
+ghostguidename=<name>, der Geisterführer
+[misc]
+seanceneedsettlement=Kreide hält nur dort, wo Menschen wohnen. Zeichne sie in deiner Siedlung.
+seanceguidehere=Dein Führer ist bereits hier.
+seanceguidearrives=Die Kreide raucht, und <name> tritt heraus.
+ghostguideunlock1=Atme aus. So. Jetzt kennt dich der Nebel.
+ghostguideunlock2=Der Geisterführer zeichnet dich. Die Seelenzehrung des Geisterbandes berührt dich nicht mehr.
+ghostguideintro=Mit Münzen kann ich nichts anfangen. Zeig mir, was du trägst.
+ghostguideoffer=Der Geisterführer handelt nur hiermit:
+ghostguidewares=  <count> <pay>  für  <amount> <get>
+ghostguideshort=Er will <count> <pay>, und so viel hast du nicht.
+ghostguidetrade=Redlich. Nimm es.
+ghostguidenohire=Die Toten ziehen nicht ein. Komm wieder, wenn du etwas brauchst.
+ghostguidetalk1=Alle stellen dieselbe erste Frage, und keinem gefällt die Antwort.
+ghostguidetalk2=Vorsicht mit dem Nebel weiter draußen. Der gehört nicht mir.
+ghostguidetalk3=Ich war Landvermesser. Ich zähle immer noch Dinge. Das beruhigt.
+ghostguidetalk4=Bring mir irgendwann ein gutes Essen. Essen kann ich es nicht. Riechen würde ich es gern.
+wardengiveschalk=Du warst also draußen im Nebel. Nimm das - Kreide, aus Grabsalz gemahlen. Zeichne zu Hause einen Kreis, dann antwortet jemand.
+seancenobodyanswers=Die Kreide hier ist alt und kalt. Nichts antwortet darauf.

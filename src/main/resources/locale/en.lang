@@ -843,3 +843,35 @@ lostpilgrim=Lost Pilgrim
 stonemourner=Stone Mourner
 hollowangel=Hollow Angel
 gravecrow=Grave Crow
+
+// The Fog Key: Ghost Chalk, the Seance Circle and the Ghost Guide
+// (docs/FOGKEY_AND_BOSSPORTALS.md Part A)
+[item]
+ghostchalk=Ghost Chalk
+spiritsteelreaver=Spiritsteel Reaver
+gravewindbow=Gravewind Bow
+[itemtooltip]
+ghostchalktip=Ground from grave salt. Enough for one circle, and only inside a settlement.
+spiritsteelreavertip=A two-handed blade of Spiritsteel. It swings as though something else is holding it too.
+gravewindbowtip=A Spiritsteel stave strung with soul thread. The draw makes no sound at all.
+[mob]
+ghostguide=Ghost Guide
+ghostguidename=<name>, the Ghost Guide
+[misc]
+seanceneedsettlement=Chalk only holds where people live. Draw it inside your settlement.
+seanceguidehere=Your guide is already here.
+seanceguidearrives=The chalk smokes, and <name> steps out of it.
+ghostguideunlock1=Breathe out. There. Now the mist knows you.
+ghostguideunlock2=The Ghost Guide marks you. The Soul Exposure of the Ghost band no longer touches you.
+ghostguideintro=I have no use for coin. Show me what you carry.
+ghostguideoffer=The Ghost Guide deals only in these:
+ghostguidewares=  <count> <pay>  for  <amount> <get>
+ghostguideshort=He wants <count> <pay>, and you are short.
+ghostguidetrade=Fair. Take it.
+ghostguidenohire=The dead do not move in. Come back when you need something.
+ghostguidetalk1=Everyone asks the same first question, and none of them like the answer.
+ghostguidetalk2=Careful with the mist further out. It is not mine.
+ghostguidetalk3=I was a surveyor. I still count things. It is restful.
+ghostguidetalk4=Bring me a good dinner sometime. I cannot eat it. I would like to smell it.
+wardengiveschalk=You have been out to the mist, then. Take this - chalk, ground from grave salt. Draw a circle at home and someone will answer.
+seancenobodyanswers=The chalk here is old and cold. Nothing answers it.

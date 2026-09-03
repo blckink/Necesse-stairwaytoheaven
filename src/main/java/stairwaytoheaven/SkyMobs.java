@@ -44,6 +44,19 @@ final class SkyMobs {
         MobRegistry.registerMob("sparkbeetle", SkyCritterMob.SparkBeetle.class, false);
         // v0.3: the Veil
         MobRegistry.registerMob("gloomshade", stairwaytoheaven.mobs.GloomShadeMob.class, true);
+        // The Seance Circle's answer (docs/FOGKEY_AND_BOSSPORTALS.md A3).
+        // countKillStat = false: he cannot be killed (canTakeDamage is false),
+        // so a bestiary row for him would never fill in. No registerSettler
+        // call either -- he is summoned, never hired.
+        //
+        // The ID is written as a LITERAL rather than as GhostGuideMob.STRING_ID
+        // deliberately: tools/locale_audit.py's registered_ids() and
+        // human_mob_ids() both match `registerMob("<id>", <Class>.class` with a
+        // regex, so an ID handed over through a constant would be registered
+        // without either of its two required locale keys being checked. The
+        // constant exists for the Seance Circle's lookup and carries the same
+        // string; GhostGuideMob.STRING_ID names this line in its own comment.
+        MobRegistry.registerMob("ghostguide", stairwaytoheaven.mobs.GhostGuideMob.class, false);
         // v0.4: The Living Sky
         MobRegistry.registerMob("galehound", stairwaytoheaven.mobs.GalehoundMob.class, true);
         MobRegistry.registerMob("dawnpiercer", stairwaytoheaven.mobs.DawnpiercerMob.class, true);

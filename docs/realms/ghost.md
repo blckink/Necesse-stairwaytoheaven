@@ -16,6 +16,16 @@ Runtime world generation remains to be proven by the integration test.
   Gate; the far side creates a persistent return gate.
 - Economy: Bonewood, Soul Thread, Spectral Ore, Spiritsteel Bars, Soul Loom,
   Spirit Forge and the three-piece Spiritsteel armour set.
+- Weapons: **Spiritsteel Reaver** (greatsword) and **Gravewind Bow**. Neither
+  is craftable and neither is on a vanilla loot table — they are traded from the
+  Ghost Guide and dropped by the realm itself (Mourning Bride at 4% each,
+  Haunted Manor chest at 20% each). Both are measured against the vanilla weapon
+  of their class one rung below: `ravenwinggreatsword` 150 → 186.67 and
+  `thecrimsonsky` 90 → 110.83, scaled by `docs/BALANCE.md` §7's Stormsteel →
+  Spiritsteel step (chest 29 → 34).
+- The **Ghost Guide** (`ghostguide`) is summoned by a Séance Circle drawn in a
+  settlement with Ghost Chalk. First conversation grants the Veil Mark; every
+  one after is a coinless barter. See `docs/FOGKEY_AND_BOSSPORTALS.md` Part A.
 
 Both stations extend the engine's settlement-workstation crafting archetype,
 so assigned settlers can run their recipe tech without a custom job type.
@@ -34,6 +44,9 @@ paths and are also recorded in `docs/VANILLA_ASSET_MAP.md`.
 | Basin and stations | `objects/spiritbasin`, `objects/windsilkloom`, `objects/aetherforge`; icons `items/spiritbasin`, `items/caveglowalchemytable`, `items/forge` |
 | Materials | `items/deadwoodlog`, `items/clothscraps`, `items/nightsteelore`, `items/nightsteelbar` |
 | Spiritsteel armour | `items/soulseedcrown`, `items/soulseedchestplate`, `items/soulseedboots` and matching `player/armor/soulseed*` sheets |
+| Spiritsteel Reaver | `items/necroticgreatsword` (32x32), `player/weapons/necroticgreatsword` (96x96) |
+| Gravewind Bow | `items/necroticbow` (32x32), `player/weapons/necroticbow` (36x66) |
+| Ghost Guide's clothes | worn vanilla items `snowhood`, `snowcloak`, `clothboots` — Eleanor's own three, no recolour |
 | Portal pair | existing mod sheets `objects/veilriftdown`, `objects/veilriftup` |
 
 ## Settlers and quest

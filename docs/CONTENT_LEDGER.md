@@ -127,6 +127,20 @@ second configuration rather than a second code path. See
 | `soulexposure` | buff | Soul Exposure: what the Veil's fog does to anyone crossing it without the Veil Mark — one stack per second in the fog, dimming the view, then slowing you, then draining life, then killing you outright at thirteen seconds, and giving a stack back per second once you are out. |
 | `veilfog` | buff | The Veil's fog itself: an invisible marker the server puts on anyone standing past the fog line, which draws the drifting mist on their screen. It stays after the Veil Mark is earned, so the border between Steinfeld and the Ghost Realm remains something you can see rather than something you only remember. |
 
+### The fog key — chalk, circle, guide
+
+`docs/FOGKEY_AND_BOSSPORTALS.md` Part A. The Warden hands a player one piece of
+Ghost Chalk the first time **that player** has stood in the fog, and sells more
+from then on. The chalk draws a Séance Circle at home; the circle calls the
+Ghost Guide; his first conversation grants the Veil Mark and every one after is
+a coinless trade. The two registrations the circle itself no longer owns — its
+own object item and its workbench recipe — are gone with it.
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `ghostchalk` | item | One piece of grave-salt chalk: the Warden's gift after a player's first step into the fog, consumed to draw a Séance Circle inside a settlement, and handed back if the circle is mined up. |
+| `ghostguide` | mob | The dead surveyor the Séance Circle calls: his first conversation grants that player the Veil Mark, and every conversation after is a barter in Ghost-region valuables or fine cooked food, never coin. |
+
 ## Crooked Beyond realm
 
 | id | kind | what it is, in one line |
@@ -210,6 +224,8 @@ second configuration rather than a second code path. See
 | `possessedchair` | mob | Mimic-style furniture ambusher used in marsh guard packs. |
 | `soulhound` | mob | Fast melee pursuer used where sightlines are short. |
 | `coffincrawler` | mob | Buried ambusher concentrated in the Ectomarsh. |
+| `spiritsteelreaver` | item | Ghost-tier two-handed greatsword, traded by the Ghost Guide and dropped in the Aftergarden. |
+| `gravewindbow` | item | Ghost-tier bow, traded by the Ghost Guide and dropped in the Aftergarden. |
 
 ## Steinfeld / The Quiet Reach
 
