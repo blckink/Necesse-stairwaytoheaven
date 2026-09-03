@@ -189,7 +189,24 @@ public final class CrookedTerrainPainter {
             // The portal is the rarest thing out here and must not lose its tile
             // to a crate or a dead tree, so it is answered first.
             if (SkyOutlands.isPortalSite(seed, tileX, tileY, hubDist)) {
-                return SkyTerrainPainter.pack(ground, SkyRegistry.seanceCircleID, biomeClass, false);
+                // This used to paint a Seance Circle. That object stopped being
+                // a door when the chalk landed: it is settlement-only now and a
+                // ring standing out here would answer nobody. The lattice is
+                // still right -- it is literally called isPortalSite and it is
+                // the one place in the Outlands reserved for a landmark -- so it
+                // carries the Crooked band's BOSS portal instead, which is what
+                // docs/FOGKEY_AND_BOSSPORTALS.md sections B2-B5 want standing here.
+                //
+                // Denser than SkyLevel.placeBossPortals's own lattice on purpose:
+                // 260-tile cells that always fire, against 600-tile cells at
+                // 0.35. The Outlands is the rim where Crooked Beyond bleeds into
+                // the sky, so it is the one pocket where portals are the terrain
+                // rather than a rare find.
+                int portal = stairwaytoheaven.bosses.BossPortalObject.portalID(
+                        stairwaytoheaven.worldgen.RealmDepth.REALM_CROOKED);
+                if (portal != 0) {
+                    return SkyTerrainPainter.pack(ground, portal, biomeClass, false);
+                }
             }
             // Crystal massifs, off the sky's own formation field: knots, ridges
             // and short veins with real gaps, so a solid-wall object cannot turn
