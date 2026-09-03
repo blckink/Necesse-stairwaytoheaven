@@ -888,3 +888,43 @@ ghostguidetalk3=Ich war Landvermesser. Ich zähle immer noch Dinge. Das beruhigt
 ghostguidetalk4=Bring mir irgendwann ein gutes Essen. Essen kann ich es nicht. Riechen würde ich es gern.
 wardengiveschalk=Du warst also draußen im Nebel. Nimm das - Kreide, aus Grabsalz gemahlen. Zeichne zu Hause einen Kreis, dann antwortet jemand.
 seancenobodyanswers=Die Kreide hier ist alt und kalt. Nichts antwortet darauf.
+
+// ============================================================
+// Die Regionsschlüssel (docs/FOGKEY_AND_BOSSPORTALS.md Abschnitte B1-B2)
+// ============================================================
+[object]
+regionkeyskyreach=Wachfeuer der Himmelsweite
+regionkeyeden=Gartenstiege von Eden
+regionkeysteinfeld=Trauerengel von Steinfeld
+regionkeyghostrealm=Rabenkanzel des Nachgartens
+regionkeycrookedbeyond=Knotts Krumme Tür
+[quests]
+swhkeyskyreachtitle=Das Wachfeuer
+swhkeyskyreachdesc=Der Warden kann ein Wachfeuer bauen, auf das die Rufsteine der Himmelsweite antworten - wenn du ihm den Sturm bringst, mit dem es brennt.
+swhkeyskyreachreward=Wachfeuer der Himmelsweite + 6x Sturmstahlbarren
+swhkeyedentitle=Die Gartenstiege
+swhkeyedendesc=Eden bewacht seinen Saft und seinen Pollen mit Zähnen und Stacheln. Hol beides aus dem Garten, dann schlägt dir der Warden eine Stiege, die seine Steine wiedererkennen.
+swhkeyedenreward=Gartenstiege von Eden + 8x Sturmstahlbarren
+swhkeysteinfeldtitle=Der Trauerengel
+swhkeysteinfelddesc=Steinfeld ist nichts als bleicher Stein und das Echo, das darin gefangen ist. Bring genug von beidem zurück, dann stellt dir der Warden einen seiner Engel in die eigene Siedlung.
+swhkeysteinfeldreward=Trauerengel von Steinfeld + 10x Sturmstahlbarren
+swhkeyghostrealmtitle=Die Rabenkanzel
+swhkeyghostrealmdesc=Aus dem Nachgarten kommt nichts, was der Nebel nicht schon berührt hat. Trag sein Knochenholz und sein Spektralerz heraus, dann setzt dir der Warden einen Raben über das Tor.
+swhkeyghostrealmreward=Rabenkanzel des Nachgartens + 10x Geisterstahlbarren
+swhkeycrookedbeyondtitle=Eine eigene Tür
+swhkeycrookedbeyonddesc=Jede Tür in der Krümmung führt irgendwohin, wo sie nicht hinführen sollte. Bring dem Warden ihr Holz und ihre Splitter, dann hängt er dir eine ein, die es mit Absicht tut.
+swhkeycrookedbeyondreward=Knotts Krumme Tür + 12x Geisterstahlbarren
+[misc]
+regionkeyneedsettlement=Ein Schlüsselstück hält nur dort, wo Menschen wohnen. Stell es in deiner Siedlung auf.
+regionkeyunlocked=Die <key> setzt sich in den Boden, und weit draußen wird ein kalter Stein warm.
+regionkeyearned=Stell es in einer Siedlung auf, dann antworten dir die Rufsteine dieses Reiches.
+wardenkeyaskskyreach=Es gibt einen Weg, das zu rufen, was da draußen schläft - aber es antwortet nur seinesgleichen. Bring mir den Sturm, dann baue ich dir ein Wachfeuer.
+wardenkeydoneskyreach=Das brennt. Stell es daheim ab, wo die Mauern dir gehören.
+wardenkeyaskeden=Dann also Eden. Saft und Pollen, und beides wird dir niemand reichen.
+wardenkeydoneeden=Grünes Zeug, und noch warm. Nimm die Stiege - sie weiß, wie ihre eigenen Steine geschnitten sind.
+wardenkeyasksteinfeld=Steinfeld lässt seine Toten stehen. Bring mir bleichen Stein und das Echo darin, dann stelle ich dir einen seiner Engel auf.
+wardenkeydonesteinfeld=Sie ist schwerer, als sie aussieht. Gib ihr Boden, auf dem man sie in Ruhe lässt.
+wardenkeyaskghostrealm=Jetzt der Nachgarten, und nimm deine Kreide mit. Knochenholz und Spektralerz.
+wardenkeydoneghostrealm=Ein Vogel für die Toten, und er sitzt überall, wo du ihn hinstellst. Das ist mehr, als die meisten von ihnen tun.
+wardenkeyaskcrookedbeyond=Der letzte, und der schlimmste. Die Krümmung hat für alles eine Tür. Bring mir das Holz und die Splitter, dann hänge ich dir eine ein, die sich benimmt.
+wardenkeydonecrookedbeyond=So. Eine eigene Tür, und sie öffnet mit Absicht. Das ist der ganze Satz.

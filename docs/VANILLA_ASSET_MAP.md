@@ -161,25 +161,53 @@ find every place a sprite is standing in for something, and "it is our own file"
 does not make it any less a stand-in.
 
 **The boss portals** (`docs/FOGKEY_AND_BOSSPORTALS.md` §B3) are supposed to look
-like their realm's **key piece** — the buildable object §B1 makes an Elder-quest
-reward — so that a player who meets one recognises what they need. Those key
-pieces are §B1's work and do not exist yet. Until they do, each realm's portal
-borrows the closest thing the mod already draws. Each swaps out by changing one
-constant in `bosses/BossPortalObject`; nothing is copied and nothing is
-recoloured.
+like their realm's **key piece** — the buildable object §B1 makes a quest reward
+— so that a player who meets one recognises what they need. The key pieces
+landed on 2026-09-03 (`objects/RegionKeyObject`) and they read the **same five
+sheets**, deliberately: §B3's rule is a statement about two objects, and it is
+only true if both point at one file. So each row below is now worn *twice* — by
+`bossportal<realm>` and by `regionkey<realm>` — and the pair swaps out together
+by changing one constant in `bosses/BossPortalObject` and its twin in
+`objects/RegionKeyObject`. Nothing is copied and nothing is recoloured.
 
 | mod sheet | size | realm | worn a second time by | why that sheet |
 |---|---|---|---|---|
-| `objects/wardenbeaconon.png` | 32x96 | Skyreach | `bossportalskyreach` (`BossPortalObject.SPRITE_SKYREACH`) | the one thing the Skyreach already draws that reads as "something happens here" — a lit standing marker |
-| `objects/skystairwaydown.png` | 32x96 | Garden of Eden | `bossportaleden` (`SPRITE_EDEN`) | already Eden's doorway: `EdenGateObject` passes `"skystairway"` to `LadderDownObject`, which reads exactly this file |
-| `objects/statues/seraph.png` | 96x192 | Steinfeld | `bossportalsteinfeld` (`SPRITE_STEINFELD`) | §B1 names *"a statue for Steinfeld"*, and the realm already stands this sheet up as its `brokenangel` (`StatueObject("seraph", 32, 1)`) |
-| `objects/statues/gloomraven.png` | 64x96 | Ghost Realm | `bossportalghostrealm` (`SPRITE_GHOST`) | the mod's own grave-marker statue, already scattered by `SkyTerrainPainter` through the realms the Skyway does not reach |
-| `objects/veilriftdown.png` | 32x96 | Crooked Beyond | `bossportalcrookedbeyond` (`SPRITE_CROOKED`) | this file IS Mr. Knott's door in the shipped mod — `CrookedDoorObject` passes `"veilrift"` to `LadderDownObject` — and §B1 names that door as Crooked's key piece |
+| `objects/wardenbeaconon.png` | 32x96 | Skyreach | `bossportalskyreach` (`BossPortalObject.SPRITE_SKYREACH`) **and** `regionkeyskyreach` (`RegionKeyObject.SHEET_SKYREACH`) | the one thing the Skyreach already draws that reads as "something happens here" — a lit standing marker |
+| `objects/skystairwaydown.png` | 32x96 | Garden of Eden | `bossportaleden` (`SPRITE_EDEN`) **and** `regionkeyeden` (`SHEET_EDEN`) | already Eden's doorway: `EdenGateObject` passes `"skystairway"` to `LadderDownObject`, which reads exactly this file |
+| `objects/statues/seraph.png` | 96x192 | Steinfeld | `bossportalsteinfeld` (`SPRITE_STEINFELD`) **and** `regionkeysteinfeld` (`SHEET_STEINFELD`) | §B1 names *"a statue for Steinfeld"*, and the realm already stands this sheet up as its `brokenangel` (`StatueObject("seraph", 32, 1)`) |
+| `objects/statues/gloomraven.png` | 64x96 | Ghost Realm | `bossportalghostrealm` (`SPRITE_GHOST`) **and** `regionkeyghostrealm` (`SHEET_GHOST`) | the mod's own grave-marker statue, already scattered by `SkyTerrainPainter` through the realms the Skyway does not reach |
+| `objects/veilriftdown.png` | 32x96 | Crooked Beyond | `bossportalcrookedbeyond` (`SPRITE_CROOKED`) **and** `regionkeycrookedbeyond` (`SHEET_CROOKED`) | this file IS Mr. Knott's door in the shipped mod — `CrookedDoorObject` passes `"veilrift"` to `LadderDownObject` — and §B1 names that door as Crooked's key piece |
 
-All five are loaded by literal path from `BossPortalObject.loadBorrowedSheets()`,
-which exists so `tools/locale_audit.py` can see them: the objects themselves must
-load through a field (the path differs per realm), and a path the audit cannot
-read as a literal is a path nothing checks.
+All five are loaded by literal path from `BossPortalObject.loadBorrowedSheets()`
+and again from `RegionKeyObject.loadBorrowedArt()`, which exist so
+`tools/locale_audit.py` can see them: the objects themselves must load through a
+field (the path differs per realm), and a path the audit cannot read as a
+literal is a path nothing checks.
+
+### 1.6b The region keys' inventory icons
+
+The key pieces are **obtainable** — they are quest rewards, so the player holds
+one before they build it — and `GameObject.generateItemTexture`
+(GameObject.java:791) is hard coded to `items/<stringID>.png`. No icon was ever
+drawn under those five names, so `RegionKeyObject.generateItemTexture` reads a
+path from a field instead, exactly the seam `RockObject.generateItemTexture`
+(RockObject.java:116) and this mod's own `GhostDecoObject` use. Every icon below
+is **cell (0,0) at 32x32** of an existing file, taken with vanilla's own
+`GameTexture(copy, spriteX, spriteY, spriteRes)` constructor (GameTexture
+.java:248) — the same constructor `TerrainSplatterTile.generateItemTexture` and
+`RockOreObject.generateItemTexture` build their icons with. **Nothing is
+recoloured and nothing new was drawn.**
+
+| icon source | file size | cell taken | icon for | why that file |
+|---|---|---|---|---|
+| `objects/wardenbeaconon.png` | 32x96 | (0,0) 32x32 | `regionkeyskyreach` | the beacon's own object is registered unobtainable, so it never had an icon; the top cell of its sheet is the lit orb, which is the half of the beacon a player would point at |
+| `items/skystairwaydown.png` | 32x32 | whole file | `regionkeyeden` | the Skyward Stairway's own icon, and the Eden Gate is that stairway — the world sheet this key wears is literally `skystairwaydown` |
+| `items/seraphstatue.png` | 32x32 | whole file | `regionkeysteinfeld` | `SkyCloudmarbleSet` already registers an obtainable `seraphstatue` on the same 96x192 sheet, so this icon IS a picture of this object |
+| `items/gloomravenstatue.png` | 32x32 | whole file | `regionkeyghostrealm` | `SkyBuildingSet` already registers an obtainable `gloomravenstatue` on the same 64x96 sheet, same relationship |
+| `objects/veilriftdown.png` | 32x96 | (0,0) 32x32 | `regionkeycrookedbeyond` | the rift/door object is registered unobtainable and never had an icon; the top cell is the oval of the door itself |
+
+All eight distinct paths are loaded by literal from
+`RegionKeyObject.loadBorrowedArt()`, for the reason the row above gives.
 ### 1.6 The mod's OWN sprites read by a second registration
 
 Not a vanilla borrow at all, and listed here for the same reason the vanilla

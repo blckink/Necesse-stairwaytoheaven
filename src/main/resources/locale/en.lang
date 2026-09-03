@@ -887,3 +887,43 @@ ghostguidetalk3=I was a surveyor. I still count things. It is restful.
 ghostguidetalk4=Bring me a good dinner sometime. I cannot eat it. I would like to smell it.
 wardengiveschalk=You have been out to the mist, then. Take this - chalk, ground from grave salt. Draw a circle at home and someone will answer.
 seancenobodyanswers=The chalk here is old and cold. Nothing answers it.
+
+// ============================================================
+// The region keys (docs/FOGKEY_AND_BOSSPORTALS.md sections B1-B2)
+// ============================================================
+[object]
+regionkeyskyreach=Skyreach Watchfire
+regionkeyeden=Eden Garden Stair
+regionkeysteinfeld=Steinfeld Mourning Angel
+regionkeyghostrealm=Aftergarden Raven Perch
+regionkeycrookedbeyond=Knott's Crooked Door
+[quests]
+swhkeyskyreachtitle=The Watchfire
+swhkeyskyreachdesc=The Warden can build a watchfire that the Skyreach's own summoning stones will answer to - if you bring him the storm to light it with.
+swhkeyskyreachreward=Skyreach Watchfire + 6x Stormsteel Bar
+swhkeyedentitle=The Garden Stair
+swhkeyedendesc=Eden guards its sap and its pollen with teeth and stings. Take both from the garden and the Warden will cut you a stair that its stones recognise.
+swhkeyedenreward=Eden Garden Stair + 8x Stormsteel Bar
+swhkeysteinfeldtitle=The Mourning Angel
+swhkeysteinfelddesc=Steinfeld is nothing but pale stone and the echoes trapped in it. Bring back enough of each and the Warden will raise one of its angels in your own settlement.
+swhkeysteinfeldreward=Steinfeld Mourning Angel + 10x Stormsteel Bar
+swhkeyghostrealmtitle=The Raven Perch
+swhkeyghostrealmdesc=Nothing comes out of the Aftergarden that the fog has not already touched. Carry back its bonewood and its spectral ore, and the Warden will set a raven over your gate.
+swhkeyghostrealmreward=Aftergarden Raven Perch + 10x Spiritsteel Bar
+swhkeycrookedbeyondtitle=A Door of Your Own
+swhkeycrookedbeyonddesc=Every door in the Crooked Beyond leads somewhere it should not. Bring the Warden its wood and its shards and he will hang you one that does it on purpose.
+swhkeycrookedbeyondreward=Knott's Crooked Door + 12x Spiritsteel Bar
+[misc]
+regionkeyneedsettlement=A key piece only holds where people live. Stand it up inside your settlement.
+regionkeyunlocked=The <key> settles into the ground, and somewhere far out a cold stone warms.
+regionkeyearned=Stand it up inside a settlement and that realm's summoning stones will answer you.
+wardenkeyaskskyreach=There is a way to call the things that sleep out there - but they only answer their own kind. Bring me the storm and I will build you a watchfire.
+wardenkeydoneskyreach=That will burn. Set it down at home, where the walls are yours.
+wardenkeyaskeden=Eden next, then. Sap and pollen, and neither will be handed to you.
+wardenkeydoneeden=Green things, and still warm. Take the stair - it knows the way its own stones are cut.
+wardenkeyasksteinfeld=Steinfeld keeps its dead standing. Bring me pale stone and the echoes in it, and I will raise you one of its angels.
+wardenkeydonesteinfeld=She is heavier than she looks. Give her ground she will be left alone on.
+wardenkeyaskghostrealm=The Aftergarden, now, and you will want your chalk before you go. Bonewood and spectral ore.
+wardenkeydoneghostrealm=A bird for the dead, and it will sit anywhere you put it. That is more than most of them will do.
+wardenkeyaskcrookedbeyond=Last one, and the worst. The Crooked Beyond has a door for everything. Bring me the wood and the shards and I will hang you one that behaves.
+wardenkeydonecrookedbeyond=There. A door of your own, and it opens on purpose. That is the whole set.

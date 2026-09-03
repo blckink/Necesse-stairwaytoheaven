@@ -103,6 +103,15 @@ public class StairwayToHeavenMod {
         necesse.engine.registries.QuestRegistry.registerQuest("swh_eleanor", stairwaytoheaven.quest.EleanorQuest.class);
         necesse.engine.registries.QuestRegistry.registerQuest("swh_crookedarrival", stairwaytoheaven.quest.CrookedArrivalQuest.class);
         necesse.engine.registries.QuestRegistry.registerQuest("swh_crookeddoor", stairwaytoheaven.quest.CrookedDoorQuest.class);
+        // One region key per realm with a boss portal — the Warden's line after
+        // "The Warden's Call" (docs/FOGKEY_AND_BOSSPORTALS.md §B1). Each asks
+        // for materials only its own realm drops and pays the buildable key
+        // piece that unlocks that realm's Summoning Stones.
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_keyskyreach", stairwaytoheaven.quest.SkyreachKeyQuest.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_keyeden", stairwaytoheaven.quest.EdenKeyQuest.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_keysteinfeld", stairwaytoheaven.quest.SteinfeldKeyQuest.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_keyghostrealm", stairwaytoheaven.quest.GhostKeyQuest.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_keycrookedbeyond", stairwaytoheaven.quest.CrookedKeyQuest.class);
         // World-map icons for the auto-placed markers (spire + return
         // stairway). Textures load client-side via GameResources; the
         // registration itself is texture-free and server-safe.
@@ -229,6 +238,13 @@ public class StairwayToHeavenMod {
         // realm's key piece is built, and scattered by SkyLevel's worldgen.
         stairwaytoheaven.bosses.BossPortalObject.register();
 
+        // ...and the five key pieces that wake them. Each wears its own realm's
+        // portal sheet, so the thing you build at home and the thing you find
+        // out there are one picture (docs/FOGKEY_AND_BOSSPORTALS.md §B1-B3).
+        // Registered AFTER the portals so the two ID sets read in the same
+        // order in every dump; nothing depends on the ordering.
+        stairwaytoheaven.objects.RegionKeyObject.register();
+
         SkyObjects.register();
     }
 
@@ -241,6 +257,7 @@ public class StairwayToHeavenMod {
         stairwaytoheaven.realms.crooked.CrookedRealm.loadTextures();
         stairwaytoheaven.realms.ghost.GhostRealm.loadTextures();
         stairwaytoheaven.bosses.BossPortalObject.loadBorrowedSheets();
+        stairwaytoheaven.objects.RegionKeyObject.loadBorrowedArt();
     }
 
     public void postInit() {

@@ -95,6 +95,7 @@ LOCAL_REGISTRARS = {
     "natural": "object",              # GhostRealm: borrowed solid scenery
     "plant": "object",                # GhostRealm: borrowed soft flora
     "registerPortal": "object",       # BossPortalObject: one per realm
+    "registerKey": "object",          # RegionKeyObject: one per realm
 }
 
 # Registry calls whose ID argument is legitimately a variable, keyed by the
@@ -146,6 +147,16 @@ VANILLA_INVISIBLE_BUFFS = ("SimpleTrinketBuff", "SimpleSetBonusBuff")
 ITEM_TEXTURE_BY_CLASS = {
     "GhostDecoObject": ("items", 1),
     "GhostStationObject": ("items", 1),
+    # RegionKeyObject.generateItemTexture crops cell (0,0) of its own iconPath
+    # argument, which is a FULL resource path ("items/seraphstatue",
+    # "objects/wardenbeaconon") rather than a bare name under one directory --
+    # three of the five key pieces borrow an item icon another registration
+    # already owns, the other two crop the world sheet itself because their
+    # object was never obtainable and no icon was ever drawn. A (directory,
+    # index) rule cannot express that, so the five paths are written out as
+    # literals in RegionKeyObject.loadBorrowedIcons() instead and check 8 (the
+    # texture-literal pass) is what verifies they exist.
+    "RegionKeyObject": None,
     # GhostChalkItem.loadItemTextures -> items/<iconName>, constructor argument
     # 0. It is an ITEM rather than an object, and this table used to be
     # consulted only for objects and tiles; see the item branch of
@@ -233,6 +244,14 @@ MULTI_OBJECT_HELD_SUFFIXES = {
 OBJECT_TEXTURE_BY_CLASS = {
     "SkyDecoObject": ("objects", 0),
     "GhostStationObject": ("objects", 0),
+    # RegionKeyObject is a SkyDecoObject, but its five registrations go through
+    # registerKey(), so the sheet name is a PARAMETER at the registerObject call
+    # site and no walk of the constructors can reach the literal -- the same
+    # shape BossPortalObject has, for the same reason (one registration helper,
+    # five realms). None means "skipped here"; the five world sheets are written
+    # out as literals in RegionKeyObject.loadBorrowedArt() instead, so check 8
+    # verifies every one of them.
+    "RegionKeyObject": None,
 }
 
 

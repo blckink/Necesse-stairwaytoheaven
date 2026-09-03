@@ -1,6 +1,6 @@
-# Quests — the Eden, Ghost and Crooked chains
+# Quests — the Eden, Ghost and Crooked chains, and the five region keys
 
-Three new HUD quest chains, five `Quest` classes in
+Four new HUD quest lines, ten `Quest` classes in
 `src/main/java/stairwaytoheaven/quest/`, each registered in
 `QuestRegistry` from `StairwayToHeavenMod.init()`:
 
@@ -11,6 +11,11 @@ Three new HUD quest chains, five `Quest` classes in
 | `swh_eleanor` | `EleanorQuest` | Ghost Realm |
 | `swh_crookedarrival` | `CrookedArrivalQuest` | Crooked Beyond, step 1 |
 | `swh_crookeddoor` | `CrookedDoorQuest` | Crooked Beyond, step 2 |
+| `swh_keyskyreach` | `SkyreachKeyQuest` | region keys, 1 of 5 |
+| `swh_keyeden` | `EdenKeyQuest` | region keys, 2 of 5 |
+| `swh_keysteinfeld` | `SteinfeldKeyQuest` | region keys, 3 of 5 |
+| `swh_keyghostrealm` | `GhostKeyQuest` | region keys, 4 of 5 |
+| `swh_keycrookedbeyond` | `CrookedKeyQuest` | region keys, 5 of 5 |
 
 Companion doc: `docs/settlers.md` covers the five settlers, three of whom hand
 these out, in full (profession, shop, where each is found).
@@ -122,6 +127,93 @@ recruitable from the moment he is found, regardless of whether the chain is
 finished — §15 names no arrival or recruitment condition for him at all. The
 quest chain is a second, independent reward track layered on top of
 recruiting him, not a precondition for it.
+
+---
+
+## The region keys — the Sky Warden
+
+`docs/FOGKEY_AND_BOSSPORTALS.md` §B1-B2. Five `DeliverItemsQuest`s, one per
+realm that has a boss portal, each paying a **buildable key piece** that wakes
+that realm's summoning stones when it is stood up inside a settlement. Handed
+out and turned in by `SkyWardenMob.advanceRegionKeys`, one at a time, in the
+order of §B4's own boss ladder.
+
+| quest | asks for | pays | wakes |
+|---|---|---|---|
+| `swh_keyskyreach`, "The Watchfire" | 10x Storm Shard + 5x Fulgurite | Skyreach Watchfire + 6x Stormsteel Bar | Cryo Queen, tier 8, 57 240 HP |
+| `swh_keyeden`, "The Garden Stair" | 8x Eden Sap + 6x Golden Pollen | Eden Garden Stair + 8x Stormsteel Bar | Moonlight Dancer, tier 8, 127 200 HP |
+| `swh_keysteinfeld`, "The Mourning Angel" | 8x Echo Shard + 20x Pale Stone | Steinfeld Mourning Angel + 10x Stormsteel Bar | Ascended Wizard, tier 9, 157 520 HP |
+| `swh_keyghostrealm`, "The Raven Perch" | 12x Bonewood + 8x Spectral Ore | Aftergarden Raven Perch + 10x Spiritsteel Bar | Pest Warden, tier 9, 161 100 HP |
+| `swh_keycrookedbeyond`, "A Door of Your Own" | 16x Oddwood + 8x Reality Shard | Knott's Crooked Door + 12x Spiritsteel Bar | Crystal Dragon, tier 10, 208 000 HP |
+
+**Every ask is region-exclusive, and that was checked rather than assumed.**
+§B1 wants a region's quest to be a reason to go to that region, so each of the
+ten materials was traced to every one of its drop sites in the source and to
+every recipe that could produce it. All ten are drop-only (no recipe makes any
+of them) and every drop site of each sits inside its own realm's package.
+**Ectoplasm was rejected for exactly this reason**: it looks like the
+Aftergarden's signature material, but it is a *vanilla* item
+(`ItemRegistry.java:929`, VERIFIED [jar]) that vanilla's own swamp hands out, so
+a quest for it could be finished without ever entering the realm. Bonewood — the
+mod's own, Ghost-only — replaced it.
+
+**The key piece is not the unlock.** Turning the quest in gives you the object;
+the unlock happens when you *place* it (`RegionKeyObject.placeObject` →
+`SkywatchWorldData.unlockBossPortals`), and only inside a settlement
+(`RegionKeyObject.canPlace`, the same shape `SeanceCircleObject` uses). Those
+are two separate world flags on purpose — `regionKeysEarned` and
+`bossPortalsUnlocked` — because collapsing them would either pay the reward
+twice or delete §B2's whole "stand it up in your base" beat. Mining the key
+piece afterwards does not re-lock the realm.
+
+**Each key piece wears its own realm's portal sheet.** §B3 asks a summoning
+stone to look like the key piece; that is a statement about two objects, and it
+is only true if both read one file. `RegionKeyObject.SHEET_*` is
+`BossPortalObject.SPRITE_*` spelled again. Every borrow, including the five
+inventory icons, has a row in `docs/VANILLA_ASSET_MAP.md` §1.6/§1.6b with its
+pixel size. No new art.
+
+### Why the Warden gives these and not the Elder
+
+§B1 says *"the reward of an Elder quest"*, and the vanilla Elder cannot be given
+one. This was traced to the end before falling back:
+
+- `ElderHumanMob.getQuests(ServerClient)` **returns `null`**
+  (`ElderHumanMob.java:400-402`), `completeQuest` returns `false` (`:405-407`)
+  and `skipQuest` returns `false` (`:410-412`) — all VERIFIED [jar]. That is the
+  whole `ContainerQuest` seam `ShopContainer`/`ShopQuestsForm` would draw a
+  quests tab from, overridden to nothing on this one mob.
+- The mob cannot be swapped for a subclass either:
+  `GameRegistry.register` throws `IllegalStateException` on a duplicate stringID
+  (`GameRegistry.java:57-58`) and `GameRegistry.replaceObj` is `protected final`
+  (`:71`), so `MobRegistry` exposes no override a mod can reach.
+- His real *"quests with unique rewards"* are `StoryObjective`s, and
+  `StoryObjectiveRegistry.registerObjective` **is** public and mod-callable. But
+  `StoryObjectiveManager` only ever surfaces the first objective in registration
+  order that is not both completed and claimed (`getCurrentObjective`, `:414`;
+  `getVisibleObjectives`, `:486-494`), and a mod's objectives sort after all 24
+  of vanilla's (`StoryObjectiveRegistry.compareTo`, `:197-203`, compares raw
+  registry IDs). So the *ask* would stay invisible until a player had finished
+  **and claimed** the entire vanilla story line through `defeatascendedwizard` —
+  and only one region could ever be in progress at a time. A quest the player
+  cannot see is `swh_beacon` again with extra steps, so it was not shipped.
+  Reordering with `showBeforeObjective` was rejected too: that comparator is
+  partial (it only answers for the one named neighbour) and re-sorting vanilla's
+  own tutorial line around it is not a trade this slice is entitled to make.
+
+So the giver is the mod's own Sky Warden — already its quest-giver, already the
+source of the Ghost Chalk, and already holding the chain these five continue.
+`advanceRegionKeys` runs on **every** conversation, settler or not, exactly like
+`offerChalk`, and is gated on his own chain reaching `Chapter.DONE`: the keys
+are what comes *after* "The Warden's Call".
+
+**The co-op dead end this line was built to avoid.** The earned-record is
+world-scoped (a key piece is a building, one per world — the same reading
+`bossPortalsUnlocked` already takes). That means a second player can be left
+holding a quest for a realm somebody else finished, and the only turn-in path is
+guarded on that same record — the exact `swh_beacon` shape. So
+`advanceRegionKeys` opens with a sweep that removes any held key quest whose
+realm the world has already moved past, before it offers or turns in anything.
 
 ---
 
