@@ -104,8 +104,8 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              # shard projectile is here too: it is delivered art with no
              # projectile behind it yet, and the guard is what stops a future
              # generator module claiming the name.
-             "mobs/gimmergoat-doe.png", "mobs/gimmergoat-doe_shorn.png",
-             "mobs/gimmergoat-ram.png", "mobs/gimmergoat-ram_shorn.png",
+             "mobs/glimmergoat-doe.png", "mobs/glimmergoat-doe_shorn.png",
+             "mobs/glimmergoat-ram.png", "mobs/glimmergoat-ram_shorn.png",
              "mobs/glimmergoat-lamb.png",
              "mobs/mistserpent.png", "mobs/mistserpent_shadow.png",
              "mobs/mistserpent_head.png", "mobs/mistserpentshard.png",

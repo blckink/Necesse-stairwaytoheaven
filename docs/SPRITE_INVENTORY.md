@@ -174,10 +174,10 @@ Mob and Tile upload; the current files in those folders are authoritative.)*
 | `dewsnail.png` | 192x128 |
 | `fenwraith.png` | 384x320 |
 | `galehound.png` | 384x256 |
-| `gimmergoat-doe.png` | 384x320 |
-| `gimmergoat-doe_shorn.png` | 384x320 |
-| `gimmergoat-ram.png` | 384x320 |
-| `gimmergoat-ram_shorn.png` | 384x320 |
+| `glimmergoat-doe.png` | 384x320 |
+| `glimmergoat-doe_shorn.png` | 384x320 |
+| `glimmergoat-ram.png` | 384x320 |
+| `glimmergoat-ram_shorn.png` | 384x320 |
 | `glimmergoat-lamb.png` | 384x320 |
 | `glimmergoat.png` | 384x320 |
 | `glimmergoat_shorn.png` | 384x320 |

@@ -217,10 +217,10 @@ public final class SkyLivestock {
         // SheepMob reads). Nothing here is recoloured. The file names are the
         // player's and are kept verbatim, typo and all -- they are what is in
         // the repo, and renaming supplied art has already cost one round.
-        GlimmergoatMob.doeTexture = GameTexture.fromFile("mobs/gimmergoat-doe").makeFinal();
-        GlimmergoatMob.doeShornTexture = GameTexture.fromFile("mobs/gimmergoat-doe_shorn").makeFinal();
-        GlimmergoatMob.buckTexture = GameTexture.fromFile("mobs/gimmergoat-ram").makeFinal();
-        GlimmergoatMob.buckShornTexture = GameTexture.fromFile("mobs/gimmergoat-ram_shorn").makeFinal();
+        GlimmergoatMob.doeTexture = GameTexture.fromFile("mobs/glimmergoat-doe").makeFinal();
+        GlimmergoatMob.doeShornTexture = GameTexture.fromFile("mobs/glimmergoat-doe_shorn").makeFinal();
+        GlimmergoatMob.buckTexture = GameTexture.fromFile("mobs/glimmergoat-ram").makeFinal();
+        GlimmergoatMob.buckShornTexture = GameTexture.fromFile("mobs/glimmergoat-ram_shorn").makeFinal();
         GlimmergoatMob.kidTexture = GameTexture.fromFile("mobs/glimmergoat-lamb").makeFinal();
     }
 }

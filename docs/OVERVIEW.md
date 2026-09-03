@@ -153,16 +153,31 @@ The mod flips exactly the same flag vanilla does
 `refuseJob` is the Guard's move in reverse — Mortimer, Caspern and Knott refuse
 farming and forestry because those characters would not do it.
 
-**Two consequences worth stating plainly:**
+**Correction, 2026-09-03.** An earlier version of this section said "all five
+profession slots the engine offers are already taken, there is no sixth" and
+"there is no miner profession in vanilla". **Both were wrong.** They came from
+reading only `JobTypeRegistry` and treating a settlement work-priority as the
+whole of a profession. It is one of FIVE separate mechanisms vanilla uses, and
+the other four are all open to a mod:
 
-1. **All five profession slots the engine offers are already taken.** There is
-   no sixth. A genuinely NEW job (a "Skywright", a "Bell-ringer") would need a
-   `JobTypeRegistry.registerType` call plus its own `LevelJob` handler — the mod
-   makes none today.
-2. **There is no miner profession in vanilla 1.3.2.** The registry has no
-   `mining` type; `expeditions` exists but is NOT withheld, so every settler can
-   already run one. A "Bergarbeiter der als einziger die Mine nutzt" is not a
-   thing the base game has.
+| # | mechanism | vanilla example | open to a mod? |
+|---|---|---|---|
+| 1 | **Work priority** — a withheld `JobType` | Farmer fertilises | **taken**: all 5 in use |
+| 2 | **Expeditions** — `ExpeditionMissionRegistry` | **Miner** is sent on mining trips; **Explorer** on cave trips; **Angler** on fishing trips; **Trader** on trading missions | **YES, wide open** |
+| 3 | **A unique player-facing service** | **Mage** enchants trinkets/weapons; **Stylist** restyles you; **Elder** gives quests and sells revival potions | **YES** |
+| 4 | **Stats** | **Guard** carries +500 base HP and its own `getRegenFlat` | **YES** |
+| 5 | **Shop inventory + recruit gate** | every NPC type | **YES**, and the mod already uses it |
+
+**Mechanism 2 is the one that matches "only the miner works the mine".**
+`ExpeditionMissionRegistry` is a `GameRegistry<SettlerExpedition>` with a fully
+public API — `registerExpedition`, `registerMinerExpedition`,
+`registerMiningTrip`, `registerFishingTrip`, `registerExplorerExpedition`
+(`ExpeditionMissionRegistry.java:184-214`). Exclusivity is
+`HumanMob.canDoExpedition(SettlerExpedition)`: `MinerHumanMob` returns true only
+for ids in `miningTripExpeditionIDs`, and `getPossibleExpeditions()` builds that
+NPC's own menu. A new sky profession is therefore: **one `SettlerExpedition`
+subclass + one settler that is the only one who returns true for it.** Nothing
+in the engine stands in the way. The mod registers none today.
 
 **VERIFIED [run]**, live job lists from the headless server:
 
@@ -268,19 +283,27 @@ is `docs/ASSET_REQUESTS.md`.
 
 ## 8. What is missing — ranked by what it costs the player
 
-**0 — the one that wastes finished art. The two farm animals spawn nowhere.**
-   `nimbusyak` and `glimmergoat` are registered (`livestock/SkyLivestock.java:92-93`) and fully implemented —
-   breeding, milking, shearing, feeding all work — but the strings
-   `"nimbusyak"` and `"glimmergoat"` appear in exactly four places in the whole
-   tree: the two registration lines and two diagnostic probes in
-   `SkyreachStatusCommand`. **No biome spawn table names them**, no shop sells
-   one, no quest gifts one, no preset stamps a pen. 35 other mobs are in spawn
-   tables; these two are not. The player drew EIGHT sheets for them
-   (`nimbusyak`, `_bull`, `_calf`; `gimmergoat-doe`, `-doe_shorn`, `-ram`,
-   `-ram_shorn`, `glimmergoat-lamb`) and none of it can be seen in a game.
-   It cascades: `nimbusmilk`, `aurorafleece`, `skycurd`, `cloudcustard`,
-   `nimbusdraught` and the `glimmerstrides` boots all have working recipes and
-   no reachable ingredient.
+**Correction, 2026-09-03.** An earlier version of this list opened with
+"the two farm animals spawn nowhere". **That was wrong** and is retracted.
+`SkyLevel.placeLivestockHerds` (`SkyLevel.java:231-243`) places both:
+
+| animal | ground | chance/region | herd |
+|---|---|---|---|
+| Nimbus Yak | cloudturf (Driftlands) | `YAK_REGION_CHANCE = 0.085F` | 2–5, persistent |
+| Glimmergoat | aurorashoal (Aurora Shoals) | `GOAT_REGION_CHANCE = 0.070F` | 2–5, persistent |
+
+Livestock deliberately does NOT ride a spawn table — `placeLivestockHerds`'s own
+comment says why, quoting the player: *"wertvolle Tiere nicht an jeder Ecke"*.
+It follows vanilla's `GenerationTools.spawnMobHerds` instead. The audit that
+produced the false claim grepped for the quoted literals `"nimbusyak"` /
+`"glimmergoat"`; `placeHerd` is called with the CONSTANTS
+`SkyLivestock.NIMBUS_YAK` / `.GLIMMERGOAT`, so the grep missed the one call site
+that matters. **A grep for a string literal is not proof that a thing is
+unreachable.** The player had both animals in their base at the time.
+
+What DOES still follow: `nimbusmilk`, `aurorafleece`, `skycurd`, `cloudcustard`,
+`nimbusdraught` and `glimmerstrides` are reachable, since their animals are.
+
 1. **Hell is not built** (§17–23). The 0.80–1.00 band paints as Crooked. One
    `case` in `SkyTerrainPainter.java:1071` to delete once a painter exists.
 2. **Eden gets no guard packs.** `SkyLevel.placeGuardPacks` has branches for
