@@ -268,6 +268,19 @@ is `docs/ASSET_REQUESTS.md`.
 
 ## 8. What is missing — ranked by what it costs the player
 
+**0 — the one that wastes finished art.** The two farm animals spawn nowhere.** `nimbusyak` and `glimmergoat` are
+   registered (`livestock/SkyLivestock.java:92-93`) and fully implemented —
+   breeding, milking, shearing, feeding all work — but the strings
+   `"nimbusyak"` and `"glimmergoat"` appear in exactly four places in the whole
+   tree: the two registration lines and two diagnostic probes in
+   `SkyreachStatusCommand`. **No biome spawn table names them**, no shop sells
+   one, no quest gifts one, no preset stamps a pen. 35 other mobs are in spawn
+   tables; these two are not. The player drew EIGHT sheets for them
+   (`nimbusyak`, `_bull`, `_calf`; `gimmergoat-doe`, `-doe_shorn`, `-ram`,
+   `-ram_shorn`, `glimmergoat-lamb`) and none of it can be seen in a game.
+   It cascades: `nimbusmilk`, `aurorafleece`, `skycurd`, `cloudcustard`,
+   `nimbusdraught` and the `glimmerstrides` boots all have working recipes and
+   no reachable ingredient.
 1. **Hell is not built** (§17–23). The 0.80–1.00 band paints as Crooked. One
    `case` in `SkyTerrainPainter.java:1071` to delete once a painter exists.
 2. **Eden gets no guard packs.** `SkyLevel.placeGuardPacks` has branches for
@@ -291,9 +304,19 @@ is `docs/ASSET_REQUESTS.md`.
    Caspern, Magpie, Halda, Ossian have no `interact()` override.
 9. **`swh_beacon` is a registered dead quest**, kept only for old-save
    deserialization.
-10. **`LongTablePreset` contains no table.** Thirty-four chairs, zero tables — its
+10. **Two realms' materials have no consumer.** Crooked's six (`oddwood`,
+    `warpresin`, `strangefabric`, `eyeseed`, `stripedshell`, `realityshard`) and
+    Steinfeld's four (`palestone`, `gravesalt`, `spiritmoss`, `echoshard`) are
+    droppable and sellable, and no recipe anywhere names any of them — neither
+    realm even defines a `registerRecipes()`. Steinfeld's own class doc claims
+    a séance quest consumes two of them; no quest file mentions either.
+11. **Five items have no source at all.** `skyanchor` is registered unbreakable
+    and placed by nothing. `skywatchhood`, `wardenmantle` and `wardenboots` are
+    obtainable-flagged armour with no recipe, shop or gift — they exist only as
+    what the Warden NPC wears.
+12. **`LongTablePreset` contains no table.** Thirty-four chairs, zero tables — its
     own comment concedes the joke.
-11. **`DoorYardPreset`'s javadoc says eleven doors; its `PLAN` grid stamps eight.**
+13. **`DoorYardPreset`'s javadoc says eleven doors; its `PLAN` grid stamps eight.**
     Doc drift inside the same file as the code.
 
 ### Harmless leftovers, recorded so nobody re-discovers them
