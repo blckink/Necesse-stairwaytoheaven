@@ -41,3 +41,8 @@ vanilla-sprites/
 # through it. It was once committed as a symlink pointing at ITSELF, which
 # blinded every audit that reads it.
 vanilla-sprites
+
+# Intermediate art working files: SOURCE_/PREVIEW_ resheet output.
+# The shipped sprite is the one under src/main/resources; the drafts that
+# produced it are scratch and were 9.5 MB of repo.
+art-drafts/

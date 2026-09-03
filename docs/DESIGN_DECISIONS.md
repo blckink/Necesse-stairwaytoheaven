@@ -7,6 +7,21 @@ Each entry says what was decided and, briefly, why.
 
 ## World structure
 
+**The whole sky world is ONE level.** `skylevel` / `skyreach2` is the only
+modded level; every realm from Skyreach to Hell is a depth BAND on it, and the
+bands overlap. *Why:* `WORLD_DESIGN.md` §3 sets biome WEIGHTS from
+`realmDepth`, not zones — separate dimensions give hard borders, no gradient and
+no anti-rush gate. This was implemented as six dimensions once and reverted on
+2026-09-02; the law is in `docs/PLAN_ONE_PLANE.md`. **A change that adds a
+`registerLevel` call breaks it.**
+
+**Rushing is stopped by Soul Exposure, not by walls.** Standing in a band you
+have not earned stacks a named, visible debuff. *Why:* §8 names the abuse case
+— a blocked tile is defeated by a teleport, so the check is against the world
+REGION. And a short step over the line must stay possible: that is how the
+player learns the next realm exists.
+
+
 **The Surface stays the player's main world.** Base, settlement, NPCs and
 vanilla progression all live there. *Why:* the mod is an expansion, not a
 replacement. A second full base splits the player's attention and makes the

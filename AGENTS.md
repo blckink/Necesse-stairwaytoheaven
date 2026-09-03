@@ -10,7 +10,7 @@ modifying anything in this repository.
    concept for the whole world: nine realms from Skyreach to Hell, the
    realmDepth worldgen, the two gates, every realm's cast, economy and palette,
    the full quest order. **It outranks every other design document here.** Where
-   `docs/DESIGN.md`, `docs/ART_DIRECTION.md` or `docs/assets-style-guide.md`
+   `docs/ART_DIRECTION.md` or `docs/assets-style-guide.md`
    disagree with it, they are stale and it wins. Part B of that file is this
    repo's own review: what the concept overturns in the existing code, the gaps
    it does not answer, and the recommended build order. Read both halves.
@@ -18,11 +18,12 @@ modifying anything in this repository.
    The working method is: build with vanilla stand-ins now, the player replaces
    them all in one pass later. **A borrowed asset that is not in that file
    breaks the swap**, so add the row in the same commit that uses it.
-4. **`docs/STATUS.md` — what actually WORKS right now.** One page: which
-   biomes, quests, NPCs, stations and structures are live, what is registered
-   but dead, and what is not built at all. Every row carries a verification
-   state. Start here before claiming anything works.
-5. `docs/CURRENT_STATE.md` — the longer narrative of where the project is
+4. **`docs/OVERVIEW.md` — what actually WORKS right now.** One page, read off
+   the code: every realm band, biome, POI, item, NPC, quest and settler job,
+   with a state per row. Start here before claiming anything works.
+5. **`docs/PLAN_ONE_PLANE.md` — the architecture law.** One level, realms as
+   depth bands, the anti-rush gate, the travel rules. A change that adds a
+   dimension breaks it.
 6. `docs/DESIGN_DECISIONS.md` — invariants you must not silently reverse
 7. `docs/TECHNICAL_LEARNINGS.md` — verified Necesse behaviour, so you do not
    rediscover the same APIs and bugs
@@ -30,11 +31,11 @@ modifying anything in this repository.
    content families, tool behaviour, UI/icon completeness, worldgen composition,
    and verification states
 9. the domain doc for what you are touching — `docs/ART_DIRECTION.md`,
-   `docs/PLAYTEST_LOG.md`, `docs/ARCHITECTURE.md`, `docs/DESIGN.md`,
+   `docs/BALANCE.md`, `docs/PLAYTEST_LOG.md`, `docs/ARCHITECTURE.md`,
    `docs/research/`
 10. `docs/WORLDBUILDING_LOOP.md` if you are expanding the world rather than
-   fixing something — what already exists, the texture law on one page, and the
-   seven-role loop the `.claude/agents/` definitions implement
+   fixing something — the seven-role loop the `.claude/agents/` definitions
+   implement. Its Veil cast is stale; `WORLD_DESIGN.md` wins.
 11. recent git history (`git log --oneline -20` and the diff of anything your
    task touches)
 
@@ -99,7 +100,7 @@ visual/image tooling for the artwork itself; use coding agents for format,
 integration, validation, generator reproducibility, and engine constraints.
 
 **Record what you verified.** After finishing, append newly proven behaviour to
-`docs/TECHNICAL_LEARNINGS.md`, update `docs/CURRENT_STATE.md` if the state
+`docs/TECHNICAL_LEARNINGS.md`, update `docs/OVERVIEW.md` if the state
 changed, and append to `docs/PLAYTEST_LOG.md` if the user reported something.
 Only write things you actually observed. Mark anything unproven as a hypothesis.
 

@@ -199,8 +199,9 @@ whose `settings.gradle` shows the current `modVersion` — not in a
 | `tools/*_audit.py` | the verification gates: sprite mass, sheet format, tile behaviour, rotation variety, furniture, locale, content ledger |
 | `scripts/` | `fetch_dedicated_server.sh`, the headless integration test, tile-sprite and map-render checks |
 | `AGENTS.md` | entry point for anyone (human or agent) changing this repository |
-| `docs/CURRENT_STATE.md` | where the project actually is right now |
-| `docs/DESIGN.md` · `docs/ARCHITECTURE.md` | design document · how the mod hooks the engine |
+| `docs/OVERVIEW.md` | what exists and works right now, read off the code |
+| `docs/WORLD_DESIGN.md` | the concept every other design doc answers to |
+| `docs/PLAN_ONE_PLANE.md` · `docs/ARCHITECTURE.md` | the one-plane law · how the mod hooks the engine |
 | `docs/PLAYER_JOURNEY.md` | the player's path A to Z, read out of the code |
 | `docs/CONTENT_LEDGER.md` | every registered ID and one line on what it is |
 | `docs/PLAYTEST_LOG.md` | real in-game feedback, append-only, KEEP entries are player-confirmed |
