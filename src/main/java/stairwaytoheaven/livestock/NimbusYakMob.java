@@ -74,7 +74,15 @@ import necesse.level.maps.light.GameLight;
  */
 public class NimbusYakMob extends CowMob {
 
-    /** Recoloured vanilla mobs/cow, mobs/bull and mobs/calf — see {@link SkyPelt}. */
+    /**
+     * The player's own three sheets: {@code mobs/nimbusyak},
+     * {@code _bull}, {@code _calf}, assigned in {@code SkyLivestock.loadTextures}.
+     *
+     * <p>NOT recoloured. These were vanilla cow/bull/calf tinted through
+     * {@link SkyPelt} until 2026-09-02, when the player supplied real sheets;
+     * the tint path is gone and must not come back. {@code SkyPelt} still
+     * serves the livestock ITEMS, which is a different question.
+     */
     public static GameTexture cowTexture;
     public static GameTexture bullTexture;
     public static GameTexture calfTexture;

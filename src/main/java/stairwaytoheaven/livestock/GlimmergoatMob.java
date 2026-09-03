@@ -59,7 +59,16 @@ import necesse.level.maps.light.GameLight;
  */
 public class GlimmergoatMob extends SheepMob {
 
-    /** Recoloured vanilla mobs/sheep, sheep_sheared, ram, ram_sheared, lamb. */
+    /**
+     * The player's own five sheets: {@code mobs/glimmergoat-doe},
+     * {@code -doe_shorn}, {@code -ram}, {@code -ram_shorn}, {@code -lamb},
+     * assigned in {@code SkyLivestock.loadTextures}.
+     *
+     * <p>NOT recoloured. Vanilla's sheep/ram/lamb were the stand-in until
+     * 2026-09-02; all five real sheets have shipped since, shorn states
+     * included. {@code extends SheepMob} is a BEHAVIOUR base — shearing,
+     * breeding, regrowth — and says nothing about the art.
+     */
     public static GameTexture doeTexture;
     public static GameTexture doeShornTexture;
     public static GameTexture buckTexture;
