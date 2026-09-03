@@ -56,6 +56,51 @@ wakes them, and using one wakes the realm's boss.
   created lazily during the head's tick, so there is nothing to buff at spawn.
   Health is exact for all five regardless — a worm body delegates `getHealth`
   and `isHit` to its head — and the error in damage is in the safe direction.
+## [Unreleased] — the fog key: chalk, circle, guide — 2026-09-03
+
+`docs/FOGKEY_AND_BOSSPORTALS.md` Part A. The Séance Circle stops being a
+teleporter and becomes the way THROUGH the fog. Travel was already solved by
+vanilla's Portal Flask; what was missing was a reason and a route.
+
+### Added
+- **`ghostchalk`** — the Warden hands one piece to a player the first time
+  *that player* has stood in Soul Exposure fog, and sells replacements at 1,200
+  coins from then on. The record is per client authentication
+  (`VeilWorldData.hasTouchedFog` / `hasBeenGivenChalk`), never world-scoped, so
+  two players reaching the fog together each earn their own piece. There is no
+  recipe: he is the only source, and a lost piece is never a dead end.
+- **`ghostguide`** — a summoned, unrecruitable `HumanShop`. His first
+  conversation calls `VeilWorldData.grantMark`, which is the existing per-player
+  Veil Mark and not a second store, so the Ghost band's Soul Exposure stops
+  applying to that player. Every conversation after is a barter: he takes
+  8 `spiritsteelbar`, 12 `veilessence`, 20 `ectoplasm` or 8 `Settler.FOOD_FINE`
+  dishes, and no coin.
+- **`spiritsteelreaver`** and **`gravewindbow`** — the Ghost Realm's first two
+  weapons, measured against `ravenwinggreatsword` (150 → 186.67) and
+  `thecrimsonsky` (90 → 110.83) scaled by `docs/BALANCE.md` §7's Stormsteel →
+  Spiritsteel step. Traded from the guide, and dropped by the Mourning Bride
+  (4% each) and the Haunted Manor chest (20% each), so a player who never
+  trades still finds them.
+
+### Changed
+- **`SeanceCircleObject` is no longer a teleporter.** The three branches are
+  gone — the Skyreach one turned the ring into a Crooked Door, the deep one said
+  there was nowhere left to send you, and the third opened a Veil Rift for
+  anyone holding the Silver Bell. It is now placeable only inside a settlement,
+  minable with a pickaxe at 50 object health (vanilla's own number for placed
+  furniture), and using it summons the Ghost Guide. Nothing here creates
+  `crookeddoordown` any more.
+- **`seancecircle` is registered unobtainable** and its Tungsten Workstation
+  recipe is deleted. The chalk is the item; breaking a placed ring returns it.
+- The rings worldgen already stands at `SkyOutlands.isPortalSite` in the Beetle
+  Outlands are left in place and are now **inert** — a circle outside a
+  settlement answers nobody. Otherwise finding one would hand out the guide for
+  free and walk around the whole chalk. Those hashed sites are the natural home
+  for Part B's region boss portals.
+- The Silver Bell is no longer a key to anything; it stays the Warden's
+  recruitment keepsake.
+- `/veilmark` now also reports, per player, whether they have touched the fog
+  and whether they have been given their chalk.
 
 ## [Unreleased] — ONE PLANE: the six dimensions collapse — 2026-09-02
 

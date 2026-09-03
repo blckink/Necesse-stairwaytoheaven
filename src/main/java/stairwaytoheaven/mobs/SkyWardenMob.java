@@ -80,6 +80,23 @@ public class SkyWardenMob extends HumanShop {
     /** What a replacement Silver Bell costs at the Warden, in coins. */
     public static final int SPARE_BELL_PRICE = 5000;
 
+    /**
+     * What a replacement Ghost Chalk costs at the Warden, in coins.
+     *
+     * <p>{@code ghostchalk} registers at brokerValue 120.0F
+     * ({@code SkyItems.register}), so 1200 is a flat <b>10x broker</b>. That
+     * multiplier is vanilla's own, not invented: {@code FriendlyWitchHumanMob}
+     * prices her whole potion shelf with
+     * {@code setStaticBrokerPriceBasedOnHappiness(3.0F, 6.0F, 2.0F)} and her
+     * cauldron with {@code (10.0F, 20.0F, 2.0F)}
+     * (FriendlyWitchHumanMob.java:94, :113 — <b>VERIFIED [jar]</b>), i.e. a
+     * vanilla shop sells between 3x and 20x broker value. The Silver Bell's own
+     * line above sits at the top of that range (5000 on a 250.0F bell = 20x)
+     * because it is a permanent key; the chalk is spent on use and A1 insists a
+     * lost piece must never be a dead end, so it sits at the bottom.
+     */
+    public static final int SPARE_CHALK_PRICE = 1200;
+
     public SkyWardenMob() {
         // Third argument is the SettlerRegistry key, NOT a free-form type name.
         // "wardensettler" is the key SkyMobs registers WardenSettler under; any
@@ -97,6 +114,17 @@ public class SkyWardenMob extends HumanShop {
         // handing out the spares he has rather than a vending machine.
         this.shop.addSellingItem("silverbell", new SellingShopItem(2, 1))
                 .setStaticPrice(SPARE_BELL_PRICE, SPARE_BELL_PRICE);
+        // ...and the Ghost Chalk, on exactly the same line shape and for
+        // exactly the same reason (docs/FOGKEY_AND_BOSSPORTALS.md A1): "The
+        // Warden hands it over the first time that player has stood in Soul
+        // Exposure fog, and sells replacements from then on... A lost piece is
+        // never a dead end because he restocks it."
+        //
+        // Stocked 3, restocking 1 a day rather than the bell's 2/1: the chalk
+        // is consumed by drawing the ring, so a player who moves their base
+        // twice in a week needs him to have more than one on the shelf.
+        this.shop.addSellingItem("ghostchalk", new SellingShopItem(3, 1))
+                .setStaticPrice(SPARE_CHALK_PRICE, SPARE_CHALK_PRICE);
     }
 
     /**
@@ -251,12 +279,53 @@ public class SkyWardenMob extends HumanShop {
             }
         }
         if (this.isServer() && player.isServerClient()) {
+            offerChalk(player.getServerClient());
             advanceChain(player.getServerClient());
         }
 
         // HumanShop.interact turns him to face the player, updates happiness
         // and opens the shop/recruit container.
         super.interact(player);
+    }
+
+    /**
+     * The Ghost Chalk, once, to whoever has been to the fog.
+     *
+     * <p>{@code docs/FOGKEY_AND_BOSSPORTALS.md} A1. Everything about this is
+     * per PLAYER and nothing about it is per world, which is the whole point of
+     * the section it comes from:
+     *
+     * <blockquote>"ein NPC der in der nähe spawnt" is a race in multiplayer:
+     * two players reach the fog together, one NPC spawns, one chalk. So the
+     * grant is per player ... Every player earns their own piece the first time
+     * <i>they</i> touch fog.</blockquote>
+     *
+     * <p>Both halves of the condition therefore live in
+     * {@code veil/VeilWorldData}, keyed on {@code ServerClient.authentication}
+     * exactly as the Veil Mark already is — {@code hasTouchedFog} is written by
+     * the region check that already runs once a second for every online player,
+     * and {@code markChalkGiven} is this method's own ledger. Neither goes near
+     * {@code quest/SkywatchWorldData}, which is world-scoped and would hand the
+     * second player's chalk to whoever asked first.
+     *
+     * <p>It is checked on EVERY conversation rather than only on recruitment,
+     * because the fog is reached long after he moves in: the trigger is the
+     * player walking to the wall, and this is the next time they see him.
+     */
+    private void offerChalk(ServerClient client) {
+        Level level = this.getLevel();
+        Server server = level == null ? null : level.getServer();
+        stairwaytoheaven.veil.VeilWorldData veil = stairwaytoheaven.veil.VeilWorldData.get(server);
+        if (veil == null || !veil.hasTouchedFog(client.authentication)) {
+            return;
+        }
+        // markChalkGiven returns true only when the ledger did not already hold
+        // this character, so the gift cannot be farmed by talking twice.
+        if (!veil.markChalkGiven(client.authentication)) {
+            return;
+        }
+        say(client, "wardengiveschalk");
+        give(client, "ghostchalk", 1);
     }
 
     /**

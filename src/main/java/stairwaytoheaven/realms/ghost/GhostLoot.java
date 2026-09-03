@@ -50,13 +50,34 @@ public final class GhostLoot {
                 new ChanceLootItemList(0.40F, LootItem.between("bonewood", 2, 4)));
     }
 
-    /** The elite: more of everything, and the only mob-source of spectral ore. */
+    /**
+     * The elite: more of everything, the only mob-source of spectral ore, and
+     * the only mob-source of the realm's two weapons.
+     *
+     * <p>{@code docs/FOGKEY_AND_BOSSPORTALS.md} A3.3: <b>"The same ghost weapons
+     * also drop randomly in the Ghost region, so a player who never trades
+     * still finds them."</b> This is that drop, and it is on the ELITE table
+     * rather than on {@link #standard()} for the reason the class comment above
+     * already gives for stack sizes: a weapon that every drifter hands out is
+     * something you were issued, not something you earned.
+     *
+     * <p><b>4%.</b> Vanilla's own reference for a weapon on a mob table is the
+     * incursion boss chest, not the trash mob, so there is no equal-tier chance
+     * to copy; the number is instead read off the two rungs this table already
+     * uses. Spectral ore — the rarest MATERIAL here — is 40%, and the finished
+     * bar is 20%; a finished weapon is worth about eight bars (see
+     * {@code GhostGuideMob}'s price list), so it sits an order of magnitude
+     * below the bar. At 4% each, an elite is a 1-in-13 chance of some weapon,
+     * which is a run of the Aftergarden rather than a grind.
+     */
     public static LootTable elite() {
         return new LootTable(
                 LootItem.between("ectoplasm", 4, 7),
                 new ChanceLootItemList(0.65F, LootItem.between("soulthread", 3, 6)),
                 new ChanceLootItemList(0.40F, LootItem.between("spectralore", 2, 4)),
-                new ChanceLootItemList(0.20F, LootItem.between("spiritsteelbar", 1, 1)));
+                new ChanceLootItemList(0.20F, LootItem.between("spiritsteelbar", 1, 1)),
+                new ChanceLootItemList(0.04F, LootItem.between("spiritsteelreaver", 1, 1)),
+                new ChanceLootItemList(0.04F, LootItem.between("gravewindbow", 1, 1)));
     }
 
     /** The ambushers: they were sitting on something, so they drop it. */

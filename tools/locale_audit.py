@@ -146,6 +146,14 @@ VANILLA_INVISIBLE_BUFFS = ("SimpleTrinketBuff", "SimpleSetBonusBuff")
 ITEM_TEXTURE_BY_CLASS = {
     "GhostDecoObject": ("items", 1),
     "GhostStationObject": ("items", 1),
+    # GhostChalkItem.loadItemTextures -> items/<iconName>, constructor argument
+    # 0. It is an ITEM rather than an object, and this table used to be
+    # consulted only for objects and tiles; see the item branch of
+    # held_content, which now falls through to icon_paths for the same reason
+    # this dict exists at all. The chalk draws the mod's OWN
+    # items/seancecircle.png -- the circle it makes -- because the object it
+    # places is registered unobtainable and no longer owns an icon of its own.
+    "GhostChalkItem": ("items", 0),
     # RockObject.generateItemTexture -> items/<rockTexture>, the first
     # constructor argument, which is NOT the registered string ID.
     "RockObject": ("items", 0),
@@ -584,6 +592,12 @@ ITEM_CLASS_VANILLA_ICON = {
     "SpiritsteelHelmet": ("fixed", "soulseedcrown"),
     "SpiritsteelChestplate": ("fixed", "soulseedchestplate"),
     "SpiritsteelBoots": ("fixed", "soulseedboots"),
+    # The Ghost Realm's two weapons, same deliberate no-recolouring pointer at
+    # a vanilla icon as the armour above. Each class names the file in its own
+    # ART constant and in its class doc; both are also in
+    # docs/VANILLA_ASSET_MAP.md §1.3b.
+    "SpiritsteelReaver": ("fixed", "necroticgreatsword"),
+    "GravewindBow": ("fixed", "necroticbow"),
 }
 
 # Marker prefix on a wanted-icon path that lives in the vanilla resource file
@@ -821,7 +835,15 @@ def held_content(recipes):
                         elif class_name in ITEM_CLASS_DRAWS_ITSELF:
                             wanted = None
                         else:
-                            wanted = []
+                            # ITEM_TEXTURE_BY_CLASS, then the engine default.
+                            # An ITEM may point loadItemTextures at one of OUR
+                            # files under another name just as an object may
+                            # (GhostChalkItem draws items/seancecircle), and
+                            # before this fell through to icon_paths that was
+                            # reported as a missing items/<stringID>.png. Every
+                            # class not in the table still lands on [], i.e.
+                            # the engine default, exactly as before.
+                            wanted = icon_paths(class_name, ctor, supers)
                     else:
                         wanted = icon_paths(class_name, ctor, supers)
                     rows.append((spot, kind, string_id, wanted, class_name))

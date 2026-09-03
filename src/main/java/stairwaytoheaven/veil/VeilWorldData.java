@@ -99,14 +99,54 @@ public class VeilWorldData extends WorldData {
     /**
      * The authentications that hold the Veil Mark.
      *
-     * <p>Empty in every world today, because §9's séance questline — Madame
-     * Orla, the Séance Table, the Ferryman — is not built. Until it is, the
-     * only thing that writes to this set is the {@code /veilmark} admin command
-     * (see {@code commands/VeilMarkCommand}). When the questline lands, the
-     * Ferryman calls {@link #grantMark} and nothing else in this package
-     * changes.
+     * <p>Written by the <b>Ghost Guide's first conversation</b>
+     * ({@code mobs/GhostGuideMob}) — {@code docs/FOGKEY_AND_BOSSPORTALS.md} A3:
+     * "First use — he unlocks you. From then on the Ghost band's Soul Exposure
+     * does not apply to that player." That is this set and nothing else; the
+     * guide calls {@link #grantMark} and no second store was invented for it.
+     * The {@code /veilmark} admin command (see {@code commands/VeilMarkCommand})
+     * still writes it too, so the gate can be tested from both sides without a
+     * séance.
      */
     private final Set<Long> markAuths = new HashSet<>();
+
+    /**
+     * The authentications that have stood in the fog at least once.
+     *
+     * <p>{@code docs/FOGKEY_AND_BOSSPORTALS.md} A1 makes the Ghost Chalk the
+     * Warden's gift "the first time that player has stood in Soul Exposure
+     * fog", and is explicit about why the record is per player rather than per
+     * world:
+     *
+     * <blockquote>"ein NPC der in der nähe spawnt" is a race in multiplayer:
+     * two players reach the fog together, one NPC spawns, one chalk. So the
+     * grant is <b>per player</b> ... Every player earns their own piece the
+     * first time <i>they</i> touch fog.</blockquote>
+     *
+     * <p>So it is keyed on {@code ServerClient.authentication}, exactly like
+     * {@link #markAuths} above it, and deliberately NOT in
+     * {@code quest/SkywatchWorldData}, which is world-scoped and would hand the
+     * second player's chalk to whoever got there first.
+     *
+     * <p>Written by {@link #tickClient} — the one place in the mod that already
+     * knows, once a second, who is standing in the fog. There is no "entered
+     * the fog" event to hook because {@link VeilRegion} deliberately has none
+     * (see its class doc), and inventing one here would rebuild exactly the
+     * boundary-crossing hook {@code WORLD_DESIGN} §8 forbids.
+     */
+    private final Set<Long> fogTouchedAuths = new HashSet<>();
+
+    /**
+     * The authentications the Warden has already handed their first chalk to.
+     *
+     * <p>Separate from {@link #fogTouchedAuths} because the two answer
+     * different questions: touching fog is a fact about the player and never
+     * expires, while this is the Warden's own ledger of who he has already
+     * given a free piece. A player who loses their chalk buys the next one
+     * (SkyWardenMob's shop line) rather than earning another gift — A1's "a
+     * lost piece is never a dead end because he restocks it".
+     */
+    private final Set<Long> chalkGivenAuths = new HashSet<>();
 
     private long nextCheckTime;
 
@@ -117,21 +157,37 @@ public class VeilWorldData extends WorldData {
     @Override
     public void addSaveData(SaveData save) {
         super.addSaveData(save);
-        long[] auths = new long[this.markAuths.size()];
-        int i = 0;
-        for (long auth : this.markAuths) {
-            auths[i++] = auth;
-        }
-        save.addLongArray("markAuths", auths);
+        save.addLongArray("markAuths", toArray(this.markAuths));
+        save.addLongArray("fogTouchedAuths", toArray(this.fogTouchedAuths));
+        save.addLongArray("chalkGivenAuths", toArray(this.chalkGivenAuths));
     }
 
     @Override
     public void applyLoadData(LoadData save) {
         super.applyLoadData(save);
-        this.markAuths.clear();
-        if (save.hasLoadDataByName("markAuths")) {
-            for (long auth : save.getLongArray("markAuths")) {
-                this.markAuths.add(auth);
+        load(save, "markAuths", this.markAuths);
+        // Absent in every world saved before the chalk existed, which reads as
+        // "nobody has touched fog yet" -- the honest answer, since the record
+        // was never kept. LoadData.getLongArray is only asked when the key is
+        // present, so an older save loads without a warning.
+        load(save, "fogTouchedAuths", this.fogTouchedAuths);
+        load(save, "chalkGivenAuths", this.chalkGivenAuths);
+    }
+
+    private static long[] toArray(Set<Long> auths) {
+        long[] out = new long[auths.size()];
+        int i = 0;
+        for (long auth : auths) {
+            out[i++] = auth;
+        }
+        return out;
+    }
+
+    private static void load(LoadData save, String name, Set<Long> into) {
+        into.clear();
+        if (save.hasLoadDataByName(name)) {
+            for (long auth : save.getLongArray(name)) {
+                into.add(auth);
             }
         }
     }
@@ -162,6 +218,35 @@ public class VeilWorldData extends WorldData {
     /** How many characters in this world have crossed. For the status command. */
     public int markCount() {
         return this.markAuths.size();
+    }
+
+    // ------------------------------------------------------------------
+    // the chalk ledger (docs/FOGKEY_AND_BOSSPORTALS.md A1)
+    // ------------------------------------------------------------------
+
+    /** Has this character ever stood in the fog? */
+    public boolean hasTouchedFog(long auth) {
+        return this.fogTouchedAuths.contains(auth);
+    }
+
+    /** Records the touch. Idempotent; true when it was actually the first. */
+    public boolean markTouchedFog(long auth) {
+        return this.fogTouchedAuths.add(auth);
+    }
+
+    /** Has the Warden already given this character their first chalk? */
+    public boolean hasBeenGivenChalk(long auth) {
+        return this.chalkGivenAuths.contains(auth);
+    }
+
+    /** Records the gift. Idempotent; true when it was actually the first. */
+    public boolean markChalkGiven(long auth) {
+        return this.chalkGivenAuths.add(auth);
+    }
+
+    /** How many characters have touched the fog. For the status command. */
+    public int fogTouchedCount() {
+        return this.fogTouchedAuths.size();
     }
 
     // ------------------------------------------------------------------
@@ -226,6 +311,14 @@ public class VeilWorldData extends WorldData {
         // WORLD_DESIGN §9 keeps it visible after the unlock so the border stays
         // legible.
         refresh(player, VeilGate.fog());
+
+        // ...and this is the moment FOGKEY A1 calls "the first time that player
+        // has stood in Soul Exposure fog". It is recorded for EVERYONE inside,
+        // Mark or no Mark, for the same reason the fog is applied to everyone:
+        // the question is whether this character has been to the wall, not
+        // whether the wall hurt them. A Marked player who somehow never
+        // collected their chalk can still walk back and ask for it.
+        this.markTouchedFog(client.authentication);
 
         if (this.hasMark(client.authentication)) {
             if (!player.isOnGenericCooldown(COOLDOWN_PARTED)) {
