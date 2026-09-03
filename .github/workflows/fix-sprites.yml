@@ -49,15 +49,18 @@ jobs:
           fi
           python3 tools/inbox_fix.py $APPLY \
             --colours "${{ inputs.colours || '32' }}" 2>&1 | tee /tmp/fit.log
-          echo "exit=$?" >> "$GITHUB_OUTPUT"
+          # PIPESTATUS, not $?: after a pipeline $? is tee's status, which is
+          # always 0, so an unresolved file used to read as a clean run.
+          echo "exit=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
         continue-on-error: true
 
       - name: Summary
+        if: always()
         run: |
           {
             echo '## Sprite fit'
             echo '```'
-            cat /tmp/fit.log
+            cat /tmp/fit.log 2>/dev/null || echo '(the fit step produced no log)'
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -71,8 +74,15 @@ jobs:
       # The inbox is a drop box, not storage: once a file has been fitted and
       # applied it would be re-fitted on every later run, so it is cleared here
       # and the fitted result lives in the sprite it replaced.
-      - name: Clear the inbox
-        run: git rm -q --ignore-unmatch 'art-inbox/*.png' || true
+      # Only the files that actually landed somewhere are cleared. An
+      # unresolved file stays in the inbox so it can be renamed and retried --
+      # deleting it would throw away the art and the evidence together.
+      - name: Clear the fitted files out of the inbox
+        run: |
+          grep -oE "^  [^ ]+\\.png +-> src/" /tmp/fit.log 2>/dev/null \
+            | awk '{print "art-inbox/" $1}' \
+            | while read -r f; do git rm -q --ignore-unmatch "$f" || true; done
+          git status --short art-inbox/ || true
 
       - name: Open a pull request
         uses: peter-evans/create-pull-request@v6
