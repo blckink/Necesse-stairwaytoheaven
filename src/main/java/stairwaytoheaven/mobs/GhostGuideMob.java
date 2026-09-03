@@ -15,6 +15,8 @@ import necesse.entity.mobs.ai.behaviourTree.BehaviourTreeAI;
 import necesse.entity.mobs.ai.behaviourTree.trees.HumanAI;
 import necesse.entity.mobs.ai.behaviourTree.util.AIMover;
 import necesse.entity.mobs.friendly.human.HumanMob;
+import necesse.entity.mobs.friendly.human.humanShop.BuyingShopItem;
+import necesse.entity.mobs.friendly.human.humanShop.SellingShopItem;
 import necesse.entity.mobs.friendly.human.humanShop.HumanShop;
 import necesse.entity.pickup.ItemPickupEntity;
 import necesse.gfx.HumanGender;
@@ -90,91 +92,10 @@ import stairwaytoheaven.veil.VeilWorldData;
 public class GhostGuideMob extends HumanShop {
 
     /**
-     * The registry ID, so the Séance Circle cannot mistype it.
-     *
-     * <p>It is NOT what {@code SkyMobs.register} passes to
-     * {@code MobRegistry.registerMob} — that line spells the string out,
-     * because {@code tools/locale_audit.py} matches the registration with a
-     * regex and an ID arriving through a constant would register a mob whose
-     * two locale keys nothing checks. The two must agree, and the registration
-     * says so at its own call site.
+     * The registry id. {@code SeanceCircleObject} summons him by it, so it lives
+     * here rather than being spelled twice.
      */
     public static final String STRING_ID = "ghostguide";
-
-    /** Per-player cooldown key and length for the printed price list. */
-    private static final String QUOTE_COOLDOWN = "swhghostguidequote";
-    private static final long QUOTE_COOLDOWN_MS = 60_000L;
-
-    /**
-     * What he will take, and what he gives back.
-     *
-     * <h3>Where the numbers come from</h3>
-     * Every row is priced in broker value, the same currency the mod's own
-     * recipes are checked in ({@code SkyArsenal.registerItems} explains the
-     * method): {@code spiritsteelbar} 55.0F and {@code veilessence} 34.0F are
-     * this mod's ({@code GhostRealm.registerItems}, {@code SkyItems.register}),
-     * {@code ectoplasm} is vanilla's at 12.0F, and vanilla's own FOOD_FINE
-     * dishes run 5.0F-14.0F (ItemRegistry.java:1427-1435 — steak 5, roastedpork
-     * 12, roastedrabbitleg 14, VERIFIED [jar]). Each trade hands the player
-     * back a little LESS than they paid, which is what a shop is:
-     *
-     * <pre>
-     *   8 spiritsteelbar   440  ->  Spiritsteel Reaver  430
-     *  12 veilessence      408  ->  Gravewind Bow       400
-     *  20 ectoplasm        240  ->  4 spiritsteelbar    220
-     *   8 fine dishes   40-112  ->  2 veilessence        68
-     * </pre>
-     *
-     * The two material rows exist so that neither weapon is behind a resource
-     * the player might not have found: raw ectoplasm buys the bars the sword
-     * costs, and a cook who never fights buys the essence the bow costs.
-     */
-    private static final Trade[] TRADES = {
-            new Trade("spiritsteelbar", 8, "spiritsteelreaver", 1),
-            new Trade("veilessence", 12, "gravewindbow", 1),
-            new Trade("ectoplasm", 20, "spiritsteelbar", 4),
-            new Trade(null, 8, "veilessence", 2),
-    };
-
-    /** One row of the price list. A null {@link #payID} means "any fine dish". */
-    private static final class Trade {
-        final String payID;
-        final int payCount;
-        final String giveID;
-        final int giveCount;
-
-        Trade(String payID, int payCount, String giveID, int giveCount) {
-            this.payID = payID;
-            this.payCount = payCount;
-            this.giveID = giveID;
-            this.giveCount = giveCount;
-        }
-
-        /** The name shown in the price list. */
-        GameMessage payName() {
-            // Vanilla's own "Fine food" string, so the food row needs no key of
-            // ours: FoodQuality.displayName is what the settlement screens
-            // already print (Settler.java:51, VERIFIED [jar]).
-            return this.payID == null
-                    ? Settler.FOOD_FINE.displayName
-                    : ItemRegistry.getLocalization(this.payID);
-        }
-
-        /** Does the item the player is holding pay for this row? */
-        boolean accepts(InventoryItem held) {
-            if (held == null || held.item == null) {
-                return false;
-            }
-            if (this.payID != null) {
-                return this.payID.equals(held.item.getStringID());
-            }
-            // FOOD_FINE is a FoodQuality, not an item list, so the test is the
-            // one field vanilla itself keys the quality off:
-            // FoodConsumableItem.quality (FoodConsumableItem.java:44).
-            return held.item instanceof FoodConsumableItem
-                    && ((FoodConsumableItem) held.item).quality == Settler.FOOD_FINE;
-        }
-    }
 
     public GhostGuideMob() {
         // null settler key: vanilla's own shape for a HumanShop nobody can hire
@@ -186,6 +107,47 @@ public class GhostGuideMob extends HumanShop {
         // despawned between conversations would make the chalk a consumable
         // with a timer on it, which A2 does not ask for.
         this.canDespawn = false;
+
+        // --- an ordinary coin shop, at endgame prices ------------------------
+        //
+        // He used to barter: hold spiritsteel or fine food, talk, and he swapped
+        // it. That was built because vanilla's shop API cannot price a row in
+        // anything but coins -- NetworkSellingShopItem.canAffordCost:82 and
+        // consumeCost:108 both hard-code ItemRegistry.getItem("coin")
+        // (VERIFIED [jar]). The player ruled on it: "Auf garkeinen fall! dann
+        // lieber hohe münzbeträge und normaler shop." So: a normal shop.
+        //
+        // The loop the barter existed to close is kept, and closed the ordinary
+        // way instead -- he BUYS what the Ghost Realm drops, well above broker,
+        // so ectoplasm and essence still turn into ghost weapons. It just goes
+        // through the player's purse on the way.
+        //
+        // Prices are anchored on Caspern, the mod's other Ghost-realm smith,
+        // whose ceiling is nightsteelveil at 2600-4800 behind a Reaper kill.
+        // These two are the realm's signature weapons at Spiritsteel tier
+        // (chest 34 / enchant 2400, docs/BALANCE.md), so they sit far above it
+        // and near the Warden's own 30 000 recruit -- the most expensive thing
+        // in the mod. Stock 1, restock 1: one a day, not a rack.
+        this.shop.addSellingItem("spiritsteelreaver", new SellingShopItem(1, 1))
+                .setStaticPriceBasedOnHappiness(14000, 24000, 1600);
+        this.shop.addSellingItem("gravewindbow", new SellingShopItem(1, 1))
+                .setStaticPriceBasedOnHappiness(12000, 20000, 1400);
+        // The materials, so neither weapon is locked behind a drop the player
+        // never happened to find. Broker values: spiritsteelbar 55.0F,
+        // veilessence 34.0F (GhostRealm.registerItems, SkyItems.register); the
+        // 3x-20x band over broker is vanilla's own (FriendlyWitchHumanMob:94).
+        this.shop.addSellingItem("spiritsteelbar", new SellingShopItem(20, 4))
+                .setStaticPriceBasedOnHappiness(400, 900, 90);
+        this.shop.addSellingItem("veilessence", new SellingShopItem(30, 6))
+                .setStaticPriceBasedOnHappiness(250, 560, 55);
+
+        // --- and he buys the realm's own drops -------------------------------
+        this.shop.addBuyingItem("ectoplasm", new BuyingShopItem())
+                .setPriceBasedOnHappiness(60, 38, 10);
+        this.shop.addBuyingItem("veilessence", new BuyingShopItem())
+                .setPriceBasedOnHappiness(170, 108, 24);
+        this.shop.addBuyingItem("spiritsteelbar", new BuyingShopItem())
+                .setPriceBasedOnHappiness(275, 175, 38);
     }
 
     /** The same brain every other talker in this mod uses: he mills about. */
@@ -224,12 +186,16 @@ public class GhostGuideMob extends HumanShop {
     }
 
     /**
-     * The fork: the unlock once, the trade every time after.
+     * First conversation unlocks the fog. Every one after opens his shop.
      *
-     * <p>Everything below is server-side and per client, which is the whole
-     * multiplayer answer — two players talking to the same guide each get their
-     * own first conversation, because the ledger is keyed on
-     * {@code ServerClient.authentication} and not on this mob.
+     * <p>The unlock is {@link VeilWorldData#grantMark}, which is already keyed
+     * on {@code ServerClient.authentication} and therefore already per player —
+     * no second store, and no multiplayer race over who reached the fog first.
+     * {@code grantMark} answers true only when the Mark was actually new, so
+     * that branch IS the first conversation and cannot fire twice.
+     *
+     * <p>Everything after it is vanilla's: {@code super.interact} opens the
+     * dialogue and the shop window built in the constructor.
      */
     @Override
     public void interact(PlayerMob player) {
@@ -238,161 +204,13 @@ public class GhostGuideMob extends HumanShop {
             return;
         }
         ServerClient client = player.getServerClient();
-        Server server = client.getServer();
-        VeilWorldData veil = VeilWorldData.get(server);
-
-        // --- 1. THE UNLOCK -------------------------------------------------
+        VeilWorldData veil = VeilWorldData.get(client.getServer());
         if (veil != null && veil.grantMark(client.authentication)) {
-            // grantMark returns true only when the Mark was actually new, so
-            // this branch is the FIRST conversation and nothing else.
             this.bubble("ghostguideunlock1");
             client.sendChatMessage(new LocalMessage("misc", "ghostguideunlock2"));
             return;
         }
-
-        // --- 2. THE TRADE --------------------------------------------------
-        InventoryItem held = player.getSelectedItem();
-        for (Trade trade : TRADES) {
-            if (!trade.accepts(held)) {
-                continue;
-            }
-            if (this.settle(client, player, trade)) {
-                // Traded. The dialogue window is deliberately NOT opened on top
-                // of it -- the exchange was the conversation.
-                return;
-            }
-            // Right kind of thing, not enough of it. Say the shortfall, then
-            // fall through to the small talk so the player is not locked out of
-            // his window by holding three ectoplasm.
-            client.sendChatMessage(new LocalMessage("misc", "ghostguideshort",
-                    "count", String.valueOf(trade.payCount),
-                    "pay", trade.payName()));
-            break;
-        }
-
-        // Nothing he wants in hand (or not enough of it): print the list, then
-        // let vanilla's own dialogue window open on his small talk.
-        this.quote(client, player);
         super.interact(player);
-    }
-
-    /**
-     * Takes the payment and hands over the goods, or answers false when the
-     * player is short.
-     *
-     * <p>The payment is counted and removed across the whole main inventory
-     * rather than out of the held stack alone — holding one Veil Essence and
-     * owning twelve is still twelve — which is the same shape
-     * {@code EleanorMob.interact} uses for her pass-on.
-     */
-    private boolean settle(ServerClient client, PlayerMob player, Trade trade) {
-        Level level = player.getLevel();
-        if (trade.payID != null) {
-            Item pay = ItemRegistry.getItem(trade.payID);
-            if (player.getInv().main.getAmount(level, player, pay, "ghostguide") < trade.payCount) {
-                return false;
-            }
-            player.getInv().main.removeItems(level, player, pay, trade.payCount, "ghostguide");
-        } else {
-            // The food row is a CATEGORY, so it is counted and removed dish by
-            // dish: a player may be paying with three different roasts.
-            if (countFineFood(player) < trade.payCount) {
-                return false;
-            }
-            if (!removeFineFood(player, level, trade.payCount)) {
-                return false;
-            }
-        }
-        this.bubble("ghostguidetrade");
-        give(client, trade.giveID, trade.giveCount);
-        return true;
-    }
-
-    /** How many FOOD_FINE dishes the player owns, across the main inventory. */
-    private static int countFineFood(PlayerMob player) {
-        int total = 0;
-        for (int slot = 0; slot < player.getInv().main.getSize(); slot++) {
-            InventoryItem item = player.getInv().main.getItem(slot);
-            if (isFineFood(item)) {
-                total += item.getAmount();
-            }
-        }
-        return total;
-    }
-
-    /** The item TYPE of the first fine dish in the inventory, or null. */
-    private static Item firstFineFoodType(PlayerMob player) {
-        for (int slot = 0; slot < player.getInv().main.getSize(); slot++) {
-            InventoryItem item = player.getInv().main.getItem(slot);
-            if (isFineFood(item)) {
-                return item.item;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Removes {@code count} dishes, of whatever kinds the player happens to be
-     * carrying.
-     *
-     * <p>It works one TYPE at a time rather than one slot at a time, and that
-     * is deliberate. {@code Inventory.removeItems(item, amount)} takes the
-     * amount from wherever in the inventory it finds it, so a loop that walked
-     * slots and assumed its own walk survived each removal could empty a slot
-     * it had already counted, run out of slots with dishes still owed, and
-     * return false having ALREADY taken the player's food. Asking for a whole
-     * type at a time and subtracting what the inventory says it actually
-     * removed cannot drift; each pass either finishes the bill or removes every
-     * dish of one kind, so the number of passes is bounded by the number of
-     * kinds, and the loop bound is a belt on top of that brace.
-     */
-    private static boolean removeFineFood(PlayerMob player, Level level, int count) {
-        if (countFineFood(player) < count) {
-            return false;
-        }
-        int remaining = count;
-        for (int pass = 0; pass < player.getInv().main.getSize() && remaining > 0; pass++) {
-            Item type = firstFineFoodType(player);
-            if (type == null) {
-                break;
-            }
-            int removed = player.getInv().main.removeItems(level, player, type, remaining, "ghostguide");
-            if (removed <= 0) {
-                break;
-            }
-            remaining -= removed;
-        }
-        return remaining <= 0;
-    }
-
-    private static boolean isFineFood(InventoryItem item) {
-        return item != null && item.item instanceof FoodConsumableItem
-                && ((FoodConsumableItem) item.item).quality == Settler.FOOD_FINE;
-    }
-
-    /**
-     * Prints the whole price list into the player's chat, at most once a minute
-     * per player.
-     *
-     * <p>The cooldown matters because the list is five lines and he is also an
-     * ordinary talker: without it, two conversations in a row would bury the
-     * rest of the chat. {@code Mob.startGenericCooldown} is the same per-player
-     * timer {@code VeilWorldData} uses to stop the fog warning repeating, and it
-     * lives on the PLAYER, so two players each get their own.
-     */
-    private void quote(ServerClient client, PlayerMob player) {
-        if (player.isOnGenericCooldown(QUOTE_COOLDOWN)) {
-            return;
-        }
-        player.startGenericCooldown(QUOTE_COOLDOWN, QUOTE_COOLDOWN_MS);
-        client.sendChatMessage(new LocalMessage("misc", "ghostguideoffer"));
-        for (Trade trade : TRADES) {
-            client.sendChatMessage(new LocalMessage("misc", "ghostguidewares",
-                    "count", String.valueOf(trade.payCount),
-                    "pay", trade.payName(),
-                    "amount", String.valueOf(trade.giveCount),
-                    "get", ItemRegistry.getLocalization(trade.giveID)));
-        }
     }
 
     /** Speech bubble over his head, seen by everyone nearby. */
@@ -403,18 +221,6 @@ public class GhostGuideMob extends HumanShop {
         }
         level.getServer().network.sendToClientsWithEntity(
                 new PacketMobChat(this.getUniqueID(), new LocalMessage("misc", miscKey)), this);
-    }
-
-    /** Hand-off; anything that does not fit drops at the player's feet. */
-    private static void give(ServerClient client, String itemStringID, int amount) {
-        PlayerMob player = client.playerMob;
-        Level level = player.getLevel();
-        InventoryItem item = new InventoryItem(itemStringID, amount);
-        boolean added = player.getInv().main.addItem(level, player, item, "ghostguide", null);
-        if (!added && item.getAmount() > 0) {
-            level.entityManager.pickups.add(
-                    new ItemPickupEntity(level, item, player.x, player.y, 0.0F, 0.0F));
-        }
     }
 
     // ------------------------------------------------------------------
