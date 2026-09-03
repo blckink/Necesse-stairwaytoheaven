@@ -34,14 +34,14 @@ hand.
   field, a ruined chapel or a statue field at every site it rolls (roughly
   one per 230x230 tiles).
 - Guard packs placed at world generation around every POI, organic and
-  hand-authored alike (`SteinfeldLevel.placeGuardPacks`), per
+  hand-authored alike (`SkyLevel`'s Steinfeld guard packs), per
   `docs/WORLD_DESIGN.md` A4.1: the walk between places is quiet
   (`SteinfeldPressure` returns 0 tickets across most open ground), arriving
   at one is not (600 tickets on the ground a POI stands on).
 - Economy: **Pale Stone** (building), **Grave Salt** (alchemy), **Spirit
   Moss** and **Echo Shard** — the two ingredients §9's séance quest (A CALL
   TO THE OTHER SIDE) already asks for, so neither sits unspent.
-- Fog, not weather: `SteinfeldLevel.canRain` and `SteinfeldBiome.canRain` are
+- Fog, not weather: `SteinfeldBiome.canRain` is
   both hard `false`. Rain over a dead heath would read as life.
 
 ## Borrowed visual sources
@@ -89,7 +89,7 @@ recorded in `docs/VANILLA_ASSET_MAP.md`.
 - **The world-event ghosts** (§7, A3.4) — transparent, unattackable figures
   that walk to a grave, a door, or the map edge. Needs its own invulnerable,
   untargetable, destination-seeking mob archetype, which is a real feature in
-  its own right and not one of this pass's four residents. `SteinfeldLevel`
+  its own right and not one of this pass's four residents. The Steinfeld band
   leaves the hook out cleanly rather than half-wired.
 - **A player-facing entry object.** Exactly like the Garden of Eden — the
   dimension directly below this one on the same ladder — Steinfeld is

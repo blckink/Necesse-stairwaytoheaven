@@ -35,10 +35,10 @@ other refuses it forever after.
 Mortimer, Caspern and Eleanor are still called "the Veil trio" in one class's
 own name (`settlement/VeilResidents.java`) even though they moved to the Ghost
 Realm once it shipped — see that class's doc comment for the history. Their
-placement call is `GhostLevel.onRegionGenerated` →
-`VeilResidents.placeInGhost`; Eveleen's is `EdenLevel.onRegionGenerated` →
-its own private `placeResident`; Knott's is
-`CrookedLevel.onRegionGenerated` → `CrookedResidents.place`.
+placement all runs from the single `SkyLevel.onRegionGenerated` since the
+one-plane refactor, gated on the region's realm BAND rather than on which level
+it is: `VeilResidents.placeInGhost` (SkyLevel.java:401), `CrookedResidents.place`
+(:405), and Eveleen's own `placeResident` (:149).
 
 ---
 
@@ -53,7 +53,7 @@ until one of them can do it, exactly the way vanilla's own `FarmerHumanMob`
 works.
 
 **Found.** Beside a Knowledge Tree in the Garden of Eden
-(`EdenLevel.placeResident`, 0.35 region chance, requires a Knowledge Tree
+(`SkyLevel.placeResident`, 0.35 region chance, requires a Knowledge Tree
 within 3 tiles — Knowledge Trees are themselves rare worldgen objects, so the
 combined odds land her inside a normal afternoon of exploring). She can also
 turn up as a settlement visitor once the settlement already has 9+ tiles of
@@ -175,7 +175,7 @@ Refuses Farming/Forestry, same shape as Caspern.
 **Found.** At the Door Yard in Crooked Beyond
 (`settlement/CrookedResidents.java`, 0.20 region chance, must stand within 9
 tiles of a stamped Door Yard site — asked through `CrookedSites.nearestDoorYard`
-rather than an object scan, the same question `CrookedLevel.placeGuardPacks`
+rather than an object scan, the same question `SkyLevel`'s Crooked guard packs
 already asks it). **Never travels** — §15 names no arrival condition, and
 Crooked Beyond is deep enough into the climb that "found in the realm" is
 already the honest story (the same call made for Eleanor).

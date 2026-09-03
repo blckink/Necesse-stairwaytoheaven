@@ -5,7 +5,7 @@ This is the concrete list: for every realm, every sprite that is currently a
 land at, and enough context to draw to the realm's brief instead of to a bare
 filename. It was built by reading the registration code in
 `src/main/java/stairwaytoheaven/realms/{eden,ghost,crooked}/`,
-`level/SkyLevel.java` + `biomes/` and `level/VeilLevel.java` + `veil/`,
+`level/SkyLevel.java` + `biomes/` + `veil/`,
 following every texture argument to the file it actually resolves to, and
 measuring that file with Pillow — nothing here is a guess or a copy of a
 number from another doc. Several of the other asset docs (`docs/realms/*.md`,
@@ -173,10 +173,10 @@ itemised version, verified against the resource tree.
 
 ---
 
-## The Veil
+## The Veil (now a field inside the Ghost band, not a world)
 
 **Palette and mood** (`docs/WORLD_DESIGN.md` §8–§9): the mod's afterlife
-layer under the deep caves, permanent night (`VeilLevel.isCave = true`) — no
+band, the Gloomfen and Ashen Reach fields inside the Ghost band — no
 daylight palette at all, only what glows. Before the Veil Mark is earned, a
 stacking **Soul Exposure** debuff punishes lingering in the fog (mild at 0–3s,
 slowed at 4–7s, draining at 8–12s, lethal past 12s), so a short step in reads
@@ -184,8 +184,8 @@ as tense rather than merely dim. Cold blue-white mist, candlelight, and
 ectoplasm glow are the only light sources this realm has.
 
 Almost everything here is already the player's own or generated art (Gloom
-Shade, Fen Wraith — see `docs/OVERVIEW.md` §3). Following `level/VeilLevel.java`
-→ `veil/` and the Veil's own biome files turned up one mob that's still a
+Shade, Fen Wraith — see `docs/OVERVIEW.md`). Following `veil/`
+and the Veil's own biome files turned up one mob that's still a
 straight vanilla reskin, plus the two literal-path borrows already on record
 in `docs/VANILLA_ASSET_MAP.md` §1.3b:
 

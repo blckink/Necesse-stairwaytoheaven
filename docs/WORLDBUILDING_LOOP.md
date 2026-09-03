@@ -37,7 +37,7 @@ biomes/          one class per sub-biome (spawn tables, ground, ambience)
 worldgen/        SkyLandscape (composition), SkyTerrainPainter (per-tile),
                  SkyNoise, SkyOrigin, *Preset (stamped structures)
 surface/         everything the mod adds to the vanilla overworld
-level/           SkyLevel, VeilLevel — the two dimensions
+level/           SkyLevel — THE one level; every realm is a depth band on it
 objects/ tiles/  our own GameObject / GameTile subclasses
 mobs/ livestock/ arsenal/   enemies, farm animals, weapons + their mobs
 settlement/      professions, workstations (loom, forge, kiln)

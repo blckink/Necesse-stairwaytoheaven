@@ -7,7 +7,7 @@ terrain, dimension `+2`, and the mob/item registrations to exist.
 
 ## What ships
 
-- `eden2`, an infinite region-streamed `EdenLevel` at dimension `+2`.
+- Eden is a BAND of the one sky plane (`skylevel` / `skyreach2`), depth 0.10-0.48, roughly 600-2880 tiles from SkyOrigin. It is not a dimension. See `docs/PLAN_ONE_PLANE.md`.
 - Eden Garden, Eden Canopy and Eden Shallows.
 - Eden Grass (the supplied sheet), Rich Eden Soil, Eden Moss, Root Floor,
   Paradise Sand and shallow lagoon water.
