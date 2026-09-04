@@ -348,7 +348,6 @@ Not a play report: a direction call plus supplied art, in chat.
 | Cloud areas enclosed, crazy areas outside | *"die wolkengebiete sind halt im idealfall immer geschlossen und außerhalb der wolkengebiete gibt es diese verrückten gebiete"* | **PARTIAL.** Outlands are cut out of the biome field as their own regions, but the cloud biomes are not yet *enclosed* shapes. Open. |
 | A garden of eden of the serpent | *"himmel hat schon viele wolken böden usw aber eben auch einen garten eden der schlange"* | OPEN — named, not designed. Needs a chapter brief. |
 | Everything is too easy | *"ist eh erstmal nur für mich und ich hab level 10 incursion durch und mir ist langweilig! alles zu einfach überall"*, and the sprite drop should keep vanilla's own material: *"crystalstone passt doch, sieht gleich aus.. nicht vanilla droppen"* | **PARTLY ADDRESSED — NOT PLAYER CONFIRMED.** `evilwall` drops `crystalstone`. The Outlands spawn `crystalgolem`, `ascendedgolem` and `crystalarmadillo` by vanilla string ID. The rest of the mod is still calibrated at deep-cave tier, so the mod's own gear no longer matches its hardest region — that gap is open. |
-
 ## 2026-09-03 — no chat messages, at all (no play session)
 
 Not a play report: one direction call, in chat.
@@ -362,3 +361,14 @@ Not a play report: one direction call, in chat.
 | Lines that were deleted rather than moved | `markersadded`, `catmarkersadded` (the map marker is the notification), `skyreachhint` (the spire marker is an exact position, the compass word was an approximation of it), `regionkeyearned` (the Warden's own hand-over line and `regionkeyneedsettlement` already say it twice), `wardenmovedin` (vanilla's recruit packet already announces the settlement), `edenplantsdone` and `eleanorstaydone` (narration over a reward that lands in the inventory), `wardenchatformat` + `wardenname` (the chat half of `SkyWardenMob.say`). `ghostguideunlock2` and `eleanorneedessencecount` were folded into the bubbles they used to duplicate. | **DONE.** |
 | A trap the chat log had been hiding | `ChatBubbleText.init` (ChatBubbleText.java:67-76, VERIFIED [jar]) deletes any bubble the same mob already has, so only the LAST of several `say()` calls was ever visible — the Warden's three intro lines survived only because the chat duplicate carried them. `SkyWardenMob.say` now buffers a conversation and `flushSay` sends it as ONE bubble. | **FIXED — NOT PLAYER CONFIRMED.** |
 | Readability of what is left | Float text does not wrap: `FloatTextFade.setText` splits on `\n` and centres each line (FloatTextFade.java:100-101, VERIFIED [jar]) and draws through `StringDrawOptions`, so a long sentence is one very wide line and a `§` colour code prints as its own characters. Every float-text line now breaks at its sentence boundary in both locales, and the two Skyfall lines lost their `§b`/`§a`. | **DONE — NOT PLAYER CONFIRMED.** Nobody has watched one of these appear in the real client. |
+
+## 2026-09-03 — POI layout direction (design feedback, no client verification)
+
+The player required houses beside roads with access paths, denser interiors,
+non-rectangular footprints, connected rooms, symmetric sensible windows,
+table-facing chairs and uninterrupted one-tile circulation. Bridges must carry
+the road across the full water/cloudstream. Settlements may include plazas,
+ponds and benches; clearings/fields must be substantial. The Skyrealm tower
+should use the supplied Necesse build only as composition guidance: stepped
+arch silhouette, strong symmetry and dense tile work. Implemented in the new
+realm POI catalogue; visual result still needs client review.

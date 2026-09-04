@@ -59,7 +59,7 @@ of §A2.3 are **TODO**: `edengateup`, `ghostgateup`, `crookeddoorup` and
 
 ---
 
-## 2. POIs — 13 presets, all of them placed
+## 2. POIs — 26 presets, all wired into worldgen
 
 None is orphaned: every `Preset` subclass has a live call site.
 
@@ -84,10 +84,15 @@ table appears in only **2**, a bed in only **1** (the Spire), and 5 of the 9 are
 "furnished" by a light and nothing else. `SkyFurnitureSet`'s 17 pieces are still
 almost unused outside the Spire.
 
-**Eden has no preset at all.** Its three POI cells (Knowledge Grove, Lagoon
-Shrine, Orchard Ring, `EdenTerrainPainter.java:100-113`) are read only by
-`EdenPressure.siteDistance` to raise spawn tickets. Guarded ground with nothing
-standing on it — the only one of the four new realms without a building.
+**The inhabited catalogue adds 13 presets.** `RealmPoiWorldPreset` places four
+in Skyreach, two in Eden, one each in Steinfeld/Ghost/Crooked, and four in the
+reserved Hell band. The large sites include actual street networks, buildings
+beside rather than on those streets, non-rectangular room unions, doors,
+windows, dense functional furniture and clear circulation. Full catalogue and
+review rules: `docs/design/realm-poi-worldgen.md`.
+
+Eden therefore has two buildings now. Its older Knowledge Grove, Lagoon Shrine
+and Orchard Ring cells still remain pressure/terrain sites rather than presets.
 
 ---
 
@@ -312,34 +317,33 @@ What DOES still follow: `nimbusmilk`, `aurorafleece`, `skycurd`, `cloudcustard`,
    `EdenShallowsBiome.getGuard()` — bloommaw, forbidden serpent, jealous vine,
    golden hornet — are dead code. Eden is the only realm whose guarded ground
    has no guards.
-3. **Eden has no building.** No `Preset` class exists for it at all.
-4. **Buildings are thinly furnished.** A table appears in 2 presets of 13, a bed
-   in 1. Five "furnished" presets have a light and nothing else.
-5. **The Warden's-house travel anchors are unplaced** (§A2.3). Four gate objects
+3. **The original 13 POIs remain thinly furnished.** The new inhabited
+   catalogue is dense, but the older shells listed in §2 are unchanged.
+4. **The Warden's-house travel anchors are unplaced** (§A2.3). Four gate objects
    registered, nothing places them; no route is fast travel yet.
-6. **Magpie, Halda and Ossian are near-unfindable.** Their placement needs a
+5. **Magpie, Halda and Ossian are near-unfindable.** Their placement needs a
    *player-built* workstation to already stand within 3 tiles of a region that
    is generating for the FIRST time — the opposite of how anyone builds. The
    other five residents key off naturally-painted landmarks and are fine.
-7. **`distortion` is threaded to every band painter and read by none.** §3's
+6. **`distortion` is threaded to every band painter and read by none.** §3's
    calm/mad variants do not exist yet.
-8. **5 of 9 named settlers have no dialogue** beyond shop and recruit: Mortimer,
+7. **5 of 9 named settlers have no dialogue** beyond shop and recruit: Mortimer,
    Caspern, Magpie, Halda, Ossian have no `interact()` override.
-9. **`swh_beacon` is a registered dead quest**, kept only for old-save
+8. **`swh_beacon` is a registered dead quest**, kept only for old-save
    deserialization.
-10. **Two realms' materials have no consumer.** Crooked's six (`oddwood`,
+9. **Two realms' materials have no consumer.** Crooked's six (`oddwood`,
     `warpresin`, `strangefabric`, `eyeseed`, `stripedshell`, `realityshard`) and
     Steinfeld's four (`palestone`, `gravesalt`, `spiritmoss`, `echoshard`) are
     droppable and sellable, and no recipe anywhere names any of them — neither
     realm even defines a `registerRecipes()`. Steinfeld's own class doc claims
     a séance quest consumes two of them; no quest file mentions either.
-11. **Five items have no source at all.** `skyanchor` is registered unbreakable
+10. **Five items have no source at all.** `skyanchor` is registered unbreakable
     and placed by nothing. `skywatchhood`, `wardenmantle` and `wardenboots` are
     obtainable-flagged armour with no recipe, shop or gift — they exist only as
     what the Warden NPC wears.
-12. **`LongTablePreset` contains no table.** Thirty-four chairs, zero tables — its
+11. **`LongTablePreset` contains no table.** Thirty-four chairs, zero tables — its
     own comment concedes the joke.
-13. **`DoorYardPreset`'s javadoc says eleven doors; its `PLAN` grid stamps eight.**
+12. **`DoorYardPreset`'s javadoc says eleven doors; its `PLAN` grid stamps eight.**
     Doc drift inside the same file as the code.
 
 ### Harmless leftovers, recorded so nobody re-discovers them

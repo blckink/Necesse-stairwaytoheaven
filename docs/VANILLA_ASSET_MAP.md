@@ -237,6 +237,7 @@ realm sections say so; the remaining rows are the future shopping list.
 | `objects/blueflowerpatch` | Blue Paradise Flower |
 | `objects/ivyore` | Eden Copper / Verdant Ore |
 | the whole `palm*` furniture family (bed, chair, table, chest, wall, …) | Eden architecture — a complete set already exists |
+| `objects/barrel` | fermentation storage inside Eden's workhouse |
 | `mobs/crocodile`, `stabbybush`, `dryadsentinel`, `bee`, `dragonwhelp` | Eden Serpent, Bloom Maw, Jealous Vine, Golden Hornet and Forbidden Serpent bodies |
 | `items/palmlog`, `dryadbranch`, `apple`, `sharkscales`, `fangoftheprotector`, `honey`, `dryadsapling`, `coconut`, `blueberry`, `frozenberry`, `raspberry`, `ivyore`, `ivybar` | Eden's first material and fruit icons |
 | `objects/spiritbasin.png`, `items/spiritbasin.png` | the Eden Threshold (`edenseedbasin`) — vanilla's Spirit Basin, reused a second time; the Ghost Gate's Soul Basin already borrows it once |
@@ -310,6 +311,7 @@ below are what `SteinfeldRealm` actually registers — see
 | `tiles/ascendedgrowth`, `ascendedcorruption`, `deepstonetiledfloor`, `ascendedvoid` | Spiral Soil, Violet Mud, Checker Stone and Wrong-Way ground in `realms/crooked` |
 | `objects/burnedbush`, `voidtrap`, `glowcoral`, `mushroom`, `witheredgrass` | Spiral Tree, Eyeball Shrub, Screaming Flower, Striped Mushroom and Bent Grass |
 | `objects/voidflame`, `boneclock`, `bonechair`, `voidcube`, `smallrunestone` | Bent Lantern, Crooked Clock, Long Chair, Ground Window and Teeth-Rock |
+| `objects/arcanicwall`, `arcanicdoor`, `arcanicwindow` | the three Crooked bazaar shop shells |
 | `mobs/mimic`, `mobs/dryadsentinel`, `mobs/scorpion` | Door Mimic, Tongue Plant and Stripe Beetle bodies |
 | `items/deadwoodlog`, `bioessence`, `clothscraps`, `crystalessence`, `crystallizedskull`, `ascendedshard` | Oddwood, Warp Resin, Strange Fabric, Eye Seed, Striped Shell and Reality Shard icons |
 
@@ -327,6 +329,9 @@ below are what `SteinfeldRealm` actually registers — see
 | `objects/charredrock` | Hellsteel-bearing rock |
 | `objects/burnedbush`, `burnedleafpile` | hell vegetation |
 | `objects/fuelskullencasing` | Boiler / Furnace Core deco |
+| `objects/factorywall`, `factorydoor`, `factorywindow`; `basaltwall`, `basaltdoor`, `basaltwindow` | office, administration, carnival and forge shells |
+| the `oak*` table/chair/bookshelf set | provisional office furniture while Hell has no custom object family |
+| `objects/jailfence`, `chieftainsthrone`, `crate` | carnival rail, central attraction and game stalls |
 
 ---
 
