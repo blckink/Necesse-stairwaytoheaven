@@ -80,6 +80,13 @@ final class SkyObjects {
         skyreeds.mapColor = new Color(168, 184, 178);
         SkyRegistry.skyreedsID = ObjectRegistry.registerObject("skyreeds", skyreeds, 1.0F, true);
 
+        // Eden's own eight-variant ground cover. OvergrownEdenTile grows this
+        // instead of vanilla grass; its ObjectItem uses the matching icon.
+        GrassObject overgrowngrass = new GrassObject("overgrowngrass", 8);
+        overgrowngrass.mapColor = new Color(45, 112, 37);
+        SkyRegistry.overgrowngrassID = ObjectRegistry.registerObject(
+                "overgrowngrass", overgrowngrass, 1.0F, true);
+
         // v0.2.6 forage plants (Driftlands): harvestable wheat-grass and a
         // berry bush that drops food instead of its own object item.
         GrassObject windwheat = new GrassObject("windwheat", 4);
@@ -137,7 +144,7 @@ final class SkyObjects {
         // Region.checkGenerationValid would sweep every crystal/reed away
         // (verified via the skyreachstatus diagnostics).
         allowShore("stormcrystal", "stormcrystalr", "aurorabloom", "aurorabloomr", "skyreeds",
-                "windwheat", "cloudberrybush");
+                "windwheat", "cloudberrybush", "overgrowngrass");
 
         registerLivingSky(skystoneRock);
         registerVeilObjects();

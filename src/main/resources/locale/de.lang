@@ -20,6 +20,7 @@ gloomwoodfloortile=Düsterholz-Boden
 marblecheckertile=Schachbrett-Marmor
 skywaytile=Himmelspflaster
 [object]
+overgrowngrass=Üppiges Eden-Gras
 nimbuswillow=Nimbusweide
 fulgurpine=Fulgur-Kiefer
 prismabirch=Prismenbirke
@@ -164,6 +165,7 @@ windwheat=Windweizen
 cloudberrybush=Wolkenbeeren-Busch
 cloudberry=Wolkenbeere
 overgrownedenseed=Eden-Grassamen
+overgrowngrass=Üppiges Eden-Gras
 cloudberrytip=Pralle Himmelsbeeren - süß, kalt und mit einem Hauch Gewitter.
 skystone=Himmelsstein
 aetheriumore=Aetheriumerz

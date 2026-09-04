@@ -77,6 +77,7 @@ chapter; the ground is real now.
 |---|---|---|
 | `overgrownedentile` | tile | Eden grass: deep lush ground that sprouts grass tufts on its own, spreads to dirt, and seeds itself back at 4% when mined — the Garden of Eden's first ground, plantable today. |
 | `overgrownedenseed` | item | Eden grass seeds: plant on dirt or Cloudturf to start an Eden patch; found rarely in sky crates, then self-renewing. |
+| `overgrowngrass` | object/item | Eden's own eight-variant walk-through grass cover, grown by Eden Grass and obtainable with its matching inventory icon. |
 
 ## The Garden of Eden — generated core
 

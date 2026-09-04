@@ -191,9 +191,9 @@ in `docs/VANILLA_ASSET_MAP.md` §1.3b:
 
 | what | id | current stand-in | size | format notes |
 |---|---|---|---|---|
-| **Cinder Cantor (body) — DONE 2026-09-03**, landed as `mobs/cindercantor.png`; the two ARM sheets below are still owed and are what finishes it. `CinderCantorMob` ports vanilla's `addDrawables` and composes our body with vanilla's arms until they arrive. Spawns in the Veil's Gloomfen/Ashen Reach/Beetlefreak Hollow **and** in Skyreach's distance-gated Outlands — `docs/VANILLA_ASSET_MAP.md` §1.2 mislabels it "Ghost Realm," which is the one factual correction this list makes to that table | `cindercantor` | `mobs/ancientskeletonmage.png` | **448×320** | Composited `HumanDrawOptions` rig, not a plain walking sheet — body sheet plus two arm sheets, all three on the same 448×320 canvas. Redraw as a matched trio (below), or the parts won't line up. |
-| **Cinder Cantor (left arm) — STILL OWED** | `cindercantor` | `mobs/ancientskeletonmagearms_left.png` | **448×320** | Same rig, left-arm layer. Draw as `mobs/cindercantorarms_left.png`; landing it is a two-string edit in `SkyMobs.loadTextures`. |
-| **Cinder Cantor (right arm) — STILL OWED** | `cindercantor` | `mobs/ancientskeletonmagearms_right.png` | **448×320** | Same rig, right-arm layer. Draw as `mobs/cindercantorarms_right.png`. |
+| **Cinder Cantor (body) — DONE 2026-09-03**, landed as `mobs/cindercantor.png`; both matching arm sheets are now landed too. Spawns in the Veil's Gloomfen/Ashen Reach/Beetlefreak Hollow **and** in Skyreach's distance-gated Outlands | `cindercantor` | `mobs/ancientskeletonmage.png` | **448×320** | Composited `HumanDrawOptions` rig: body plus two arm sheets on the same canvas. |
+| **Cinder Cantor (left arm) — DONE 2026-09-03** | `cindercantor` | `mobs/ancientskeletonmagearms_left.png` | **448×320** | Supplied and loaded as `mobs/cindercantorarms_left.png`. |
+| **Cinder Cantor (right arm) — DONE 2026-09-03** | `cindercantor` | `mobs/ancientskeletonmagearms_right.png` | **448×320** | Supplied and loaded as `mobs/cindercantorarms_right.png`. |
 | Soul Exposure debuff icon — the HUD icon for the pre-Veil-Mark fog debuff (`veil/SoulExposureBuff.BORROWED_ICON`) | — | `buffs/spirithaunted.png` | **32×32** | Standard buff icon. |
 | Veil fog particles — what the permanent mist itself is drawn out of (`veil/VeilFogBuff.BORROWED_PARTICLES`, and the same sheet `HuginStatueObjectEntity` uses) | — | `particles/fog.png` | **128×16** | 4 animation frames, 32×16 each, laid out in one row. |
 

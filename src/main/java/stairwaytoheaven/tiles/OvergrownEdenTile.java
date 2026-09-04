@@ -67,9 +67,9 @@ public class OvergrownEdenTile extends SkyGroundTile {
     @Override
     public void addSimulateLogic(Level level, int x, int y, long ticks,
             SimulatePriorityList list, boolean sendChanges) {
-        // Vanilla's own offline-growth helper, on vanilla's own grass object.
+        // Vanilla's own offline-growth helper, pointed at Eden's grass object.
         necesse.level.gameTile.OvergrownGrassTile.addSimulateGrow(
-                level, x, y, GROW_CHANCE, ticks, "grass", list, sendChanges);
+                level, x, y, GROW_CHANCE, ticks, "overgrowngrass", list, sendChanges);
     }
 
     @Override
@@ -79,12 +79,11 @@ public class OvergrownEdenTile extends SkyGroundTile {
 
     @Override
     public void tick(Level level, int x, int y) {
-        // OvergrownGrassTile.tick verbatim: sprout a grass tuft on an empty
-        // tile at the grow rate. The object is vanilla's; Eden's own flora
-        // replaces the string when the chapter lands.
+        // OvergrownGrassTile.tick verbatim: sprout an Eden grass tuft on an
+        // empty tile at the grow rate.
         if (level.isServer()) {
             if (level.getObjectID(x, y) == 0 && GameRandom.globalRandom.getChance(GROW_CHANCE)) {
-                GameObject grass = ObjectRegistry.getObject(ObjectRegistry.getObjectID("grass"));
+                GameObject grass = ObjectRegistry.getObject(ObjectRegistry.getObjectID("overgrowngrass"));
                 if (grass.canPlace(level, x, y, 0, false) == null) {
                     grass.placeObject(level, x, y, 0, false);
                     level.objectLayer.setIsPlayerPlaced(x, y, false);
