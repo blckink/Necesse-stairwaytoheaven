@@ -318,8 +318,19 @@ def main():
             box = (p["ox"] + sx, p["oy"] + sy, p["ox"] + sx + 16, p["oy"] + sy + 16)
             cell = src.crop(box)
             key = (col, row)
-            if key in seen and seen[key][0].tobytes() != cell.tobytes():
-                clashes.append((key, seen[key][1], p["name"]))
+            if key in seen:
+                # Only a DISAGREEMENT BETWEEN TWO SHAPES is the seam bug this
+                # exists to catch. The same shape can legitimately touch one
+                # engine cell more than once -- "notch" is wider than one tile,
+                # so its own middle row hits (1,1) "all four sides" from TWO
+                # on-canvas tiles. Painted art is never byte-identical between
+                # two repeated tiles, and it does not need to be: only one of
+                # them ships. So a repeat FROM THE SAME SHAPE is silently kept
+                # (first one wins); only a mismatch across DIFFERENT shapes is
+                # the real defect, because that is what a player would actually
+                # see disagree at a boundary in game.
+                if seen[key][1] != p["name"] and seen[key][0].tobytes() != cell.tobytes():
+                    clashes.append((key, seen[key][1], p["name"]))
                 continue
             seen[key] = (cell, p["name"])
             sheet.paste(cell, (col * 16, row * 16))
