@@ -46,8 +46,18 @@ OUT = os.path.join(REPO, "build", "qa", "wallpaint")
 DOOR_PITCH = 76   # 32px slot + room for the label under it
 RES_OBJ = os.path.join(REPO, "src", "main", "resources", "objects")
 T = 32                      # a tile is 32x32 of screen
-PAD = 48                    # room around a shape for the bands it reaches into
-GAP = 40                    # between shapes
+PAD = 32                    # room for the caption drawn ABOVE a shape/section --
+                            # the caption sits at PAD-26, so this is the floor
+                            # before it clips off the top of the canvas.
+SHAPE_GAP = 10              # between painted shapes on canvas, and between the
+                            # shape row and the door row -- tight on purpose: the
+                            # player found a big gap made a generator SHIFT the
+                            # art, not just leave it blank. Less dead space.
+ROW_GAP = 40                # between the door row and the window row ONLY. The
+                            # door row's labels sit BELOW it and the window row's
+                            # captions sit ABOVE it, so that one seam needs real
+                            # clearance or the two texts overlap -- SHAPE_GAP is
+                            # too tight for it.
 
 # The shapes you paint. Each is an ASCII picture in Scene's own language:
 # '#' our wall, 'X' a FOREIGN wall (a different material butting against ours),
@@ -144,7 +154,7 @@ def plan():
         x0, y0, x1, y1 = shape_box(cells)
         placed.append({"name": name, "note": note, "rows": rows, "cells": cells,
                        "ox": x - x0, "oy": PAD - y0, "w": x1 - x0, "h": y1 - y0})
-        x += (x1 - x0) + GAP
+        x += (x1 - x0) + SHAPE_GAP
     return placed, x
 
 
@@ -164,9 +174,9 @@ def main():
     args = ap.parse_args()
 
     placed, canvas_w = plan()
-    door_y = PAD + max(p["h"] for p in placed) + GAP + 24
+    door_y = PAD + max(p["h"] for p in placed) + SHAPE_GAP + 24
     win_x = PAD
-    win_y = door_y + 128 + GAP + 24
+    win_y = door_y + 128 + ROW_GAP + 24
     canvas_w = max(canvas_w, PAD + 8 * DOOR_PITCH, 900)
     canvas_h = win_y + 128 + PAD
 
