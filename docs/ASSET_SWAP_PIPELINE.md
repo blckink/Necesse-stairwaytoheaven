@@ -95,14 +95,70 @@ can downsample by taking the most common colour per block), counts colours,
 checks the background is really transparent, and writes a preview. It refuses
 what it cannot fix and says why.
 
-**A generated sheet usually will not pass on the first try**, because
-generators do not honour cell geometry. The stage that fixes that — segment
-each frame, normalise it into its cell on a shared ground line, then
-modal-downsample — is **specified but not built**; the spec is in this repo's
-history (`docs/HANDOFF_LOCAL_PIPELINE.md` as of 2026-09-02, restorable from
-`backup-20260905-lokalstand/`). Until it exists, a sheet whose frames drifted
-has to go back to the generator rather than be rescaled as a whole: X and Y
-scales differ per sheet and a whole-image resize is not recoverable.
+**A generated sheet will not pass on the first try**, because generators do not
+honour cell geometry. Two stages fix that, in this order.
+
+### 4a. Frames onto vanilla's grid — `tools/mob_sheet_intake.py`
+
+```sh
+python3 tools/mob_sheet_intake.py art-inbox/cow-new-nimbusyak.png \
+        --vanilla mobs/cow.png
+```
+
+Never rescale the whole sheet: X and Y scales differ and a whole-image resize
+is not recoverable. Each frame moves into its own cell instead, and the target
+is not a guess — **the vanilla sheet is the specification.** For every cell it
+says how big the subject may be and where its feet are, so each frame is scaled
+to vanilla's envelope *for its row* and set on vanilla's ground line. Per row,
+not per cell: scaling each frame to its own bbox makes the walk cycle pulse.
+
+The trap it exists for: **the side rows do not segment.** A side-on cow is wide
+enough to touch its neighbour, so alpha gaps find two merged blobs where there
+are six frames. The tool measures the column pitch on the rows that *do*
+separate and applies it to the merged ones; where nothing separates it refuses
+rather than guessing.
+
+Measured on the supplied Nimbus Yak: of 27 occupied cells, none sits more than
+2px off vanilla's ground line.
+
+### 4b. Palette — `tools/palette_reduce.py`
+
+```sh
+python3 tools/palette_reduce.py fitted.png -o final.png --colours 38
+```
+
+Shipped sheets carry 19–38 colours; a painted or generated one carries tens of
+thousands. Plain `Image.quantize` fails here in a way worth knowing about:
+median cut splits by **population**, so on a mostly-white yak every slot goes to
+a shade of white and the saturated pixels that carry the animal's character get
+merged into beige. Quantised to 16, 24, 32 *or* 48, the pink noses and green
+flower crowns all disappeared.
+
+This reserves a share of the palette for saturated pixels and cuts them against
+each other. On the same sheet that returns the noses and crowns at **38**
+colours, where the naive 48 had lost them.
+
+**This is not one bad file.** Counted across the 342 PNGs under
+`src/main/resources/` (median: 11 colours, so the generated art is disciplined),
+sixteen sit above 100 and nine are far past it:
+
+| colours | file |
+|---:|---|
+| 46 849 | `objects/cloudtree.png` |
+| 35 537 | `mobs/nimbusyak_bull.png` |
+| 34 890 | `mobs/nimbusyak.png` |
+| 29 647 | `objects/nimbuswillow.png` |
+| 16 524 | `mobs/nimbusyak_calf.png` |
+| 9 897 | `mobs/fenwraith.png` |
+| 6 094 | `mobs/stormwisp.png` |
+| 2 405 | `tiles/skyway_splat.png` |
+| 2 201 | `mobs/mistserpent_head.png` |
+
+Every one is supplied or generated art that reached `src/main/resources/`
+without a palette pass. They render, and they do not look like the game they
+are in. Reducing them is a **player decision per sheet**, not a batch job:
+the measurement says "too many colours", only a person can say the result
+still reads.
 
 ### 5. Show the player, and ask
 
