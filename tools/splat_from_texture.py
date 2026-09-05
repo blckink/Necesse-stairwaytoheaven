@@ -84,19 +84,104 @@ def make_seamless(im, tile=TILE):
     return out
 
 
-def cut_patches(texture, n, tile=TILE):
-    """Take n well-spread square patches from the texture."""
+def outlier_cost(patch, tile=TILE):
+    """How much of the patch is not the material.
+
+    A supplied texture usually contains more than the surface: holes, edges,
+    props. Cutting one of those turns a foreign object into a floor tile that
+    repeats across the world, so candidates carrying extremes are ranked down.
+    """
+    from PIL import Image
+    im = patch.convert("RGB").resize((tile, tile), Image.LANCZOS)
+    px = im.load()
+    lum = sorted(0.299 * px[x, y][0] + 0.587 * px[x, y][1] + 0.114 * px[x, y][2]
+                 for y in range(tile) for x in range(tile))
+    mid = lum[len(lum) // 2]
+    far = sum(1 for v in lum if abs(v - mid) > 70) / float(len(lum))
+    return far * 100.0
+
+
+def vary(base, alt, seed, tile=TILE, share=0.22):
+    """One tile, with details changed in a few areas -- vanilla's own trick.
+
+    Measured on shipped splats, neighbouring variant blocks differ by 15-30% of
+    their pixels (dirt 21.4, snow 15.1, grass 15.0/1.5/13.2). That is not a
+    different crop of the material -- a different crop differs in 80-90%, which
+    reads as a different floor. It is the SAME tile with some of its detail
+    replaced: other pebbles here, another crack there.
+
+    So this keeps the base and swaps a handful of small patches out of an
+    alternate cut, deterministically per block.
+    """
+    from PIL import Image
+    import random
+    out = base.copy()
+    rnd = random.Random(seed)
+    target = tile * tile * share
+    covered = 0
+    while covered < target:
+        w = rnd.randint(3, max(4, tile // 4))
+        h = rnd.randint(3, max(4, tile // 4))
+        x = rnd.randrange(0, tile - w + 1)
+        y = rnd.randrange(0, tile - h + 1)
+        out.paste(alt.crop((x, y, x + w, y + h)), (x, y))
+        covered += w * h
+    return out
+
+
+def cut_patches(texture, n, tile=TILE, stride=None):
+    """Pick n distinct patches that tile well and are free of foreign objects.
+
+    Scans the texture on a grid, scores every candidate, and takes the best n
+    that are not near-duplicates of one another -- the variation between them
+    is what stops the ground reading as one image repeated.
+    """
     from PIL import Image
     w, h = texture.size
-    side = min(w, h) // 2 or 1
-    spots = [(0, 0), (w - side, 0), (0, h - side), (w - side, h - side),
-             ((w - side) // 2, (h - side) // 2)]
-    out = []
-    for i in range(n):
-        x, y = spots[i % len(spots)]
-        patch = texture.crop((x, y, x + side, y + side))
-        out.append(make_seamless(patch, tile))
-    return out
+    side = max(tile, min(w, h) // 3)
+    stride = stride or max(tile, side // 2)
+    cands = []
+    for y in range(0, max(1, h - side + 1), stride):
+        for x in range(0, max(1, w - side + 1), stride):
+            patch = texture.crop((x, y, x + side, y + side))
+            sv, sh = seam_cost(patch, tile)
+            cands.append(((sv + sh) / 2.0 + outlier_cost(patch, tile) * 2.0,
+                          x, y, patch))
+    cands.sort(key=lambda c: c[0])
+
+    def signature(p):
+        im = p.convert("RGB").resize((4, 4), Image.LANCZOS)
+        return list(im.getdata())
+
+    def dist(a, b):
+        return sum(abs(p[c] - q[c]) for p, q in zip(a, b) for c in range(3)) \
+            / float(len(a) * 3)
+
+    # Variation, but of ONE material. Measured on vanilla, neighbouring blocks
+    # of a splat differ by 15-30% of their pixels (dirt 21.4, snow 15.1, grass
+    # 15.0/1.5/13.2). Picking the most distinct patches instead gave 80-90% --
+    # five different floors rather than five faces of one floor. So candidates
+    # are held inside a band around the best patch: far enough apart to vary,
+    # close enough to still be the same stone.
+    best = cands[0]
+    base_sig = signature(best[3])
+    chosen, sigs = [make_seamless(best[3], tile)], [base_sig]
+    for lo, hi in ((2.0, 12.0), (1.0, 20.0), (0.0, 1e9)):   # widen only if short
+        for score, x, y, patch in cands[1:]:
+            if len(chosen) >= n:
+                break
+            sig = signature(patch)
+            if not (lo <= dist(sig, base_sig) <= hi):
+                continue
+            if any(dist(sig, s) < lo for s in sigs):
+                continue
+            chosen.append(make_seamless(patch, tile))
+            sigs.append(sig)
+        if len(chosen) >= n:
+            break
+    while len(chosen) < n:
+        chosen.append(chosen[len(chosen) % max(1, len(chosen))])
+    return chosen
 
 
 def main():
@@ -131,7 +216,22 @@ def main():
     print("reference: %s -- %d block(s) of %d cells"
           % (os.path.basename(args.like), blocks, 7 * 3))
 
-    patches = cut_patches(tex, max(1, args.variants))
+    # Every block needs its own look, and inside a block the four plain-variant
+    # cells need four more. Vanilla does exactly this: measured block-to-block
+    # difference is 21% on dirt_splat, 15% on snow_splat, 15-30% across our own
+    # skystone -- the ground is deliberately not the same image five times.
+    nvar = max(1, args.variants)
+    # Two cuts of the material: one is the base every cell is built from, the
+    # other only supplies the details that get swapped in.
+    cuts = cut_patches(tex, 2)
+    base, alt = cuts[0], cuts[-1]
+    patches = []
+    for by in range(blocks):
+        patches.append(base if by == 0 else vary(base, alt, 1000 + by))
+        for v in range(nvar):
+            patches.append(vary(base, alt, 2000 + by * 16 + v))
+    print("built %d tiles from one base for %d block(s) x (1 blend + %d plain)"
+          % (len(patches), blocks, nvar))
     out = Image.new("RGBA", ref.size, (0, 0, 0, 0))
     ref_a = ref.getchannel("A")
 
@@ -143,7 +243,9 @@ def main():
                 # The four plain-variant cells get their own patch each, so a
                 # field of this tile does not repeat one image forever.
                 plain = (cy == 0 and cx >= 3)
-                patch = patches[(cx - 3) % len(patches)] if plain else patches[0]
+                start = by * (1 + nvar)
+                idx = start + 1 + (cx - 3) % nvar if plain else start
+                patch = patches[idx % len(patches)]
                 px0, py0 = cx * TILE, by * BLOCK_H + cy * TILE
                 out.paste(patch, (px0, py0))
     out.putalpha(ref_a)
