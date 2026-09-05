@@ -81,6 +81,51 @@ def draw_grid(src, dst, cell):
         im.save(dst)
 
 
+# Which shipped files speak for a realm. Measuring the palette off the mod's
+# own art beats naming colours from a design doc: the doc says "high
+# saturation", the files say #003000.
+REALM_KEYS = {
+    "eden": ("eden", "paradise", "serpent", "sungrape", "goldenorchid", "knowledge"),
+    "skyreach": ("sky", "cloud", "nimbus", "storm", "aurora", "gale", "zephyr"),
+    "ghost": ("ghost", "spirit", "bonewood", "spectral", "mourning", "coffin"),
+    "steinfeld": ("steinfeld", "grave", "hollow", "pilgrim", "mourner"),
+    "crooked": ("crooked", "gloom", "wrongway", "checker"),
+    "veil": ("veil", "fog", "mist"),
+}
+
+
+def realm_palette(realm, limit=8):
+    """The dominant colours of the realm's own shipped art, measured."""
+    import collections
+    import glob
+    key = None
+    low = (realm or "").lower()
+    for name, _ in REALM_KEYS.items():
+        if name in low:
+            key = name
+            break
+    if key is None:
+        return []
+    from PIL import Image
+    counts = collections.Counter()
+    files = [p for p in glob.glob(os.path.join(REPO, "src/main/resources/**/*.png"),
+                                  recursive=True)
+             if any(k in os.path.basename(p).lower() for k in REALM_KEYS[key])]
+    for p in files[:25]:
+        try:
+            with Image.open(p) as im:
+                im = im.convert("RGBA")
+                px = im.load()
+                for y in range(0, im.height, 2):
+                    for x in range(0, im.width, 2):
+                        r, g, b, a = px[x, y]
+                        if a >= 128:
+                            counts[(r // 16 * 16, g // 16 * 16, b // 16 * 16)] += 1
+        except Exception:
+            continue
+    return ["#%02x%02x%02x" % c for c, _ in counts.most_common(limit)]
+
+
 BRIEF = """# {id} — {what}
 
 **Realm:** {realm}
@@ -119,9 +164,9 @@ budget — it becomes a different thing wearing that skeleton.
    sheet. Name and hold a palette of 3–5 base colours plus their shades. This
    single rule is what separates a usable sheet from a smooth illustration.
 
-## Context for the drawing
+## The realm it has to belong to
 
-{notes}
+{palette}
 
 ## How it is checked when it comes back
 
@@ -152,11 +197,24 @@ def prepare(item, outdir):
         except Exception as exc:
             gridline += "\n\n*(grid overlay failed: %s)*" % exc
 
+    pal = realm_palette(item["realm"])
+    if pal:
+        palette = ("**%s already ships these colours** (most used first):\n\n"
+                   "`%s`\n\n"
+                   "Draw to that list. It is measured off the art this realm already\n"
+                   "ships, not copied out of a design document -- so the sprite lands\n"
+                   "next to its neighbours instead of next to a description of them."
+                   % (item["realm"], "`  `".join(pal)))
+    else:
+        palette = ("No shipped art was found for **%s** yet, so there is no measured\n"
+                   "palette. Read `docs/WORLD_DESIGN.md` §36 for the realm's intent and\n"
+                   "name 3-5 exact colours before drawing." % item["realm"])
+    palette += "\n\n### Context for the drawing\n\n" + (item.get("notes") or "(none recorded)")
     text = BRIEF.format(id=item["id"], what=item["what"] or item["id"],
                         realm=item["realm"], standin=item["standin"],
                         w=w, h=h, mode=item.get("mode", "?"),
                         gridline=gridline,
-                        notes=item.get("notes") or "(none recorded)")
+                        palette=palette)
     with open(os.path.join(outdir, "brief.md"), "w", encoding="utf-8") as f:
         f.write(text)
     return base, cell

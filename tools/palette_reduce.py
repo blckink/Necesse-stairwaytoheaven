@@ -83,8 +83,9 @@ def main():
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("source")
     ap.add_argument("-o", "--out")
-    ap.add_argument("--colours", type=int, default=38,
-                    help="palette cap (vanilla sheets carry 19-38)")
+    ap.add_argument("--colours", type=int, default=33,
+                    help="palette cap; 33 is the player's chosen compromise "
+                         "inside vanilla's 19-38 band")
     ap.add_argument("--accent-share", type=float, default=0.35)
     ap.add_argument("--saturation", type=float, default=0.35)
     ap.add_argument("--report", action="store_true")
