@@ -346,36 +346,47 @@ ours.)*
 
 ---
 
-## The twelve bestiary icons that gate a real mechanic
+## Bestiary icons — SOLVED 2026-09-05, and what is left is two rows
 
-**Not decoration — a game system.** Eden's five hostiles and the Ghost Realm's
-seven are registered `MobRegistry.registerMob(id, class, false)`, while the
-Skyreach's, Steinfeld's and the Crooked Beyond's are registered `true`. The
-third argument is `countKillStat` (VERIFIED [jar], `MobRegistry.java:824`), so
-those twelve have **no bestiary row and count no kills** — a player can clear
-Eden and the Aftergarden and the game will not admit they were there.
+**This used to be a request for twelve 32x32 icons. It is not one any more.**
 
-The flag itself is a one-word change. What stops it being one is the icon:
-`MobRegistry.loadMobIcons` calls `GameTexture.fromFile("mobs/icons/" + id)` for
-**every** registered mob (`MobRegistry.java:950-953, 985-987`), so flipping the
-flag without the file adds twelve bestiary rows drawn with the engine's ERR
-texture. (The three-argument overload also passes `countKillStat` through as
-`createSpawnItem`, so each also gains a `<id>spawnitem`; that part is harmless
-and matches what the mod's other hostiles already do.)
+Nineteen of the mod's creatures deliberately carry no art of their own: each
+either subclasses a vanilla mob and inherits its whole draw, or blits a vanilla
+sheet (`EdenRealm.loadTextures`, `CrookedRealm.loadTextures`). The bestiary did
+not know that — `MobRegistry.loadMobIcons` calls
+`GameTexture.fromFile("mobs/icons/" + stringID)` for **every** registered mob and
+falls back to `GameResources.error`, so **six of them were already shipping an
+ERR tile in the journal**: Steinfeld's four plus the door mimic and the tongue
+plant, all registered `countKillStat = true`.
 
-Twelve files, **32×32 each**, in `src/main/resources/mobs/icons/`. Same format
-as the 26 the mod already ships there — a head-and-shoulders read of the mob at
-bestiary size, on transparent background.
+The fix was not a PNG. **VERIFIED [jar]:** `Mob.getMobIcon()` (Mob.java:1760) is
+plainly overridable, and the journal asks the MOB rather than the registry
+(`FormJournalEntryComponent.java:240`). All nineteen now return the icon of the
+creature whose body they wear — see `mobs/BorrowedMobIcon`.
 
-| realm | file |
-|---|---|
-| Eden | `bloommaw.png` · `edenserpent.png` · `forbiddenserpent.png` · `goldenhornet.png` · `jealousvine.png` |
-| Ghost Realm | `coffincrawler.png` · `drifter.png` · `headlessbutler.png` · `lanternwidow.png` · `mourningbride.png` · `soulhound.png` |
-| Ghost Realm | `possessedchair.png` — registered and on no spawn table; it appears only in the Ectomarsh guard pack |
+**Drawing twelve icons would have been the wrong fix even if it were free.** A
+Drifter that walks around as a Deep Cave Spirit and shows a hand-drawn
+something-else in the journal is two different creatures to the player. When
+these mobs get their own bodies, they get their own faces in the same pass and
+every override disappears with them.
 
-Each of these mobs subclasses a vanilla mob and wears the parent's world sprite,
-so the icon is the only art any of them needs. `docs/AREA_OVERVIEW.md` tracks
-this as an open hole and `tools/area_census.py` prints it on every run.
+### What is still owed: two, and only when someone with a client looks
+
+| mob | body it wears | why it is still off |
+|---|---|---|
+| `edenserpent` | `crocodile` | vanilla registers the crocodile `countKillStat = false`, so it is not in vanilla's own bestiary and there may be no icon to borrow |
+| `forbiddenserpent` | `petdragonwhelp` | same — a pet, not a bestiary entry |
+
+Every other parent (`stabbybush`, `dryadsentinel`, `honeybee`,
+`deepcavespirit`, `bonewalker`, `phantom`, `forestspector`, `mimic`, `jackal`,
+`desertcrawler`, `ancientarmoredskeleton`, `crystalgolem`, `crazedraven`,
+`scorpion`) IS a vanilla bestiary mob, so its icon provably exists.
+
+**This cannot be checked from here.** A dedicated server renders nothing and
+ships zero PNGs. The check is one look at the journal on a client: if those two
+show a picture, flip them to `true` in `EdenRealm.registerMobs` — one word each.
+If they show ERR, they are the only two icons this mod actually owes, at
+32x32 each.
 
 ## A note on the two unresolved Ghost IDs
 

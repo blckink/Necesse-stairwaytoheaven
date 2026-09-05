@@ -171,4 +171,17 @@ public class GoldenHornetMob extends EdenHostileMob {
                     .color(new Color(224, 178, 32));
         }
     }
+
+    /**
+     * Bestiary face: it wears mobs/bee, which honeybee owns (EdenRealm.loadTextures), so it wears that creature's
+     * face in the journal too. {@code Mob.getMobIcon()} is overridable and
+     * {@code FormJournalEntryComponent} asks the MOB rather than the registry,
+     * so this needs no PNG of its own -- see {@link stairwaytoheaven.mobs.BorrowedMobIcon}
+     * for why borrowing the face is the right answer and not a shortcut.
+     */
+    @Override
+    public necesse.gfx.gameTexture.GameTexture getMobIcon() {
+        return stairwaytoheaven.mobs.BorrowedMobIcon.from("honeybee", super.getMobIcon());
+    }
+
 }

@@ -377,19 +377,46 @@ eingetragen. Der Reproduzierbarkeits-Gate bestätigt es:
 `tools/asset_generator/generate_assets.py` läuft durch und produziert
 byte-identische Dateien.
 
-### Was an Kunst offen ist: 12 Bestiarium-Icons
+### Die Bestiarium-Icons: gelöst, ohne ein neues Pixel
 
-Edens fünf und die sieben des Ghost Realms sind mit `countKillStat = false`
-registriert, während Skyreach, Steinfeld und Crooked mit `true` registrieren.
-Diese zwölf haben **keine Bestiarium-Zeile und zählen keine Kills** — du kannst
-Eden leerräumen und das Spiel gibt nicht zu, dass du dort warst.
+**Das war vorher als „zwölf fehlende Icons" notiert. Es war keine Kunstfrage.**
 
-Das Flag umzulegen ist **kein Einzeiler**: der Drei-Argument-`registerMob`
-reicht `countKillStat` auch als `createSpawnItem` durch, und
-`MobRegistry.loadMobIcons` lädt `mobs/icons/<id>` für **jeden** Mob — ohne
-Datei bekommst du zwölf Zeilen mit der ERR-Textur der Engine. Die zwölf Icons
-à 32×32 sind der echte Preis; sie stehen mit Begründung in
-`docs/ASSET_REQUESTS.md`.
+Neunzehn Kreaturen tragen absichtlich keine eigene Kunst — jede erbt entweder
+eine Vanilla-Klasse samt Zeichnung oder blittet direkt ein Vanilla-Sheet. Das
+Bestiarium wusste das nicht: `MobRegistry.loadMobIcons` lädt
+`mobs/icons/<id>` für **jeden** registrierten Mob und fällt auf die ERR-Kachel
+zurück. **Sechs davon zeigten das schon heute im Journal** — Steinfelds vier
+plus Türmimik und Zungenpflanze.
+
+Der Ausweg war eine Zeile, kein PNG: `Mob.getMobIcon()` ist überschreibbar, und
+das Journal fragt den **Mob**, nicht das Register
+(`FormJournalEntryComponent.java:240`, VERIFIED [jar]). Alle neunzehn geben
+jetzt das Gesicht des Tiers zurück, dessen Körper sie tragen —
+`mobs/BorrowedMobIcon`.
+
+**Zwölf Icons zu malen wäre auch inhaltlich falsch gewesen.** Ein Drifter, der
+als Deep Cave Spirit herumläuft und im Journal etwas anderes zeigt, sind für den
+Spieler zwei Kreaturen. Wenn diese Mobs eigene Körper bekommen, bekommen sie im
+selben Durchgang eigene Gesichter — und jede Überschreibung verschwindet mit
+ihnen.
+
+**Was jetzt zählt:** zehn Feinde neu im Bestiarium (Edens drei, Ghosts sieben),
+sechs kaputte Zeilen repariert.
+
+**Zwei bleiben offen, nachvollziehbar.** Eden-Schlange trägt `crocodile`,
+Verbotene Schlange trägt `petdragonwhelp` — die einzigen beiden Eltern, die
+Vanilla selbst *nicht* ins Bestiarium stellt. Ob es dort ein Icon zu leihen
+gibt, lässt sich von einem Dedicated Server aus nicht prüfen: der rendert nichts
+und liefert null PNGs. **Ein Blick in dein Journal klärt es.** Zeigen die beiden
+ein Bild, ist es je ein Wort in `EdenRealm.registerMobs`; zeigen sie ERR, sind
+das die einzigen zwei Icons, die dieser Mod wirklich schuldet.
+
+### Die Galerie
+
+Alle 341 einzeln abbildbaren Sprites stecken in der Handy-Seite oben —
+originalgroß, mit Pixelraster, auf Schachbrett damit Transparenz sichtbar
+bleibt. Nicht dabei: `kk-sprites/` (Generator-Zwischenstufen) und das
+Vorschaubild.
 
 ---
 

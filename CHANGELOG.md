@@ -102,8 +102,38 @@ found.
   because everything before it asserts on progression a reset legitimately
   wipes, and phase 3 reloads the world to prove the reset reached disk.
 
+### Added, after the player pushed back on "twelve icons owed"
+- **`mobs/BorrowedMobIcon` and nineteen `getMobIcon()` overrides.** The player's
+  question was the right one — "kann es doch nicht so schwer sein die 12 icons
+  kurz aus dem sheet zu ziehen?" — and the answer turned out to be that no icon
+  needed drawing at all. **VERIFIED [jar]:** `Mob.getMobIcon()` (Mob.java:1760)
+  is plainly overridable and the journal asks the MOB rather than the registry
+  (`FormJournalEntryComponent.java:240`), so a creature that wears a vanilla
+  body can simply answer with that creature's face. All nineteen mobs that carry
+  no art of their own now do.
+- **Ten hostiles entered the bestiary**: Eden's bloommaw, jealousvine and
+  goldenhornet, and all seven of the Ghost band's. Each parent
+  (`stabbybush`, `dryadsentinel`, `honeybee`, `deepcavespirit`, `bonewalker`,
+  `phantom`, `forestspector`, `mimic`, `jackal`, `desertcrawler`) is itself a
+  vanilla bestiary mob, so its icon provably exists.
+
+### Fixed
+- **Six journal rows were already drawing the engine's ERR tile**, and nobody
+  had noticed. `MobRegistry.loadMobIcons` loads `mobs/icons/<id>` for *every*
+  registered mob and `GameTexture.fromFile` falls back to `GameResources.error`
+  (GameTexture.java:170) — so Steinfeld's four plus the Crooked Beyond's door
+  mimic and tongue plant, all registered `countKillStat = true` with no PNG of
+  their own, have been shipping a broken picture. The same override fixes them.
+
 ### Not done, and written down rather than half-done
-- **Twelve hostiles still never enter the bestiary.** Eden's five and Ghost's
+- **Two hostiles still never enter the bestiary.** `edenserpent` wears
+  `crocodile` and `forbiddenserpent` wears `petdragonwhelp` — the only two
+  parents vanilla does not put in its own bestiary, so whether there is an icon
+  to borrow cannot be checked from here: a dedicated server renders nothing and
+  ships zero PNGs. Both stay `false` until somebody with a client looks at the
+  journal, because a row showing ERR is worse than no row. One word each in
+  `EdenRealm.registerMobs` once it is known. This replaces the earlier entry:
+- ~~**Twelve hostiles still never enter the bestiary.**~~ Eden's five and Ghost's
   seven register `countKillStat = false` while every other realm's register
   `true`. This is NOT a one-word fix: the three-argument
   `MobRegistry.registerMob` passes `countKillStat` through as

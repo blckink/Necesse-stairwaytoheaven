@@ -172,14 +172,33 @@ public final class GhostRealm {
                 0.0F, false);
     }
 
+    /**
+     * The Aftergarden's seven, all of them now in the player's bestiary.
+     *
+     * <p>The third argument is {@code countKillStat} (MobRegistry.java:824,
+     * VERIFIED [jar]). All seven were {@code false} while the Skyreach's,
+     * Steinfeld's and the Crooked Beyond's were {@code true}, so the whole
+     * realm was invisible to the journal —
+     * {@code docs/AREA_OVERVIEW.md} measured it.
+     *
+     * <p>Every one of these subclasses a vanilla mob and inherits its draw, so
+     * none has a PNG of its own and turning the flag on would have produced
+     * seven rows drawn with the engine's ERR tile.
+     * {@link stairwaytoheaven.mobs.BorrowedMobIcon} is why that does not
+     * happen: each returns the face of the creature it subclasses, and all
+     * seven parents ({@code deepcavespirit}, {@code bonewalker},
+     * {@code phantom}, {@code forestspector}, {@code mimic}, {@code jackal},
+     * {@code desertcrawler}) are themselves bestiary mobs, so their icons
+     * provably exist.
+     */
     private static void registerMobs() {
-        MobRegistry.registerMob("drifter", DrifterMob.class, false);
-        MobRegistry.registerMob("headlessbutler", HeadlessButlerMob.class, false);
-        MobRegistry.registerMob("lanternwidow", LanternWidowMob.class, false);
-        MobRegistry.registerMob("mourningbride", MourningBrideMob.class, false);
-        MobRegistry.registerMob("possessedchair", PossessedChairMob.class, false);
-        MobRegistry.registerMob("soulhound", SoulHoundMob.class, false);
-        MobRegistry.registerMob("coffincrawler", CoffinCrawlerMob.class, false);
+        MobRegistry.registerMob("drifter", DrifterMob.class, true);
+        MobRegistry.registerMob("headlessbutler", HeadlessButlerMob.class, true);
+        MobRegistry.registerMob("lanternwidow", LanternWidowMob.class, true);
+        MobRegistry.registerMob("mourningbride", MourningBrideMob.class, true);
+        MobRegistry.registerMob("possessedchair", PossessedChairMob.class, true);
+        MobRegistry.registerMob("soulhound", SoulHoundMob.class, true);
+        MobRegistry.registerMob("coffincrawler", CoffinCrawlerMob.class, true);
     }
 
     public static void registerRecipes() {

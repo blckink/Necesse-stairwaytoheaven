@@ -3258,3 +3258,42 @@ tileRange)` and friends. There is no `size()`.
 range — a superset of the disc — so a distance test still has to follow it. Use
 it rather than walking `entityManager.mobs` whenever the question is local: a
 retrofit asks it once per lattice site and a large box has thousands.
+
+## The bestiary asks the MOB for its icon, so a borrowed body can borrow its face
+
+**[jar]** `Mob.getMobIcon()` (Mob.java:1760-1762) is an ordinary overridable
+method whose default is `MobRegistry.getMobIcon(this.getStringID())`, and the
+journal calls it on the instance: `FormJournalEntryComponent.java:240` reads
+`GameTexture entryMobIcon = mob.getMobIcon();`.
+
+That matters because `MobRegistry.loadMobIcons` (`:950-953`) loads
+`mobs/icons/<stringID>` for **every** registered mob and `GameTexture.fromFile`
+falls back to `GameResources.error` when the file is absent
+(GameTexture.java:170-172). A mod whose creatures deliberately wear vanilla
+bodies therefore ships broken journal rows for every one of them that counts a
+kill — six of ours did, unnoticed, for months.
+
+**The registry field is not the way in.** `MobRegistry.MobRegistryElement.icon`
+is a public field, but the class is `protected static` inside `MobRegistry` and
+`MobRegistry`'s own constructor is **private** (`:370`), so the class cannot be
+subclassed and the protected nested type cannot be named from a mod. Reflection
+would work; overriding `getMobIcon()` is better and needs nothing unusual.
+
+**Which parent's icon is safe to borrow.** Only a mob vanilla itself registers
+`countKillStat = true` provably has an icon, because that flag is what puts it
+in vanilla's own bestiary. Checked for our nineteen: every parent is one except
+`crocodile` and `petdragonwhelp`. **A dedicated server cannot settle it** — it
+renders nothing and ships zero PNGs — so that last pair needs one look at a
+client's journal.
+
+## `registerMob(id, class, true)` also mints a spawn item, and its name is free
+
+**[jar]** The three-argument overload passes `countKillStat` through as
+`createSpawnItem` (MobRegistry.java:824-826), and `onRegister` then registers
+`<id>spawnitem` in the ItemRegistry (`:714-719`). That sounds like ten new IDs
+needing ten new locale entries — it is not:
+`MobSpawnItem.getDisplayName` builds `new LocalMessage("item", "mobspawnitem",
+"mob", MobRegistry.getLocalization(mobStringID))`
+(placeableItem/MobSpawnItem.java:120), so the name is derived from the mob's own
+localization. **[run]** Flipping ten mobs to `true` added zero new problems to
+`tools/locale_audit.py`.

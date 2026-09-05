@@ -145,4 +145,17 @@ public class MourningBrideMob extends ForestSpectorMob {
     public boolean isValidSpawnLocation(Server server, ServerClient client, int targetX, int targetY) {
         return SkySpawnRules.daylightSpawn(this, server, client, targetX, targetY);
     }
+
+    /**
+     * Bestiary face: it subclasses ForestSpectorMob, so it wears that creature's
+     * face in the journal too. {@code Mob.getMobIcon()} is overridable and
+     * {@code FormJournalEntryComponent} asks the MOB rather than the registry,
+     * so this needs no PNG of its own -- see {@link stairwaytoheaven.mobs.BorrowedMobIcon}
+     * for why borrowing the face is the right answer and not a shortcut.
+     */
+    @Override
+    public necesse.gfx.gameTexture.GameTexture getMobIcon() {
+        return stairwaytoheaven.mobs.BorrowedMobIcon.from("forestspector", super.getMobIcon());
+    }
+
 }

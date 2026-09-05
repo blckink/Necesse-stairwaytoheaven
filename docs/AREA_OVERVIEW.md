@@ -145,15 +145,12 @@ Shrine and Orchard Ring are terrain/pressure sites, not buildings.
 
 **Boss.** Moonlight Dancer, tier 8, 40 000 base → **127 200 HP**.
 
-**Open holes.** No critters — the realm has no ambient life at all. All five
-hostiles are registered `countKillStat = false`, so none has a bestiary row and
-none counts a kill, while the Skyreach's, Steinfeld's and the Crooked Beyond's
-all do. Fixing that is not a one-word change: the three-argument
-`MobRegistry.registerMob` passes `countKillStat` through as `createSpawnItem`
-too, and `MobRegistry.loadMobIcons` loads `mobs/icons/<id>` for every mob, so
-flipping the flag adds five bestiary rows drawn with the engine's ERR texture.
-The five icons are the real cost, and they belong in `docs/ASSET_REQUESTS.md`
-rather than in a one-line commit.
+**Open holes.** No critters — the realm has no ambient life at all. Three of
+the five hostiles entered the bestiary on 2026-09-05 (`mobs/BorrowedMobIcon`);
+`edenserpent` and `forbiddenserpent` did not, because they wear `crocodile` and
+`petdragonwhelp` — the only two parents vanilla does not put in its own
+bestiary, so whether there is an icon to borrow cannot be checked without a
+client. `docs/ASSET_REQUESTS.md` has the one-look test.
 
 ---
 
@@ -235,8 +232,9 @@ Graveyard shells.
 
 **Boss.** Pest Warden, tier 9, 45 000 base → **161 100 HP**.
 
-**Open holes.** No critters. Seven of the nine hostiles registered
-`countKillStat = false` — same cost as Eden's five, seven icons.
+**Open holes.** No critters. The seven that had no bestiary row got one on
+2026-09-05 — each returns the face of the vanilla creature it subclasses
+(`mobs/BorrowedMobIcon`).
 
 ---
 
@@ -323,10 +321,10 @@ Eden packs are placed at region generation, which fires once per region ever.
    life at all. Steinfeld's fix is already written in `WORLD_DESIGN` §A3.4 and
    just not built: ghosts that are not enemies, that stand, or that walk the
    same path between two gravestones forever.
-3. **Twelve hostiles never enter the bestiary.** Eden's five and Ghost's seven
-   are `countKillStat = false` while Skyreach's, Steinfeld's and Crooked's are
-   `true`. The blocker is twelve `mobs/icons/*.png`, not the flag — see the Eden
-   section for why.
+3. **Two hostiles still never enter the bestiary.** Ten of the twelve landed on
+   2026-09-05, and six rows that were already drawing the engine's ERR tile now
+   draw a picture. `edenserpent` and `forbiddenserpent` wait on one look at a
+   client's journal — `docs/ASSET_REQUESTS.md`.
 4. **Ten realm materials are named by no recipe.** Crooked's six and
    Steinfeld's four now have quest and shop demand, but nothing is *crafted*
    from any of them.
