@@ -24,3 +24,22 @@ repositories {
 //   Make sure that the gradle dir is a Git submodule pointing to the common mod module
 assert file("$project.projectDir/gradle/main.gradle").exists() : "\n\n\n>>> You might've forgot to clone recursively/add the common Git submodule\n\n\n"
 apply from: 'gradle/main.gradle'
+
+
+// ===== Ausliefern ins Splitscreen-Setup ===== //
+//   Haengt an buildModJar, damit nach einem Bauen nie ein alter Stand in den
+//   Mods-Ordnern der beiden Spieler liegenbleibt -- man kann es nicht
+//   vergessen. Das Skript ueberspringt sich selbst, wenn kein
+//   Windows-Laufwerk da ist (kopfloser Server, Fernsitzung), und laesst den
+//   Build dann gruen; SWH_NO_DEPLOY=1 schaltet es ganz ab.
+task deploySplitroast(type: Exec) {
+    group = "necesse"
+    description = "Legt das gebaute Jar in die Mods-Ordner von Player 1 und 2"
+    commandLine "$projectDir/scripts/deploy_splitroast.sh"
+    // Ein Finalizer laeuft auch, wenn die finalisierte Aufgabe gescheitert
+    // ist. Ohne diese Bedingung ueberdeckt dann "kein Jar in build/jar/" den
+    // eigentlichen Compile-Fehler, den man lesen will.
+    onlyIf { tasks.buildModJar.state.failure == null }
+}
+
+tasks.named('buildModJar') { finalizedBy 'deploySplitroast' }
