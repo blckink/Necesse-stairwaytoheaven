@@ -26,6 +26,9 @@ modifying anything in this repository.
    by `tools/area_census.py` rather than remembered. Read it before deciding
    what a realm needs. `docs/SAVE_COMPAT.md` is its companion: what an existing
    save is missing, and the `/swhreset` command that repairs it.
+   `docs/MOD_SUMMARY.md` is the same material written FOR THE PLAYER, in German:
+   every NPC with their full shop inventory, every quest with its ask and reward,
+   every boss, and the sprite ledger. Keep it in step when content lands.
 5. **`docs/PLAN_ONE_PLANE.md` — the architecture law.** One level, realms as
    depth bands, the anti-rush gate, the travel rules. A change that adds a
    dimension breaks it.

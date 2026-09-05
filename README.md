@@ -226,6 +226,7 @@ whose `settings.gradle` shows the current `modVersion` — not in a
 | `scripts/` | `fetch_dedicated_server.sh`, the headless integration test, tile-sprite and map-render checks |
 | `AGENTS.md` | entry point for anyone (human or agent) changing this repository |
 | `docs/OVERVIEW.md` | what exists and works right now, read off the code |
+| `docs/MOD_SUMMARY.md` | the player-facing summary (German): every NPC + shop inventory, every quest, every boss, the sprite ledger |
 | `docs/AREA_OVERVIEW.md` | how full each realm is — cast, spawn density, NPCs, quests, POIs, boss; measured by `tools/area_census.py` |
 | `docs/SAVE_COMPAT.md` | what an existing save is missing, and the `/swhreset` command that repairs it |
 | `docs/WORLD_DESIGN.md` | the concept every other design doc answers to |
