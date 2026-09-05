@@ -5,7 +5,7 @@ How work runs here, alone or in parallel.
 ## The six phases
 
 **1 — Sync.** `git status`, `git log --oneline -20`, `git fetch`. Read
-`AGENTS.md`, `docs/CURRENT_STATE.md`, `docs/DESIGN_DECISIONS.md`,
+`AGENTS.md`, `docs/OVERVIEW.md`, `docs/DESIGN_DECISIONS.md`,
 `docs/TECHNICAL_LEARNINGS.md`. A handoff message can be stale; the repository
 is not. If they disagree, the repository wins and you say so.
 
@@ -47,7 +47,7 @@ cell painted as the complement of its intended shape, reaches the player as
 audits can see it.
 
 **5 — Record.** Append proven behaviour to `docs/TECHNICAL_LEARNINGS.md`,
-refresh `docs/CURRENT_STATE.md` if the state moved, append player feedback to
+refresh `docs/OVERVIEW.md` if the state moved, append player feedback to
 `docs/PLAYTEST_LOG.md`. Only what you observed.
 
 **6 — Hand off.** Files changed · tests actually run · known risks · what is
@@ -81,6 +81,64 @@ produces work you can check.
 **Worktrees** (`isolation: "worktree"`) when agents would otherwise fight over
 the tree. For read-only research or cleanly partitioned files, plain parallel
 agents are fine.
+
+## Where ownership is written down
+
+The rules above say ownership "is declared up front" but not *where*. It is
+declared in **`docs/AGENT_BOARD.md`**, on `master`, and only the lead writes
+there. A remote session has no memory and cannot see anyone's local status
+files — it sees the repository, so the board has to live in it.
+
+The board carries one row per active branch: who, which files, which order,
+what state. A branch with no row owns no files.
+
+Every dispatched job gets an order file, `docs/orders/<branch>.md`, from
+`docs/orders/TEMPLATE.md`. The bar for that file: a session with no history
+reads it and starts working **without asking anything**, because it cannot ask
+— it runs when nobody is watching. It names the task, the checkable
+finish condition, the files it owns, what it must not touch, and the gates that
+must be green.
+
+The lead writes board row and order file *before* the session starts, and
+checks there that no two open orders name the same file. Two orders that
+overlap run one after the other.
+
+**Only the lead merges into `master`.** Remote sessions push their own branch
+and stop there. Branches are transport, not an archive: once a branch is
+contained in `master` (`git rev-list --count origin/master..<branch>` = 0) it
+has done its job and is deleted.
+
+## Deploying to the splitscreen setup
+
+`scripts/deploy_splitroast.sh` puts the built jar into both players' mod
+folders. `buildModJar` finalises into it, so a build cannot silently leave a
+stale version behind.
+
+The mod folders are **not** in the game directory. SplitRoast runs the two
+instances under Goldberg and redirects `USERPROFILE`/`APPDATA` per player
+(`SplitRoast.Launch/Coop/UserProfileEnv.cs`), so Necesse writes to
+`%USERPROFILE%\SplitRoast\Profiles\Player<N>\AppData\Roaming\Necesse\mods`.
+Copying into `SplitRoast_Instances/1169040/p1|p2` has no effect.
+
+Two things the script has to get right, and checks rather than assumes:
+
+- The jar's name carries both versions (`Stairway_to_Heaven-<gv>-<mv>.jar`), so
+  after a version bump a plain copy leaves two builds side by side and the game
+  loads both. It deletes every `Stairway_to_Heaven-*.jar` first, then verifies
+  afterwards that exactly one remains per folder, and prints the count.
+- Targets are resolved to their real directory and de-duplicated on
+  device:inode, not on the path text — a Windows junction can point two paths at
+  one directory, and then the file must not be written twice.
+
+`gameVersion` is read out of the game jar the build points at
+(`gradle/main.gradle`, `GameInfo.version`). Building against the dedicated
+server produces a `1.3.2` jar; the players run **1.3.3** from the Steam
+install. For a build that is going to be played, point `NECESSE_GAME_DIR` at
+the Steam directory.
+
+On a machine with no Windows drive the script skips itself and returns 0, so
+the same build stays green in a remote session. `SWH_NO_DEPLOY=1` switches it
+off entirely.
 
 ## Commits
 
@@ -126,7 +184,7 @@ already pushed** — which is the practical reason this repo's rule is that a
 session pushes its branch before it stops.
 
 Teleport makes a **local copy**: work done afterwards stays local and does not
-flow back to the web session. So the branch, `docs/CURRENT_STATE.md` and the
+flow back to the web session. So the branch, `docs/OVERVIEW.md` and the
 commit messages remain the real handoff between one session and the next,
 exactly as the six phases above assume. Teleport moves the conversation; the
 repository moves the work.
