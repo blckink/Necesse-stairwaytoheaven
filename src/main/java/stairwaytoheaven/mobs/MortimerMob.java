@@ -101,6 +101,59 @@ public class MortimerMob extends SkySettlerMob {
                 .setPriceBasedOnHappiness(70, 45, 12);
     }
 
+    /**
+     * His own chain — {@link stairwaytoheaven.quest.MortimerRitesQuest} — run
+     * before vanilla's dialogue window opens, the same shape
+     * {@code EveleenMob.interact} uses and for the same documented reasons:
+     * every branch is idempotent, and it is deliberately NOT gated on
+     * {@code !isSettler()}, so a player who paid his 8 000 on the first meeting
+     * can still come back with the shrouds and still be paid.
+     */
+    @Override
+    public void interact(necesse.entity.mobs.PlayerMob player) {
+        if (this.isServer() && player.isServerClient()) {
+            necesse.level.maps.Level level = this.getLevel();
+            necesse.engine.network.server.Server server =
+                    level == null ? null : level.getServer();
+            advanceRites(server, player.getServerClient());
+        }
+        super.interact(player);
+    }
+
+    private void advanceRites(necesse.engine.network.server.Server server,
+            necesse.engine.network.server.ServerClient client) {
+        stairwaytoheaven.quest.SkyQuests.Step step =
+                stairwaytoheaven.quest.SkyQuests.advanceResidentChain(server, client,
+                        stairwaytoheaven.quest.SkywatchWorldData.CHAIN_MORTIMER_RITES,
+                        new stairwaytoheaven.quest.MortimerRitesQuest());
+        if (step == stairwaytoheaven.quest.SkyQuests.Step.ASKED) {
+            this.bubble("mortimerasksrites");
+        } else if (step == stairwaytoheaven.quest.SkyQuests.Step.PAID) {
+            // The Ghost band's own bar. Six, benchmarked in the quest's own doc
+            // against GhostKeyQuest's ten.
+            giveReward(client, "spiritsteelbar", 6, "mortimer");
+            this.bubble("mortimerritesdone");
+        }
+    }
+
+    /**
+     * The price, waived once the dead are seen to. Vanilla's recruit page is
+     * the payment mechanism ({@code SkySettlerMob}'s own doc forbids
+     * hand-rolling it in {@code interact}), and an empty list IS a free
+     * recruit — exactly what {@code EveleenMob} does with the same flag shape.
+     */
+    @Override
+    public java.util.List<necesse.inventory.InventoryItem> getRecruitItems(
+            necesse.engine.network.server.ServerClient client) {
+        necesse.level.maps.Level level = this.getLevel();
+        necesse.engine.network.server.Server server = level == null ? null : level.getServer();
+        if (server != null && stairwaytoheaven.quest.SkywatchWorldData.residentChainDone(
+                server, stairwaytoheaven.quest.SkywatchWorldData.CHAIN_MORTIMER_RITES)) {
+            return java.util.Collections.emptyList();
+        }
+        return super.getRecruitItems(client);
+    }
+
     @Override protected int lookSeed() { return 0x30E713; }
     @Override protected HumanGender gender() { return HumanGender.MALE; }
     @Override protected Color shirtColor() { return new Color(34, 32, 38); }

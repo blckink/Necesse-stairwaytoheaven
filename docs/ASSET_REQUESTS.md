@@ -346,6 +346,37 @@ ours.)*
 
 ---
 
+## The twelve bestiary icons that gate a real mechanic
+
+**Not decoration — a game system.** Eden's five hostiles and the Ghost Realm's
+seven are registered `MobRegistry.registerMob(id, class, false)`, while the
+Skyreach's, Steinfeld's and the Crooked Beyond's are registered `true`. The
+third argument is `countKillStat` (VERIFIED [jar], `MobRegistry.java:824`), so
+those twelve have **no bestiary row and count no kills** — a player can clear
+Eden and the Aftergarden and the game will not admit they were there.
+
+The flag itself is a one-word change. What stops it being one is the icon:
+`MobRegistry.loadMobIcons` calls `GameTexture.fromFile("mobs/icons/" + id)` for
+**every** registered mob (`MobRegistry.java:950-953, 985-987`), so flipping the
+flag without the file adds twelve bestiary rows drawn with the engine's ERR
+texture. (The three-argument overload also passes `countKillStat` through as
+`createSpawnItem`, so each also gains a `<id>spawnitem`; that part is harmless
+and matches what the mod's other hostiles already do.)
+
+Twelve files, **32×32 each**, in `src/main/resources/mobs/icons/`. Same format
+as the 26 the mod already ships there — a head-and-shoulders read of the mob at
+bestiary size, on transparent background.
+
+| realm | file |
+|---|---|
+| Eden | `bloommaw.png` · `edenserpent.png` · `forbiddenserpent.png` · `goldenhornet.png` · `jealousvine.png` |
+| Ghost Realm | `coffincrawler.png` · `drifter.png` · `headlessbutler.png` · `lanternwidow.png` · `mourningbride.png` · `soulhound.png` |
+| Ghost Realm | `possessedchair.png` — registered and on no spawn table; it appears only in the Ectomarsh guard pack |
+
+Each of these mobs subclasses a vanilla mob and wears the parent's world sprite,
+so the icon is the only art any of them needs. `docs/AREA_OVERVIEW.md` tracks
+this as an open hole and `tools/area_census.py` prints it on every run.
+
 ## A note on the two unresolved Ghost IDs
 
 `HauntedManorPreset.java` asks `ObjectRegistry.getObjectID("deadwoodwall")`

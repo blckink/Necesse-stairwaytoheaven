@@ -16,6 +16,14 @@ Counted from the registries, not from memory: **73 objects · 46 items · 15 til
 26 mobs · 7 biomes · 5 journal quests · 2 dimensions · 92 recipes**, every ID named
 in English and German.
 
+> **This section describes v0.6.0 and `master` has moved past it** — the six
+> realms are now depth bands of one level rather than two dimensions, and the
+> registries are larger. The counts that are kept current are in
+> [`docs/OVERVIEW.md`](docs/OVERVIEW.md) (what works) and
+> [`docs/AREA_OVERVIEW.md`](docs/AREA_OVERVIEW.md) (how full each realm is,
+> measured by `tools/area_census.py`). Those two are the status documents;
+> this one is the pitch.
+
 ### The Skyreach — four sky biomes
 
 A real third world layer (`+1`, above `surface`/`cave`/`deepcave`): persistent,
@@ -144,6 +152,24 @@ export NECESSE_GAME_DIR=/path/to/necesse-dedicated-server
 non-cheat): it reports generated tile/biome/object counts around the origin plus
 placement diagnostics — paste its output into bug reports.
 
+## Admin commands (testing)
+
+All ADMIN-level, all server-side.
+
+| command | what it does |
+|---|---|
+| `/swhreset` | reports this world's mod state — story stage, region keys, portal unlocks, resident claims, fog and chalk ledgers. **Changes nothing.** |
+| `/swhreset world` | retrofits content into ground an older build generated — boss portals, guard packs, residents, herds. Safe to run twice. |
+| `/swhreset quests confirm` | puts the whole chain back to before the first ascent, so an existing save can be played from A to Z again |
+| `/swhreset all confirm` | both, plus clears the one-per-world resident claims (read the warning first) |
+| `/skyreachstatus` · `/edenstatus` · `/veilstatus` · `/skysurfacestatus` | what generated, per region |
+| `/veilmark [player] [1/0]` | grants or revokes the Veil Mark, so the fog gate can be tested from both sides |
+
+**An existing save does not automatically get content added after its regions
+were generated** — `onRegionGenerated` fires once per region, ever. That is what
+`/swhreset world` is for. The whole picture, including which build added what,
+is [`docs/SAVE_COMPAT.md`](docs/SAVE_COMPAT.md).
+
 ## Troubleshooting
 
 **The sky (or the Veil) suddenly looks like a vanilla ocean — sharks, zombies,
@@ -200,6 +226,8 @@ whose `settings.gradle` shows the current `modVersion` — not in a
 | `scripts/` | `fetch_dedicated_server.sh`, the headless integration test, tile-sprite and map-render checks |
 | `AGENTS.md` | entry point for anyone (human or agent) changing this repository |
 | `docs/OVERVIEW.md` | what exists and works right now, read off the code |
+| `docs/AREA_OVERVIEW.md` | how full each realm is — cast, spawn density, NPCs, quests, POIs, boss; measured by `tools/area_census.py` |
+| `docs/SAVE_COMPAT.md` | what an existing save is missing, and the `/swhreset` command that repairs it |
 | `docs/WORLD_DESIGN.md` | the concept every other design doc answers to |
 | `docs/PLAN_ONE_PLANE.md` · `docs/ARCHITECTURE.md` | the one-plane law · how the mod hooks the engine |
 | `docs/PLAYER_JOURNEY.md` | the player's path A to Z, read out of the code |
@@ -233,6 +261,26 @@ Inseln über einem begehbaren Nebelmeer.
 
 Stand **v0.6.0**, aus den Registries gezählt: 73 Objekte, 46 Items, 15 Tiles,
 26 Mobs, 7 Biome, 5 Quests, 2 Dimensionen, 92 Rezepte.
+
+> **Dieser Abschnitt beschreibt v0.6.0; `master` ist weiter.** Die sechs Reiche
+> sind inzwischen Tiefenbänder EINER Ebene statt zweier Dimensionen, und die
+> Registries sind größer. Aktuell gehalten werden
+> [`docs/OVERVIEW.md`](docs/OVERVIEW.md) (was funktioniert) und
+> [`docs/AREA_OVERVIEW.md`](docs/AREA_OVERVIEW.md) (wie voll jedes Gebiet ist).
+
+**Bestehende Spielstände.** Der Mod bricht keinen alten Spielstand — aber er
+kann ihm auch nichts Neues geben: `onRegionGenerated` läuft genau einmal pro
+Region. Wer eine Welt vor dem 03.09.2026 erkundet hat, hat dort **keine
+Boss-Portale**, und Spielen allein erzeugt keines. Dafür gibt es
+`/swhreset` (ADMIN):
+
+- `/swhreset` — meldet nur, ändert nichts
+- `/swhreset world` — trägt fehlende Inhalte in bereits erzeugtes Gelände nach
+- `/swhreset quests confirm` — setzt die ganze Questkette auf Anfang zurück,
+  damit eine bestehende Welt von A bis Z durchgetestet werden kann
+
+Die vollständige Beschreibung steht in
+[`docs/SAVE_COMPAT.md`](docs/SAVE_COMPAT.md).
 
 - **Bauen:** Tungsten-Werkbank → 8 Wolframbarren + 15 Quarz → Treppe auf der Oberfläche
   platzieren und benutzen. Die Treppe ist ein **Portal**: egal wo sie steht, sie führt

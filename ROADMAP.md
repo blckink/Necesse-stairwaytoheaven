@@ -24,12 +24,33 @@ with different content than the plan below them. What shipped is now in
 Detail for each is in `CHANGELOG.md`. **Nothing in 0.6.0 has been played by a
 human yet** — see the verification states in `docs/IMPLEMENTATION_RULES.md` §14.
 
-## Next — a boss for the Outland portals
+## Done since this file was last rewritten
 
-The Beetle Outlands shipped (2026-08-31) with Seance Circles standing at fixed
-sites, and nothing behind them. `SeanceCircleObject` says so out loud in the
-sky. That is the smallest piece that turns the new region from scenery into a
-destination, and the **Storm Sovereign** below is the obvious candidate.
+- **The bosses landed** (2026-09-03, `docs/FOGKEY_AND_BOSSPORTALS.md`). Five
+  realms, one each, at summoning stones scattered through their own band and
+  woken by a key piece the Warden pays for and you stand in your settlement:
+  57 240 → 127 200 → 157 520 → 161 100 → 208 000 HP. This supersedes the
+  "a boss for the Outland portals" entry that stood here.
+- **The areas were measured** (2026-09-05). `docs/AREA_OVERVIEW.md` and
+  `tools/area_census.py`: cast, spawn density, NPCs, quests and POIs per realm,
+  read off the code. It found Eden's guard packs were dead code and Steinfeld
+  had no inhabitant; both are fixed.
+- **An existing save can be tested from A to Z** (2026-09-05). `/swhreset` and
+  `docs/SAVE_COMPAT.md`.
+
+## Next — the ambient life, and Hell
+
+Two holes the census can prove, in order of what they cost the player.
+
+**Only the Skyreach has critters or animals.** Four realms have no ambient life
+at all. Steinfeld's answer is already written and merely unbuilt —
+`WORLD_DESIGN` §A3.4: *"The ghosts here are mostly not enemies. Some simply
+stand. Some walk without purpose. One might walk the same path between two
+gravestones forever."*
+
+**Hell is a hole with four buildings in it.** The 0.80–1.00 band paints as
+Crooked, and the four Hell POI presets stand in Crooked ground. It is the only
+realm with no biome, no cast, no NPC, no quest and no boss rung.
 
 ## Then — Chapter 01: the Skyreach has one building
 

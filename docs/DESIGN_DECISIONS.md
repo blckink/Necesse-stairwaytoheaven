@@ -54,7 +54,22 @@ of a normal update.** A one-off manual deletion was accepted once, from a
 backup, during the v0.5 transition. That was an exception and is over.
 
 **Surface data is never touched by Skyreach migration.** Any migration code
-that could reset Surface state is a bug, not a trade-off.
+that could reset Surface state is a bug, not a trade-off. This binds
+`/swhreset` too: it reads and writes sky-side quest state, world flags and sky
+mobs, and never a surface level, an inventory, a settlement or a player's items
+(`commands/SwhResetCommand`, `docs/SAVE_COMPAT.md`). It is also why that
+command's "residents still standing" report says out loud that it only scanned
+the sky — a settler who moved into a town lives on the surface, and the command
+does not look there.
+
+**Progression records only ever move forwards — with exactly one exception,
+and it is admin-only.** `unlockBossPortals`, `markRegionKeyEarned`,
+`markEleanorPassedOn` and `wardenRecruited` never un-record, which is what stops
+a mined-up key piece re-locking a realm. `SkywatchWorldData.resetProgress` is
+the one method that undoes them, nothing in play calls it, and it is reachable
+only from `/swhreset quests confirm` (ADMIN, and the word `confirm` is
+required). Keeping the exception in one named place is what lets the rule stay
+absolute everywhere else.
 
 ## The Warden
 

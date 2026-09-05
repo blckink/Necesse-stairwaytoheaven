@@ -3169,3 +3169,92 @@ when the file is read (Translation.java:181). From there:
 and resolves them client-side, so joined lines still reach each player in their
 own language — `AbstractBeeHiveObjectEntity` builds its inspect text this way
 (AbstractBeeHiveObjectEntity.java:590-611).
+
+## `onRegionGenerated` fires once per region, ever — which is why old saves miss content
+
+**[jar]** `RegionManager.loadNewRegion` (RegionManager.java:229-270) calls
+`this.level.onRegionGenerated(region, forceSkipGenerate)` **only** inside
+`if (regionGenerated)`, and `regionGenerated` is set only when
+`filesManager.loadRegion(region)` returned false — i.e. the region was not
+already on disk. A region that exists is loaded and never generated again.
+
+Everything this mod scatters — guard packs, boss portals, residents, livestock
+herds — is placed from `SkyLevel.onRegionGenerated`. **So a save keeps whatever
+the build that generated each region knew about, forever.** Boss portals shipped
+2026-09-03; a world walked before that has none anywhere it has been, and no
+amount of playing produces one.
+
+**[run]** The repair is `SkyLevel.retrofitArea` (`/swhreset world`,
+`docs/SAVE_COMPAT.md`): every lattice in that class is a pure function of the
+world seed and the tile, so walking a region again computes the sites the
+original generation would have. Measured on the integration test's own world:
+`regions=4225 mobs=+1 bossportals=+0` on the first pass, `mobs=+0
+bossportals=+0` on a second pass over the identical box.
+
+**Region size is 16x16 tiles** (`RegionManager.REGION_SIZE_BITS = 4`,
+`REGION_SIZE = 16`), so a 1024x1024 box is 4 225 regions and takes a few
+seconds — which is why a retrofit has to be bounded rather than offered over a
+whole world.
+
+**`ensureTilesAreLoadedButDontGenerate` is not the safe alternative it looks
+like.** It reaches `loadNewRegion` with `forceSkipGenerate = true`, which calls
+`onGenerateRegionSkipped` and then **still** calls `onRegionGenerated`. Over
+ground that has never existed that creates blank regions, writes them to disk,
+and invites placement code to fill an empty region.
+
+## A deterministic placement with a fallback search is not idempotent for free
+
+**[run]** `SkyLevel.placePortalAt` places a boss portal at its hashed site, or —
+when that tile is blocked — on the first free tile in a deterministic walk of up
+to sixteen candidates within ±3. Each candidate is tested with "is this tile
+empty".
+
+That per-tile test cannot make the call idempotent, and the retrofit proved it:
+walking the same site a second time finds the *offset* tile occupied — by the
+portal it placed last time — treats it as any other blocked candidate, and
+places a **second portal** on the next free offset. Measured before the fix: a
+second `/swhreset world` over an identical box reported `bossportals=+1`.
+
+The fix is to ask about the SITE, not the tile: `hasPortalNear` scans the whole
+±3 search box before the loop. The same shape applies to `placePackAt` (ask
+whether the site already has a persistent hostile — pack members wander, so an
+exact-tile test would fail) and `placeHerd` (ask whether the region already has
+one of that species).
+
+This is reachable without any retrofit: `generateForced` re-runs generation on
+an existing region.
+
+## `MobRegistry.registerMob(id, class, boolean)` — the boolean is `countKillStat`, and it is also `createSpawnItem`
+
+**[jar]** `MobRegistry.java:824-826`:
+
+```java
+public static int registerMob(String stringID, Class<? extends Mob> mobClass, boolean countKillStat) {
+    return registerMob(stringID, mobClass, countKillStat, false, countKillStat);
+}
+```
+
+The third argument of the five-argument form is `createSpawnItem`, so the short
+overload ties the two together: `true` gives the mob a bestiary row AND
+registers a `<id>spawnitem` in the ItemRegistry (`onRegister`,
+`MobRegistry.java:714-719`). To get kill statistics without a spawn item, call
+`registerMob(id, class, true, false, false)`.
+
+**And every registered mob loads an icon regardless of the flag.**
+`MobRegistry.loadMobIcons` (`:950-953`) walks *all* elements and each one's
+`loadIcon()` is `GameTexture.fromFile("mobs/icons/" + stringID)` (`:985-987`).
+So turning `countKillStat` on for a mob with no `mobs/icons/<id>.png` adds a
+bestiary row drawn with the engine's ERR texture. The icon is the real cost of
+that flag, not the flag.
+
+## `EntityList` has `count()`, not `size()`, and region-scoped lookups
+
+**[jar]** `EntityList<T>` (`necesse/entity/manager/EntityList.java`) implements
+`Iterable<T>` and exposes `count()`, `countCache()`, `stream()`,
+`streamAreaTileRange(x, y, tileRange)`, `getInRegionByTileRange(tileX, tileY,
+tileRange)` and friends. There is no `size()`.
+
+`getInRegionByTileRange` returns everything in the REGIONS covering that tile
+range — a superset of the disc — so a distance test still has to follow it. Use
+it rather than walking `entityManager.mobs` whenever the question is local: a
+retrofit asks it once per lattice site and a large box has thousands.

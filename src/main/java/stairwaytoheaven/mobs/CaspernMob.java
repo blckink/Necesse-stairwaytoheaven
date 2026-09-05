@@ -83,6 +83,52 @@ public class CaspernMob extends SkySettlerMob {
                 .setPriceBasedOnHappiness(45, 29, 8);
     }
 
+    /**
+     * His own chain — {@link stairwaytoheaven.quest.CaspernForgeQuest} — run
+     * before vanilla's dialogue window opens. Same shape and same reasoning as
+     * {@code MortimerMob.interact}: idempotent, and not gated on
+     * {@code !isSettler()}, so recruiting him early never strands the reward.
+     */
+    @Override
+    public void interact(necesse.entity.mobs.PlayerMob player) {
+        if (this.isServer() && player.isServerClient()) {
+            necesse.level.maps.Level level = this.getLevel();
+            necesse.engine.network.server.Server server =
+                    level == null ? null : level.getServer();
+            advanceForge(server, player.getServerClient());
+        }
+        super.interact(player);
+    }
+
+    private void advanceForge(necesse.engine.network.server.Server server,
+            necesse.engine.network.server.ServerClient client) {
+        stairwaytoheaven.quest.SkyQuests.Step step =
+                stairwaytoheaven.quest.SkyQuests.advanceResidentChain(server, client,
+                        stairwaytoheaven.quest.SkywatchWorldData.CHAIN_CASPERN_FORGE,
+                        new stairwaytoheaven.quest.CaspernForgeQuest());
+        if (step == stairwaytoheaven.quest.SkyQuests.Step.ASKED) {
+            this.bubble("caspernasksforge");
+        } else if (step == stairwaytoheaven.quest.SkyQuests.Step.PAID) {
+            // Six bars, matching Mortimer's exactly: the two are the same rung
+            // of the same realm and neither should be the obviously better one.
+            giveReward(client, "spiritsteelbar", 6, "caspern");
+            this.bubble("caspernforgedone");
+        }
+    }
+
+    /** The price, waived once the forge burns again. See {@code MortimerMob}. */
+    @Override
+    public java.util.List<necesse.inventory.InventoryItem> getRecruitItems(
+            necesse.engine.network.server.ServerClient client) {
+        necesse.level.maps.Level level = this.getLevel();
+        necesse.engine.network.server.Server server = level == null ? null : level.getServer();
+        if (server != null && stairwaytoheaven.quest.SkywatchWorldData.residentChainDone(
+                server, stairwaytoheaven.quest.SkywatchWorldData.CHAIN_CASPERN_FORGE)) {
+            return java.util.Collections.emptyList();
+        }
+        return super.getRecruitItems(client);
+    }
+
     @Override protected int lookSeed() { return 0xCA5DE1; }
     @Override protected HumanGender gender() { return HumanGender.MALE; }
     @Override protected Color shirtColor() { return new Color(48, 52, 66); }

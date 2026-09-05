@@ -103,6 +103,8 @@ deliberately not used by any of this.
 | Ghost Guide | `snowhood` (32x32), `snowcloak` (32x32), `clothboots` (30x32) (worn items) | the summoned guide's pale hooded silhouette — deliberately Eleanor's own three, so the Ghost Realm's two dead read as the same kind of person. No icon row: he is never a settler, so no settlement screen ever asks for a face |
 | Mr. Knott | `mobs/icons/exoticmerchanthuman` (icon) | his settlement-screen face — a merchant who deals in stranger things |
 | Mr. Knott | `jesterhat`, `labcoat`, `jesterboots` (worn items) | the Doorman's jester hat and lab coat — a showman testing whether a door leads anywhere |
+| Ives | `mobs/icons/elderhuman` (icon) | his settlement-screen face — vanilla registers `elderhuman` as a mob, so `mobs/icons/elderhuman` is one of its own icons; an old man who keeps a churchyard is the closest face vanilla's roster draws |
+| Ives | `leatherhood`, `clothrobe`, `clothboots` (worn items) | the Verger's hood and plain robe — the only wardrobe in the mod's cast that reads as somebody who works outdoors in fog rather than as a merchant |
 
 Note that the icon only shows where no mob is available:
 `Settler.getSettlerFaceDrawOptions` draws the settler's own human face from the

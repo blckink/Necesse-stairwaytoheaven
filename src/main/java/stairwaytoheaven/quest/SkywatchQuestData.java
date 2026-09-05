@@ -263,6 +263,54 @@ public class SkywatchQuestData extends LevelData {
         this.returnStairs.clear();
     }
 
+    /**
+     * Puts the sky-side story back to before the first ascent, on purpose.
+     *
+     * <p>This is {@link #migrateLegacySave}'s deliberate half. That one runs
+     * itself, once, when a v1 save is opened; this one is invoked by
+     * {@code /swhreset quests} so an EXISTING world can play the chain again
+     * from the top — see {@code docs/SAVE_COMPAT.md} for the whole picture and
+     * for what a reset cannot undo.
+     *
+     * <h2>What it deliberately keeps</h2>
+     * <ul>
+     * <li><b>The spire's geometry</b> — {@code spirePlaced} and every
+     *     coordinate. The tower is BUILT GROUND, and the player may have
+     *     furnished it; re-stamping the preset over their work is a different
+     *     and much ruder operation than restarting a quest. The Warden is put
+     *     back by {@code SkyLevel.restoreSpireWarden} instead, which places a
+     *     mob and touches no tile.</li>
+     * <li><b>{@code returnStairs}</b> — a player's way home from the Skywatch
+     *     Gate. Clearing it would strand anyone standing in the sky when the
+     *     command runs, which is not progression, it is a trap.</li>
+     * <li><b>{@code basketPlaced}</b> — the cat basket is furniture with no
+     *     recipe. {@code healCatBasket}'s own comment says why re-placing it is
+     *     a farm rather than a repair, and a reset must not become that farm.
+     *     The basket stays standing and the cats simply have to be coaxed to it
+     *     again.</li>
+     * </ul>
+     *
+     * <p>{@code catsSpawned} IS cleared, so {@code serverTick} spawns a fresh
+     * pair at their lairs — coaxing a cat home is the objective, and the cats
+     * have to be back out there for it to exist.
+     */
+    public void resetProgress() {
+        this.stage = 0;
+        this.recruited = false;
+        this.recruitedAuth = 0L;
+        this.catsSpawned = false;
+        this.blackHome = false;
+        this.tabbyHome = false;
+        this.catsIntroShown = false;
+        this.catsRewardGiven = false;
+        this.anchorIntroShown = false;
+        this.anchorDone = false;
+        this.finaleShown = false;
+        this.spireMarkerAuths.clear();
+        this.stairsMarkerAuths.clear();
+        this.catMarkerAuths.clear();
+    }
+
     /** Remembers which surface stairway tile this player ascended from. */
     public void setReturnStairway(long clientAuth, int tileX, int tileY) {
         this.returnStairs.put(clientAuth, new long[]{tileX, tileY});
