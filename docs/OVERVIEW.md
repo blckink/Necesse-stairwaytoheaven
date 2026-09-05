@@ -109,19 +109,21 @@ and Orchard Ring cells still remain pressure/terrain sites rather than presets.
 | **Magpie** | Skyreach, beside a mod workstation | 12 000 | buys sky salvage above broker | — |
 | **Halda**, Cellarer | Skyreach, same | 9 000 | the mod's 3 crafted materials | — |
 | **Ossian Vane** | Skyreach, same | 18 000 | rotating incursion-exclusive loot (3 of 8) | — |
+| **Ives**, Verger of the Quiet Reach | **Steinfeld**, beside a broken angel | 11 000 → **free** after his quest | the realm's four materials (buys), gravestones/candles/urn/stone fence + Pale Stone (sells) | `swh_steinfeldvigil` |
 | **Spire Cats** ×2 | Skyreach lairs | not recruitable | — | objective of `swh_cats` |
 
 **Arrivals.** Eveleen, Mortimer and Caspern also travel to the settlement the
 vanilla way once a condition is met (9+ Eden tiles / 3+ gravestones / an Aether
-Forge). Eleanor, Knott, Magpie, Halda and Ossian never travel — they must be
-found.
+Forge). Eleanor, Knott, Magpie, Halda, Ossian and Ives never travel — they must
+be found. Ives has no arrival gate because Steinfeld offers no settlement
+condition one could key off, the same call Eleanor and Knott make.
 
 **No generic settlers.** Every human this mod adds is a unique, named,
 one-per-world individual. There is no "a farmhand arrives" event of its own.
 
 ---
 
-## 4. Quests — 10 registered, 9 live
+## 4. Quests — 18 registered, 17 live
 
 | id | giver | do | reward |
 |---|---|---|---|
@@ -134,6 +136,10 @@ one-per-world individual. There is no "a farmhand arrives" event of its own.
 | `swh_eleanor` | Eleanor | PASS ON with 12× veil essence, or recruit | PASS ON: will-o'-wisp lantern + 14× spiritsteel bar (she is deleted **permanently**) · STAY: 14× spiritsteel bar |
 | `swh_crookedarrival` | Crooked Door | find Knott | signpost only |
 | `swh_crookeddoor` | Knott | 5× reality shard, 8× warp resin, 8× strange fabric | Zephyr Harness, 12× stormsteel bar, 6× reality shard |
+| `swh_keyskyreach` … `swh_keycrookedbeyond` | Warden, after the Call is DONE | two materials only that realm drops, one realm at a time in boss-ladder order | that realm's key piece + 6 / 8 / 10 Stormsteel, then 10 / 12 Spiritsteel. Standing the piece in a settlement wakes that realm's boss portals |
+| `swh_steinfeldvigil` | **Ives** | 14× grave salt, 10× spirit moss | his 11 000 fee waived, 10× stormsteel bar |
+| `swh_mortimerrites` | **Mortimer** | 12× soul thread, 10× bonewood | his 8 000 fee waived, 6× spiritsteel bar |
+| `swh_caspernforge` | **Caspern** | 12× spectral ore, 8× veil essence | his 14 000 fee waived, 6× spiritsteel bar |
 | `swh_beacon` | **nobody** | — | — · **DEAD**: registered, never handed out; kept only so pre-0.5 saves deserialize |
 
 ---
@@ -311,12 +317,13 @@ What DOES still follow: `nimbusmilk`, `aurorafleece`, `skycurd`, `cloudcustard`,
 
 1. **Hell is not built** (§17–23). The 0.80–1.00 band paints as Crooked. One
    `case` in `SkyTerrainPainter.java:1071` to delete once a painter exists.
-2. **Eden gets no guard packs.** `SkyLevel.placeGuardPacks` has branches for
-   Skyreach, Steinfeld, Ghost and Crooked and **none for Eden**, so
-   `EdenGardenBiome.getGuard()`, `EdenCanopyBiome.getGuard()` and
-   `EdenShallowsBiome.getGuard()` — bloommaw, forbidden serpent, jealous vine,
-   golden hornet — are dead code. Eden is the only realm whose guarded ground
-   has no guards.
+2. ~~**Eden gets no guard packs.**~~ **FIXED 2026-09-05.** `placeGuardPacks`
+   had branches for four realms and none for Eden, so `EdenGardenBiome`,
+   `EdenCanopyBiome` and `EdenShallowsBiome`'s `getGuard()` were dead code —
+   while `EdenPressure` had already been written with the discs for them. Three
+   `placePacksOf` calls on Eden's own grove / lagoon / orchard lattices closed
+   it: 0 → 11.4 guarded sites per 1000x1000 (`docs/AREA_OVERVIEW.md`). An
+   existing save needs `/swhreset world` to see them.
 3. **The original 13 POIs remain thinly furnished.** The new inhabited
    catalogue is dense, but the older shells listed in §2 are unchanged.
 4. **The Warden's-house travel anchors are unplaced** (§A2.3). Four gate objects
@@ -327,16 +334,21 @@ What DOES still follow: `nimbusmilk`, `aurorafleece`, `skycurd`, `cloudcustard`,
    other five residents key off naturally-painted landmarks and are fine.
 6. **`distortion` is threaded to every band painter and read by none.** §3's
    calm/mad variants do not exist yet.
-7. **5 of 9 named settlers have no dialogue** beyond shop and recruit: Mortimer,
-   Caspern, Magpie, Halda, Ossian have no `interact()` override.
+7. **3 of 10 named settlers have no `interact()` of their own**: Magpie, Halda
+   and Ossian. Mortimer and Caspern gained one on 2026-09-05 along with
+   `swh_mortimerrites` and `swh_caspernforge`. (All ten do have talk lines --
+   `talkKey()` is on the base class -- so "no dialogue" was always too strong;
+   what they lacked was anything to DO.)
 8. **`swh_beacon` is a registered dead quest**, kept only for old-save
    deserialization.
-9. **Two realms' materials have no consumer.** Crooked's six (`oddwood`,
+9. **Two realms' materials have no RECIPE.** Crooked's six (`oddwood`,
     `warpresin`, `strangefabric`, `eyeseed`, `stripedshell`, `realityshard`) and
     Steinfeld's four (`palestone`, `gravesalt`, `spiritmoss`, `echoshard`) are
-    droppable and sellable, and no recipe anywhere names any of them — neither
-    realm even defines a `registerRecipes()`. Steinfeld's own class doc claims
-    a séance quest consumes two of them; no quest file mentions either.
+    named by no recipe anywhere — neither realm even defines a
+    `registerRecipes()`. All four Steinfeld materials now have quest or shop
+    DEMAND (`swh_steinfeldvigil` takes grave salt and spirit moss,
+    `swh_keysteinfeld` takes echo shard and pale stone, Ives buys all four),
+    which is not the same thing as being craftable with.
 10. **Five items have no source at all.** `skyanchor` is registered unbreakable
     and placed by nothing. `skywatchhood`, `wardenmantle` and `wardenboots` are
     obtainable-flagged armour with no recipe, shop or gift — they exist only as

@@ -21,6 +21,14 @@ modifying anything in this repository.
 4. **`docs/OVERVIEW.md` — what actually WORKS right now.** One page, read off
    the code: every realm band, biome, POI, item, NPC, quest and settler job,
    with a state per row. Start here before claiming anything works.
+4b. **`docs/AREA_OVERVIEW.md` — how FULL each realm is.** The other half of the
+   same question: cast, spawn density, NPCs, quests and POIs per realm, measured
+   by `tools/area_census.py` rather than remembered. Read it before deciding
+   what a realm needs. `docs/SAVE_COMPAT.md` is its companion: what an existing
+   save is missing, and the `/swhreset` command that repairs it.
+   `docs/MOD_SUMMARY.md` is the same material written FOR THE PLAYER, in German:
+   every NPC with their full shop inventory, every quest with its ask and reward,
+   every boss, and the sprite ledger. Keep it in step when content lands.
 5. **`docs/PLAN_ONE_PLANE.md` — the architecture law.** One level, realms as
    depth bands, the anti-rush gate, the travel rules. A change that adds a
    dimension breaks it.
@@ -125,6 +133,7 @@ python3 tools/sheet_format_audit.py   # sheets the engine reads at fixed offsets
 python3 tools/rotation_variety_audit.py # a cell the engine reads apart holds its own art
 python3 tools/template_audit.py       # sprite templates match the cards that spec them
 python3 tools/content_ledger.py --check # nothing registered ships undescribed
+python3 tools/area_census.py          # per-realm density/cast/quest census; reading tool, not a gate
 python3 tools/tile_behaviour_audit.py # every tile is what it is presented as
 python3 tools/wall_render_preview.py  # walls: compose scenes, then LOOK at build/qa/
 python3 tools/rotation_preview.py     # rotations: every cell where it lands, then LOOK

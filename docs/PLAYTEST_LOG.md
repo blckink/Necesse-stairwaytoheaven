@@ -7,6 +7,29 @@ Status values: **KEEP** · **OPEN** · **FIXED** · **REDESIGN** · **FEATURE**
 
 ---
 
+## 2026-09-05 — "Übersicht pro Gebiet", and testing an existing save
+
+Not a play session — a request, in the player's own words:
+
+> *"erstelle einfache Übersicht pro Gebiet unseres mods. checke Dichte, Anzahl
+> Bosse, Mobs Tiere etc und baue erstmal die Quests npcs und bosse etc aus für
+> längeren Spielspaß. jeweils passend zum biom. und bitte setze Mod wieder
+> zurück soweit wie möglich für existierende Spielstände. wollen alles von A-Z
+> testen."*
+
+| Area | Observation | Status |
+|---|---|---|
+| No per-area overview existed | Nobody could answer "how many mobs does Steinfeld have, and how densely do they spawn" without reading twenty files, so every answer in the docs was a guess that went stale | **FIXED** — `tools/area_census.py` reads it off the source; `docs/AREA_OVERVIEW.md` is the page |
+| Steinfeld is empty | The census put a number on what `WORLD_DESIGN` Part B had already recorded: a band 2280 tiles deep, four hostiles, no critters, **no NPC**, one quest | **FIXED — NOT YET PLAYER CONFIRMED** — Ives, the Verger of the Quiet Reach, plus `swh_steinfeldvigil` |
+| Eden is the quietest realm and was never meant to be | Its three biomes all define guard packs and `SkyLevel.placeGuardPacks` never called any of them: **0 guarded sites** against 20–31 in every other realm | **FIXED — NOT YET PLAYER CONFIRMED** — three `placePacksOf` calls; 0 → 11.4 sites per 1000×1000 |
+| Two of the Ghost band's NPCs had nothing to do | Mortimer and Caspern: a shop, a greeting line, no quest | **FIXED — NOT YET PLAYER CONFIRMED** — `swh_mortimerrites` and `swh_caspernforge`, each waiving that person's recruit fee |
+| "setze Mod wieder zurück ... für existierende Spielstände" | Two separate problems: the chain is one-way and cannot be replayed, and `onRegionGenerated` fires once per region so an old save has **no boss portals anywhere it has been** | **FIXED — NOT YET PLAYER CONFIRMED** — `/swhreset` (`status` / `world` / `quests confirm` / `all confirm`), documented in `docs/SAVE_COMPAT.md`, covered by three integration-test passes and a third server phase |
+| Bosses | Five realms already had one — `cryoqueen`, `moonlightdancer`, `ascendedwizard`, `pestwarden`, `crystaldragon`, 57 240 → 208 000 HP — reached through the region keys and the summoning stones. Nothing was missing except a way for an **existing** save to see the portals | KEEP — the ladder is `docs/FOGKEY_AND_BOSSPORTALS.md` §B4; Hell has no rung because Hell is not built |
+| Twelve hostiles never enter the bestiary | Eden's five and Ghost's seven register `countKillStat = false`; the blocker is twelve 32×32 icons, not the flag | OPEN — written up in `docs/ASSET_REQUESTS.md` with the exact reason |
+| Four realms have no ambient life | Only the Skyreach has critters or animals. `WORLD_DESIGN` §A3.4 already describes Steinfeld's fix — ghosts that are not enemies, that stand, or walk the same path between two gravestones forever — and it is simply unbuilt | OPEN |
+
+---
+
 ## 2026-08-24 — v0.5.0 · first extended play of the new build
 
 Played in a real long-running Windows save. This is the first session with

@@ -163,6 +163,37 @@ public abstract class SkySettlerMob extends HumanShop {
                         this.getUniqueID(), message), this);
     }
 
+    /**
+     * Hands a quest reward over; anything that does not fit drops at the
+     * player's feet.
+     *
+     * <p>{@code EveleenMob} and {@code EleanorMob} each carry a private,
+     * character-for-character identical copy of this, written before there was
+     * a third caller. There are five now, so it lives here — a reward that is
+     * silently swallowed by a full inventory is the kind of bug that only shows
+     * up as "the quest paid me nothing", and it should be impossible to
+     * reintroduce by copying the method badly. The two originals are left alone
+     * deliberately: they work, and rewriting working reward code to save eight
+     * lines is a change with no upside and a real downside.
+     *
+     * @param source the inventory-event source string vanilla logs the transfer
+     *               under; use the giver's own name
+     */
+    protected final void giveReward(ServerClient client, String itemStringID, int amount,
+            String source) {
+        if (client == null || client.playerMob == null) {
+            return;
+        }
+        necesse.entity.mobs.PlayerMob player = client.playerMob;
+        necesse.level.maps.Level level = player.getLevel();
+        InventoryItem item = new InventoryItem(itemStringID, amount);
+        boolean added = player.getInv().main.addItem(level, player, item, source, null);
+        if (!added && item.getAmount() > 0) {
+            level.entityManager.pickups.add(new necesse.entity.pickup.ItemPickupEntity(
+                    level, item, player.x, player.y, 0.0F, 0.0F));
+        }
+    }
+
     /** A fixed face, so the same person is the same person in every world. */
     protected abstract int lookSeed();
 

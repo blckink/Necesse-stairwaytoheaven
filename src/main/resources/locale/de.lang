@@ -522,6 +522,8 @@ caspernsettlername=Caspern <name>, Geisterschmied
 eleanorsettlername=Eleanor <name>, die noch immer hier ist
 knottsettler=Mr. Knott
 knottsettlername=Mr. Knott <name>, der Türsteher
+ivessettler=Ives
+ivessettlername=Ives <name>, Küster der Stillen Weite
 
 [misc]
 // --- Herkunft jedes Siedlers (Hinweis im Siedlungsfenster) ---
@@ -533,6 +535,24 @@ mortimersettlertip=Im Nachgarten zu finden, bei einem Grabstein. Er kommt außer
 caspernsettlertip=Im Nachgarten zu finden, bei einem Grabstein. Er kommt außerdem in eine Siedlung, die eine Ätherschmiede gebaut hat. Arbeitet in Handwerk und Transport - und nichts im Freien.
 eleanorsettlertip=Im Nachgarten zu finden, bei einem Grabstein. Sie kommt nie zu dir - du entscheidest, ob sie bleibt. Arbeitet in der Tierhaltung.
 knottsettlertip=Im Jenseits der Krümmung zu finden, auf dem Türhof. Er kommt nicht von selbst in eine Siedlung. Arbeitet im Handel, und nichts im Freien.
+ivessettlertip=In Steinfeld zu finden, bei einem zerbrochenen Engel. Er kommt nicht von selbst in eine Siedlung. Arbeitet in Handwerk und Transport - und kauft alles, was die Stille Weite hergibt.
+
+// --- Ives, der Küster ---
+ivestalkpitch=Hier draußen landen die Dinge. Am Ende auch die Leute. Irgendwer muss aufschreiben, was sie einmal waren, und offenbar bin das ich.
+ivestalk1=Hier wird nichts begraben. Hier wird nur abgelegt. Das ist ein Unterschied, und er stört mich.
+ivestalk2=Einer von ihnen geht jeden Abend dieselben elf Schritte. Ich habe mitgezählt. Unterbrochen habe ich ihn nicht.
+ivestalk3=Das Gold wird dunkel hier draußen. Alles, worauf der Himmel stolz war, wird hier draußen dunkel.
+ivestalk4=Ich führe eine Liste. Eine Seite davon habe ich noch nie zu Ende gebracht.
+ivesasksvigil=Bring mir Grabsalz und Geistermoos, dann lege ich sie ordentlich nieder. Vierzehn und zehn. Sie haben lange genug gewartet.
+ivesvigildone=So. Jetzt können sie aufhören zu laufen. Nimm die Barren - der Wärter schuldete sie mir, und ich wollte sie nie.
+
+// --- Mortimers letzte Ehre ---
+mortimerasksrites=Zwölf da draußen habe ich nicht erreichen können. Bring mir Seelenfaden für die Leichentücher und Knochenholz für die Kisten, dann hole ich sie.
+mortimerritesdone=Erledigt, und ordentlich erledigt. Behalt dein Geld. Nimm stattdessen die Barren - und nimm mich.
+
+// --- Casperns Schmiede ---
+caspernasksforge=Mein Feuer ist ausgegangen, und ich bekomme es nicht wieder an. Spektralerz, um es zu nähren, Schleieressenz, um es zu löschen. Danach reden wir darüber, was du geschmiedet haben willst.
+caspernforgedone=Hör dir das an. Das ist der Klang, von dem ich dir erzählt habe. Nimm die hier, und bezahl mich nie wieder.
 
 // --- Eveleen ---
 eveleentalkpitch=Ich bin den weiten Weg heraufgekommen, auf der Suche nach einem Garten, der angeblich noch wächst. Gefunden habe ich ihn nicht. Aber du hast Boden, und ich habe Samen, die dir hier oben sonst niemand verkauft.
@@ -598,6 +618,24 @@ swhcrookedarrivaltitle=Eine Tür, die irgendwohin führt
 swhcrookedarrivaldesc=Türen stehen hier reihenweise, verschlossen vor dem Nichts. Jemand glaubt noch, dass eine von ihnen funktioniert.
 swhcrookedarrivalobj=Finde, wer den Türhof noch hütet - halte Ausschau nach einer roten Tür, die für sich allein steht.
 swhspeaktoknott=Sprich mit Mr. Knott.
+swhsteinfeldvigiltitle=Die Totenwache
+swhsteinfeldvigildesc=Ives hält die Stille Weite in Ordnung, und die Stille Weite bleibt nicht in Ordnung. Die, die hier draußen umhergehen, spuken niemandem - sie wurden nur nie niedergelegt. Er weiß, was dafür nötig ist, und hat von beidem nichts mehr.
+swhsteinfeldvigilreward=Ives zieht kostenlos in deine Siedlung + 10x Sturmstahlbarren
+swhspeaktoives=Sprich mit Ives.
+
+// --- Mortimer, der Nachgarten ---
+swhmortimerritestitle=Die letzte Ehre
+swhmortimerritesdesc=Mortimer kann jedes Grab im Nachgarten benennen und fast keines erreichen. Ein Leichentuch ist Faden, ein Sarg ist Holz, und ihm fehlt beides.
+swhmortimerritesreward=Mortimer zieht kostenlos in deine Siedlung + 6x Geiststahlbarren
+swhspeaktomortimer=Sprich mit Mortimer.
+
+// --- Caspern, der Nachgarten ---
+swhcaspernforgetitle=Die kalte Schmiede
+swhcaspernforgedesc=Das Feuer des Geisterschmieds ist ausgegangen. Spektralerz nährt es, Schleieressenz löscht es - und Letztere fällt nur dort, wo der Nebel am dichtesten steht.
+swhcaspernforgereward=Caspern zieht kostenlos in deine Siedlung + 6x Geiststahlbarren
+swhspeaktocaspern=Sprich mit Caspern.
+
+// --- Mr. Knott, die Krümmungs-Kette (Fortsetzung) ---
 swhcrookeddoortitle=Überzeug die Tür
 swhcrookeddoordesc=Mr. Knott glaubt schon länger als jeder andere, dass sich eine dieser Türen überzeugen lässt, irgendwohin zu führen. Bring ihm, was eine solche Tür brauchen würde.
 swhcrookeddoorreward=Zephyr-Gurtzeug + 12x Sturmstahlbarren + 6x Realitätssplitter

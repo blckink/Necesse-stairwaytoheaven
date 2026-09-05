@@ -521,6 +521,8 @@ caspernsettlername=Caspern <name>, Spirit Smith
 eleanorsettlername=Eleanor <name>, who is still here
 knottsettler=Mr. Knott
 knottsettlername=Mr. Knott <name>, the Doorman
+ivessettler=Ives
+ivessettlername=Ives <name>, Verger of the Quiet Reach
 
 [misc]
 // --- where each settler comes from (settlement screen "acquire" tip) ---
@@ -532,6 +534,24 @@ mortimersettlertip=Found in the Aftergarden, beside a gravestone. He also travel
 caspernsettlertip=Found in the Aftergarden, beside a gravestone. He also travels to a settlement that has built an Aether Forge. Works Crafting and Hauling, and nothing outdoors.
 eleanorsettlertip=Found in the Aftergarden, beside a gravestone. She never comes to you - you decide whether she stays. Works Husbandry.
 knottsettlertip=Found in Crooked Beyond, at the Door Yard. He does not travel to a settlement on his own. Works Trading, and nothing outdoors.
+ivessettlertip=Found in Steinfeld, beside a broken angel. He does not travel to a settlement on his own. Works Crafting and Hauling, and buys everything the Quiet Reach gives up.
+
+// --- Ives, the Verger ---
+ivestalkpitch=Things end up out here. People too, in the end. Somebody has to write down what they were, and I appear to be somebody.
+ivestalk1=Nothing is buried here. It is only put down. There is a difference, and I mind it.
+ivestalk2=One of them walks the same eleven steps every evening. I have counted. I have not interrupted.
+ivestalk3=The gold goes dark out here. Everything the sky was proud of goes dark out here.
+ivestalk4=I keep a list. I have never finished a page of it.
+ivesasksvigil=Bring me grave salt and spirit moss and I will lay them properly. Fourteen and ten. They have waited long enough.
+ivesvigildone=There. They can stop walking now. Take the bars - the Warden owed me and I never wanted them.
+
+// --- Mortimer's rites ---
+mortimerasksrites=There are twelve out there I have not been able to reach. Bring me soul thread for the shrouds and bonewood for the boxes, and I will go get them.
+mortimerritesdone=Done, and done properly. Keep your money. Keep the bars instead, and keep me.
+
+// --- Caspern's forge ---
+caspernasksforge=My fire went out and I have not been able to relight it. Spectral ore to feed it, veil essence to quench it. Then we can talk about what you want made.
+caspernforgedone=Listen to that. That is the sound I told you about. Take these, and do not pay me anything again.
 
 // --- Eveleen ---
 eveleentalkpitch=I came up the long way, looking for a garden somebody told me was still growing. I have not found it. But you have soil, and I have seeds nobody else up here will sell you.
@@ -597,6 +617,24 @@ swhcrookedarrivaltitle=A Door That Goes Somewhere
 swhcrookedarrivaldesc=Doors stand in rows here, closed on nothing. Someone still believes one of them works.
 swhcrookedarrivalobj=Find whoever keeps the Door Yard - look for a red door that stands alone.
 swhspeaktoknott=Speak with Mr. Knott.
+swhsteinfeldvigiltitle=The Vigil
+swhsteinfeldvigildesc=Ives keeps the Quiet Reach, and the Quiet Reach does not stay kept. The ones who walk out here are not haunting anybody - they were simply never laid down. He knows what it takes and has run out of both.
+swhsteinfeldvigilreward=Ives joins your settlement for free + 10x Stormsteel Bar
+swhspeaktoives=Speak with Ives.
+
+// --- Mortimer, the Aftergarden ---
+swhmortimerritestitle=The Last Rites
+swhmortimerritesdesc=Mortimer can name every grave in the Aftergarden and reach almost none of them. A shroud is thread and a coffin is wood, and he is short of both.
+swhmortimerritesreward=Mortimer joins your settlement for free + 6x Spiritsteel Bar
+swhspeaktomortimer=Speak with Mortimer.
+
+// --- Caspern, the Aftergarden ---
+swhcaspernforgetitle=The Cold Forge
+swhcaspernforgedesc=The Spirit Smith's fire has gone out. Spectral ore feeds it and veil essence quenches it, and the second only drops where the fog is thickest.
+swhcaspernforgereward=Caspern joins your settlement for free + 6x Spiritsteel Bar
+swhspeaktocaspern=Speak with Caspern.
+
+// --- Mr. Knott, the Crooked chain (continued) ---
 swhcrookeddoortitle=Convince the Door
 swhcrookeddoordesc=Mr. Knott has spent longer than anyone believing one of these doors can be convinced to lead somewhere. Bring him what a door like that would need.
 swhcrookeddoorreward=Zephyr Harness + 12x Stormsteel Bar + 6x Reality Shard

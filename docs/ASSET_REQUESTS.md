@@ -346,6 +346,48 @@ ours.)*
 
 ---
 
+## Bestiary icons — SOLVED 2026-09-05, and what is left is two rows
+
+**This used to be a request for twelve 32x32 icons. It is not one any more.**
+
+Nineteen of the mod's creatures deliberately carry no art of their own: each
+either subclasses a vanilla mob and inherits its whole draw, or blits a vanilla
+sheet (`EdenRealm.loadTextures`, `CrookedRealm.loadTextures`). The bestiary did
+not know that — `MobRegistry.loadMobIcons` calls
+`GameTexture.fromFile("mobs/icons/" + stringID)` for **every** registered mob and
+falls back to `GameResources.error`, so **six of them were already shipping an
+ERR tile in the journal**: Steinfeld's four plus the door mimic and the tongue
+plant, all registered `countKillStat = true`.
+
+The fix was not a PNG. **VERIFIED [jar]:** `Mob.getMobIcon()` (Mob.java:1760) is
+plainly overridable, and the journal asks the MOB rather than the registry
+(`FormJournalEntryComponent.java:240`). All nineteen now return the icon of the
+creature whose body they wear — see `mobs/BorrowedMobIcon`.
+
+**Drawing twelve icons would have been the wrong fix even if it were free.** A
+Drifter that walks around as a Deep Cave Spirit and shows a hand-drawn
+something-else in the journal is two different creatures to the player. When
+these mobs get their own bodies, they get their own faces in the same pass and
+every override disappears with them.
+
+### What is still owed: two, and only when someone with a client looks
+
+| mob | body it wears | why it is still off |
+|---|---|---|
+| `edenserpent` | `crocodile` | vanilla registers the crocodile `countKillStat = false`, so it is not in vanilla's own bestiary and there may be no icon to borrow |
+| `forbiddenserpent` | `petdragonwhelp` | same — a pet, not a bestiary entry |
+
+Every other parent (`stabbybush`, `dryadsentinel`, `honeybee`,
+`deepcavespirit`, `bonewalker`, `phantom`, `forestspector`, `mimic`, `jackal`,
+`desertcrawler`, `ancientarmoredskeleton`, `crystalgolem`, `crazedraven`,
+`scorpion`) IS a vanilla bestiary mob, so its icon provably exists.
+
+**This cannot be checked from here.** A dedicated server renders nothing and
+ships zero PNGs. The check is one look at the journal on a client: if those two
+show a picture, flip them to `true` in `EdenRealm.registerMobs` — one word each.
+If they show ERR, they are the only two icons this mod actually owes, at
+32x32 each.
+
 ## A note on the two unresolved Ghost IDs
 
 `HauntedManorPreset.java` asks `ObjectRegistry.getObjectID("deadwoodwall")`

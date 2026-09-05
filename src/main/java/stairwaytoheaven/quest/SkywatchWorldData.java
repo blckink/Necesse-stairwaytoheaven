@@ -187,6 +187,39 @@ public class SkywatchWorldData extends WorldData {
      */
     public final java.util.HashSet<String> regionKeysEarned = new java.util.HashSet<>();
 
+    /**
+     * Which of the realms' own resident side-chains have been turned in.
+     *
+     * <p>{@link #edenPlantsGiven} and {@link #crookedDoorwayOpened} are the
+     * same fact for Eveleen and Mr. Knott, written as two named booleans
+     * because they were the only two. They are not the only two any more —
+     * Ives keeps the Quiet Reach, Mortimer buries the Aftergarden's dead and
+     * Caspern relights his forge — and four more booleans of identical shape
+     * would be four more save fields, four more load lines and four more
+     * static helper pairs to keep in step.
+     *
+     * <p>So the new ones are a set of KEYS, exactly the way
+     * {@link #bossPortalsUnlocked} and {@link #regionKeysEarned} are and for
+     * the same stated reason: a save written before a chain existed still
+     * loads, and a set of names cannot be silently shifted by a renumbering.
+     * The two originals stay as they are — rewriting a field that is already
+     * on disk in every existing save to gain consistency would be a migration
+     * for no player-visible benefit.
+     *
+     * <p>Each entry means "this world has paid this chain's reward once".
+     * World-scoped rather than per player, like every other payout record
+     * here: the reward includes waiving a settler's recruit fee, and a
+     * settler is a building's worth of shared property, not a personal item.
+     */
+    public final java.util.HashSet<String> residentChainsDone = new java.util.HashSet<>();
+
+    /** {@link #residentChainsDone} key — Ives, the Verger of the Quiet Reach. */
+    public static final String CHAIN_STEINFELD_VIGIL = "steinfeldvigil";
+    /** {@link #residentChainsDone} key — Mortimer's unburied dead. */
+    public static final String CHAIN_MORTIMER_RITES = "mortimerrites";
+    /** {@link #residentChainsDone} key — Caspern's cold forge. */
+    public static final String CHAIN_CASPERN_FORGE = "caspernforge";
+
     public boolean catHomeSet = false;
     public int catHomeX = 0;
     public int catHomeY = 0;
@@ -208,6 +241,8 @@ public class SkywatchWorldData extends WorldData {
                 this.bossPortalsUnlocked.toArray(new String[0]));
         save.addStringArray("regionKeysEarned",
                 this.regionKeysEarned.toArray(new String[0]));
+        save.addStringArray("residentChainsDone",
+                this.residentChainsDone.toArray(new String[0]));
         save.addBoolean("catHomeSet", this.catHomeSet);
         save.addInt("catHomeX", this.catHomeX);
         save.addInt("catHomeY", this.catHomeY);
@@ -240,6 +275,12 @@ public class SkywatchWorldData extends WorldData {
         for (String earned : save.getStringArray("regionKeysEarned", new String[0], false)) {
             if (earned != null && !earned.isEmpty()) {
                 this.regionKeysEarned.add(earned);
+            }
+        }
+        this.residentChainsDone.clear();
+        for (String done : save.getStringArray("residentChainsDone", new String[0], false)) {
+            if (done != null && !done.isEmpty()) {
+                this.residentChainsDone.add(done);
             }
         }
         this.catHomeSet = save.getBoolean("catHomeSet", this.catHomeSet, false);
@@ -495,6 +536,82 @@ public class SkywatchWorldData extends WorldData {
         SkywatchWorldData data = get(server);
         if (data != null) {
             data.regionKeysEarned.add(RealmDepth.keyOf(realm));
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // The realms' resident side-chains
+    // ------------------------------------------------------------------
+
+    /**
+     * Has this world already paid this resident chain's reward?
+     *
+     * <p>Answers TRUE when the record cannot be read at all, the same way round
+     * as {@link #regionKeyEarned} and for the same reason: the safe failure for
+     * a REWARD is "already paid". A world whose record is missing must not be
+     * able to farm a settler for an unlimited supply of bars.
+     */
+    public static boolean residentChainDone(Server server, String chainKey) {
+        SkywatchWorldData data = get(server);
+        return data == null || data.residentChainsDone.contains(chainKey);
+    }
+
+    /** Records that a resident chain has been turned in and paid. Idempotent. */
+    public static void markResidentChainDone(Server server, String chainKey) {
+        SkywatchWorldData data = get(server);
+        if (data != null) {
+            data.residentChainsDone.add(chainKey);
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Resetting, for a world that wants to play the chain again
+    // ------------------------------------------------------------------
+
+    /**
+     * Un-records everything this class records, so an existing save can be
+     * tested from the beginning.
+     *
+     * <p>Every other write on this class is deliberately one-way — the doc on
+     * {@link #unlockBossPortals(int)} says progression only ever goes forwards,
+     * and that rule is what keeps a mined-up key piece from re-locking a realm.
+     * This method is the ONE exception, and it exists so the rule can stay
+     * absolute everywhere else: nothing in play calls it. It is reachable only
+     * from {@code /swhreset quests}, which is ADMIN and asks for the word
+     * {@code confirm} first ({@code commands/SwhResetCommand}).
+     *
+     * <h2>What it cannot do, and why the command says so out loud</h2>
+     * These are FLAGS. Clearing {@link #wardenRecruited} does not evict the
+     * Warden from a settlement, clearing {@link #residentsClaimed} does not
+     * delete a Magpie who already lives somewhere, and clearing
+     * {@link #bossPortalsUnlocked} does not un-build a key piece standing in a
+     * base. A world reset with residents still in it can therefore end up with
+     * two Magpies — which is exactly what {@code residentsClaimed} exists to
+     * prevent — so {@link #residentsClaimed} is cleared only when the caller
+     * asks for it, and the command's report names every person still standing.
+     *
+     * @param clearResidentClaims whether to also forget which named residents
+     *     this world has produced. The duplicate risk above is real; pass
+     *     {@code true} only when the residents have been removed or the world
+     *     is a throwaway test.
+     */
+    public void resetProgress(boolean clearResidentClaims) {
+        this.wardenRecruited = false;
+        this.wardenAuth = 0L;
+        this.blackHome = false;
+        this.tabbyHome = false;
+        this.eleanorPassedOn = false;
+        this.edenPlantsGiven = false;
+        this.crookedDoorwayOpened = false;
+        this.bossPortalsUnlocked.clear();
+        this.regionKeysEarned.clear();
+        this.residentChainsDone.clear();
+        this.catHomeSet = false;
+        this.catHomeX = 0;
+        this.catHomeY = 0;
+        this.catHomeLevel = "";
+        if (clearResidentClaims) {
+            this.residentsClaimed.clear();
         }
     }
 }

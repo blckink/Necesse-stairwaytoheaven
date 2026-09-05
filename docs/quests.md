@@ -94,6 +94,66 @@ which ending happens lives in `EleanorMob` itself, not in the quest class.
 1900), so "at or above" the Skyreach finale's 10 Stormsteel Bar means *more*
 of the mod's own harder bar, not merely matching the count of an easier one.
 
+## Steinfeld — Ives, the Verger
+
+**`swh_steinfeldvigil`, "The Vigil".** Steinfeld's first quest that is not a
+region key, and its first NPC — see `docs/AREA_OVERVIEW.md` for the measurement
+that made the case, and `WORLD_DESIGN` Part B for the hole it had already
+recorded ("Steinfeld has no NPC, no boss and no station"). Handed out by
+`IvesMob.interact` on the first conversation and turned in on any later one.
+
+**The ask:** 14x `gravesalt`, 10x `spiritmoss`. Both Steinfeld-only, per the
+rule `SkyreachKeyQuest` states — and both chosen because they were **the two
+materials in the realm nothing consumed**. `swh_keysteinfeld` already takes Echo
+Shard and Pale Stone; no recipe anywhere named Grave Salt or Spirit Moss.
+
+**Reward:** his 11 000 recruit fee waived + 10x Stormsteel Bar. The same shape
+and the same bar count as `swh_edenplants`, because the two are the same beat
+one band apart: a person found in a realm who joins for free once you have
+proved you can work their ground.
+
+**Where the character comes from.** §A3.4, not invention: *"Hier landen Dinge,
+die nicht mehr richtig zum Himmel gehören"*, and the ghosts out here who
+*"simply stand"* or *"walk without purpose"*. A verger keeps a churchyard. He is
+the one person out here who has decided that is somebody's job.
+
+## The Ghost Realm — Mortimer and Caspern
+
+Both had a shop, a greeting line and nothing to do. `docs/OVERVIEW.md` §8.7 had
+listed it for months and `docs/AREA_OVERVIEW.md` put a number on it: four named
+people in the band and two live quests, one of them a region key.
+
+**`swh_mortimerrites`, "The Last Rites".** 12x `soulthread` + 10x `bonewood` —
+a shroud is thread and a coffin is wood, and the Undertaker is the only person
+in the mod who would think of them in that order. Reward: his 8 000 fee waived
++ 6x Spiritsteel Bar. Soul Thread had **no consumer at all** before this.
+
+**`swh_caspernforge`, "The Cold Forge".** 12x `spectralore` + 8x `veilessence`
+— the ore feeds his fire, the essence quenches it. Reward: his 14 000 fee
+waived + 6x Spiritsteel Bar. This is the first thing in the mod that sends a
+player into the **Gloomfen and the Ashen Reach** on purpose: Veil Essence only
+drops there, and those two ex-Veil biomes had no quest reason to enter at all.
+Veil Essence also had three buyers and no consumer, which made it money rather
+than a material.
+
+**Six, not ten.** `swh_keyghostrealm` pays ten Spiritsteel, and these sit below
+it for the reason `SkyreachKeyQuest` gives about its own curve: the key's real
+payout is the tier-9 boss it unlocks, and a side chain matching it would make
+the key look like the smaller errand. The two match each other bar for bar
+because they are the same rung of the same realm; what separates them is the
+fee, and Caspern's is nearly twice Mortimer's.
+
+**Bonewood and Spectral Ore are asked for twice** — here and by
+`swh_keyghostrealm` — and that is deliberate. A realm whose materials have
+exactly one buyer each is a realm you farm once.
+
+**One shared state machine.** All three of these, plus Eveleen's and Knott's,
+run `SkyQuests.advanceResidentChain`: ask once, take once, pay once, guarded by
+`SkywatchWorldData.residentChainsDone`. Deliberately NOT gated on
+`!isSettler()` — that gate is the bug `EveleenMob.interact` documents at
+length, and it would make a chain unfinishable for anyone who recruited the
+giver at full price on the first meeting.
+
 ## The Crooked chain — Mr. Knott
 
 **Step 1 — `swh_crookedarrival`, "A Door That Goes Somewhere".** Pure
@@ -267,9 +327,14 @@ edge case at all, it *is* one of her two intended endings.
 
 ## Deferred
 
-- No dedicated quest chain for Mortimer or Caspern — §11 gives them only an
-  arrival condition (a graveyard, an Aether Forge), not a delivery quest, and
-  this pass did not invent one.
+- ~~No dedicated quest chain for Mortimer or Caspern.~~ **Built 2026-09-05**,
+  above. §11 gives them only an arrival condition and no delivery quest; the
+  case for inventing one is `docs/AREA_OVERVIEW.md`'s measurement, not §11.
 - The Architect and the Hell chain (§16-§25) are a separate, later pass.
+- Steinfeld has no ARRIVAL quest to match `swh_edenreach` and
+  `swh_crookedarrival`. Both of those are handed out by a gate OBJECT the player
+  uses, and Steinfeld has no gate — building one is a whole content family
+  (object + item + recipe + art), so Ives hands out his own quest when found,
+  the same way Eleanor does.
 - The Reality Stitcher recipe that `swh_crookeddoor`'s materials are a down
   payment on is not built yet.

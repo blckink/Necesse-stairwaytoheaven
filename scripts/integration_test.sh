@@ -218,6 +218,37 @@ for _ in $(seq 1 90); do
     sleep 2
 done
 
+# The save-compatibility path, part 1 (docs/SAVE_COMPAT.md). Only the
+# NON-destructive halves run here, because everything after this point in phase
+# 1 and all of phase 2 asserts on progression that a reset would legitimately
+# wipe -- the cats above most of all. The reset itself runs at the very end of
+# phase 2, and phase 3 checks it survived the write.
+#
+#   1. `status` -- the bare command must REPORT and change nothing. A
+#      destructive command whose zero-argument form is destructive is exactly
+#      what this assertion exists to catch.
+#   2. `world` TWICE -- the retrofit generates any ground in its box that has
+#      never generated, so the FIRST run legitimately places things (this world
+#      is 128 tiles old and the box is 1024). The second run walks the identical
+#      box with everything now current and must place NOTHING. That is the
+#      idempotence assertion, and it is what breaks if placePackAt, placeHerd or
+#      placePortalAt ever stops refusing a site it has already filled.
+echo "Running swhreset (status: must change nothing)..."
+echo "swhreset" >&3
+wait_for "SWH_RESET_DONE" 120
+echo "Running swhreset world (first pass: generates and fills the box)..."
+echo "swhreset world" >&3
+for _ in $(seq 1 180); do
+    [ "$(grep -c SWH_RESET_DONE "$LOG")" -ge 2 ] && break
+    sleep 2
+done
+echo "Running swhreset world again (second pass: must place nothing)..."
+echo "swhreset world" >&3
+for _ in $(seq 1 180); do
+    [ "$(grep -c SWH_RESET_DONE "$LOG")" -ge 3 ] && break
+    sleep 2
+done
+
 stop_server
 LOG1="$WORK_DIR/server.log"
 
@@ -247,8 +278,26 @@ wait_for "SKYREACH_STATUS_DONE" 180
 echo "Finishing the restored Skyfall..."
 echo "skysurfacestatus event" >&3
 wait_for "SKYSURFACE_STATUS_DONE" 240
+# The save-compatibility path, part 2: the DESTRUCTIVE half, run last on purpose.
+# Every assertion above depends on progression this wipes -- both cats are home
+# by now and the reset legitimately sends them back to their lairs -- so it has
+# to come after all of it. Phase 3 then reloads the world and checks the reset
+# is still there, which is the only way to tell a reset from a reset that was
+# never written to disk.
+echo "Running swhreset quests confirm (put the chain back to the start)..."
+echo "swhreset quests confirm" >&3
+wait_for "SWH_RESET_DONE" 120
 stop_server
 LOG2="$WORK_DIR/server2.log"
+
+# --- Phase 3: same world again, to prove the reset was written ----------------
+echo "Restarting server on the same world (reset-persistence pass)..."
+start_server "$WORK_DIR/server3.log"
+# A bare status is a pure read, so it cannot repair what it is checking.
+echo "swhreset" >&3
+wait_for "SWH_RESET_DONE" 120
+stop_server
+LOG3="$WORK_DIR/server3.log"
 
 # --- verification -------------------------------------------------------------
 echo "--- verifying log ---"
@@ -291,6 +340,44 @@ grep -qE "biome (gloomfen|ashenreach)" "$LOG1" || { echo "FAIL: Veil biomes did 
 # the fen has quietly eaten the realm it was moved into.
 grep -qE "biome (aftergarden|boneorchard|ectomarsh)" "$LOG1" \
     || { echo "FAIL: the Ghost Realm's own biomes did not paint in its band"; STATUS=1; }
+
+echo "--- verifying save compatibility: /swhreset ---"
+# 1. The bare command REPORTS. If this line is missing the default mode is not
+#    status any more, and the zero-argument form has become destructive.
+grep -qF "swhreset: reporting only. Nothing was changed." "$LOG1" \
+    || { echo "FAIL: bare /swhreset did not run in report-only mode"; STATUS=1; }
+# 2. The retrofit ran twice over the identical box, and the SECOND run placed
+#    nothing. That is the idempotence assertion: placePackAt, placeHerd and
+#    placePortalAt must each refuse a site they have already filled, or a second
+#    walk over a region doubles every pack in it. The first run is allowed to
+#    place things -- it also generates ground in the box that never existed.
+[ "$(grep -c "swhreset world: repairing" "$LOG1")" -ge 2 ] \
+    || { echo "FAIL: /swhreset world did not run twice"; STATUS=1; }
+grep -qE "regions=[0-9]+ mobs=\+0 bossportals=\+0" "$LOG1" \
+    || grep -qF "nothing was missing here" "$LOG1" \
+    || { echo "FAIL: a second /swhreset world over the same box still placed something - a placement is not idempotent"; STATUS=1; }
+# 3. The reset ran at the end of phase 2, and said what it did about the Warden.
+grep -qF "swhreset quests: the chain is back at the start." "$LOG2" \
+    || { echo "FAIL: /swhreset quests confirm did not reset the chain"; STATUS=1; }
+grep -qE "spire Warden (put back at [0-9-]+,[0-9-]+|not replaced)" "$LOG2" \
+    || { echo "FAIL: /swhreset quests said nothing about the spire Warden"; STATUS=1; }
+# 4. ...and it survived the world write. Phase 3 is a fresh server on the same
+#    world, and its bare status must read stage 0, no keys and no cats home. A
+#    reset that only lives in memory is worse than no reset at all: the operator
+#    believes the world was put back and it was not.
+grep -qE "story  stage=0 recruited=false cats=00" "$LOG3" \
+    || { echo "FAIL: the quest reset did not survive the save/load round trip"; STATUS=1; }
+grep -qE "keys   earned=\[\] portalsUnlocked=\[\]" "$LOG3" \
+    || { echo "FAIL: the region-key/portal unlock records survived a reset they should not have"; STATUS=1; }
+
+echo "--- verifying Steinfeld has an inhabitant and the resident chains exist ---"
+# Ives is a one-per-world find beside a broken angel, so a 64-tile probe around
+# the ORIGIN will not see him -- the Skyreach is 1920 tiles short of his band.
+# What the live registry CAN prove is that the mob and the settler type both
+# registered, which is the failure SkySettlers.assertWired is built to turn into
+# a boot crash: if either had drifted the server would not be up to answer.
+grep -qE "Loaded mods:.*Stairway to Heaven|Stairway to Heaven" "$LOG1" \
+    || { echo "FAIL: the mod did not load (SkySettlers.assertWired would crash the boot on a settler drift)"; STATUS=1; }
 
 echo "--- verifying the harvest-tool audit ---"
 # Every custom deco/prop object must report the tool type and HP decided in

@@ -254,6 +254,15 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
         if (this.isClient()) {
             return;
         }
+        // A herd belongs to a region, so a region that already has one is done.
+        // onRegionGenerated fires once and this used to be enough; retrofitArea
+        // can now walk a region a second time, and a second walk must not stand
+        // up a second herd on top of the first. Cheap, and it also closes the
+        // older path: generateForced re-runs generation on an existing region.
+        if (this.hasPersistentMobIn(mobID, region.tileXOffset - 8, region.tileYOffset - 8,
+                region.tileXOffset + region.tileWidth + 8, region.tileYOffset + region.tileHeight + 8)) {
+            return;
+        }
         // Seed mixes the world seed with the region coordinates, so a flock
         // belongs to a place rather than to the order regions happen to load.
         long flockSeed = (this.getWorldGenSeed() * 0x9E3779B97F4A7C15L)
@@ -319,6 +328,40 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
                 SkyTerrainPainter.WORKSHOP_CELL, SkyTerrainPainter.SALT_WORKSHOP,
                 SkyTerrainPainter.WORKSHOP_CHANCE, 0x85EBCA77L,
                 stairwaytoheaven.worldgen.SkyPressure.GUARD_RADIUS);
+
+        // Eden's three POI lattices: the Knowledge Grove, the Lagoon Shrine and
+        // the Orchard Ring.
+        //
+        // These were MISSING until 2026-09-05, and the consequence was not
+        // subtle: EdenGardenBiome.getGuard(), EdenCanopyBiome.getGuard() and
+        // EdenShallowsBiome.getGuard() were all dead code, so the bloommaw, the
+        // forbidden serpent, the jealous vine and the golden hornet had no
+        // guarded ground anywhere in the realm. EdenPressure had ALREADY been
+        // written for them -- its GUARD_TICKETS/APPROACH_TICKETS discs sit at
+        // exactly these three lattices (EdenPressure.java:96-104) -- so Eden was
+        // the only realm whose pressure field marked ground as dangerous that
+        // nothing was ever placed on. Every other realm's three lines were
+        // carried over when its level was folded into this one and Eden's
+        // simply were not; docs/AREA_OVERVIEW.md measured it.
+        //
+        // The lattices are the pressure field's own, constant for constant, so
+        // a pack lands where EdenPressure already says a fight belongs.
+        float eden = stairwaytoheaven.realms.eden.EdenPressure.GUARD_RADIUS;
+        placePacksOf(region, RealmDepth.REALM_EDEN,
+                stairwaytoheaven.realms.eden.EdenTerrainPainter.GROVE_CELL,
+                stairwaytoheaven.realms.eden.EdenTerrainPainter.SALT_GROVE,
+                stairwaytoheaven.realms.eden.EdenTerrainPainter.GROVE_CHANCE,
+                0x9E3779B1L, eden);
+        placePacksOf(region, RealmDepth.REALM_EDEN,
+                stairwaytoheaven.realms.eden.EdenTerrainPainter.LAGOON_CELL,
+                stairwaytoheaven.realms.eden.EdenTerrainPainter.SALT_LAGOON,
+                stairwaytoheaven.realms.eden.EdenTerrainPainter.LAGOON_CHANCE,
+                0x85EBCA77L, eden);
+        placePacksOf(region, RealmDepth.REALM_EDEN,
+                stairwaytoheaven.realms.eden.EdenTerrainPainter.ORCHARD_CELL,
+                stairwaytoheaven.realms.eden.EdenTerrainPainter.SALT_ORCHARD,
+                stairwaytoheaven.realms.eden.EdenTerrainPainter.ORCHARD_CHANCE,
+                0xC2B2AE3DL, eden);
 
         // Steinfeld: one organic POI lattice plus the two hand-authored
         // landmarks. Moved here verbatim from SteinfeldLevel.placeGuardPacks.
@@ -466,6 +509,22 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
                 ^ ((long) siteX * 0x27D4EB2FL)
                 ^ ((long) siteY * 0x165667B1L)
                 ^ ((long) realm * 0x9E3779B1L);
+        // A site that already carries its portal does not get a second one.
+        //
+        // The per-tile "is this tile empty" check below is NOT enough, and the
+        // retrofit is what proved it: the search is a deterministic walk of up
+        // to sixteen candidates within +-3 of the site, so when the site tile
+        // itself is blocked the portal lands on an OFFSET tile. Walking the
+        // same site again then finds that offset tile occupied -- by the portal
+        // -- treats it like any other blocked candidate, and places a second
+        // portal on the next free offset. Measured: a second /swhreset world
+        // over an identical box reported bossportals=+1.
+        //
+        // The same trap is reachable without any retrofit: generateForced
+        // re-runs generation on an existing region.
+        if (this.hasPortalNear(siteX, siteY)) {
+            return;
+        }
         GameRandom random = new GameRandom(portalSeed);
         for (int attempt = 0; attempt < 16; attempt++) {
             int tileX = attempt == 0 ? siteX : siteX + random.getIntBetween(-3, 3);
@@ -508,6 +567,14 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
         switch (this.realmOfRegion(region)) {
             case RealmDepth.REALM_EDEN:
                 this.placeEveleen(region);
+                break;
+            case RealmDepth.REALM_STEINFELD:
+                // Ives, beside a broken angel. Steinfeld had NO resident of any
+                // kind until 2026-09-05 -- docs/AREA_OVERVIEW.md measured it and
+                // WORLD_DESIGN Part B had already recorded it ("Steinfeld has no
+                // NPC, no boss and no station"). Rules in
+                // settlement.SteinfeldResidents, same shape as the Ghost trio's.
+                stairwaytoheaven.settlement.SteinfeldResidents.place(this, region, seed);
                 break;
             case RealmDepth.REALM_GHOST:
                 // Mortimer, Caspern and Eleanor, beside a gravestone. All the
@@ -667,6 +734,15 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
         stairwaytoheaven.biomes.GuardedBiome.Guard guard =
                 ((stairwaytoheaven.biomes.GuardedBiome) biome).getGuard();
         if (guard == null) {
+            return;
+        }
+        // A site that is already guarded is not guarded twice. The members
+        // wander after they are placed, so this asks about the SITE rather than
+        // about the exact tiles below: any persistent hostile within the ground
+        // the pressure field calls this site's own means the pack is standing.
+        // Needed because retrofitArea walks regions that generated long ago,
+        // and because generateForced re-runs generation on an existing region.
+        if (this.hasPersistentHostileNear(siteX, siteY, radius + 4.0F)) {
             return;
         }
         long packSeed = (this.getWorldGenSeed() * 0x9E3779B97F4A7C15L)
@@ -891,6 +967,253 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
         }
         // Fallback: beside the spire, so the quest is never soft-locked
         return new Point(quest.spireX + (stormveil ? -3 : 3), quest.spireY + 3);
+    }
+
+    // ---- Retrofitting ground that generated before the content existed ----
+
+    /**
+     * What one {@link #retrofitArea} call put into the world.
+     *
+     * <p>Counted by looking at the world before and after rather than by
+     * threading a counter through six placement methods: the placements are the
+     * mod's oldest and most carefully seeded code and none of them should grow
+     * a return value for a debug command's sake.
+     */
+    public static final class RetrofitReport {
+        public int regionsWalked;
+        public int mobsAdded;
+        public int portalsAdded;
+
+        @Override
+        public String toString() {
+            return "regions=" + this.regionsWalked
+                    + " mobs=+" + this.mobsAdded
+                    + " bossportals=+" + this.portalsAdded;
+        }
+    }
+
+    /**
+     * Re-runs the additive placements over ground that is already generated.
+     *
+     * <h2>The problem this solves</h2>
+     * {@link #onRegionGenerated} fires <b>once per region, ever</b>. Everything
+     * the mod scatters — guard packs, boss portals, residents, herds — is
+     * placed from there, so a region generated by an older build keeps whatever
+     * that build knew about and never learns anything new. A save that walked
+     * the Skyreach before 2026-09-03 has <b>no boss portals anywhere it has
+     * been</b>, and no amount of playing will produce one: the whole boss ladder
+     * is unreachable in exactly the part of the world the player has explored.
+     *
+     * <p>Every lattice in this class is a pure function of the world seed and
+     * the tile, which is what makes the repair possible at all: walking a region
+     * again computes the same sites the original generation would have, so the
+     * world ends up as if the content had always been there. That is why this is
+     * a retrofit and not a re-roll.
+     *
+     * <h2>Why it is safe to run twice</h2>
+     * Each placement refuses ground that already holds its own work —
+     * {@link #placePortalAt} will not overwrite an occupied tile,
+     * {@link #placePackAt} skips a site that already has a persistent hostile
+     * on it, {@link #placeHerd} skips a region that already has its herd, and
+     * both resident paths hold a one-per-world claim in
+     * {@code SkywatchWorldData}. Running it on fully-current ground places
+     * nothing and reports zeros.
+     *
+     * <h2>What it deliberately cannot do</h2>
+     * <b>It never re-paints ground that already exists.</b> Terrain, POI presets
+     * and the {@code WorldPreset} catalogue all write tiles, and tiles in
+     * explored territory may be a player's base by now. A building that was
+     * added after a region generated stays missing in that region, and the
+     * honest answer is to walk further out. Only mobs and the one-tile boss
+     * portals are retrofitted into ground that already exists.
+     *
+     * <h2>It DOES generate ground that never existed</h2>
+     * The region walk asks for each region with {@code loadIfNotLoaded = true},
+     * so a region inside the box that has never been generated is generated
+     * now. That is deliberate and it is not a second behaviour smuggled in:
+     * generation here is the same deterministic, seed-derived generation that
+     * walking there would trigger, so the box ends up uniformly current rather
+     * than half-repaired. The cost is real though — a 1024x1024 box is about
+     * 4 200 regions and takes seconds, and it writes them all to disk — which
+     * is why {@code SwhResetCommand} bounds the radius rather than offering to
+     * repair a whole world in one call.
+     *
+     * @param centreX centre of the box to repair, in tiles
+     * @param centreY centre of the box to repair, in tiles
+     * @param radiusTiles half-width of that box; the caller bounds this, not us
+     */
+    public RetrofitReport retrofitArea(int centreX, int centreY, int radiusTiles) {
+        RetrofitReport report = new RetrofitReport();
+        if (this.isClient()) {
+            return report;
+        }
+        int minX = centreX - radiusTiles;
+        int minY = centreY - radiusTiles;
+        int maxX = centreX + radiusTiles;
+        int maxY = centreY + radiusTiles;
+        this.regionManager.ensureTilesAreLoaded(minX, minY, maxX, maxY);
+
+        int mobsBefore = this.entityManager.mobs.count();
+        int portalsBefore = this.countBossPortals(minX, minY, maxX, maxY);
+
+        int regionBits = necesse.level.maps.regionSystem.RegionManager.REGION_SIZE_BITS;
+        for (int regionX = minX >> regionBits; regionX <= maxX >> regionBits; regionX++) {
+            for (int regionY = minY >> regionBits; regionY <= maxY >> regionBits; regionY++) {
+                Region region = this.regionManager.getRegion(regionX, regionY, true);
+                if (region == null) {
+                    continue;
+                }
+                report.regionsWalked++;
+                placeLivestockHerds(region);
+                placeResident(region);
+                placeRealmResidents(region);
+                placeGuardPacks(region);
+                placeBossPortals(region);
+            }
+        }
+
+        report.mobsAdded = this.entityManager.mobs.count() - mobsBefore;
+        report.portalsAdded = this.countBossPortals(minX, minY, maxX, maxY) - portalsBefore;
+        return report;
+    }
+
+    /** How many of any realm's boss portals stand in this box. */
+    private int countBossPortals(int minX, int minY, int maxX, int maxY) {
+        int count = 0;
+        for (int tileX = minX; tileX <= maxX; tileX++) {
+            for (int tileY = minY; tileY <= maxY; tileY++) {
+                if (!this.regionManager.isTileLoaded(tileX, tileY)) {
+                    continue;
+                }
+                int objectID = this.getObjectID(tileX, tileY);
+                if (objectID == 0) {
+                    continue;
+                }
+                for (int realm = 0; realm < RealmDepth.REALM_COUNT; realm++) {
+                    if (objectID == stairwaytoheaven.bosses.BossPortalObject.portalID(realm)) {
+                        count++;
+                        break;
+                    }
+                }
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Stands a Sky Warden back in the spire when the story says he should be
+     * there and nobody is.
+     *
+     * <p>{@code WardenSpirePreset} places him at stamp time and only at stamp
+     * time, and once he is recruited he is removed for good. So a world whose
+     * story flags were put back by {@code /swhreset quests} would have an empty
+     * tower and an unstartable chain — the reset would have made the mod less
+     * playable, not more. This is the one thing the reset needs that is not a
+     * flag, and it is deliberately a mob placement and not a re-stamp: the
+     * preset would overwrite whatever the player has built inside their spire.
+     *
+     * @return true when a Warden was actually added
+     */
+    public boolean restoreSpireWarden() {
+        if (this.isClient()) {
+            return false;
+        }
+        SkywatchQuestData quest = SkywatchQuestData.get(this);
+        if (!quest.spirePlaced || quest.recruited) {
+            return false;
+        }
+        this.regionManager.ensureTilesAreLoaded(quest.spireX - 2, quest.spireY - 2,
+                quest.spireX + 2, quest.spireY + 2);
+        for (Mob existing : this.entityManager.mobs) {
+            if ("skywarden".equals(existing.getStringID())) {
+                return false;
+            }
+        }
+        Mob warden = MobRegistry.getMob("skywarden", this);
+        if (warden == null) {
+            return false;
+        }
+        this.entityManager.addMob(warden, quest.spireX * 32 + 16, quest.spireY * 32 + 16);
+        return true;
+    }
+
+    /**
+     * Is a persistent hostile standing within {@code radius} tiles of here?
+     *
+     * <p>Asks {@code EntityList.getInRegionByTileRange} rather than walking
+     * every mob on the level: this runs once per lattice site, and a retrofit
+     * of a large box walks thousands of sites. The list it returns is a
+     * superset — whole regions, not a disc — so the distance test below still
+     * has to be done.
+     */
+    private boolean hasPersistentHostileNear(int tileX, int tileY, float radius) {
+        float limit = radius * 32.0F;
+        for (Mob mob : this.entityManager.mobs.getInRegionByTileRange(
+                tileX, tileY, (int) Math.ceil(radius))) {
+            if (mob.canDespawn || !mob.isHostile) {
+                continue;
+            }
+            float dx = mob.x - (tileX * 32 + 16);
+            float dy = mob.y - (tileY * 32 + 16);
+            if (dx * dx + dy * dy <= limit * limit) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Does any realm's boss portal already stand within reach of this site?
+     *
+     * <p>The radius is {@code placePortalAt}'s own search box, so "reach" means
+     * exactly the set of tiles that call could ever have put one on. Any
+     * realm's portal counts, not just this realm's: two realms' bands overlap
+     * by design, their lattices are salted apart, and two summoning stones
+     * three tiles apart would be scenery rather than a landmark.
+     *
+     * <p>Only loaded tiles are asked. An unloaded neighbour cannot hold a
+     * portal this call is about to duplicate, because the site's whole search
+     * box is inside the region being walked.
+     */
+    private boolean hasPortalNear(int siteX, int siteY) {
+        for (int dx = -3; dx <= 3; dx++) {
+            for (int dy = -3; dy <= 3; dy++) {
+                int tileX = siteX + dx;
+                int tileY = siteY + dy;
+                if (!this.isTileWithinBounds(tileX, tileY)
+                        || !this.regionManager.isTileLoaded(tileX, tileY)) {
+                    continue;
+                }
+                int objectID = this.getObjectID(tileX, tileY);
+                if (objectID == 0) {
+                    continue;
+                }
+                for (int realm = 0; realm < RealmDepth.REALM_COUNT; realm++) {
+                    if (objectID == stairwaytoheaven.bosses.BossPortalObject.portalID(realm)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /** Is a persistent mob of this species already standing in this box? */
+    private boolean hasPersistentMobIn(String mobID, int minX, int minY, int maxX, int maxY) {
+        int centreX = (minX + maxX) / 2;
+        int centreY = (minY + maxY) / 2;
+        int reach = Math.max(maxX - centreX, maxY - centreY);
+        for (Mob mob : this.entityManager.mobs.getInRegionByTileRange(centreX, centreY, reach)) {
+            if (mob.canDespawn || !mobID.equals(mob.getStringID())) {
+                continue;
+            }
+            int tileX = mob.getTileX();
+            int tileY = mob.getTileY();
+            if (tileX >= minX && tileX <= maxX && tileY >= minY && tileY <= maxY) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

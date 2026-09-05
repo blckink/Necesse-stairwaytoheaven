@@ -69,6 +69,7 @@ public final class SkySettlers {
     public static final String CASPERN = "caspernsettler";
     public static final String ELEANOR = "eleanorsettler";
     public static final String KNOTT = "knottsettler";
+    public static final String IVES = "ivessettler";
 
     /** The Skyreach's own three: placed beside a derelict workshop. */
     public static final String[] SKY_RESIDENTS = {MAGPIE, HALDA, OSSIAN};
@@ -79,6 +80,13 @@ public final class SkySettlers {
      * the level).
      */
     public static final String[] VEIL_RESIDENTS = {MORTIMER, CASPERN, ELEANOR};
+
+    /**
+     * Steinfeld's own — one person, and the realm's first. He is an array of
+     * one rather than a bare constant so {@code SteinfeldResidents} reads the
+     * same as {@code VeilResidents} and gains a second name without a rewrite.
+     */
+    public static final String[] STEINFELD_RESIDENTS = {IVES};
 
     /**
      * Every ID below is written as a LITERAL, in both registry calls, and never
@@ -99,6 +107,7 @@ public final class SkySettlers {
         MobRegistry.registerMob("caspernsettler", stairwaytoheaven.mobs.CaspernMob.class, false);
         MobRegistry.registerMob("eleanorsettler", stairwaytoheaven.mobs.EleanorMob.class, false);
         MobRegistry.registerMob("knottsettler", stairwaytoheaven.mobs.KnottMob.class, false);
+        MobRegistry.registerMob("ivessettler", stairwaytoheaven.mobs.IvesMob.class, false);
 
         // The three found in the Skyreach. No arrival ticket: see the class
         // note above.
@@ -143,6 +152,20 @@ public final class SkySettlers {
                 new SkyResident("knottsettler", () -> GameTexture.fromFile("mobs/icons/exoticmerchanthuman"),
                         "knottsettlertip", null, 0));
 
+        // Steinfeld's own, and the only person in that band. Found beside a
+        // broken angel and nowhere else: the realm has no settlement condition
+        // a visitor timer could key off — no Eden patch, no graveyard, no forge
+        // — and inventing one would be a gate with nothing behind it. Same call
+        // Eleanor and Knott make, for the same reason.
+        //
+        // The icon is vanilla's Elder face by literal path, the way Eveleen
+        // wears the Farmer's and Caspern the Blacksmith's: an old man who keeps
+        // a churchyard is the closest thing vanilla's roster draws. Row in
+        // docs/VANILLA_ASSET_MAP.md.
+        SettlerRegistry.registerSettler("ivessettler",
+                new SkyResident("ivessettler", () -> GameTexture.fromFile("mobs/icons/elderhuman"),
+                        "ivessettlertip", null, 0));
+
         assertWired();
     }
 
@@ -156,8 +179,8 @@ public final class SkySettlers {
      * {@code SettlerRegistry.onSettlerRegistryClosed} makes for settler types.
      */
     private static void assertWired() {
-        for (String[] group : new String[][]{SKY_RESIDENTS, VEIL_RESIDENTS,
-                {EVELEEN, MAGPIE, HALDA, OSSIAN, MORTIMER, CASPERN, ELEANOR, KNOTT}}) {
+        for (String[] group : new String[][]{SKY_RESIDENTS, VEIL_RESIDENTS, STEINFELD_RESIDENTS,
+                {EVELEEN, MAGPIE, HALDA, OSSIAN, MORTIMER, CASPERN, ELEANOR, KNOTT, IVES}}) {
             for (String id : group) {
                 if (MobRegistry.getMobID(id) < 0) {
                     throw new IllegalStateException(

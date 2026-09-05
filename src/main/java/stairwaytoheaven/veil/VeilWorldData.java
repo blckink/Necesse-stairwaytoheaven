@@ -250,6 +250,31 @@ public class VeilWorldData extends WorldData {
         return this.fogTouchedAuths.size();
     }
 
+    /**
+     * Forgets every Mark, every fog touch and every chalk gift, so the anti-rush
+     * gate and the chalk grant can both be played again in an existing world.
+     *
+     * <p>The chalk ledger is the reason this cannot simply be
+     * {@link #revokeMark(long)} in a loop: {@code SkyWardenMob.offerChalk}
+     * refuses a second piece to a character it has already paid, so a world
+     * whose story flags were reset but whose chalk ledger was not would send
+     * the player to a Séance Circle they can no longer draw. The three ledgers
+     * are one fact — "how far has this character got past the fog" — and they
+     * reset together or not at all.
+     *
+     * <p>Called only from {@code /swhreset quests}. Returns how many character
+     * records were dropped in total, so the command can report a number rather
+     * than a shrug.
+     */
+    public int resetProgress() {
+        int dropped = this.markAuths.size() + this.fogTouchedAuths.size()
+                + this.chalkGivenAuths.size();
+        this.markAuths.clear();
+        this.fogTouchedAuths.clear();
+        this.chalkGivenAuths.clear();
+        return dropped;
+    }
+
     // ------------------------------------------------------------------
     // the region check
     // ------------------------------------------------------------------

@@ -3169,3 +3169,131 @@ when the file is read (Translation.java:181). From there:
 and resolves them client-side, so joined lines still reach each player in their
 own language — `AbstractBeeHiveObjectEntity` builds its inspect text this way
 (AbstractBeeHiveObjectEntity.java:590-611).
+
+## `onRegionGenerated` fires once per region, ever — which is why old saves miss content
+
+**[jar]** `RegionManager.loadNewRegion` (RegionManager.java:229-270) calls
+`this.level.onRegionGenerated(region, forceSkipGenerate)` **only** inside
+`if (regionGenerated)`, and `regionGenerated` is set only when
+`filesManager.loadRegion(region)` returned false — i.e. the region was not
+already on disk. A region that exists is loaded and never generated again.
+
+Everything this mod scatters — guard packs, boss portals, residents, livestock
+herds — is placed from `SkyLevel.onRegionGenerated`. **So a save keeps whatever
+the build that generated each region knew about, forever.** Boss portals shipped
+2026-09-03; a world walked before that has none anywhere it has been, and no
+amount of playing produces one.
+
+**[run]** The repair is `SkyLevel.retrofitArea` (`/swhreset world`,
+`docs/SAVE_COMPAT.md`): every lattice in that class is a pure function of the
+world seed and the tile, so walking a region again computes the sites the
+original generation would have. Measured on the integration test's own world:
+`regions=4225 mobs=+1 bossportals=+0` on the first pass, `mobs=+0
+bossportals=+0` on a second pass over the identical box.
+
+**Region size is 16x16 tiles** (`RegionManager.REGION_SIZE_BITS = 4`,
+`REGION_SIZE = 16`), so a 1024x1024 box is 4 225 regions and takes a few
+seconds — which is why a retrofit has to be bounded rather than offered over a
+whole world.
+
+**`ensureTilesAreLoadedButDontGenerate` is not the safe alternative it looks
+like.** It reaches `loadNewRegion` with `forceSkipGenerate = true`, which calls
+`onGenerateRegionSkipped` and then **still** calls `onRegionGenerated`. Over
+ground that has never existed that creates blank regions, writes them to disk,
+and invites placement code to fill an empty region.
+
+## A deterministic placement with a fallback search is not idempotent for free
+
+**[run]** `SkyLevel.placePortalAt` places a boss portal at its hashed site, or —
+when that tile is blocked — on the first free tile in a deterministic walk of up
+to sixteen candidates within ±3. Each candidate is tested with "is this tile
+empty".
+
+That per-tile test cannot make the call idempotent, and the retrofit proved it:
+walking the same site a second time finds the *offset* tile occupied — by the
+portal it placed last time — treats it as any other blocked candidate, and
+places a **second portal** on the next free offset. Measured before the fix: a
+second `/swhreset world` over an identical box reported `bossportals=+1`.
+
+The fix is to ask about the SITE, not the tile: `hasPortalNear` scans the whole
+±3 search box before the loop. The same shape applies to `placePackAt` (ask
+whether the site already has a persistent hostile — pack members wander, so an
+exact-tile test would fail) and `placeHerd` (ask whether the region already has
+one of that species).
+
+This is reachable without any retrofit: `generateForced` re-runs generation on
+an existing region.
+
+## `MobRegistry.registerMob(id, class, boolean)` — the boolean is `countKillStat`, and it is also `createSpawnItem`
+
+**[jar]** `MobRegistry.java:824-826`:
+
+```java
+public static int registerMob(String stringID, Class<? extends Mob> mobClass, boolean countKillStat) {
+    return registerMob(stringID, mobClass, countKillStat, false, countKillStat);
+}
+```
+
+The third argument of the five-argument form is `createSpawnItem`, so the short
+overload ties the two together: `true` gives the mob a bestiary row AND
+registers a `<id>spawnitem` in the ItemRegistry (`onRegister`,
+`MobRegistry.java:714-719`). To get kill statistics without a spawn item, call
+`registerMob(id, class, true, false, false)`.
+
+**And every registered mob loads an icon regardless of the flag.**
+`MobRegistry.loadMobIcons` (`:950-953`) walks *all* elements and each one's
+`loadIcon()` is `GameTexture.fromFile("mobs/icons/" + stringID)` (`:985-987`).
+So turning `countKillStat` on for a mob with no `mobs/icons/<id>.png` adds a
+bestiary row drawn with the engine's ERR texture. The icon is the real cost of
+that flag, not the flag.
+
+## `EntityList` has `count()`, not `size()`, and region-scoped lookups
+
+**[jar]** `EntityList<T>` (`necesse/entity/manager/EntityList.java`) implements
+`Iterable<T>` and exposes `count()`, `countCache()`, `stream()`,
+`streamAreaTileRange(x, y, tileRange)`, `getInRegionByTileRange(tileX, tileY,
+tileRange)` and friends. There is no `size()`.
+
+`getInRegionByTileRange` returns everything in the REGIONS covering that tile
+range — a superset of the disc — so a distance test still has to follow it. Use
+it rather than walking `entityManager.mobs` whenever the question is local: a
+retrofit asks it once per lattice site and a large box has thousands.
+
+## The bestiary asks the MOB for its icon, so a borrowed body can borrow its face
+
+**[jar]** `Mob.getMobIcon()` (Mob.java:1760-1762) is an ordinary overridable
+method whose default is `MobRegistry.getMobIcon(this.getStringID())`, and the
+journal calls it on the instance: `FormJournalEntryComponent.java:240` reads
+`GameTexture entryMobIcon = mob.getMobIcon();`.
+
+That matters because `MobRegistry.loadMobIcons` (`:950-953`) loads
+`mobs/icons/<stringID>` for **every** registered mob and `GameTexture.fromFile`
+falls back to `GameResources.error` when the file is absent
+(GameTexture.java:170-172). A mod whose creatures deliberately wear vanilla
+bodies therefore ships broken journal rows for every one of them that counts a
+kill — six of ours did, unnoticed, for months.
+
+**The registry field is not the way in.** `MobRegistry.MobRegistryElement.icon`
+is a public field, but the class is `protected static` inside `MobRegistry` and
+`MobRegistry`'s own constructor is **private** (`:370`), so the class cannot be
+subclassed and the protected nested type cannot be named from a mod. Reflection
+would work; overriding `getMobIcon()` is better and needs nothing unusual.
+
+**Which parent's icon is safe to borrow.** Only a mob vanilla itself registers
+`countKillStat = true` provably has an icon, because that flag is what puts it
+in vanilla's own bestiary. Checked for our nineteen: every parent is one except
+`crocodile` and `petdragonwhelp`. **A dedicated server cannot settle it** — it
+renders nothing and ships zero PNGs — so that last pair needs one look at a
+client's journal.
+
+## `registerMob(id, class, true)` also mints a spawn item, and its name is free
+
+**[jar]** The three-argument overload passes `countKillStat` through as
+`createSpawnItem` (MobRegistry.java:824-826), and `onRegister` then registers
+`<id>spawnitem` in the ItemRegistry (`:714-719`). That sounds like ten new IDs
+needing ten new locale entries — it is not:
+`MobSpawnItem.getDisplayName` builds `new LocalMessage("item", "mobspawnitem",
+"mob", MobRegistry.getLocalization(mobStringID))`
+(placeableItem/MobSpawnItem.java:120), so the name is derived from the mob's own
+localization. **[run]** Flipping ten mobs to `true` added zero new problems to
+`tools/locale_audit.py`.

@@ -3,6 +3,149 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [Unreleased] — the areas, measured and filled in — 2026-09-05
+
+The question was "how full is each area of the mod, and can I test it from an
+existing save". Neither had an answer anybody could look up, so the first half
+of this pass was measuring and the second half was fixing what the measurement
+found.
+
+### Added
+- **`tools/area_census.py` and `docs/AREA_OVERVIEW.md`** — a per-realm census
+  read off the source: biomes, hostiles, critters, animals, NPCs, live quests,
+  POIs, boss, spawn-table weights and guard packs, plus the guarded-site
+  density that actually decides how often a realm attacks you. The tool reports
+  only holes it can PROVE — a `getGuard()` with no caller, a realm with no
+  critter table, a realm with no NPC, a hostile registered
+  `countKillStat = false` — and it found four on its first run.
+- **`/swhreset` (`commands/SwhResetCommand`) and `docs/SAVE_COMPAT.md`** — the
+  answer to "we want to test everything from A to Z on this world". Four modes:
+  `status` (the default, reports and changes nothing), `world` (retrofits
+  content into ground an older build generated), `quests confirm` (puts the
+  whole chain back to before the first ascent) and `all confirm`. ADMIN, and
+  the destructive halves want the literal word `confirm`.
+- **`SkyLevel.retrofitArea`** — re-runs the additive placements over
+  already-generated ground. The reason it is possible at all is that every
+  lattice in that class is a pure function of the world seed and the tile, so
+  walking a region again computes the sites the original generation would have.
+  It repairs boss portals, guard packs, residents and herds; it never re-paints
+  ground that already exists, because explored ground may be somebody's base.
+- **`SkyLevel.restoreSpireWarden`** — the one thing the quest reset needs that
+  is not a flag. `WardenSpirePreset` places the Warden at stamp time only, so a
+  reset world would have an empty tower and an unstartable chain. A mob
+  placement, not a re-stamp: the preset would overwrite a furnished spire.
+- **Ives, the Verger of the Quiet Reach** (`ivessettler`) — **Steinfeld's first
+  inhabitant.** `WORLD_DESIGN` Part B had recorded the hole ("Steinfeld has no
+  NPC, no boss and no station") and `AREA_OVERVIEW` measured what it cost: a
+  band 2280 tiles deep with four hostiles, no critters, nobody to talk to and
+  exactly one quest, which the Warden only offers after the whole Warden's Call
+  is done. His character is §A3.4's, not an invention — *"Hier landen Dinge,
+  die nicht mehr richtig zum Himmel gehören"* — and he is the realm's only
+  vendor: he buys all four of its materials above broker. Found beside a broken
+  angel; no new art (vanilla wardrobe and the Elder's face, both in
+  `VANILLA_ASSET_MAP`).
+- **Three resident quest chains**, one per NPC who had a shop and nothing to do:
+  `swh_steinfeldvigil` (Ives — 14 grave salt + 10 spirit moss; his 11 000 fee
+  waived + 10 Stormsteel Bar), `swh_mortimerrites` (Mortimer — 12 soul thread +
+  10 bonewood; his 8 000 fee waived + 6 Spiritsteel Bar) and
+  `swh_caspernforge` (Caspern — 12 spectral ore + 8 veil essence; his 14 000 fee
+  waived + 6 Spiritsteel Bar). Each asks only for materials its own realm drops
+  — `SkyreachKeyQuest`'s stated rule — and each was pointed at something with
+  **no consumer at all**: grave salt and spirit moss, soul thread, veil essence.
+  Caspern's ask is the first thing in the mod that sends a player into the
+  Gloomfen and the Ashen Reach on purpose.
+- **`SkyQuests.advanceResidentChain`** — the ask-once / take-once / pay-once
+  state machine `EveleenMob` wrote first, extracted before a fourth and fifth
+  hand-rolled copy could drift apart from it. The bubble stays the caller's:
+  each of these people has their own voice.
+- **`SkywatchWorldData.residentChainsDone`** — a set of keys rather than three
+  more booleans, for the reason `bossPortalsUnlocked` and `regionKeysEarned`
+  already give: a save written before a chain existed still loads.
+
+### Fixed
+- **Eden's guard packs were dead code, and had been since the one-plane
+  collapse.** `EdenGardenBiome.getGuard()`, `EdenCanopyBiome.getGuard()` and
+  `EdenShallowsBiome.getGuard()` all define packs — bloommaw, forbidden
+  serpent, jealous vine, golden hornet — and `SkyLevel.placeGuardPacks` had
+  branches for Skyreach, Steinfeld, Ghost and Crooked and **none for Eden**.
+  Every other realm's three lines were carried over when its level was folded
+  into `SkyLevel` and Eden's simply were not, while `EdenPressure` had already
+  been written with the 600-ticket discs for them. So Eden was the only realm
+  whose pressure field marked ground as dangerous that nothing was ever placed
+  on: **0 guarded sites**, against 20–31 everywhere else. Three `placePacksOf`
+  calls on Eden's own grove / lagoon / orchard lattices — the same constants
+  `EdenPressure` reads — put it at 11.4 sites per 1000x1000.
+- **`placePackAt`, `placeHerd` and `placePortalAt` are now idempotent.** None
+  refused a site it had already filled, which was harmless while
+  `onRegionGenerated` was the only caller and is not once a retrofit can walk a
+  region twice. It also closes the older path nobody had hit: `generateForced`
+  re-runs generation on an existing region.
+- **A blocked boss-portal site could grow a second portal**, and the retrofit is
+  what found it. `placePortalAt` searches up to sixteen deterministic
+  candidates within ±3 of its site, so when the site tile itself is blocked the
+  portal lands on an offset. Walking the same site again then found that offset
+  occupied — by the portal — treated it as any other blocked candidate, and
+  placed a SECOND portal on the next free offset. Measured before the fix: a
+  second `/swhreset world` over an identical box reported `bossportals=+1`. The
+  per-tile "is this tile empty" test can never catch this; the site now asks
+  whether it already carries a portal at all.
+
+### Verification
+- `./gradlew buildModJar` — exit 0.
+- `python3 tools/locale_audit.py` — 33 problems, all pre-existing; the pass
+  added 28 new IDs and zero new problems.
+- `python3 tools/content_ledger.py --check` — 366 IDs, 0 undescribed.
+- `scripts/integration_test.sh` — extended with three `/swhreset` passes and a
+  **third server phase**. The retrofit runs twice over the identical box and
+  the second run must place nothing, which is the only assertion that catches a
+  placement losing its idempotence; the reset runs at the very end of phase 2
+  because everything before it asserts on progression a reset legitimately
+  wipes, and phase 3 reloads the world to prove the reset reached disk.
+
+### Added, after the player pushed back on "twelve icons owed"
+- **`mobs/BorrowedMobIcon` and nineteen `getMobIcon()` overrides.** The player's
+  question was the right one — "kann es doch nicht so schwer sein die 12 icons
+  kurz aus dem sheet zu ziehen?" — and the answer turned out to be that no icon
+  needed drawing at all. **VERIFIED [jar]:** `Mob.getMobIcon()` (Mob.java:1760)
+  is plainly overridable and the journal asks the MOB rather than the registry
+  (`FormJournalEntryComponent.java:240`), so a creature that wears a vanilla
+  body can simply answer with that creature's face. All nineteen mobs that carry
+  no art of their own now do.
+- **Ten hostiles entered the bestiary**: Eden's bloommaw, jealousvine and
+  goldenhornet, and all seven of the Ghost band's. Each parent
+  (`stabbybush`, `dryadsentinel`, `honeybee`, `deepcavespirit`, `bonewalker`,
+  `phantom`, `forestspector`, `mimic`, `jackal`, `desertcrawler`) is itself a
+  vanilla bestiary mob, so its icon provably exists.
+
+### Fixed
+- **Six journal rows were already drawing the engine's ERR tile**, and nobody
+  had noticed. `MobRegistry.loadMobIcons` loads `mobs/icons/<id>` for *every*
+  registered mob and `GameTexture.fromFile` falls back to `GameResources.error`
+  (GameTexture.java:170) — so Steinfeld's four plus the Crooked Beyond's door
+  mimic and tongue plant, all registered `countKillStat = true` with no PNG of
+  their own, have been shipping a broken picture. The same override fixes them.
+
+### Not done, and written down rather than half-done
+- **Two hostiles still never enter the bestiary.** `edenserpent` wears
+  `crocodile` and `forbiddenserpent` wears `petdragonwhelp` — the only two
+  parents vanilla does not put in its own bestiary, so whether there is an icon
+  to borrow cannot be checked from here: a dedicated server renders nothing and
+  ships zero PNGs. Both stay `false` until somebody with a client looks at the
+  journal, because a row showing ERR is worse than no row. One word each in
+  `EdenRealm.registerMobs` once it is known. This replaces the earlier entry:
+- ~~**Twelve hostiles still never enter the bestiary.**~~ Eden's five and Ghost's
+  seven register `countKillStat = false` while every other realm's register
+  `true`. This is NOT a one-word fix: the three-argument
+  `MobRegistry.registerMob` passes `countKillStat` through as
+  `createSpawnItem` as well, and `MobRegistry.loadMobIcons` loads
+  `mobs/icons/<id>` for every registered mob, so flipping the flag adds twelve
+  bestiary rows drawn with the engine's ERR texture. The twelve icons are the
+  real cost and they belong in `docs/ASSET_REQUESTS.md`.
+- **Four realms still have no critters or animals.** Steinfeld's fix is already
+  written in `WORLD_DESIGN` §A3.4 and merely unbuilt: ghosts that are not
+  enemies, that stand, or that walk the same path between two gravestones
+  forever.
+
 ## [Unreleased] — the region keys — 2026-09-03
 
 `docs/FOGKEY_AND_BOSSPORTALS.md` §B1–B2. The boss portals shipped inert and

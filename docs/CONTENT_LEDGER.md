@@ -50,6 +50,7 @@ unlike the four above, no `SkyArrivals` gate makes him walk to a settlement:
 
 | id | kind | what it is, in one line |
 |---|---|---|
+| `ivessettler` | mob | Ives the Verger of the Quiet Reach: Steinfeld's only inhabitant, a **crafting and hauling** settler who refuses farming and forestry. The realm's only vendor - he buys all four of its materials (Pale Stone, Grave Salt, Spirit Moss, Echo Shard) above broker, and sells the churchyard that goes around a grave. His quest, The Vigil, waives his 11 000 fee. Found once per world beside a broken angel; does not travel to a settlement on its own. |
 | `knottsettler` | mob | Mr. Knott the Doorman: a **trading** settler who refuses farming and forestry, and the only vendor of Crooked Beyond's weird furniture and cosmetic masks, buying Warp Resin, Eye Seed and Reality Shard in turn. Found once per world at the Door Yard; does not travel to a settlement on its own. |
 
 ## The Beetle Outlands — the sky's wrong ground
