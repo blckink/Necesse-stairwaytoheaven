@@ -8,7 +8,7 @@ already speaks: Beetlejuice gothic, ghost world, bureaucratic afterlife, zombie
 apocalypse, gates of heaven, magic world.
 
 Read first, in this order: `AGENTS.md`, `docs/WORLDBUILDING_LOOP.md` §1 and §6,
-`docs/CURRENT_STATE.md`, `docs/DESIGN.md` (Parts III–V), `ROADMAP.md`,
+`docs/OVERVIEW.md`, `docs/DESIGN.md` (Parts III–V), `ROADMAP.md`,
 `docs/IMPLEMENTATION_RULES.md` §8–§11, `docs/PLAYTEST_LOG.md` (what the player
 liked is marked KEEP — build toward it, never over it).
 

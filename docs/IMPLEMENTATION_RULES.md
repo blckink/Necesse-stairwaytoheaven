@@ -145,7 +145,7 @@ The later perfect-Heaven concept and the Veil's gothic/morbid comedy belong in t
 
 ## 11. Preserve KEEP content and verified architecture
 
-Do not silently redo working systems or player-approved content. In particular, read `docs/CURRENT_STATE.md`, `docs/PLAYTEST_LOG.md` and `docs/DESIGN_DECISIONS.md` before touching:
+Do not silently redo working systems or player-approved content. In particular, read `docs/OVERVIEW.md`, `docs/PLAYTEST_LOG.md` and `docs/DESIGN_DECISIONS.md` before touching:
 
 - portal/SkyOrigin routing
 - save schema/migration

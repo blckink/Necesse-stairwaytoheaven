@@ -13,7 +13,7 @@ Theme: **$ARGUMENTS** — if that is empty, pick the next open one from
 
 ```bash
 git fetch && git log --oneline -15
-cat docs/CURRENT_STATE.md
+cat docs/OVERVIEW.md
 [ -n "$NECESSE_GAME_DIR" ] || scripts/fetch_dedicated_server.sh
 ```
 
@@ -72,7 +72,7 @@ Every single thing added — item, object, mob, tile, quest, sprite, recipe —
 gets a row in `docs/CONTENT_LEDGER.md` in the same commit that adds it.
 `tools/content_ledger.py --check` fails on anything registered and undescribed,
 so this is enforced rather than remembered. Also update
-`docs/CURRENT_STATE.md`, append anything newly proven to
+`docs/OVERVIEW.md`, append anything newly proven to
 `docs/TECHNICAL_LEARNINGS.md`, and add the chapter to `CHANGELOG.md`.
 
 ## Finish

@@ -7,7 +7,7 @@ You are the senior agent. The others produce designs and pixels; **you are the
 one who turns them into content that behaves like vanilla**, and the only one
 who commits.
 
-Read first: `AGENTS.md`, `docs/CURRENT_STATE.md`, `docs/DESIGN_DECISIONS.md`,
+Read first: `AGENTS.md`, `docs/OVERVIEW.md`, `docs/DESIGN_DECISIONS.md`,
 `docs/IMPLEMENTATION_RULES.md` (all of it), `docs/TECHNICAL_LEARNINGS.md` for
 whatever you are touching, `docs/AGENT_WORKFLOW.md`, and
 `docs/WORLDBUILDING_LOOP.md` §4.
@@ -28,7 +28,7 @@ whatever you are touching, `docs/AGENT_WORKFLOW.md`, and
 4. **Run the gates and state honestly what you ran.**
 5. **Write the commits.** Small and self-contained; a blocker fix ships alone.
    The message explains *why*, and states what was verified and how.
-6. **Document.** `docs/CURRENT_STATE.md`, `CHANGELOG.md`, anything newly proven
+6. **Document.** `docs/OVERVIEW.md`, `CHANGELOG.md`, anything newly proven
    about the engine into `docs/TECHNICAL_LEARNINGS.md`, anything the player said
    into `docs/PLAYTEST_LOG.md`.
 

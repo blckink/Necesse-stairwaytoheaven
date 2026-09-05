@@ -46,7 +46,7 @@ Sky*Set.java     the registration files: Building, Cloudmarble, Furniture,
                  Objects, Items, Mobs, Registry
 ```
 
-Current state, always: `docs/CURRENT_STATE.md`. Never trust a handoff over it.
+Current state, always: `docs/OVERVIEW.md`. Never trust a handoff over it.
 
 **The three documents that are law, in this order:**
 
@@ -189,7 +189,7 @@ half-integrated.
 
 1. **A chapter ends green or it ends loudly.** The integrator does not commit a
    chapter whose gates are red. If it cannot finish, it says exactly what
-   blocked it, in the report and in `docs/CURRENT_STATE.md`, and the next
+   blocked it, in the report and in `docs/OVERVIEW.md`, and the next
    iteration picks that up first.
 2. **Nothing player-approved is touched.** `docs/PLAYTEST_LOG.md` marks content
    KEEP. A loop that quietly redesigns liked content burns the run.
@@ -197,7 +197,7 @@ half-integrated.
 ### The eight roles
 
 Definitions live in `.claude/agents/`. All read `AGENTS.md` and
-`docs/CURRENT_STATE.md` first; **only the integrator commits**.
+`docs/OVERVIEW.md` first; **only the integrator commits**.
 
 | # | Agent | Produces | Acceptance |
 |---|---|---|---|
@@ -292,7 +292,7 @@ what it is for a player. The ~200 IDs that predate it sit in a baseline the
 check exempts; **everything added from now on does not get that exemption**, and
 a scaffolded row with an empty description still fails.
 
-Per chapter the integrator also updates `docs/CURRENT_STATE.md`, appends newly
+Per chapter the integrator also updates `docs/OVERVIEW.md`, appends newly
 proven engine behaviour to `docs/TECHNICAL_LEARNINGS.md`, adds player feedback to
 `docs/PLAYTEST_LOG.md`, and writes the chapter into `CHANGELOG.md`. Quests and
 sprites that carry no registration of their own go in the ledger's free-text
@@ -380,7 +380,7 @@ register belongs above the Skyway. Do not mix all three into one screen.
 
 ```bash
 git fetch && git log --oneline -20
-cat docs/CURRENT_STATE.md
+cat docs/OVERVIEW.md
 scripts/fetch_dedicated_server.sh        # free; prints the path to export
 export NECESSE_GAME_DIR=<that path>
 ./gradlew decompileToSources -PuseDecompiledSources=true
