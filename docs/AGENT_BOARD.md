@@ -28,9 +28,14 @@ front". Diese Datei ist der Ort, an dem sie erklaert wird.
 
 | Zweig | Agent | Besitzt | Auftrag | Zustand | Seit |
 |---|---|---|---|---|---|
-| `claude/mod-areas-quests-expansion-pmiygp` | Fernsitzung (beendet) | `tools/area_census.py`, `docs/AREA_OVERVIEW.md`, `docs/MOD_SUMMARY.md`, `mobs/BorrowedMobIcon` | — (vor diesem Ablauf entstanden) | **fertig, wartet auf Merge-Entscheidung des Nutzers** | 2026-09-05 |
+| `claude/skyreach-worldgen-pois` | eigene Sitzung, vom Nutzer gestartet | `worldgen/**`, `SkyreachStatusCommand.java`, `scripts/integration_test.sh`, `docs/design/chapter-01-*` | `docs/orders/level-and-pois.md` | **vergeben 2026-09-06** | 2026-09-06 |
+| (Lead, direkt auf `master`) | Lead | `tools/asset_*.py`, `tools/mob_sheet_intake.py`, `tools/palette_reduce.py`, `tools/tile_*`, `src/main/resources/tiles/**`, `src/main/resources/mobs/**` | — | laufend: Sprites und Tiles | 2026-09-06 |
 
-Sonst ist nichts belegt. `master` ist frei.
+Die beiden ueberschneiden sich nicht: Worldgen gegen Grafik. Wer an
+`worldgen/` sitzt, fasst keine Ressourcen an, und umgekehrt.
+
+`claude/mod-areas-quests-expansion-pmiygp` ist am 2026-09-05 gemergt und
+geloescht worden; die Fernstelle traegt nur noch `master`.
 
 ## Zweige: Benennung und Lebensdauer
 
