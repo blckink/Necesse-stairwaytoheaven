@@ -24,6 +24,29 @@ standing at a derelict workshop in the Skyreach.
 | `haldasettler` | mob | Halda the Cellarer: sells the worked goods of the three stations (skyweave, stormglass, stormsteel) and buys the raw end of every sky gathering loop. |
 | `ossiansettler` | mob | Ossian Vane, the last reader: the only source of incursion-tier salvage without an incursion, and the Aether Forge's customer for high-tier bars. |
 
+## Sky voyages — the mod's own special task
+
+Magpie's expedition category, and the first profession in this mod that vanilla
+does not already have (`settlement/SkyVoyages.java`,
+`docs/design/settler-professions.md` §4.1). Posted at the settlement's vanilla
+mission board, which shows them as a fourth button beside Expedition, Mining
+trip and Fishing trip. Each is gated on that realm's key piece having been
+built (`SkywatchWorldData.bossPortalsUnlocked`) and pays that realm's own
+materials plus a happiness object.
+
+`ExpeditionMissionRegistry` is not read by `tools/content_ledger.py`, so these
+rows are kept by hand.
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `skyvoyage` | expedition category | The fourth kind of mission a settlement can post: a courier's run out along the old sky road and back. |
+| `skyreachvoyage` | expedition | Magpie runs the Skyreach and returns with skystone, cloudwood, windsilk, aurora petal, fulgurite and storm shard. 900 coins. |
+| `edenvoyage` | expedition | The Garden of Eden run: eden wood and sap, berries, apples, golden pollen, eden copper, sungrapes. 1800 coins. |
+| `steinfeldvoyage` | expedition | The Quiet Reach run: pale stone, grave salt, spirit moss, echo shards, charwood. 2600 coins. |
+| `ghostvoyage` | expedition | The Aftergarden run: bonewood, soul thread, spectral ore and veil essence, and an epic happiness object. 3600 coins. |
+| `crookedvoyage` | expedition | The Crooked Beyond run: oddwood, warp resin, strange fabric, eye seed, striped shell, reality shard. 4800 coins. |
+| `longroundvoyage` | expedition | The Long Round: needs the whole road open, pays a worked good out of every realm, and is the only haul in the mod that can carry a legendary happiness object. 9000 coins. |
+
 ## Settlers with professions — the four who travel
 
 The mod's first settlers that arrive at a settlement on their own, the way every

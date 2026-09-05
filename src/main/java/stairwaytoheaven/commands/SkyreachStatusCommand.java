@@ -119,6 +119,7 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         diagnoseToolAudit(logs);
         diagnoseNetAudit(logs);
         diagnoseWorkstations(logs);
+        diagnoseVoyages(server, logs);
         locateFromPlayer((SkyLevel) level, serverClient, logs);
         logs.add("SKYREACH_STATUS_DONE");
     }
@@ -563,6 +564,94 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                     + " recipes=" + recipes
                     + " makes=" + (results.length() == 0 ? "NOTHING" : results));
         }
+    }
+
+    /**
+     * The sky voyages — the mod's own expedition category — and whether they
+     * are wired the way {@link stairwaytoheaven.settlement.SkyVoyages} says.
+     *
+     * <p>Three things a dedicated-server pass CAN prove about a special task,
+     * and they are the three that break silently:
+     *
+     * <ul>
+     * <li><b>The category is named.</b> An expedition whose category has no
+     *     entry in {@code categoryDisplayNames} still registers fine and the
+     *     mission board draws a button reading "Unknown category"
+     *     ({@code MissionBoardContainerForm.java:459}).</li>
+     * <li><b>Nothing leaked into a vanilla set.</b> Registering through
+     *     {@code registerExplorerExpedition} instead of {@code registerExpedition}
+     *     would put a sky voyage in front of vanilla's Explorer, who would then
+     *     be able to run it. That is a one-word mistake with no visible symptom
+     *     until someone sends the wrong settler.</li>
+     * <li><b>Every reward item exists.</b> The haul is named by string ID and
+     *     only resolved when the courier comes home, so a typo pays out an ERR
+     *     stack hours into a save rather than failing at boot.</li>
+     * </ul>
+     */
+    private void diagnoseVoyages(Server server, CommandLog logs) {
+        java.util.List<necesse.engine.expeditions.SettlerExpedition> voyages =
+                stairwaytoheaven.settlement.SkyVoyages.all();
+        boolean categoryNamed = necesse.engine.registries.ExpeditionMissionRegistry
+                .categoryDisplayNames.containsKey(
+                        stairwaytoheaven.settlement.SkyVoyages.CATEGORY);
+        int allExpeditions = 0;
+        for (necesse.engine.expeditions.SettlerExpedition ignored
+                : necesse.engine.registries.ExpeditionMissionRegistry.getExpeditions()) {
+            allExpeditions++;
+        }
+        logs.add("voyage registry: category="
+                + stairwaytoheaven.settlement.SkyVoyages.CATEGORY
+                + " named=" + categoryNamed
+                + " ours=" + voyages.size()
+                + " expeditionsingame=" + allExpeditions);
+
+        int unresolved = 0;
+        int leaked = 0;
+        for (necesse.engine.expeditions.SettlerExpedition voyage : voyages) {
+            int id = voyage.getID();
+            boolean inVanillaSet =
+                    necesse.engine.registries.ExpeditionMissionRegistry.explorerExpeditionIDs.contains(id)
+                    || necesse.engine.registries.ExpeditionMissionRegistry.miningTripExpeditionIDs.contains(id)
+                    || necesse.engine.registries.ExpeditionMissionRegistry.fishingTripIDs.contains(id);
+            if (inVanillaSet) {
+                leaked++;
+            }
+            StringBuilder bad = new StringBuilder();
+            int haulSize = 0;
+            if (voyage instanceof stairwaytoheaven.settlement.SkyVoyages.RealmVoyage) {
+                String[] haul = ((stairwaytoheaven.settlement.SkyVoyages.RealmVoyage) voyage).haul;
+                haulSize = haul.length;
+                for (String itemStringID : haul) {
+                    if (necesse.engine.registries.ItemRegistry.getItemID(itemStringID) < 0) {
+                        unresolved++;
+                        bad.append(' ').append(itemStringID);
+                    }
+                }
+            }
+            logs.add("voyage " + voyage.getStringID()
+                    + " id=" + id
+                    + " category=" + voyage.getCategoryStringID()
+                    + " ours=" + stairwaytoheaven.settlement.SkyVoyages.isVoyage(voyage)
+                    + " invanillaset=" + inVanillaSet
+                    + " haul=" + haulSize
+                    + " unresolved=" + (bad.length() == 0 ? "none" : bad.toString().trim()));
+        }
+
+        // The gate the voyages read. Not a pass/fail — a fresh test world has
+        // no Warden and no realm keys, so "open=none" is the CORRECT state
+        // here and every voyage is expected to be unavailable.
+        StringBuilder open = new StringBuilder();
+        if (server != null && stairwaytoheaven.quest.SkywatchWorldData.hasWarden(server)) {
+            open.append("skyreach");
+            for (int r = stairwaytoheaven.worldgen.RealmDepth.REALM_EDEN;
+                 r < stairwaytoheaven.worldgen.RealmDepth.REALM_COUNT; r++) {
+                if (stairwaytoheaven.quest.SkywatchWorldData.bossPortalsUnlocked(server, r)) {
+                    open.append('+').append(stairwaytoheaven.worldgen.RealmDepth.keyOf(r));
+                }
+            }
+        }
+        logs.add("voyage gate: open=" + (open.length() == 0 ? "none" : open.toString())
+                + " unresolved=" + unresolved + " leaked=" + leaked);
     }
 
     /** Verifies the Warden's Spire, the NPCs and the quest data integrity. */

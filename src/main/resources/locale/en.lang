@@ -954,3 +954,25 @@ wardenkeyaskghostrealm=The Aftergarden, now, and you will want your chalk before
 wardenkeydoneghostrealm=A bird for the dead, and it will sit anywhere you put it. That is more than most of them will do.
 wardenkeyaskcrookedbeyond=Last one, and the worst. The Crooked Beyond has a door for everything. Bring me the wood and the shards and I will hang you one that behaves.
 wardenkeydonecrookedbeyond=There. A door of your own, and it opens on purpose. That is the whole set.
+
+// --- Sky voyages: the mod's own expedition category ------------------
+// A mission board shows "<name> <type>" (ui.missionnameformat), and the
+// type comes from the category below. So the NAME here is the destination
+// and nothing else - vanilla does the same and reads "Copper Ore Mining
+// trip". These are Magpie's; see stairwaytoheaven.settlement.SkyVoyages.
+[expedition]
+skyreachvoyage=The Skyreach
+edenvoyage=Garden of Eden
+steinfeldvoyage=The Quiet Reach
+ghostvoyage=The Aftergarden
+crookedvoyage=Crooked Beyond
+longroundvoyage=The Long Round
+skyvoyagelocked=That road is not open yet
+
+[ui]
+skyvoyagemission=Sky voyage
+skyvoyageask=I want to send you back out on the old road
+skyvoyageselect=Where am I going, then?
+skyvoyagecost=I will run to <expedition> and back for <cost> coins. <chance>% says I make it.
+skyvoyagemore=Show me the rest of the road
+skyvoyagecomplete=Everything that was on the manifest, and a little that was not.

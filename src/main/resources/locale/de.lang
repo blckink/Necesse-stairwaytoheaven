@@ -955,3 +955,25 @@ wardenkeyaskghostrealm=Jetzt der Nachgarten, und nimm deine Kreide mit. Knochenh
 wardenkeydoneghostrealm=Ein Vogel für die Toten, und er sitzt überall, wo du ihn hinstellst. Das ist mehr, als die meisten von ihnen tun.
 wardenkeyaskcrookedbeyond=Der letzte, und der schlimmste. Die Krümmung hat für alles eine Tür. Bring mir das Holz und die Splitter, dann hänge ich dir eine ein, die sich benimmt.
 wardenkeydonecrookedbeyond=So. Eine eigene Tür, und sie öffnet mit Absicht. Das ist der ganze Satz.
+
+// --- Himmelsfahrten: die eigene Expeditionsart der Mod ---------------
+// Das Missionsbrett zeigt "<name> <type>" (ui.missionnameformat), und der
+// Typ kommt aus der Kategorie unten. Der NAME hier ist also nur das Ziel -
+// bei Vanilla steht dort genauso "Kupfererz Bergbaufahrt". Sie gehoeren
+// Magpie; siehe stairwaytoheaven.settlement.SkyVoyages.
+[expedition]
+skyreachvoyage=Die Himmelsweite
+edenvoyage=Garten Eden
+steinfeldvoyage=Die Stille Weite
+ghostvoyage=Der Nachgarten
+crookedvoyage=Jenseits der Krümmung
+longroundvoyage=Die Große Runde
+skyvoyagelocked=Diese Straße ist noch nicht offen
+
+[ui]
+skyvoyagemission=Himmelsfahrt
+skyvoyageask=Ich will dich wieder auf die alte Straße schicken
+skyvoyageselect=Wohin denn?
+skyvoyagecost=Ich laufe bis <expedition> und zurück, für <cost> Münzen. <chance>% sagen, ich komme an.
+skyvoyagemore=Zeig mir den Rest der Straße
+skyvoyagecomplete=Alles, was auf dem Frachtbrief stand. Und etwas, das nicht draufstand.

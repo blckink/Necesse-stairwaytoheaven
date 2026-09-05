@@ -11,6 +11,29 @@ of this pass was measuring and the second half was fixing what the measurement
 found.
 
 ### Added
+- **Sky voyages (`settlement/SkyVoyages.java`)** — the mod's first settler
+  special task that vanilla does not already have. A **fourth expedition
+  category** beside Expedition, Mining trip and Fishing trip, with six missions:
+  one per realm the mod ships, plus **The Long Round**, which needs the whole
+  road open and is the only haul in the mod that can carry a legendary
+  happiness object. Magpie runs them (`canDoExpedition` /
+  `getPossibleExpeditions`, the two overrides vanilla's Miner writes); no
+  vanilla Explorer, Miner or Angler can be sent on one, because they are
+  registered through the plain `registerExpedition` and never enter vanilla's
+  three category sets. Gated on `SkywatchWorldData.bossPortalsUnlocked` — the
+  realm key pieces — rather than on vanilla's story objectives, which cannot
+  see that a player has opened the Ghost Realm. Every one of the eight settlers
+  before this borrowed a vanilla profession (`docs/settlers.md`); this one is
+  new work in the game. The census that proves the wiring is in
+  `skyreachstatus` (`voyage registry` / `voyage` / `voyage gate` lines).
+- **`docs/design/settler-professions.md`** — eight endgame professions, with
+  the four shapes a special task can take read out of the 1.3.2 jar and a
+  build order. Answers two questions `docs/design/chapter-01-skyreach-cast.md`
+  left open, one of them negatively: **a modded object can never be a mission
+  board** (`ServerSettlementData.getMissionBoardTile` compares against the
+  literal `"missionboard"`), so the Kite Rack cannot be Magpie's departure
+  station. The positive answer is that a settler *can* drive vanilla's
+  expedition mechanism, which is what the entry above is.
 - **`tools/area_census.py` and `docs/AREA_OVERVIEW.md`** — a per-realm census
   read off the source: biomes, hostiles, critters, animals, NPCs, live quests,
   POIs, boss, spawn-table weights and guard packs, plus the guarded-site

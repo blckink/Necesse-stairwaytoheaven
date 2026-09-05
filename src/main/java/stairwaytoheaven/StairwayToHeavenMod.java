@@ -75,6 +75,13 @@ public class StairwayToHeavenMod {
         stairwaytoheaven.arsenal.SkyArsenal.register();
         stairwaytoheaven.arsenal.SkyArsenal.registerItems();
         stairwaytoheaven.settlement.SkyProfessions.register();
+        // The mod's own settler special task: a fourth expedition category
+        // beside vanilla's Expedition / Mining trip / Fishing trip. Registered
+        // here rather than in SkyMobs beside the settlers themselves because
+        // ExpeditionMissionRegistry is the registry being written to, and it
+        // closes with the rest after init(). Only MagpieMob.canDoExpedition
+        // links the two.
+        stairwaytoheaven.settlement.SkyVoyages.register();
         stairwaytoheaven.livestock.SkyLivestock.register();
         SkyBuildingSet.registerItems();
         stairwaytoheaven.settlement.SkyProfessions.registerItems();

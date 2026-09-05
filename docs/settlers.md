@@ -11,6 +11,16 @@ this document is where each one actually lives and how a player finds them.
 Companion doc: `docs/quests.md` covers the three quest chains three of these
 five hand out. The borrowed-sprite table is at the bottom of this file.
 
+**A distinction this file established and the mod has since moved past.** Every
+profession named below is one vanilla already registered — `fertilize`,
+`hunting`, `husbandry`, `tradingmission` — turned on for a settler with one
+line, which is exactly how vanilla's own Farmer and Hunter work. That is a
+settler *with* a profession, not a new profession. The mod's first special task
+that the game did not previously have is **sky voyages**
+(`settlement/SkyVoyages.java`), a fourth expedition category that Magpie runs;
+`docs/design/settler-professions.md` sets out the four shapes such a task can
+take and seven more proposals in the same class.
+
 ## How to read "found" vs. "travels"
 
 Every one of the five is placed **once per world**, deterministically, by
