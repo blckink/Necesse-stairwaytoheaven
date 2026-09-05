@@ -441,9 +441,19 @@ def default_vanilla():
     run it. `vanilla-sprites/` is gitignored on purpose but is where the dump
     lives in a working checkout, so look there first.
     """
+    env = os.environ.get("NECESSE_VANILLA_SPRITES")
+    if env and os.path.isdir(os.path.join(env, "items")):
+        return env
     local = os.path.join(REPO, "vanilla-sprites")
     if os.path.isdir(os.path.join(local, "items")):
         return local
+    # Known dumps, in the order they turn up on a working machine. Without one
+    # of these the audit measures nothing while still printing "0 flagged" --
+    # which is exactly the silent pass this function exists to prevent.
+    for guess in (os.path.expanduser("~/dev/Necesse sprites"),
+                  "/home/user/necesse-game/sprites"):
+        if os.path.isdir(os.path.join(guess, "items")):
+            return guess
     return "/home/user/necesse-game/sprites"
 
 
