@@ -31,7 +31,7 @@ What this does instead, per file in src/main/resources/kk-sprites/:
      The icon is taken from the finished sheet instead of being drawn a second
      time, so it cannot drift from the object it stands for -- but ONLY where
      the cut is 1:1: the first frame's art has to fit the 32x32 slot already.
-     34 of the 76 shipped object/item pairs do. The rest need a drawn glyph,
+     32 of the 76 shipped object/item pairs do. The rest need a drawn glyph,
      and the tool says so rather than shrinking a tree into a green smudge
      (tools/asset_templates.py, template_item). An existing icon is only
      replaced when docs/ASSET_REQUESTS.md still lists it as borrowed.
@@ -268,6 +268,12 @@ def column_pitch(sheet):
     safe direction, because a too-wide frame can only make the derived icon
     look too big and be refused, while a too-narrow one would silently cut a
     tree trunk out of its canopy and call it an icon.
+
+    The cost of erring that way: two variants that TOUCH, with no transparent
+    column between them, are indistinguishable from one drawing crossing the
+    seam, so their sheet counts as a single frame and its icon is refused.
+    objects/aetheriumore and objects/gloomshroom (both 64x32 with 32-wide art)
+    are the two shipped examples.
     """
     for pitch in CELL_PITCHES:
         if sheet.width % pitch or sheet.width == pitch:

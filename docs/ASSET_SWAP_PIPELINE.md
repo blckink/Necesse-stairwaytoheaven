@@ -76,8 +76,8 @@ background; exact canvas or an exact integer multiple.
 *Objects.* `asset_intake.py` cuts the inventory icon straight out of the
 finished sheet, so it cannot drift from the object it stands for. It cuts only
 where the cut is **1:1**: the first frame's art has to fit the 32×32 slot
-already, which it does for **34 of the 76** shipped object/item pairs (saplings,
-flowers, ground clutter, tabletop props). The other 42 are trees, furniture and
+already, which it does for **32 of the 76** shipped object/item pairs (saplings,
+flowers, ground clutter, tabletop props). The other 44 are trees, furniture and
 multi-tile pieces whose world sprite is far bigger than a slot, and shrinking
 one is not an icon — `tools/asset_templates.py` (`template_item`) states the
 rule: *"a tree's icon is a compact glyph, not the 128×1024 world sheet scaled
@@ -128,6 +128,13 @@ column pitch (32 / 64 / 128 px) whose seams the art does not run through wins,
 and when none is clean the whole sheet counts as one frame — a too-wide frame
 can only get the icon refused, while a too-narrow one would cut a trunk out of
 a canopy and call it an icon.
+
+That erring-wide costs two sheets: **variants that touch, with no transparent
+column between them, cannot be told apart from one drawing crossing the seam**,
+so the sheet counts as one frame and its icon is refused. `objects/aetheriumore`
+and `objects/gloomshroom` — both 64×32 with 32-wide art — are the two shipped
+cases. If a future sheet needs to be cut, give its variants a 1 px transparent
+gutter.
 
 `--apply` writes the icon only when it may: when `items/<name>.png` does not
 exist yet, or when `docs/ASSET_REQUESTS.md` still lists that icon as a borrowed
