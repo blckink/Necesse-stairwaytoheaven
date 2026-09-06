@@ -27,6 +27,21 @@ What this does instead, per file in src/main/resources/kk-sprites/:
      dark ground.
   5. REPORTS. One line per file, and a path to look at.
 
+  6. CUTS THE ICON, for an object sheet that also has an items/<name>.png.
+     The icon is taken from the finished sheet instead of being drawn a second
+     time, so it cannot drift from the object it stands for -- but ONLY where
+     the cut is 1:1: the first frame's art has to fit the 32x32 slot already.
+     34 of the 76 shipped object/item pairs do. The rest need a drawn glyph,
+     and the tool says so rather than shrinking a tree into a green smudge
+     (tools/asset_templates.py, template_item). An existing icon is only
+     replaced when docs/ASSET_REQUESTS.md still lists it as borrowed.
+
+Mob icons are deliberately NOT cut here, and need no extractor: every
+registered mob either ships its own mobs/icons/<id>.png (26 of them, none of
+them borrowed) or overrides getMobIcon() through mobs/BorrowedMobIcon (19),
+and the remaining 11 are countKillStat=false, so they have no journal row at
+all. See docs/ASSET_SWAP_PIPELINE.md for the one case that still needs a hand.
+
 Nothing is written into src/main/resources unless you pass --apply, and even
 then only for files whose class checks passed.
 
@@ -219,12 +234,129 @@ def contact_sheet(im, label, out_path, zoom=4):
     return out_path
 
 
+# The only column pitches an object sheet is documented to use. Generic
+# objects and furniture are "32 x however many variants/rotations"
+# (docs/research/asset-formats.md 3; docs/research/furniture-formats.md:40-55).
+# SingleRockObject reserves a 64px slot and draws its left 32
+# (asset-formats.md:211). TreeObject uses 128px cells
+# (tools/asset_generator/gen_trees.py:4-10). Nothing else is guessed.
+CELL_PITCHES = (32, 64, 128)
+
+
+def straddling_rows(sheet, pitch):
+    """How badly the art crosses the cell boundaries this pitch implies.
+
+    Counted as rows where an opaque pixel sits on BOTH sides of a boundary --
+    i.e. one drawing running through the seam. A pitch that splits a tree
+    canopy down the middle scores in the hundreds; a real column boundary
+    between two rotations scores zero.
+    """
+    alpha = sheet.getchannel("A").load()
+    worst = 0
+    for x in range(pitch, sheet.width, pitch):
+        n = sum(1 for y in range(sheet.height)
+                if alpha[x - 1, y] >= 128 and alpha[x, y] >= 128)
+        worst = max(worst, n)
+    return worst
+
+
+def column_pitch(sheet):
+    """Width of the sheet's first frame, measured rather than assumed.
+
+    The smallest documented pitch whose seams the art does not run through
+    wins. When none is clean the WHOLE sheet is treated as one frame -- the
+    safe direction, because a too-wide frame can only make the derived icon
+    look too big and be refused, while a too-narrow one would silently cut a
+    tree trunk out of its canopy and call it an icon.
+    """
+    for pitch in CELL_PITCHES:
+        if sheet.width % pitch or sheet.width == pitch:
+            continue
+        if straddling_rows(sheet, pitch) <= 2:
+            return pitch
+    return sheet.width
+
+
+def icon_from_object_sheet(sheet, size=(32, 32)):
+    """(icon, note). The first frame cut 1:1 into the inventory slot, or None.
+
+    An icon is only derived when the frame's art ALREADY fits the slot, so the
+    cut is pixel-for-pixel and cannot be wrong. Anything bigger would have to
+    be scaled down, and a shrunken world sprite is not a Necesse icon -- see
+    tools/asset_templates.py template_item(): "a tree's icon is a compact
+    glyph, not the 128x1024 world sheet scaled down". Those stay drawn.
+    """
+    frame = sheet.crop((0, 0, column_pitch(sheet), sheet.height))
+    bbox = frame.getchannel("A").getbbox()
+    if bbox is None:
+        return None, "first %dpx frame is empty" % frame.width
+    art = frame.crop(bbox)
+    if art.width > size[0] or art.height > size[1]:
+        return None, ("first frame's art is %dx%d, too big for a %dx%d slot -- "
+                      "an icon for this one has to be DRAWN as a compact glyph"
+                      % (art.width, art.height, size[0], size[1]))
+    icon = Image.new("RGBA", size, (0, 0, 0, 0))
+    icon.alpha_composite(art, ((size[0] - art.width) // 2,
+                               (size[1] - art.height) // 2))
+    note = "cut 1:1 from the first %dpx frame, art %dx%d" % (
+        frame.width, art.width, art.height)
+    if art.width > size[0] - 4 or art.height > size[1] - 4:
+        note += " (fills past the 28x28 safe area)"
+    return icon, note
+
+
+def companion_item(rel):
+    """(relative path, slot size, exists) for an object's same-name item icon.
+
+    A missing file is not automatically a missing icon: most objects that ship
+    without one are the auto-registered multi-tile halves, which must NOT have
+    an icon (tools/furniture_audit.py rule 7). So an icon is only invented for
+    a name docs/ASSET_REQUESTS.md explicitly still lists as a borrowed
+    items/ stand-in -- those are the ones waiting for exactly this file.
+    """
+    if not rel or not rel.startswith("objects/"):
+        return None
+    name = os.path.basename(rel)
+    item_rel = os.path.join("items", name)
+    item_path = os.path.join(RES, item_rel)
+    if os.path.isfile(item_path):
+        with Image.open(item_path) as current:
+            return item_rel, current.size, True
+    if icon_is_still_borrowed(os.path.splitext(name)[0]):
+        return item_rel, (32, 32), False
+    return None
+
+
+def icon_is_still_borrowed(name, _cache={}):
+    """Is items/<name>.png still a vanilla loan, or is it our own art?
+
+    PROJECT.md: "Keine gelieferte Handzeichnung wird ueberschrieben." A
+    derived icon may replace a stand-in we borrowed; it may not replace
+    something that was drawn for us. docs/ASSET_REQUESTS.md is the loan
+    register and asset_worklist reads it, so ask that rather than guess.
+    """
+    if "rows" not in _cache:
+        try:
+            import asset_worklist
+            open_rows, _broken, _done = asset_worklist.build()
+        except Exception:
+            _cache["rows"] = None
+        else:
+            _cache["rows"] = {
+                r["id"].strip(" ,.").lower() for r in open_rows
+                if (r.get("standin") or "").startswith("items/")}
+    rows = _cache["rows"]
+    if rows is None:
+        return None                     # register unreadable: caller decides
+    return name.lower() in rows
+
+
 def run(cmd):
     p = subprocess.run(cmd, capture_output=True, text=True, cwd=REPO)
     return p.returncode, (p.stdout or "") + (p.stderr or "")
 
 
-def process(path, apply_it):
+def process(path, apply_it, overwrite_icons=False):
     stem = os.path.splitext(os.path.basename(path))[0]
     im = Image.open(path).convert("RGBA")
     rel, want, cands = target_for(stem, im.size)
@@ -285,10 +417,40 @@ def process(path, apply_it):
     preview = contact_sheet(fitted, stem, os.path.join(QA, stem + "_preview.png"))
     print("   preview  %s" % os.path.relpath(preview, REPO))
 
+    derived, item_rel = None, None
+    companion = companion_item(rel) if klass == "object" else None
+    if ok and companion:
+        item_rel, item_size, item_exists = companion
+        icon, note = icon_from_object_sheet(fitted, item_size)
+        print("   icon     %s: %s" % (item_rel, note))
+        if icon is not None:
+            icon.save(os.path.join(QA, stem + "_item_staged.png"))
+            icon_preview = contact_sheet(
+                icon, stem + " item icon",
+                os.path.join(QA, stem + "_item_preview.png"))
+            print("   preview  %s" % os.path.relpath(icon_preview, REPO))
+            # An icon that is still a borrowed stand-in may be paid back; one
+            # that was drawn for us is not ours to overwrite (PROJECT.md).
+            borrowed = icon_is_still_borrowed(os.path.splitext(
+                os.path.basename(item_rel))[0])
+            if not item_exists or borrowed or overwrite_icons:
+                derived = icon
+            elif borrowed is None:
+                print("   icon     KEPT: the loan register could not be read, "
+                      "so the shipped icon is left alone (--overwrite-icons)")
+            else:
+                print("   icon     KEPT: %s is not on the borrowed list, so it "
+                      "is our own art (--overwrite-icons to replace it)"
+                      % item_rel)
+
     if apply_it and ok:
         dest = os.path.join(RES, rel)
         fitted.save(dest)
         print("   APPLIED  -> %s" % rel)
+        if derived is not None:
+            derived.save(os.path.join(RES, item_rel))
+            print("   APPLIED  -> %s (icon cut from the sheet%s)"
+                  % (item_rel, "" if companion[2] else ", new file"))
         print("            remember: add it to generate_assets.py's CONVERTED")
         print("            guard, or the next generator run overwrites it")
     elif apply_it:
@@ -302,6 +464,9 @@ def main():
                     help="image files (default: everything in kk-sprites/)")
     ap.add_argument("--apply", action="store_true",
                     help="write passing files into src/main/resources")
+    ap.add_argument("--overwrite-icons", action="store_true",
+                    help="also replace an items/<name>.png that is NOT on the "
+                         "borrowed list -- i.e. art that was drawn for us")
     args = ap.parse_args()
     files = args.files
     if not files:
@@ -309,7 +474,7 @@ def main():
                        if f.lower().endswith(".png"))
     status = 0
     for f in files:
-        status |= process(f, args.apply)
+        status |= process(f, args.apply, args.overwrite_icons)
         print()
     print("previews in %s" % os.path.relpath(QA, REPO))
     return status

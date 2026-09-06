@@ -71,11 +71,36 @@ size stay exactly where vanilla put them; shape may deviate as long as it stays
 inside its cell; **no icons**; true pixel art on a tight palette; transparent
 background; exact canvas or an exact integer multiple.
 
-**No icons is deliberate.** The inventory/bestiary icon is cut from the
-finished sheet afterwards, so it always matches the sheet it represents. A
-hand-drawn icon would not. (Check whether `Mob.getMobIcon()` already covers the
-mob case before writing an extractor — `mobs/BorrowedMobIcon` on the
-`pmiygp` branch does exactly this for borrowed art.)
+**No icons is deliberate**, and for three different reasons — one per class.
+
+*Objects.* `asset_intake.py` cuts the inventory icon straight out of the
+finished sheet, so it cannot drift from the object it stands for. It cuts only
+where the cut is **1:1**: the first frame's art has to fit the 32×32 slot
+already, which it does for **34 of the 76** shipped object/item pairs (saplings,
+flowers, ground clutter, tabletop props). The other 42 are trees, furniture and
+multi-tile pieces whose world sprite is far bigger than a slot, and shrinking
+one is not an icon — `tools/asset_templates.py` (`template_item`) states the
+rule: *"a tree's icon is a compact glyph, not the 128×1024 world sheet scaled
+down."* Those still get **drawn**, and intake says which ones by name.
+
+*Mobs.* No extractor needed — **checked, not assumed** (2026-09-06): all 56
+registered mobs are covered already. 26 ship their own `mobs/icons/<id>.png`
+and none of those is on the borrowed list; 19 override `getMobIcon()` through
+`mobs/BorrowedMobIcon` (merged to `master` with
+`claude/mod-areas-quests-expansion-pmiygp`, so the old note about that branch is
+stale) and answer with the face of the body they wear; the remaining 11 are
+registered `countKillStat=false` — settlers, livestock, the mistserpent
+segments — and have no journal row to show an icon in. **The one thing to
+remember:** when a borrowed body is finally swapped for our own sheet, that
+mob's `getMobIcon()` override has to go *and* it needs a real
+`mobs/icons/<id>.png` in the same pass, or the journal shows the previous
+tenant's face.
+
+*Items.* Only some can be derived at all. Of the 32 open icon rows in
+`docs/ASSET_REQUESTS.md`, just four (`soulbasin`, `spectralorerock`,
+`ghostgravestone`, `spiritwillow`) belong to an object sheet to cut from. The
+other 28 are bars, ores, berries, cloth, armour pieces — free-standing icons
+with no sheet anywhere. **Those have to be drawn**; no tool can conjure them.
 
 ### 3. Generate — the manual step
 
@@ -88,12 +113,28 @@ into `art-inbox/`, named after the vanilla stand-in's basename, or
 ```sh
 python3 tools/asset_intake.py                   # report only, writes nothing
 python3 tools/asset_intake.py --apply           # ship what passed
+python3 tools/asset_intake.py --apply --overwrite-icons   # see the warning below
 ```
 
 It resolves the target, checks the size (exact, or an exact integer upscale it
 can downsample by taking the most common colour per block), counts colours,
 checks the background is really transparent, and writes a preview. It refuses
 what it cannot fix and says why.
+
+For an object sheet it then cuts the item icon (see §2) and writes a second
+preview, `<name>_item_preview.png`, so the icon is looked at on its own before
+it ships. The first frame is **measured, not assumed**: the smallest documented
+column pitch (32 / 64 / 128 px) whose seams the art does not run through wins,
+and when none is clean the whole sheet counts as one frame — a too-wide frame
+can only get the icon refused, while a too-narrow one would cut a trunk out of
+a canopy and call it an icon.
+
+`--apply` writes the icon only when it may: when `items/<name>.png` does not
+exist yet, or when `docs/ASSET_REQUESTS.md` still lists that icon as a borrowed
+stand-in. **An icon that is our own art is never overwritten** (`PROJECT.md`:
+"Keine gelieferte Handzeichnung wird ueberschrieben") — intake prints `icon
+KEPT` and moves on. `--overwrite-icons` lifts that guard; it is for a
+deliberate redraw, not for a routine run.
 
 **A generated sheet will not pass on the first try**, because generators do not
 honour cell geometry. Two stages fix that, in this order.
