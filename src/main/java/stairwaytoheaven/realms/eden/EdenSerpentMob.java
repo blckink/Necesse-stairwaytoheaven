@@ -56,6 +56,12 @@ public class EdenSerpentMob extends EdenHostileMob {
     public static final int ARMOR = EdenTiers.EDEN_ARMOR;
 
     /**
+     * Aggression range, the chaser tree's own range argument: the measured 480 x1.30 = 624
+     * (docs/BALANCE.md §10).
+     */
+    public static final int AGGRO_RANGE = EdenTiers.aggro(480);
+
+    /**
      * Drops, at Eden's x1.3 drop value.
      *
      * <p>The scale is the realm's common mob material and the fang is the rare
@@ -90,7 +96,7 @@ public class EdenSerpentMob extends EdenHostileMob {
     public void init() {
         super.init();
         this.ai = new BehaviourTreeAI<>(this,
-                new ConfusedCollisionPlayerChaserWandererAI<EdenSerpentMob>(null, 480, DAMAGE, 110, 40000) {
+                new ConfusedCollisionPlayerChaserWandererAI<EdenSerpentMob>(null, AGGRO_RANGE, DAMAGE, 110, 40000) {
                     @Override
                     public boolean attackTarget(EdenSerpentMob mob, Mob target) {
                         boolean hit = super.attackTarget(mob, target);

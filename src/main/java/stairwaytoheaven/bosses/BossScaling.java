@@ -90,6 +90,23 @@ public final class BossScaling {
      */
     public static final String TIER_KEY = "swhtier";
 
+    /**
+     * Keys the two ascension uplift percentages are stored under, next to the
+     * tier (docs/BALANCE.md §10).
+     *
+     * <p>They ride the same {@link ActiveBuff} GND map as the tier, so they are
+     * saved and networked by exactly the paths the class header already proves.
+     * {@link TierBuff#init} reads them with a DEFAULT OF 100, which is what
+     * makes this save-compatible: a boss already standing in the player's world
+     * was spawned before these keys existed, so it reads 100 and keeps the
+     * strength it was summoned at. Only a newly summoned boss is harder.
+     */
+    public static final String HEALTH_UPLIFT_KEY = "swhhpuplift";
+    public static final String DAMAGE_UPLIFT_KEY = "swhdmguplift";
+
+    /** Neutral uplift: the tier curve alone, and the default for an old save. */
+    public static final int NO_UPLIFT = 100;
+
     private static Buff pressure;
 
     private BossScaling() {
@@ -119,14 +136,17 @@ public final class BossScaling {
      * its unscaled health — 18 000 of a possible 57 240 — so the last thing
      * this does is top it back up.
      *
-     * @param tier the incursion tablet tier, from {@link SkyBossLadder.Boss}.
+     * @param boss the ladder row being summoned; carries both the incursion
+     *             tablet tier and the realm's §10 uplift.
      */
-    public static void apply(Mob mob, int tier) {
-        if (mob == null || pressure == null || tier <= 0) {
+    public static void apply(Mob mob, SkyBossLadder.Boss boss) {
+        if (mob == null || pressure == null || boss == null || boss.tier <= 0) {
             return;
         }
         ActiveBuff active = new ActiveBuff(pressure, mob, 0, null);
-        active.getGndData().setInt(TIER_KEY, tier);
+        active.getGndData().setInt(TIER_KEY, boss.tier);
+        active.getGndData().setInt(HEALTH_UPLIFT_KEY, boss.healthUplift);
+        active.getGndData().setInt(DAMAGE_UPLIFT_KEY, boss.damageUplift);
         mob.buffManager.addBuff(active, true);
         // The buff is in place, so getMaxHealth() now reports the scaled body.
         mob.setHealth(mob.getMaxHealth());
@@ -169,14 +189,18 @@ public final class BossScaling {
             if (tier <= 0) {
                 return;
             }
+            // Default 100 -- see HEALTH_UPLIFT_KEY. A boss saved before the
+            // §10 uplift existed stays at the strength it was summoned at.
+            int healthUplift = buff.getGndData().getInt(HEALTH_UPLIFT_KEY, NO_UPLIFT);
+            int damageUplift = buff.getGndData().getInt(DAMAGE_UPLIFT_KEY, NO_UPLIFT);
             // -1.0F because the buff manager starts these two modifiers at
             // 1.0F and ADDS each buff's value (Modifier.FLOAT_ADD_APPEND).
             // Vanilla's own incursion code stores the same increase for the
             // same reason -- BiomeMissionIncursionData.getHealthIncrease.
             buff.setModifier(BuffModifiers.MAX_HEALTH,
-                    SkyBossLadder.healthMultiplier(tier) - 1.0F);
+                    SkyBossLadder.healthMultiplier(tier) * healthUplift / 100.0F - 1.0F);
             buff.setModifier(BuffModifiers.ALL_DAMAGE,
-                    SkyBossLadder.damageMultiplier(tier) - 1.0F);
+                    SkyBossLadder.damageMultiplier(tier) * damageUplift / 100.0F - 1.0F);
         }
     }
 }

@@ -44,14 +44,39 @@ public final class EdenTiers {
     private EdenTiers() {
     }
 
-    /** Eden HP floor: Skyreach's 1000 x the summed incursion-3 health curve (1.52) → 1500. */
-    public static final int EDEN_HP = 1500;
+    /** Eden measured HP floor: Skyreach's 1000 x the summed incursion-3 health curve (1.52) → 1500. */
+    public static final int FLOOR_EDEN_HP = 1500;
 
-    /** Eden damage floor: 130 x the summed incursion-3 damage curve (1.29) = 167.7 → 165. */
-    public static final float EDEN_DAMAGE = 165.0F;
+    /** Eden measured damage floor: 130 x the summed incursion-3 damage curve (1.29) = 167.7 → 165. */
+    public static final float FLOOR_EDEN_DAMAGE = 165.0F;
 
-    /** Eden armour: one hand-walked step over the Skyreach's measured 40. */
-    public static final int EDEN_ARMOR = 45;
+    /** Eden measured armour floor: one hand-walked step over the Skyreach's measured 40. */
+    public static final int FLOOR_EDEN_ARMOR = 45;
+
+    /**
+     * Eden's rung of the ascension uplift (docs/BALANCE.md §10): x1.35 health.
+     *
+     * <p>Between the Skyreach's x1.30 and Steinfeld's x1.40 — the uplift rises
+     * outwards so the gap between neighbouring realms grows rather than
+     * shrinks. {@link SkyMobTiers} holds the same three knobs for the bands it
+     * owns and states the reasoning once.
+     */
+    public static final int UPLIFT_EDEN_HP = 135;
+
+    /** Eden damage uplift: x1.18, between the Skyreach's x1.15 and Steinfeld's x1.21. */
+    public static final int UPLIFT_EDEN_DAMAGE = 118;
+
+    /** Eden aggression-range uplift: x1.30. */
+    public static final int UPLIFT_EDEN_AGGRO = 130;
+
+    /** Eden HP: the measured 1500 x1.35 = 2025. */
+    public static final int EDEN_HP = FLOOR_EDEN_HP * UPLIFT_EDEN_HP / 100;
+
+    /** Eden damage: the measured 165 x1.18 = 194.7. */
+    public static final float EDEN_DAMAGE = FLOOR_EDEN_DAMAGE * UPLIFT_EDEN_DAMAGE / 100.0F;
+
+    /** Eden armour: the measured 45 x1.25 = 56. */
+    public static final int EDEN_ARMOR = FLOOR_EDEN_ARMOR * SkyMobTiers.UPLIFT_ARMOR / 100;
 
     /** Eden drop value, applied to loot quantities; raw incursion 3 is x1.45. */
     public static final float EDEN_DROP_VALUE = 1.3F;
@@ -84,5 +109,10 @@ public final class EdenTiers {
     /** A loot quantity lifted by Eden's x1.3 drop value. */
     public static int drop(int baseAmount) {
         return SkyMobTiers.drop(baseAmount, EDEN_DROP_VALUE);
+    }
+
+    /** A mob's own aggression range, lifted by Eden's x1.30; see {@link SkyMobTiers#aggro}. */
+    public static int aggro(int baseRange) {
+        return SkyMobTiers.aggro(baseRange, UPLIFT_EDEN_AGGRO);
     }
 }

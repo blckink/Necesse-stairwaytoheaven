@@ -67,6 +67,12 @@ public class GoldenHornetMob extends EdenHostileMob {
     public static final int ARMOR = EdenTiers.EDEN_ARMOR;
 
     /**
+     * Aggression range, the chaser tree's own range argument: the measured 520 x1.30 = 676
+     * (docs/BALANCE.md §10).
+     */
+    public static final int AGGRO_RANGE = EdenTiers.aggro(520);
+
+    /**
      * Drops, at Eden's x1.3 drop value. Golden Pollen is the realm's only
      * flying-mob material and the Eden Press's flux, so the hornet is a
      * resource and not only an interruption.
@@ -94,7 +100,7 @@ public class GoldenHornetMob extends EdenHostileMob {
     public void init() {
         super.init();
         this.ai = new BehaviourTreeAI<>(this,
-                new ConfusedCollisionPlayerChaserWandererAI<>(null, 520, DAMAGE, 60, 40000));
+                new ConfusedCollisionPlayerChaserWandererAI<>(null, AGGRO_RANGE, DAMAGE, 60, 40000));
     }
 
     /** It flies. BeeFollowingMob's own height, so it clears the same things. */

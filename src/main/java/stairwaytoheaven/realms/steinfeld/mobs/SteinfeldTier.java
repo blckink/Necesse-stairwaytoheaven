@@ -47,12 +47,29 @@ public final class SteinfeldTier {
     private SteinfeldTier() {
     }
 
-    /** Realm HP: the Skyreach floor of 1000 x 2.12, the summed incursion-5 health curve. */
-    public static final int HP = 2100;
-    /** Realm damage: the floor's 130 x 1.54 = 200.2, read as 200. */
-    public static final float DAMAGE = 200.0F;
-    /** Realm armour: one hand-walked step over Eden's 45, two over the measured 40. */
-    public static final int ARMOR = 50;
+    /** Measured HP floor: the Skyreach floor of 1000 x 2.12, the summed incursion-5 health curve. */
+    public static final int FLOOR_HP = 2100;
+    /** Measured damage floor: the Skyreach floor's 130 x 1.54 = 200.2, read as 200. */
+    public static final float FLOOR_DAMAGE = 200.0F;
+    /** Measured armour floor: one hand-walked step over Eden's 45, two over the measured 40. */
+    public static final int FLOOR_ARMOR = 50;
+
+    /**
+     * Steinfeld's rung of the ascension uplift (docs/BALANCE.md §10): x1.40
+     * health, between Eden's x1.35 and the Veil's x1.45.
+     */
+    public static final int UPLIFT_HP = 140;
+    /** Damage uplift: x1.21, between Eden's x1.18 and the Veil's x1.24. */
+    public static final int UPLIFT_DAMAGE = 121;
+    /** Aggression-range uplift: x1.35. */
+    public static final int UPLIFT_AGGRO = 135;
+
+    /** Realm HP: the measured 2100 x1.40 = 2940. */
+    public static final int HP = FLOOR_HP * UPLIFT_HP / 100;
+    /** Realm damage: the measured 200 x1.21 = 242. */
+    public static final float DAMAGE = FLOOR_DAMAGE * UPLIFT_DAMAGE / 100.0F;
+    /** Realm armour: the measured 50 x1.25 = 62. */
+    public static final int ARMOR = FLOOR_ARMOR * SkyMobTiers.UPLIFT_ARMOR / 100;
     /** Realm drop value, applied to loot quantities. */
     public static final float DROP_VALUE = 1.6F;
 
@@ -78,5 +95,10 @@ public final class SteinfeldTier {
     /** A loot quantity lifted by the realm's x1.6 drop value. */
     public static int drop(int baseAmount) {
         return SkyMobTiers.drop(baseAmount, DROP_VALUE);
+    }
+
+    /** A mob's own aggression range, lifted by the realm's x1.35; see {@link SkyMobTiers#aggro}. */
+    public static int aggro(int baseRange) {
+        return SkyMobTiers.aggro(baseRange, UPLIFT_AGGRO);
     }
 }

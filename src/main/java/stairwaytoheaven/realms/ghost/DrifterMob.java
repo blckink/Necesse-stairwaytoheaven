@@ -10,6 +10,7 @@ import necesse.entity.mobs.ai.behaviourTree.util.FlyingAIMover;
 import necesse.entity.mobs.hostile.DeepCaveSpiritMob;
 import necesse.inventory.lootTable.LootTable;
 import stairwaytoheaven.mobs.SkySpawnRules;
+import stairwaytoheaven.mobs.SkyMobTiers;
 
 /**
  * Drifter — the Aftergarden's ordinary dead, going nowhere in particular until
@@ -51,13 +52,19 @@ public class DrifterMob extends DeepCaveSpiritMob {
      * around Classic (VERIFIED [jar]). Vanilla's spirit is 225.
      */
     public static final MaxHealthGetter MAX_HEALTH =
-            new MaxHealthGetter(1120, 2100, 2800, 3640, 5040);
+            SkyMobTiers.scaled(SkyMobTiers.VEIL_HP);
 
     /** Ghost Realm row = <b>230 damage</b>. Vanilla's spirit hits for 65. */
-    public static final GameDamage DAMAGE = new GameDamage(230.0F);
+    public static final GameDamage DAMAGE = new GameDamage(SkyMobTiers.VEIL_DAMAGE);
 
     /** Ghost Realm row = <b>55 armour</b>. Vanilla's spirit wears 20. */
-    public static final int ARMOR = 55;
+    public static final int ARMOR = SkyMobTiers.VEIL_ARMOR;
+
+    /**
+     * Aggression range, the chaser tree's own range argument: the measured 448 x1.40 = 627
+     * (docs/BALANCE.md §10).
+     */
+    public static final int AGGRO_RANGE = SkyMobTiers.aggro(448, SkyMobTiers.UPLIFT_VEIL_AGGRO);
 
     public static LootTable lootTable = GhostLoot.standard();
 
@@ -74,7 +81,7 @@ public class DrifterMob extends DeepCaveSpiritMob {
     public void init() {
         super.init();
         this.ai = new BehaviourTreeAI<>(this,
-                new ConfusedCollisionPlayerChaserWandererAI<>(null, 448, DAMAGE, 100, 40000),
+                new ConfusedCollisionPlayerChaserWandererAI<>(null, AGGRO_RANGE, DAMAGE, 100, 40000),
                 new FlyingAIMover());
     }
 

@@ -26,6 +26,7 @@ import necesse.inventory.lootTable.LootTable;
 import necesse.inventory.lootTable.lootItem.ChanceLootItemList;
 import necesse.inventory.lootTable.lootItem.LootItem;
 import stairwaytoheaven.mobs.SkySpawnRules;
+import stairwaytoheaven.mobs.SkyMobTiers;
 
 /**
  * Fen Wraith — the Gloomfen's own dead, wading the murkwater and leaving a
@@ -140,7 +141,7 @@ public class FenWraithMob extends SpiritGhoulMob {
      * {@code AscendedGolemMob.MAX_HEALTH}'s 0.40 / 0.75 / 1.00 / 1.30 / 1.80
      * around Classic (VERIFIED [jar]). Vanilla's ghoul is 275.
      */
-    public static final MaxHealthGetter MAX_HEALTH = new MaxHealthGetter(1120, 2100, 2800, 3640, 5040);
+    public static final MaxHealthGetter MAX_HEALTH = SkyMobTiers.scaled(SkyMobTiers.VEIL_HP);
 
     /**
      * Ghost Realm rung (incursion tier 7) = 130 x 1.75 = 227.5, snapped onto the
@@ -148,7 +149,7 @@ public class FenWraithMob extends SpiritGhoulMob {
      * {@code CrystalGolemMob.damage} (VERIFIED [jar]). Vanilla builds 52 as a
      * local inside {@code SpiritGhoulMob.init}.
      */
-    public static final GameDamage DAMAGE = new GameDamage(230.0F);
+    public static final GameDamage DAMAGE = new GameDamage(SkyMobTiers.VEIL_DAMAGE);
 
     /**
      * The burning wake. Vanilla's pool is {@code GameDamage(38)} against a melee
@@ -156,7 +157,7 @@ public class FenWraithMob extends SpiritGhoulMob {
      * at that same ratio against our 230, the trail is 168, so dawdling in the
      * wake stays the mistake it was designed to be instead of a rounding error.
      */
-    public static final GameDamage POOL_DAMAGE = new GameDamage(168.0F);
+    public static final GameDamage POOL_DAMAGE = new GameDamage(SkyMobTiers.VEIL_DAMAGE * 73 / 100.0F);
 
     /** Vanilla's cadence, unchanged: one pool per 16 units run on dry land. */
     public static final double POOL_SPAWN_RUN_DISTANCE = 16.0;
@@ -172,7 +173,13 @@ public class FenWraithMob extends SpiritGhoulMob {
      * {@code CrystalArmadillo} and {@code AscendedBatMob}. Vanilla's ghoul
      * wears 20.
      */
-    public static final int ARMOR = 55;
+    public static final int ARMOR = SkyMobTiers.VEIL_ARMOR;
+
+    /**
+     * Aggression range, the chaser tree's own range argument: the measured 768 x1.40 = 1075
+     * (docs/BALANCE.md §10).
+     */
+    public static final int AGGRO_RANGE = SkyMobTiers.aggro(768, SkyMobTiers.UPLIFT_VEIL_AGGRO);
 
     /**
      * Veil essence is what a shade is made of and what the mod already drops
@@ -202,7 +209,7 @@ public class FenWraithMob extends SpiritGhoulMob {
         // against our own damage — SpiritGhoulMob.init's GameDamage(52) is a
         // local with no seam to write through.
         this.ai = new BehaviourTreeAI<>(this,
-                new ConfusedCollisionPlayerChaserWandererAI<>(null, 768, DAMAGE, 50, 40000));
+                new ConfusedCollisionPlayerChaserWandererAI<>(null, AGGRO_RANGE, DAMAGE, 50, 40000));
     }
 
     /**

@@ -67,6 +67,12 @@ public class DawnpiercerMob extends HostileMob {
     /** Measured 40 on {@code AscendedBatMob}/{@code NightSwarmBatMob}; armour has no role modifier. */
     public static final int ARMOR = SkyMobTiers.SKYREACH_ARMOR;
 
+    /**
+     * Aggression range, the chaser tree's own range argument: the measured 512 x1.25 = 640
+     * (docs/BALANCE.md §10).
+     */
+    public static final int AGGRO_RANGE = SkyMobTiers.aggro(512, SkyMobTiers.UPLIFT_SKYREACH_AGGRO);
+
     public DawnpiercerMob() {
         super(MAX_HEALTH);
         // Difficulty curve on vanilla's own ratios, so this rung holds on all
@@ -84,7 +90,7 @@ public class DawnpiercerMob extends HostileMob {
     @Override
     public void init() {
         super.init();
-        this.ai = new BehaviourTreeAI<>(this, new ConfusedCollisionPlayerChaserWandererAI<>(null, 512, damage, 70, 40000));
+        this.ai = new BehaviourTreeAI<>(this, new ConfusedCollisionPlayerChaserWandererAI<>(null, AGGRO_RANGE, damage, 70, 40000));
     }
 
     @Override

@@ -65,6 +65,15 @@ public class StormWispMob extends FlyingHostileMob {
     /** Measured 40 on {@code CrystalGolemMob}/{@code AscendedBatMob}; armour has no role modifier. */
     public static final int ARMOR = SkyMobTiers.SKYREACH_ARMOR;
 
+    /**
+     * Aggression range, the chaser tree's own range argument: the measured 448 x1.25 = 560. The SHOOTING range,
+     * argument 7 of the same constructor, is left at 384: a wisp that
+     * notices from further away but still has to close to fire is a
+     * harder wisp, one that snipes from 560 is a different mob
+     * (docs/BALANCE.md §10).
+     */
+    public static final int AGGRO_RANGE = SkyMobTiers.aggro(448, SkyMobTiers.UPLIFT_SKYREACH_AGGRO);
+
     public StormWispMob() {
         super(MAX_HEALTH);
         // Difficulty curve on vanilla's own ratios, so this rung holds on all
@@ -88,7 +97,7 @@ public class StormWispMob extends FlyingHostileMob {
         this.ai = new BehaviourTreeAI<>(
                 this,
                 new CollisionShooterPlayerChaserWandererAI<StormWispMob>(
-                        null, 448, damage, 100, CooldownAttackTargetAINode.CooldownTimer.CAN_ATTACK, 2200, 384, 40000) {
+                        null, AGGRO_RANGE, damage, 100, CooldownAttackTargetAINode.CooldownTimer.CAN_ATTACK, 2200, 384, 40000) {
                     public boolean shootAtTarget(StormWispMob mob, Mob target) {
                         if (StormWispMob.this.canAttack()) {
                             StormWispMob.this.startAttackCooldown();

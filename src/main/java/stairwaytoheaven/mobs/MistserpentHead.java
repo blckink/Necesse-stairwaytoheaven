@@ -155,7 +155,8 @@ public class MistserpentHead extends HostileWormMobHead<MistserpentBody, Mistser
      * It is a small step down, and the pass still makes the serpent far more
      * dangerous: see {@link #ARMOR} and {@link #HEAD_COLLISION}.
      */
-    public static final int MAX_HEALTH = 1400;
+    public static final int MAX_HEALTH =
+            SkyMobTiers.hp(SkyMobTiers.SKYREACH_HP, SkyMobTiers.ROLE_ELITE_HP);
 
     /**
      * 40 = the floor's armour exactly.
@@ -169,7 +170,7 @@ public class MistserpentHead extends HostileWormMobHead<MistserpentBody, Mistser
      * {@code m.getArmorFlat()} onto every coil each tick
      * (WormMobBody.java:155), so this one number armours the whole chain.
      */
-    public static final int ARMOR = 40;
+    public static final int ARMOR = SkyMobTiers.SKYREACH_ARMOR;
 
     /**
      * 130 on the head, and 130 on every coil.
@@ -208,9 +209,9 @@ public class MistserpentHead extends HostileWormMobHead<MistserpentBody, Mistser
      * {@link #getCollisionDamage(Mob, boolean, ServerClient)} below and in
      * {@link MistserpentBody}.
      */
-    public static final GameDamage HEAD_COLLISION = new GameDamage(130.0F);
+    public static final GameDamage HEAD_COLLISION = new GameDamage(SkyMobTiers.SKYREACH_DAMAGE);
     /** @see #HEAD_COLLISION — every coil hits at the floor too, and for why. */
-    public static final GameDamage BODY_COLLISION = new GameDamage(130.0F);
+    public static final GameDamage BODY_COLLISION = new GameDamage(SkyMobTiers.SKYREACH_DAMAGE);
 
     /**
      * Only in open Mistsea. The serpent swims the cloud sea; spawning it on an

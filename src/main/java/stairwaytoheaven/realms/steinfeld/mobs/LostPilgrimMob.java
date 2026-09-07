@@ -47,6 +47,12 @@ public class LostPilgrimMob extends DeepCaveSpiritMob {
     public static final int ARMOR = SteinfeldTier.ARMOR;
 
     /**
+     * Aggression range, the chaser tree's own range argument: the measured 448 x1.35 = 604
+     * (docs/BALANCE.md §10).
+     */
+    public static final int AGGRO_RANGE = SteinfeldTier.aggro(448);
+
+    /**
      * A pilgrim is what an Echo Shard comes from — {@code docs/WORLD_DESIGN.md}
      * §7 names the source directly ("Echo Shard (from ghost apparitions)") —
      * so this is the one guaranteed place to find them rather than a crate
@@ -77,7 +83,7 @@ public class LostPilgrimMob extends DeepCaveSpiritMob {
         // 448 search, same 100 knockback, same 40s wander, same FlyingAIMover,
         // against OUR damage rather than vanilla's shared baseDamage field.
         this.ai = new BehaviourTreeAI<>(this,
-                new ConfusedCollisionPlayerChaserWandererAI<>(null, 448, DAMAGE, 100, 40000),
+                new ConfusedCollisionPlayerChaserWandererAI<>(null, AGGRO_RANGE, DAMAGE, 100, 40000),
                 new FlyingAIMover());
     }
 

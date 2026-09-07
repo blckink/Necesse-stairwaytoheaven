@@ -28,6 +28,7 @@ import necesse.inventory.lootTable.lootItem.LootItem;
 import necesse.level.maps.Level;
 import necesse.level.maps.light.GameLight;
 import stairwaytoheaven.mobs.SkySpawnRules;
+import stairwaytoheaven.mobs.SkyMobTiers;
 
 /**
  * Rime Sentry — a piece of Skywatch frost machinery still standing on the
@@ -139,7 +140,7 @@ public class RimeSentryMob extends FrostSentryMob {
      * floor holds on every difficulty and not only on the one it was read off.
      * Vanilla's Frost Sentry is 120.
      */
-    public static final MaxHealthGetter MAX_HEALTH = new MaxHealthGetter(280, 525, 700, 910, 1260);
+    public static final MaxHealthGetter MAX_HEALTH = SkyMobTiers.scaled(SkyMobTiers.hp(SkyMobTiers.SKYREACH_HP, SkyMobTiers.ROLE_RANGED_HP));
 
     /**
      * Skyreach floor 130 damage ({@code CrystalGolemMob.damage}, VERIFIED [jar])
@@ -148,14 +149,21 @@ public class RimeSentryMob extends FrostSentryMob {
      * Vanilla's {@code FrostSentryMob.damage} is 17 and is deliberately left
      * alone — it is a shared static.
      */
-    public static final GameDamage DAMAGE = new GameDamage(110.0F);
+    public static final GameDamage DAMAGE = SkyMobTiers.damage(SkyMobTiers.SKYREACH_DAMAGE, SkyMobTiers.ROLE_RANGED_DAMAGE);
 
     /**
      * The floor's armour, unreduced: {@code CrystalGolemMob} sets 40, the
      * rolling {@code CrystalArmadillo} rolls at 40 and {@code AscendedBatMob}
      * wears 40 (VERIFIED [jar]). Vanilla's Frost Sentry wears 5.
      */
-    public static final int ARMOR = 40;
+    public static final int ARMOR = SkyMobTiers.SKYREACH_ARMOR;
+
+    /**
+     * Aggression range, the chaser tree's own range argument: the measured 352 x1.25 = 440. A stationary
+     * shooter's range IS its aggression range
+     * (docs/BALANCE.md §10).
+     */
+    public static final int AGGRO_RANGE = SkyMobTiers.aggro(352, SkyMobTiers.UPLIFT_SKYREACH_AGGRO);
 
     /**
      * Our sheet, filled by {@code SkyMobs.loadTextures} on the client only. It
@@ -266,7 +274,7 @@ public class RimeSentryMob extends FrostSentryMob {
     @Override
     public void init() {
         super.init();
-        this.ai = new BehaviourTreeAI<>(this, new StationaryPlayerShooterAI<RimeSentryMob>(352) {
+        this.ai = new BehaviourTreeAI<>(this, new StationaryPlayerShooterAI<RimeSentryMob>(AGGRO_RANGE) {
             @Override
             public void shootTarget(RimeSentryMob mob, Mob target) {
                 FrostSentryProjectile projectile = new FrostSentryProjectile(

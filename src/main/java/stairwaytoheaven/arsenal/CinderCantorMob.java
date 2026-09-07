@@ -33,6 +33,7 @@ import necesse.inventory.lootTable.lootItem.LootItem;
 import necesse.level.maps.Level;
 import necesse.level.maps.light.GameLight;
 import stairwaytoheaven.mobs.SkySpawnRules;
+import stairwaytoheaven.mobs.SkyMobTiers;
 
 /**
  * Cinder Cantor — a masked singer of the old rite, still walking the ash. The
@@ -115,7 +116,8 @@ public class CinderCantorMob extends AncientSkeletonMageMob {
      * 0.40 / 0.75 / 1.00 / 1.30 / 1.80 around Classic (VERIFIED [jar]).
      * Vanilla's mage is 400.
      */
-    public static final MaxHealthGetter MAX_HEALTH = new MaxHealthGetter(780, 1470, 1960, 2550, 3530);
+    public static final MaxHealthGetter MAX_HEALTH = SkyMobTiers.scaled(
+                    SkyMobTiers.hp(SkyMobTiers.VEIL_HP, SkyMobTiers.ROLE_RANGED_HP));
 
     /**
      * Ghost Realm rung 230 x 0.85 (ranged role) = 195.5, snapped onto the
@@ -123,7 +125,8 @@ public class CinderCantorMob extends AncientSkeletonMageMob {
      * {@code CrystalGolemMob.damage} (130, VERIFIED [jar]) run out to incursion
      * tier 7. Vanilla builds 90 inline inside its AI.
      */
-    public static final GameDamage DAMAGE = new GameDamage(195.0F);
+    public static final GameDamage DAMAGE = SkyMobTiers.damage(SkyMobTiers.VEIL_DAMAGE,
+            SkyMobTiers.ROLE_RANGED_DAMAGE);
 
     /**
      * Ghost Realm rung = <b>55 armour</b>. There is no armour array in
@@ -133,7 +136,13 @@ public class CinderCantorMob extends AncientSkeletonMageMob {
      * {@code CrystalArmadillo} and {@code AscendedBatMob}. Vanilla's mage
      * wears 25.
      */
-    public static final int ARMOR = 55;
+    public static final int ARMOR = SkyMobTiers.VEIL_ARMOR;
+
+    /**
+     * Aggression range, the chaser tree's own range argument: the measured 640 x1.40 = 896
+     * (docs/BALANCE.md §10).
+     */
+    public static final int AGGRO_RANGE = SkyMobTiers.aggro(640, SkyMobTiers.UPLIFT_VEIL_AGGRO);
 
     /**
      * Our body and both matching arm sheets, composed by
@@ -247,7 +256,7 @@ public class CinderCantorMob extends AncientSkeletonMageMob {
         // wander, 120.0F bolt at range 640 with 50 knockback, teleport on a 3s
         // cooldown within 7 tiles) against our own damage.
         ConfusedPlayerChaserWandererAI<CinderCantorMob> chaserAI =
-                new ConfusedPlayerChaserWandererAI<CinderCantorMob>(null, 640, 320, 40000, false, false) {
+                new ConfusedPlayerChaserWandererAI<CinderCantorMob>(null, AGGRO_RANGE, 320, 40000, false, false) {
                     @Override
                     public boolean attackTarget(CinderCantorMob mob, Mob target) {
                         if (!mob.canAttack()) {

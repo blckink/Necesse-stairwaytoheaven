@@ -45,6 +45,12 @@ public class StoneMournerMob extends AncientArmoredSkeletonMob {
     public static final int ARMOR = SteinfeldTier.ARMOR;
 
     /**
+     * Aggression range, the chaser tree's own range argument: the measured 512 x1.35 = 691
+     * (docs/BALANCE.md §10).
+     */
+    public static final int AGGRO_RANGE = SteinfeldTier.aggro(512);
+
+    /**
      * A mourner is made of the ground it stands on: mostly Pale Stone, with the
      * rare Grave Salt worked into the plate the way a real mourning-suit is
      * trimmed in black. Quantities at the realm's x1.6 drop value.
@@ -67,7 +73,7 @@ public class StoneMournerMob extends AncientArmoredSkeletonMob {
         // through -- the tree is rebuilt against OUR damage instead, on
         // vanilla's own shape: 512 search, 100 knockback, 40s wander.
         this.ai = new BehaviourTreeAI<>(this,
-                new ConfusedCollisionPlayerChaserWandererAI<>(null, 512, DAMAGE, 100, 40000));
+                new ConfusedCollisionPlayerChaserWandererAI<>(null, AGGRO_RANGE, DAMAGE, 100, 40000));
     }
 
     @Override

@@ -75,28 +75,111 @@ public final class SkyMobTiers {
     private SkyMobTiers() {
     }
 
-    /** Skyreach floor HP: {@code AscendedGolemMob.MAX_HEALTH} on CLASSIC. */
-    public static final int SKYREACH_HP = 1000;
-    /** Skyreach floor damage: {@code CrystalGolemMob.damage}, measured 130. */
-    public static final float SKYREACH_DAMAGE = 130.0F;
-    /** Skyreach floor armour: measured 40 on crystal/ascended golem and both ascended bats. */
-    public static final int SKYREACH_ARMOR = 40;
+    // ===== The measured floor =====
+    // These are the numbers §5 of docs/BALANCE.md derives from vanilla, and
+    // they do not move. They are kept as their own constants rather than folded
+    // into the shipped rows below so the derivation stays checkable: every
+    // shipped value is a floor times a percentage, and both halves are readable
+    // out of the built jar.
 
-    /** Ghost Realm (the Veil) HP: floor x2.80, the summed incursion-7 health curve. */
-    public static final int VEIL_HP = 2800;
-    /** Ghost Realm damage: floor x1.75 (the summed incursion-7 damage curve) rounded 227.5 → 230. */
-    public static final float VEIL_DAMAGE = 230.0F;
-    /** Ghost Realm armour: one step over the measured ascended 40. */
-    public static final int VEIL_ARMOR = 55;
+    /** Skyreach floor HP: {@code AscendedGolemMob.MAX_HEALTH} on CLASSIC. */
+    public static final int FLOOR_SKYREACH_HP = 1000;
+    /** Skyreach floor damage: {@code CrystalGolemMob.damage}, measured 130. */
+    public static final float FLOOR_SKYREACH_DAMAGE = 130.0F;
+    /** Skyreach floor armour: measured 40 on crystal/ascended golem and both ascended bats. */
+    public static final int FLOOR_SKYREACH_ARMOR = 40;
+
+    /** Ghost Realm (the Veil) floor HP: Skyreach x2.80, the summed incursion-7 health curve. */
+    public static final int FLOOR_VEIL_HP = 2800;
+    /** Veil floor damage: Skyreach x1.75 (summed incursion-7 damage curve) rounded 227.5 → 230. */
+    public static final float FLOOR_VEIL_DAMAGE = 230.0F;
+    /** Veil floor armour: one hand-walked step over the measured ascended 40. */
+    public static final int FLOOR_VEIL_ARMOR = 55;
+
+    /** Crooked Beyond floor HP: Skyreach x4.00, the summed incursion-10 health curve. */
+    public static final int FLOOR_CROOKED_HP = 4000;
+    /** Crooked floor damage: Skyreach x2.15, the summed incursion-10 damage curve → 280. */
+    public static final float FLOOR_CROOKED_DAMAGE = 280.0F;
+    /** Crooked floor armour: two hand-walked steps above the measured ascended 40. */
+    public static final int FLOOR_CROOKED_ARMOR = 60;
+
+    // ===== The ascension uplift =====
+    // docs/BALANCE.md §10. The player is through incursion 10 AND through the
+    // mod's own first pass, so the floor above is no longer a challenge — it is
+    // a starting line. Every band is lifted by its own percentage, and the
+    // percentages RISE outwards, so the gap between two neighbouring realms
+    // grows instead of shrinking. That is the whole reason there is one knob per
+    // band rather than one global multiplier: a global one preserves the old
+    // curve exactly, and the old curve is what was too flat at the top.
+    //
+    // Health carries the largest uplift because health only lengthens a fight.
+    // Damage carries the smallest because damage is what kills a player, and a
+    // 1.5x hit on a 280-damage mob would not be harder, it would be a different
+    // game. Armour is one rule for every band ({@link #UPLIFT_ARMOR}) since it
+    // was never on a vanilla curve to begin with.
+    //
+    // All arithmetic below is integer, so every shipped value is exactly
+    // reproducible: floor * percent / 100. scripts/balance_check.sh recomputes
+    // it from the jar rather than trusting the comment.
+
+    /** Skyreach health uplift: x1.30. */
+    public static final int UPLIFT_SKYREACH_HP = 130;
+    /** Skyreach damage uplift: x1.15. */
+    public static final int UPLIFT_SKYREACH_DAMAGE = 115;
+    /** Skyreach aggression-range uplift: x1.25. */
+    public static final int UPLIFT_SKYREACH_AGGRO = 125;
+
+    /** Veil / Ghost Realm health uplift: x1.45. */
+    public static final int UPLIFT_VEIL_HP = 145;
+    /** Veil / Ghost Realm damage uplift: x1.24. */
+    public static final int UPLIFT_VEIL_DAMAGE = 124;
+    /** Veil / Ghost Realm aggression-range uplift: x1.40. */
+    public static final int UPLIFT_VEIL_AGGRO = 140;
+
+    /** Crooked Beyond health uplift: x1.55, the steepest rung. */
+    public static final int UPLIFT_CROOKED_HP = 155;
+    /** Crooked Beyond damage uplift: x1.30. */
+    public static final int UPLIFT_CROOKED_DAMAGE = 130;
+    /** Crooked Beyond aggression-range uplift: x1.50. */
+    public static final int UPLIFT_CROOKED_AGGRO = 150;
+
+    /**
+     * Armour uplift, x1.25, the same in every band.
+     *
+     * <p>Armour is the one column §5 admits has no vanilla array behind it — it
+     * was walked up by hand, 40 / 45 / 50 / 55 / 60. Re-spacing it by a single
+     * factor keeps that hand-walked shape instead of inventing a second ladder:
+     * 50 / 56 / 62 / 68 / 75, still five even steps, still under nothing
+     * vanilla ships (the rolled-up {@code CrystalArmadillo} is 60).
+     */
+    public static final int UPLIFT_ARMOR = 125;
+
+    // ===== The shipped rows =====
+
+    /** Skyreach HP: the measured 1000 x1.30 = 1300. */
+    public static final int SKYREACH_HP = FLOOR_SKYREACH_HP * UPLIFT_SKYREACH_HP / 100;
+    /** Skyreach damage: the measured 130 x1.15 = 149.5. */
+    public static final float SKYREACH_DAMAGE =
+            FLOOR_SKYREACH_DAMAGE * UPLIFT_SKYREACH_DAMAGE / 100.0F;
+    /** Skyreach armour: the measured 40 x1.25 = 50. */
+    public static final int SKYREACH_ARMOR = FLOOR_SKYREACH_ARMOR * UPLIFT_ARMOR / 100;
+
+    /** Ghost Realm (the Veil) HP: the floor's 2800 x1.45 = 4060. */
+    public static final int VEIL_HP = FLOOR_VEIL_HP * UPLIFT_VEIL_HP / 100;
+    /** Ghost Realm damage: the floor's 230 x1.24 = 285.2. */
+    public static final float VEIL_DAMAGE = FLOOR_VEIL_DAMAGE * UPLIFT_VEIL_DAMAGE / 100.0F;
+    /** Ghost Realm armour: the floor's 55 x1.25 = 68. */
+    public static final int VEIL_ARMOR = FLOOR_VEIL_ARMOR * UPLIFT_ARMOR / 100;
     /** Ghost Realm drop value, applied to loot quantities; raw incursion 7 is x2.05. */
     public static final float VEIL_DROP_VALUE = 1.9F;
 
-    /** Crooked Beyond HP: floor x4.00, the summed incursion-10 health curve. */
-    public static final int CROOKED_HP = 4000;
-    /** Crooked Beyond damage: floor x2.15, the summed incursion-10 damage curve rounded to 280. */
-    public static final float CROOKED_DAMAGE = 280.0F;
-    /** Crooked Beyond armour: two deliberate steps above the measured ascended value of 40. */
-    public static final int CROOKED_ARMOR = 60;
+    /** Crooked Beyond HP: the floor's 4000 x1.55 = 6200. */
+    public static final int CROOKED_HP = FLOOR_CROOKED_HP * UPLIFT_CROOKED_HP / 100;
+    /** Crooked Beyond damage: the floor's 280 x1.30 = 364. */
+    public static final float CROOKED_DAMAGE =
+            FLOOR_CROOKED_DAMAGE * UPLIFT_CROOKED_DAMAGE / 100.0F;
+    /** Crooked Beyond armour: the floor's 60 x1.25 = 75. */
+    public static final int CROOKED_ARMOR = FLOOR_CROOKED_ARMOR * UPLIFT_ARMOR / 100;
     /** Crooked Beyond drop value: vanilla incursion tier 10 raises loot to x2.50. */
     public static final float CROOKED_DROP_VALUE = 2.5F;
 
@@ -139,9 +222,39 @@ public final class SkyMobTiers {
         return realmHealth * rolePercent / 100;
     }
 
-    /** A realm's damage floor with a role percentage applied, e.g. {@code damage(SKYREACH_DAMAGE, ROLE_FAST_DAMAGE)} = 104. */
+    /** A realm's damage floor with a role percentage applied, e.g. {@code damage(SKYREACH_DAMAGE, ROLE_FAST_DAMAGE)} = 119.6. */
     public static GameDamage damage(float realmDamage, int rolePercent) {
         return new GameDamage(realmDamage * (float) rolePercent / 100.0F);
+    }
+
+    /**
+     * A mob's own aggression range, lifted by its band's aggro uplift.
+     *
+     * <p><b>What "aggression range" is here, VERIFIED [jar].</b> Every chaser
+     * tree in the game takes it as its second constructor argument and hands it
+     * straight to the chaser node: {@code CollisionPlayerChaserWandererAI(
+     * Supplier, int range, GameDamage, int knockback, int wanderFrequency)}
+     * passes argument 2 into {@code CollisionPlayerChaserAI(int, GameDamage,
+     * int)}, {@code PlayerChaserWandererAI(Supplier, int range, int knockback,
+     * int wanderFrequency, boolean, boolean)} does the same, and
+     * {@code CollisionShooterPlayerChaserWandererAI} passes argument 2 into the
+     * chaser and its separate argument 7 into the SHOOTING node — so on a
+     * shooter it is argument 2, not 7, that decides when the mob starts caring.
+     * Read off the bytecode of all three with {@code javap -c}.
+     *
+     * <p><b>Why a per-mob base rather than one number per realm.</b> The ranges
+     * a mob ships with are not noise: 384 on the slow golem against 512 on the
+     * hounds is the difference between something you can walk around and
+     * something that commits. Multiplying each mob's own range keeps that
+     * shape and still moves the whole band, where a single per-realm range
+     * would flatten every mob in the realm into the same reach.
+     *
+     * @param baseRange the range the mob had before the uplift, in pixels
+     *                  (32 per tile).
+     * @param upliftPercent one of the {@code UPLIFT_*_AGGRO} constants.
+     */
+    public static int aggro(int baseRange, int upliftPercent) {
+        return baseRange * upliftPercent / 100;
     }
 
     /**

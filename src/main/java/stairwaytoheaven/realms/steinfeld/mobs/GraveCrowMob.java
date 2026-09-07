@@ -60,6 +60,12 @@ public class GraveCrowMob extends CrazedRavenMob {
     public static final int ARMOR = SteinfeldTier.ARMOR;
 
     /**
+     * Aggression range, the chaser tree's own range argument: the measured 480 x1.35 = 648
+     * (docs/BALANCE.md §10).
+     */
+    public static final int AGGRO_RANGE = SteinfeldTier.aggro(480);
+
+    /**
      * A grave crow works the treeline for what the wind carries loose: mostly
      * nothing, sometimes a scrap of Spirit Moss caught in a wing. Vanilla's
      * own raven feather and egg drops are replaced outright — a corvid here
@@ -79,7 +85,7 @@ public class GraveCrowMob extends CrazedRavenMob {
     public void init() {
         super.init();
         this.ai = new BehaviourTreeAI<>(this,
-                new ConfusedPlayerChaserWandererAI<GraveCrowMob>(() -> false, 480, 320, 20000, false, false) {
+                new ConfusedPlayerChaserWandererAI<GraveCrowMob>(() -> false, AGGRO_RANGE, 320, 20000, false, false) {
                     @Override
                     public boolean attackTarget(GraveCrowMob mob, Mob target) {
                         if (!mob.canAttack()) {

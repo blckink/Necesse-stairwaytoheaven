@@ -16,6 +16,7 @@ import necesse.entity.mobs.ai.behaviourTree.trees.ConfusedCollisionPlayerChaserW
 import necesse.entity.mobs.hostile.BoneWalkerMob;
 import necesse.inventory.lootTable.LootTable;
 import stairwaytoheaven.mobs.SkySpawnRules;
+import stairwaytoheaven.mobs.SkyMobTiers;
 
 /**
  * Headless Butler — still doing the rounds of a house that burned down, still
@@ -53,13 +54,19 @@ public class HeadlessButlerMob extends BoneWalkerMob {
 
     /** Ghost Realm row = <b>2800 HP</b> on Classic. Vanilla's walker is 175. */
     public static final MaxHealthGetter MAX_HEALTH =
-            new MaxHealthGetter(1120, 2100, 2800, 3640, 5040);
+            SkyMobTiers.scaled(SkyMobTiers.VEIL_HP);
 
     /** Ghost Realm row = <b>230 damage</b>. Vanilla builds 30 inline in its AI. */
-    public static final GameDamage DAMAGE = new GameDamage(230.0F);
+    public static final GameDamage DAMAGE = new GameDamage(SkyMobTiers.VEIL_DAMAGE);
 
     /** Ghost Realm row = <b>55 armour</b>. Vanilla's walker wears none. */
-    public static final int ARMOR = 55;
+    public static final int ARMOR = SkyMobTiers.VEIL_ARMOR;
+
+    /**
+     * Aggression range, the chaser tree's own range argument: the measured 512 x1.40 = 716
+     * (docs/BALANCE.md §10).
+     */
+    public static final int AGGRO_RANGE = SkyMobTiers.aggro(512, SkyMobTiers.UPLIFT_VEIL_AGGRO);
 
     /**
      * The last words. Three of them, so a graveyard full of butlers is not a
@@ -95,7 +102,7 @@ public class HeadlessButlerMob extends BoneWalkerMob {
         // write through. super.init() still runs first because it is what
         // rolls the mob's seasonal hat.
         this.ai = new BehaviourTreeAI<>(this,
-                new ConfusedCollisionPlayerChaserWandererAI<>(() -> false, 512, DAMAGE, 100, 40000));
+                new ConfusedCollisionPlayerChaserWandererAI<>(() -> false, AGGRO_RANGE, DAMAGE, 100, 40000));
     }
 
     @Override

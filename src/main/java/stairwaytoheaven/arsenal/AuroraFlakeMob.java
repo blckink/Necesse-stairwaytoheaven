@@ -27,6 +27,7 @@ import necesse.inventory.lootTable.lootItem.LootItem;
 import necesse.level.maps.Level;
 import necesse.level.maps.light.GameLight;
 import stairwaytoheaven.mobs.SkySpawnRules;
+import stairwaytoheaven.mobs.SkyMobTiers;
 
 /**
  * Aurora Flake — a drifting crystal that hangs over the shoals and throws
@@ -93,7 +94,7 @@ public class AuroraFlakeMob extends CryoFlakeMob {
      * — {@code AscendedGolemMob.MAX_HEALTH}'s 0.40 / 0.75 / 1.00 / 1.30 / 1.80
      * around Classic (VERIFIED [jar]). Vanilla's flake is 350.
      */
-    public static final MaxHealthGetter MAX_HEALTH = new MaxHealthGetter(240, 450, 600, 780, 1080);
+    public static final MaxHealthGetter MAX_HEALTH = SkyMobTiers.scaled(SkyMobTiers.hp(SkyMobTiers.SKYREACH_HP, SkyMobTiers.ROLE_FAST_HP));
 
     /**
      * Skyreach floor 130 damage ({@code CrystalGolemMob.damage}, VERIFIED [jar])
@@ -102,14 +103,21 @@ public class AuroraFlakeMob extends CryoFlakeMob {
      * {@code incursionDamage} (100) are both left alone — they are shared
      * statics that the real Cryo Flake reads.
      */
-    public static final GameDamage DAMAGE = new GameDamage(105.0F);
+    public static final GameDamage DAMAGE = SkyMobTiers.damage(SkyMobTiers.SKYREACH_DAMAGE, SkyMobTiers.ROLE_FAST_DAMAGE);
 
     /**
      * The floor's armour, unreduced: {@code CrystalGolemMob} sets 40, the
      * rolling {@code CrystalArmadillo} rolls at 40 and {@code AscendedBatMob}
      * wears 40 (VERIFIED [jar]). Vanilla's flake wears 20.
      */
-    public static final int ARMOR = 40;
+    public static final int ARMOR = SkyMobTiers.SKYREACH_ARMOR;
+
+    /**
+     * Aggression range, the chaser tree's own range argument: the measured 448 x1.25 = 560; the shooting
+     * range (argument 7) stays at 384
+     * (docs/BALANCE.md §10).
+     */
+    public static final int AGGRO_RANGE = SkyMobTiers.aggro(448, SkyMobTiers.UPLIFT_SKYREACH_AGGRO);
 
     /**
      * Our sheet, filled by {@code SkyMobs.loadTextures} on the client only. It
@@ -203,7 +211,7 @@ public class AuroraFlakeMob extends CryoFlakeMob {
         this.ai = new BehaviourTreeAI<>(
                 this,
                 new CollisionShooterPlayerChaserWandererAI<AuroraFlakeMob>(
-                        null, 448, DAMAGE, 100,
+                        null, AGGRO_RANGE, DAMAGE, 100,
                         CooldownAttackTargetAINode.CooldownTimer.CAN_ATTACK, 2000, 384, 40000) {
                     @Override
                     public boolean shootAtTarget(AuroraFlakeMob mob, Mob target) {

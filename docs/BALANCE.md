@@ -313,3 +313,154 @@ wrong:
   `docs/CURRENT_STATE.md` and in the classes themselves.
 - Every balance change should cite the section it implements, so a later reader
   can tell a deliberate ladder position from a number somebody liked.
+
+## 10. The ascension uplift (2026-09-07)
+
+**Status: VERIFIED [jar] + VERIFIED [run]** — every number below is read back
+out of the built jar by `scripts/balance_check.sh`, which is green. **Not
+player-confirmed:** nobody has fought a single one of these values.
+
+### Why
+
+Sections 3 to 7 above measured the mod's floor against vanilla's incursion tier
+1 and built a ladder from there. That was right when it was written, and it is
+still the right *shape* — but it was calibrated for a player arriving at the
+Skyreach, and the enemies were never raised again after the realms were built
+out. The floor became the whole game. The player asked for the enemies to be
+"deutlich schwerer", staggered by realm band so the curve does not tip.
+
+So §5's rows are now the **measured floor**, and what ships is
+`floor × uplift`. The floor does not move — it stays the checkable, vanilla-
+derived thing it was. The uplift is one number per band, and the numbers **rise
+outwards**, so the gap between two neighbouring realms grows rather than
+shrinks. A single global multiplier would have preserved the old curve exactly,
+and the old curve being too flat at the top is the problem.
+
+Health carries the largest uplift, because health only lengthens a fight.
+Damage carries the smallest, because damage is what kills a player: a ×1.55 hit
+on a 280-damage Crooked mob would not be harder, it would be a different game.
+Armour is a single ×1.25 for every band, since §5 already admits armour was
+walked up by hand and never sat on a vanilla curve.
+
+| realm band | HP uplift | damage uplift | armour uplift | aggro uplift |
+|---|---|---|---|---|
+| Skyreach | ×1.30 | ×1.15 | ×1.25 | ×1.25 |
+| Eden | ×1.35 | ×1.18 | ×1.25 | ×1.30 |
+| Steinfeld | ×1.40 | ×1.21 | ×1.25 | ×1.35 |
+| Ghost Realm / Veil | ×1.45 | ×1.24 | ×1.25 | ×1.40 |
+| Crooked Beyond | ×1.55 | ×1.30 | ×1.25 | ×1.50 |
+
+All arithmetic is integer (`floor * percent / 100`), so every shipped value is
+exactly reproducible rather than hand-rounded.
+
+### The realm rows, old and new
+
+| realm band | HP old → new | damage old → new | armour old → new |
+|---|---|---|---|
+| Skyreach | 1000 → **1300** | 130 → **149.5** | 40 → **50** |
+| Eden | 1500 → **2025** | 165 → **194.7** | 45 → **56** |
+| Steinfeld | 2100 → **2940** | 200 → **242** | 50 → **62** |
+| Ghost Realm / Veil | 2800 → **4060** | 230 → **285.2** | 55 → **68** |
+| Crooked Beyond | 4000 → **6200** | 280 → **364** | 60 → **75** |
+
+Where the constants live: `SkyMobTiers` (Skyreach, Veil, Crooked and the shared
+`UPLIFT_ARMOR`), `EdenTiers`, `SteinfeldTier`. The role modifiers of §6 are
+unchanged and still apply on top.
+
+### Every mob, old and new
+
+Read out of the jar by `scripts/balance_check.sh`. `—` in the aggro column means
+the mob has no aggression range of its own to lift (it inherits a vanilla AI
+tree); `960 (held)` is a deliberate exception, written down in the mob's own
+javadoc.
+
+| band | mob | role | HP | damage | armour | aggro range |
+|---|---|---|---|---|---|---|
+| Skyreach | SkystoneGolem | elite | 1400 → 1820 | 130 → 149.5 | 40 → 50 | 384 → 480 |
+| Skyreach | Galehound | fast | 600 → 780 | 104 → 119.6 | 40 → 50 | 512 → 640 |
+| Skyreach | ZephyrRay | fast | 600 → 780 | 104 → 119.6 | 40 → 50 | 512 → 640 |
+| Skyreach | Dawnpiercer | fast | 600 → 780 | 104 → 119.6 | 40 → 50 | 512 → 640 |
+| Skyreach | StormWisp | ranged | 700 → 910 | 110.5 → 127.1 | 40 → 50 | 448 → 560 |
+| Skyreach | AuroraFlake | fast | 600 → 780 | 105 → 119.6 | 40 → 50 | 448 → 560 |
+| Skyreach | RimeSentry | ranged | 700 → 910 | 110 → 127.1 | 40 → 50 | 352 → 440 |
+| Skyreach | MistserpentHead | elite | 1400 → 1820 | 130 → 149.5 | 40 → 50 | — |
+| Eden | JealousVine | standard | 1500 → 2025 | 165 → 194.7 | 45 → 56 | 560 → 728 |
+| Eden | EdenSerpent | standard | 1500 → 2025 | 165 → 194.7 | 45 → 56 | 480 → 624 |
+| Eden | BloomMaw | standard | 1500 → 2025 | 165 → 194.7 | 45 → 56 | 384 → 499 |
+| Eden | ForbiddenSerpent | elite | 2100 → 2835 | 165 → 194.7 | 45 → 56 | 640 → 832 |
+| Eden | GoldenHornet | fast | 900 → 1215 | 132 → 155.8 | 45 → 56 | 520 → 676 |
+| Steinfeld | StoneMourner | standard | 2100 → 2940 | 200 → 242 | 50 → 62 | 512 → 691 |
+| Steinfeld | HollowAngel | elite | 2940 → 4116 | 200 → 242 | 50 → 62 | — |
+| Steinfeld | GraveCrow | ranged | 1470 → 2058 | 170 → 205.7 | 50 → 62 | 480 → 648 |
+| Steinfeld | LostPilgrim | fast | 1260 → 1764 | 160 → 193.6 | 50 → 62 | 448 → 604 |
+| Veil | GloomShade | standard | 2800 → 4060 | 230 → 285.2 | 55 → 68 | 512 → 716 |
+| Veil | FenWraith | standard | 2800 → 4060 | 230 → 285.2 | 55 → 68 | 768 → 1075 |
+| Veil | CinderCantor | ranged | 1960 → 2842 | 195 → 242.4 | 55 → 68 | 640 → 896 |
+| Ghost | CoffinCrawler | standard | 2800 → 4060 | 230 → 285.2 | 55 → 68 | 512 → 716 |
+| Ghost | Drifter | standard | 2800 → 4060 | 230 → 285.2 | 55 → 68 | 448 → 627 |
+| Ghost | HeadlessButler | standard | 2800 → 4060 | 230 → 285.2 | 55 → 68 | 512 → 716 |
+| Ghost | MourningBride | elite | 3920 → 5684 | 230 → 285.2 | 55 → 68 | 448 → 627 |
+| Ghost | LanternWidow | ranged | 1960 → 2842 | 195 → 242.4 | 55 → 68 | 512 → 716 |
+| Ghost | SoulHound | fast | 1680 → 2436 | 184 → 228.2 | 55 → 68 | 512 → 716 |
+| Ghost | PossessedChair | standard | 2800 → 4060 | rolled | 55 → 68 | — |
+| Crooked | TonguePlant | standard | 4000 → 6200 | 280 → 364 | 60 → 75 | 960 (held) |
+| Crooked | DoorMimic | elite | 5600 → 8680 | rolled | 60 → 75 | — |
+
+Ten of these rows carried **literal** numbers before this pass — every Ghost
+Realm resident, plus the four arsenal mobs — so they could not have picked up a
+change to the tier holders at all. They were routed through the constants with
+identical values first, in the same commit, and only then lifted. That is why
+the "old" column matches what git revision `4a5cda0` shipped.
+
+### The five bosses, old and new
+
+The tier stays where §B4 put it. The uplift is a **second factor** on top,
+because vanilla's damage array runs out at tier 10 and then adds only
+`undefinedDamageScalingPerTier = 0.04F` per tier: walking the Crystal Dragon
+from tier 10 to tier 14 would take its health from ×4.00 to ×5.80 and its damage
+only from ×2.15 to ×2.31. Raising the tier therefore cannot make a boss hit
+harder, which is half of what this pass is for.
+
+| realm | boss | tier | final HP old → new | damage ×old → ×new |
+|---|---|---|---|---|
+| Skyreach | Cryo Queen | 8 | 57 240 → **74 412** | 1.87 → **2.15** |
+| Eden | Moonlight Dancer | 8 | 127 200 → **171 720** | 1.87 → **2.21** |
+| Steinfeld | Ascended Wizard | 9 | 157 520 → **220 528** | 2.00 → **2.42** |
+| Ghost Realm | Pest Warden | 9 | 161 100 → **233 595** | 2.00 → **2.48** |
+| Crooked Beyond | Crystal Dragon | 10 | 208 000 → **322 400** | 2.15 → **2.80** |
+
+The uplift travels on the same `ActiveBuff` GND map as the tier, under
+`swhhpuplift` / `swhdmguplift`, and `TierBuff.init` reads it with a **default of
+100**. That is what makes it save-compatible: a boss already standing in the
+player's world was summoned before those keys existed, reads 100, and keeps the
+strength it was summoned at. Only a newly summoned boss is harder.
+
+Boss **aggression range is unchanged**: all five are vanilla mobs spawned by
+string ID, and their AI trees are built by vanilla code the mod never enters.
+
+### How to check it
+
+```bash
+export NECESSE_GAME_DIR=/path/to/Necesse    # contains Server.jar
+./gradlew buildModJar
+scripts/balance_check.sh
+```
+
+It reads the statline out of the **built jar** by reflection and fails on any
+row that disagrees with its own table, on any value that is not strictly above
+the value it replaced, and on any role column that stops rising outwards across
+the five bands — "damit die Kurve nicht kippt", measured rather than asserted.
+It also greps the source for a chaser tree still carrying a numeric range
+literal, which is the one thing static-field reflection cannot see: a mob could
+declare `AGGRO_RANGE` and still hand its AI the old number. What the script
+cannot do is say whether any of this is *fun*; that needs the real client and
+belongs in `docs/PLAYTEST_LOG.md`.
+
+### Known gap
+
+`CrookedGolemMob`, `CrookedArmadilloMob` and `RareCrookedGolemMob` carry **no
+statline of their own at all** — they are vanilla reskins that inherit
+`CrystalGolemMob`'s 500 HP / 130 damage and `AscendedGolemMob`'s 1000. That
+predates this pass and is not fixed by it: three of the five Crooked Beyond
+enemies are therefore still standing at the Skyreach floor. It is the largest
+single hole left in the ladder.

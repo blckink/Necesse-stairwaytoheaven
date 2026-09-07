@@ -12,6 +12,7 @@ import necesse.entity.mobs.MaxHealthGetter;
 import necesse.entity.mobs.hostile.MimicMob;
 import necesse.inventory.lootTable.LootTable;
 import stairwaytoheaven.mobs.SkySpawnRules;
+import stairwaytoheaven.mobs.SkyMobTiers;
 
 /**
  * Possessed Chair — the piece of furniture in the manor that has been watching
@@ -52,10 +53,10 @@ public class PossessedChairMob extends MimicMob {
      * Vanilla's mimic is 600.
      */
     public static final MaxHealthGetter MAX_HEALTH =
-            new MaxHealthGetter(1120, 2100, 2800, 3640, 5040);
+            SkyMobTiers.scaled(SkyMobTiers.VEIL_HP);
 
     /** Ghost Realm row = <b>55 armour</b>. Vanilla's mimic wears 20. */
-    public static final int ARMOR = 55;
+    public static final int ARMOR = SkyMobTiers.VEIL_ARMOR;
 
     /** 230 x (14/63) rounded — the low end of vanilla's own dice, rescaled. */
     public static final int MIN_DAMAGE_ROLL = 51;

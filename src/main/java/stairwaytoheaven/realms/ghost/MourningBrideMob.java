@@ -20,6 +20,7 @@ import necesse.entity.mobs.buffs.ActiveBuff;
 import necesse.entity.mobs.hostile.ForestSpectorMob;
 import necesse.inventory.lootTable.LootTable;
 import stairwaytoheaven.mobs.SkySpawnRules;
+import stairwaytoheaven.mobs.SkyMobTiers;
 
 /**
  * Mourning Bride — the Aftergarden's elite, and the reason a guarded place in
@@ -66,17 +67,24 @@ public class MourningBrideMob extends ForestSpectorMob {
      * Vanilla's spector is 250.
      */
     public static final MaxHealthGetter MAX_HEALTH =
-            new MaxHealthGetter(1568, 2940, 3920, 5096, 7056);
+            SkyMobTiers.scaled(
+                    SkyMobTiers.hp(SkyMobTiers.VEIL_HP, SkyMobTiers.ROLE_ELITE_HP));
 
     /**
      * Ghost Realm row, <b>230 damage</b> — the elite modifier is x1.0 on
      * damage, because an elite is meant to be a longer fight and not a
      * one-shot.
      */
-    public static final GameDamage DAMAGE = new GameDamage(230.0F);
+    public static final GameDamage DAMAGE = new GameDamage(SkyMobTiers.VEIL_DAMAGE);
 
     /** Ghost Realm row = <b>55 armour</b>. Vanilla's spector wears 20. */
-    public static final int ARMOR = 55;
+    public static final int ARMOR = SkyMobTiers.VEIL_ARMOR;
+
+    /**
+     * Aggression range, the chaser tree's own range argument: the measured 448 x1.40 = 627
+     * (docs/BALANCE.md §10).
+     */
+    public static final int AGGRO_RANGE = SkyMobTiers.aggro(448, SkyMobTiers.UPLIFT_VEIL_AGGRO);
 
     /** Knockback on her touch, matching the realm's other melee attackers. */
     public static final float KNOCKBACK = 50.0F;
@@ -102,7 +110,7 @@ public class MourningBrideMob extends ForestSpectorMob {
     public void init() {
         super.init();
         this.ai = new BehaviourTreeAI<>(this,
-                new ConfusedPlayerChaserWandererAI<MourningBrideMob>(null, 448, 200, 40000, false, false) {
+                new ConfusedPlayerChaserWandererAI<MourningBrideMob>(null, AGGRO_RANGE, 200, 40000, false, false) {
                     @Override
                     public boolean canHitTarget(MourningBrideMob mob, float fromX, float fromY, Mob target) {
                         return ChaserAINode.hasLineOfSightToTarget(mob, fromX, fromY, -10.0F, target, 10.0F);

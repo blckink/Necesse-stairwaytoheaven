@@ -50,6 +50,12 @@ public class JealousVineMob extends EdenHostileMob {
     public static final int ARMOR = EdenTiers.EDEN_ARMOR;
 
     /**
+     * Aggression range, the chaser tree's own range argument: the measured 560 x1.30 = 728
+     * (docs/BALANCE.md §10).
+     */
+    public static final int AGGRO_RANGE = EdenTiers.aggro(560);
+
+    /**
      * Drops, at Eden's x1.3 drop value. Eden Sap is the plant material and the
      * vine is its most reliable source, which is what makes clearing the canopy
      * pay rather than merely cost.
@@ -78,7 +84,7 @@ public class JealousVineMob extends EdenHostileMob {
     public void init() {
         super.init();
         this.ai = new BehaviourTreeAI<>(this,
-                new ConfusedCollisionPlayerChaserWandererAI<>(null, 560, DAMAGE, 140, 40000));
+                new ConfusedCollisionPlayerChaserWandererAI<>(null, AGGRO_RANGE, DAMAGE, 140, 40000));
     }
 
     @Override

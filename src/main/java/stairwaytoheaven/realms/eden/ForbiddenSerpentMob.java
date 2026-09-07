@@ -55,6 +55,12 @@ public class ForbiddenSerpentMob extends EdenHostileMob {
     public static final int ARMOR = EdenTiers.EDEN_ARMOR;
 
     /**
+     * Aggression range, the chaser tree's own range argument: the measured 640 x1.30 = 832
+     * (docs/BALANCE.md §10).
+     */
+    public static final int AGGRO_RANGE = EdenTiers.aggro(640);
+
+    /**
      * Drops, at Eden's x1.3 drop value.
      *
      * <p>The Knowledge Cutting is the point of killing one: it is how a player
@@ -86,7 +92,7 @@ public class ForbiddenSerpentMob extends EdenHostileMob {
         super.init();
         this.canDespawn = false;
         this.ai = new BehaviourTreeAI<>(this,
-                new ConfusedCollisionPlayerChaserWandererAI<ForbiddenSerpentMob>(null, 640, DAMAGE, 150, 40000) {
+                new ConfusedCollisionPlayerChaserWandererAI<ForbiddenSerpentMob>(null, AGGRO_RANGE, DAMAGE, 150, 40000) {
                     @Override
                     public boolean attackTarget(ForbiddenSerpentMob mob, Mob target) {
                         boolean hit = super.attackTarget(mob, target);

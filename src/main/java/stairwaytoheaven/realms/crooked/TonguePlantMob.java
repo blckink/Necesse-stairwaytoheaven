@@ -75,6 +75,20 @@ public class TonguePlantMob extends DryadSentinelMob {
     public static final int ARMOR = SkyMobTiers.CROOKED_ARMOR;
 
     /**
+     * Aggression range, the chaser tree's own range argument: vanilla's 960,
+     * DELIBERATELY NOT lifted by the Crooked band's x1.50 (docs/BALANCE.md
+     * §10).
+     *
+     * <p>960 pixels is 30 tiles — already further than a player can see, let
+     * alone react to, so a plant that noticed at 45 tiles instead would play
+     * exactly the same and only the table would change. The constant exists
+     * anyway so scripts/balance_check.sh reads a number here rather than
+     * skipping the mob, and so the exception is written down where the mob is
+     * rather than as a name in a grep.
+     */
+    public static final int AGGRO_RANGE = 960;
+
+    /**
      * Vanilla's own wake radius, restated because {@link #serverTick()} relies
      * on it: {@code DryadSentinelMob.getNearestPlayer} uses
      * {@code checkInRange = 320} pixels, i.e. ten tiles.
@@ -123,7 +137,7 @@ public class TonguePlantMob extends DryadSentinelMob {
         super.init();
         this.isHostile = false;
         CollisionPlayerChaserWandererAI<TonguePlantMob> tree =
-                new CollisionPlayerChaserWandererAI<>(null, 960, DAMAGE, 200, 40000);
+                new CollisionPlayerChaserWandererAI<>(null, AGGRO_RANGE, DAMAGE, 200, 40000);
         tree.collisionPlayerChaserAI.collisionChaserAINode.attackMoveCooldown = 500;
         this.ai = new BehaviourTreeAI<>(this, tree, new AIMover());
     }

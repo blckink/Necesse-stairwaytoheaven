@@ -9,6 +9,7 @@ import necesse.entity.mobs.ai.behaviourTree.trees.ConfusedCollisionPlayerChaserW
 import necesse.entity.mobs.hostile.DesertCrawlerMob;
 import necesse.inventory.lootTable.LootTable;
 import stairwaytoheaven.mobs.SkySpawnRules;
+import stairwaytoheaven.mobs.SkyMobTiers;
 
 /**
  * Coffin Crawler — a box that was buried and has changed its mind, dragging
@@ -46,13 +47,19 @@ public class CoffinCrawlerMob extends DesertCrawlerMob {
      * Vanilla's crawler is 350.
      */
     public static final MaxHealthGetter MAX_HEALTH =
-            new MaxHealthGetter(1120, 2100, 2800, 3640, 5040);
+            SkyMobTiers.scaled(SkyMobTiers.VEIL_HP);
 
     /** Ghost Realm row = <b>230 damage</b>. Vanilla's crawler hits for 90. */
-    public static final GameDamage DAMAGE = new GameDamage(230.0F);
+    public static final GameDamage DAMAGE = new GameDamage(SkyMobTiers.VEIL_DAMAGE);
 
     /** Ghost Realm row = <b>55 armour</b>. Vanilla's crawler wears 20. */
-    public static final int ARMOR = 55;
+    public static final int ARMOR = SkyMobTiers.VEIL_ARMOR;
+
+    /**
+     * Aggression range, the chaser tree's own range argument: the measured 512 x1.40 = 716
+     * (docs/BALANCE.md §10).
+     */
+    public static final int AGGRO_RANGE = SkyMobTiers.aggro(512, SkyMobTiers.UPLIFT_VEIL_AGGRO);
 
     /** Vanilla's crawler drops nothing; this one was buried with grave goods. */
     public static LootTable lootTable = GhostLoot.ambusher();
@@ -67,7 +74,7 @@ public class CoffinCrawlerMob extends DesertCrawlerMob {
     public void init() {
         super.init();
         this.ai = new BehaviourTreeAI<>(this,
-                new ConfusedCollisionPlayerChaserWandererAI<>(null, 512, DAMAGE, 100, 40000));
+                new ConfusedCollisionPlayerChaserWandererAI<>(null, AGGRO_RANGE, DAMAGE, 100, 40000));
     }
 
     @Override

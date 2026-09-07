@@ -12,6 +12,7 @@ import necesse.entity.mobs.hostile.PhantomMob;
 import necesse.entity.projectile.PhantomBoltProjectile;
 import necesse.inventory.lootTable.LootTable;
 import stairwaytoheaven.mobs.SkySpawnRules;
+import stairwaytoheaven.mobs.SkyMobTiers;
 
 /**
  * Lantern Widow — she has been looking for him with that lamp for a long time,
@@ -55,13 +56,21 @@ public class LanternWidowMob extends PhantomMob {
      * 450.
      */
     public static final MaxHealthGetter MAX_HEALTH =
-            new MaxHealthGetter(784, 1470, 1960, 2548, 3528);
+            SkyMobTiers.scaled(
+                    SkyMobTiers.hp(SkyMobTiers.VEIL_HP, SkyMobTiers.ROLE_RANGED_HP));
 
     /** Ghost Realm row x0.85 (ranged) = <b>195 damage</b>. Vanilla's is 115. */
-    public static final GameDamage DAMAGE = new GameDamage(195.0F);
+    public static final GameDamage DAMAGE = SkyMobTiers.damage(SkyMobTiers.VEIL_DAMAGE,
+            SkyMobTiers.ROLE_RANGED_DAMAGE);
 
     /** Ghost Realm row = <b>55 armour</b>. Vanilla's phantom wears 30. */
-    public static final int ARMOR = 55;
+    public static final int ARMOR = SkyMobTiers.VEIL_ARMOR;
+
+    /**
+     * Aggression range, the chaser tree's own range argument: the measured 512 x1.40 = 716
+     * (docs/BALANCE.md §10).
+     */
+    public static final int AGGRO_RANGE = SkyMobTiers.aggro(512, SkyMobTiers.UPLIFT_VEIL_AGGRO);
 
     public static LootTable lootTable = GhostLoot.standard();
 
@@ -91,7 +100,7 @@ public class LanternWidowMob extends PhantomMob {
     public void init() {
         super.init();
         PlayerChaserWandererAI<LanternWidowMob> chaserAI =
-                new PlayerChaserWandererAI<LanternWidowMob>(null, 512, 512, 40000, true, false) {
+                new PlayerChaserWandererAI<LanternWidowMob>(null, AGGRO_RANGE, 512, 40000, true, false) {
                     @Override
                     public boolean canHitTarget(LanternWidowMob mob, float fromX, float fromY, Mob target) {
                         return true;

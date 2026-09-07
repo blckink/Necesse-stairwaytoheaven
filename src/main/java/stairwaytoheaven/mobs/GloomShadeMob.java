@@ -74,6 +74,12 @@ public class GloomShadeMob extends HostileMob {
     /** One realm step over the ascended 40 measured on golem and both bats. */
     public static final int ARMOR = SkyMobTiers.VEIL_ARMOR;
 
+    /**
+     * Aggression range, the chaser tree's own range argument: the measured 512 x1.40 = 716
+     * (docs/BALANCE.md §10).
+     */
+    public static final int AGGRO_RANGE = SkyMobTiers.aggro(512, SkyMobTiers.UPLIFT_VEIL_AGGRO);
+
     public GloomShadeMob() {
         super(MAX_HEALTH);
         // Difficulty curve on vanilla's own ratios, so this rung holds on all
@@ -95,7 +101,7 @@ public class GloomShadeMob extends HostileMob {
     @Override
     public void init() {
         super.init();
-        this.ai = new BehaviourTreeAI<>(this, new ConfusedCollisionPlayerChaserWandererAI<>(null, 512, damage, 80, 40000));
+        this.ai = new BehaviourTreeAI<>(this, new ConfusedCollisionPlayerChaserWandererAI<>(null, AGGRO_RANGE, damage, 80, 40000));
     }
 
     @Override

@@ -208,7 +208,7 @@ public class BossPortalObjectEntity extends ObjectEntity {
         level.entityManager.addMob(mob, spawnX, spawnY);
         // AFTER addMob, because that is where the engine runs Mob.init() and
         // sets the boss's health -- see BossScaling.apply.
-        BossScaling.apply(mob, boss.tier);
+        BossScaling.apply(mob, boss);
         return mob;
     }
 }

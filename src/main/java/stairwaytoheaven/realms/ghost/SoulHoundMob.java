@@ -9,6 +9,7 @@ import necesse.entity.mobs.ai.behaviourTree.trees.ConfusedCollisionPlayerChaserW
 import necesse.entity.mobs.hostile.JackalMob;
 import necesse.inventory.lootTable.LootTable;
 import stairwaytoheaven.mobs.SkySpawnRules;
+import stairwaytoheaven.mobs.SkyMobTiers;
 
 /**
  * Soul Hound — somebody's dog, still waiting, and it does not know the
@@ -42,13 +43,21 @@ public class SoulHoundMob extends JackalMob {
      * ratios (VERIFIED [jar]). Vanilla's jackal is 200.
      */
     public static final MaxHealthGetter MAX_HEALTH =
-            new MaxHealthGetter(672, 1260, 1680, 2184, 3024);
+            SkyMobTiers.scaled(
+                    SkyMobTiers.hp(SkyMobTiers.VEIL_HP, SkyMobTiers.ROLE_FAST_HP));
 
     /** Ghost Realm row x0.8 (fast) = <b>184 damage</b>. Vanilla's is 44. */
-    public static final GameDamage DAMAGE = new GameDamage(184.0F);
+    public static final GameDamage DAMAGE = SkyMobTiers.damage(SkyMobTiers.VEIL_DAMAGE,
+            SkyMobTiers.ROLE_FAST_DAMAGE);
 
     /** Ghost Realm row = <b>55 armour</b>. Vanilla's jackal wears 10. */
-    public static final int ARMOR = 55;
+    public static final int ARMOR = SkyMobTiers.VEIL_ARMOR;
+
+    /**
+     * Aggression range, the chaser tree's own range argument: the measured 512 x1.40 = 716
+     * (docs/BALANCE.md §10).
+     */
+    public static final int AGGRO_RANGE = SkyMobTiers.aggro(512, SkyMobTiers.UPLIFT_VEIL_AGGRO);
 
     /**
      * Vanilla's jackal drops NOTHING at all — its loot table is empty, because
@@ -70,7 +79,7 @@ public class SoulHoundMob extends JackalMob {
         // damage; JackalMob.init builds `new GameDamage(44.0F)` as a local
         // inside the constructor call, so there is no field to write through.
         this.ai = new BehaviourTreeAI<>(this,
-                new ConfusedCollisionPlayerChaserWandererAI<>(null, 512, DAMAGE, 100, 40000));
+                new ConfusedCollisionPlayerChaserWandererAI<>(null, AGGRO_RANGE, DAMAGE, 100, 40000));
     }
 
     @Override

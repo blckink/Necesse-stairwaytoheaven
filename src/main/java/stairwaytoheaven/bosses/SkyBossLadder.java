@@ -136,27 +136,50 @@ public final class SkyBossLadder {
         /** The incursion tablet tier this portal fights at (§B4). */
         public final int tier;
 
+        /**
+         * This realm's ascension health uplift, in percent, applied ON TOP of
+         * the tier curve (docs/BALANCE.md §10). 100 means the tier curve alone.
+         *
+         * <p>It is a second factor rather than a higher tier because vanilla's
+         * damage array RUNS OUT at tier 10 and then adds only
+         * {@code undefinedDamageScalingPerTier = 0.04F} per tier: walking the
+         * Crystal Dragon from tier 10 to tier 14 would take its health from
+         * x4.00 to x5.80 but its damage only from x2.15 to x2.31. Bumping the
+         * tier therefore cannot make a boss hit meaningfully harder, which is
+         * half of what this pass is for. Keeping the tier and multiplying
+         * afterwards leaves vanilla's verified curve untouched and puts the
+         * whole change in one legible number.
+         */
+        public final int healthUplift;
+
+        /** This realm's ascension damage uplift, in percent; see {@link #healthUplift}. */
+        public final int damageUplift;
+
         Boss(int realm, String mobStringID, String vanillaIncursion,
-                int baseHealthClassic, int tier) {
+                int baseHealthClassic, int tier, int healthUplift, int damageUplift) {
             this.realm = realm;
             this.mobStringID = mobStringID;
             this.vanillaIncursion = vanillaIncursion;
             this.baseHealthClassic = baseHealthClassic;
             this.tier = tier;
+            this.healthUplift = healthUplift;
+            this.damageUplift = damageUplift;
         }
 
         public float healthMultiplier() {
-            return SkyBossLadder.healthMultiplier(this.tier);
+            return SkyBossLadder.healthMultiplier(this.tier) * this.healthUplift / 100.0F;
         }
 
         public float damageMultiplier() {
-            return SkyBossLadder.damageMultiplier(this.tier);
+            return SkyBossLadder.damageMultiplier(this.tier) * this.damageUplift / 100.0F;
         }
 
         /**
-         * What the boss actually walks out with, for logs and for checking the
-         * ladder against §B4's "final HP" column: 57 240, 127 200, 157 520,
-         * 161 100, 208 000.
+         * What the boss actually walks out with, for logs and for
+         * scripts/balance_check.sh: 74 412, 171 720, 220 528, 233 595,
+         * 322 400. §B4's own column — 57 240, 127 200, 157 520, 161 100,
+         * 208 000 — is what the tier curve alone produces, i.e. these five
+         * numbers before the §10 uplift.
          */
         public int finalHealth() {
             return Math.round(this.baseHealthClassic * this.healthMultiplier());
@@ -166,8 +189,11 @@ public final class SkyBossLadder {
     /**
      * The ladder, indexed by realm. §B4's table, unchanged.
      *
-     * <p>It is monotone on purpose — 57k, 127k, 158k, 161k, 208k — so walking
-     * outwards is walking up. Which other incursion bosses are left unused, and
+     * <p>It is monotone on purpose — 74k, 172k, 221k, 234k, 322k — so walking
+     * outwards is walking up. The uplift column rises outwards too (130 / 135 /
+     * 140 / 145 / 155 percent, matching each realm's own mob uplift in
+     * {@link stairwaytoheaven.mobs.SkyMobTiers}), so the gaps widen rather than
+     * close. Which other incursion bosses are left unused, and
      * why, is recorded in §B4; nothing here should grow a row without that
      * document growing one first.
      */
@@ -178,31 +204,36 @@ public final class SkyBossLadder {
         // 18 000 = CryoQueenMob.BASE_MAX_HEALTH (:110) CLASSIC slot. Tier 8 ->
         // x3.18 = 57 240.
         BY_REALM[RealmDepth.REALM_SKYREACH] =
-                new Boss(RealmDepth.REALM_SKYREACH, "cryoqueen", "SnowDeepCaveIncursionBiome", 18000, 8);
+                new Boss(RealmDepth.REALM_SKYREACH, "cryoqueen", "SnowDeepCaveIncursionBiome",
+                        18000, 8, 130, 115);
 
         // Moon Arena -> MoonArenaIncursionBiome.java:29 super("moonlightdancer").
         // 40 000 = MoonlightDancerMob.MAX_HEALTH (:111) CLASSIC slot. Tier 8 ->
         // x3.18 = 127 200.
         BY_REALM[RealmDepth.REALM_EDEN] =
-                new Boss(RealmDepth.REALM_EDEN, "moonlightdancer", "MoonArenaIncursionBiome", 40000, 8);
+                new Boss(RealmDepth.REALM_EDEN, "moonlightdancer", "MoonArenaIncursionBiome",
+                        40000, 8, 135, 118);
 
         // Settlement Ruins -> SettlementRuinsIncursionBiome.java:46
         // super("ascendedwizard"). 44 000 = AscendedWizardMob.MAX_HEALTH (:167)
         // CLASSIC slot. Tier 9 -> x3.58 = 157 520.
         BY_REALM[RealmDepth.REALM_STEINFELD] =
-                new Boss(RealmDepth.REALM_STEINFELD, "ascendedwizard", "SettlementRuinsIncursionBiome", 44000, 9);
+                new Boss(RealmDepth.REALM_STEINFELD, "ascendedwizard", "SettlementRuinsIncursionBiome",
+                        44000, 9, 140, 121);
 
         // Swamp Deep Cave -> SwampDeepCaveIncursionBiome.java:31
         // super("pestwarden"). 45 000 = PestWardenHead.BASE_MAX_HEALTH (:107)
         // CLASSIC slot. Tier 9 -> x3.58 = 161 100.
         BY_REALM[RealmDepth.REALM_GHOST] =
-                new Boss(RealmDepth.REALM_GHOST, "pestwarden", "SwampDeepCaveIncursionBiome", 45000, 9);
+                new Boss(RealmDepth.REALM_GHOST, "pestwarden", "SwampDeepCaveIncursionBiome",
+                        45000, 9, 145, 124);
 
         // Crystal Hollow -> CrystalHollowIncursionBiome.java:28
         // super("crystaldragon"). 52 000 = CrystalDragonHead.MAX_HEALTH (:103)
         // CLASSIC slot. Tier 10 -> x4.00 = 208 000.
         BY_REALM[RealmDepth.REALM_CROOKED] =
-                new Boss(RealmDepth.REALM_CROOKED, "crystaldragon", "CrystalHollowIncursionBiome", 52000, 10);
+                new Boss(RealmDepth.REALM_CROOKED, "crystaldragon", "CrystalHollowIncursionBiome",
+                        52000, 10, 155, 130);
 
         // Hell: reserved, not built. §B4 holds mutanthydra (Scrapyard,
         // ScrapyardIncursionBiome.java:28; MutantHydraBossMob.MAX_HEALTH (:105)

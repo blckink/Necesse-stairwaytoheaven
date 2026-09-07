@@ -60,6 +60,12 @@ public class BloomMawMob extends EdenHostileMob {
     public static final GameDamage DAMAGE = EdenTiers.damage();
     public static final int ARMOR = EdenTiers.EDEN_ARMOR;
 
+    /**
+     * Aggression range, the chaser tree's own range argument: the measured 384 x1.30 = 499
+     * (docs/BALANCE.md §10).
+     */
+    public static final int AGGRO_RANGE = EdenTiers.aggro(384);
+
     /** Drops, at Eden's x1.3 drop value. Sap is the plant-side material. */
     public static LootTable lootTable = new LootTable(
             new ChanceLootItemList(0.80F, LootItem.between("edensap",
@@ -88,7 +94,7 @@ public class BloomMawMob extends EdenHostileMob {
         // three tiles: far enough that standing next to one is a mistake, short
         // enough that it can never hit you from off screen.
         this.ai = new BehaviourTreeAI<>(this,
-                new ConfusedPlayerChaserWandererAI<BloomMawMob>(null, 384, 96, -1, false, false) {
+                new ConfusedPlayerChaserWandererAI<BloomMawMob>(null, AGGRO_RANGE, 96, -1, false, false) {
                     @Override
                     public boolean attackTarget(BloomMawMob mob, Mob target) {
                         if (!mob.canAttack()) {
