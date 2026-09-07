@@ -91,6 +91,19 @@ beside rather than on those streets, non-rectangular room unions, doors,
 windows, dense functional furniture and clear circulation. Full catalogue and
 review rules: `docs/design/realm-poi-worldgen.md`.
 
+**And they now stand in the world — counted, not assumed.** From 2026-09-04 to
+2026-09-07 they were registered and largely absent, and no gate looked: the POI
+counts in `scripts/integration_test.sh` were the SURFACE catalogue's, a
+different system. `/skyreachstatus pois` (`RealmPoiCensus`) walks the whole
+realm disc through the placement decision itself and then through the preset
+regions the world really built, and the integration test fails on anything less
+than 13/13. Measured over six seeds on 2026-09-07: **13/13 on all of them**,
+~1,450 places in a 6144-tile disc, nearest one **126–430 tiles** from the
+arrival pad. `[run]`, not `[game]` — nothing has looked at one yet. Before the
+fix the same census read 11/13 and 419 tiles. What it does not check is whether
+a footprint's INTERIOR is solid: `validSite` samples nine points, so a 57×41
+Sky Town can still straddle Mistsea between them.
+
 Eden therefore has two buildings now. Its older Knowledge Grove, Lagoon Shrine
 and Orchard Ring cells still remain pressure/terrain sites rather than presets.
 

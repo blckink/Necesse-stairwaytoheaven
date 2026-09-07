@@ -15,6 +15,7 @@ import necesse.level.maps.Level;
 import stairwaytoheaven.SkyCloudmarbleSet;
 import stairwaytoheaven.SkyRegistry;
 import stairwaytoheaven.level.SkyLevel;
+import stairwaytoheaven.worldgen.pois.RealmPoiCensus;
 
 /**
  * Admin/debug command: forces the Skyreach to generate around the world origin
@@ -36,8 +37,11 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                 // "dump" prints the stamped spire tile by tile (SPIREMAP lines)
                 // so scripts can composite the real interior with real sprites:
                 // the only way to actually LOOK at what the preset built.
+                // "pois" runs the realm-POI census: how many of the thirteen
+                // inhabited places the world really stands up, and how far the
+                // nearest one is from the tile the stairway puts you on.
                 new necesse.engine.commands.CmdParameter("mode",
-                        new necesse.engine.commands.parameterHandlers.StringParameterHandler("", "cats", "dump"), true));
+                        new necesse.engine.commands.parameterHandlers.StringParameterHandler("", "cats", "dump", "pois"), true));
     }
 
     @Override
@@ -120,6 +124,9 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         diagnoseNetAudit(logs);
         diagnoseWorkstations(logs);
         diagnoseVoyages(server, logs);
+        if (mode.equals("pois")) {
+            RealmPoiCensus.run((SkyLevel) level, logs);
+        }
         locateFromPlayer((SkyLevel) level, serverClient, logs);
         logs.add("SKYREACH_STATUS_DONE");
     }

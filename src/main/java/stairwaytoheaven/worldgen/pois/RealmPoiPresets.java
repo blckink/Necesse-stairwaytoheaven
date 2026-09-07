@@ -82,6 +82,34 @@ public final class RealmPoiPresets {
         }
     }
 
+    /**
+     * Stable lowercase key per kind.
+     *
+     * <p>The census and the preset debug names share it, so a queued rectangle
+     * in the world can be traced back to the row of the catalogue that asked
+     * for it. Ordinals are not enough for that: the debug name is a string the
+     * engine hands back, and a number in it reads as an index into whatever the
+     * reader assumes. Append rather than rename — scripts grep these.
+     */
+    public static String key(int kind) {
+        switch (kind) {
+            case SKY_TOWER: return "skytower";
+            case SKY_TOWN: return "skytown";
+            case SKY_TOLL_BRIDGE: return "skytollbridge";
+            case SKY_INN: return "skyinn";
+            case EDEN_CROWN_GARDEN: return "edencrowngarden";
+            case EDEN_FERMENT_HOUSE: return "edenfermenthouse";
+            case STEINFELD_MEMORIAL: return "steinfeldmemorial";
+            case GHOST_ARCHIVE: return "ghostarchive";
+            case CROOKED_BAZAAR: return "crookedbazaar";
+            case HELL_BORDER_OFFICE: return "hellborderoffice";
+            case HELL_ADMINISTRATION: return "helladministration";
+            case HELL_FORGE: return "hellforge";
+            case HELL_CARNIVAL: return "hellcarnival";
+            default: throw new IllegalArgumentException("Unknown realm POI " + kind);
+        }
+    }
+
     public static int realm(int kind) {
         if (kind <= SKY_INN) return 0;
         if (kind <= EDEN_FERMENT_HOUSE) return 1;

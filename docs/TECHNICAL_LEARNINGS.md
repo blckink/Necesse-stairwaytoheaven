@@ -3345,3 +3345,61 @@ here`, and `portals in 512 tiles of the spire: 1` in the very next report.
   600.** "portals in 512 tiles of the spire: 0" straight after a status call
   measures the scan, not the mod. The number only means something once
   `/swhreset world` has generated the box.
+
+## A footprint that straddles a preset-region border is dropped twice, not placed once (VERIFIED [run], 2026-09-07)
+
+`WorldPresetsRegion` is 1024×1024 tiles, aligned to multiples of 1024 from the
+world origin (`startTileX = worldPresetRegionX * 64 * 16`, `tileWidth = 1024`),
+so preset regions tile the plane without overlap. `addToRegion` is called once
+per region, and a placer that iterates a coarser cell grid sees each border cell
+from **both** neighbours.
+
+The obvious guard against placing such a cell twice —
+
+```java
+if (x < startX || y < startY || x + width >= endX || y + height >= endY) continue;
+```
+
+— is not a de-duplication. It is a rejection *both* neighbours agree on, so the
+structure is placed **zero** times. Measured across a whole realm disc: **35% of
+every candidate site in the world**, and worst for the widest presets, because
+the probability a footprint of width *w* straddles a border is `w/1024` per
+axis. The 61-tile Hell Administration lost about 12% of its sites to that alone,
+compounded over two axes and two regions.
+
+What works is deciding ownership from **one point** — the site's centre, which
+exactly one region contains — and then nudging the footprint inside its owner:
+
+```java
+if (siteX < startX || siteX >= endX || siteY < startY || siteY >= endY) continue;
+int x = clamp(siteX - width / 2, startX, endX - width - 1);
+```
+
+`scripts/integration_test.sh` asserts `splitbyregion=0` so this cannot come
+back quietly.
+
+## `PlaceableWorldPreset.setDebugName` is how a census tells one preset's kinds apart (VERIFIED [run], 2026-09-07)
+
+`LevelPresetsRegion.addPreset` returns the placeable, and
+`getDebugName()` is `stringID + ":" + index + "@" + hash` plus, if
+`setDebugName` was called, `"\n" + name`. `getDebugData()` hands the whole queue
+back for a preset region **without generating a single tile**.
+
+One `WorldPreset` that places thirteen different structures therefore reports
+thirteen indistinguishable records until it names them. One chained call —
+
+```java
+region.addPreset(this, x, y, size, board, place).setDebugName(RealmPoiPresets.key(kind));
+```
+
+— is the difference between "the catalogue queued 1,452 things" and "the Sky
+Toll Bridge stands nowhere in this world". Reading a whole 6144-tile disc
+(169 preset regions) this way costs ~3 seconds.
+
+## `removeIfWithinSpawnRegionRange` only applies to the SURFACE (VERIFIED [source], 2026-09-07)
+
+`PlaceableWorldPreset`'s constructor sets it to
+`SpawnTileFinder.CLEAR_SPAWN_REGION_RANGE` for `LevelIdentifier.SURFACE_IDENTIFIER`
+and to `-1` for every other level. `SkySurfaceStatusCommand`'s census has to
+subtract presets blocked by the world spawn; a census on `skyreach2` must not,
+because nothing there is ever blocked that way.

@@ -218,6 +218,25 @@ for _ in $(seq 1 90); do
     sleep 2
 done
 
+# The thirteen inhabited places (swh_realmpois). Until 2026-09-07 NO gate looked
+# at them at all: the POI assertions above are skysurfacestatus's, which counts
+# the SURFACE catalogue -- a different system, with a different string ID. The
+# thirteen could have been generating zero times since they were registered on
+# 2026-09-04 and this test would still have printed "0 FAIL". It did, on
+# 2026-09-05, while the player was in the sky finding nothing.
+#
+# `pois` mode walks the whole realm disc twice: once through the placement
+# decision itself (RealmPoiWorldPreset.survey, the same function addToRegion
+# calls) for the funnel, and once through the preset regions the world really
+# built for the queue. Then it force-generates the nearest place and counts what
+# is standing in it, because a queued rectangle is not a building.
+echo "Running skyreachstatus pois (the thirteen inhabited places)..."
+echo "skyreachstatus pois" >&3
+for _ in $(seq 1 180); do
+    [ "$(grep -c SKYREACH_STATUS_DONE "$LOG")" -ge 5 ] && break
+    sleep 2
+done
+
 # The save-compatibility path, part 1 (docs/SAVE_COMPAT.md). Only the
 # NON-destructive halves run here, because everything after this point in phase
 # 1 and all of phase 2 asserts on progression that a reset would legitimately
@@ -492,6 +511,54 @@ grep -qE "realm check: scale=[0-9]+ .* 0=skyreach" "$LOG1" \
     || { echo "FAIL: depth 0 is not Skyreach -- the spawn realm moved"; STATUS=1; }
 grep -qE "realm check: .* 5800=hell" "$LOG1" \
     || { echo "FAIL: the far end of the realm field is not Hell"; STATUS=1; }
+
+echo "--- verifying the thirteen inhabited places actually stand ---"
+# The gate that did not exist until 2026-09-07. Every assertion here is on the
+# QUEUE the world built, not on the catalogue being registered -- registration
+# was never the problem. Measured over six seeds on 2026-09-07: 13/13 on all of
+# them, nearest place 126-430 tiles from the arrival pad.
+grep -qE "realmpoi census: .* kinds=13/13 " "$LOG1" \
+    || { echo "FAIL: the placer accepts no site at all for one of the thirteen inhabited places"; \
+         grep -aE "realmpoi kind .* accepted=0 " "$LOG1"; STATUS=1; }
+grep -qE "realmpoi census: .* queuedkinds=13/13 " "$LOG1" \
+    || { echo "FAIL: one of the thirteen inhabited places is in no preset region in the world"; \
+         grep -aE "realmpoi kind .* queued=0 " "$LOG1"; STATUS=1; }
+# ...named one by one, so a regression says WHICH place vanished rather than
+# only that the total slipped.
+for poi in skytower skytown skytollbridge skyinn edencrowngarden edenfermenthouse \
+    steinfeldmemorial ghostarchive crookedbazaar hellborderoffice helladministration \
+    hellforge hellcarnival; do
+    grep -qE "realmpoi kind $poi: .* queued=[1-9][0-9]* nearest=[0-9]+" "$LOG1" \
+        || { echo "FAIL: $poi stands nowhere in the world"; \
+             grep -aE "realmpoi kind $poi:" "$LOG1" | tail -1; STATUS=1; }
+done
+# ...and a floor per realm band, so a whole band cannot quietly empty out even
+# while every kind still appears somewhere.
+for band in skyreach eden steinfeld ghostrealm crookedbeyond hell; do
+    grep -qE "realmpoi funnel $band: candidates=[1-9][0-9]* accepted=[1-9][0-9]*" "$LOG1" \
+        || { echo "FAIL: the $band band stands up no inhabited place"; \
+             grep -aE "realmpoi funnel $band:" "$LOG1" | tail -1; STATUS=1; }
+done
+# The defect this pass fixed, asserted as an exact zero. A footprint straddling
+# a preset-region border used to be rejected by BOTH neighbours and vanish --
+# 35% of every candidate in the world, and worst for the widest presets. The
+# owning region is now decided by the site's centre and the footprint nudged
+# inside it, so this number has no reason ever to be non-zero again.
+grep -qE "realmpoi funnel .* splitbyregion=[1-9]" "$LOG1" \
+    && { echo "FAIL: candidates are being lost to preset-region borders again"; STATUS=1; }
+# The player has to find one on foot. Not "exists somewhere in a 12288-tile
+# world" -- within walking distance of the tile the stairway puts them on.
+NEAREST_POI="$(grep -aoE "realmpoi census: .* nearest=[a-z]+@[0-9]+" "$LOG1" | tail -1 | grep -oE "@[0-9]+$" | tr -d '@')"
+if [ -z "$NEAREST_POI" ]; then
+    echo "FAIL: no inhabited place anywhere near the arrival pad (nearest=NONE)"; STATUS=1
+elif [ "$NEAREST_POI" -gt 900 ]; then
+    echo "FAIL: the nearest inhabited place is $NEAREST_POI tiles from the arrival pad (limit 900)"; STATUS=1
+fi
+# ...and it has to be a building, not a queued rectangle. This is the one
+# assertion the queue itself cannot make.
+grep -qE "realmpoi stamp: .* objects=[1-9][0-9]*/" "$LOG1" \
+    || { echo "FAIL: the nearest inhabited place generated no objects at all"; \
+         grep -aE "realmpoi stamp:" "$LOG1" | tail -1; STATUS=1; }
 
 # ...and the five weapons must be real registered items with a name, not IDs.
 for arsenal_item in skyreave thunderhead prismcaller skywatchwhistle stormdisc; do

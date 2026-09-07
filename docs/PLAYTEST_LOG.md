@@ -564,3 +564,102 @@ connected. "The Skyreach is enterable" means the plane was minted in the existin
 world, its ground and biomes generated, the spire stamped with
 `door=cloudmarbledoor isDoor=true approach=[air air air air] clear=true`, and
 `wardens=1 cats=2` standing in it. It does not mean anyone has looked at it.
+
+---
+
+## 2026-09-07 (3) — the thirteen inhabited places, and the walk to the first one
+
+Not a play session. The standing complaint is the player's, from 2026-09-06:
+the thirteen realm POIs were registered on 2026-09-04 and **he never found
+one**. This entry records what a headless run measures about that, and the walk
+from the arrival pad to the nearest place — which is the closest an unrendered
+server can get to answering it.
+
+`/skyreachstatus pois` (new) walks the whole realm disc twice: once through the
+placement decision itself (`RealmPoiWorldPreset.survey`, the function
+`addToRegion` calls) and once through the preset regions the world really
+built. `scripts/integration_test.sh` drives it and fails on anything less than
+thirteen.
+
+### What the census found, before anything was changed
+
+| Band | candidates | accepted | lost to region borders | lost to ground |
+|---|---|---|---|---|
+| skyreach | 44 | **4** | 17 | 23 |
+| eden | 215 | 59 | 82 | 74 |
+| steinfeld | 269 | 97 | 100 | 72 |
+| ghostrealm | 434 | 108 | 162 | 164 |
+| crookedbeyond | 220 | 62 | 77 | 81 |
+| hell | 1112 | 187 | 369 | 556 |
+
+**11 of 13** kinds stood anywhere in that world; Sky Town and the Sky Toll
+Bridge stood nowhere at all, and the nearest place of any kind was 419 tiles
+from where the stairway puts you. Three defects, in the order they cost the
+most:
+
+1. **35% of every candidate in the world fell down the gap between two preset
+   regions.** The rule was "one region must contain the whole footprint", which
+   both neighbours of a straddling footprint answer no to — so it was dropped
+   twice rather than placed once. It hit the widest presets hardest, which is
+   Sky Town at 57 and Hell Administration at 61.
+2. **The kind was chosen before anyone looked at the ground.** One roll picked
+   one of the band's kinds, and if that kind did not fit, the cell was thrown
+   away — a cell that could have carried a Sky Inn was lost for being unable to
+   carry a Sky Tower.
+3. **One sample per site, against an ocean.** The Skyreach is islands over open
+   Mistsea; a single centred try threw away 22 of 34 home-band cells.
+
+### After the fix, six seeds
+
+Owning region decided by the site's centre and the footprint nudged inside it;
+the band's kinds tried in a rotated order, first that fits takes the site; 16
+placement attempts per kind (vanilla's own `findRandomPresetTile` uses 400).
+
+| seed | kinds standing | nearest place | tiles from the pad |
+|---|---|---|---|
+| 1542171856 | **13/13** | Sky Toll Bridge | 126 |
+| 1575612384 | **13/13** | Sky Toll Bridge | 131 |
+| 1483717428 | **13/13** | Sky Toll Bridge | 303 |
+| 1519141594 | **13/13** | Sky Town | 399 |
+| 1491118393 | **13/13** | Sky Tower | 430 |
+
+1,452 of 1,516 accepted sites are in the world's real queue; the other 64 lose
+their ground to the shared `villages` occupancy board, which is correct
+behaviour and now visible instead of silent.
+
+### The walk, seed 1542171856
+
+Arrival pad `-97,-149` (nine tiles south of the spire). Nearest place: a Sky
+Toll Bridge whose footprint starts at `-187,-59`, centre `-172,-48` — **126
+tiles as the crow flies, 75 west and 101 south.**
+
+There is a continuous walk. Flood-filling the real terrain
+(`SkyTerrainPainter.describeTile` via `scripts/SkyMapDump.java`, 400×400 tiles
+around the pair, treating anything that is not Mistsea as walkable) finds a
+**177-tile path with no cloud-sea crossing anywhere on it**:
+
+```
+  -97,-149  skyplinth   the pad itself
+ -117,-149  cloudturf   west off the spire grounds
+ -137,-149  skystone    the ridge west of the hub
+ -172,-144  skystone    turn south
+ -172,-124  cloudturf
+ -172,-104  skyroad + skyironFence   <- a built road, ~24 tiles of it
+ -172, -84  cloudturf
+ -172, -64  skyway      into the Skyway Passages
+ -172, -48  stormslate  the bridge
+```
+
+Composition of the path: 62 skystone, 59 cloudturf, **24 skyroad**, 20 skyway,
+10 stormslate. The narrowest the land gets along it is 31 tiles east–west, so
+it is not a knife-edge. The route leaves the pad **west**, then turns **south**
+and follows the existing road.
+
+| Area | Observation | Status |
+|---|---|---|
+| The thirteen inhabited places do not appear in the world | 11/13 before, 13/13 after, on six seeds | **FIXED — NOT YET PLAYER CONFIRMED** |
+| No gate covered them at all | `/skyreachstatus pois` + eight assertions in `scripts/integration_test.sh` | **FIXED** |
+| Nothing stands within walking distance of the arrival pad | 419 tiles before; 126–430 across six seeds after, and the test fails over 900 | **FIXED — NOT YET PLAYER CONFIRMED** |
+| The Sky Toll Bridge demanded a perfectly symmetric 31-tile strait | Measured on three seeds under the old rule: **0, 0 and 1** bridges in an entire world. It paints its own cloud stream, so the world only has to supply one to join | **FIXED** — one side, not both |
+| `validSite` samples nine points of a footprint, not its interior | A 57×41 Sky Town whose nine samples are land can still straddle Mistsea between them. Unchanged by this pass, and unmeasured | **OPEN** |
+| Does a place READ as a town? | Nothing here answers that. §13's limit: dedicated server, nothing rendered, nobody connected. `objects=44/713` for the bridge is a count, not a picture | **OPEN** |
