@@ -20,11 +20,11 @@ it is the state as it stands now.
 
 | realm | tiles out | biomes | hostiles | critters | animals | NPCs | live quests | POIs | boss |
 |---|---|---|---|---|---|---|---|---|---|
-| **Skyreach** | 0–1800 | 4 | 8 | 4 | 2 | 7 | 5 | 4 | `cryoqueen` t8 · 57 240 HP |
-| **Eden** | 600–2880 | 3 | 5 | **0** | 0 | 1 | 3 | 2 | `moonlightdancer` t8 · 127 200 HP |
-| **Steinfeld** | 1920–4200 | 3 | 4 | **0** | 0 | 1 | 2 | 1 | `ascendedwizard` t9 · 157 520 HP |
-| **Ghost Realm** | 2880–5280 | 5 | 9 | **0** | 0 | 4 | 4 | 1 | `pestwarden` t9 · 161 100 HP |
-| **Crooked Beyond** | 4200–5640 | 5 | 8 | 1 | 0 | 1 | 3 | 1 | `crystaldragon` t10 · 208 000 HP |
+| **Skyreach** | 0–1800 | 4 | 8 | 4 | 2 | 7 | 5 | 4 | `cryoqueen` t8 · 74 412 HP |
+| **Eden** | 600–2880 | 3 | 5 | **0** | 0 | 1 | 3 | 2 | `moonlightdancer` t8 · 171 720 HP |
+| **Steinfeld** | 1920–4200 | 3 | 4 | **0** | 0 | 1 | 2 | 1 | `ascendedwizard` t9 · 220 528 HP |
+| **Ghost Realm** | 2880–5280 | 5 | 9 | **0** | 0 | 4 | 4 | 1 | `pestwarden` t9 · 233 595 HP |
+| **Crooked Beyond** | 4200–5640 | 5 | 8 | 1 | 0 | 1 | 3 | 1 | `crystaldragon` t10 · 322 400 HP |
 | **Hell** | 4800–6000+ | **0** | 0 | 0 | 0 | 0 | 0 | 4 unreachable | — |
 
 Read down the "NPCs" and "live quests" columns and the shape of the mod is
@@ -116,7 +116,7 @@ so pre-0.5 saves deserialize.
 **POIs (4).** Sky Tower, Sky Town, Toll Bridge, Sky Inn — plus the Warden's
 Spire, the richest single building in the mod.
 
-**Boss.** Cryo Queen, incursion tier 8, 18 000 base → **57 240 HP**.
+**Boss.** Cryo Queen, incursion tier 8, 18 000 base → **74 412 HP**.
 
 ---
 
@@ -143,7 +143,7 @@ thinnest table in the mod. Eden's tables are also the only ones using plain
 **POIs (2).** Crown Garden, Ferment House. The older Knowledge Grove, Lagoon
 Shrine and Orchard Ring are terrain/pressure sites, not buildings.
 
-**Boss.** Moonlight Dancer, tier 8, 40 000 base → **127 200 HP**.
+**Boss.** Moonlight Dancer, tier 8, 40 000 base → **171 720 HP**.
 
 **Open holes.** No critters — the realm has no ambient life at all. Three of
 the five hostiles entered the bestiary on 2026-09-05 (`mobs/BorrowedMobIcon`);
@@ -184,7 +184,7 @@ which the Warden only offers once the whole Warden's Call is done.
 **POIs (1).** Steinfeld Memorial, plus the (unfurnished) Graveyard and Ruined
 Chapel shells.
 
-**Boss.** Ascended Wizard, tier 9, 44 000 base → **157 520 HP**.
+**Boss.** Ascended Wizard, tier 9, 44 000 base → **220 528 HP**.
 
 **Open holes.** Zero critters — §A3.4 asks for exactly the thing that would fix
 it (*"The ghosts here are mostly not enemies. Some simply stand. Some walk
@@ -230,7 +230,7 @@ Gloomfen and the Ashen Reach on purpose: Veil Essence only drops there.
 **POIs (1).** Ghost Archive, plus the Haunted Manor, Mausoleum and Sunken
 Graveyard shells.
 
-**Boss.** Pest Warden, tier 9, 45 000 base → **161 100 HP**.
+**Boss.** Pest Warden, tier 9, 45 000 base → **233 595 HP**.
 
 **Open holes.** No critters. The seven that had no bestiary row got one on
 2026-09-05 — each returns the face of the vanilla creature it subclasses
@@ -268,7 +268,7 @@ is the quietest ground outside Eden — deliberately, here.
 **POIs (1).** Crooked Bazaar, plus the Door Yard, Inverted House, Long Table
 and Crooked House shells.
 
-**Boss.** Crystal Dragon, tier 10, 52 000 base → **208 000 HP**.
+**Boss.** Crystal Dragon, tier 10, 52 000 base → **322 400 HP**.
 
 **Open holes.** Six materials (`oddwood`, `warpresin`, `strangefabric`,
 `eyeseed`, `stripedshell`, `realityshard`) that no recipe consumes.

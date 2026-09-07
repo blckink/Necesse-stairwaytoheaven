@@ -67,10 +67,12 @@ public class DoorMimicMob extends MimicMob {
     /** Crooked row armour, unreduced by the role. Vanilla's mimic wears 20. */
     public static final int ARMOR = SkyMobTiers.CROOKED_ARMOR;
 
-    /** Low end of the damage dice — see the class comment for the arithmetic. */
-    public static final int MIN_DAMAGE_ROLL = 62;
-    /** High end of the damage dice. 14 dice of 62..498 average 280. */
-    public static final int MAX_DAMAGE_ROLL = 498;
+    /** Low end of the damage dice — the realm row x (14/63); see the class comment. */
+    public static final int MIN_DAMAGE_ROLL =
+            Math.round(SkyMobTiers.CROOKED_DAMAGE * 14 / 63.0F);
+    /** High end of the damage dice — the realm row x (112/63); 14 dice average the row. */
+    public static final int MAX_DAMAGE_ROLL =
+            Math.round(SkyMobTiers.CROOKED_DAMAGE * 112 / 63.0F);
 
     /**
      * What a mimic is carrying.

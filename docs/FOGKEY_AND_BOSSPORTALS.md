@@ -95,6 +95,15 @@ which would buff the whole plane.
 | **Steinfeld** | `ascendedwizard` | Settlement Ruins | 44 000 | 9 | 157 520 |
 | **Ghost** | `pestwarden` | Swamp Deep Cave | 45 000 | 9 | 161 100 |
 | **Crooked** | `crystaldragon` | Crystal Hollow | 52 000 | 10 | 208 000 |
+
+> **The last column is now the tier curve alone, not what ships.** Since
+> 2026-09-07 each row also carries a per-realm ascension uplift on top —
+> ×1.30 / ×1.35 / ×1.40 / ×1.45 / ×1.55 — so the five bosses actually walk out
+> with **74 412 / 171 720 / 220 528 / 233 595 / 322 400 HP**. The uplift lives
+> in `SkyBossLadder.Boss`, is derived in `docs/BALANCE.md` §10, and is checked
+> against the built jar by `scripts/balance_check.sh`. The tiers below are
+> unchanged: the uplift is a second factor, because vanilla's damage array runs
+> out at tier 10.
 | **Hell** | `mutanthydra` | Scrapyard | 80 000 | later | reserved |
 
 Base HP is the CLASSIC world-difficulty column of each boss's

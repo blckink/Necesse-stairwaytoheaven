@@ -87,14 +87,19 @@ public class BalanceCheck {
                 1960, 2842, 195.0F, 242.42F, 55, 68, 512, 716),
         r("Ghost", "stairwaytoheaven.realms.ghost.SoulHoundMob", "fast",
                 1680, 2436, 184.0F, 228.16F, 55, 68, 512, 716),
+        // A mimic rolls 14 dice instead of carrying one GameDamage, so its
+        // damage column is the MEAN of MIN_DAMAGE_ROLL..MAX_DAMAGE_ROLL. Those
+        // two were literals until 2026-09-07 and did NOT follow the realm row;
+        // that is exactly the half-landed change this script exists to catch,
+        // and it is why they are checked rather than skipped.
         r("Ghost", "stairwaytoheaven.realms.ghost.PossessedChairMob", "standard",
-                2800, 4060, -1.0F, -1.0F, 55, 68, -1, -1),
+                2800, 4060, 230.0F, 285.0F, 55, 68, -1, -1),
 
         // --- Crooked Beyond, floor 4000 / 280 / 60, uplift 155 / 130 / 125 % ---
         r("Crooked", "stairwaytoheaven.realms.crooked.TonguePlantMob", "standard",
                 4000, 6200, 280.0F, 364.0F, 60, 75, 960, 960),
         r("Crooked", "stairwaytoheaven.realms.crooked.DoorMimicMob", "elite",
-                5600, 8680, -1.0F, -1.0F, 60, 75, -1, -1),
+                5600, 8680, 280.0F, 364.0F, 60, 75, -1, -1),
     };
 
     /** realm index | boss id | tier | old final HP | new final HP | old xdmg | new xdmg */
@@ -305,6 +310,20 @@ public class BalanceCheck {
             Field d = v.getClass().getField("damage");
             d.setAccessible(true);
             return (Float) d.get(v);
+        }
+        // A mimic has no GameDamage: MimicMob rolls damageDiceCount dice
+        // between two public non-final int fields. The mean is what the ladder
+        // row is written against, so the mean is what is checked.
+        Field lo = findField(c, "MIN_DAMAGE_ROLL");
+        Field hi = findField(c, "MAX_DAMAGE_ROLL");
+        if (lo != null && hi != null) {
+            lo.setAccessible(true);
+            hi.setAccessible(true);
+            try {
+                return ((Integer) lo.get(null) + (Integer) hi.get(null)) / 2.0F;
+            } catch (IllegalAccessException e) {
+                return -1.0F;
+            }
         }
         return -1.0F;
     }

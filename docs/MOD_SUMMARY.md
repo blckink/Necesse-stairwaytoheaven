@@ -283,11 +283,11 @@ permanenten Buff — nie über `LevelModifiers`, das würde die ganze Ebene buff
 
 | Realm | Boss | aus welcher Incursion | Basis-HP | Stufe | **finale HP** |
 |---|---|---|---|---|---|
-| Skyreach | `cryoqueen` — Cryo-Königin | Snow Deep Cave | 18 000 | 8 (×3,18) | **57 240** |
-| Eden | `moonlightdancer` — Mondlichttänzerin | Moon Arena | 40 000 | 8 (×3,18) | **127 200** |
-| Steinfeld | `ascendedwizard` — Aufgestiegener Magier | Settlement Ruins | 44 000 | 9 (×3,58) | **157 520** |
-| Ghost Realm | `pestwarden` — Pestwächter | Swamp Deep Cave | 45 000 | 9 (×3,58) | **161 100** |
-| Crooked Beyond | `crystaldragon` — Kristalldrache | Crystal Hollow | 52 000 | 10 (×4,00) | **208 000** |
+| Skyreach | `cryoqueen` — Cryo-Königin | Snow Deep Cave | 18 000 | 8 (×3,18, dazu Aufschlag ×1,30) | **74 412** |
+| Eden | `moonlightdancer` — Mondlichttänzerin | Moon Arena | 40 000 | 8 (×3,18, dazu Aufschlag ×1,35) | **171 720** |
+| Steinfeld | `ascendedwizard` — Aufgestiegener Magier | Settlement Ruins | 44 000 | 9 (×3,58, dazu Aufschlag ×1,40) | **220 528** |
+| Ghost Realm | `pestwarden` — Pestwächter | Swamp Deep Cave | 45 000 | 9 (×3,58, dazu Aufschlag ×1,45) | **233 595** |
+| Crooked Beyond | `crystaldragon` — Kristalldrache | Crystal Hollow | 52 000 | 10 (×4,00, dazu Aufschlag ×1,55) | **322 400** |
 | Hell | `mutanthydra` reserviert | Scrapyard | 80 000 | — | **nicht gebaut** |
 
 Die Leiter ist absichtlich monoton: nach außen laufen heißt nach oben laufen.

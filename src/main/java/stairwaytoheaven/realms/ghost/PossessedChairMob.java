@@ -58,10 +58,12 @@ public class PossessedChairMob extends MimicMob {
     /** Ghost Realm row = <b>55 armour</b>. Vanilla's mimic wears 20. */
     public static final int ARMOR = SkyMobTiers.VEIL_ARMOR;
 
-    /** 230 x (14/63) rounded — the low end of vanilla's own dice, rescaled. */
-    public static final int MIN_DAMAGE_ROLL = 51;
-    /** 230 x (112/63) rounded — the high end, rescaled. Mean lands on 230. */
-    public static final int MAX_DAMAGE_ROLL = 409;
+    /** The realm row x (14/63) — the low end of vanilla's own dice, rescaled. */
+    public static final int MIN_DAMAGE_ROLL =
+            Math.round(SkyMobTiers.VEIL_DAMAGE * 14 / 63.0F);
+    /** The realm row x (112/63) — the high end, rescaled. The mean lands on the row. */
+    public static final int MAX_DAMAGE_ROLL =
+            Math.round(SkyMobTiers.VEIL_DAMAGE * 112 / 63.0F);
 
     public static LootTable lootTable = GhostLoot.ambusher();
 
