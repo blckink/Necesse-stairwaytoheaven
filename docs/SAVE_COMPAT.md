@@ -21,6 +21,28 @@ nothing, and its destructive forms want the word `confirm`.
 
 ---
 
+## 0. First: which of the two questions are you asking?
+
+Everything below this section is about a world that **already ran an older build
+of this mod**. That is not the same question as installing the mod into a world
+that has only ever been vanilla and other mods, and the answers are opposite.
+
+| your world | what it is missing | what to do |
+|---|---|---|
+| never ran this mod | **nothing** | install it and play. `/swhreset` is not needed |
+| ran an older build | whatever that build did not know about, everywhere it has been | §1 onward |
+
+If your world never ran this mod, **§7 is your section** — skip §1–§6 entirely.
+The short version is that the mod adds exactly one level, `skyreach2`, your save
+does not contain it, and every part of the mod is created the first time it is
+asked for rather than at world creation. §7 names each part and where it is
+created; the run that measured it on two of the player's own saves is in
+`docs/PLAYTEST_LOG.md`, 2026-09-07.
+
+Everything from here to §6 assumes the other case.
+
+---
+
 ## 1. Why an old save is missing content, in one paragraph
 
 `SkyLevel.onRegionGenerated` fires **once per region, ever**. Guard packs, boss
@@ -169,6 +191,11 @@ Then play it in order. Everything below is reachable from a reset world:
 `/skyreachstatus`, `/edenstatus`, `/veilstatus` and `/skysurfacestatus` report
 what generated; `/swhreset` reports what progressed.
 
+**Testing it without a person in the chair.** `scripts/save_compat_check.sh
+<world-zip> [other-mods-dir]` copies a save, boots the dedicated server on the
+copy, walks it through the sequence above and asserts what came out. It works on
+an old mod save as well as on a mod-free one — §7 describes it in full.
+
 ## 4. The one migration that runs by itself
 
 `SkywatchQuestData.migrateLegacySave` — a **v1 (pre-0.5) save has no
@@ -205,6 +232,17 @@ lives on the surface, and this command does not look there.
 | 2026-09-03 | the region key pieces and their five quests | yes — the Warden hands them out on conversation |
 | 2026-09-04 | the 13 inhabited realm POIs | **no** — they paint ground |
 | earlier | terrain, biomes, tiles | **no** — walk further out |
+
+**One measured caveat on the boss-portal row.** On the player's live world
+(`Friemliburg`), `/swhreset world` walked its 4 225 regions, placed 23 mobs and
+reported `bossportals=+0`, and the count around the spire stayed at 0. The
+lattice says that box holds exactly one site. Either that site has no land under
+it in the ground the older build painted — in which case the retrofit is behaving
+exactly as this document says it does, because it never re-paints ground — or
+`placePortalAt` has a defect on already-generated ground. Nothing in the current
+debug commands can tell those apart; it needs a tile readout at the site.
+Recorded in `docs/PLAYTEST_LOG.md`, 2026-09-07 (2). Until it is settled, read
+this row as "yes, where there is ground to stand on".
 
 ---
 
@@ -247,18 +285,55 @@ has nothing to do on such a world either. `/swhreset` on it reports
 `stage=0 recruited=false`, which is the correct answer: the story has not
 started, and the player is meant to play it from the top.
 
-### Checking it, on a copy
+### And the other direction: taking the mod back out
 
-`scripts/save_compat_check.sh` is this section as a script. It boots the real
-1.3.3 server on a **copy** of a world, with the same mod set it was played with,
-and drives `skyreachstatus` — the same `world.getLevel(skyreach2)` the stairway
-makes one call deeper.
+Seen by accident while testing, and worth writing down because a player who
+tries the mod may well remove it again. A world that carries this mod's world
+data, opened **without** the mod, does not corrupt and does not refuse to load —
+but for each of our keys it prints
 
-```bash
-export NECESSE_GAME_DIR="/path/to/Necesse"   # Steam install: it has Server.jar
-./gradlew buildModJar
-scripts/save_compat_check.sh backup-saves-<date>/Player1/worlds/<World>.zip <other-mods-dir>
+```
+(ERR) Could not instantiate world data with id swhskyfall
+(ERR) java.lang.NullPointerException: ... WorldDataRegistry.getElement(String) is null
+	at necesse.engine.registries.WorldDataRegistry.loadWorldData(WorldDataRegistry.java:43)
+	at necesse.engine.world.WorldEntity.applyLoadData(WorldEntity.java:441)
 ```
 
-It copies the zip before opening it and never writes to the original. The run
-that first proved this is in `docs/PLAYTEST_LOG.md`.
+and carries on with that data **dropped**, then saves the world without it. So
+removing the mod is survivable for the surface world and destroys the mod's own
+progress — the Warden record, the region keys, the fog ledger. Re-installing
+later starts the chain again. That is vanilla's behaviour, not something this mod
+can catch, and the stack trace is not a bug in it.
+
+### Checking it, on a copy
+
+`scripts/save_compat_check.sh` is this section as a script. It boots the
+dedicated server on a **copy** of a world, optionally with the same mod set it
+was played with, and asserts the table above rather than only reading it:
+
+```bash
+export NECESSE_GAME_DIR=/path/to/necesse-server-1-3-3   # the dedicated server
+./gradlew buildModJar
+scripts/save_compat_check.sh backup-saves-<date>/Player1/worlds/<World>.zip [other-mods-dir]
+```
+
+Two phases. **A** asks for the Skyreach (`skyreachstatus` — the same
+`world.getLevel(skyreach2)` the stairway makes one call deeper), generates ground
+out in the other realm bands (`edenstatus`, `veilstatus`), then walks the box
+around the spire (`swhreset world`) and reads the report on both sides of it.
+**B** restarts on the same world and walks the identical box again, which must
+place nothing.
+
+What it then checks: the plane and its regions reached the disk; the preset
+catalogue's own records on `skyreach2` (`LevelPresetsRegion` writes each
+generated preset's stringID, so this reads `swh_realmpois` and `swh_crookedhouse`
+off disk rather than inferring them from tiles); a boss portal and a resident
+claim exist where the plane is new; the surface half's region, player and
+settlement file counts are unchanged; and no exception names this mod. Other
+mods' errors are printed and **not** failed on — they are not ours to fix, and
+failing on them would make the check useless in exactly the situation it exists
+for.
+
+It copies the zip before opening it and never writes to the original, so it is
+safe to aim at a backup. Aim it at a backup. The runs that proved this are in
+`docs/PLAYTEST_LOG.md`, 2026-09-07.

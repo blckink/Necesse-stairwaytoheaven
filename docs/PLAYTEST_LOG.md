@@ -466,3 +466,101 @@ loaded fine, `Skyreach OK: class=SkyLevel identifier=skyreach2`, 0 exceptions,
 generated before boss portals shipped on 2026-09-03, and `/swhreset world` is
 what repairs it. **NOT PLAYER CONFIRMED** — nobody has opened either world in the
 real client with this build.
+
+---
+
+## 2026-09-07 (2) — the same two worlds, second run: persistence, and one correction
+
+Two sessions were dispatched at point 2n and ran in parallel without knowing it.
+The entry above is the first one. This is the second, and it is kept because it
+measures three things the first did not — and corrects one line of it.
+
+The two harnesses have been folded into one: `scripts/save_compat_check.sh` keeps
+its name, its copy-before-open rule and its optional other-mods directory, and
+gained a second phase and the assertions below. There is no
+`scripts/existing_save_test.sh`.
+
+### What is new here
+
+**1. It survives being written to disk.** The first run stopped after one boot.
+This one saves, restarts on the same world and re-walks the identical box:
+
+```
+[2026-09-07 16:01:09] Skyreach OK: class=SkyLevel identifier=skyreach2 dimension=1 isCave=false
+[2026-09-07 16:01:09] quest: stage=0 spirePlaced=true recruited=false spire=-568,-151 ...
+[2026-09-07 16:01:11]   regions=4225 mobs=+0 bossportals=+0
+[2026-09-07 16:01:11]   claims residents=[mortimersettler, ossiansettler, caspernsettler, magpiesettler, eleanorsettler, haldasettler, knottsettler]
+[2026-09-07 16:01:11]   portals in 512 tiles of the spire: 1
+```
+
+The resident claims are the load-bearing line: they live in `SkywatchWorldData`
+in `world.dat`, so reading them back after a restart is real persistence rather
+than re-generation.
+
+**2. `swh_realmpois` is now read off disk, by name.** The first run inferred it
+from `Starting to load level presets region skyreach2`, which proves the preset
+system ran but not that our catalogue placed anything. `LevelPresetsRegion`
+writes each generated preset's `presetStringID` into
+`levels/presets/<level>/RxC.dat`, so the saved world can be asked directly. On
+Friemlingen, after generating ground in the Eden and Ghost/Crooked bands as well
+as around the spire:
+
+```
+the catalogue's own records on skyreach2:  13 swh_crookedhouse  3 swh_crookedrealm  2 swh_realmpois
+```
+
+Worth knowing for anyone who probes this again: **the catalogue is very thin near
+the spire.** A fully explored sky (Friemliburg, 17 preset regions) holds 130
+`swh_crookedhouse` records against 8 `swh_realmpois`. A 1024-box around the
+origin is simply not a place where the rarer one can be expected to appear, and a
+check that demands it there fails on chance rather than on a defect.
+
+**3. The surface half is measured, not assumed.** Region, player and settlement
+file counts are taken from the untouched source zip and again from the saved
+world. Friemlingen `surfaceRegions=11 players=4 settlements=2` before and after;
+Friemliburg `31 / 3 / 2` before and after. `docs/DESIGN_DECISIONS.md`'s rule held.
+
+### The correction
+
+The entry above says Friemliburg's `portals in 512 tiles of the spire: 0` is
+"§6's known gap … and `/swhreset world` is what repairs it". **The retrofit was
+run on that world and it did not repair it:**
+
+```
+[2026-09-07 15:59:06] swhreset world: repairing 1024x1024 tiles around the Warden's Spire (-346,98)
+[2026-09-07 15:59:06]   regions=4225 mobs=+23 bossportals=+0
+[2026-09-07 15:59:06] swhreset: reporting only. Nothing was changed.
+[2026-09-07 15:59:06]   portals in 512 tiles of the spire: 0
+```
+
+`mobs=+23` shows the retrofit was working on that ground, so this is not a walk
+that silently did nothing. The lattice was computed offline for both worlds
+(`BossPortalObject.PORTAL_CELL=600`, `PORTAL_CHANCE=0.35`, one lattice per realm
+at `SALT_PORTAL + realm*SALT_STRIDE`, sites filtered to their own realm band):
+
+| world | sky seed | spire | portal sites inside the 1024-box |
+|---|---|---|---|
+| Friemlingen (`EARPH`) | 1560694368 | -568,-152 | **1**, at -444,337 → placed |
+| Friemliburg (`baPYC`) | 1535057781 | -346,98 | **1**, at -834,-251 → **not placed** |
+
+So exactly one site each, and only the world with new ground got its portal. Two
+explanations fit and this run cannot tell them apart: either that site has no
+land under it in the ground the **older** build painted (in which case the
+retrofit is correct — it never re-paints ground, so a portal cannot stand on the
+cloud sea), or `placePortalAt` has a defect on already-generated ground.
+Distinguishing them needs a tile readout at -834,-251, which no debug command
+prints today.
+
+| Area | Observation | Status |
+|---|---|---|
+| The four parts survive a save/load round trip | Restart + re-walk reports `mobs=+0 bossportals=+0` and the same portal and resident counts | **FIXED — NOT YET PLAYER CONFIRMED** |
+| `/swhreset world` did not put a boss portal into the player's live world | One site exists in that box and it stayed empty. Not distinguished from correct behaviour — see above | **OPEN** |
+| `(ERR) Tried to stop root performance timer`, 13 lines | Only during `/swhreset world` on Friemliburg, i.e. only when the retrofit walks regions loaded **from disk**. Zero on Friemlingen and zero in all three phases of `integration_test.sh`, so it correlates with old ground, not with the retrofit as such. Not an exception; the world saved and reloaded cleanly | **OPEN** |
+| Orphan levels from older builds (`skyreach`, `veil`, `veil2`, `ghost2` in Friemliburg) | Not a crash risk: `LevelSave.loadSave` falls back to a plain `Level` when a saved level's `stringID` is not registered, and neither player's `.dat` sits on one — Player1 is on `skyreach2`, Player2 on `surface` | KEEP |
+| Opening a world that HAS our data **without** the mod | Found by accident — `-mod <dir>` wants a directory with exactly one jar, so pointing it at four loaded none of them. The server started anyway and printed `Could not instantiate world data with id swhskyfall` + an NPE out of `WorldDataRegistry.loadWorldData`, then carried on with that data dropped and saved the world without it. Vanilla behaviour, nothing this mod can catch, but it is what uninstalling costs | **KEEP** — written into `SAVE_COMPAT.md` §7 so nobody reads that trace as a bug here |
+
+Same §13 limit as the entry above: dedicated server, nothing rendered, nobody
+connected. "The Skyreach is enterable" means the plane was minted in the existing
+world, its ground and biomes generated, the spire stamped with
+`door=cloudmarbledoor isDoor=true approach=[air air air air] clear=true`, and
+`wardens=1 cats=2` standing in it. It does not mean anyone has looked at it.
