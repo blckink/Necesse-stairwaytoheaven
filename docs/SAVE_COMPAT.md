@@ -193,3 +193,60 @@ lives on the surface, and this command does not look there.
 | 2026-09-03 | the region key pieces and their five quests | yes — the Warden hands them out on conversation |
 | 2026-09-04 | the 13 inhabited realm POIs | **no** — they paint ground |
 | earlier | terrain, biomes, tiles | **no** — walk further out |
+
+---
+
+## 7. Installing the mod into a world that has never had it
+
+Everything above is about an **old mod save**. This section is the other
+question, and it is the one a new player actually asks: *I have a world I have
+played for weeks with vanilla and three other mods. Can I drop this mod in and
+start it from the beginning without throwing that world away?*
+
+**Yes, and nothing has to be repaired first.** No part of this mod is created at
+world-creation time; every part is created the first time it is asked for. That
+is not a policy statement, it is what each mechanism does:
+
+| part | when it is created | why an existing world gets it |
+|---|---|---|
+| **the realm plane** (`skyreach2`) | `WorldGenerator.getNewLevel`, registered in `postInit` (`StairwayToHeavenMod.java:305-315`) | the level does not exist in the save; `world.getLevel` generates it on the first ascent. Necesse asks the registered generators for any identifier it cannot load |
+| **`swh_realmpois`** and `swh_crookedhouse` | `WorldPresetRegistry.initRegion`, per 1024×1024 preset region **per level identifier** (`WorldPresetsRegion.getLevelRegionsFuture`) | the save holds `levels/presets/<identifier>/` only for identifiers it has visited. It has no `skyreach2` folder, so every sky preset region is computed fresh against the **current** registry |
+| **boss portals, guard packs, residents, livestock herds** | `SkyLevel.onRegionGenerated` | it fires once per region *ever*, and no sky region has ever been generated in this world — so all of them fire, with today's content |
+| **`SkywatchWorldData`, `VeilWorldData`, `SkyfallWorldData`** | lazily in their own `get(Server)`: `worldEntity.getWorldData(KEY)`, and a `new …()` + `addWorldData` when it comes back null | `WorldEntity.getWorldData` returns null for a key the save never wrote. All three handle that; none assumes it was seeded at creation |
+| **`SkywatchQuestData`** (level data) | lazily in `get(Level)`, same shape | a fresh `skyreach2` has no level data at all |
+| **the settlers who travel to you** | `Settler.addNewRecruitSettler`, called on every recruit-visitor roll of every settlement (`SkyArrivals`) | it is a runtime override read per roll, not a hook wired at world creation. An existing settlement starts offering them as soon as its gate opens |
+| **the way up** | the Skyward Stairway is **craftable** — 8 tungsten bar + 15 quartz at the Tungsten Workstation (`SkyItems.registerRecipes`) | nothing has to have been placed by worldgen for the player to reach the sky |
+
+**`migrateLegacySave` does not fire here.** It is called from
+`applyLoadData`, i.e. only when there *is* saved quest data to read. A world
+that never had the mod creates its `SkywatchQuestData` with `new`, which never
+takes that path — "never existed" and "pre-0.5" are not confused.
+
+### The one thing such a world does not get
+
+The **three surface POIs** — Aeronaut Camp, Skyward Shrine, Sky Fragment Crater.
+They are placed by `swhsurfacepois` into *surface* preset regions, and the save
+already holds `levels/presets/surface/` for everywhere the player has been. They
+appear only where the player has not walked yet. This is §6's "no — they paint
+ground" rule, and `/swhreset world` does not help: it only walks the sky.
+
+Everything else in the sky is new ground by definition, so the retrofit command
+has nothing to do on such a world either. `/swhreset` on it reports
+`stage=0 recruited=false`, which is the correct answer: the story has not
+started, and the player is meant to play it from the top.
+
+### Checking it, on a copy
+
+`scripts/save_compat_check.sh` is this section as a script. It boots the real
+1.3.3 server on a **copy** of a world, with the same mod set it was played with,
+and drives `skyreachstatus` — the same `world.getLevel(skyreach2)` the stairway
+makes one call deeper.
+
+```bash
+export NECESSE_GAME_DIR="/path/to/Necesse"   # Steam install: it has Server.jar
+./gradlew buildModJar
+scripts/save_compat_check.sh backup-saves-<date>/Player1/worlds/<World>.zip <other-mods-dir>
+```
+
+It copies the zip before opening it and never writes to the original. The run
+that first proved this is in `docs/PLAYTEST_LOG.md`.
