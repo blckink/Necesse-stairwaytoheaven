@@ -3297,3 +3297,51 @@ needing ten new locale entries — it is not:
 (placeableItem/MobSpawnItem.java:120), so the name is derived from the mob's own
 localization. **[run]** Flipping ten mobs to `true` added zero new problems to
 `tools/locale_audit.py`.
+
+## World presets are not frozen at world creation (VERIFIED [source] + [run], 2026-09-07)
+
+`WorldPresetsRegion.getLevelRegionsFuture` builds a `LevelPresetsRegion` **per
+1024×1024 preset region AND per level identifier**, on demand, and hands it to
+`WorldPresetRegistry.initRegion`, which walks `prioritySortedPresets` — the
+live registry — every time. There is no per-world list of enabled presets in
+the save.
+
+Two consequences, and they are the whole of this mod's save compatibility:
+
+- A preset registered by a mod installed **today** runs in a world created
+  **months ago**, for every preset region that world has not built yet.
+- A save holds `levels/presets/<identifier>/<x>x<y>.dat` only for identifiers it
+  has visited. A world that never had this mod has no `skyreach2` folder at all,
+  so **every** sky preset region is computed fresh. The same world's `surface`
+  folder is full, which is exactly why the three surface POIs do not appear
+  where the player has already walked.
+
+Seen live: `Starting to load level presets region skyreach2 (-128x-64)` on a
+save whose `levels/` held only `surface`, `cave`, `deepcave`, `cavetrial*` and
+`incursion*`. `docs/SAVE_COMPAT.md` §7.
+
+## `retrofitArea`'s `+N` counters are a post-generation delta (VERIFIED [source] + [run], 2026-09-07)
+
+`SkyLevel.retrofitArea` calls `regionManager.ensureTilesAreLoaded` over the
+whole box **before** taking `portalsBefore` / `mobsBefore`. Generating the box
+fires `onRegionGenerated`, which places the portals, packs, residents and herds
+— so by the time the baseline is read, the work is already done and the repair
+loop that follows adds nothing.
+
+**`bossportals=+0` on ground that has never existed does not mean no portal was
+placed.** It means generation placed them and the repair had nothing to add.
+`+N` only ever means "this was missing from ground that already existed". On a
+mod-free save: `regions=4225 mobs=+0 bossportals=+0`, `nothing was missing
+here`, and `portals in 512 tiles of the spire: 1` in the very next report.
+
+## Two smaller things worth not rediscovering (2026-09-07)
+
+- **Steam's `Necesse/` ships a `Server.jar`, and it is 1.3.3.** The free
+  dedicated-server download is 1.3.2. Anything that has to run against a real
+  1.3.3 save wants the Steam jar. Its `jre/` is Windows binaries, so under WSL
+  fall back to `java` on PATH — `integration_test.sh` and
+  `save_compat_check.sh` both already do.
+- **`skyreachstatus` scans a radius of 64; `BossPortalObject.PORTAL_CELL` is
+  600.** "portals in 512 tiles of the spire: 0" straight after a status call
+  measures the scan, not the mod. The number only means something once
+  `/swhreset world` has generated the box.

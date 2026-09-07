@@ -79,8 +79,20 @@ region that already has its herd, and both resident paths hold a one-per-world
 claim. Run twice over the same box, the second run places nothing and says
 `nothing was missing here`. The integration test runs it twice and asserts
 exactly that, because it is the only assertion that would catch a placement
-losing its idempotence. (A *first* run on a young world legitimately places
-plenty — it is generating the box as well as repairing it.)
+losing its idempotence.
+
+**What the `+N` counters actually measure, because it is easy to read them
+backwards.** `retrofitArea` calls `ensureTilesAreLoaded` over the whole box
+*first*, and only then takes `portalsBefore`. So generating the box has already
+fired `onRegionGenerated` — and placed everything — by the time the baseline is
+counted, and the repair loop afterwards finds its own work already done. A first
+run on **ungenerated** ground therefore reports `bossportals=+0` and `nothing
+was missing here` while standing up plenty of portals. `+N` means something was
+missing from ground that already existed, which is the only case worth
+reporting. (An earlier version of this paragraph claimed the opposite — that a
+first run on a young world "legitimately places plenty" by the counter. It does
+not, and a 2026-09-07 run on a mod-free save is what showed it: `regions=4225
+bossportals=+0`, and `portals in 512 tiles of the spire: 1` immediately after.)
 
 512 tiles is one call. Repairing a large explored world is several deliberate
 calls from different places, not one command that walks an unbounded area.

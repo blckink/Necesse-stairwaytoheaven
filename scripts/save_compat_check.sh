@@ -80,6 +80,14 @@ cd "$WORK_DIR"
 rm -f "$PIPE"
 mkfifo "$PIPE"
 unset JAVA_TOOL_OPTIONS
+# Why the mods land via `-localdir` and not via `-mod`, so nobody "fixes" it:
+# `-mod <dir>` is the DEVELOPMENT mod switch and wants a directory holding
+# exactly ONE jar. Point it at four and it logs "Development mod must be a
+# directory with one jar file in it" and loads nothing from there. What actually
+# loads all four is `-localdir`, which makes ./mods/ (i.e. $WORK_DIR/mods) the
+# server's mods folder -- the log then shows four "from ModsFolderModProvider"
+# lines. The -mod argument is kept only because integration_test.sh passes it
+# and dropping it here would make the two scripts differ for no reason.
 echo "Booting 1.3.3 server on a COPY of $WORLD (port $PORT), mods: $(ls mods | tr '\n' ' ')"
 "$JAVA_BIN" -Xms256m -Xmx2G -Djdk.attach.allowAttachSelf=true -jar "$GAME_DIR/Server.jar" -nogui -localdir \
     -world "$WORLD" -owner tester -port "$PORT" -mod "\"$WORK_DIR/mods\"" \

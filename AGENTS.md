@@ -125,6 +125,10 @@ export NECESSE_GAME_DIR=/path/to/necesse-dedicated-server   # contains Server.ja
 ./gradlew decompileToSources -PuseDecompiledSources=true    # -> $DIR/decompiled/
 ./gradlew buildModJar                 # or: ./gradlew clean buildModJar
 scripts/integration_test.sh           # boots a real server, generates, restarts
+scripts/save_compat_check.sh <world.zip> [other-mods-dir]
+                                      # the opposite question: boots a real
+                                      # server on a COPY of an EXISTING save and
+                                      # proves the mod installs into it
 scripts/tile_sprite_check.sh          # client-side tile sprite indices (headless)
 scripts/java_syntax_check.sh          # NO game install? javac syntax-only gate
 python3 tools/size_audit.py           # sprite mass vs vanilla; must print 0 flags
