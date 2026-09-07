@@ -3403,3 +3403,58 @@ Toll Bridge stands nowhere in this world". Reading a whole 6144-tile disc
 and to `-1` for every other level. `SkySurfaceStatusCommand`'s census has to
 subtract presets blocked by the world spawn; a census on `skyreach2` must not,
 because nothing there is ever blocked that way.
+
+## Reading a mod mob's statline out of the built jar, headless
+
+**VERIFIED [run]**, 2026-09-07, while building `scripts/balance_check.sh`.
+
+**A mod mob class LOADS headless but does not INSTANTIATE.** With
+`$NECESSE_GAME_DIR/Server.jar` and the built mod jar on the classpath,
+`Class.forName("stairwaytoheaven.mobs.GalehoundMob")` succeeds and its static
+fields read back fine — including object fields like `GameDamage` and
+`MaxHealthGetter`, whose static initialisers only touch other mod constants.
+`getDeclaredConstructor().newInstance()` on the same class throws
+`InvocationTargetException`: the constructor wants an initialised engine.
+
+So a check that wants a mob's numbers reads **static fields**, and a check that
+wants to know what the mob's *AI* was handed cannot use reflection at all — the
+AI tree is built in the constructor. `balance_check.sh` closes that gap with a
+source grep instead, and says so in its own header.
+
+**Read `MaxHealthGetter`'s CLASSIC slot off the array, not through `get()`.**
+`MaxHealthGetter extends DifficultyBasedGetter<Integer>` and `get(GameDifficulty)`
+is the obvious call, but touching `GameDifficulty` triggers its static
+initialiser, which pulls in `GameMessage` localisation that has not been booted.
+`ProtectedDifficultyBasedGetter.array` is an `Object[]` indexed by
+`GameDifficulty` ordinal, so index **2** is CLASSIC:
+
+```java
+Field arr = v.getClass().getSuperclass().getDeclaredField("array");
+arr.setAccessible(true);
+int classic = (Integer) ((Object[]) arr.get(v))[2];
+```
+
+Note `GameDamage.damage` is a **public final instance** field, so a
+static-field walker will miss it — look it up with `getField` on the instance's
+class.
+
+## Aggression range is argument 2 of every chaser tree the mod uses
+
+**VERIFIED [jar]**, 2026-09-07, from `javap -c` on 1.3.3's `Server.jar`.
+
+Three different chaser trees, one convention:
+
+| tree | signature | range |
+|---|---|---|
+| `CollisionPlayerChaserWandererAI` | `(Supplier, int, GameDamage, int, int)` | arg 2 → `CollisionPlayerChaserAI(int, GameDamage, int)` |
+| `PlayerChaserWandererAI` | `(Supplier, int, int, int, boolean, boolean)` | arg 2; arg 4 is the `WandererAINode` frequency |
+| `CollisionShooterPlayerChaserWandererAI` | `(Supplier, int, GameDamage, int, CooldownTimer, int, int, int)` | arg 2 → chaser; **arg 7 → the SHOOTING node** |
+
+The shooter is the trap: it takes two range-like ints, and raising argument 7
+makes a mob snipe from further rather than notice from further.
+
+**`SkyBiome.RANGE_STANDARD` / `RANGE_RANGED` / `RANGE_ELITE` and their
+per-realm twins are NOT aggression ranges.** They are the radius argument of
+`MobSpawnTable.addLimited(rate, id, max, range)` — a cap on how many of that mob
+may exist within that radius of the player. Confusing the two would leave every
+mob's actual reach untouched while changing spawn density across six realms.
