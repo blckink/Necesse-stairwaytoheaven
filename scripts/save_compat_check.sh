@@ -114,6 +114,30 @@ echo "Reporting what this world holds (/swhreset, report only)..."
 echo "swhreset" >&3
 sleep 8
 
+# skyreachstatus only forces a 64-tile radius, and the boss-portal lattice has a
+# 600-tile cell -- so "portals nearby: 0" above measures the scan, not the mod.
+# `/swhreset world` generates the whole 1024x1024 box around the spire, which is
+# what running into it on foot would do, and the bare form afterwards counts
+# what that generation actually stood up. Without this pass there is no evidence
+# in the log that boss portals reach an existing world at all.
+echo "Generating the box around the spire (/swhreset world) and counting again..."
+echo "swhreset world" >&3
+waited=0
+while [ "$(grep -c SWH_RESET_DONE "$LOG" 2>/dev/null || true)" -lt 2 ]; do
+    sleep 2
+    waited=$((waited + 2))
+    kill -0 "$SERVER_PID" 2>/dev/null || fail "server exited during /swhreset world"
+    [ "$waited" -ge 600 ] && fail "timeout waiting for /swhreset world"
+done
+echo "swhreset" >&3
+waited=0
+while [ "$(grep -c SWH_RESET_DONE "$LOG" 2>/dev/null || true)" -lt 3 ]; do
+    sleep 2
+    waited=$((waited + 2))
+    kill -0 "$SERVER_PID" 2>/dev/null || fail "server exited during the second /swhreset report"
+    [ "$waited" -ge 300 ] && fail "timeout waiting for the second /swhreset report"
+done
+
 echo "Saving..."
 echo "save" >&3
 waited=0
