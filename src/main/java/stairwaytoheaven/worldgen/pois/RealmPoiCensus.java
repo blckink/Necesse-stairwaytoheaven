@@ -48,6 +48,12 @@ import stairwaytoheaven.worldgen.SkyOrigin;
  *
  * <p>What it cannot answer is whether the result READS as a town to a player.
  * That is {@code [game]}, and this is {@code [run]}.
+ *
+ * <p><b>It is not free on a live world.</b> Reading the queue asks the world for
+ * 169 preset regions, which computes and keeps them, so the next save carries
+ * 169 more preset-region records. Nothing is placed by that — a preset region is
+ * an intention, and it is a pure function of the world seed either way — but it
+ * is why this is a mode rather than part of every {@code /skyreachstatus}.
  */
 public final class RealmPoiCensus {
 
@@ -159,6 +165,11 @@ public final class RealmPoiCensus {
             for (int pry = firstRegionY; pry <= lastRegionY; pry++) {
                 WorldPresetsRegion worldPresets = world.getWorldPresets(
                         prx * PRESET_REGION_REGIONS, pry * PRESET_REGION_REGIONS);
+                // customSeed 0, as SkySurfaceStatusCommand's census does. It
+                // only seeds the GameRandom handed to addToRegion, and this
+                // catalogue never touches that one: it reads the world's own
+                // generation seed off the region's WorldEntity. So the queue
+                // read here is the queue the level generates from.
                 LevelPresetsRegion presets = worldPresets.getLevelRegions(identifier, 0);
                 for (LevelPresetsRegion.PresetDebugData data : presets.getDebugData()) {
                     String name = data.getDebugName();
