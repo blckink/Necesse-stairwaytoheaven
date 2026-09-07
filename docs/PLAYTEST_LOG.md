@@ -635,25 +635,42 @@ tiles as the crow flies, 75 west and 101 south.**
 
 There is a continuous walk. Flood-filling the real terrain
 (`SkyTerrainPainter.describeTile` via `scripts/SkyMapDump.java`, 400×400 tiles
-around the pair, treating anything that is not Mistsea as walkable) finds a
-**177-tile path with no cloud-sea crossing anywhere on it**:
+around the pair) finds a **177-tile path with no cloud-sea crossing anywhere on
+it**:
 
 ```
   -97,-149  skyplinth   the pad itself
- -117,-149  cloudturf   west off the spire grounds
- -137,-149  skystone    the ridge west of the hub
- -172,-144  skystone    turn south
- -172,-124  cloudturf
- -172,-104  skyroad + skyironFence   <- a built road, ~24 tiles of it
- -172, -84  cloudturf
- -172, -64  skyway      into the Skyway Passages
+ -113,-145  cloudturf   west off the spire grounds
+ -130,-142  cloudturf
+ -143,-135  cloudturf   the open turf west of the hub
+ -150,-122  cloudturf + cloudbell   turning south
+ -152,-104  cloudturf
+ -167, -99  cloudturf
+ -171, -83  cloudturf
+ -171, -63  skyway      into the Skyway Passages
  -172, -48  stormslate  the bridge
 ```
 
-Composition of the path: 62 skystone, 59 cloudturf, **24 skyroad**, 20 skyway,
-10 stormslate. The narrowest the land gets along it is 31 tiles east–west, so
-it is not a knife-edge. The route leaves the pad **west**, then turns **south**
-and follows the existing road.
+Composition: 129 cloudturf, 21 skyway, 13 skyroad, 10 stormslate, 2 skyplinth,
+2 skystone; 15 of the 177 tiles are built ground. The route leaves the pad
+**west**, then turns **south**.
+
+**What "walkable" means here, exactly.** Terrain alone is not the whole
+question — objects block movement too. Two passes:
+
+- Treating **every** object as a wall — tall cloud grass, flowers, lichen and
+  all — there is **no** path. That is not a real answer; those are clutter you
+  walk through.
+- Treating the **structural** objects as walls (fences, the three wall kinds,
+  every tree, rocks, crystals, statues, crates, the Aether Forge, telescope,
+  astrolabe, rubble, starfall, candelabra, scree) and fence **gates** and low
+  flora as passable, the 177-tile path above exists. Along it the walker steps
+  on 12 sky reeds, 4 wind wheat, 4 cloud bells, 2 lichen, 2 tulips and **one
+  sky-iron fence gate**, and nothing else.
+
+That blocker list was written from what the objects plainly are; it was **not**
+read off `GameObject.isSolid` in a running registry. Call it a strong
+indication, not a proof — `[run]` on the terrain, reasoning on the objects.
 
 | Area | Observation | Status |
 |---|---|---|
@@ -661,7 +678,8 @@ and follows the existing road.
 | No gate covered them at all | `/skyreachstatus pois` + eight assertions in `scripts/integration_test.sh` | **FIXED** |
 | Nothing stands within walking distance of the arrival pad | 419 tiles before; 126–430 across six seeds after, and the test fails over 900 | **FIXED — NOT YET PLAYER CONFIRMED** |
 | The Sky Toll Bridge demanded a perfectly symmetric 31-tile strait | Measured on three seeds under the old rule: **0, 0 and 1** bridges in an entire world. It paints its own cloud stream, so the world only has to supply one to join | **FIXED** — one side, not both |
-| `validSite` samples nine points of a footprint, not its interior | A 57×41 Sky Town whose nine samples are land can still straddle Mistsea between them. Unchanged by this pass, and unmeasured | **OPEN** |
+| `validSite` samples nine points of a footprint, not its interior | Now measured, on the very place the route above leads to: **190 of the toll bridge's 713 footprint tiles are Mistsea**. The nine samples all passed. Unchanged by this pass | **OPEN** |
+| `skyLand` only excludes Mistsea, never built ground | Unlike `CrookedHouseWorldPreset.goodSky`, which also tests `descBuilt`. The same footprint covers **130 built tiles** — 77 sky road, 24 sky plinth, 16 stormslate, 13 skystone tile — so a place can be stamped across the sky's own road network. It was rare at the old 9% acceptance; at ~99% and triple the density it is not. One-line fix: `&& !SkyTerrainPainter.descBuilt(desc)` in `RealmPoiWorldPreset.skyLand`, which needs a rebuild and a full re-measure | **OPEN** |
 | Does a place READ as a town? | Nothing here answers that. §13's limit: dedicated server, nothing rendered, nobody connected. `objects=44/713` for the bridge is a count, not a picture | **OPEN** |
 
 ### On the player's own world, on a copy — the fix does not reach explored sky
