@@ -131,12 +131,12 @@ itemised version, verified against the resource tree.
 
 | what | id | current stand-in | size | format notes |
 |---|---|---|---|---|
-| Eden Serpent — the realm's standard threat, "poison attack" (§5) | `edenserpent` | `mobs/crocodile.png` | **768×640** | Walking mob sheet, non-standard width: 6×128px animation columns over 4 direction rows + a particle row (`spriteSize()` = 128 in `EdenSerpentMob`). |
-| Bloom Maw — carnivorous flower | `bloommaw` | `mobs/stabbybush.png` | **382×320** | Walking-mob-family height, odd width — read exactly, don't round to 384. Cell size 64px. |
-| Jealous Vine — attacks out of vegetation | `jealousvine` | `mobs/dryadsentinel.png` | **768×896** | Large multi-row sheet, cell 128px. **Same file as Crooked Beyond's Tongue Plant** below — two mod mobs in two different realms currently wear identical art. |
-| Golden Hornet — fast air enemy | `goldenhornet` | `mobs/bee.png` | **64×128** | Small critter-scale sheet, cell 32px (2 cols × 4 direction rows). |
-| Forbidden Serpent — elite, guards the Knowledge Tree | `forbiddenserpent` | `mobs/dragonwhelp.png` | **448×320** | Walking mob sheet, cell 64px. |
-| Paradise Palm (+ Paradise Coconut) | `paradisepalm` (alias of vanilla `palmtree`) | `objects/palmtree.png` | **256×514** | Object/tree sheet. §A3.3 explicitly wants Eden's trees **larger than vanilla's** — this is vanilla's own normal-sized palm, the opposite of the brief. Height is 514, not 512 — read from the file. |
+| ~~Eden Serpent — the realm's standard threat, "poison attack" (§5)~~ **DONE 2026-09-08** — own `mobs/edenserpent.png` sheet and bestiary icon | `edenserpent` | ~~`mobs/crocodile.png`~~ **ours** | **768×640** | Walking mob sheet, non-standard width: 6×128px animation columns over 4 direction rows + a particle row (`spriteSize()` = 128 in `EdenSerpentMob`). |
+| ~~Bloom Maw — carnivorous flower~~ **DONE 2026-09-08** — own `mobs/bloommaw.png` sheet and bestiary icon | `bloommaw` | ~~`mobs/stabbybush.png`~~ **ours** | **382×320** | Walking-mob-family height, odd width — read exactly, don't round to 384. Cell size 64px. |
+| ~~Jealous Vine — attacks out of vegetation~~ **DONE 2026-09-08** — own `mobs/jealousvine.png` sheet and bestiary icon | `jealousvine` | ~~`mobs/dryadsentinel.png`~~ **ours** | **768×896** | Large multi-row sheet, cell 128px. |
+| ~~Golden Hornet — fast air enemy~~ **DONE 2026-09-08** — own `mobs/goldenhornet.png` sheet and bestiary icon | `goldenhornet` | ~~`mobs/bee.png`~~ **ours** | **64×128** | Small critter-scale sheet, cell 32px (2 cols × 4 direction rows). |
+| ~~Forbidden Serpent — elite, guards the Knowledge Tree~~ **DONE 2026-09-08** — own `mobs/forbiddenserpent.png` sheet and bestiary icon | `forbiddenserpent` | ~~`mobs/dragonwhelp.png`~~ **ours** | **448×320** | Walking mob sheet, cell 64px. |
+| ~~Paradise Palm (+ Paradise Coconut)~~ **DONE 2026-09-08** — own `paradisepalm` object ID and `objects/paradisepalm.png` sheet | `paradisepalm` | ~~`objects/palmtree.png`~~ **ours** | **256×514** | Vanilla `TreeObject` behaviour retained on a separate ID, so base-game palms are not globally overwritten. |
 | Tree of Plenty | `treeofplenty` (alias `appletree`) | `objects/appletree.png` | **256×640** | Object/tree sheet. Same oversized-canopy note as Paradise Palm. |
 | Giant Fig Tree | `giantfigtree` (alias `bananatree`) | `objects/bananatree.png` | **256×640** | Object/tree sheet. Same note. |
 | Knowledge Tree — the realm's one-of-a-kind worldgen landmark | `knowledgetree` (alias `dryadtree`) | `objects/dryadtree.png` | **384×512** | Object/tree sheet — the single most distinctive silhouette in the realm and still 100% vanilla. |
@@ -370,23 +370,11 @@ something-else in the journal is two different creatures to the player. When
 these mobs get their own bodies, they get their own faces in the same pass and
 every override disappears with them.
 
-### What is still owed: two, and only when someone with a client looks
+### Eden bestiary icons: resolved 2026-09-08
 
-| mob | body it wears | why it is still off |
-|---|---|---|
-| `edenserpent` | `crocodile` | vanilla registers the crocodile `countKillStat = false`, so it is not in vanilla's own bestiary and there may be no icon to borrow |
-| `forbiddenserpent` | `petdragonwhelp` | same — a pet, not a bestiary entry |
-
-Every other parent (`stabbybush`, `dryadsentinel`, `honeybee`,
-`deepcavespirit`, `bonewalker`, `phantom`, `forestspector`, `mimic`, `jackal`,
-`desertcrawler`, `ancientarmoredskeleton`, `crystalgolem`, `crazedraven`,
-`scorpion`) IS a vanilla bestiary mob, so its icon provably exists.
-
-**This cannot be checked from here.** A dedicated server renders nothing and
-ships zero PNGs. The check is one look at the journal on a client: if those two
-show a picture, flip them to `true` in `EdenRealm.registerMobs` — one word each.
-If they show ERR, they are the only two icons this mod actually owes, at
-32x32 each.
+All five Eden hostiles now have purpose-built bodies and 32x32 icons. The old
+borrowed-icon exception is no longer used by these mobs, and all five are
+registered for the kill statistic/bestiary.
 
 ## A note on the two unresolved Ghost IDs
 

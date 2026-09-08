@@ -22,7 +22,7 @@ import necesse.level.maps.Level;
  * <blockquote><pre>
  * int textX = x * 32 + 16;
  * int textY = y * 32 + 32;
- * serverClient.sendUniqueFloatText(textX, textY, new LocalMessage("ui", "egghatchtip"), "inspect", 6000);
+ * serverClient.sendUniqueFloatText(textX, textY, new LocalMessage("ui", messageKey), "inspect", 6000);
  * </pre></blockquote>
  *
  * <p>{@code "inspect"} is vanilla's own unique type and it is deliberately

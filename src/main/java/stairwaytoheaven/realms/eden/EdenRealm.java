@@ -1,5 +1,7 @@
 package stairwaytoheaven.realms.eden;
 
+import java.awt.Color;
+
 import necesse.engine.registries.BiomeRegistry;
 import necesse.engine.registries.ItemRegistry;
 import necesse.engine.registries.MobRegistry;
@@ -126,7 +128,13 @@ public final class EdenRealm {
         goldenOrchidID = object("yellowflowerpatch");
         giantMonsteraID = object("swampgrass");
         giantFigTreeID = object("bananatree");
-        paradisePalmID = object("palmtree");
+        // Vanilla palmtree behaviour and dimensions, but on Eden's own ID and
+        // texture. Shadowing objects/palmtree.png would recolour every desert
+        // palm in the base game, so the replacement must be a real mod object.
+        paradisePalmID = ObjectRegistry.registerObject("paradisepalm",
+                new necesse.level.gameObject.TreeObject("paradisepalm", "palmlog", "palmsapling",
+                        new Color(133, 79, 18), 40, 80, 120, "palmleaves"),
+                0.0F, false, false, true);
         treeOfPlentyID = object("appletree");
         edenBerryBushID = object("blackberrybush");
         sunGrapeBushID = object("blueberrybush");
@@ -150,41 +158,13 @@ public final class EdenRealm {
         return objectID;
     }
 
-    /**
-     * Eden's five, and why exactly three of them count a kill.
-     *
-     * <p>The third argument is {@code countKillStat} (MobRegistry.java:824,
-     * VERIFIED [jar]) and it is what puts a creature in the player's bestiary.
-     * All five were {@code false}, so a player could clear the Garden and the
-     * game would not admit they had been there —
-     * {@code docs/AREA_OVERVIEW.md} measured it.
-     *
-     * <p>It is not simply a flag, because {@code MobRegistry.loadMobIcons}
-     * loads {@code mobs/icons/<id>} for every registered mob and falls back to
-     * the engine's ERR tile. None of these five has a PNG of its own by
-     * design — each blits a vanilla sheet — so turning the flag on without an
-     * answer for the icon would have traded "no row" for "a row with a broken
-     * picture". {@link stairwaytoheaven.mobs.BorrowedMobIcon} is that answer:
-     * each mob returns the face of the creature whose body it wears.
-     *
-     * <p><b>The two that stay {@code false}, and the exact reason.</b> The
-     * borrow only works when the parent HAS an icon, and vanilla only draws one
-     * for a mob it puts in its own bestiary. {@code stabbybush},
-     * {@code dryadsentinel} and {@code honeybee} are all registered
-     * {@code countKillStat = true} by vanilla, so their icons provably exist.
-     * {@code crocodile} and {@code petdragonwhelp} are registered
-     * {@code false} — the Eden Serpent's and the Forbidden Serpent's bodies —
-     * and whether the game ships an icon for them cannot be checked from a
-     * dedicated server, which renders nothing and carries no PNG at all. Both
-     * stay off until somebody with a client confirms it, because a bestiary row
-     * showing ERR is worse than no row. That check is one look at the journal.
-     */
+    /** Registers all five Eden enemies with their own sheets and 32x32 icons. */
     private static void registerMobs() {
-        MobRegistry.registerMob("edenserpent", EdenSerpentMob.class, false);
+        MobRegistry.registerMob("edenserpent", EdenSerpentMob.class, true);
         MobRegistry.registerMob("bloommaw", BloomMawMob.class, true);
         MobRegistry.registerMob("jealousvine", JealousVineMob.class, true);
         MobRegistry.registerMob("goldenhornet", GoldenHornetMob.class, true);
-        MobRegistry.registerMob("forbiddenserpent", ForbiddenSerpentMob.class, false);
+        MobRegistry.registerMob("forbiddenserpent", ForbiddenSerpentMob.class, true);
     }
 
     /**
@@ -215,12 +195,12 @@ public final class EdenRealm {
                 Recipes.ingredientsFromScript("{{aetheriumbar, 4}, {skystone, 10}, {windwheat, 8}}")));
     }
 
-    /** Client-only vanilla stand-ins; the dedicated server never calls this. */
+    /** Client-only Eden sheets; the dedicated server never calls this. */
     public static void loadTextures() {
-        EdenSerpentMob.texture = GameTexture.fromFile("mobs/crocodile");
-        BloomMawMob.texture = GameTexture.fromFile("mobs/stabbybush");
-        JealousVineMob.texture = GameTexture.fromFile("mobs/dryadsentinel");
-        GoldenHornetMob.texture = GameTexture.fromFile("mobs/bee");
-        ForbiddenSerpentMob.texture = GameTexture.fromFile("mobs/dragonwhelp");
+        EdenSerpentMob.texture = GameTexture.fromFile("mobs/edenserpent");
+        BloomMawMob.texture = GameTexture.fromFile("mobs/bloommaw");
+        JealousVineMob.texture = GameTexture.fromFile("mobs/jealousvine");
+        GoldenHornetMob.texture = GameTexture.fromFile("mobs/goldenhornet");
+        ForbiddenSerpentMob.texture = GameTexture.fromFile("mobs/forbiddenserpent");
     }
 }

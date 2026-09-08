@@ -28,11 +28,9 @@ import necesse.inventory.lootTable.lootItem.LootItem;
  * of these standing over its cache
  * ({@link EdenCanopyBiome#getGuard()}).
  *
- * <p><b>Borrowed art:</b> vanilla {@code mobs/dragonwhelp} — a crimson winged
- * serpent, 448x320, i.e. seven 64px columns over five rows. Chosen because it
- * is the only vanilla sheet that reads as a serpent AND is unmistakably
- * different from the Eden Serpent's green crocodile at a glance; an elite that
- * looks like the standard enemy is a health bar, not an encounter. Drawn with
+ * <p><b>Sprite:</b> purpose-built {@code mobs/forbiddenserpent}, 448x320: seven
+ * 64px columns over five rows, visually distinct from the standard Eden
+ * Serpent. Drawn with
  * {@code PetDragonWhelpMob.addDrawables}' own offsets ({@code drawX - 32},
  * {@code drawY - 44}). NOT subclassed: that class is a player pet.
  *
@@ -153,17 +151,5 @@ public class ForbiddenSerpentMob extends EdenHostileMob {
         }
     }
 
-
-    /**
-     * Bestiary face: it wears mobs/dragonwhelp, which petdragonwhelp owns (EdenRealm.loadTextures), so it wears that creature's
-     * face in the journal too. {@code Mob.getMobIcon()} is overridable and
-     * {@code FormJournalEntryComponent} asks the MOB rather than the registry,
-     * so this needs no PNG of its own -- see {@link stairwaytoheaven.mobs.BorrowedMobIcon}
-     * for why borrowing the face is the right answer and not a shortcut.
-     */
-    @Override
-    public necesse.gfx.gameTexture.GameTexture getMobIcon() {
-        return stairwaytoheaven.mobs.BorrowedMobIcon.from("petdragonwhelp", super.getMobIcon());
-    }
 
 }

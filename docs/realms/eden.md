@@ -19,13 +19,14 @@ terrain, dimension `+2`, and the mob/item registrations to exist.
 
 ## Borrowed stand-ins
 
-No new bitmap art was created. Terrain uses the literal vanilla sheets listed
+Terrain uses the literal vanilla sheets listed
 in `docs/VANILLA_ASSET_MAP.md`. Vegetation is made from vanilla registry
 objects (`grass`, `swampgrass`, flower patches, fruit trees, berry bushes,
-palms, reeds, seashells, `dryadtree`, `rock`, `ivyoreswamp`) so their native
-renderer, tool response and drops stay intact. Eden item icons borrow literal
-vanilla item paths; the five hostile bodies borrow `crocodile`, `stabbybush`,
-`dryadsentinel`, `bee` and `dragonwhelp`.
+reeds, seashells, `dryadtree`, `rock`, `ivyoreswamp`) so their native
+renderer, tool response and drops stay intact. Eden item icons still borrow
+literal vanilla paths where recorded in the asset map. Paradise Palm and all
+five hostile mobs now use purpose-built sprites; each hostile also has its own
+32x32 bestiary icon.
 
 ## Settler and quest chain
 

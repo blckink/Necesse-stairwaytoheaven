@@ -124,6 +124,7 @@ chapter; the ground is real now.
 | `goldenpollen` | item | Bright material carried by Golden Hornets. |
 | `knowledgecutting` | item | Rare living cutting recovered near Knowledge Trees. |
 | `paradisecoconut` | item | Lagoon-shore fruit and cache reward. |
+| `paradisepalm` | object | Eden's oversized lagoon palm, using vanilla palm tree behaviour on its own sprite and object ID. |
 | `edenberry` | item | Common Eden berry and cache reward. |
 | `moonmelon` | item | Cool garden fruit and cache reward. |
 | `sungrape` | item | Warm shore fruit intended for the future Eden Press. |

@@ -117,6 +117,13 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              "objects/catbasket.png",
              "mobs/crookedgolem.png", "mobs/rarecrookedgolem.png",
              "mobs/crookedarmadillo.png",
+             "mobs/edenserpent.png", "mobs/bloommaw.png",
+             "mobs/jealousvine.png", "mobs/goldenhornet.png",
+             "mobs/forbiddenserpent.png",
+             "mobs/icons/edenserpent.png", "mobs/icons/bloommaw.png",
+             "mobs/icons/jealousvine.png", "mobs/icons/goldenhornet.png",
+             "mobs/icons/forbiddenserpent.png",
+             "objects/paradisepalm.png", "items/paradisepalm.png",
              # The Eden ground pair, copied verbatim by convert_biome_art
              # (both arrive already on vanilla's format).
              "tiles/overgrowneden_splat.png", "items/overgrownedenseed.png",

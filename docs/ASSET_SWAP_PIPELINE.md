@@ -146,6 +146,16 @@ deliberate redraw, not for a routine run.
 **A generated sheet will not pass on the first try**, because generators do not
 honour cell geometry. Two stages fix that, in this order.
 
+**Generated checkerboards and dark preview backgrounds are not alpha.** Never
+remove them with a global luminance, greyscale, or broad near-background key:
+real outlines, mouths, eye sockets, teeth and snow highlights occupy those same
+values. The safe extraction used for the Eden batch on 2026-09-08 starts from
+the untouched raw render, keeps chromatic sprite pixels, restores only adjacent
+dark outline pixels, and fills neutral holes enclosed by that silhouette. For a
+black backdrop, remove only near-neutral near-black exterior pixels; do not use
+a broad threshold. Every result must then be viewed over both dark and light
+grounds. The light review is a mask audit, not merely a presentation option.
+
 ### 4a. Frames onto vanilla's grid — `tools/mob_sheet_intake.py`
 
 ```sh

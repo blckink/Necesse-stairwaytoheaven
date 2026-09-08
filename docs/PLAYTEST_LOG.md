@@ -708,3 +708,10 @@ that never existed and leaves existing ground alone, by design.
 | Area | Observation | Status |
 |---|---|---|
 | Explored sky in an existing save keeps the old, sparse distribution | 13/13 queued on Friemliburg, but the nearest one stamps 9 objects instead of 74 because its ground predates the fix | **OPEN** — no fix attempted; re-stamping built ground would overwrite whatever the player built there |
+## 2026-09-08 — Eden sprite alpha regression reported and corrected
+
+The player reported that dark sprite regions disappeared against light preview
+backgrounds, explicitly including Bloom Maw and Paradise Palm. All six Eden
+replacement sprites were re-extracted from untouched raw generations and
+reviewed on light and dark backgrounds. This was an asset-mask defect, not an
+intentional design change.
