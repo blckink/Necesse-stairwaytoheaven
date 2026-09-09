@@ -46,3 +46,12 @@ vanilla-sprites
 # The shipped sprite is the one under src/main/resources; the drafts that
 # produced it are scratch and were 9.5 MB of repo.
 art-drafts/
+
+# Dedicated-server runtime droppings. A server started with the repo root as its
+# working directory writes these; 5n-a's first run committed them by accident.
+# They are a local server's state, not repo content.
+cfg/
+cache/
+mods/
+logs/
+latest-server-log.txt

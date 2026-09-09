@@ -1,8 +1,0 @@
-{
-	{
-		id = stairwaytoheaven,
-		name = Stairway to Heaven,
-		type = DEV_MOD,
-		enabled = true
-	}
-}

@@ -305,8 +305,18 @@ public final class RealmPoiCensus {
         int bad = 0;
         for (int x = 0; x < preset.width; x++) {
             for (int y = 0; y < preset.height; y++) {
+                // A plan preset holds -1 wherever its '.' margin leaves the
+                // terrain painter's own ground, and ObjectRegistry.getObject
+                // throws on -1 rather than returning air. Guarded exactly as
+                // connectedWall below already guards it: an empty cell carries
+                // no window. Without this the whole census dies at the first
+                // plan-built kind and every kind after it goes unreported.
+                int id = preset.getObject(x, y);
+                if (id <= 0) {
+                    continue;
+                }
                 necesse.level.gameObject.GameObject object =
-                        necesse.engine.registries.ObjectRegistry.getObject(preset.getObject(x, y));
+                        necesse.engine.registries.ObjectRegistry.getObject(id);
                 if (!(object instanceof necesse.level.gameObject.WallWindowObject)) {
                     continue;
                 }
