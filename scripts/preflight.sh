@@ -62,6 +62,10 @@ run "variant_strip_audit"  python3 tools/variant_strip_audit.py
 run "size_audit"           python3 tools/size_audit.py
 run "sheet_format_audit"   python3 tools/sheet_format_audit.py
 run "content_ledger"       python3 tools/content_ledger.py --check
+# Cheap and pure: the POI room plans built in code are still the maps the
+# dossier draws. A dropped character shifts a whole building and the game
+# generates the shifted one without complaint.
+run "plan_transcription"   python3 tools/plan_transcription_audit.py
 run "buildModJar"          ./gradlew buildModJar -q
 
 # locale_audit is reported but does not gate: it stands at 33 known problems

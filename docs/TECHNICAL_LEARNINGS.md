@@ -3469,3 +3469,48 @@ black backgrounds it removed only near-neutral near-black pixels connected to
 the exterior. Every cutout was then composited over both light and dark review
 backgrounds. This dual-background review is now a mandatory mask audit before
 integration; the raw generation is retained until approval.
+
+## 2026-09-09 — What a `Preset` writes, and the four rules a room plan has to obey
+
+Read while building `RealmPoiPresets.plan`, the interpreter for the fourteen
+ASCII room plans in `docs/design/chapter-01-skyreach-pois.md`. All four are
+**VERIFIED [jar]** from `$NECESSE_GAME_DIR/decompiled/` unless marked otherwise.
+
+**`-1` in a `Preset` means "leave this alone", and that is per LAYER.**
+`Preset.clearPreset()` fills every tile and every object layer with -1, and
+`applyToLevel` writes a cell only `if (tile != -1)` / `if (object != -1)`. So a
+plan can leave the terrain painter's own meadow, crag or cloud sea showing
+through its margins simply by writing nothing there — which is the opposite of
+what `RealmPoiPresets.blank()` does, and why a plan-built preset must not be
+blanked first. Writing object **0** is the other thing entirely: that clears the
+tile, which is what a designed floor character has to do or a tree keeps
+standing in the middle of the room.
+
+**`WallWindowObject.getWindowDir` is an exact predicate, and a window that
+fails it is deleted without a word.** It accepts only
+`(wallUp && wallDown && !wallLeft && !wallRight)` → dir 1, or
+`(wallLeft && wallRight && !wallUp && !wallDown)` → dir 0; anything else is -1.
+"Wall" means `WallObject.isConnectedWall`, i.e. the wall itself and whatever
+joined `wallObject.connectedWalls` — the window does (`onObjectRegistryClosed`),
+**a door does not**: `WallDoorObject extends DoorObject`, not `WallObject`, so a
+window beside a door is a window with an open side. The Sky Tower had shipped
+two invalid ones since 2026-09-04 and no gate could see them; `skyreachstatus
+pois` now reports `badwindows=` per kind, asked of the preset with this same
+predicate.
+
+**A chair's rotation IS the direction of its table.** `ChairObject.facesTable`
+switches on the rotation and looks at exactly that one tile for a
+`TableObjectInterface`: 0 above, 1 right, 2 below, 3 left. So a plan does not
+need to declare a chair's rotation — it can be read off which side the table is
+drawn on, and a chair with no table on any side is a transcription slip worth
+throwing on.
+
+**`GameObject.getValidObjectLayers()` is how you check a decoration belongs on
+the layer you are about to write it to.** `TableDecorationObject` adds
+`ObjectLayerRegistry.FENCE_AND_TABLE_DECOR` there and the wall lights add
+`WALL_DECOR`. `Preset.setObjectLayer` refuses nothing, so writing an ordinary
+object onto one of those layers produces a piece that draws in the wrong place
+and cannot be removed. `WallObject.registerWallObjects(prefix, …)` returns
+`{wall, doorClosed, doorOpen, window}` and registers them as
+`prefix + "wall" / "door" / "window"`, which is where `skystonebrickwindow`
+comes from without appearing in any source file.

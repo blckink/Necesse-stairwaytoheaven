@@ -218,10 +218,10 @@ for _ in $(seq 1 90); do
     sleep 2
 done
 
-# The thirteen inhabited places (swh_realmpois). Until 2026-09-07 NO gate looked
+# The sixteen inhabited places (swh_realmpois). Until 2026-09-07 NO gate looked
 # at them at all: the POI assertions above are skysurfacestatus's, which counts
 # the SURFACE catalogue -- a different system, with a different string ID. The
-# thirteen could have been generating zero times since they were registered on
+# catalogue could have been generating zero times since they were registered on
 # 2026-09-04 and this test would still have printed "0 FAIL". It did, on
 # 2026-09-05, while the player was in the sky finding nothing.
 #
@@ -230,7 +230,7 @@ done
 # calls) for the funnel, and once through the preset regions the world really
 # built for the queue. Then it force-generates the nearest place and counts what
 # is standing in it, because a queued rectangle is not a building.
-echo "Running skyreachstatus pois (the thirteen inhabited places)..."
+echo "Running skyreachstatus pois (the sixteen inhabited places)..."
 echo "skyreachstatus pois" >&3
 for _ in $(seq 1 180); do
     [ "$(grep -c SKYREACH_STATUS_DONE "$LOG")" -ge 5 ] && break
@@ -512,24 +512,45 @@ grep -qE "realm check: scale=[0-9]+ .* 0=skyreach" "$LOG1" \
 grep -qE "realm check: .* 5800=hell" "$LOG1" \
     || { echo "FAIL: the far end of the realm field is not Hell"; STATUS=1; }
 
-echo "--- verifying the thirteen inhabited places actually stand ---"
+echo "--- verifying the sixteen inhabited places actually stand ---"
 # The gate that did not exist until 2026-09-07. Every assertion here is on the
 # QUEUE the world built, not on the catalogue being registered -- registration
 # was never the problem. Measured over six seeds on 2026-09-07: 13/13 on all of
 # them, nearest place 126-430 tiles from the arrival pad.
-grep -qE "realmpoi census: .* kinds=13/13 " "$LOG1" \
-    || { echo "FAIL: the placer accepts no site at all for one of the thirteen inhabited places"; \
+#
+# The count is RealmPoiPresets.COUNT and has to be raised with it: the toll-house
+# (2026-09-09) took the catalogue to 14 without touching these two greps, so the
+# gate had been failing on a number rather than on a defect. Waysides and the
+# Dew-Keeper's Hut took it to 16.
+grep -qE "realmpoi census: .* kinds=16/16 " "$LOG1" \
+    || { echo "FAIL: the placer accepts no site at all for one of the sixteen inhabited places"; \
          grep -aE "realmpoi kind .* accepted=0 " "$LOG1"; STATUS=1; }
-grep -qE "realmpoi census: .* queuedkinds=13/13 " "$LOG1" \
-    || { echo "FAIL: one of the thirteen inhabited places is in no preset region in the world"; \
+grep -qE "realmpoi census: .* queuedkinds=16/16 " "$LOG1" \
+    || { echo "FAIL: one of the sixteen inhabited places is in no preset region in the world"; \
          grep -aE "realmpoi kind .* queued=0 " "$LOG1"; STATUS=1; }
 # ...named one by one, so a regression says WHICH place vanished rather than
 # only that the total slipped.
 for poi in skytower skytown skytollbridge skyinn edencrowngarden edenfermenthouse \
     steinfeldmemorial ghostarchive crookedbazaar hellborderoffice helladministration \
-    hellforge hellcarnival; do
+    hellforge hellcarnival skywaytollhouse waysideshrine dewkeepershut; do
     grep -qE "realmpoi kind $poi: .* queued=[1-9][0-9]* nearest=[0-9]+" "$LOG1" \
         || { echo "FAIL: $poi stands nowhere in the world"; \
+             grep -aE "realmpoi kind $poi:" "$LOG1" | tail -1; STATUS=1; }
+    # ...and its preset really carries objects. Only the NEAREST place of all is
+    # force-generated below, so without this every other kind could resolve to
+    # an empty rectangle and still count as queued. It bites hardest on the
+    # plan-built places, which do not clear their footprint first: an
+    # interpreter that wrote nothing would look exactly like one that worked.
+    grep -qE "realmpoi kind $poi: .* presetobjects=[1-9][0-9]* " "$LOG1" \
+        || { echo "FAIL: $poi's preset is empty -- a queued rectangle with nothing in it"; \
+             grep -aE "realmpoi kind $poi:" "$LOG1" | tail -1; STATUS=1; }
+    # ...and every window it places survives. WallWindowObject.getWindowDir
+    # deletes a window whose walls do not form exactly one opposite pair, and
+    # leaves a hole in the wall where it stood; the Sky Tower shipped two such
+    # from 2026-09-04 and no count could see them. Asked of the preset with the
+    # engine's own predicate, so it covers every kind and not just the nearest.
+    grep -qE "realmpoi kind $poi: .* badwindows=0 " "$LOG1" \
+        || { echo "FAIL: $poi places a window the engine will delete (§0.3)"; \
              grep -aE "realmpoi kind $poi:" "$LOG1" | tail -1; STATUS=1; }
 done
 # ...and a floor per realm band, so a whole band cannot quietly empty out even
@@ -558,6 +579,13 @@ fi
 # assertion the queue itself cannot make.
 grep -qE "realmpoi stamp: .* objects=[1-9][0-9]*/" "$LOG1" \
     || { echo "FAIL: the nearest inhabited place generated no objects at all"; \
+         grep -aE "realmpoi stamp:" "$LOG1" | tail -1; STATUS=1; }
+# ...and every object its preset asked for is really standing on its tile. A
+# count alone passes while the engine quietly drops things after the preset
+# writes them; this compares the generated world with the preset tile by tile
+# and the log names the first few that disagree.
+grep -qE "realmpoi stamp: .* missing=0 " "$LOG1" \
+    || { echo "FAIL: the nearest inhabited place is missing objects its preset placed"; \
          grep -aE "realmpoi stamp:" "$LOG1" | tail -1; STATUS=1; }
 
 # ...and the five weapons must be real registered items with a name, not IDs.

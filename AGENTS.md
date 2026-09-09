@@ -139,6 +139,7 @@ python3 tools/template_audit.py       # sprite templates match the cards that sp
 python3 tools/content_ledger.py --check # nothing registered ships undescribed
 python3 tools/area_census.py          # per-realm density/cast/quest census; reading tool, not a gate
 python3 tools/tile_behaviour_audit.py # every tile is what it is presented as
+python3 tools/plan_transcription_audit.py # POI room plans in code still match the dossier's maps
 python3 tools/wall_render_preview.py  # walls: compose scenes, then LOOK at build/qa/
 python3 tools/rotation_preview.py     # rotations: every cell where it lands, then LOOK
 ```

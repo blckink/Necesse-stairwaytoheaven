@@ -49,9 +49,19 @@ public final class RealmPoiPresets {
      * from the ordinal ranges it used to read.
      */
     public static final int SKY_TOLL_HOUSE = 13;
-    public static final int COUNT = 14;
+    /**
+     * POI 2.1 of the dossier, and the first place built by {@link #plan} rather
+     * than typed out in {@code setObject} calls. APPENDED, for the reason
+     * {@link #SKY_TOLL_HOUSE} states.
+     */
+    public static final int SKY_WAYSIDE_SHRINE = 14;
+    /** POI 2.11 of the dossier, the second {@link #plan}-built place. */
+    public static final int SKY_DEW_KEEPERS_HUT = 15;
+    public static final int COUNT = 16;
 
     private static final int UP = 0, RIGHT = 1, DOWN = 2, LEFT = 3;
+    /** Wall-decor rotation: where the WALL is, not where the piece faces (§0.2). */
+    private static final int WALL_BELOW = 0, WALL_LEFT = 1, WALL_ABOVE = 2, WALL_RIGHT = 3;
 
     private RealmPoiPresets() {
     }
@@ -72,6 +82,10 @@ public final class RealmPoiPresets {
             case HELL_FORGE: return 29;
             case HELL_CARNIVAL: return 39;
             case SKY_TOLL_HOUSE: return 23;
+            // Read OFF the plan, never declared beside it: a mistyped row would
+            // otherwise shift the whole building against its own footprint.
+            case SKY_WAYSIDE_SHRINE: return WAYSIDE_PLAN[0].length();
+            case SKY_DEW_KEEPERS_HUT: return HUT_PLAN[0].length();
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -92,6 +106,8 @@ public final class RealmPoiPresets {
             case HELL_FORGE: return 23;
             case HELL_CARNIVAL: return 31;
             case SKY_TOLL_HOUSE: return 19;
+            case SKY_WAYSIDE_SHRINE: return WAYSIDE_PLAN.length;
+            case SKY_DEW_KEEPERS_HUT: return HUT_PLAN.length;
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -121,6 +137,8 @@ public final class RealmPoiPresets {
             case HELL_FORGE: return "hellforge";
             case HELL_CARNIVAL: return "hellcarnival";
             case SKY_TOLL_HOUSE: return "skywaytollhouse";
+            case SKY_WAYSIDE_SHRINE: return "waysideshrine";
+            case SKY_DEW_KEEPERS_HUT: return "dewkeepershut";
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -139,7 +157,7 @@ public final class RealmPoiPresets {
     public static int realm(int kind) {
         switch (kind) {
             case SKY_TOWER: case SKY_TOWN: case SKY_TOLL_BRIDGE: case SKY_INN:
-            case SKY_TOLL_HOUSE:
+            case SKY_TOLL_HOUSE: case SKY_WAYSIDE_SHRINE: case SKY_DEW_KEEPERS_HUT:
                 return 0;
             case EDEN_CROWN_GARDEN: case EDEN_FERMENT_HOUSE: return 1;
             case STEINFELD_MEMORIAL: return 2;
@@ -168,6 +186,8 @@ public final class RealmPoiPresets {
             case HELL_FORGE: return hellForge();
             case HELL_CARNIVAL: return hellCarnival();
             case SKY_TOLL_HOUSE: return skywayTollHouse();
+            case SKY_WAYSIDE_SHRINE: return waysideShrine();
+            case SKY_DEW_KEEPERS_HUT: return dewKeepersHut();
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -277,7 +297,14 @@ public final class RealmPoiPresets {
         door(p, 24, 25, door);
         door(p, 24, 14, door);
         door(p, 24, 7, door);
-        windows(p, window, new int[][]{{10,25},{16,25},{32,25},{38,25},{12,19},{36,19},{17,11},{31,11},{21,5},{27,5}});
+        // (16,25) and (32,25) used to be in this row and were never in the
+        // world: y=25 is the transept's north wall only OUTSIDE the nave's own
+        // rectangle (x 12..36), so those two sat on interior floor with no wall
+        // beside them, WallWindowObject.getWindowDir returned -1 and the engine
+        // deleted both -- exactly the failure chapter-01-skyreach-pois.md §0.3
+        // is written about. Moved to the transept's south wall, mid-run.
+        // `realmpoi kind ... badwindows=` now counts this for every kind.
+        windows(p, window, new int[][]{{10,25},{38,25},{16,41},{32,41},{12,19},{36,19},{17,11},{31,11},{21,5},{27,5}});
         // Central processional aisle is x=24 and remains clear.
         int chair = SkyFurnitureSet.skywatchChairID;
         int table = SkyFurnitureSet.skywatchTableID;
@@ -599,6 +626,536 @@ public final class RealmPoiPresets {
         door(p, 7, 9, door); door(p, 31, 9, door); door(p, 7, 21, door); door(p, 31, 21, door);
         for (int[] at : new int[][]{{6,6},{9,6},{30,6},{33,6},{6,24},{9,24},{30,24},{33,24}}) p.setObject(at[0], at[1], object("crate"));
         for (int[] at : new int[][]{{12,12},{26,12},{12,18},{26,18}}) p.setObject(at[0], at[1], object("scraplamp"));
+        return p;
+    }
+
+    // =======================================================================
+    // The plan interpreter
+    //
+    // docs/design/chapter-01-skyreach-pois.md holds fourteen room plans drawn
+    // one character per tile. Transcribing each of them into setObject calls by
+    // hand -- the way the fourteen above were built -- means
+    // re-deciding the dossier's four written-once rules fourteen times, and
+    // getting one of them wrong fourteen ways. So the plan itself is the source
+    // and the rules live here, once:
+    //
+    //   0.2  a multi-tile piece writes BOTH halves with the SAME rotation,
+    //        the far half in the direction the rotation points
+    //   0.2  wall decor goes on ObjectLayerRegistry.WALL_DECOR and its OWN tile
+    //        must not be masonry, or the banner opens a hole in the building
+    //   0.2  table decorations go on FENCE_AND_TABLE_DECOR, on a table tile
+    //   0.3  a window sits mid-run: exactly one opposite pair of connected
+    //        walls, the other axis open. WallWindowObject.getWindowDir returns
+    //        -1 otherwise and the engine silently deletes it
+    //   0.4  a straight fence run has orthogonal neighbours; a lone post is the
+    //        thing the player already complained about
+    //
+    // Every one of these throws at load rather than in the world:
+    // RealmPoiWorldPreset.onRegistryClosed builds every kind when the registries
+    // close, so a plan that breaks a rule fails the game's startup, not a
+    // player's walk. Rings and curves (POIs 6, 8, 9) still need
+    // SkyLandscape.discRing and are out of this interpreter's scope.
+    // =======================================================================
+
+    /** How many distinct plan characters a legend can carry; plain ASCII. */
+    private static final int LEGEND_SIZE = 128;
+
+    /**
+     * The character table one plan is read through.
+     *
+     * <p>{@code ground} is the floor written under every character that does not
+     * name a tile of its own, so a plan's props stand on its own paving rather
+     * than on whatever the terrain painter grew. Characters declared with
+     * {@link #loose} keep that painter ground on purpose -- a streetlamp beside
+     * a hut, a fence across a meadow.
+     */
+    private static final class Legend {
+        private final int ground;
+        private final int[] tile = new int[LEGEND_SIZE];
+        private final int[] object = new int[LEGEND_SIZE];
+        private final byte[] rotation = new byte[LEGEND_SIZE];
+        /** Far half of a multi-tile piece, and the plan character that must mark it. */
+        private final int[] counter = new int[LEGEND_SIZE];
+        private final char[] counterChar = new char[LEGEND_SIZE];
+        /** Decorations for a table character, handed out in plan reading order. */
+        private final int[][] tableDecor = new int[LEGEND_SIZE][];
+        private final int[] tableDecorNext = new int[LEGEND_SIZE];
+        /** WALL_DECOR object, with {@link #rotation} holding where the wall is. */
+        private final int[] wallDecor = new int[LEGEND_SIZE];
+        /** Counts as connected masonry for the window and wall-decor rules. */
+        private final boolean[] masonry = new boolean[LEGEND_SIZE];
+        private final boolean[] isWindow = new boolean[LEGEND_SIZE];
+        private final boolean[] isFence = new boolean[LEGEND_SIZE];
+        private final boolean[] isTable = new boolean[LEGEND_SIZE];
+        private final boolean[] isChair = new boolean[LEGEND_SIZE];
+        private final boolean[] known = new boolean[LEGEND_SIZE];
+
+        Legend(int ground) {
+            this.ground = ground;
+            java.util.Arrays.fill(this.tile, -1);
+            java.util.Arrays.fill(this.object, -1);
+            java.util.Arrays.fill(this.counter, -1);
+            java.util.Arrays.fill(this.wallDecor, -1);
+        }
+
+        private Legend mark(char c) {
+            if (c >= LEGEND_SIZE) {
+                throw new IllegalStateException("Plan character '" + c + "' is not ASCII");
+            }
+            if (this.known[c]) {
+                throw new IllegalStateException("Plan character '" + c + "' is declared twice");
+            }
+            this.known[c] = true;
+            return this;
+        }
+
+        /** The plan's own paving: writes the ground and clears what stood on it. */
+        Legend floor(char c) {
+            mark(c);
+            this.tile[c] = this.ground;
+            this.object[c] = 0;
+            return this;
+        }
+
+        /** Paving of its own kind -- an inlay, a weighbridge, a terrace. */
+        Legend floor(char c, String tileID) {
+            floor(c);
+            this.tile[c] = tile(tileID);
+            return this;
+        }
+
+        Legend prop(char c, String objectID) {
+            return prop(c, objectID, UP);
+        }
+
+        /** A piece standing on the plan's own ground. */
+        Legend prop(char c, String objectID, int rotation) {
+            mark(c);
+            this.tile[c] = this.ground;
+            this.object[c] = object(objectID);
+            this.rotation[c] = (byte) rotation;
+            return this;
+        }
+
+        /** A piece that keeps the terrain painter's own ground under it. */
+        Legend loose(char c, String objectID) {
+            mark(c);
+            this.object[c] = object(objectID);
+            return this;
+        }
+
+        /**
+         * A multi-tile piece, both halves, same rotation (§0.2).
+         *
+         * <p>{@code Preset.applyToLevel} never runs {@code MultiTile.placeObject},
+         * so the far half is written here or it is not written at all -- and a
+         * bed with no foot is a bed the player cannot sleep in. The far half
+         * lands in the direction the rotation points, and {@code counterChar}
+         * must be the character the plan draws there: that is what makes the
+         * ASCII map and the object agree instead of merely coexist.
+         */
+        Legend pair(char c, char counterChar, String objectID, int rotation) {
+            prop(c, objectID, rotation);
+            mark(counterChar);
+            this.counter[c] = object(objectID + "2");
+            this.counterChar[c] = counterChar;
+            // The far half is written by its master. Its own character carries
+            // the ground so the floor under it stays the room's floor.
+            this.tile[counterChar] = this.ground;
+            return this;
+        }
+
+        /** Masonry: wall, and the two things that count as connected wall. */
+        Legend wall(char c, String objectID) {
+            prop(c, objectID);
+            this.masonry[c] = true;
+            return this;
+        }
+
+        /**
+         * A door. NOT masonry: {@code WallDoorObject extends DoorObject}, and
+         * only {@code WallObject} and {@code WallWindowObject} put themselves in
+         * {@code WallObject.connectedWalls}, so a window beside a door is a
+         * window with an open side.
+         */
+        Legend door(char c, String objectID) {
+            return prop(c, objectID);
+        }
+
+        /** A window, checked against §0.3 wherever the plan places it. */
+        Legend window(char c, String objectID) {
+            wall(c, objectID);
+            this.isWindow[c] = true;
+            return this;
+        }
+
+        /** A fence or gate, checked against §0.4 for lone posts. */
+        Legend fence(char c, String objectID) {
+            loose(c, objectID);
+            this.isFence[c] = true;
+            return this;
+        }
+
+        /**
+         * A table, and the decorations that stand ON it (§0.2).
+         *
+         * <p>Table decorations live on {@code FENCE_AND_TABLE_DECOR} and cannot
+         * stand on bare floor, so this is the only way the interpreter will
+         * write one -- there is deliberately no "decoration" character. Where a
+         * plan draws one character for several tables carrying different pieces
+         * (§2.11 draws {@code mm} for a tome and a potted cloudberry), the list
+         * is handed out in plan reading order, left to right and top to bottom.
+         */
+        Legend table(char c, String tableID, String... decorIDs) {
+            prop(c, tableID);
+            // "Tischdeko nur auf Tischen" is only worth anything if the thing
+            // called a table really is one. ChairObject.facesTable and
+            // TableDecorationObject both test for this interface and nothing
+            // else, so it is the same question the engine asks.
+            if (!(ObjectRegistry.getObject(this.object[c]) instanceof
+                    necesse.level.gameObject.TableObjectInterface)) {
+                throw new IllegalStateException("Table character '" + c + "' is "
+                        + tableID + ", which is not a TableObjectInterface;"
+                        + " a decoration cannot stand on it");
+            }
+            this.isTable[c] = true;
+            int[] decor = new int[decorIDs.length];
+            for (int i = 0; i < decorIDs.length; i++) {
+                decor[i] = layered(decorIDs[i], ObjectLayerRegistry.FENCE_AND_TABLE_DECOR,
+                        "a table decoration");
+            }
+            this.tableDecor[c] = decor;
+            return this;
+        }
+
+        /**
+         * A chair, whose rotation is READ off the plan rather than declared
+         * (§0.2: "a chair at a table is turned toward the table").
+         *
+         * <p>{@code ChairObject.facesTable} checks exactly the tile the rotation
+         * points at -- 0 above, 1 right, 2 below, 3 left -- so {@link #plan}
+         * turns each chair toward the orthogonally adjacent table character and
+         * throws if there is none. One character can therefore serve every chair
+         * in a room whatever side of the table it sits on, which is how the
+         * dossier draws them.
+         */
+        Legend chair(char c, String objectID) {
+            prop(c, objectID);
+            this.isChair[c] = true;
+            return this;
+        }
+
+        /**
+         * Wall decor -- a banner or a wall lamp (§0.2).
+         *
+         * <p>{@code wallDir} is where the WALL is, not where the piece faces.
+         * The character marks the FLOOR tile the piece hangs from, so this
+         * LAYERS onto a character already declared as floor: {@code
+         * floor('n').decor('n', "skywatchbanner", WALL_ABOVE)}. Hanging one off
+         * a wall character is refused here, because a banner written onto
+         * masonry replaces it and opens a hole in the building -- the failure
+         * the dossier calls out by name. {@link #plan} then checks that the wall
+         * it says it hangs from is really drawn there.
+         */
+        Legend decor(char c, String objectID, int wallDir) {
+            if (c >= LEGEND_SIZE || !this.known[c]) {
+                throw new IllegalStateException("Wall decor '" + c
+                        + "' must first be declared as the floor tile it hangs from");
+            }
+            if (this.object[c] != 0) {
+                throw new IllegalStateException("Wall decor '" + c
+                        + "' sits on a character that carries an object of its own"
+                        + (this.masonry[c] ? " -- masonry, which it would replace,"
+                                + " opening a hole in the building" : ""));
+            }
+            this.wallDecor[c] = layered(objectID, ObjectLayerRegistry.WALL_DECOR, "wall decor");
+            this.rotation[c] = (byte) wallDir;
+            return this;
+        }
+
+        /**
+         * A character the plan draws that this build deliberately does not
+         * write, with the reason in the caller. Used for the dossier's unbuilt
+         * art: {@link #object} would throw at load rather than quietly drop it,
+         * and shipping an error texture is a release blocker
+         * ({@code docs/IMPLEMENTATION_RULES.md} §5).
+         */
+        Legend pending(char c, boolean keepGround) {
+            mark(c);
+            if (keepGround) {
+                this.tile[c] = this.ground;
+                this.object[c] = 0;
+            }
+            return this;
+        }
+    }
+
+    /**
+     * An object that really belongs on the layer a legend wants to put it on.
+     *
+     * <p>{@code GameObject.getValidObjectLayers} is the engine's own answer:
+     * {@code TableDecorationObject} adds {@code FENCE_AND_TABLE_DECOR} and
+     * {@code SkyWallLightObject} adds {@code WALL_DECOR}. Writing an ordinary
+     * object onto one of those layers is not refused by {@code Preset} and
+     * produces a piece that draws in the wrong place and cannot be removed.
+     */
+    private static int layered(String id, int layer, String what) {
+        int value = object(id);
+        if (!ObjectRegistry.getObject(value).getValidObjectLayers().contains(layer)) {
+            throw new IllegalStateException(id + " is not " + what
+                    + ": its valid object layers are "
+                    + ObjectRegistry.getObject(value).getValidObjectLayers()
+                    + ", not " + layer);
+        }
+        return value;
+    }
+
+    /** The character at {@code (x,y)} of a plan, or {@code '.'} off its edge. */
+    private static char at(String[] rows, int x, int y) {
+        if (y < 0 || y >= rows.length) return '.';
+        String row = rows[y];
+        if (x < 0 || x >= row.length()) return '.';
+        return row.charAt(x);
+    }
+
+    private static boolean masonryAt(String[] rows, Legend legend, int x, int y) {
+        char c = at(rows, x, y);
+        return c < LEGEND_SIZE && legend.masonry[c];
+    }
+
+    /**
+     * The rotation that turns a chair at {@code (x,y)} toward its table, in
+     * {@code ChairObject.facesTable}'s own terms, or -1 if no side has one.
+     */
+    private static int towardTable(String[] rows, Legend legend, int x, int y) {
+        int[][] sides = {{UP, 0, -1}, {RIGHT, 1, 0}, {DOWN, 0, 1}, {LEFT, -1, 0}};
+        for (int[] side : sides) {
+            char c = at(rows, x + side[1], y + side[2]);
+            if (c < LEGEND_SIZE && legend.isTable[c]) {
+                return side[0];
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Writes one of the dossier's room plans into a preset.
+     *
+     * <p>{@code '.'} and a space write NOTHING -- {@code Preset} holds -1 in
+     * every cell and {@code applyToLevel} skips -1 (verified in the decompiled
+     * {@code Preset.applyToLevel}), so the terrain painter's own meadow, crag or
+     * cloud sea shows through the margins. That is the opposite of {@link
+     * #blank}, which clears its whole rectangle and so bulldozes them; a plan
+     * preset must not be blanked first.
+     *
+     * @throws IllegalStateException on any transcription slip or any breach of
+     *         §0.2-§0.4 -- see this section's header for the list
+     */
+    private static void plan(Preset p, String[] rows, Legend legend) {
+        for (int y = 0; y < rows.length; y++) {
+            String row = rows[y];
+            if (row.length() != rows[0].length()) {
+                throw new IllegalStateException("Plan row " + y + " is " + row.length()
+                        + " wide, row 0 is " + rows[0].length()
+                        + " -- a dropped character shifts the whole building");
+            }
+            for (int x = 0; x < row.length(); x++) {
+                char c = row.charAt(x);
+                if (c == '.' || c == ' ') continue;
+                if (c >= LEGEND_SIZE || !legend.known[c]) {
+                    throw new IllegalStateException(
+                            "Plan character '" + c + "' at " + x + "," + y + " has no legend entry");
+                }
+                String where = "'" + c + "' at " + x + "," + y;
+
+                // 0.3: a window in a corner -- or beside a door -- is silently
+                // deleted by the engine. Refuse it here instead.
+                if (legend.isWindow[c]) {
+                    boolean up = masonryAt(rows, legend, x, y - 1);
+                    boolean down = masonryAt(rows, legend, x, y + 1);
+                    boolean left = masonryAt(rows, legend, x - 1, y);
+                    boolean right = masonryAt(rows, legend, x + 1, y);
+                    boolean vertical = up && down && !left && !right;
+                    boolean horizontal = left && right && !up && !down;
+                    if (!vertical && !horizontal) {
+                        throw new IllegalStateException("Window " + where
+                                + " is not mid-run in a straight wall (walls up=" + up
+                                + " right=" + right + " down=" + down + " left=" + left
+                                + "); WallWindowObject.getWindowDir would delete it");
+                    }
+                }
+
+                // 0.4: a straight run is a connected fence; a lone post is not.
+                if (legend.isFence[c]) {
+                    char n = at(rows, x, y - 1), e = at(rows, x + 1, y);
+                    char s = at(rows, x, y + 1), w = at(rows, x - 1, y);
+                    boolean joined = (n < LEGEND_SIZE && legend.isFence[n])
+                            || (e < LEGEND_SIZE && legend.isFence[e])
+                            || (s < LEGEND_SIZE && legend.isFence[s])
+                            || (w < LEGEND_SIZE && legend.isFence[w]);
+                    if (!joined) {
+                        throw new IllegalStateException("Fence " + where
+                                + " has no orthogonal neighbour; FenceObject.attachesToObject"
+                                + " would draw a lone post");
+                    }
+                }
+
+                // 0.2: a chair is turned toward the table it sits at, and the
+                // plan says which side that is.
+                int rotation = legend.rotation[c];
+                if (legend.isChair[c]) {
+                    rotation = towardTable(rows, legend, x, y);
+                    if (rotation < 0) {
+                        throw new IllegalStateException("Chair " + where
+                                + " has no table on any orthogonal side;"
+                                + " ChairObject.facesTable would find nothing to sit at");
+                    }
+                }
+
+                if (legend.tile[c] >= 0) {
+                    p.setTile(x, y, legend.tile[c]);
+                }
+                if (legend.object[c] >= 0) {
+                    p.setObject(x, y, legend.object[c], rotation);
+                }
+
+                // 0.2: both halves, same rotation, far half where the rotation
+                // points -- and the plan has to draw it there.
+                if (legend.counter[c] >= 0) {
+                    int dx = rotation == RIGHT ? 1 : rotation == LEFT ? -1 : 0;
+                    int dy = rotation == DOWN ? 1 : rotation == UP ? -1 : 0;
+                    char drawn = at(rows, x + dx, y + dy);
+                    if (drawn != legend.counterChar[c]) {
+                        throw new IllegalStateException("Multi-tile piece " + where
+                                + " points its far half at " + (x + dx) + "," + (y + dy)
+                                + ", where the plan draws '" + drawn + "' and not '"
+                                + legend.counterChar[c] + "'");
+                    }
+                    p.setObject(x + dx, y + dy, legend.counter[c], rotation);
+                }
+
+                // 0.2: table decoration, on a table, on its own layer.
+                int[] decor = legend.tableDecor[c];
+                if (decor != null && decor.length > 0) {
+                    p.setObjectLayer(ObjectLayerRegistry.FENCE_AND_TABLE_DECOR, x, y,
+                            decor[legend.tableDecorNext[c]++ % decor.length]);
+                }
+
+                // 0.2: wall decor hangs from masonry. That its OWN tile is not
+                // masonry is settled in Legend.decor, where the character is
+                // declared; what only the plan can answer is whether the wall it
+                // names is really drawn on that side.
+                if (legend.wallDecor[c] >= 0) {
+                    int wallDir = legend.rotation[c];
+                    int wx = x + (wallDir == WALL_RIGHT ? 1 : wallDir == WALL_LEFT ? -1 : 0);
+                    int wy = y + (wallDir == WALL_BELOW ? 1 : wallDir == WALL_ABOVE ? -1 : 0);
+                    if (!masonryAt(rows, legend, wx, wy)) {
+                        throw new IllegalStateException("Wall decor " + where
+                                + " says its wall is at " + wx + "," + wy
+                                + ", where the plan draws '" + at(rows, wx, wy) + "'");
+                    }
+                    p.setObjectLayer(ObjectLayerRegistry.WALL_DECOR, x, y,
+                            legend.wallDecor[c], wallDir);
+                }
+            }
+        }
+    }
+
+    /**
+     * POI 2.1, the Skywatch Wayside, from the plan in §2.1 verbatim.
+     *
+     * <p>The dossier's smallest place and the world's connective tissue: a paved
+     * pocket off the road, a balustrade on three sides, benches with their backs
+     * to the rail, and a locked offering cabinet. 3 lights in 99 tiles = 1 per
+     * 33, inside §0.5's 25-40 band for a designed open-air place.
+     *
+     * <p>The stele at (5,3) is left out: {@code skywatchstele} is §4's new art
+     * and is not registered, and with it goes the Warden's Ledger drip-feed
+     * (§3.1) this POI exists to carry. Its tile stays paving so the pocket still
+     * reads whole.
+     */
+    private static final String[] WAYSIDE_PLAN = {
+            "...........",
+            ".|||||||||.",
+            ".|Bb,,,Bb|.",
+            ".|v,,S,,w|.",
+            ".|,,,,,,,|.",
+            ".|k,,c,,r|.",
+            ".|,,,,,,,|.",
+            ".L,,,,,,,L.",
+            "...........",
+    };
+
+    private static Preset waysideShrine() {
+        Preset p = new Preset(width(SKY_WAYSIDE_SHRINE), height(SKY_WAYSIDE_SHRINE));
+        Legend legend = new Legend(SkyRegistry.skyroadTileID)
+                .floor(',')
+                .fence('|', "cloudmarblefence")
+                // Backs to the north rail, both halves, rotation 1 (§2.1).
+                .pair('B', 'b', "skywatchbench", RIGHT)
+                .prop('k', "skywatchcabinet", RIGHT)
+                .prop('c', "skywatchcandelabra")
+                .loose('L', "wardencandelabra")
+                // Planting, not scatter: the pocket's own three plants.
+                .prop('v', "skytulip")
+                .prop('w', "cloudbell")
+                .prop('r', "cloudberrybush")
+                .pending('S', true);
+        plan(p, WAYSIDE_PLAN, legend);
+        return p;
+    }
+
+    /**
+     * POI 2.11, the Dew-Keeper's Hut, from the plan in §2.11 verbatim.
+     *
+     * <p>A small dwelling with nobody in it: one room of 35 tiles, a snail run
+     * outside, the bed made. Two windows, both mid-run -- (7,1) north and (11,4)
+     * east -- which is exactly what {@link #plan}'s §0.3 test proves rather than
+     * assumes. The five Dew Snails in the run are placed by
+     * {@link RealmPoiWorldPreset}, the only caller that holds a level.
+     *
+     * <p>The stele at (2,4) and the cracked cistern at (6,11) are left out for
+     * the reason {@link #waysideShrine} gives: both are §4 new art. They stand
+     * on the run's own ground, so their tiles are left to the terrain painter.
+     */
+    private static final String[] HUT_PLAN = {
+            ".............",
+            "...####O####.",
+            "...#c====eE#.",
+            "...#==h====#.",
+            "..sD==mm===O.",
+            "...#k==h===#.",
+            "...#o=====r#.",
+            "...#########.",
+            "..L..........",
+            "..ffffGffff..",
+            "..f.g...g.f..",
+            "..f..gw...f..",
+            "..fffffffff..",
+    };
+
+    private static Preset dewKeepersHut() {
+        Preset p = new Preset(width(SKY_DEW_KEEPERS_HUT), height(SKY_DEW_KEEPERS_HUT));
+        Legend legend = new Legend(SkyRegistry.prismFloorID)
+                .floor('=')
+                .wall('#', "skystonebrickwall")
+                .window('O', "skystonebrickwindow")
+                .door('D', "skystonebrickdoor")
+                // Head to the east wall, both halves, rotation 3 (§2.11).
+                .pair('E', 'e', "skywatchbed", LEFT)
+                .prop('r', "skywatchdresser", LEFT)
+                .table('m', "skywatchmodulartable", "skywatchtome", "pottedcloudberry")
+                .chair('h', "skywatchchair")
+                .prop('k', "skywatchcabinet", RIGHT)
+                .prop('o', "cookingpot")
+                .prop('c', "skywatchcandelabra")
+                .loose('L', "wardencandelabra")
+                .fence('f', "skyironfence")
+                .fence('G', "skyironfencegate")
+                .loose('g', "glowfern")
+                .pending('s', false)
+                .pending('w', false);
+        plan(p, HUT_PLAN, legend);
         return p;
     }
 }

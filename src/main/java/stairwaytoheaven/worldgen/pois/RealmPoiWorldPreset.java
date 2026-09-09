@@ -18,7 +18,7 @@ import stairwaytoheaven.worldgen.SkyNoise;
 import stairwaytoheaven.worldgen.SkyOrigin;
 import stairwaytoheaven.worldgen.SkyTerrainPainter;
 
-/** Places the thirteen inhabited POIs into their realm bands on {@code skyreach2}. */
+/** Places the sixteen inhabited POIs into their realm bands on {@code skyreach2}. */
 public class RealmPoiWorldPreset extends WorldPreset {
     public static final String STRING_ID = "swh_realmpois";
     private static final String OCCUPIED_BOARD = "villages";
@@ -43,7 +43,9 @@ public class RealmPoiWorldPreset extends WorldPreset {
     private static final int[][] REALM_KINDS = {
             {RealmPoiPresets.SKY_TOWER, RealmPoiPresets.SKY_TOWN,
                     RealmPoiPresets.SKY_TOLL_BRIDGE, RealmPoiPresets.SKY_INN,
-                    RealmPoiPresets.SKY_TOLL_HOUSE},
+                    RealmPoiPresets.SKY_TOLL_HOUSE,
+                    RealmPoiPresets.SKY_WAYSIDE_SHRINE,
+                    RealmPoiPresets.SKY_DEW_KEEPERS_HUT},
             {RealmPoiPresets.EDEN_CROWN_GARDEN, RealmPoiPresets.EDEN_FERMENT_HOUSE},
             {RealmPoiPresets.STEINFELD_MEMORIAL},
             {RealmPoiPresets.GHOST_ARCHIVE},
@@ -251,7 +253,7 @@ public class RealmPoiWorldPreset extends WorldPreset {
                                 placeInhabitants(kind, level, x, y);
                             }
                         })
-                        // Which of the thirteen this rectangle is. Without it the
+                        // Which of the sixteen this rectangle is. Without it the
                         // queue only says "swh_realmpois", and a census can count
                         // records but not tell a Sky Inn from a Hell Carnival.
                         .setDebugName(RealmPoiPresets.key(kind));
@@ -277,6 +279,15 @@ public class RealmPoiWorldPreset extends WorldPreset {
         if (kind == RealmPoiPresets.SKY_TOLL_HOUSE) {
             // Plan  2.12: Magpie waits at (18,5) in the ledger room.
             spawn(level, "magpiesettler", x + 18, y + 5);
+        }
+        if (kind == RealmPoiPresets.SKY_DEW_KEEPERS_HUT) {
+            // Plan  2.11: five Dew Snails inside the run, which is the whole
+            // reason to walk into the hut -- the netting loop the mod built and
+            // then hid in open terrain where nobody meets five at once. Inside
+            // the fence, clear of the gate at (6,9) and of the glowferns.
+            for (int[] at : new int[][]{{3, 10}, {6, 10}, {9, 11}, {4, 11}, {8, 11}}) {
+                spawn(level, "dewsnail", x + at[0], y + at[1]);
+            }
         }
     }
 

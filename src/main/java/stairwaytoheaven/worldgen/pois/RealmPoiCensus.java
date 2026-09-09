@@ -16,7 +16,7 @@ import stairwaytoheaven.worldgen.RealmDepth;
 import stairwaytoheaven.worldgen.SkyOrigin;
 
 /**
- * How many of the thirteen inhabited places a world really stands up, and how
+ * How many of the sixteen inhabited places a world really stands up, and how
  * far the nearest one is from the tile the stairway drops the player on.
  *
  * <h2>Why this exists</h2>
@@ -24,7 +24,7 @@ import stairwaytoheaven.worldgen.SkyOrigin;
  * player never found any of it. Nothing could have told him: {@code
  * scripts/integration_test.sh} counts the SURFACE POIs, which are a different
  * system ({@code swhsurfacepois}), and the word {@code realmpoi} did not occur
- * anywhere in it. The thirteen could have been generating zero times for days
+ * anywhere in it. The catalogue could have been generating zero times for days
  * and every gate would still have been green. This class is the gate that was
  * missing.
  *
@@ -215,6 +215,8 @@ public final class RealmPoiCensus {
                     .append(": realm=").append(RealmDepth.keyOf(RealmPoiPresets.realm(kind)))
                     .append(" size=").append(RealmPoiPresets.width(kind)).append('x')
                     .append(RealmPoiPresets.height(kind))
+                    .append(" presetobjects=").append(presetObjects(kind))
+                    .append(" badwindows=").append(badWindows(kind))
                     .append(" accepted=").append(acceptedByKind[kind])
                     .append(" queued=").append(queuedByKind[kind]);
             if (queued == null) {
@@ -248,6 +250,95 @@ public final class RealmPoiCensus {
                 + " ms=" + (System.currentTimeMillis() - started));
     }
 
+    /**
+     * How many objects one kind's preset actually carries, on every layer.
+     *
+     * <p>The third question ({@link #stampNearest}) is only ever asked of the
+     * single nearest place, so fifteen of the sixteen kinds could resolve to an
+     * empty rectangle and every count above would still be green. This is the
+     * same assertion made where it costs nothing: a preset is a pure function of
+     * its kind, so it can be built and counted without generating a tile.
+     *
+     * <p>It matters most for the plan-built places. Those deliberately do NOT
+     * clear their rectangle first -- {@code '.'} leaves the terrain painter's
+     * own ground -- so an interpreter that wrote nothing at all would look
+     * exactly like one that worked, right up to the player walking there.
+     */
+    private static int presetObjects(int kind) {
+        necesse.level.maps.presets.Preset preset =
+                RealmPoiPresets.build(kind, new necesse.engine.util.GameRandom(0L));
+        int objects = 0;
+        for (int layer = 0; layer < preset.objects.length; layer++) {
+            for (int x = 0; x < preset.width; x++) {
+                for (int y = 0; y < preset.height; y++) {
+                    int object = preset.getObject(layer, x, y);
+                    if (object > 0) {
+                        objects++;
+                    }
+                }
+            }
+        }
+        return objects;
+    }
+
+    /**
+     * Windows this kind's preset places where the engine will delete them.
+     *
+     * <p>{@code WallWindowObject.getWindowDir} accepts a window only where the
+     * connected walls form exactly ONE opposite pair; anywhere else it returns
+     * -1 and the window is silently gone — the failure
+     * {@code chapter-01-skyreach-pois.md} §0.3 is written about. Nothing noticed:
+     * a deleted window leaves a hole in the wall and every count stays green,
+     * and the Sky Tower shipped two of them from 2026-09-04 (both mid-run of a
+     * row that the nave's own rectangle turns into interior floor).
+     *
+     * <p>Asked of the PRESET, with the engine's own predicate, so all sixteen
+     * kinds are covered for the price of building sixteen presets — the stamp
+     * below can only ever look at whichever one happens to be nearest.
+     * {@code RealmPoiPresets.plan} makes the same test on the plan characters,
+     * before the objects exist; this is the same rule asked of the outcome, and
+     * it reaches the hand-built kinds the interpreter does not touch.
+     */
+    private static int badWindows(int kind) {
+        necesse.level.maps.presets.Preset preset =
+                RealmPoiPresets.build(kind, new necesse.engine.util.GameRandom(0L));
+        int bad = 0;
+        for (int x = 0; x < preset.width; x++) {
+            for (int y = 0; y < preset.height; y++) {
+                necesse.level.gameObject.GameObject object =
+                        necesse.engine.registries.ObjectRegistry.getObject(preset.getObject(x, y));
+                if (!(object instanceof necesse.level.gameObject.WallWindowObject)) {
+                    continue;
+                }
+                necesse.level.gameObject.WallWindowObject window =
+                        (necesse.level.gameObject.WallWindowObject) object;
+                if (window.getWindowDir(
+                        connectedWall(preset, window, x, y - 1),
+                        connectedWall(preset, window, x + 1, y),
+                        connectedWall(preset, window, x, y + 1),
+                        connectedWall(preset, window, x - 1, y)) < 0) {
+                    bad++;
+                }
+            }
+        }
+        return bad;
+    }
+
+    /** Whether the preset's tile at {@code (x,y)} is wall the window connects to. */
+    private static boolean connectedWall(necesse.level.maps.presets.Preset preset,
+            necesse.level.gameObject.WallWindowObject window, int x, int y) {
+        if (x < 0 || y < 0 || x >= preset.width || y >= preset.height) {
+            // Off the preset's edge the world's own ground shows through, which
+            // is never wall. A window on the outer row is a window in a corner.
+            return false;
+        }
+        int id = preset.getObject(x, y);
+        if (id <= 0) {
+            return false;
+        }
+        return window.isConnectedWall(necesse.engine.registries.ObjectRegistry.getObject(id));
+    }
+
     /** The kind a queued rectangle's debug name belongs to, or -1 if unnamed. */
     private static int kindOf(String key) {
         for (int kind = 0; kind < RealmPoiPresets.COUNT; kind++) {
@@ -259,11 +350,20 @@ public final class RealmPoiCensus {
     }
 
     /**
-     * Force-generates the nearest place and counts what is standing in it.
+     * Force-generates the nearest place and compares it, tile by tile, with the
+     * preset it was supposed to be.
      *
      * <p>This is the assertion that separates "queued" from "built". A preset
      * that resolves no objects still queues a rectangle, and the difference is
      * invisible everywhere except here.
+     *
+     * <p>A count alone is not enough. The engine deletes some objects on its own
+     * terms after a preset writes them -- a window whose walls do not form one
+     * opposite pair is dropped by {@code WallWindowObject.getWindowDir}, which
+     * is exactly the failure {@code chapter-01-skyreach-pois.md} §0.3 warns
+     * about -- and a place that lost its windows still counts sixty-odd objects
+     * and reads as green. So every tile the preset writes an object to is
+     * checked for that object, and the first few that disagree are named.
      */
     private static void stampNearest(Level level, Site site, CommandLog logs) {
         if (site == null) {
@@ -273,11 +373,30 @@ public final class RealmPoiCensus {
         long started = System.currentTimeMillis();
         level.regionManager.ensureTilesAreLoaded(site.x, site.y,
                 site.x + site.width - 1, site.y + site.height - 1);
+        necesse.level.maps.presets.Preset preset =
+                RealmPoiPresets.build(site.kind, new necesse.engine.util.GameRandom(0L));
         int objects = 0;
+        int expected = 0;
+        int missing = 0;
+        StringBuilder first = new StringBuilder();
         for (int x = site.x; x < site.x + site.width; x++) {
             for (int y = site.y; y < site.y + site.height; y++) {
-                if (level.getObjectID(x, y) != 0) {
+                int standing = level.getObjectID(x, y);
+                if (standing != 0) {
                     objects++;
+                }
+                int wanted = preset.getObject(x - site.x, y - site.y);
+                if (wanted <= 0) {
+                    continue;
+                }
+                expected++;
+                if (standing == wanted) {
+                    continue;
+                }
+                missing++;
+                if (missing <= 4) {
+                    first.append(' ').append(x - site.x).append(',').append(y - site.y)
+                            .append('=').append(standing).append("!=").append(wanted);
                 }
             }
         }
@@ -286,6 +405,8 @@ public final class RealmPoiCensus {
                 + " at=" + site.x + "," + site.y
                 + " objects=" + objects + "/" + area
                 + " fill=" + String.format(Locale.ROOT, "%.1f%%", 100.0 * objects / area)
+                + " placed=" + (expected - missing) + "/" + expected
+                + " missing=" + missing + first
                 + " ms=" + (System.currentTimeMillis() - started));
     }
 

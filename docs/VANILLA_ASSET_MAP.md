@@ -132,6 +132,19 @@ until the Ghost Realm ships its own, at which point only the shop line changes.
 | `crystalstone` | Crooked Beyond | `evilwall` — the player's call: it matches the sprite |
 | `stone` | Ghost Realm | `veilrock` |
 
+### 1.4b Vanilla objects a POI preset places by string ID
+
+Placed whole, art and behaviour both vanilla's. They swap out by naming a mod
+object of the same role in the preset's own legend; nothing else changes.
+
+| vanilla ID | realm | placed by | why that one |
+|---|---|---|---|
+| `cookingpot` | Skyreach | `RealmPoiPresets.dewKeepersHut` (dossier §2.11) | the hut's cooking loop, on site: a working pot beside the cabinet's food starter kit, so a player who has never used the mod's food chain can cook something on the spot. The mod has no cooking station of its own |
+
+*(This subsection covers `RealmPoiPresets` only. The older presets'
+vanilla furniture — `barrel`, `crate`, the `oak*` and `palm*` families — is
+recorded per realm in §2.)*
+
 ### 1.5 Vanilla sheets a mod asset was DRAWN ON
 
 Not borrowed at runtime — the art is the player's own, but its layout is

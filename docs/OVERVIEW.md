@@ -84,12 +84,27 @@ table appears in only **2**, a bed in only **1** (the Spire), and 5 of the 9 are
 "furnished" by a light and nothing else. `SkyFurnitureSet`'s 17 pieces are still
 almost unused outside the Spire.
 
-**The inhabited catalogue adds 13 presets.** `RealmPoiWorldPreset` places four
+**The inhabited catalogue adds 16 presets.** `RealmPoiWorldPreset` places seven
 in Skyreach, two in Eden, one each in Steinfeld/Ghost/Crooked, and four in the
 reserved Hell band. The large sites include actual street networks, buildings
 beside rather than on those streets, non-rectangular room unions, doors,
 windows, dense functional furniture and clear circulation. Full catalogue and
 review rules: `docs/design/realm-poi-worldgen.md`.
+
+**Three of the seven Skyreach ones come from the dossier**
+(`docs/design/chapter-01-skyreach-pois.md`, fourteen designed places). The
+Skyway Toll-House (§2.12) was transcribed into `setObject` calls by hand on
+2026-09-09. The Skywatch Wayside (§2.1) and the Dew-Keeper's Hut (§2.11) are
+not: `RealmPoiPresets.plan(Preset, String[], Legend)` reads the dossier's ASCII
+map character for character and implements the dossier's §0.2–§0.4 rules **once**
+— both halves of a multi-tile piece, wall decor on `WALL_DECOR` and never on
+masonry, table decorations only on a real `TableObjectInterface`, a chair turned
+toward its table, a window only mid-run in a straight wall, no lone fence post.
+Every breach throws at load, because `onRegistryClosed` builds all sixteen
+kinds; each rule was confirmed to fire by breaking it and booting a server.
+`tools/plan_transcription_audit.py` proves the arrays in the code are still
+character-identical to the sections in the dossier. The remaining eleven plans
+are unbuilt. **`[run]`, not `[game]`.**
 
 **And they now stand in the world — counted, not assumed.** From 2026-09-04 to
 2026-09-07 they were registered and largely absent, and no gate looked: the POI
@@ -97,12 +112,34 @@ counts in `scripts/integration_test.sh` were the SURFACE catalogue's, a
 different system. `/skyreachstatus pois` (`RealmPoiCensus`) walks the whole
 realm disc through the placement decision itself and then through the preset
 regions the world really built, and the integration test fails on anything less
-than 13/13. Measured over six seeds on 2026-09-07: **13/13 on all of them**,
+than 16/16. Measured over six seeds on 2026-09-07: **13/13 on all of them**,
 ~1,450 places in a 6144-tile disc, nearest one **126–430 tiles** from the
 arrival pad. `[run]`, not `[game]` — nothing has looked at one yet. Before the
 fix the same census read 11/13 and 419 tiles. What it does not check is whether
 a footprint's INTERIOR is solid: `validSite` samples nine points, so a 57×41
 Sky Town can still straddle Mistsea between them.
+
+**The census grew two assertions on 2026-09-09**, because "queued" was still
+too weak a word. `presetobjects=` counts what each kind's preset really carries
+— only the NEAREST place is force-generated, so fifteen kinds could have
+resolved to empty rectangles and every number stayed green — and `badwindows=`
+asks `WallWindowObject.getWindowDir` about every window each preset places. The
+stamp now compares the generated world with the preset tile by tile
+(`placed=N/M missing=K`) instead of counting non-zero objects. The first thing
+that found: **the Sky Tower had shipped two windows since 2026-09-04 that the
+engine deleted on sight**, both on the row where the nave's own rectangle turns
+the transept's north wall into interior floor. Fixed by moving them to the
+transept's south wall; the gate now fails on `badwindows` above 0 and on
+`missing` above 0 for any kind.
+
+**Skyreach's band is thin, and seven kinds now share it.** The census disc
+holds only ~35 candidate cells in the home realm against ~780 in Hell, so each
+Skyreach kind lands 1–9 times per world. On one seed in six, the 49×55 Sky
+Tower — the kind whose ground test is hardest to pass — drew zero and the gate
+went red. Nothing about the placement rules changed for it; the band is simply
+under-supplied for the number of kinds in it, and the dossier's "common"
+(§0.6, one per 72×72 road cell) is a different lattice from the 220-tile one
+these ride.
 
 Eden therefore has two buildings now. Its older Knowledge Grove, Lagoon Shrine
 and Orchard Ring cells still remain pressure/terrain sites rather than presets.

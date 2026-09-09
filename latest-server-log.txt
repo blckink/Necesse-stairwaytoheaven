@@ -1,0 +1,43 @@
+[2026-09-09 22:47:59] Launched game with arguments: -nogui -localdir -world bcWIN -owner tester -port 14791 -mod "/home/blackoffset/projekte/necesse-mod/ablage/build/jar"
+[2026-09-09 22:47:59] SYSTEM INFO:
+[2026-09-09 22:47:59] 	Username: blackoffset
+[2026-09-09 22:47:59] 	OS: GNU/Linux Ubuntu 26.04.1 LTS (Resolute Raccoon) build 6.18.33.2-microsoft-standard-WSL2
+[2026-09-09 22:47:59] 	CPU: AMD Ryzen 7 9700X 8-Core Processor
+[2026-09-09 22:47:59] 	OS arch: amd64
+[2026-09-09 22:47:59] 	Memory total: 16.28 GB
+[2026-09-09 22:47:59] 	Memory max: 1.07 GB
+[2026-09-09 22:47:59] 	Java path: /usr/lib/jvm/java-21-openjdk-amd64
+[2026-09-09 22:47:59] 	Java version: 21.0.12
+[2026-09-09 22:47:59] 	JVM arguments:
+[2026-09-09 22:47:59] 		-Xms256m
+[2026-09-09 22:47:59] 		-Xmx1G
+[2026-09-09 22:47:59] 	LWJGL version: 3.4.1+2
+[2026-09-09 22:47:59] 	Root path: /mnt/c/Program Files (x86)/Steam/steamapps/common/Necesse/
+[2026-09-09 22:47:59] 	AppData path: 
+[2026-09-09 22:47:59] 	Working dir: /home/blackoffset/projekte/necesse-mod/ablage
+[2026-09-09 22:47:59] 	Natives path: INTERNAL
+[2026-09-09 22:48:00] Could not load settings file, does not exist. Creating new default settings.cfg
+[2026-09-09 22:48:00] Could not load server settings file, does not exist. Creating new default server.cfg
+[2026-09-09 22:48:00] > skyreachstatus pois
+[2026-09-09 22:48:00] Loading dedicated server on version 1.3.3.
+[2026-09-09 22:48:00] Loading dev mod from /home/blackoffset/projekte/necesse-mod/ablage/build/jar
+[2026-09-09 22:48:00] Found mod: Stairway to Heaven (stairwaytoheaven, 0.6.0) from DevModProvider
+[2026-09-09 22:48:00] (ERR) The mod stairwaytoheaven (v. 0.6.0) causes an error on startup.
+[2026-09-09 22:48:00] (ERR) You can try to contact the author with the below error message, or remove the mod.
+[2026-09-09 22:48:00] (ERR) java.lang.IllegalStateException: Could not self-attach to current VM using external process
+[2026-09-09 22:48:00] (ERR) 	at net.bytebuddy.agent.ByteBuddyAgent.installExternal(ByteBuddyAgent.java:701)
+[2026-09-09 22:48:00] (ERR) 	at net.bytebuddy.agent.ByteBuddyAgent.install(ByteBuddyAgent.java:632)
+[2026-09-09 22:48:00] (ERR) 	at net.bytebuddy.agent.ByteBuddyAgent.install(ByteBuddyAgent.java:612)
+[2026-09-09 22:48:00] (ERR) 	at net.bytebuddy.agent.ByteBuddyAgent.install(ByteBuddyAgent.java:564)
+[2026-09-09 22:48:00] (ERR) 	at net.bytebuddy.agent.ByteBuddyAgent.install(ByteBuddyAgent.java:541)
+[2026-09-09 22:48:00] (ERR) 	at necesse.engine.util.ComputedValue.get(ComputedValue.java:16)
+[2026-09-09 22:48:00] (ERR) 	at necesse.engine.modLoader.LoadedMod.loadClasses(LoadedMod.java:112)
+[2026-09-09 22:48:00] (ERR) 	at necesse.engine.modLoader.ModLoader.loadMods(ModLoader.java:189)
+[2026-09-09 22:48:00] (ERR) 	at necesse.engine.GlobalData.loadAll(GlobalData.java:254)
+[2026-09-09 22:48:00] (ERR) 	at necesse.engine.loading.ServerLoader.loadGame(ServerLoader.java:78)
+[2026-09-09 22:48:00] (ERR) 	at necesse.StartPlatformServer.start(StartPlatformServer.java:16)
+[2026-09-09 22:48:00] (ERR) 	at StartDesktopServer.main(StartDesktopServer.java:6)
+[2026-09-09 22:48:00] 
+[2026-09-09 22:48:00] You can now exit
+[2026-09-09 22:48:00] Server has stopped
+[2026-09-09 22:48:00] Exiting in 2 seconds...

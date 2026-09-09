@@ -14,6 +14,9 @@ they only enter unexplored regions and cannot overlap another reserved POI.
 | Skyreach | Wolkenhain district | 57×41 | road cross, plaza, pond/bench, four irregular occupied parcels |
 | Skyreach | Cloudstream toll bridge | 31×23 | 3-wide bridge continues the road across a 5-wide stream |
 | Skyreach | Last Updraft Inn | 17×15 | L-plan, two entrances, tables/chairs, counter, kitchen, bedroom |
+| Skyreach | Skyway Toll-House | 23×19 | dossier §2.12, transcribed by hand: weighing hall, ledger room (Magpie), vault |
+| Skyreach | Skywatch Wayside | 11×9 | dossier §2.1, read from its ASCII plan: paved pocket, balustrade, benches, offering cabinet |
+| Skyreach | Dew-Keeper's Hut | 13×13 | dossier §2.11, read from its ASCII plan: one-room dwelling, two windows, snail run with 5 Dew Snails |
 | Eden | Crown Garden hamlet | 45×35 | road cross, two homes, large planted clearing, seed shrine |
 | Eden | Fermentation house | 19×17 | bent workhouse, dining area, barrels, storage, seed basin |
 | Steinfeld | Memorial court | 23×23 | four-way path, monument, graves, columns and lights |
