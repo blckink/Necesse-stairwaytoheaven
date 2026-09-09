@@ -218,7 +218,7 @@ for _ in $(seq 1 90); do
     sleep 2
 done
 
-# The sixteen inhabited places (swh_realmpois). Until 2026-09-07 NO gate looked
+# The nineteen inhabited places (swh_realmpois). Until 2026-09-07 NO gate looked
 # at them at all: the POI assertions above are skysurfacestatus's, which counts
 # the SURFACE catalogue -- a different system, with a different string ID. The
 # catalogue could have been generating zero times since they were registered on
@@ -230,7 +230,7 @@ done
 # calls) for the funnel, and once through the preset regions the world really
 # built for the queue. Then it force-generates the nearest place and counts what
 # is standing in it, because a queued rectangle is not a building.
-echo "Running skyreachstatus pois (the sixteen inhabited places)..."
+echo "Running skyreachstatus pois (the nineteen inhabited places)..."
 echo "skyreachstatus pois" >&3
 for _ in $(seq 1 180); do
     [ "$(grep -c SKYREACH_STATUS_DONE "$LOG")" -ge 5 ] && break
@@ -512,7 +512,7 @@ grep -qE "realm check: scale=[0-9]+ .* 0=skyreach" "$LOG1" \
 grep -qE "realm check: .* 5800=hell" "$LOG1" \
     || { echo "FAIL: the far end of the realm field is not Hell"; STATUS=1; }
 
-echo "--- verifying the sixteen inhabited places actually stand ---"
+echo "--- verifying the nineteen inhabited places actually stand ---"
 # The gate that did not exist until 2026-09-07. Every assertion here is on the
 # QUEUE the world built, not on the catalogue being registered -- registration
 # was never the problem. Measured over six seeds on 2026-09-07: 13/13 on all of
@@ -521,18 +521,20 @@ echo "--- verifying the sixteen inhabited places actually stand ---"
 # The count is RealmPoiPresets.COUNT and has to be raised with it: the toll-house
 # (2026-09-09) took the catalogue to 14 without touching these two greps, so the
 # gate had been failing on a number rather than on a defect. Waysides and the
-# Dew-Keeper's Hut took it to 16.
-grep -qE "realmpoi census: .* kinds=16/16 " "$LOG1" \
-    || { echo "FAIL: the placer accepts no site at all for one of the sixteen inhabited places"; \
+# Dew-Keeper's Hut took it to 16; the Fold, the Institute and the Wayhouse
+# (2026-09-09) to 19.
+grep -qE "realmpoi census: .* kinds=19/19 " "$LOG1" \
+    || { echo "FAIL: the placer accepts no site at all for one of the nineteen inhabited places"; \
          grep -aE "realmpoi kind .* accepted=0 " "$LOG1"; STATUS=1; }
-grep -qE "realmpoi census: .* queuedkinds=16/16 " "$LOG1" \
-    || { echo "FAIL: one of the sixteen inhabited places is in no preset region in the world"; \
+grep -qE "realmpoi census: .* queuedkinds=19/19 " "$LOG1" \
+    || { echo "FAIL: one of the nineteen inhabited places is in no preset region in the world"; \
          grep -aE "realmpoi kind .* queued=0 " "$LOG1"; STATUS=1; }
 # ...named one by one, so a regression says WHICH place vanished rather than
 # only that the total slipped.
 for poi in skytower skytown skytollbridge skyinn edencrowngarden edenfermenthouse \
     steinfeldmemorial ghostarchive crookedbazaar hellborderoffice helladministration \
-    hellforge hellcarnival skywaytollhouse waysideshrine dewkeepershut; do
+    hellforge hellcarnival skywaytollhouse waysideshrine dewkeepershut \
+    shepherdsfold fallinginstitute passagewayhouse; do
     grep -qE "realmpoi kind $poi: .* queued=[1-9][0-9]* nearest=[0-9]+" "$LOG1" \
         || { echo "FAIL: $poi stands nowhere in the world"; \
              grep -aE "realmpoi kind $poi:" "$LOG1" | tail -1; STATUS=1; }

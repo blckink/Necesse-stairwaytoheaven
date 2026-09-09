@@ -20,7 +20,7 @@ it is the state as it stands now.
 
 | realm | tiles out | biomes | hostiles | critters | animals | NPCs | live quests | POIs | boss |
 |---|---|---|---|---|---|---|---|---|---|
-| **Skyreach** | 0–1800 | 4 | 8 | 4 | 2 | 7 | 5 | 4 | `cryoqueen` t8 · 74 412 HP |
+| **Skyreach** | 0–1800 | 4 | 8 | 4 | 2 | 7 | 5 | 10 | `cryoqueen` t8 · 74 412 HP |
 | **Eden** | 600–2880 | 3 | 5 | **0** | 0 | 1 | 3 | 2 | `moonlightdancer` t8 · 171 720 HP |
 | **Steinfeld** | 1920–4200 | 3 | 4 | **0** | 0 | 1 | 2 | 1 | `ascendedwizard` t9 · 220 528 HP |
 | **Ghost Realm** | 2880–5280 | 5 | 9 | **0** | 0 | 4 | 4 | 1 | `pestwarden` t9 · 233 595 HP |
@@ -113,8 +113,13 @@ near-unfindable.
 `swh_anchor` → `swh_keyskyreach`. Plus `swh_beacon`, registered and dead, kept
 so pre-0.5 saves deserialize.
 
-**POIs (4).** Sky Tower, Sky Town, Toll Bridge, Sky Inn — plus the Warden's
-Spire, the richest single building in the mod.
+**POIs (10).** Sky Tower, Sky Town, Toll Bridge, Sky Inn — plus the Warden's
+Spire, the richest single building in the mod. Six more came out of
+`docs/design/chapter-01-skyreach-pois.md` on 2026-09-09: the Skyway Toll-House
+(§2.12), the Skywatch Wayside (§2.1), the Dew-Keeper's Hut (§2.11), the
+Shepherd's Fold (§2.2), the Institute of Applied Falling (§2.3) and the Passage
+Wayhouse (§2.7). Counted by `/skyreachstatus pois` on a real seed, not by
+reading constants.
 
 **Boss.** Cryo Queen, incursion tier 8, 18 000 base → **74 412 HP**.
 

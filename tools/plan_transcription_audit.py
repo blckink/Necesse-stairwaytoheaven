@@ -29,6 +29,9 @@ PRESETS = REPO / "src/main/java/stairwaytoheaven/worldgen/pois/RealmPoiPresets.j
 PLANS = {
     "WAYSIDE_PLAN": "### 2.1 Skywatch Wayside",
     "HUT_PLAN": "### 2.11 The Dew-Keeper's Hut",
+    "FOLD_PLAN": "### 2.2 The Shepherd's Fold",
+    "INSTITUTE_PLAN": "### 2.3 The Institute of Applied Falling",
+    "WAYHOUSE_PLAN": "### 2.7 The Passage Wayhouse",
 }
 
 # The dossier draws each row as "  y12  ..#####..", the leading label being a

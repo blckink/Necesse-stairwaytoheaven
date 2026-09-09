@@ -9,6 +9,7 @@ import necesse.engine.world.worldPresets.LevelPresetsRegion;
 import necesse.engine.world.worldPresets.WorldPreset;
 import necesse.level.maps.Level;
 import stairwaytoheaven.SkyRegistry;
+import stairwaytoheaven.livestock.SkyLivestock;
 import stairwaytoheaven.realms.crooked.CrookedTerrainPainter;
 import stairwaytoheaven.realms.eden.EdenTerrainPainter;
 import stairwaytoheaven.realms.ghost.GhostTerrainPainter;
@@ -18,7 +19,7 @@ import stairwaytoheaven.worldgen.SkyNoise;
 import stairwaytoheaven.worldgen.SkyOrigin;
 import stairwaytoheaven.worldgen.SkyTerrainPainter;
 
-/** Places the sixteen inhabited POIs into their realm bands on {@code skyreach2}. */
+/** Places the nineteen inhabited POIs into their realm bands on {@code skyreach2}. */
 public class RealmPoiWorldPreset extends WorldPreset {
     public static final String STRING_ID = "swh_realmpois";
     private static final String OCCUPIED_BOARD = "villages";
@@ -45,7 +46,10 @@ public class RealmPoiWorldPreset extends WorldPreset {
                     RealmPoiPresets.SKY_TOLL_BRIDGE, RealmPoiPresets.SKY_INN,
                     RealmPoiPresets.SKY_TOLL_HOUSE,
                     RealmPoiPresets.SKY_WAYSIDE_SHRINE,
-                    RealmPoiPresets.SKY_DEW_KEEPERS_HUT},
+                    RealmPoiPresets.SKY_DEW_KEEPERS_HUT,
+                    RealmPoiPresets.SKY_SHEPHERDS_FOLD,
+                    RealmPoiPresets.SKY_FALLING_INSTITUTE,
+                    RealmPoiPresets.SKY_PASSAGE_WAYHOUSE},
             {RealmPoiPresets.EDEN_CROWN_GARDEN, RealmPoiPresets.EDEN_FERMENT_HOUSE},
             {RealmPoiPresets.STEINFELD_MEMORIAL},
             {RealmPoiPresets.GHOST_ARCHIVE},
@@ -253,7 +257,7 @@ public class RealmPoiWorldPreset extends WorldPreset {
                                 placeInhabitants(kind, level, x, y);
                             }
                         })
-                        // Which of the sixteen this rectangle is. Without it the
+                        // Which of the nineteen this rectangle is. Without it the
                         // queue only says "swh_realmpois", and a census can count
                         // records but not tell a Sky Inn from a Hell Carnival.
                         .setDebugName(RealmPoiPresets.key(kind));
@@ -288,6 +292,23 @@ public class RealmPoiWorldPreset extends WorldPreset {
             for (int[] at : new int[][]{{3, 10}, {6, 10}, {9, 11}, {4, 11}, {8, 11}}) {
                 spawn(level, "dewsnail", x + at[0], y + at[1]);
             }
+        }
+        if (kind == RealmPoiPresets.SKY_SHEPHERDS_FOLD) {
+            // Plan  2.2: the flock in the pasture west of the cottage, on the
+            // meadow tiles the plan leaves unwritten and clear of its trees,
+            // bushes and lamp. The section was written around the Cloud Lamb;
+            // its own 2026-09-02 note records that the mob is gone and that
+            // the fold reads as Glimmergoats and a Nimbus Yak instead.
+            for (int[] at : new int[][]{{3, 6}, {6, 4}, {5, 9}, {7, 5}}) {
+                spawn(level, SkyLivestock.GLIMMERGOAT, x + at[0], y + at[1]);
+            }
+            spawn(level, SkyLivestock.NIMBUS_YAK, x + 6, y + 6);
+        }
+        if (kind == RealmPoiPresets.SKY_FALLING_INSTITUTE) {
+            // Plan  2.3: Test Subject VII, in the exact centre of the crater,
+            // completely unharmed. It is the punchline, so it does not wander
+            // off before the player has walked the arc down to it.
+            spawn(level, SkyLivestock.NIMBUS_YAK, x + 13, y + 17);
         }
     }
 

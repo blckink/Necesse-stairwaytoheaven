@@ -300,12 +300,24 @@ sein"* — genau da liegen sie.
 
 | Gebiet | Kacheln vom Ursprung | Biome | Feinde | Critter | Tiere | NPCs | Quests | POIs | bewachte Orte / 1000×1000 |
 |---|---|---|---|---|---|---|---|---|---|
-| **Skyreach** | 0 – 1 800 | 4 | 8 | 4 | 2 | 7 | 5 | 4 | 28,7 |
+| **Skyreach** | 0 – 1 800 | 4 | 8 | 4 | 2 | 7 | 5 | 10 ⭐ | 28,7 |
 | **Eden** | 600 – 2 880 | 3 | 5 | 0 | 0 | 1 | 3 | 2 | 11,4 ⭐ *(vorher 0)* |
 | **Steinfeld** | 1 920 – 4 200 | 3 | 4 | 0 | 0 | 1 ⭐ | 2 ⭐ | 1 | 20,3 |
 | **Ghost Realm** | 2 880 – 5 280 | 5 | 9 | 0 | 0 | 4 | 4 ⭐ | 1 | 21,8 |
 | **Crooked Beyond** | 4 200 – 5 640 | 5 | 8 | 1 | 0 | 1 | 3 | 1 | 30,9 |
 | **Hell** | 4 800+ | 0 | 0 | 0 | 0 | 0 | 0 | 4 unerreichbar | 0 |
+
+**Sechs neue Orte im Skyreach (Stand 2026-09-09).** Zu Turm, Stadt, Zollbrücke
+und Gasthaus kommen sechs Plätze aus dem POI-Dossier: das **Skyway-Zollhaus**
+mit Magpie im Kontor, die **Skywatch-Wegstation** am Straßenrand, die
+**Tauhalter-Hütte** mit fünf Tauschnecken im Gehege, der **Schäferhof** mit
+Weberei, Bett und einer Herde aus vier Glimmerziegen und einem Nimbus-Yak, das
+**Institut für Angewandte Fallkunst** (eine Startrampe, die im Nichts endet,
+sechs abstürzende Maschinen und ein Krater — in dessen Mitte ein völlig
+unversehrtes Nimbus-Yak steht und kaut) und das **Passagen-Wegehaus** mit zwei
+echten Betten und einem Vorratsschrank. Was diesen Orten noch fehlt, sind die
+Stelen, der Wolkenquell-Brunnen und die Wegsteine: dafür gibt es noch keine
+Grafik, deshalb stehen sie nicht da, statt als Fehlertextur.
 
 **Zur Dichte, weil die Zahl leicht falsch gelesen wird:** ein Spawn-Gewicht
 entscheidet, **was** dir entgegenkommt, nie **ob**. Das macht die Kachel selbst

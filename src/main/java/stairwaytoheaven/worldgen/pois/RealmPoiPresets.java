@@ -57,7 +57,13 @@ public final class RealmPoiPresets {
     public static final int SKY_WAYSIDE_SHRINE = 14;
     /** POI 2.11 of the dossier, the second {@link #plan}-built place. */
     public static final int SKY_DEW_KEEPERS_HUT = 15;
-    public static final int COUNT = 16;
+    /** POI 2.2 of the dossier: the cottage and the pasture around it. */
+    public static final int SKY_SHEPHERDS_FOLD = 16;
+    /** POI 2.3 of the dossier: the launch ramp, the falling arc, the crater. */
+    public static final int SKY_FALLING_INSTITUTE = 17;
+    /** POI 2.7 of the dossier: the inn on the Skyway. */
+    public static final int SKY_PASSAGE_WAYHOUSE = 18;
+    public static final int COUNT = 19;
 
     private static final int UP = 0, RIGHT = 1, DOWN = 2, LEFT = 3;
     /** Wall-decor rotation: where the WALL is, not where the piece faces (§0.2). */
@@ -86,6 +92,9 @@ public final class RealmPoiPresets {
             // otherwise shift the whole building against its own footprint.
             case SKY_WAYSIDE_SHRINE: return WAYSIDE_PLAN[0].length();
             case SKY_DEW_KEEPERS_HUT: return HUT_PLAN[0].length();
+            case SKY_SHEPHERDS_FOLD: return FOLD_PLAN[0].length();
+            case SKY_FALLING_INSTITUTE: return INSTITUTE_PLAN[0].length();
+            case SKY_PASSAGE_WAYHOUSE: return WAYHOUSE_PLAN[0].length();
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -108,6 +117,9 @@ public final class RealmPoiPresets {
             case SKY_TOLL_HOUSE: return 19;
             case SKY_WAYSIDE_SHRINE: return WAYSIDE_PLAN.length;
             case SKY_DEW_KEEPERS_HUT: return HUT_PLAN.length;
+            case SKY_SHEPHERDS_FOLD: return FOLD_PLAN.length;
+            case SKY_FALLING_INSTITUTE: return INSTITUTE_PLAN.length;
+            case SKY_PASSAGE_WAYHOUSE: return WAYHOUSE_PLAN.length;
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -139,6 +151,9 @@ public final class RealmPoiPresets {
             case SKY_TOLL_HOUSE: return "skywaytollhouse";
             case SKY_WAYSIDE_SHRINE: return "waysideshrine";
             case SKY_DEW_KEEPERS_HUT: return "dewkeepershut";
+            case SKY_SHEPHERDS_FOLD: return "shepherdsfold";
+            case SKY_FALLING_INSTITUTE: return "fallinginstitute";
+            case SKY_PASSAGE_WAYHOUSE: return "passagewayhouse";
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -158,6 +173,8 @@ public final class RealmPoiPresets {
         switch (kind) {
             case SKY_TOWER: case SKY_TOWN: case SKY_TOLL_BRIDGE: case SKY_INN:
             case SKY_TOLL_HOUSE: case SKY_WAYSIDE_SHRINE: case SKY_DEW_KEEPERS_HUT:
+            case SKY_SHEPHERDS_FOLD: case SKY_FALLING_INSTITUTE:
+            case SKY_PASSAGE_WAYHOUSE:
                 return 0;
             case EDEN_CROWN_GARDEN: case EDEN_FERMENT_HOUSE: return 1;
             case STEINFELD_MEMORIAL: return 2;
@@ -188,6 +205,9 @@ public final class RealmPoiPresets {
             case SKY_TOLL_HOUSE: return skywayTollHouse();
             case SKY_WAYSIDE_SHRINE: return waysideShrine();
             case SKY_DEW_KEEPERS_HUT: return dewKeepersHut();
+            case SKY_SHEPHERDS_FOLD: return shepherdsFold();
+            case SKY_FALLING_INSTITUTE: return fallingInstitute();
+            case SKY_PASSAGE_WAYHOUSE: return passageWayhouse();
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -689,6 +709,9 @@ public final class RealmPoiPresets {
         private final boolean[] isTable = new boolean[LEGEND_SIZE];
         private final boolean[] isChair = new boolean[LEGEND_SIZE];
         private final boolean[] known = new boolean[LEGEND_SIZE];
+        /** Single tiles where the plan's character means a second thing. */
+        private final java.util.HashMap<Integer, Character> override =
+                new java.util.HashMap<>();
 
         Legend(int ground) {
             this.ground = ground;
@@ -762,6 +785,16 @@ public final class RealmPoiPresets {
             // The far half is written by its master. Its own character carries
             // the ground so the floor under it stays the room's floor.
             this.tile[counterChar] = this.ground;
+            // A two-tile TABLE is a table on both its halves: §2.7 seats four
+            // chairs at two dinner tables and two of them face the far half.
+            // {@code DinnerTable2Object extends TableObject}, so
+            // ChairObject.facesTable really does accept that tile -- this asks
+            // the engine's own question rather than assuming the answer.
+            if (ObjectRegistry.getObject(this.object[c]) instanceof
+                    necesse.level.gameObject.TableObjectInterface) {
+                this.isTable[c] = true;
+                this.isTable[counterChar] = true;
+            }
             return this;
         }
 
@@ -888,6 +921,27 @@ public final class RealmPoiPresets {
             }
             return this;
         }
+
+        /**
+         * One tile where the plan's character is read as {@code meaning}
+         * instead.
+         *
+         * <p>A legend is otherwise a per-character table, and that is what
+         * makes a plan reviewable. §2.7's own legend breaks it exactly once:
+         * it draws {@code 's'} for the bookshelf inside the wayhouse AND for
+         * the stele out on the apron, "s (interior) … s (y11)". The plan is
+         * transcribed verbatim (the dossier is design intent and is not
+         * rewritten to match a build), so the second meaning is named here, by
+         * coordinate. {@link #plan} checks the tile is really drawn.
+         */
+        Legend reads(int x, int y, char meaning) {
+            if (meaning >= LEGEND_SIZE || !this.known[meaning]) {
+                throw new IllegalStateException("Plan tile " + x + "," + y
+                        + " is read as '" + meaning + "', which has no legend entry");
+            }
+            this.override.put((x << 16) | y, meaning);
+            return this;
+        }
     }
 
     /**
@@ -952,6 +1006,18 @@ public final class RealmPoiPresets {
      *         §0.2-§0.4 -- see this section's header for the list
      */
     private static void plan(Preset p, String[] rows, Legend legend) {
+        // Every named tile has to be a tile the plan really draws on. An
+        // override on empty margin would move a piece nobody can see it move.
+        for (java.util.Map.Entry<Integer, Character> entry : legend.override.entrySet()) {
+            int x = entry.getKey() >> 16;
+            int y = entry.getKey() & 0xFFFF;
+            char drawn = at(rows, x, y);
+            if (drawn == '.' || drawn == ' ') {
+                throw new IllegalStateException("Plan tile " + x + "," + y
+                        + " is read as '" + entry.getValue()
+                        + "', but the plan draws nothing there");
+            }
+        }
         for (int y = 0; y < rows.length; y++) {
             String row = rows[y];
             if (row.length() != rows[0].length()) {
@@ -961,6 +1027,8 @@ public final class RealmPoiPresets {
             }
             for (int x = 0; x < row.length(); x++) {
                 char c = row.charAt(x);
+                Character second = legend.override.get((x << 16) | y);
+                if (second != null) c = second;
                 if (c == '.' || c == ' ') continue;
                 if (c >= LEGEND_SIZE || !legend.known[c]) {
                     throw new IllegalStateException(
@@ -1156,6 +1224,229 @@ public final class RealmPoiPresets {
                 .pending('s', false)
                 .pending('w', false);
         plan(p, HUT_PLAN, legend);
+        return p;
+    }
+
+    /**
+     * POI 2.2, the Shepherd's Fold, from the plan in §2.2 verbatim.
+     *
+     * <p>The cottage the mod promised and never built, inside a plot that is
+     * deliberately more than half empty grazing. Four windows, all mid-run:
+     * (13,2) north, (9,4) and (9,8) west, (17,6) east — the north one has the
+     * plot fence running past it at (13,1), which is not masonry and so does
+     * not close the run ({@code WallObject.connectedWalls} holds walls and
+     * wall-windows only). The pasture's own meadow is the terrain painter's:
+     * every {@code '.'} is left unwritten, which is where §2.2's
+     * {@code tallcloudgrass} already grows ({@code SkyTerrainPainter}).
+     *
+     * <p>Three things the section asks for are NOT here, and each for the same
+     * reason: the plan is the source and it does not draw them.
+     * <ul>
+     *   <li>{@code cloudspringfont} at (4,6) is §4 new art, like the steles —
+     *       {@link #object} would throw at load rather than drop it quietly.
+     *   <li>The {@code feedingtrough} at (4,8): vanilla registers it as a
+     *       two-tile piece ({@code feedingtrough} + {@code feedingtrough2},
+     *       {@code MultiTile(0,1,1,2)}), and §0.2 wants both halves drawn. The
+     *       plan draws one {@code 'u'}, so this ships no trough rather than
+     *       half of one.
+     *   <li>The two {@code skywatchbanner} and the nine-tile carpet appear in
+     *       §2.2's object table but in no cell of its map. Writing them beside
+     *       the interpreter would be the hand-transcription this whole section
+     *       exists to replace.
+     * </ul>
+     *
+     * <p>The flock — Glimmergoats and a Nimbus Yak, per the section's own
+     * 2026-09-02 note that the Cloud Lamb is gone — is placed by
+     * {@link RealmPoiWorldPreset}, the only caller that holds a level. So is
+     * Wren: she is not registered, and the fold stands without her.
+     */
+    private static final String[] FOLD_PLAN = {
+            ".....................",
+            ".|||||||||||||||||||.",
+            ".|.......####O####.|.",
+            ".|.T.....#W======#.|.",
+            ".|......LO=====eE#.|.",
+            ".|.......#ch=====#.|.",
+            ".|..w....#=mmh==rO.|.",
+            ".|.....bb#=h=====#.|.",
+            ".|..u...bO=====c=#.|.",
+            ".|.......#k===os=#.|.",
+            ".|.......####D####.|.",
+            ".|ffGff.....,,,....|.",
+            ".|f...f....L,,,L...|.",
+            ".|f...fT....,,,....|.",
+            ".|f...f.....,,,....|.",
+            ".ffffffffffffGffffff.",
+            ".....................",
+    };
+
+    private static Preset shepherdsFold() {
+        Preset p = new Preset(width(SKY_SHEPHERDS_FOLD), height(SKY_SHEPHERDS_FOLD));
+        Legend legend = new Legend(SkyRegistry.nimbusFloorID)
+                .floor('=')
+                .floor(',', "snowstonepathtile")
+                .wall('#', "skystonebrickwall")
+                .window('O', "skystonebrickwindow")
+                .door('D', "skystonebrickdoor")
+                // The plot rail and the lambing pen are the same fence; two
+                // characters because the plan reads better with two.
+                .fence('|', "skyironfence")
+                .fence('f', "skyironfence")
+                .fence('G', "skyironfencegate")
+                // Head to the east wall, both halves, rotation 3 (§2.2).
+                .pair('E', 'e', "skywatchbed", LEFT)
+                .prop('r', "skywatchdresser", LEFT)
+                .prop('W', "windsilkloom", RIGHT)
+                // One two-tile table drawn as two: chalice west, tome east, in
+                // the plan's own reading order.
+                .table('m', "skywatchmodulartable", "skywatchchalice", "skywatchtome")
+                .chair('h', "skywatchchair")
+                .prop('k', "skywatchcabinet")
+                .prop('s', "skywatchbookshelf")
+                .prop('o', "skywatchclock")
+                .prop('c', "skywatchcandelabra")
+                .loose('L', "wardencandelabra")
+                .loose('T', "cloudtree")
+                .loose('b', "cloudberrybush")
+                .pending('w', false)
+                .pending('u', false);
+        plan(p, FOLD_PLAN, legend);
+        return p;
+    }
+
+    /**
+     * POI 2.3, the Institute of Applied Falling, from the plan in §2.3
+     * verbatim.
+     *
+     * <p>A plank ramp that stops in mid-air, six machines falling away from its
+     * end in a widening arc, and a crater. 425 of its 525 tiles are the meadow
+     * the terrain painter already grows and this preset writes nothing into —
+     * that empty middle is the joke, so the arc's props are {@link
+     * Legend#loose} and keep the ground they landed on.
+     *
+     * <p>The four {@code skywatchstele} that carry the test log are §4 new art
+     * and are left out; without them the sequel pointer to §2.14 goes with
+     * them, which is written up rather than faked. Test Subject VII — the
+     * Nimbus Yak in the middle of the crater, unharmed, chewing — is a mob and
+     * is placed by {@link RealmPoiWorldPreset}; its tile is crater floor here
+     * so the punchline stands on something.
+     */
+    private static final String[] INSTITUTE_PLAN = {
+            ".........................",
+            ".........................",
+            ".....L....L....L.........",
+            "..s=============.........",
+            "..=============..........",
+            ".................W.......",
+            ".................s.......",
+            "...................b.....",
+            "...................p.....",
+            "..................W......",
+            "..................s......",
+            "................p........",
+            "...............Wr........",
+            "..............s..........",
+            ".........Lxxxxxxxxx......",
+            ".........x########x......",
+            ".........xWk######x......",
+            ".........x###Y####x......",
+            ".........x########x......",
+            ".........xxxxxxxxxL......",
+            ".........................",
+    };
+
+    private static Preset fallingInstitute() {
+        Preset p = new Preset(width(SKY_FALLING_INSTITUTE), height(SKY_FALLING_INSTITUTE));
+        // The crater floor is the ground: it is what the cabinet and the yak
+        // stand on. The ramp names its own decking.
+        Legend legend = new Legend(tile("skystonetile"))
+                .floor('#')
+                .floor('=', "nimbusfloortile")
+                // The rim is drawn as scree AND rock; one character is one
+                // object, and the rock is what makes a crater read as a crater.
+                .loose('x', "skystonerock")
+                .loose('W', "aeronautwreck")
+                .loose('b', "skyballoon")
+                .loose('p', "skyparcel")
+                .loose('r', "skywatchrubble")
+                .loose('L', "wardencandelabra")
+                // The reward, back to the crater's north wall of rim (§2.3).
+                .prop('k', "skywatchcabinet", DOWN)
+                .pending('s', false)
+                .pending('Y', true);
+        plan(p, INSTITUTE_PLAN, legend);
+        return p;
+    }
+
+    /**
+     * POI 2.7, the Passage Wayhouse, from the plan in §2.7 verbatim.
+     *
+     * <p>A cloudmarble inn with two real beds and a cache, on ground that
+     * currently offers neither. Four windows, all mid-run: (6,1) and (10,1)
+     * north, (3,4) west, (13,6) east. Two dinner tables seat four chairs, and
+     * two of those chairs face the tables' FAR halves — which is why {@link
+     * Legend#pair} marks both halves of a table as one.
+     *
+     * <p>The two {@code skywaywaystone} at (6,10) and (10,10) are the reason
+     * the section exists and are §4 new art; their tiles stay apron paving so
+     * the approach still reads whole, and the fast-travel network they carry is
+     * left unbuilt rather than mocked up. The {@code skywatchstele} at (8,11)
+     * goes with them — §2.7's legend draws it with the same {@code 's'} as the
+     * bookshelf inside the house, so {@link Legend#reads} names that one tile.
+     *
+     * <p>Rows y12-y14 are drawn as the causeway that is already there. Nothing
+     * places this preset on one yet ({@link RealmPoiWorldPreset} has no
+     * on-a-road test), so they are written as what they are drawn as: two rows
+     * of apron and a balustrade along the south edge. On a real passage that is
+     * the paving and the rail the passage already has.
+     */
+    private static final String[] WAYHOUSE_PLAN = {
+            "...................",
+            "...###O###O###.....",
+            "...#cn=====eE#.....",
+            "...#=hT=hT===#..Y..",
+            "...O==th=th==#.....",
+            "...#=========#..w..",
+            "...#k=====c==O.....",
+            "...#=======eE#.....",
+            "...#s=====o==#.Y...",
+            "...#####D#####.....",
+            "..L,,,y,,,y,,,L....",
+            "..,,,,,,s,,,,,,....",
+            ",,,,,,,,,,,,,,,,,,,",
+            ",,,,,,,,,,,,,,,,,,,",
+            "|||||||||||||||||||",
+    };
+
+    private static Preset passageWayhouse() {
+        Preset p = new Preset(width(SKY_PASSAGE_WAYHOUSE), height(SKY_PASSAGE_WAYHOUSE));
+        Legend legend = new Legend(SkyRegistry.gloomwoodFloorID)
+                .floor('=')
+                .floor(',', "skywaytile")
+                // The waystone is unbuilt art; the apron under it is not.
+                .floor('y', "skywaytile")
+                .wall('#', "cloudmarblewall")
+                .window('O', "cloudmarblewindow")
+                .door('D', "cloudmarbledoor")
+                .fence('|', "cloudmarblefence")
+                // Both dinner tables run north-south, rotation 2 (§2.7).
+                .pair('T', 't', "skywatchdinnertable", DOWN)
+                .chair('h', "skywatchchair")
+                // Both beds head to the east wall, rotation 3 (§2.7).
+                .pair('E', 'e', "skywatchbed", LEFT)
+                .prop('k', "skywatchcabinet", RIGHT)
+                .prop('s', "skywatchbookshelf")
+                .prop('o', "skywatchclock")
+                .prop('c', "skywatchcandelabra")
+                .floor('n')
+                .decor('n', "skywatchbanner", WALL_ABOVE)
+                .loose('L', "wardencandelabra")
+                .loose('Y', "cloudtree")
+                .pending('w', false)
+                // §2.7's own legend gives 's' two meanings; out here it is the
+                // stele, which is not built, so the apron simply runs through.
+                .reads(8, 11, ',');
+        plan(p, WAYHOUSE_PLAN, legend);
         return p;
     }
 }

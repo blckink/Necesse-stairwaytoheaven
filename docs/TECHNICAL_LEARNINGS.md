@@ -3514,3 +3514,33 @@ and cannot be removed. `WallObject.registerWallObjects(prefix, …)` returns
 `{wall, doorClosed, doorOpen, window}` and registers them as
 `prefix + "wall" / "door" / "window"`, which is where `skystonebrickwindow`
 comes from without appearing in any source file.
+
+## 2026-09-09 — Two-tile tables seat chairs on BOTH halves, and the feeding trough is two tiles too
+
+Found while transcribing the dossier's §2.2, §2.3 and §2.7 room plans through
+`RealmPoiPresets.plan`.
+
+**Both halves of a `DinnerTableObject` are a table.** `registerDinnerTable`
+registers `<id>` and `<id>2`, and `DinnerTable2Object extends TableObject
+implements TorchHolderInterface, DecorationHolderInterface` — `TableObject`
+itself is what `implements TableObjectInterface`. So the far half satisfies
+`ChairObject.facesTable` exactly as the master does, which is what lets §2.7
+seat four chairs at two tables with two of them turned toward the counter tile.
+`Legend.pair` now marks both characters as a table when the piece really is one,
+asked with `instanceof TableObjectInterface` rather than assumed.
+**VERIFIED [jar]** — decompiled 1.3.3 `DinnerTableObject.java` /
+`DinnerTable2Object.java`.
+
+**Vanilla's `feedingtrough` is a multi-tile piece.**
+`FeedingTroughObject.registerFeedingTrough` registers `feedingtrough` +
+`feedingtrough2` and `getMultiTile` returns `MultiTile(0, 1, 1, 2, rotation,
+true, counterID, getID())` — one tile wide, two tall, master on the far cell. A
+preset writes both halves or it writes a broken trough, because
+`Preset.applyToLevel` never runs `MultiTile.placeObject`.
+
+**And the counter always sits in the direction the rotation points**, which is
+the same convention the mod's benches and beds already use. Read off vanilla's
+own `FeedingTrough1Preset` script rather than reasoned about: its `objects`
+array holds `518` at (1,1) with `519` at (2,1) and both rotations `1` (right),
+and `518` at (1,2) with `519` at (1,3) and both rotations `2` (down).
+**VERIFIED [jar]** — decompiled 1.3.3.
