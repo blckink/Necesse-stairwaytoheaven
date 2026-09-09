@@ -10,9 +10,15 @@
 #   scripts/preflight.sh            # build against the PLAYED install (1.3.3)
 #   scripts/preflight.sh --headless # build against the dedicated server (1.3.2)
 #
-# Deploy is deliberately NOT part of this. `./gradlew buildModJar` runs
-# deploySplitroast itself and refuses to ship a jar whose game version does not
-# match the played one; preflight only reports.
+# THIS SCRIPT DEPLOYS. `./gradlew buildModJar` runs deploySplitroast as part of
+# the build, so a green default run has already copied the jar into both
+# SplitRoast profiles -- that is what makes "ready to play" true rather than
+# merely claimed. deploySplitroast refuses when the built game version does not
+# match the played one, so it cannot replace a 1.3.3 install with a 1.3.2 jar.
+#
+# --headless therefore builds but does NOT deploy, and leaves a 1.3.2 jar in
+# build/jar/. Run the script again without the flag to put the played 1.3.3 jar
+# back.
 
 set -u
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"

@@ -27,7 +27,10 @@ renderer, tool response and drops stay intact. Eden item icons still borrow
 literal vanilla paths where recorded in the asset map. Paradise Palm and all
 five hostile mobs now use purpose-built sprites; each hostile also has its own
 32x32 bestiary icon. Tree of Plenty, Giant Fig Tree, Knowledge Tree, Paradise
-Fern and Giant Monstera also have separate object IDs and purpose-built sheets.
+Fern also have separate object IDs and purpose-built sheets. Giant Monstera is
+back on vanilla's `swampgrass` stand-in since 2026-09-09: the delivered sheet
+had four of its eight variant cells empty, so half of every placed plant drew
+nothing. `docs/ASSET_REQUESTS.md` carries the reopened row.
 
 ## Settler and quest chain
 
