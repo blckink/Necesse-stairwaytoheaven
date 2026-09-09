@@ -146,6 +146,16 @@ deliberate redraw, not for a routine run.
 **A generated sheet will not pass on the first try**, because generators do not
 honour cell geometry. Two stages fix that, in this order.
 
+**Generated checkerboards and dark preview backgrounds are not alpha.** Never
+remove them with a global luminance, greyscale, or broad near-background key:
+real outlines, mouths, eye sockets, teeth and snow highlights occupy those same
+values. The safe extraction used for the Eden batch on 2026-09-08 starts from
+the untouched raw render, keeps chromatic sprite pixels, restores only adjacent
+dark outline pixels, and fills neutral holes enclosed by that silhouette. For a
+black backdrop, remove only near-neutral near-black exterior pixels; do not use
+a broad threshold. Every result must then be viewed over both dark and light
+grounds. The light review is a mask audit, not merely a presentation option.
+
 ### 4a. Frames onto vanilla's grid — `tools/mob_sheet_intake.py`
 
 ```sh
@@ -251,9 +261,28 @@ degrades to useful rather than failing.
    the behaviour stays.
 4. Add the file to `generate_assets.py`'s `CONVERTED` guard, or the next
    generator run overwrites the art. That mistake has shipped once.
-5. Gates: `./gradlew buildModJar`, `python3 tools/size_audit.py`,
-   `tools/sheet_format_audit.py`, `tools/locale_audit.py`,
-   `tools/content_ledger.py --check`.
+5. Gates: `scripts/preflight.sh` runs all of them in one go —
+   `./gradlew buildModJar`, `tools/variant_strip_audit.py`,
+   `tools/size_audit.py`, `tools/sheet_format_audit.py`,
+   `tools/locale_audit.py`, `tools/content_ledger.py --check`.
+
+**A green gate is not the same as a checked asset.** `size_audit.py` only
+measures assets that have a row in it, and 56 of the 67 supplied files in
+`generate_assets.py`'s `CONVERTED` guard have none — for those, a green run
+says nothing at all. `variant_strip_audit.py` prints that count on every run.
+Before citing an audit as proof for a specific sprite,
+`grep <name> tools/size_audit.py`; no hit means not measured.
+
+**Variant strips are the trap.** For a `GrassObject` the engine takes the
+variant count from the sheet itself — `int sprites = getWidth() / 32` in
+`GrassObject.loadTextures` — and `addDrawables` then picks one uniformly per
+tile over `0 .. textures.length - 1`. A 256×32 sheet is therefore always eight
+variants, and any empty 32px cell is a plant that draws nothing on that tile.
+The second constructor argument is `density`, not the variant count; reading it
+as the count is what let `objects/giantmonstera.png` ship on 2026-09-09 with
+four of eight cells empty. `asset_intake.py` passed that file — it checks
+canvas, colours and alpha, never per-cell content. `tools/variant_strip_audit.py`
+is the gate that catches it.
 
 ## Running it from Archon
 

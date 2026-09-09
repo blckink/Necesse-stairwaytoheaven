@@ -28,10 +28,9 @@ import necesse.level.maps.Level;
  * Golden Hornet — the fast air enemy (§5: <i>"Golden Hornet — fast air
  * enemy"</i>), and A3.3's <i>"aggressive paradise insects"</i>.
  *
- * <p><b>Borrowed art:</b> vanilla {@code mobs/bee} — a gold-and-black insect,
- * 64x128, i.e. two 32px animation frames over four direction rows. It is the
- * sheet vanilla's own {@code BeeFollowingMob} flies on, and it is drawn here
- * with that mob's offsets ({@code drawX - 16}, {@code drawY - 22}) and its
+ * <p><b>Sprite:</b> purpose-built {@code mobs/goldenhornet}, 64x128: two 32px
+ * animation frames over four direction rows. It is drawn with the proven bee
+ * offsets ({@code drawX - 16}, {@code drawY - 22}) and its
  * two-frame {@code getAnimSprite} — which is not optional: the default
  * {@code Mob.getAnimSprite} returns columns 0-5, and this sheet has two.
  * NOT subclassed, because {@code BeeFollowingMob} is a summon that belongs to a
@@ -176,18 +175,6 @@ public class GoldenHornetMob extends EdenHostileMob {
                     .movesConstant(EdenSerpentMob.deathSpeed(knockbackX), EdenSerpentMob.deathSpeed(knockbackY))
                     .color(new Color(224, 178, 32));
         }
-    }
-
-    /**
-     * Bestiary face: it wears mobs/bee, which honeybee owns (EdenRealm.loadTextures), so it wears that creature's
-     * face in the journal too. {@code Mob.getMobIcon()} is overridable and
-     * {@code FormJournalEntryComponent} asks the MOB rather than the registry,
-     * so this needs no PNG of its own -- see {@link stairwaytoheaven.mobs.BorrowedMobIcon}
-     * for why borrowing the face is the right answer and not a shortcut.
-     */
-    @Override
-    public necesse.gfx.gameTexture.GameTexture getMobIcon() {
-        return stairwaytoheaven.mobs.BorrowedMobIcon.from("honeybee", super.getMobIcon());
     }
 
 }

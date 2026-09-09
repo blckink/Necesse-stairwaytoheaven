@@ -29,10 +29,9 @@ import necesse.inventory.lootTable.lootItem.LootItem;
  * is short; a Bloom Maw you can see is a Bloom Maw you can walk around, and one
  * standing over a cache is a wall you have to deal with.
  *
- * <p><b>Borrowed art:</b> vanilla {@code mobs/stabbybush} — a green mossy bush
- * with pale blue eyes and, in the attack column, an open mouth. 382x320: six
- * 64px columns (idle, attack, four walk) over four direction rows plus a
- * particle row. Drawn with {@code StabbyBushMob.addDrawables}' own offsets
+ * <p><b>Sprite:</b> purpose-built {@code mobs/bloommaw}, 382x320: six 64px
+ * columns (idle, attack, four walk) over four direction rows plus a particle
+ * row. Drawn with the proven {@code StabbyBushMob.addDrawables} offsets
  * ({@code drawX - 32}, {@code drawY - 44 - 7}). NOT subclassed: vanilla's bush
  * carries a frenzy buff that detonates it at max stacks
  * ({@code StabbyBushMob.serverTick}), which is a fine joke at 100 HP and an
@@ -167,18 +166,6 @@ public class BloomMawMob extends EdenHostileMob {
                     .movesConstant(EdenSerpentMob.deathSpeed(knockbackX), EdenSerpentMob.deathSpeed(knockbackY))
                     .color(new Color(74, 132, 46));
         }
-    }
-
-    /**
-     * Bestiary face: it wears mobs/stabbybush (EdenRealm.loadTextures), so it wears that creature's
-     * face in the journal too. {@code Mob.getMobIcon()} is overridable and
-     * {@code FormJournalEntryComponent} asks the MOB rather than the registry,
-     * so this needs no PNG of its own -- see {@link stairwaytoheaven.mobs.BorrowedMobIcon}
-     * for why borrowing the face is the right answer and not a shortcut.
-     */
-    @Override
-    public necesse.gfx.gameTexture.GameTexture getMobIcon() {
-        return stairwaytoheaven.mobs.BorrowedMobIcon.from("stabbybush", super.getMobIcon());
     }
 
 }

@@ -117,6 +117,21 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              "objects/catbasket.png",
              "mobs/crookedgolem.png", "mobs/rarecrookedgolem.png",
              "mobs/crookedarmadillo.png",
+             "mobs/edenserpent.png", "mobs/bloommaw.png",
+             "mobs/jealousvine.png", "mobs/goldenhornet.png",
+             "mobs/forbiddenserpent.png",
+             "mobs/icons/edenserpent.png", "mobs/icons/bloommaw.png",
+             "mobs/icons/jealousvine.png", "mobs/icons/goldenhornet.png",
+             "mobs/icons/forbiddenserpent.png",
+             "objects/paradisepalm.png", "items/paradisepalm.png",
+             "objects/treeofplenty.png", "items/treeofplenty.png",
+             "objects/giantfigtree.png", "items/giantfigtree.png",
+             "objects/knowledgetree.png", "items/knowledgetree.png",
+             "objects/paradisefern.png",
+             # objects/giantmonstera.png is NOT here: the delivered sheet had
+             # four empty variant cells and was withdrawn on 2026-09-09. The
+             # object is back on vanilla's swampgrass stand-in until a usable
+             # sheet arrives; put it back in this guard when it does.
              # The Eden ground pair, copied verbatim by convert_biome_art
              # (both arrive already on vanilla's format).
              "tiles/overgrowneden_splat.png", "items/overgrownedenseed.png",

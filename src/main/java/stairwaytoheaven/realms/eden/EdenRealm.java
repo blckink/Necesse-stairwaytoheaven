@@ -1,5 +1,7 @@
 package stairwaytoheaven.realms.eden;
 
+import java.awt.Color;
+
 import necesse.engine.registries.BiomeRegistry;
 import necesse.engine.registries.ItemRegistry;
 import necesse.engine.registries.MobRegistry;
@@ -119,15 +121,42 @@ public final class EdenRealm {
 
     private static void registerObjects() {
         serpentGrassID = object("grass");
-        paradiseFernID = object("swampgrass");
+        necesse.level.gameObject.GrassObject paradiseFern =
+                new necesse.level.gameObject.GrassObject("paradisefern", 8);
+        paradiseFern.mapColor = new Color(54, 174, 76);
+        paradiseFernID = ObjectRegistry.registerObject("paradisefern", paradiseFern, 0.0F, false);
         floweringVineID = object("grass");
         redParadiseFlowerID = object("redflowerpatch");
         blueParadiseFlowerID = object("blueflowerpatch");
         goldenOrchidID = object("yellowflowerpatch");
+        // Back on vanilla's stand-in since 2026-09-09. The delivered
+        // objects/giantmonstera.png was unusable: of the eight 32px cells the
+        // engine derives from a 256px sheet (GrassObject.loadTextures:
+        // width / 32) four were EMPTY, and addDrawables picks uniformly over
+        // all of them -- half of every placed plant rendered as nothing. The
+        // rest was seven 11-26px clumps floating in the canvas middle, not
+        // grounded plants. tools/variant_strip_audit.py is the gate for this
+        // now; docs/ASSET_REQUESTS.md carries the redraw brief.
         giantMonsteraID = object("swampgrass");
-        giantFigTreeID = object("bananatree");
-        paradisePalmID = object("palmtree");
-        treeOfPlentyID = object("appletree");
+        giantFigTreeID = ObjectRegistry.registerObject("giantfigtree",
+                new necesse.level.gameObject.FruitTreeObject(
+                        "giantfigtree", "palmlog", "bananasapling",
+                        900.0F, 1800.0F, "banana", 1.5F, 4,
+                        new Color(119, 43, 126), 42, 60, 80, "fruitpalmleaves"),
+                100.0F, true);
+        // Vanilla palmtree behaviour and dimensions, but on Eden's own ID and
+        // texture. Shadowing objects/palmtree.png would recolour every desert
+        // palm in the base game, so the replacement must be a real mod object.
+        paradisePalmID = ObjectRegistry.registerObject("paradisepalm",
+                new necesse.level.gameObject.TreeObject("paradisepalm", "palmlog", "palmsapling",
+                        new Color(133, 79, 18), 40, 80, 120, "palmleaves"),
+                0.0F, false, false, true);
+        treeOfPlentyID = ObjectRegistry.registerObject("treeofplenty",
+                new necesse.level.gameObject.FruitTreeObject(
+                        "treeofplenty", "sprucelog", "applesapling",
+                        900.0F, 1800.0F, "paradiseapple", 1.5F, 4,
+                        new Color(74, 168, 75), 30, 60, 100, "appleleaves"),
+                100.0F, true);
         edenBerryBushID = object("blackberrybush");
         sunGrapeBushID = object("blueberrybush");
         moonMelonBushID = object("blueberrybush");
@@ -139,7 +168,11 @@ public final class EdenRealm {
         giantLotusID = object("blueflowerpatch");
         paradiseReedsID = object("reeds");
         edenShellsID = object("seashell");
-        knowledgeTreeID = object("dryadtree");
+        knowledgeTreeID = ObjectRegistry.registerObject("knowledgetree",
+                new necesse.level.gameObject.DryadTreeObject(
+                        "knowledgetree", "dryadlog", "dryadsapling",
+                        new Color(205, 145, 27), 45, 60, 110, "dryadleaves"),
+                100.0F, true);
     }
 
     private static int object(String id) {
@@ -150,41 +183,13 @@ public final class EdenRealm {
         return objectID;
     }
 
-    /**
-     * Eden's five, and why exactly three of them count a kill.
-     *
-     * <p>The third argument is {@code countKillStat} (MobRegistry.java:824,
-     * VERIFIED [jar]) and it is what puts a creature in the player's bestiary.
-     * All five were {@code false}, so a player could clear the Garden and the
-     * game would not admit they had been there —
-     * {@code docs/AREA_OVERVIEW.md} measured it.
-     *
-     * <p>It is not simply a flag, because {@code MobRegistry.loadMobIcons}
-     * loads {@code mobs/icons/<id>} for every registered mob and falls back to
-     * the engine's ERR tile. None of these five has a PNG of its own by
-     * design — each blits a vanilla sheet — so turning the flag on without an
-     * answer for the icon would have traded "no row" for "a row with a broken
-     * picture". {@link stairwaytoheaven.mobs.BorrowedMobIcon} is that answer:
-     * each mob returns the face of the creature whose body it wears.
-     *
-     * <p><b>The two that stay {@code false}, and the exact reason.</b> The
-     * borrow only works when the parent HAS an icon, and vanilla only draws one
-     * for a mob it puts in its own bestiary. {@code stabbybush},
-     * {@code dryadsentinel} and {@code honeybee} are all registered
-     * {@code countKillStat = true} by vanilla, so their icons provably exist.
-     * {@code crocodile} and {@code petdragonwhelp} are registered
-     * {@code false} — the Eden Serpent's and the Forbidden Serpent's bodies —
-     * and whether the game ships an icon for them cannot be checked from a
-     * dedicated server, which renders nothing and carries no PNG at all. Both
-     * stay off until somebody with a client confirms it, because a bestiary row
-     * showing ERR is worse than no row. That check is one look at the journal.
-     */
+    /** Registers all five Eden enemies with their own sheets and 32x32 icons. */
     private static void registerMobs() {
-        MobRegistry.registerMob("edenserpent", EdenSerpentMob.class, false);
+        MobRegistry.registerMob("edenserpent", EdenSerpentMob.class, true);
         MobRegistry.registerMob("bloommaw", BloomMawMob.class, true);
         MobRegistry.registerMob("jealousvine", JealousVineMob.class, true);
         MobRegistry.registerMob("goldenhornet", GoldenHornetMob.class, true);
-        MobRegistry.registerMob("forbiddenserpent", ForbiddenSerpentMob.class, false);
+        MobRegistry.registerMob("forbiddenserpent", ForbiddenSerpentMob.class, true);
     }
 
     /**
@@ -215,12 +220,12 @@ public final class EdenRealm {
                 Recipes.ingredientsFromScript("{{aetheriumbar, 4}, {skystone, 10}, {windwheat, 8}}")));
     }
 
-    /** Client-only vanilla stand-ins; the dedicated server never calls this. */
+    /** Client-only Eden sheets; the dedicated server never calls this. */
     public static void loadTextures() {
-        EdenSerpentMob.texture = GameTexture.fromFile("mobs/crocodile");
-        BloomMawMob.texture = GameTexture.fromFile("mobs/stabbybush");
-        JealousVineMob.texture = GameTexture.fromFile("mobs/dryadsentinel");
-        GoldenHornetMob.texture = GameTexture.fromFile("mobs/bee");
-        ForbiddenSerpentMob.texture = GameTexture.fromFile("mobs/dragonwhelp");
+        EdenSerpentMob.texture = GameTexture.fromFile("mobs/edenserpent");
+        BloomMawMob.texture = GameTexture.fromFile("mobs/bloommaw");
+        JealousVineMob.texture = GameTexture.fromFile("mobs/jealousvine");
+        GoldenHornetMob.texture = GameTexture.fromFile("mobs/goldenhornet");
+        ForbiddenSerpentMob.texture = GameTexture.fromFile("mobs/forbiddenserpent");
     }
 }

@@ -37,7 +37,19 @@ public final class RealmPoiPresets {
     public static final int HELL_ADMINISTRATION = 10;
     public static final int HELL_FORGE = 11;
     public static final int HELL_CARNIVAL = 12;
-    public static final int COUNT = 13;
+    /**
+     * POI 2.12 of {@code docs/design/chapter-01-skyreach-pois.md}, the first of
+     * that dossier's fourteen to be built.
+     *
+     * <p>APPENDED, not inserted between the Skyreach kinds it belongs with:
+     * {@link RealmPoiWorldPreset#survey} rotates through {@link
+     * RealmPoiWorldPreset#REALM_KINDS} by ordinal, so renumbering the existing
+     * twelve would move every already-generated region's kind under its own
+     * queued rectangle. Realm membership comes from {@link #realm} instead of
+     * from the ordinal ranges it used to read.
+     */
+    public static final int SKY_TOLL_HOUSE = 13;
+    public static final int COUNT = 14;
 
     private static final int UP = 0, RIGHT = 1, DOWN = 2, LEFT = 3;
 
@@ -59,6 +71,7 @@ public final class RealmPoiPresets {
             case HELL_ADMINISTRATION: return 61;
             case HELL_FORGE: return 29;
             case HELL_CARNIVAL: return 39;
+            case SKY_TOLL_HOUSE: return 23;
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -78,6 +91,7 @@ public final class RealmPoiPresets {
             case HELL_ADMINISTRATION: return 45;
             case HELL_FORGE: return 23;
             case HELL_CARNIVAL: return 31;
+            case SKY_TOLL_HOUSE: return 19;
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -106,17 +120,36 @@ public final class RealmPoiPresets {
             case HELL_ADMINISTRATION: return "helladministration";
             case HELL_FORGE: return "hellforge";
             case HELL_CARNIVAL: return "hellcarnival";
+            case SKY_TOLL_HOUSE: return "skywaytollhouse";
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
 
+    /**
+     * Which realm band a kind belongs to.
+     *
+     * <p>Written as an explicit switch rather than the ordinal ranges it used
+     * to be ({@code kind <= SKY_INN} and friends). Those ranges were only ever
+     * true while the catalogue happened to be sorted by realm, and the first
+     * kind appended past {@code HELL_CARNIVAL} silently became a Hell POI.
+     * A new kind that forgets this switch now fails loudly at load, in
+     * {@link RealmPoiWorldPreset#onRegistryClosed}, instead of generating in
+     * the wrong half of the world.
+     */
     public static int realm(int kind) {
-        if (kind <= SKY_INN) return 0;
-        if (kind <= EDEN_FERMENT_HOUSE) return 1;
-        if (kind == STEINFELD_MEMORIAL) return 2;
-        if (kind == GHOST_ARCHIVE) return 3;
-        if (kind == CROOKED_BAZAAR) return 4;
-        return 5;
+        switch (kind) {
+            case SKY_TOWER: case SKY_TOWN: case SKY_TOLL_BRIDGE: case SKY_INN:
+            case SKY_TOLL_HOUSE:
+                return 0;
+            case EDEN_CROWN_GARDEN: case EDEN_FERMENT_HOUSE: return 1;
+            case STEINFELD_MEMORIAL: return 2;
+            case GHOST_ARCHIVE: return 3;
+            case CROOKED_BAZAAR: return 4;
+            case HELL_BORDER_OFFICE: case HELL_ADMINISTRATION:
+            case HELL_FORGE: case HELL_CARNIVAL:
+                return 5;
+            default: throw new IllegalArgumentException("Unknown realm POI " + kind);
+        }
     }
 
     public static Preset build(int kind, GameRandom random) {
@@ -134,6 +167,7 @@ public final class RealmPoiPresets {
             case HELL_ADMINISTRATION: return hellAdministration();
             case HELL_FORGE: return hellForge();
             case HELL_CARNIVAL: return hellCarnival();
+            case SKY_TOLL_HOUSE: return skywayTollHouse();
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -306,6 +340,94 @@ public final class RealmPoiPresets {
         door(p, 11, 5, door); door(p, 19, 17, door);
         road(p, 12, 5, 2, 1, road); road(p, 17, 17, 2, 1, road);
         furnishHome(p, 4, 2, "skywatch"); furnishHome(p, 20, 14, "skywatch");
+        return p;
+    }
+
+    /**
+     * POI 2.12, the Skyway Toll-House, transcribed tile-for-tile from the plan
+     * in {@code docs/design/chapter-01-skyreach-pois.md} §2.12.
+     *
+     * <p>Three rooms behind one shell: the weighing hall west of the x=12
+     * partition, and east of it the ledger room (Magpie) above the y=8
+     * partition and the vault (the Bonded Lockbox) below it. The two display
+     * stands are the Writ and the Lockbox; the tome on Magpie's desk is the
+     * Ledger of Undelivered Post. The mobs are placed by
+     * {@link RealmPoiWorldPreset}, which is the only caller that has a level.
+     *
+     * <p>The dossier's {@code skywatchstele} on the apron is left out: it is
+     * new art this build does not have, and {@link #object} would throw at
+     * load rather than quietly drop it.
+     */
+    private static Preset skywayTollHouse() {
+        Preset p = blank(SKY_TOLL_HOUSE);
+        int floor = SkyRegistry.gloomwoodFloorID;
+        int wall = SkyCloudmarbleSet.cloudmarbleWallID;
+        int doorID = SkyCloudmarbleSet.cloudmarbleDoorID;
+        int window = SkyCloudmarbleSet.cloudmarbleWindowID;
+
+        // The apron the passage runs across, laid before the shell so the
+        // building's own south wall keeps its tile.
+        road(p, 1, 15, 21, 2, SkyCloudmarbleSet.skywayTileID);
+        road(p, 0, 17, 23, 1, SkyCloudmarbleSet.skywayTileID);
+
+        building(p, floor, wall, new Rectangle(2, 2, 19, 13));
+        // Internal partitions: x=12 splits hall from east wing, y=8 splits the
+        // east wing into ledger room above and vault below.
+        for (int y = 3; y <= 13; y++) p.setObject(12, y, wall);
+        for (int x = 13; x <= 19; x++) p.setObject(x, 8, wall);
+        door(p, 7, 14, doorID);
+        door(p, 12, 5, doorID);
+        door(p, 12, 11, doorID);
+        // Every one mid-run in a straight wall; a window in a corner is
+        // silently deleted (§0.3).
+        windows(p, window, new int[][]{{6, 2}, {16, 2}, {16, 14}, {2, 6}, {2, 11}, {20, 5}, {20, 11}});
+
+        // The chequer weighbridge, accent scale: 15 tiles, never a whole room.
+        p.fillTile(6, 6, 3, 5, SkyRegistry.marbleCheckerID);
+
+        int chair = SkyFurnitureSet.skywatchChairID;
+        int desk = SkyFurnitureSet.skywatchDeskID;
+        int cabinet = SkyFurnitureSet.skywatchCabinetID;
+        int display = SkyFurnitureSet.skywatchDisplayID;
+        int candelabra = SkyFurnitureSet.skywatchCandelabraID;
+
+        // Weighing hall.
+        p.setObject(3, 4, desk, RIGHT);
+        p.setObject(4, 4, chair, LEFT);
+        p.setObject(3, 12, object("skywatchbench"), RIGHT);
+        p.setObject(4, 12, object("skywatchbench2"), RIGHT);
+        p.setObject(9, 9, object("skywatchrubble"));
+        p.setObject(10, 4, candelabra);
+        p.setObject(10, 12, candelabra);
+
+        // Ledger room: Magpie's desk carries the Ledger of Undelivered Post,
+        // the display stand the Skyway Writ.
+        p.setObject(14, 4, desk, RIGHT);
+        p.setObjectLayer(ObjectLayerRegistry.FENCE_AND_TABLE_DECOR, 14, 4, object("skywatchtome"));
+        p.setObject(15, 4, chair, LEFT);
+        p.setObject(17, 3, SkyFurnitureSet.skywatchBookshelfID, DOWN);
+        p.setObject(18, 3, SkyFurnitureSet.skywatchBookshelfID, DOWN);
+        p.setObject(19, 6, cabinet, LEFT);
+        p.setObject(16, 6, display);
+        p.setObject(14, 6, candelabra);
+
+        // Vault: bonded cargo nobody ever came back for, and the Lockbox.
+        p.setObject(14, 10, cabinet, DOWN);
+        p.setObject(18, 10, cabinet, DOWN);
+        p.setObject(14, 12, object("barrel"));
+        p.setObject(18, 12, object("barrel"));
+        p.setObject(16, 11, display);
+
+        // Wall lights. Rotation is where the WALL is, and the decor's own tile
+        // must be floor -- these all sit on the floor row beside the masonry.
+        for (int[] at : new int[][]{{3, 3}, {10, 3}}) {
+            p.setObjectLayer(ObjectLayerRegistry.WALL_DECOR, at[0], at[1], object("mistglasslantern"), DOWN);
+        }
+        for (int[] at : new int[][]{{3, 13}, {10, 13}, {16, 13}}) {
+            p.setObjectLayer(ObjectLayerRegistry.WALL_DECOR, at[0], at[1], object("mistglasslantern"), UP);
+        }
+        p.setObject(5, 15, object("wardencandelabra"));
+        p.setObject(17, 15, object("wardencandelabra"));
         return p;
     }
 

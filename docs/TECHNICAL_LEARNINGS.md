@@ -3458,3 +3458,14 @@ per-realm twins are NOT aggression ranges.** They are the radius argument of
 `MobSpawnTable.addLimited(rate, id, max, range)` — a cap on how many of that mob
 may exist within that radius of the player. Confusing the two would leave every
 mob's actual reach untouched while changing spawn density across six realms.
+## 2026-09-08 — Generated sprite background removal must start at the exterior
+
+**[run + visual review]** Removing pixels globally by brightness, greyness or
+distance from a sampled background colour also removes legitimate black/white
+sprite details. The Eden correction pass rebuilt all six assets from untouched
+raw outputs. For checker backgrounds it kept chromatic pixels, recovered
+connected dark outline pixels and filled only enclosed silhouette holes; for
+black backgrounds it removed only near-neutral near-black pixels connected to
+the exterior. Every cutout was then composited over both light and dark review
+backgrounds. This dual-background review is now a mandatory mask audit before
+integration; the raw generation is retained until approval.

@@ -42,7 +42,8 @@ public class RealmPoiWorldPreset extends WorldPreset {
 
     private static final int[][] REALM_KINDS = {
             {RealmPoiPresets.SKY_TOWER, RealmPoiPresets.SKY_TOWN,
-                    RealmPoiPresets.SKY_TOLL_BRIDGE, RealmPoiPresets.SKY_INN},
+                    RealmPoiPresets.SKY_TOLL_BRIDGE, RealmPoiPresets.SKY_INN,
+                    RealmPoiPresets.SKY_TOLL_HOUSE},
             {RealmPoiPresets.EDEN_CROWN_GARDEN, RealmPoiPresets.EDEN_FERMENT_HOUSE},
             {RealmPoiPresets.STEINFELD_MEMORIAL},
             {RealmPoiPresets.GHOST_ARCHIVE},
@@ -247,6 +248,7 @@ public class RealmPoiWorldPreset extends WorldPreset {
                             @Override
                             public void place(GameRandom placeRandom, Level level, PerformanceTimerManager placeTimer) {
                                 RealmPoiPresets.build(kind, placeRandom).applyToLevel(level, x, y);
+                                placeInhabitants(kind, level, x, y);
                             }
                         })
                         // Which of the thirteen this rectangle is. Without it the
@@ -255,6 +257,34 @@ public class RealmPoiWorldPreset extends WorldPreset {
                         .setDebugName(RealmPoiPresets.key(kind));
             }
         });
+    }
+
+    /**
+     * The people a stamped POI comes with, at the tile its plan puts them on.
+     *
+     * <p>A {@link necesse.level.maps.presets.Preset} carries tiles and objects
+     * and nothing else, so an inhabitant cannot be part of one; the place
+     * closure is the first point that holds a {@link Level}. Server side only —
+     * the client receives the mob over the wire, and spawning it on both ends
+     * is how you get two of somebody.
+     *
+     * <p>{@code canDespawn = false}, like {@code SkyLevel.placeResident}: a
+     * settler the player walked past has to still be there on the way back, or
+     * a once-per-world recruit is lost to a chunk unload.
+     */
+    private static void placeInhabitants(int kind, Level level, int x, int y) {
+        if (level.isClient()) return;
+        if (kind == RealmPoiPresets.SKY_TOLL_HOUSE) {
+            // Plan  2.12: Magpie waits at (18,5) in the ledger room.
+            spawn(level, "magpiesettler", x + 18, y + 5);
+        }
+    }
+
+    private static void spawn(Level level, String mobID, int tileX, int tileY) {
+        necesse.entity.mobs.Mob mob = necesse.engine.registries.MobRegistry.getMob(mobID, level);
+        if (mob == null) return;
+        mob.canDespawn = false;
+        level.entityManager.addMob(mob, tileX * 32 + 16, tileY * 32 + 16);
     }
 
     private static boolean validSite(int kind, int realm, int seed, int x, int y, int width, int height) {

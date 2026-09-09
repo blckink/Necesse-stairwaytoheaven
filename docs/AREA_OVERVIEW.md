@@ -145,12 +145,8 @@ Shrine and Orchard Ring are terrain/pressure sites, not buildings.
 
 **Boss.** Moonlight Dancer, tier 8, 40 000 base → **171 720 HP**.
 
-**Open holes.** No critters — the realm has no ambient life at all. Three of
-the five hostiles entered the bestiary on 2026-09-05 (`mobs/BorrowedMobIcon`);
-`edenserpent` and `forbiddenserpent` did not, because they wear `crocodile` and
-`petdragonwhelp` — the only two parents vanilla does not put in its own
-bestiary, so whether there is an icon to borrow cannot be checked without a
-client. `docs/ASSET_REQUESTS.md` has the one-look test.
+**Open holes.** No critters — the realm has no ambient life at all. All five
+hostiles now have their own bodies and 32x32 bestiary icons.
 
 ---
 
@@ -321,16 +317,12 @@ Eden packs are placed at region generation, which fires once per region ever.
    life at all. Steinfeld's fix is already written in `WORLD_DESIGN` §A3.4 and
    just not built: ghosts that are not enemies, that stand, or that walk the
    same path between two gravestones forever.
-3. **Two hostiles still never enter the bestiary.** Ten of the twelve landed on
-   2026-09-05, and six rows that were already drawing the engine's ERR tile now
-   draw a picture. `edenserpent` and `forbiddenserpent` wait on one look at a
-   client's journal — `docs/ASSET_REQUESTS.md`.
-4. **Ten realm materials are named by no recipe.** Crooked's six and
+3. **Ten realm materials are named by no recipe.** Crooked's six and
    Steinfeld's four now have quest and shop demand, but nothing is *crafted*
    from any of them.
-5. **Eden and the Crooked Beyond hold one person each**, and neither has a
+4. **Eden and the Crooked Beyond hold one person each**, and neither has a
    found-in-the-realm chain beyond the one they already had.
-6. **Eden Shallows has a single spawn entry**, and Eden's three tables are the
+5. **Eden Shallows has a single spawn entry**, and Eden's three tables are the
    only ones in the mod using plain `add` rather than `addLimited`, so nothing
    caps how many stack up in one ring.
 7. **`possessedchair` and `doormimic` guard ground they cannot spawn on** —

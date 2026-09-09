@@ -232,15 +232,13 @@ realm sections say so; the remaining rows are the future shopping list.
 | `tiles/saltwater_shallow` | Turquoise Shallow Water |
 | `tiles/dryadfloor`, `tiles/dryadpath` | Root Floor |
 | `tiles/ancientroots` | the Knowledge Tree's ground |
-| `objects/palmtree`, `coconuttree` | Paradise Palm |
-| `objects/bananatree`, `lemontree`, `appletree` | Tree of Plenty, Fig, Pomegranate |
-| `objects/dryadtree` | Knowledge Tree |
+| `objects/lemontree` | Pomegranate Tree; Tree of Plenty and Giant Fig now have own sheets |
+| `objects/swampgrass` | Adam's Vine and Giant Monstera (the latter back on the stand-in 2026-09-09, delivered sheet had four empty variant cells); Paradise Fern now has its own sheet |
 | `objects/blackberrybush`, `blueberrybush` | Eden Berry bushes |
 | `objects/blueflowerpatch` | Blue Paradise Flower |
 | `objects/ivyore` | Eden Copper / Verdant Ore |
 | the whole `palm*` furniture family (bed, chair, table, chest, wall, …) | Eden architecture — a complete set already exists |
 | `objects/barrel` | fermentation storage inside Eden's workhouse |
-| `mobs/crocodile`, `stabbybush`, `dryadsentinel`, `bee`, `dragonwhelp` | Eden Serpent, Bloom Maw, Jealous Vine, Golden Hornet and Forbidden Serpent bodies |
 | `items/palmlog`, `dryadbranch`, `apple`, `sharkscales`, `fangoftheprotector`, `honey`, `dryadsapling`, `coconut`, `blueberry`, `frozenberry`, `raspberry`, `ivyore`, `ivybar` | Eden's first material and fruit icons |
 | `objects/spiritbasin.png`, `items/spiritbasin.png` | the Eden Threshold (`edenseedbasin`) — vanilla's Spirit Basin, reused a second time; the Ghost Gate's Soul Basin already borrows it once |
 | this mod's own `objects/skystairwaydown.png`, `objects/skystairwayup.png` | the Eden Gate down/up pair (`edengatedown`/`edengateup`) — the Skyward Stairway's own sheets, reused a second time rather than drawn fresh |
@@ -366,6 +364,8 @@ and the realm cannot be faked without them:
 | `mobs/cryoflake` (sheet) | `auroraflake` — `arsenal/AuroraFlakeMob` on `mobs/auroraflake.png`, still a `CryoFlakeMob` subclass for behaviour (chime, shatter particles, the spinning two-layer draw) with `addDrawables` ported so only the texture changes. Supplied already on format: 64x128, body over pulse, both centred on the rotation pivot | 2026-09-02 |
 | `mobs/sheep`, `mobs/sheep_sheared`, `mobs/ram`, `mobs/ram_sheared`, `mobs/lamb` (sheets, recoloured at load time) | the Glimmergoat's five states on the mod's own sheets, supplied already on vanilla's grid — `glimmergoat-doe`, `-doe_shorn`, `-ram`, `-ram_shorn`, `-lamb`. Four of the five shipped as `gimmergoat-*`; the player confirmed on 2026-09-03 that the missing `l` was a typo, so all five are spelled `glimmergoat-` now, matching the mob id | 2026-09-02 |
 | `crystalarmadillo` (mob, by string ID) | `crookedarmadillo` — `mobs/CrookedArmadilloMob` on `mobs/crookedarmadillo.png`, same relationship to `CrystalArmadillo`. One thing did NOT come across: vanilla's second `crystalarmadillo_light` glow pass, because we have one sheet and not two — see the class comment | this pass |
+| `mobs/crocodile`, `stabbybush`, `dryadsentinel`, `bee`, `dragonwhelp` | Eden's five hostile bodies now use `mobs/edenserpent`, `bloommaw`, `jealousvine`, `goldenhornet`, `forbiddenserpent`; each also has its own bestiary icon | 2026-09-08 |
+| `objects/palmtree` | Eden worldgen now places the separate `paradisepalm` TreeObject on `objects/paradisepalm.png`; vanilla palm behaviour is retained without shadowing the base-game texture | 2026-09-08 |
 
 The vanilla sheets stay the format reference for these three and are listed as
 such in §1.5; the runtime no longer touches them.

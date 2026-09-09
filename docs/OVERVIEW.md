@@ -277,17 +277,14 @@ These are the objects with real behaviour, as opposed to deco and furniture.
 
 ## 7. Sprites — ours vs. vanilla
 
-**350 PNGs ship with the mod**: 129 items · 96 objects · 29 mobs + 26 bestiary
+**378 PNGs ship with the mod**: 135 items · 107 objects · 38 mobs + 31 bestiary
 icons · 21 tiles · 16 kk-sprites · 11 armour · 5 weapons · 5 particles ·
 4 projectiles · 3 map icons · 2 statues · 2 carpets · 1 preview.
 
-**55 literal `GameTexture.fromFile` paths**, of which **38 resolve to our own
-files** and **17 to the game's own resources** — one flat resource map serves
-both, so a literal path is not evidence of borrowing:
+The remaining literal Vanilla `GameTexture.fromFile` paths include:
 
 ```
-mobs/bee  mobs/cow  mobs/crocodile  mobs/dragonwhelp  mobs/dryadsentinel
-mobs/scorpion  mobs/stabbybush
+mobs/cow  mobs/scorpion
 mobs/icons/{blacksmith,exoticmerchant,farmer,pawnbroker,stylist}human
 tiles/{cryptash,ravenfloor,stonebrickfloor,swampgrass,swamprock}_splat
 ```

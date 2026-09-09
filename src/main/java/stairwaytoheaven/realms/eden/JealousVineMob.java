@@ -21,10 +21,8 @@ import necesse.inventory.lootTable.lootItem.LootItem;
  * and it is the reason walking between the giant trunks is not the same as
  * crossing a meadow.
  *
- * <p><b>Borrowed art:</b> vanilla {@code mobs/dryadsentinel} — an amber crown
- * over a mass of dark tendrils, which is a living plant seen from above and
- * needs no reinterpretation to be a vine. 768x896: six 128px columns over
- * seven rows. Drawn with {@code DryadSentinelMob.addDrawables}' own offsets
+ * <p><b>Sprite:</b> purpose-built {@code mobs/jealousvine}, 768x896: six 128px
+ * columns over seven rows. Drawn with the proven Dryad Sentinel offsets
  * ({@code drawX - 64}, {@code drawY - 112 + 20}). NOT subclassed: the vanilla
  * sentinel's damage lives inside an anonymous AI it builds in {@code init()}
  * together with a root-spike ability chain, and rebuilding half of that to
@@ -121,18 +119,6 @@ public class JealousVineMob extends EdenHostileMob {
                     .movesConstant(EdenSerpentMob.deathSpeed(knockbackX), EdenSerpentMob.deathSpeed(knockbackY))
                     .color(new Color(168, 106, 32));
         }
-    }
-
-    /**
-     * Bestiary face: it wears mobs/dryadsentinel (EdenRealm.loadTextures), so it wears that creature's
-     * face in the journal too. {@code Mob.getMobIcon()} is overridable and
-     * {@code FormJournalEntryComponent} asks the MOB rather than the registry,
-     * so this needs no PNG of its own -- see {@link stairwaytoheaven.mobs.BorrowedMobIcon}
-     * for why borrowing the face is the right answer and not a shortcut.
-     */
-    @Override
-    public necesse.gfx.gameTexture.GameTexture getMobIcon() {
-        return stairwaytoheaven.mobs.BorrowedMobIcon.from("dryadsentinel", super.getMobIcon());
     }
 
 }

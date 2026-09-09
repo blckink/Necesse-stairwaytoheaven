@@ -23,12 +23,12 @@ import necesse.inventory.lootTable.lootItem.LootItem;
  * <p>§5: <i>"Eden Serpent — poison attack; drops Serpent Scale, Venom Fang"</i>.
  * A3.3 states the thesis it exists to prove: <b>beauty can be dangerous</b>.
  *
- * <p><b>Borrowed art:</b> vanilla {@code mobs/crocodile} — a bright green
- * scaled reptile seen from above, 768x640, i.e. six 128px animation columns
- * over four direction rows plus a particle row. Drawn with
+ * <p><b>Sprite:</b> purpose-built {@code mobs/edenserpent}, 768x640: six 128px
+ * animation columns over four direction rows plus a particle row. Drawn with
  * {@code CrocodileMob.addDrawables}' own offsets ({@code drawX - 64},
  * {@code drawY - 128 + 36}, {@code sprite(x, y, 128)}), copied rather than
- * guessed. Not subclassed, because {@code CrocodileMob} is a {@code FriendlyMob}
+ * guessed. The original geometry came from the temporary crocodile stand-in.
+ * Not subclassed, because {@code CrocodileMob} is a {@code FriendlyMob}
  * that only turns hostile when struck — it would never guard anything, and its
  * {@code serverTick} would keep switching itself back.
  *
@@ -154,18 +154,6 @@ public class EdenSerpentMob extends EdenHostileMob {
     static float deathSpeed(float knockback) {
         return knockback / 2.0F + GameRandom.globalRandom.getIntBetween(5, 15)
                 * (GameRandom.globalRandom.nextBoolean() ? -1 : 1);
-    }
-
-    /**
-     * Bestiary face: it wears mobs/crocodile (EdenRealm.loadTextures), so it wears that creature's
-     * face in the journal too. {@code Mob.getMobIcon()} is overridable and
-     * {@code FormJournalEntryComponent} asks the MOB rather than the registry,
-     * so this needs no PNG of its own -- see {@link stairwaytoheaven.mobs.BorrowedMobIcon}
-     * for why borrowing the face is the right answer and not a shortcut.
-     */
-    @Override
-    public necesse.gfx.gameTexture.GameTexture getMobIcon() {
-        return stairwaytoheaven.mobs.BorrowedMobIcon.from("crocodile", super.getMobIcon());
     }
 
 }

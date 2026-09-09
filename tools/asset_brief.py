@@ -171,11 +171,18 @@ budget — it becomes a different thing wearing that skeleton.
 ## How it is checked when it comes back
 
 `tools/asset_intake.py` measures the returned file: exact size or an exact
-integer downsample, colour count, whether the background is really
-transparent, and per-frame occupancy against the vanilla original. It refuses
-what it cannot fix and says why. Nothing reaches the game unreviewed — the
-finished sheet goes to the player for approval first, with a 1× preview,
-because no measurement can tell whether the art reads.
+integer downsample, colour count, and whether the background is really
+transparent. It refuses what it cannot fix and says why.
+
+**Intake does NOT look inside the cells.** It passed a sheet on 2026-09-09
+whose variant cells were half empty. For a variant strip (grass, ground cover,
+anything the engine slices into 32px columns) the gate is
+`tools/variant_strip_audit.py`: it counts the opaque pixels per cell and fails
+on an empty or near-empty one. Run it before offering the sheet.
+
+Nothing reaches the game unreviewed — the finished sheet goes to the player for
+approval first, with a 1× preview, because no measurement can tell whether the
+art reads.
 """
 
 
