@@ -277,7 +277,7 @@ These are the objects with real behaviour, as opposed to deco and furniture.
 
 ## 7. Sprites — ours vs. vanilla
 
-**370 PNGs ship with the mod**: 132 items · 102 objects · 38 mobs + 31 bestiary
+**378 PNGs ship with the mod**: 135 items · 107 objects · 38 mobs + 31 bestiary
 icons · 21 tiles · 16 kk-sprites · 11 armour · 5 weapons · 5 particles ·
 4 projectiles · 3 map icons · 2 statues · 2 carpets · 1 preview.
 

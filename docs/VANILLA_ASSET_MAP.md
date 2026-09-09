@@ -232,8 +232,8 @@ realm sections say so; the remaining rows are the future shopping list.
 | `tiles/saltwater_shallow` | Turquoise Shallow Water |
 | `tiles/dryadfloor`, `tiles/dryadpath` | Root Floor |
 | `tiles/ancientroots` | the Knowledge Tree's ground |
-| `objects/bananatree`, `lemontree`, `appletree` | Tree of Plenty, Fig, Pomegranate |
-| `objects/dryadtree` | Knowledge Tree |
+| `objects/lemontree` | Pomegranate Tree; Tree of Plenty and Giant Fig now have own sheets |
+| `objects/swampgrass` | Adam's Vine; Paradise Fern and Giant Monstera now have separate own sheets |
 | `objects/blackberrybush`, `blueberrybush` | Eden Berry bushes |
 | `objects/blueflowerpatch` | Blue Paradise Flower |
 | `objects/ivyore` | Eden Copper / Verdant Ore |

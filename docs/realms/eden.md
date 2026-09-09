@@ -21,12 +21,13 @@ terrain, dimension `+2`, and the mob/item registrations to exist.
 
 Terrain uses the literal vanilla sheets listed
 in `docs/VANILLA_ASSET_MAP.md`. Vegetation is made from vanilla registry
-objects (`grass`, `swampgrass`, flower patches, fruit trees, berry bushes,
-reeds, seashells, `dryadtree`, `rock`, `ivyoreswamp`) so their native
+objects (`grass`, flower patches, the remaining fruit/berry bushes, reeds,
+seashells, `rock`, `ivyoreswamp`) so their native
 renderer, tool response and drops stay intact. Eden item icons still borrow
 literal vanilla paths where recorded in the asset map. Paradise Palm and all
 five hostile mobs now use purpose-built sprites; each hostile also has its own
-32x32 bestiary icon.
+32x32 bestiary icon. Tree of Plenty, Giant Fig Tree, Knowledge Tree, Paradise
+Fern and Giant Monstera also have separate object IDs and purpose-built sheets.
 
 ## Settler and quest chain
 

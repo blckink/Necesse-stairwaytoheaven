@@ -121,13 +121,24 @@ public final class EdenRealm {
 
     private static void registerObjects() {
         serpentGrassID = object("grass");
-        paradiseFernID = object("swampgrass");
+        necesse.level.gameObject.GrassObject paradiseFern =
+                new necesse.level.gameObject.GrassObject("paradisefern", 8);
+        paradiseFern.mapColor = new Color(54, 174, 76);
+        paradiseFernID = ObjectRegistry.registerObject("paradisefern", paradiseFern, 0.0F, false);
         floweringVineID = object("grass");
         redParadiseFlowerID = object("redflowerpatch");
         blueParadiseFlowerID = object("blueflowerpatch");
         goldenOrchidID = object("yellowflowerpatch");
-        giantMonsteraID = object("swampgrass");
-        giantFigTreeID = object("bananatree");
+        necesse.level.gameObject.GrassObject giantMonstera =
+                new necesse.level.gameObject.GrassObject("giantmonstera", 8);
+        giantMonstera.mapColor = new Color(31, 132, 65);
+        giantMonsteraID = ObjectRegistry.registerObject("giantmonstera", giantMonstera, 0.0F, false);
+        giantFigTreeID = ObjectRegistry.registerObject("giantfigtree",
+                new necesse.level.gameObject.FruitTreeObject(
+                        "giantfigtree", "palmlog", "bananasapling",
+                        900.0F, 1800.0F, "banana", 1.5F, 4,
+                        new Color(119, 43, 126), 42, 60, 80, "fruitpalmleaves"),
+                100.0F, true);
         // Vanilla palmtree behaviour and dimensions, but on Eden's own ID and
         // texture. Shadowing objects/palmtree.png would recolour every desert
         // palm in the base game, so the replacement must be a real mod object.
@@ -135,7 +146,12 @@ public final class EdenRealm {
                 new necesse.level.gameObject.TreeObject("paradisepalm", "palmlog", "palmsapling",
                         new Color(133, 79, 18), 40, 80, 120, "palmleaves"),
                 0.0F, false, false, true);
-        treeOfPlentyID = object("appletree");
+        treeOfPlentyID = ObjectRegistry.registerObject("treeofplenty",
+                new necesse.level.gameObject.FruitTreeObject(
+                        "treeofplenty", "sprucelog", "applesapling",
+                        900.0F, 1800.0F, "paradiseapple", 1.5F, 4,
+                        new Color(74, 168, 75), 30, 60, 100, "appleleaves"),
+                100.0F, true);
         edenBerryBushID = object("blackberrybush");
         sunGrapeBushID = object("blueberrybush");
         moonMelonBushID = object("blueberrybush");
@@ -147,7 +163,11 @@ public final class EdenRealm {
         giantLotusID = object("blueflowerpatch");
         paradiseReedsID = object("reeds");
         edenShellsID = object("seashell");
-        knowledgeTreeID = object("dryadtree");
+        knowledgeTreeID = ObjectRegistry.registerObject("knowledgetree",
+                new necesse.level.gameObject.DryadTreeObject(
+                        "knowledgetree", "dryadlog", "dryadsapling",
+                        new Color(205, 145, 27), 45, 60, 110, "dryadleaves"),
+                100.0F, true);
     }
 
     private static int object(String id) {
