@@ -96,6 +96,28 @@ if (gameDirectory == "auto") {
         }
     }
 
+    // WSL: the Steam install lives on the Windows drive, which none of the
+    // probes above reach, so "auto" found nothing and every build launched
+    // without NECESSE_GAME_DIR in its environment died with the message below
+    // ("BUILD FAILED in 4s" from a bare `bash -lc ./gradlew ...`, 2026-09-09).
+    // Exporting the variable fixes the shell that remembers to; these two
+    // fallbacks fix the shell that does not. Order matters and is the same
+    // order ENVIRONMENT.md gives: the PLAYED install first, so a forgetful
+    // build produces a deliverable 1.3.3 jar rather than a 1.3.2 one that
+    // deploySplitroast would then refuse.
+    if (gameDirectory == null) {
+        for (String candidate : [
+            "/mnt/c/Program Files (x86)/Steam/steamapps/common/Necesse",
+            "${System.getenv('HOME')}/dev/necesse-server-1-3-2-24650233/necesse-server-1-3-2-24650233",
+        ]) {
+            if (resolveGameJar(candidate) != null) {
+                gameDirectory = candidate
+                logger.lifecycle("NECESSE_GAME_DIR was not set; falling back to $candidate")
+                break
+            }
+        }
+    }
+
     if (gameDirectory == null) throw new Exception("Could not find game install directory automatically. Install it, set the NECESSE_GAME_DIR environment variable, or specify full gamePath in settings.gradle.")
 
     logger.info("Automatically found Necesse directory at [$gameDirectory].")
