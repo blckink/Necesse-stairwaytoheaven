@@ -233,7 +233,7 @@ realm sections say so; the remaining rows are the future shopping list.
 | `tiles/dryadfloor`, `tiles/dryadpath` | Root Floor |
 | `tiles/ancientroots` | the Knowledge Tree's ground |
 | `objects/lemontree` | Pomegranate Tree; Tree of Plenty and Giant Fig now have own sheets |
-| `objects/swampgrass` | Adam's Vine; Paradise Fern and Giant Monstera now have separate own sheets |
+| `objects/swampgrass` | Adam's Vine and Giant Monstera (the latter back on the stand-in 2026-09-09, delivered sheet had four empty variant cells); Paradise Fern now has its own sheet |
 | `objects/blackberrybush`, `blueberrybush` | Eden Berry bushes |
 | `objects/blueflowerpatch` | Blue Paradise Flower |
 | `objects/ivyore` | Eden Copper / Verdant Ore |

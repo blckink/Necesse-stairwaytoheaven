@@ -129,7 +129,7 @@ chapter; the ground is real now.
 | `giantfigtree` | object | Twisted tropical Eden tree bearing purple fruit clusters. |
 | `knowledgetree` | object | Rare golden landmark tree surrounded by Eden's danger gradient. |
 | `paradisefern` | object | Eight-variant walk-through fern ground cover for Eden. |
-| `giantmonstera` | object | Eight-variant walk-through split-leaf ground cover for Eden. |
+| `giantmonstera` | object | Walk-through split-leaf ground cover for Eden. On vanilla's `swampgrass` stand-in since 2026-09-09 — the delivered own sheet had four empty variant cells and was withdrawn. |
 | `edenberry` | item | Common Eden berry and cache reward. |
 | `moonmelon` | item | Cool garden fruit and cache reward. |
 | `sungrape` | item | Warm shore fruit intended for the future Eden Press. |

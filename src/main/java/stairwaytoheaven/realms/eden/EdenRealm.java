@@ -129,10 +129,15 @@ public final class EdenRealm {
         redParadiseFlowerID = object("redflowerpatch");
         blueParadiseFlowerID = object("blueflowerpatch");
         goldenOrchidID = object("yellowflowerpatch");
-        necesse.level.gameObject.GrassObject giantMonstera =
-                new necesse.level.gameObject.GrassObject("giantmonstera", 8);
-        giantMonstera.mapColor = new Color(31, 132, 65);
-        giantMonsteraID = ObjectRegistry.registerObject("giantmonstera", giantMonstera, 0.0F, false);
+        // Back on vanilla's stand-in since 2026-09-09. The delivered
+        // objects/giantmonstera.png was unusable: of the eight 32px cells the
+        // engine derives from a 256px sheet (GrassObject.loadTextures:
+        // width / 32) four were EMPTY, and addDrawables picks uniformly over
+        // all of them -- half of every placed plant rendered as nothing. The
+        // rest was seven 11-26px clumps floating in the canvas middle, not
+        // grounded plants. tools/variant_strip_audit.py is the gate for this
+        // now; docs/ASSET_REQUESTS.md carries the redraw brief.
+        giantMonsteraID = object("swampgrass");
         giantFigTreeID = ObjectRegistry.registerObject("giantfigtree",
                 new necesse.level.gameObject.FruitTreeObject(
                         "giantfigtree", "palmlog", "bananasapling",

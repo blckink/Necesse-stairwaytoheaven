@@ -261,9 +261,28 @@ degrades to useful rather than failing.
    the behaviour stays.
 4. Add the file to `generate_assets.py`'s `CONVERTED` guard, or the next
    generator run overwrites the art. That mistake has shipped once.
-5. Gates: `./gradlew buildModJar`, `python3 tools/size_audit.py`,
-   `tools/sheet_format_audit.py`, `tools/locale_audit.py`,
-   `tools/content_ledger.py --check`.
+5. Gates: `scripts/preflight.sh` runs all of them in one go —
+   `./gradlew buildModJar`, `tools/variant_strip_audit.py`,
+   `tools/size_audit.py`, `tools/sheet_format_audit.py`,
+   `tools/locale_audit.py`, `tools/content_ledger.py --check`.
+
+**A green gate is not the same as a checked asset.** `size_audit.py` only
+measures assets that have a row in it, and 56 of the 67 supplied files in
+`generate_assets.py`'s `CONVERTED` guard have none — for those, a green run
+says nothing at all. `variant_strip_audit.py` prints that count on every run.
+Before citing an audit as proof for a specific sprite,
+`grep <name> tools/size_audit.py`; no hit means not measured.
+
+**Variant strips are the trap.** For a `GrassObject` the engine takes the
+variant count from the sheet itself — `int sprites = getWidth() / 32` in
+`GrassObject.loadTextures` — and `addDrawables` then picks one uniformly per
+tile over `0 .. textures.length - 1`. A 256×32 sheet is therefore always eight
+variants, and any empty 32px cell is a plant that draws nothing on that tile.
+The second constructor argument is `density`, not the variant count; reading it
+as the count is what let `objects/giantmonstera.png` ship on 2026-09-09 with
+four of eight cells empty. `asset_intake.py` passed that file — it checks
+canvas, colours and alpha, never per-cell content. `tools/variant_strip_audit.py`
+is the gate that catches it.
 
 ## Running it from Archon
 

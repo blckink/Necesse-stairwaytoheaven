@@ -250,11 +250,17 @@ final class SkyObjects {
     }
 
     /** GrassObject variant that drops a material when cleared. */
-    private static int registerPickable(String stringID, int variants, Color mapColor,
+    // NOTE: `density` is GrassObject's crowding limit (densityCheck), NOT the
+    // number of sprite variants. The engine takes the variant count from the
+    // sheet -- loadTextures does `getWidth() / 32` -- so it cannot be set from
+    // here at all. Reading this argument as a variant count is what let a
+    // half-empty sheet ship on 2026-09-09; tools/variant_strip_audit.py checks
+    // the sheets now.
+    private static int registerPickable(String stringID, int density, Color mapColor,
             String lootItem, int min, int max) {
         final necesse.inventory.lootTable.LootTable loot = new necesse.inventory.lootTable.LootTable(
                 necesse.inventory.lootTable.lootItem.LootItem.between(lootItem, min, max));
-        GrassObject plant = new GrassObject(stringID, variants) {
+        GrassObject plant = new GrassObject(stringID, density) {
             @Override
             public necesse.inventory.lootTable.LootTable getLootTable(
                     necesse.level.maps.Level level, int layerID, int tileX, int tileY) {
@@ -267,7 +273,7 @@ final class SkyObjects {
         return id;
     }
 
-    /** Walk-through carpet grass: 4 variants, no drops. */
+    /** Walk-through carpet grass: density 4, no drops. Variant count comes from the sheet. */
     private static int registerMeadowGrass(String stringID, Color mapColor) {
         GrassObject grass = new GrassObject(stringID, 4);
         grass.mapColor = mapColor;
