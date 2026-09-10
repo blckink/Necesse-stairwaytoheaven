@@ -2,6 +2,7 @@ package stairwaytoheaven.realms.hell;
 
 import necesse.engine.registries.BiomeRegistry;
 import necesse.engine.registries.MobRegistry;
+import necesse.engine.registries.TileRegistry;
 import stairwaytoheaven.realms.hell.mobs.AshSpiritMob;
 import stairwaytoheaven.realms.hell.mobs.BoilerHoundMob;
 import stairwaytoheaven.realms.hell.mobs.InfernalClerkMob;
@@ -42,13 +43,15 @@ import stairwaytoheaven.realms.hell.mobs.TicketImpMob;
  * reuses that scan. An ID hidden behind a constant is an ID neither gate can
  * name-check, so every call below spells its string out.
  *
- * <h2>No tiles, no objects, no items — and that is the point</h2>
- * Every ground and prop Hell paints is a tile or object the mod already
- * registers, reached by its existing ID field (see
- * {@link HellTerrainPainter}'s own header). Nothing is registered here that
- * would need a sheet, an icon or a locale pair drawn for it, because the
- * texture work is a separate pass. What Hell is still missing is therefore
- * NAMED rather than faked:
+ * <h2>Two grounds, no objects, no items</h2>
+ * The realm owns exactly two sheets: {@code cinderash} and {@code furnaceslag},
+ * the pale and the dark half of its floor. That is the whole of {@code
+ * docs/STATUS.md} 7n, the pass 6n deferred when it let Hell paint the Veil's
+ * {@code ashsand} and the Gloomfen's {@code blackpeat} as stand-ins. Every
+ * PROP Hell scatters is still an object the mod already registers, reached by
+ * its existing ID field (see {@link HellTerrainPainter}'s own header), and
+ * nothing here needs an inventory icon, because neither ground is obtainable.
+ * What Hell is still missing is therefore NAMED rather than faked:
  *
  * <ul>
  * <li><b>§20's six materials</b> — Hellsteel Ore, Brimstone, Infernal Brass,
@@ -78,15 +81,23 @@ public final class HellRealm {
     /** A3.8's Furnace: black ground at the far edge of the plane. */
     public static FurnaceReachBiome furnaceReach;
 
+    // ===== The two grounds =====
+
+    /** Burnt grit and cinder dust — the pale half of Hell's floor. */
+    public static int cinderAshID;
+    /** Cooled slag crust with the embers showing — the dark half. */
+    public static int furnaceSlagID;
+
     /**
      * Everything the realm puts into the registries.
      *
-     * <p>Biomes before mobs, the order every other realm uses, because the
-     * terrain painter needs the biome IDs and the registry closes at the end
-     * of the {@code init()} loop.
+     * <p>Biomes and tiles before mobs, the order every other realm uses,
+     * because the terrain painter needs both sets of IDs and the registry
+     * closes at the end of the {@code init()} loop.
      */
     public static void register() {
         registerBiomes();
+        registerTiles();
         registerMobs();
     }
 
@@ -101,6 +112,31 @@ public final class HellRealm {
                 "infernalfringe", new InfernalFringeBiome(), false);
         furnaceReach = BiomeRegistry.registerBiome(
                 "furnacereach", new FurnaceReachBiome(), false);
+    }
+
+    /**
+     * The two grounds §17 and A3.8 describe, and the only sheets this realm
+     * owns.
+     *
+     * <p>Registered the way Crooked Beyond registers its six and the way
+     * vanilla registers {@code spidernesttile}: {@code brokerValue 0}, not
+     * obtainable, not obtainable in creative, on the terrain tile layer. Hell
+     * has no floor the player crafts — §21's machines and §23's crops are the
+     * economy pass, and it has not happened — so an obtainable ground would put
+     * two tiles in a building menu with no recipe behind them.
+     *
+     * <p>They take over exactly the share {@code ashsand} and {@code blackpeat}
+     * held in {@link HellTerrainPainter#groundAt}; those two are the Veil's and
+     * the Gloomfen's and also floor the Ghost band, Crooked Beyond and the
+     * Outlands, so they are left untouched rather than repainted.
+     */
+    public static void registerTiles() {
+        cinderAshID = TileRegistry.registerTile("cinderashtile",
+                new stairwaytoheaven.realms.hell.tiles.CinderAshTile(),
+                0.0F, false, false, true);
+        furnaceSlagID = TileRegistry.registerTile("furnaceslagtile",
+                new stairwaytoheaven.realms.hell.tiles.FurnaceSlagTile(),
+                0.0F, false, false, true);
     }
 
     /**

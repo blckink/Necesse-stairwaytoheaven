@@ -52,13 +52,20 @@ import stairwaytoheaven.worldgen.SkyTerrainPainter;
  * world agree, and the pressure field and preset placers can ask the same
  * question the painter will answer later.
  *
- * <h2>No new art</h2>
- * Every ground and every prop below is a tile or object THIS MOD ALREADY
+ * <h2>Two of its own sheets, and no others</h2>
+ * The hell share of {@link #groundAt} is {@link HellRealm#cinderAshID} and
+ * {@link HellRealm#furnaceSlagID}, the realm's own two grounds since
+ * {@code docs/STATUS.md} 7n. They took over the exact share the Veil's
+ * {@code ashsand} and the Gloomfen's {@code blackpeat} held as stand-ins — the
+ * ratios below did not move — and those two tiles are untouched, because they
+ * also floor the Ghost band, Crooked Beyond and the Outlands.
+ *
+ * <p>Everything else here is still a tile or object THIS MOD ALREADY
  * REGISTERS, reached by its existing {@code SkyRegistry} /
- * {@link CrookedRealm} field. Not one new sheet, not one recolour — which is
- * what makes this pass structure-and-behaviour only and leaves Hell's own
- * palette to the texture pass. {@code docs/VANILLA_ASSET_MAP.md} therefore
- * grows no row for the ground: nothing new is borrowed, it is re-used.
+ * {@link CrookedRealm} field: Crooked's mud and stripe in the Fringe,
+ * Steinfeld's {@code deadsoil} and {@code miststone} in the Furnace, and all
+ * five props. {@code docs/VANILLA_ASSET_MAP.md} therefore grows no row for the
+ * ground: nothing new is borrowed, it is re-used or it is ours.
  */
 public final class HellTerrainPainter {
 
@@ -152,13 +159,13 @@ public final class HellTerrainPainter {
                         : CrookedRealm.crookedStripeID;
             }
             float hell = (roll - crookedShare) / (1.0F - crookedShare);
-            return hell < 0.55F ? SkyRegistry.blackpeatID : SkyRegistry.ashsandID;
+            return hell < 0.55F ? HellRealm.furnaceSlagID : HellRealm.cinderAshID;
         }
         if (roll < 0.34F) {
-            return SkyRegistry.blackpeatID;
+            return HellRealm.furnaceSlagID;
         }
         if (roll < 0.64F) {
-            return SkyRegistry.ashsandID;
+            return HellRealm.cinderAshID;
         }
         return roll < 0.86F ? SkyRegistry.deadsoilID : SkyRegistry.miststoneID;
     }

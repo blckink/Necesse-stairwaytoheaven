@@ -138,6 +138,33 @@ what it is meant to be. That is what the 1× preview is for, and ultimately what
 playing it is for — `docs/PLAYTEST_LOG.md` is where your verdicts live, and
 anything marked KEEP there outranks every measurement in this file.
 
+## Terrain is different: never generate a splat, stamp one
+
+For a `_splat` the three steps above are the wrong shape, because 21 of the
+file's properties are the engine's and not the artist's. Ask the model for a
+**plain tileable texture** instead — any size, any colour count, no alpha — and
+press it through an existing correct splat:
+
+```sh
+python3 tools/splat_from_texture.py texture.png \
+        --like src/main/resources/tiles/ashsand_splat.png \
+        -o src/main/resources/tiles/cinderash_splat.png --colours 37
+python3 tools/fix_splat.py src/main/resources/tiles/cinderash_splat.png \
+        --kind terrain --quieten --apply --preview build/qa/splat/
+python3 tools/splat_check.py src/main/resources/tiles/cinderash_splat.png \
+        --like src/main/resources/tiles/ashsand_splat.png
+```
+
+`splat_check` is the gate for commit 49ea020's four measured failures — a
+non-integer scale, alpha painted as black, a six-figure colour count, and a lost
+cell grid — and it passes by construction, which is the point. `fix_splat` is
+the step that is easy to skip and must not be: a generated texture scores 0–20%
+on vanilla's 2×2 block coherence where every shipped splat scores 100%, and
+`tile_behaviour_audit.py` will refuse the sheet for it. **Prompt for small,
+dense detail.** Patches are cut at a third of the render and scaled to 32 px, so
+plate-sized features put one feature on every tile and the field shows a
+lattice.
+
 ## If you want art that fits without generating it
 
 `tools/asset_generator/` draws every shipped sprite deterministically, in

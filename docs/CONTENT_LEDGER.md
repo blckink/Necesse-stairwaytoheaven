@@ -11,6 +11,8 @@ sections at the bottom.
 
 | id | kind | what it is, in one line |
 |---|---|---|
+| `cinderashtile` | tile | Zunderasche — the pale half of Hell's floor: burnt grit and cinder dust. Painted by `HellTerrainPainter` across both bands, heaviest where the Infernal Fringe has left Crooked Beyond behind. Not obtainable; there is no hell floor to craft yet. |
+| `furnaceslagtile` | tile | Ofenschlacke — the dark half: cooled slag crust with embers still showing through. The Furnace Reach's own ground at the far edge of the plane, and the darker of Hell's two so the heat reads as specks rather than as glare. Not obtainable. |
 | `ashspirit` | mob | Hell elite. What the Furnace leaves behind, standing up again — vanilla's Ash Golem body at 10 278 HP / 387.6 damage / 81 armour. Drops Reality Shard, Oddwood, Charwood. |
 | `boilerhound` | mob | Hell fast role. Lives beside the machines and comes out when the pressure drops — vanilla's Jackal body at 4405 HP / 310.1 damage / 81 armour. |
 | `bossportalhell` | object | The Infernal Summoning Forge. Hell's boss portal: unlocked by the Infernal Seal, wakes the Mutant Hydra at 528 000 HP. Scattered through the Hell band only. |

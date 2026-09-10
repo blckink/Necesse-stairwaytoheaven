@@ -56,6 +56,12 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              "tiles/cloudturf_splat.png", "tiles/aurorashoal_splat.png",
              "tiles/blackpeat_splat.png", "tiles/ashsand_splat.png",
              "tiles/charfloor_splat.png",
+             # Hell's own two grounds (STATUS.md 7n). Stamped by
+             # tools/splat_from_texture.py: only the flat texture was
+             # generated, the 21 cell shapes are ashsand's and blackpeat's own
+             # alpha. gen_splats must never write them -- a redraw here would
+             # be a redraw of the one part that was never art.
+             "tiles/cinderash_splat.png", "tiles/furnaceslag_splat.png",
              "objects/skyseraphtree.png", "items/skyseraphtree.png",
              "objects/statues/seraph.png", "items/seraphstatue.png",
              "objects/cloudtree.png", "items/cloudtree.png",

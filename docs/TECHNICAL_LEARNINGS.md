@@ -3829,3 +3829,33 @@ every mob that wears a vanilla sheet and ships no `mobs/icons/<id>.png`. The fou
 new mobs answer with the 32×32 icon of the archetype whose sheet they wear,
 which is also the honest answer: same body in the world, same face in the
 journal.
+
+**[run] A generated ground texture fails the 2×2 rule even when every splat
+check passes, and the two fix passes pull against each other.** Hell's two
+grounds (2026-09-10) went through `tools/splat_from_texture.py`, so scale, the
+21 cell shapes and the alpha were right by construction and
+`tools/splat_check.py` was green on all four of commit 49ea020's failure modes.
+`tools/tile_behaviour_audit.py` still refused both, on a number no splat check
+looks at: **2×2 block coherence 0.0% and 21.9%, against vanilla's 100% on every
+splat in the game.** An image model paints per pixel; Necesse's tone unit is an
+aligned 2×2 block, and that is what makes a technically perfect sheet read as
+dither at 1×. `tools/fix_splat.py --quieten` is the fix, and it was itself
+incomplete: its THIN pass counted density over the WHOLE sheet while the gate
+reads only the four full-tile variant cells, so it stopped at 866 against a band
+of 280–620. Running it to the gate's own numbers then broke the other one —
+thinning removes the *quietest* pixels, so the mean |dRGB| of what survives goes
+UP (10.7 → 17.9). Both passes now iterate together until density and loudness
+land at once; on `cinderash` that is 899/24.1/0% before and 334/13.6/100% after.
+The order to remember for any generated terrain: stamp, then `fix_splat
+--quieten`, then look at the 1× field, and only then show it to anyone.
+
+**[run] Ask an image model for small dense detail, never for large shapes, when
+the output is a 32 px ground tile.** `tools/splat_from_texture.py` cuts patches
+of `min(w,h)//3` — 341 px out of a 1024 px render — and scales each to 32 px. A
+texture whose features are plate-sized therefore puts exactly one feature on
+every tile, and the four plain variants differ by only ~22% by design, so the
+field lays down a visible lattice. Measured on a Flux render of cracked basalt
+with wide molten cracks: beautiful as a picture, a repeating hook on every tile
+in the 1× field. The same prompt asked for "hundreds of small angular
+fragments" tiled cleanly. This is a property of the pipeline's arithmetic, not
+of the model.

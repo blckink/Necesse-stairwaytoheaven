@@ -180,6 +180,17 @@ def cells(im):
     return [im.crop((c * 32, 0, c * 32 + 32, 32)) for c in range(3, 7)]
 
 
+def measured_density(im):
+    """The density number the gate reads: averaged over the four plain cells."""
+    rows = [measure(c.convert("RGB")) for c in cells(im)]
+    return sum(r[0] for r in rows) / len(rows)
+
+
+def measured_mean(im):
+    """The loudness number the gate reads: the WORST of the four plain cells."""
+    return max(measure(c.convert("RGB"))[1] for c in cells(im))
+
+
 def report(im, label):
     rows = [measure(c.convert("RGB")) for c in cells(im)]
     d = sum(r[0] for r in rows) / len(rows)   # the audit averages density
@@ -232,6 +243,36 @@ def fix(path, kind, apply_it, preview_path, quieten_it=False):
     budget = hi * (out.width // 32) * (out.height // 32)
     if report(out, "mid")[0] > hi:
         out = thin(out, modal, budget)
+        # ...and then keep going until the numbers the GATE reads land, which
+        # is not the same thing. thin() stops on the whole-sheet count, but the
+        # audit reads only the four full-tile variant cells (see cells()), and
+        # on an evenly speckled texture those four are busier than the sheet
+        # average -- the blend cells carry large flat runs the plain cells do
+        # not. Scaling the budget down and going round again is what the pass's
+        # own docstring already promises ("until it lands"); measured on Hell's
+        # cinderash it was the difference between 866 and in-band. A sheet that
+        # already lands takes none of these turns, so nothing shipped moves.
+        #
+        # The two passes also pull against each other and have to be run
+        # together, which the single-shot order could not do: thinning removes
+        # the QUIETEST pixels, so the mean of what is left goes UP (on
+        # cinderash, 10.7 -> 17.9 -- density landed and loudness broke). So
+        # quieten again after thinning, tightening whichever target is still
+        # missed, until both of the gate's numbers are in band.
+        mean_target = mean_max
+        for _ in range(12):
+            d, m = measured_density(out), measured_mean(out)
+            if d <= hi and m <= mean_target and m <= mean_max:
+                break
+            if m > mean_max:
+                out, f = quieten(out, modal, mean_target)
+                out = snap_blocks(out)   # the lerp can round a block apart
+                factor = max(factor, f)
+                if measured_mean(out) > mean_max:
+                    mean_target *= 0.85
+            if measured_density(out) > hi:
+                budget = int(budget * 0.85)
+                out = thin(out, modal, budget)
 
     after = report(out, "after")
     if factor:

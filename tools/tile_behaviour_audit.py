@@ -94,6 +94,11 @@ ROLES = {
     "murkmosstile": TERRAIN,
     "blackpeattile": TERRAIN,
     "ashsandtile": TERRAIN,
+    # Hell's own two grounds. Natural terrain, not floors, for the same reason
+    # edenrootfloor is: isFloor=False and terrain priorities 206/207, nowhere
+    # near PRIORITY_FLOOR, and neither has a recipe -- worldgen paints them.
+    "cinderashtile": TERRAIN,
+    "furnaceslagtile": TERRAIN,
     "murkwatertile": LIQUID,
     "marblecheckertile": FLOOR,
     "gloomwoodfloortile": FLOOR,

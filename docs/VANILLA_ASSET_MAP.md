@@ -364,7 +364,7 @@ below are what `SteinfeldRealm` actually registers — see
 |---|---|
 | mod `objects/aetherforge`, `items/aetherforge` | Hell's boss portal (Infernal Summoning Forge) and its region key (The Infernal Seal). A lit furnace mouth is the right SHAPE for §21's Infernal Forge; the sheet is the sky's until Hell's own art lands. |
 | vanilla mob bodies `ancientarmoredskeleton`, `ashgolem`, `crazedraven`, `jackal` | Infernal Clerk, Ash Spirit, Ticket Imp and Boiler Hound. The Ash Golem is the only one that is already a hell creature; the other three are archetype stand-ins. |
-| mod tiles `blackpeat`, `ashsand`, `deadsoil`, `miststone`, `violetmud`, `crookedstripe` | Hell's two band grounds. All six are already registered by the Veil, Steinfeld and Crooked Beyond — re-used, not newly borrowed. |
+| mod tiles `deadsoil`, `miststone`, `violetmud`, `crookedstripe` | The Furnace's two other grounds and the Fringe's Crooked share. All four are already registered by Steinfeld and Crooked Beyond — re-used, not newly borrowed. `blackpeat` and `ashsand` stood in here until 2026-09-10 and no longer do: **DONE 2026-09-10**, replaced by Hell's own `cinderash` and `furnaceslag` (§4). |
 
 
 | vanilla asset | stands in for |
@@ -416,6 +416,7 @@ and the realm cannot be faked without them:
 | `crystalarmadillo` (mob, by string ID) | `crookedarmadillo` — `mobs/CrookedArmadilloMob` on `mobs/crookedarmadillo.png`, same relationship to `CrystalArmadillo`. One thing did NOT come across: vanilla's second `crystalarmadillo_light` glow pass, because we have one sheet and not two — see the class comment | this pass |
 | `mobs/crocodile`, `stabbybush`, `dryadsentinel`, `bee`, `dragonwhelp` | Eden's five hostile bodies now use `mobs/edenserpent`, `bloommaw`, `jealousvine`, `goldenhornet`, `forbiddenserpent`; each also has its own bestiary icon | 2026-09-08 |
 | `objects/palmtree` | Eden worldgen now places the separate `paradisepalm` TreeObject on `objects/paradisepalm.png`; vanilla palm behaviour is retained without shadowing the base-game texture | 2026-09-08 |
+| mod tiles `blackpeat`, `ashsand` (Hell's share only) | `cinderashtile` and `furnaceslagtile` — Hell's own two grounds on `tiles/cinderash_splat.png` and `tiles/furnaceslag_splat.png`, taking over the exact share the two stand-ins held in `HellTerrainPainter.groundAt`. Only the flat texture was generated (`bin/bild`, Flux, seeds 7402 and 7101); `tools/splat_from_texture.py` stamped it through the two stand-ins' own alpha, so every cell shape is still the engine's. `blackpeat` and `ashsand` themselves are unchanged and still floor the Ghost band, Crooked Beyond and the Outlands | 2026-09-10 |
 
 The vanilla sheets stay the format reference for these three and are listed as
 such in §1.5; the runtime no longer touches them.
