@@ -218,7 +218,7 @@ for _ in $(seq 1 90); do
     sleep 2
 done
 
-# The twenty-two inhabited places (swh_realmpois). Until 2026-09-07 NO gate looked
+# The twenty-five inhabited places (swh_realmpois). Until 2026-09-07 NO gate looked
 # at them at all: the POI assertions above are skysurfacestatus's, which counts
 # the SURFACE catalogue -- a different system, with a different string ID. The
 # catalogue could have been generating zero times since they were registered on
@@ -230,7 +230,7 @@ done
 # calls) for the funnel, and once through the preset regions the world really
 # built for the queue. Then it force-generates the nearest place and counts what
 # is standing in it, because a queued rectangle is not a building.
-echo "Running skyreachstatus pois (the twenty-two inhabited places)..."
+echo "Running skyreachstatus pois (the twenty-five inhabited places)..."
 echo "skyreachstatus pois" >&3
 for _ in $(seq 1 180); do
     [ "$(grep -c SKYREACH_STATUS_DONE "$LOG")" -ge 5 ] && break
@@ -512,7 +512,7 @@ grep -qE "realm check: scale=[0-9]+ .* 0=skyreach" "$LOG1" \
 grep -qE "realm check: .* 5800=hell" "$LOG1" \
     || { echo "FAIL: the far end of the realm field is not Hell"; STATUS=1; }
 
-echo "--- verifying the twenty-two inhabited places actually stand ---"
+echo "--- verifying the twenty-five inhabited places actually stand ---"
 # The gate that did not exist until 2026-09-07. Every assertion here is on the
 # QUEUE the world built, not on the catalogue being registered -- registration
 # was never the problem. Measured over six seeds on 2026-09-07: 13/13 on all of
@@ -523,12 +523,13 @@ echo "--- verifying the twenty-two inhabited places actually stand ---"
 # gate had been failing on a number rather than on a defect. Waysides and the
 # Dew-Keeper's Hut took it to 16; the Fold, the Institute and the Wayhouse
 # (2026-09-09) to 19; the Redoubt, the Manufactory and the Anvil (2026-09-10)
-# to 22.
-grep -qE "realmpoi census: .* kinds=22/22 " "$LOG1" \
-    || { echo "FAIL: the placer accepts no site at all for one of the twenty-two inhabited places"; \
+# to 22; the Gate, the Choir and the Reef (2026-09-10) to 25, which is twelve
+# of the dossier's fourteen sections -- 2.13 and 2.14 are still unbuilt.
+grep -qE "realmpoi census: .* kinds=25/25 " "$LOG1" \
+    || { echo "FAIL: the placer accepts no site at all for one of the twenty-five inhabited places"; \
          grep -aE "realmpoi kind .* accepted=0 " "$LOG1"; STATUS=1; }
-grep -qE "realmpoi census: .* queuedkinds=22/22 " "$LOG1" \
-    || { echo "FAIL: one of the twenty-two inhabited places is in no preset region in the world"; \
+grep -qE "realmpoi census: .* queuedkinds=25/25 " "$LOG1" \
+    || { echo "FAIL: one of the twenty-five inhabited places is in no preset region in the world"; \
          grep -aE "realmpoi kind .* queued=0 " "$LOG1"; STATUS=1; }
 # ...named one by one, so a regression says WHICH place vanished rather than
 # only that the total slipped.
@@ -536,7 +537,8 @@ for poi in skytower skytown skytollbridge skyinn edencrowngarden edenfermenthous
     steinfeldmemorial ghostarchive crookedbazaar hellborderoffice helladministration \
     hellforge hellcarnival skywaytollhouse waysideshrine dewkeepershut \
     shepherdsfold fallinginstitute passagewayhouse \
-    nightfellredoubt aethermanufactory sovereignsanvil; do
+    nightfellredoubt aethermanufactory sovereignsanvil \
+    unopenedgate prismchoir serpentsreef; do
     grep -qE "realmpoi kind $poi: .* queued=[1-9][0-9]* nearest=[0-9]+" "$LOG1" \
         || { echo "FAIL: $poi stands nowhere in the world"; \
              grep -aE "realmpoi kind $poi:" "$LOG1" | tail -1; STATUS=1; }
@@ -608,6 +610,15 @@ grep -qE "realmpoi stamp: .* objects=[1-9][0-9]*/" "$LOG1" \
 grep -qE "realmpoi stamp: .* missing=0 " "$LOG1" \
     || { echo "FAIL: the nearest inhabited place is missing objects its preset placed"; \
          grep -aE "realmpoi stamp:" "$LOG1" | tail -1; STATUS=1; }
+# ...and the same question asked of the Serpent's Reef by name. It is the only
+# kind placed on OPEN WATER, and the only one that paints its own land into the
+# Mistsea, so it is the only one where "does an object survive beside a tile the
+# same preset just turned into water" is an open question. The census stamps it
+# in addition to the nearest place; the greps above are satisfied by any stamp
+# line, so this one names the kind.
+grep -qE "realmpoi stamp: kind=serpentsreef .* missing=0 " "$LOG1" \
+    || { echo "FAIL: the Serpent's Reef is missing objects its preset placed"; \
+         grep -aE "realmpoi stamp: kind=serpentsreef" "$LOG1" | tail -1; STATUS=1; }
 
 # ...and the five weapons must be real registered items with a name, not IDs.
 for arsenal_item in skyreave thunderhead prismcaller skywatchwhistle stormdisc; do

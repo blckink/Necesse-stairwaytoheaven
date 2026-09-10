@@ -3593,3 +3593,50 @@ Skyreach site; the census's own timing moved from 2620 ms to 2648 ms.
 Measured after, seed 1527996859: `kinds=22/22 queuedkinds=22/22`, and each of
 the thirteen Skyreach kinds holds **2–4 accepted sites** instead of 0–6.
 **VERIFIED [run]** — `scripts/integration_test.sh`, both seeds.
+
+## A preset that writes its own water loses the objects standing beside it
+
+*2026-09-10, building POI 2.10 (the Serpent's Reef) — the catalogue's first
+place put in OPEN MISTSEA rather than on ground the terrain painter made.*
+
+The Reef paints its own land mask: 123 reef tiles into 625 tiles of
+`mistseatile`, the same thing `RealmPoiPresets.tollBridge` does with its stream.
+`Preset.applyToLevel` writes both without complaint — it calls
+`level.objectLayer.setObject` unconditionally, with no placement test
+(**VERIFIED [jar]**). The objects are then swept out again afterwards, and
+nothing in the queue, the funnel or the per-kind object count can see it: the
+census read `presetobjects=30` and the world held 16.
+
+Two independent engine rules, and it took both fixes to reach `missing=0`.
+
+**1. Shore. `GameObject.isValid` returns false for an object whose
+`canPlaceOnShore` is false on a `Level.isShore` tile, and `Level.adjacentGetters`
+includes the DIAGONALS** — so one corner touching liquid is enough
+(**VERIFIED [jar]**, `GameObject.java:410-420`). A reef is shore end to end.
+This mod already knew: `SkyObjects.allowShore` exists with the note that "sky
+islands are small: most tiles border the Mistsea", and `SkyBuildingSet` flags
+its natural props for the same reason. The lists were simply incomplete —
+`fulguriterock` and `prismshardrock` were flagged and `aetheriumrock`, registered
+in the same idiom three lines away, was not; nor was `skystonerock`, the rock the
+terrain painter scatters across every island and the base every ore variant is
+built on. `aeronautwreck` and `skyballoon` were missing for a better reason:
+they are registered as rare-encounter seeds, absent from normal worldgen, so
+until the Reef nothing had ever placed one near the sea.
+
+**2. Grass needs organic ground. `skyscree` is a `GrassObject`; its
+`grassValidTileIDs` is empty, and vanilla's `GrassObject.runGrassCanPlace` then
+refuses any tile that is not `isOrganic`** (**VERIFIED [jar]**,
+`GrassObject.java:334-349`). §2.10 draws its spine as "skystonerock + skyscree",
+and on the Reef's own `skystonetile` the scree half cannot exist — ten of them
+were written and swept every run. §2.6's rim mixes the same two and works, but
+only because it does **not** pave its cells: `Legend.scatter` declares pieces and
+not ground, so the Anvil's scree lands on the island turf underneath. The Reef
+ships a stone spine and the reason is in the legend line.
+
+**The lesson is about the gate, not the reef.** `RealmPoiCensus` force-generated
+only the NEAREST place of all, and a POI 700 tiles out is almost never nearest.
+It now stamps the Reef by name as well, because it is the only kind that asks
+this question; `scripts/integration_test.sh` asserts
+`realmpoi stamp: kind=serpentsreef .* missing=0` separately, since the existing
+greps are satisfied by any stamp line. Seed 1524002983:
+`placed=30/30 missing=0`. **VERIFIED [run]**.

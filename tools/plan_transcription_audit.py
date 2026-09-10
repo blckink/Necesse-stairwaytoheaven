@@ -35,6 +35,9 @@ PLANS = {
     "REDOUBT_PLAN": "### 2.4 Nightfell Redoubt",
     "MANUFACTORY_PLAN": "### 2.5 The Aether Manufactory",
     "ANVIL_PLAN": "### 2.6 The Sovereign's Anvil",
+    "GATE_PLAN": "### 2.8 The Unopened Gate",
+    "CHOIR_PLAN": "### 2.9 The Prism Choir",
+    "REEF_PLAN": "### 2.10 The Serpent's Reef",
 }
 
 # The dossier draws each row as "  y12  ..#####..", the leading label being a

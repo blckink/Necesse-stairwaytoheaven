@@ -84,20 +84,21 @@ table appears in only **2**, a bed in only **1** (the Spire), and 5 of the 9 are
 "furnished" by a light and nothing else. `SkyFurnitureSet`'s 17 pieces are still
 almost unused outside the Spire.
 
-**The inhabited catalogue adds 22 presets.** `RealmPoiWorldPreset` places
-thirteen in Skyreach, two in Eden, one each in Steinfeld/Ghost/Crooked, and four
+**The inhabited catalogue adds 25 presets.** `RealmPoiWorldPreset` places
+sixteen in Skyreach, two in Eden, one each in Steinfeld/Ghost/Crooked, and four
 in the reserved Hell band. The large sites include actual street networks, buildings
 beside rather than on those streets, non-rectangular room unions, doors,
 windows, dense functional furniture and clear circulation. Full catalogue and
 review rules: `docs/design/realm-poi-worldgen.md`.
 
-**Nine of the thirteen Skyreach ones come from the dossier**
+**Twelve of the sixteen Skyreach ones come from the dossier**
 (`docs/design/chapter-01-skyreach-pois.md`, fourteen designed places). The
 Skyway Toll-House (§2.12) was transcribed into `setObject` calls by hand on
 2026-09-09. The Skywatch Wayside (§2.1), the Dew-Keeper's Hut (§2.11), the
 Shepherd's Fold (§2.2), the Institute of Applied Falling (§2.3), the Passage
 Wayhouse (§2.7), and — on 2026-09-10 — the Nightfell Redoubt (§2.4), the Aether
-Manufactory (§2.5) and the Sovereign's Anvil (§2.6)
+Manufactory (§2.5), the Sovereign's Anvil (§2.6), the Unopened Gate (§2.8), the
+Prism Choir (§2.9) and the Serpent's Reef (§2.10)
 are not: `RealmPoiPresets.plan(Preset, String[], Legend)` reads the dossier's ASCII
 map character for character and implements the dossier's §0.2–§0.4 rules **once**
 — both halves of a multi-tile piece, wall decor on `WALL_DECOR` and never on
@@ -109,16 +110,28 @@ lantern character on all four inner faces of their shell), a carpet on
 `TILE_LAYER` (`Legend.rug`, §2.5's 65-tile runner) and a scattered formation
 (`Legend.scatter`, §2.6's 92-tile rim at 55% coverage — writing a rock on all 92
 would seal the arena, since `RockObject` is solid).
-Every breach throws at load, because `onRegistryClosed` builds all twenty-two
+§2.8 added one more (`Legend.paves`, the ground under a character that writes
+none of its own — the Gate stands five pieces INSIDE its chequer dais, and
+without it each would punch a skyway-paved hole in the one accent surface it
+has).
+Every breach throws at load, because `onRegistryClosed` builds all twenty-five
 kinds; each rule was confirmed to fire by breaking it and booting a server.
 `tools/plan_transcription_audit.py` proves the arrays in the code are still
-character-identical to the sections in the dossier. The remaining five plans
-are unbuilt, and every §4 piece of new art the eight built ones ask for — the
+character-identical to the sections in the dossier. **Two plans are still
+unbuilt: §2.13 the Grange Cellar and §2.14 the Test Range.** Every §4 piece of
+new art the eleven built ones ask for — the
 steles, `cloudspringfont`, `skywaywaystone`, Wren's wardrobe, `sovereignaltar`,
-the Skywatch Revenant, the Fulgur Shade and the three `sovereignshard` — is left
+`prismchime`, `reefmaw`, the Skywatch Revenant, the Fulgur Shade and the three
+`sovereignshard` — is left
 out rather than faked; each is named in the preset's own javadoc. Without the
 altar the Anvil is its rim, its ring and its Seraphs and no wave fight, which is
-what §2.6 asks for by name. **`[run]`, not `[game]`.**
+what §2.6 asks for by name. The Prism Choir pays the same price hardest: its
+seven `prismchime` and its `cloudspringfont` are ALL of its centrepiece and all
+of its light, so §2.9 ships today as a ring, a floor, four gates and a pedestal,
+with the lap-the-ring puzzle and Sovereign Shard III still on the art queue.
+§2.9 offers a fallback (chimes built from `aurorabloom` + `starfall` + a
+pedestal each) and it is deliberately NOT taken: that is three objects on one
+tile, which no plan cell can hold. **`[run]`, not `[game]`.**
 
 **And they now stand in the world — counted, not assumed.** From 2026-09-04 to
 2026-09-07 they were registered and largely absent, and no gate looked: the POI
@@ -126,12 +139,22 @@ counts in `scripts/integration_test.sh` were the SURFACE catalogue's, a
 different system. `/skyreachstatus pois` (`RealmPoiCensus`) walks the whole
 realm disc through the placement decision itself and then through the preset
 regions the world really built, and the integration test fails on anything less
-than 22/22. Measured over six seeds on 2026-09-07: **13/13 on all of them**,
+than 25/25. Measured over six seeds on 2026-09-07: **13/13 on all of them**,
 ~1,450 places in a 6144-tile disc, nearest one **126–430 tiles** from the
-arrival pad. On 2026-09-10, seed 1527996859: **22/22 accepted and 22/22
-queued**, 1,539 places, nearest one 296 tiles out. `[run]`, not `[game]` —
+arrival pad. On 2026-09-10, seed 1524002983: **25/25 accepted and 25/25
+queued**, 1,439 places, nearest one 155 tiles out. `[run]`, not `[game]` —
 nothing has looked at one yet. Before the
 fix the same census read 11/13 and 419 tiles.
+
+**The census stamps the Serpent's Reef by name, on top of the nearest place.**
+Every other kind stands on ground the terrain painter already made, so one
+force-generated stamp answers the same question for all of them. §2.10 is the
+only kind placed in OPEN MISTSEA, painting its own 123 land tiles into 625 of
+water, and "does an object survive on a tile whose neighbour the same preset has
+just turned into sea" is a question only it asks. It was worth asking: the first
+run of that gate found **14 of the Reef's 30 objects swept away** between the
+preset writing them and the census reading them back. See
+`docs/TECHNICAL_LEARNINGS.md` — two separate engine rules, both now respected.
 
 **How a kind gets a cell changed on 2026-09-10, and it was a real defect.**
 Outside Skyreach the rotation is a per-cell hash; that spreads the mix without

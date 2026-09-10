@@ -196,8 +196,15 @@ final class SkyBuildingSet {
 
         // Natural props must survive the shore sweep if worldgen later places
         // them near the Mistsea (same reason SkyObjects calls allowShore).
+        // The wreck and the balloon joined the list on 2026-09-10, when the
+        // Serpent's Reef (POI 2.10) became the first worldgen that places
+        // them at all -- they are registered above as rare-encounter SEEDS,
+        // absent from normal worldgen, so until now nothing had ever put one
+        // near the sea for the sweep to find. All three of the reef's hull
+        // tiles were swept; the reef IS a shore, end to end.
         for (String propId : new String[]{"stormscreed", "skywatchrubble",
-                "chargecrystal", "withershrub", "aurorashards", "starfall"}) {
+                "chargecrystal", "withershrub", "aurorashards", "starfall",
+                "aeronautwreck", "skyballoon"}) {
             ObjectRegistry.getObject(ObjectRegistry.getObjectID(propId)).canPlaceOnShore = true;
         }
 

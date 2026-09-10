@@ -20,7 +20,7 @@ it is the state as it stands now.
 
 | realm | tiles out | biomes | hostiles | critters | animals | NPCs | live quests | POIs | boss |
 |---|---|---|---|---|---|---|---|---|---|
-| **Skyreach** | 0–1800 | 4 | 8 | 4 | 2 | 7 | 5 | 13 | `cryoqueen` t8 · 74 412 HP |
+| **Skyreach** | 0–1800 | 4 | 8 | 4 | 2 | 7 | 5 | 16 | `cryoqueen` t8 · 74 412 HP |
 | **Eden** | 600–2880 | 3 | 5 | **0** | 0 | 1 | 3 | 2 | `moonlightdancer` t8 · 171 720 HP |
 | **Steinfeld** | 1920–4200 | 3 | 4 | **0** | 0 | 1 | 2 | 1 | `ascendedwizard` t9 · 220 528 HP |
 | **Ghost Realm** | 2880–5280 | 5 | 9 | **0** | 0 | 4 | 4 | 1 | `pestwarden` t9 · 233 595 HP |
@@ -113,7 +113,7 @@ near-unfindable.
 `swh_anchor` → `swh_keyskyreach`. Plus `swh_beacon`, registered and dead, kept
 so pre-0.5 saves deserialize.
 
-**POIs (13).** Sky Tower, Sky Town, Toll Bridge, Sky Inn — plus the Warden's
+**POIs (16).** Sky Tower, Sky Town, Toll Bridge, Sky Inn — plus the Warden's
 Spire, the richest single building in the mod. Six more came out of
 `docs/design/chapter-01-skyreach-pois.md` on 2026-09-09: the Skyway Toll-House
 (§2.12), the Skywatch Wayside (§2.1), the Dew-Keeper's Hut (§2.11), the
@@ -123,8 +123,16 @@ hostile ones: the **Nightfell Redoubt** (§2.4, the compound built out of the
 `nightfell` walls no worldgen had ever placed), the **Aether Manufactory**
 (§2.5, three rooms and all three profession workstations working) and the
 **Sovereign's Anvil** (§2.6, the arena — without its altar, which is unbuilt
-art). Counted by `/skyreachstatus pois` on a real seed, not by reading
-constants; on seed 1527996859 each of the thirteen holds 2–4 accepted sites.
+art). Three more later the same day, which take the band to **sixteen** and the
+dossier to twelve of its fourteen: the **Unopened Gate** (§2.8, a causeway, a
+chequer dais, two Seraphs and no gate between them — 89 objects), the **Prism
+Choir** (§2.9, a ring and a pedestal; its seven chimes and its font are unbuilt
+art, so it ships without its centrepiece and without any light) and the
+**Serpent's Reef** (§2.10, the only place in the catalogue that stands in open
+Mistsea and paints its own 123 land tiles into 625 of water, with a guaranteed
+Mistserpent circling it). Counted by `/skyreachstatus pois` on a real seed, not
+by reading constants; on seed 1524002983 all sixteen hold 2–4 accepted sites and
+the Reef stamps `placed=30/30 missing=0`.
 
 **Boss.** Cryo Queen, incursion tier 8, 18 000 base → **74 412 HP**.
 

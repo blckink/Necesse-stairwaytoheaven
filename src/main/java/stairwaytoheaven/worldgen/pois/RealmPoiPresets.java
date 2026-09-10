@@ -79,7 +79,13 @@ public final class RealmPoiPresets {
     public static final int SKY_AETHER_MANUFACTORY = 20;
     /** POI 2.6 of the dossier: the arena, which is a rim, a ring and an altar. */
     public static final int SKY_SOVEREIGNS_ANVIL = 21;
-    public static final int COUNT = 22;
+    /** POI 2.8 of the dossier: the causeway, the dais, and the gate that is not there. */
+    public static final int SKY_UNOPENED_GATE = 22;
+    /** POI 2.9 of the dossier: the ring the Aurora Shoals sing on. */
+    public static final int SKY_PRISM_CHOIR = 23;
+    /** POI 2.10 of the dossier: 123 tiles of reef in 625 of open Mistsea. */
+    public static final int SKY_SERPENTS_REEF = 24;
+    public static final int COUNT = 25;
 
     private static final int UP = 0, RIGHT = 1, DOWN = 2, LEFT = 3;
     /** Wall-decor rotation: where the WALL is, not where the piece faces (§0.2). */
@@ -114,6 +120,9 @@ public final class RealmPoiPresets {
             case SKY_NIGHTFELL_REDOUBT: return REDOUBT_PLAN[0].length();
             case SKY_AETHER_MANUFACTORY: return MANUFACTORY_PLAN[0].length();
             case SKY_SOVEREIGNS_ANVIL: return ANVIL_PLAN[0].length();
+            case SKY_UNOPENED_GATE: return GATE_PLAN[0].length();
+            case SKY_PRISM_CHOIR: return CHOIR_PLAN[0].length();
+            case SKY_SERPENTS_REEF: return REEF_PLAN[0].length();
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -142,6 +151,9 @@ public final class RealmPoiPresets {
             case SKY_NIGHTFELL_REDOUBT: return REDOUBT_PLAN.length;
             case SKY_AETHER_MANUFACTORY: return MANUFACTORY_PLAN.length;
             case SKY_SOVEREIGNS_ANVIL: return ANVIL_PLAN.length;
+            case SKY_UNOPENED_GATE: return GATE_PLAN.length;
+            case SKY_PRISM_CHOIR: return CHOIR_PLAN.length;
+            case SKY_SERPENTS_REEF: return REEF_PLAN.length;
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -179,6 +191,9 @@ public final class RealmPoiPresets {
             case SKY_NIGHTFELL_REDOUBT: return "nightfellredoubt";
             case SKY_AETHER_MANUFACTORY: return "aethermanufactory";
             case SKY_SOVEREIGNS_ANVIL: return "sovereignsanvil";
+            case SKY_UNOPENED_GATE: return "unopenedgate";
+            case SKY_PRISM_CHOIR: return "prismchoir";
+            case SKY_SERPENTS_REEF: return "serpentsreef";
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -201,6 +216,7 @@ public final class RealmPoiPresets {
             case SKY_SHEPHERDS_FOLD: case SKY_FALLING_INSTITUTE:
             case SKY_PASSAGE_WAYHOUSE: case SKY_NIGHTFELL_REDOUBT:
             case SKY_AETHER_MANUFACTORY: case SKY_SOVEREIGNS_ANVIL:
+            case SKY_UNOPENED_GATE: case SKY_PRISM_CHOIR: case SKY_SERPENTS_REEF:
                 return 0;
             case EDEN_CROWN_GARDEN: case EDEN_FERMENT_HOUSE: return 1;
             case STEINFELD_MEMORIAL: return 2;
@@ -240,6 +256,9 @@ public final class RealmPoiPresets {
             case SKY_NIGHTFELL_REDOUBT: return nightfellRedoubt(random);
             case SKY_AETHER_MANUFACTORY: return aetherManufactory(random);
             case SKY_SOVEREIGNS_ANVIL: return sovereignsAnvil();
+            case SKY_UNOPENED_GATE: return unopenedGate(random);
+            case SKY_PRISM_CHOIR: return prismChoir();
+            case SKY_SERPENTS_REEF: return serpentsReef(random);
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -1050,6 +1069,35 @@ public final class RealmPoiPresets {
             }
             this.formation[c] = pieces;
             this.coverage[c] = coverage;
+            return this;
+        }
+
+        /**
+         * The ground under a character that does not already write the right
+         * one. LAYERS onto an already declared character, like {@link #decor},
+         * so no existing plan's ground moves.
+         *
+         * <p>Two cases, both in §2.8 and §2.10 and neither expressible before.
+         * <ul>
+         *   <li>A {@link #scatter} formation declares its PIECES and not its
+         *       ground, and §2.6's rim wants exactly that — the Anvil stands on
+         *       land and its rim is meant to keep the terrain painter's own
+         *       crag. §2.10's spine is the opposite: the Reef is placed in OPEN
+         *       Mistsea, so a cell left unwritten leaves its rock standing in
+         *       the water beside the reef instead of on it.
+         *   <li>A piece standing on paving of its own kind. §2.8 puts two
+         *       cabinets, a pedestal and two Seraphs INSIDE its chequer dais,
+         *       and {@link #prop} writes the plan's own ground under a piece —
+         *       which would punch five skyway-paved holes in the one 5% accent
+         *       surface the place has.
+         * </ul>
+         */
+        Legend paves(char c, String tileID) {
+            if (c >= LEGEND_SIZE || !this.known[c]) {
+                throw new IllegalStateException("Paving '" + c
+                        + "' must first be declared as the character it goes under");
+            }
+            this.tile[c] = tile(tileID);
             return this;
         }
     }
@@ -1940,6 +1988,265 @@ public final class RealmPoiPresets {
                 .prop('g', "chargecrystal")
                 .loose('L', "wardencandelabra");
         plan(p, ANVIL_PLAN, legend);
+        return p;
+    }
+
+    /**
+     * POI 2.8, the Unopened Gate, from the plan in §2.8 verbatim.
+     *
+     * <p>The dossier's own favourite image and the cheapest place in it: a
+     * closed balustrade ring on {@code discRing(r=10)}, a chequer dais, two
+     * colossal Seraphs facing each other across five tiles — and the gate
+     * between them <b>is not there.</b> Nobody ever hung it. 272 of the 621
+     * tiles are left to the terrain painter and 230 more are paving with
+     * nothing on them, which is the point rather than an omission.
+     *
+     * <p>12 {@code wardencandelabra} in 621 = 1 per 52, deliberately the same
+     * count and rhythm as the warden tower's twelve (§0.5).
+     *
+     * <p>The dais is the rectangle x10..16 x y9..13, and the five pieces
+     * standing IN it — two Seraphs, two cabinets, the pedestal — are paved with
+     * its chequer by {@link Legend#paves} rather than with the plan's own
+     * skyway tile, which would leave five holes in the one accent surface the
+     * place has. §2.8's "32 tiles" counts only the cells its map draws
+     * {@code '+'} on; the rectangle is 35.
+     *
+     * <p>NOT built, with the reason: the two Skywatch Revenants that hold the
+     * posts are §4 new art and unregistered, so the gate stands unguarded (see
+     * {@link RealmPoiWorldPreset#placeInhabitants}); and the grove of
+     * {@code skyseraphtree} and {@code skyseraphsapling} outside the ring is in
+     * §2.8's object table but in no cell of its map, so it is not written —
+     * the same rule §2.2's banners and carpet fell under.
+     *
+     * <p>ONCE PER WORLD in the dossier. The placer has no frequency model yet;
+     * this kind is placed like every other, as §2.3, §2.5, §2.6 and §2.12
+     * already are.
+     */
+    private static final String[] GATE_PLAN = {
+            "...........................",
+            "..........|||G|||..........",
+            "........|||,,L,,|||........",
+            ".......|L,,,,,,,,,L|.......",
+            "......||,,,,,,,,,,,||......",
+            ".....||,,,,,,,,,,,,,||.....",
+            "....|L,,,,,,,,,,,,,,,L|....",
+            "....|,,,,,,,,,,,,,,,,,|....",
+            "...||,,,,,,,,,,,,,,,,,||...",
+            "...|,,,,,,+k+++k+,,,,,,|...",
+            "...|,,,,,,+++++++,,,,,,|...",
+            "...GL,,,,,A+++++A,,,,,LG...",
+            "...|,,,,,,+++++++,,,,,,|...",
+            "...|,,,,,,+++P+++,,,,,,|...",
+            "...||,,,,,,,,,,,,,,,,,||...",
+            "....|,,,,,,,,,,,,,,,,,|....",
+            "....|L,,,,,,,,,,,,,,,L|....",
+            ".....||,,,,,,,,,,,,,||.....",
+            "......||,,,,,,,,,,,||......",
+            ".......|L,,,,,,,,,L|.......",
+            "........|||,,L,,|||........",
+            "..........|||G|||..........",
+            "...........................",
+    };
+
+    private static Preset unopenedGate(GameRandom random) {
+        Preset p = new Preset(width(SKY_UNOPENED_GATE), height(SKY_UNOPENED_GATE));
+        Legend legend = new Legend(SkyCloudmarbleSet.skywayTileID)
+                .floor(',')
+                // Accent scale, 5% of the plot: the dais the gate would stand on.
+                .floor('+', "marblecheckertile")
+                .fence('|', "cloudmarblefence")
+                .fence('G', "cloudmarblefencegate")
+                .prop('A', "seraphstatue").paves('A', "marblecheckertile")
+                .prop('P', "skywatchdisplay").paves('P', "marblecheckertile")
+                .prop('k', "skywatchcabinet").paves('k', "marblecheckertile")
+                .loose('L', "wardencandelabra");
+        plan(p, GATE_PLAN, legend);
+        // §2.8's guaranteed cache, in both cabinets flanking the dais.
+        for (int[] at : new int[][]{{11, 9}, {15, 9}}) {
+            p.addInventory(new LootTable(
+                    LootItem.between("seraphwood", 8, 16),
+                    LootItem.between("aetheriumbar", 3, 6),
+                    LootItem.between("goldbar", 4, 10),
+                    ChanceLootItem.between(0.70F, "coin", 500, 1500)
+            ), random, at[0], at[1], new Object[0]);
+        }
+        return p;
+    }
+
+    /**
+     * POI 2.9, the Prism Choir, from the plan in §2.9 verbatim.
+     *
+     * <p>A ring on {@code discRing(r=8)} with four gates on the axes, 152 tiles
+     * of prism floor inside it, and a pedestal off centre.
+     *
+     * <p>What it does NOT have is its own centrepiece, and that is the honest
+     * state of it. {@code prismchime} and {@code cloudspringfont} are both §4
+     * new art and neither is registered, so the seven singing columns and the
+     * font are {@link Legend#pending} — with them go the lap-the-ring puzzle,
+     * Sovereign Shard III and the Prismshard cache of §2.9, and none of it is
+     * faked. §2.9 offers a fallback ("the chimes can be built from
+     * {@code aurorabloom} + {@code starfall} + a {@code skywatchdisplay}
+     * pedestal each"), and it is not taken: that is three objects on one tile,
+     * which is not a thing a plan cell can hold, and a plan whose characters
+     * stop meaning one piece each stops being reviewable. The place, its ring,
+     * its gates, its floor and its pedestal stand today; the choir is a §4 work
+     * order.
+     *
+     * <p>That also leaves it UNLIT: §2.9's four {@code wardencandelabra} stand
+     * "outside each gate" at (10,1) (10,19) (1,10) (19,10), which its map draws
+     * as empty margin — the rule §2.2's banners fell under — and the other
+     * eight of its twelve lights are the chimes and the font.
+     *
+     * <p>The two Aurora Flakes are placed by {@link RealmPoiWorldPreset}. The
+     * Dawnpiercers §2.9 has diving in from outside the ring are the Shoals' own
+     * spawn rather than residents, and are not placed here.
+     */
+    private static final String[] CHOIR_PLAN = {
+            ".....................",
+            ".....................",
+            "........||G||........",
+            "......|||,,,|||......",
+            "....|||,,,,,,,|||....",
+            "....|,,,,,C,,,,,|....",
+            "...||,,,,,,,,,,,||...",
+            "...|,,C,,,P,,,C,,|...",
+            "..||,,,,,,,,,,,,,||..",
+            "..|,,,,,,,,,,,,,,,|..",
+            "..G,,,,,,,w,,,,,,,G..",
+            "..|,,C,,,,,,,,,C,,|..",
+            "..||,,,,,,,,,,,,,||..",
+            "...|,,,,,,,,,,,,,|...",
+            "...||,,,,,,,,,,,||...",
+            "....|,,,C,,,C,,,|....",
+            "....|||,,,,,,,|||....",
+            "......|||,,,|||......",
+            "........||G||........",
+            ".....................",
+            ".....................",
+    };
+
+    private static Preset prismChoir() {
+        Preset p = new Preset(width(SKY_PRISM_CHOIR), height(SKY_PRISM_CHOIR));
+        Legend legend = new Legend(SkyRegistry.prismFloorID)
+                .floor(',')
+                .fence('|', "cloudmarblefence")
+                .fence('G', "cloudmarblefencegate")
+                .prop('P', "skywatchdisplay")
+                // Both unbuilt art. Their tiles stay prism floor, so the ring
+                // still reads as one continuous surface with a gap in it.
+                .pending('C', true)
+                .pending('w', true);
+        plan(p, CHOIR_PLAN, legend);
+        return p;
+    }
+
+    /**
+     * POI 2.10, the Serpent's Reef, from the plan in §2.10 verbatim.
+     *
+     * <p>The one place in the catalogue that is mostly WATER: a wobbled crescent
+     * of 123 land tiles in 625, the rest open Mistsea the preset paints itself.
+     * That is the {@code iceberg} lesson §2.10 is written around — one inhabited
+     * cluster of about a dozen objects, a few outlying rocks, and one narrative
+     * prop carrying the whole story — and it is why this kind needs a ground
+     * test of its own ({@link RealmPoiWorldPreset#validSite}): the ordinary
+     * nine-sample land test would reject the reef everywhere it belongs.
+     *
+     * <p>Three things the interpreter had to be asked, not assumed.
+     * <ul>
+     *   <li>The spine {@code '#'} is {@code skystonerock} on the reef's own
+     *       stone, and not the rock-and-scree mix §2.10 draws: a
+     *       {@code GrassObject} cannot stand on a non-organic tile, which is
+     *       measured rather than assumed and written up at the legend line.
+     *       Solid, as a ridge should be, and the reef stays walkable around it.
+     *   <li>§2.10's lighting line puts three {@code starfall} ON the spine, at
+     *       (7,8), (5,12) and (16,18) — tiles its map draws as spine. Named by
+     *       coordinate with {@link Legend#reads}, whose meaning character is
+     *       here one the plan never draws; that is allowed and is what lets an
+     *       object table row be transcribed without rewriting the map.
+     *   <li>The reef is walkable where it has to be. The pedestal at (11,19)
+     *       and the hold at (8,19) are reached from (10,19)/(12,19) and
+     *       (7,19)/(8,20), none of which the spine crosses.
+     * </ul>
+     *
+     * <p>NOT built, with the reason: the {@code reefmaw} in the wreck is §4 new
+     * art (an icon) and unregistered; and the waterline clusters of
+     * {@code skyreeds}, {@code skylichen} and {@code skyscree} §2.10's object
+     * table asks for "scattered on the reef" are in no cell of its map. The
+     * Mistserpent, which is registered and which §2.10 exists to make findable,
+     * is placed by {@link RealmPoiWorldPreset}.
+     */
+    private static final String[] REEF_PLAN = {
+            "~~~~~~~~~~~~~~~~~~~~~~~~~",
+            "~~~~~~~~~~~~~~~~~~~~~~~~~",
+            "~~~~~~~~~~~~~~~~~~~~~~~~~",
+            "~~~~~~~~~~~~~~~~~~~~~~~~~",
+            "~~~~~~~~~~~~~~~~~~~~~~~~~",
+            "~~~~~~~~~~~~~~~~~~~~~~~~~",
+            "~~~~~~~~~###=~~~~~~~~~~~~",
+            "~~~~~~~=#=====~~~~~~~~~~~",
+            "~~~~~~=#======~~~~~~~~~~~",
+            "~~~~~~#=====~~~~~~~~~~~~~",
+            "~~~~~L#===~~~~~~~~~~~~~~~",
+            "~~~~=====~~~~~~~~~~~~~~~~",
+            "~~~~=#===~~~~~~~~~~~~~~~~",
+            "~~~~a#==~~~~~~~~~====~~~~",
+            "~~~~=#==~~~~~~~~~=p==~~~~",
+            "~~~~====~~~~~~~~=====~~~~",
+            "~~~~~=#=~~~~~~~~==p=L~~~~",
+            "~~~~~~a#=~~~~~~~====~~~~~",
+            "~~~~~~==f=W=b=W=#==~~~~~~",
+            "~~~~~~==k#=P=r=#===~~~~~~",
+            "~~~~~~~====#=#===~~~~~~~~",
+            "~~~~~~~~~~======~~~~~~~~~",
+            "~~~~~~~~~~~~=~~~~~~~~~~~~",
+            "~~~~~~~~~~~~~~~~~~~~~~~~~",
+            "~~~~~~~~~~~~~~~~~~~~~~~~~",
+    };
+
+    private static Preset serpentsReef(GameRandom random) {
+        Preset p = new Preset(width(SKY_SERPENTS_REEF), height(SKY_SERPENTS_REEF));
+        Legend legend = new Legend(tile("skystonetile"))
+                .floor('=')
+                // The open cloud sea the reef sits in, painted by the preset
+                // itself -- the same thing tollBridge does with its stream.
+                .floor('~', "mistseatile")
+                // §2.10 draws the spine as "skystonerock + skyscree". It ships
+                // as rock alone, and the scree is not a cut but an engine fact
+                // measured on 2026-09-10: skyscree is a GrassObject, its
+                // grassValidTileIDs is empty, and vanilla's
+                // GrassObject.runGrassCanPlace then refuses any tile that is
+                // not organic -- which the reef's own skystonetile is not. Ten
+                // of them were written and swept again before the census could
+                // read them back. §2.6's rim gets away with the same mix only
+                // because it does NOT pave its cells and its scree lands on the
+                // island turf the terrain painter grew.
+                .prop('#', "skystonerock")
+                // One hull read end-on, bow east, drawn as two tiles.
+                .prop('W', "aeronautwreck", RIGHT)
+                .prop('b', "skyballoon")
+                // Two cells of rubble, two characters, because §2.10 draws two.
+                .prop('f', "skywatchrubble")
+                .prop('r', "skywatchrubble")
+                .prop('k', "skywatchcabinet", UP)
+                .prop('P', "skywatchdisplay")
+                .prop('a', "aetheriumrock")
+                .prop('p', "prismshardrock")
+                .prop('L', "wardencandelabra")
+                // Drawn nowhere: §2.10 states these three by coordinate, on
+                // cells its map draws as spine.
+                .prop('*', "starfall")
+                .reads(7, 8, '*')
+                .reads(5, 12, '*')
+                .reads(16, 18, '*');
+        plan(p, REEF_PLAN, legend);
+        // The hold, which is the reef's reason to be a mining stop as well as
+        // a landmark.
+        p.addInventory(new LootTable(
+                LootItem.between("aetheriumore", 4, 10),
+                LootItem.between("prismshard", 2, 6),
+                LootItem.between("windsilk", 2, 5),
+                ChanceLootItem.between(0.60F, "coin", 200, 800)
+        ), random, 8, 19, new Object[0]);
         return p;
     }
 }

@@ -19,7 +19,7 @@ import stairwaytoheaven.worldgen.SkyNoise;
 import stairwaytoheaven.worldgen.SkyOrigin;
 import stairwaytoheaven.worldgen.SkyTerrainPainter;
 
-/** Places the twenty-two inhabited POIs into their realm bands on {@code skyreach2}. */
+/** Places the twenty-five inhabited POIs into their realm bands on {@code skyreach2}. */
 public class RealmPoiWorldPreset extends WorldPreset {
     public static final String STRING_ID = "swh_realmpois";
     private static final String OCCUPIED_BOARD = "villages";
@@ -52,7 +52,10 @@ public class RealmPoiWorldPreset extends WorldPreset {
                     RealmPoiPresets.SKY_PASSAGE_WAYHOUSE,
                     RealmPoiPresets.SKY_NIGHTFELL_REDOUBT,
                     RealmPoiPresets.SKY_AETHER_MANUFACTORY,
-                    RealmPoiPresets.SKY_SOVEREIGNS_ANVIL},
+                    RealmPoiPresets.SKY_SOVEREIGNS_ANVIL,
+                    RealmPoiPresets.SKY_UNOPENED_GATE,
+                    RealmPoiPresets.SKY_PRISM_CHOIR,
+                    RealmPoiPresets.SKY_SERPENTS_REEF},
             {RealmPoiPresets.EDEN_CROWN_GARDEN, RealmPoiPresets.EDEN_FERMENT_HOUSE},
             {RealmPoiPresets.STEINFELD_MEMORIAL},
             {RealmPoiPresets.GHOST_ARCHIVE},
@@ -349,7 +352,7 @@ public class RealmPoiWorldPreset extends WorldPreset {
                                 placeInhabitants(kind, level, x, y);
                             }
                         })
-                        // Which of the twenty-two this rectangle is. Without it the
+                        // Which of the twenty-five this rectangle is. Without it the
                         // queue only says "swh_realmpois", and a census can count
                         // records but not tell a Sky Inn from a Hell Carnival.
                         .setDebugName(RealmPoiPresets.key(kind));
@@ -438,6 +441,29 @@ public class RealmPoiWorldPreset extends WorldPreset {
                 spawn(level, "stormwisp", x + at[0], y + at[1]);
             }
         }
+        if (kind == RealmPoiPresets.SKY_PRISM_CHOIR) {
+            // Plan §2.9: "2 Aurora Flakes at (8,10) and (12,10)". The
+            // Dawnpiercers the section has diving in from outside the ring are
+            // the Shoals' own spawn rather than residents of the place, so
+            // they are not planted here.
+            for (int[] at : new int[][]{{8, 10}, {12, 10}}) {
+                spawn(level, "auroraflake", x + at[0], y + at[1]);
+            }
+        }
+        if (kind == RealmPoiPresets.SKY_SERPENTS_REEF) {
+            // Plan §2.10, and the whole reason the place exists: the
+            // Mistserpent spawns IN_MISTSEA, in open water where nobody swims,
+            // so most players will never meet the mod's only worm chain. Here
+            // it is guaranteed. On a '~' cell east of the crescent, which is
+            // the water it circles; MobRegistry.getMob runs WormMobHead.init,
+            // which is what builds the body and tail behind the head.
+            spawn(level, "mistserpent", x + 12, y + 12);
+            // The Reefmaw in the wreck is §4 new art and unregistered.
+        }
+        // SKY_UNOPENED_GATE has no branch on purpose. Plan §2.8 posts two
+        // Skywatch Revenants ON the dais, "exactly where a pair of gate wardens
+        // would stand"; they share the Redoubt's missing sheet, so the gate
+        // stands unguarded rather than garrisoned with somebody else's mob.
     }
 
     private static void spawn(Level level, String mobID, int tileX, int tileY) {
@@ -448,6 +474,23 @@ public class RealmPoiWorldPreset extends WorldPreset {
     }
 
     private static boolean validSite(int kind, int realm, int seed, int x, int y, int width, int height) {
+        if (kind == RealmPoiPresets.SKY_SERPENTS_REEF) {
+            // The one kind that wants OPEN CLOUD. §2.10 puts the reef "in the
+            // Mistsea, between islands", and its preset paints its own 123
+            // land tiles into 625 of water, so what the world has to supply is
+            // sea and not shore -- the ordinary nine-sample land test below
+            // would reject it everywhere it belongs. Inverted rather than
+            // relaxed: a reef stamped half onto an island would carve the
+            // island's own ground into water.
+            for (int sx = 0; sx <= 2; sx++) {
+                for (int sy = 0; sy <= 2; sy++) {
+                    if (skyLand(seed, x + sx * (width - 1) / 2, y + sy * (height - 1) / 2)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
         if (kind == RealmPoiPresets.SKY_TOLL_BRIDGE) {
             // Both road ends must reach real ground, or the bridge leads
             // nowhere; and the cloud stream it spans must run off at least one

@@ -300,7 +300,7 @@ sein"* — genau da liegen sie.
 
 | Gebiet | Kacheln vom Ursprung | Biome | Feinde | Critter | Tiere | NPCs | Quests | POIs | bewachte Orte / 1000×1000 |
 |---|---|---|---|---|---|---|---|---|---|
-| **Skyreach** | 0 – 1 800 | 4 | 8 | 4 | 2 | 7 | 5 | 13 ⭐ | 28,7 |
+| **Skyreach** | 0 – 1 800 | 4 | 8 | 4 | 2 | 7 | 5 | 16 ⭐ | 28,7 |
 | **Eden** | 600 – 2 880 | 3 | 5 | 0 | 0 | 1 | 3 | 2 | 11,4 ⭐ *(vorher 0)* |
 | **Steinfeld** | 1 920 – 4 200 | 3 | 4 | 0 | 0 | 1 ⭐ | 2 ⭐ | 1 | 20,3 |
 | **Ghost Realm** | 2 880 – 5 280 | 5 | 9 | 0 | 0 | 4 | 4 ⭐ | 1 | 21,8 |
@@ -343,6 +343,31 @@ Dossier sagt ausdrücklich, ihn nicht mit einer Beschwörung auszuliefern, die e
 nicht einlösen kann. Ohne ihn ist es ein Ort zum Finden, noch kein Kampf. Auch
 die Skywatch-Revenants und die Fulgur-Shades, die alle drei Orte bevölkern
 sollen, warten auf ihr Sprite-Sheet.
+
+**Und noch drei am selben Tag — damit stehen zwölf der vierzehn Orte des
+Dossiers.** Das **Ungeöffnete Tor** ist das beste Bild des Dossiers und das
+billigste: ein Damm führt auf ein Schachbrett-Podest hinaus, zwei riesige
+Seraphen stehen einander gegenüber — und das Tor dazwischen **ist nicht da**.
+Niemand hat es je aufgehängt. Zwölf Kandelaber auf einem geschlossenen Ring,
+zwei Schränke am Podest mit Seraphenholz, Aetherium- und Goldbarren. 272 seiner
+621 Kacheln bleiben leer, und genau das ist der Ort.
+
+Der **Prismenchor** ist ein Ring in den Aurora-Untiefen mit einem Podest darin —
+und ehrlicherweise noch nicht mehr. Seine sieben singenden Kristallsäulen und
+der Wolkenquell-Brunnen in der Mitte sind seine ganze Mitte und sein ganzes
+Licht, und für beide gibt es noch keine Grafik. Damit wartet auch das Rätsel
+(alle sieben Säulen anschlagen, bevor die erste verklingt) und Souveränsplitter
+III auf die Kunst. Zwei Aurora-Flocken halten die Mitte.
+
+Das **Serpentinenriff** ist der einzige Ort im ganzen Katalog, der **im offenen
+Nebelmeer** liegt: 123 Kachelchen Riff in 625 Kacheln Wasser, ein Rücken aus
+Skystone quer hindurch, zwei Aeronauten-Wracks mit einem halb zusammengefallenen
+Ballon darüber, ein Laderaum mit Aetheriumerz, Prismensplittern und Windseide,
+zwei Aetherium- und zwei Prismensplitter-Adern zum Abbauen — und eine
+**Nebelschlange**, die garantiert dort ihre Runden zieht. Die Wurmkette gibt es
+seit v0.5.1, aber sie erscheint nur über offener See, wo niemand schwimmt; hier
+triffst du sie zuverlässig, und das Riff ist der einzige feste Boden weit und
+breit. Der Reefmaw im Wrack wartet noch auf sein Symbol.
 
 **Zur Dichte, weil die Zahl leicht falsch gelesen wird:** ein Spawn-Gewicht
 entscheidet, **was** dir entgegenkommt, nie **ob**. Das macht die Kachel selbst

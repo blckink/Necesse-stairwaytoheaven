@@ -16,7 +16,7 @@ import stairwaytoheaven.worldgen.RealmDepth;
 import stairwaytoheaven.worldgen.SkyOrigin;
 
 /**
- * How many of the twenty-two inhabited places a world really stands up, and how
+ * How many of the twenty-five inhabited places a world really stands up, and how
  * far the nearest one is from the tile the stairway drops the player on.
  *
  * <h2>Why this exists</h2>
@@ -233,6 +233,18 @@ public final class RealmPoiCensus {
 
         // ---- 3. does anything get written? --------------------------------
         stampNearest(level, nearestOfAll, logs);
+        // ...and the Reef as well, whichever one is nearest, because it is the
+        // only kind in the catalogue that is placed on OPEN WATER and paints
+        // its own land into it (§2.10). Every other kind stands on ground the
+        // terrain painter already made, so the stamp above answers the same
+        // question for all of them; a rock written onto a tile whose neighbour
+        // the same preset has just turned into mistsea is a question only this
+        // kind asks. Skipped silently when the Reef happens to BE the nearest.
+        if (nearestQueuedByKind[RealmPoiPresets.SKY_SERPENTS_REEF] != null
+                && nearestOfAll != null
+                && nearestOfAll.kind != RealmPoiPresets.SKY_SERPENTS_REEF) {
+            stampNearest(level, nearestQueuedByKind[RealmPoiPresets.SKY_SERPENTS_REEF], logs);
+        }
 
         logs.add("realmpoi census: seed=" + seed
                 + " arrival=" + arrival.x + "," + arrival.y
@@ -254,7 +266,7 @@ public final class RealmPoiCensus {
      * How many objects one kind's preset actually carries, on every layer.
      *
      * <p>The third question ({@link #stampNearest}) is only ever asked of the
-     * single nearest place, so twenty-one of the twenty-two kinds could resolve to an
+     * single nearest place, so twenty-four of the twenty-five kinds could resolve to an
      * empty rectangle and every count above would still be green. This is the
      * same assertion made where it costs nothing: a preset is a pure function of
      * its kind, so it can be built and counted without generating a tile.
@@ -292,8 +304,8 @@ public final class RealmPoiCensus {
      * and the Sky Tower shipped two of them from 2026-09-04 (both mid-run of a
      * row that the nave's own rectangle turns into interior floor).
      *
-     * <p>Asked of the PRESET, with the engine's own predicate, so all twenty-two
-     * kinds are covered for the price of building twenty-two presets — the stamp
+     * <p>Asked of the PRESET, with the engine's own predicate, so all twenty-five
+     * kinds are covered for the price of building twenty-five presets — the stamp
      * below can only ever look at whichever one happens to be nearest.
      * {@code RealmPoiPresets.plan} makes the same test on the plan characters,
      * before the objects exist; this is the same rule asked of the outcome, and

@@ -246,7 +246,29 @@ final class SkyObjects {
                 "nimbussapling", "fulgursapling", "prismasapling", "skyseraphsapling",
                 "cloudbell", "skytulip", "thunderbloom", "glowfern", "auroralily", "staticmoss",
                 "tallcloudgrass", "stormsedge", "prismgrass",
-                "fulguriterock", "prismshardrock");
+                "fulguriterock", "prismshardrock",
+                // The three the list had always been missing, found on
+                // 2026-09-10 by the Serpent's Reef (POI 2.10), which is 123
+                // land tiles in 625 of open Mistsea and so is shore almost
+                // everywhere: 14 of its 30 objects were swept away between
+                // the preset writing them and the census reading them back.
+                //
+                // VERIFIED [jar]: GameObject.isValid returns false for an
+                // object with canPlaceOnShore == false on a Level.isShore
+                // tile, and Level.adjacentGetters includes the DIAGONALS, so
+                // one corner touching the sea is enough.
+                //
+                // These belong here on their own merits and not only for the
+                // reef. skystonerock is the rock the terrain painter scatters
+                // across the islands and the base every ore variant is built
+                // on; aetheriumrock is registered in the same idiom, in this
+                // file, beside the two ore rocks that were already listed --
+                // it was an omission that it was not. Sky islands are small
+                // and most of their tiles border the Mistsea (see the same
+                // note above the first allowShore call), so without this the
+                // Skyreach's own stone cannot lie at the Skyreach's own
+                // water's edge.
+                "skystonerock", "skyscree", "aetheriumrock");
     }
 
     /** GrassObject variant that drops a material when cleared. */
