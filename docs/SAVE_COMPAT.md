@@ -241,8 +241,22 @@ places are simply further out.
 the lattice and onto `SkyLevel.ensureWardenSpire` (`SkyLandmarkPois`). That path
 force-loads its own site, exactly the way the spire does, so **an existing save
 does get all three** the next time anybody ascends or runs `/skyreachstatus` —
-they are not "further out", they are stamped on demand. Two consequences worth
-knowing before you open an old world:
+they are not "further out", they are stamped on demand.
+
+**Which means the rule above does not hold for them, and this is the one place
+in this document where something you built could be at risk.** The site is a
+pure function of the seed and `SkyLandmarkPois.ensureAll` does not look at what
+is standing there first; the toll-house in particular is `blank()`-built, so it
+CLEARS its whole 23x19 footprint before writing, 180-700 tiles from the spire —
+which is ground a long-running save has walked. The odds of it landing on
+anything are small (the site test wants nine samples of land, and the odds of a
+given rectangle holding a player's build are low), but they are not zero and
+nothing checks. **Back the save up before the first ascent on a build newer
+than 2026-09-10.** The named follow-up is a "walls already stand in this
+footprint" pre-check in `ensureAll` that skips the stamp and the settler for
+that one landmark.
+
+Two more consequences worth knowing:
 
 - **A save that already stood up a toll-house from the lattice keeps it.** It is
   built ground and nothing removes it, so such a world can hold that one plus
