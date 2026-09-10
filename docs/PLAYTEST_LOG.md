@@ -822,8 +822,12 @@ CORNERS of a 57x41 rectangle be dry, which in a realm this wet is a rare
 rectangle; the band offers the town two or three lattice cells and it lost all
 of them to smaller kinds. With `dryRing` guarding the objects, the site test
 only has to decide what it alone can decide, so it now asks the centre cross —
-centre and the middle of each edge, where the four house blocks and the plaza
-are — and lets the rim touch a cloud-sea edge.
+the plaza and the four road ends — and lets the rim touch a cloud-sea edge.
+**That is a weaker promise than the old comment made:** the four house blocks
+sit in the four quadrants and no sample lands on one, so a block can now stand
+over water on its own floor with a cloudturf rim. Sampling the four block
+centres instead of the four road ends would cost the same five calls; it is
+listed as open below rather than changed at the end of a delivery run.
 
 **3. `r5200` asked Hell about Crooked Beyond.** `realmForDepth` is
 seed-noised, so no fixed radius stays inside Crooked's band: the failing run's
@@ -837,12 +841,12 @@ field really answers Crooked and reports the radius it chose as `rpeak=<r>:`.
 |---|---|---|---|---|
 | 1 | Save laden | The player's own Friemliburg, on a copy, takes the mod and comes back up with its Skyreach — and a fresh world does too. | `scripts/save_compat_check.sh Friemliburg.zip`: `Before: skyreach2 entries=1 surfaceRegions=31 players=3 settlements=2`, then the phases below | VERIFIED [run] |
 | 2 | Treppe bauen | The spire and its beacon stand, with the Marble Checker floor intact. | `spire check: beaconObject=wardenbeaconoff wardenFloor=marblecheckertile` | VERIFIED [run] |
-| 3 | Aufsteigen | The Skyreach is its own level and paints without a wrong tile. | `Veil ground OK: class=SkyLevel identifier=skyreach2 dimension=1`; `painter oracle: tileMismatches=0` | VERIFIED [run] |
+| 3 | Aufsteigen | The Skyreach is its own level and paints without a wrong tile. | `painter oracle: tileMismatches=0`; the level's identity line `Veil ground OK: class=SkyLevel identifier=skyreach2 dimension=1 isCave=false` is off seed 1486237612 — this pass changed nothing on that path and the PASS summary does not print it | VERIFIED [run] |
 | 4 | Sky Warden anwerben | One Warden and both cats are in the world; the settler is registered and both recruit routes carry a price and a shop. | `npc check: wardens=1 cats=2`; `recruit check: skywarden settler=WardenSettler price=coinx30000 shop=present` | VERIFIED [run] |
-| 5 | Veil oeffnen | `veilstatus` samples the Veil bands and finds their own ground. | `murkmosstile`, `hauntedgrasstile`, `ectoplasmtile` counts in the Veil sample | VERIFIED [run] |
+| 5 | Veil oeffnen | `veilstatus` samples the Veil bands and finds their own ground, not the Skyreach's. | `murkmosstile x3239`, `hauntedgrasstile x2383`, `ectoplasmtile x625` — off seed 1486237612, same reason as row 3 | VERIFIED [run] |
 | 6 | Skyreach-Orte besuchen | **All twenty-four lattice kinds now stand somewhere, on every one of the six seeds, and the place each run walked to is complete to the tile.** | `realmpoi census: seed=1576333831 ... queued=1440 unnamed=0 kinds=24/24 queuedkinds=24/24 landmarks=3 nearest=skytollbridge@366` and `realmpoi stamp: kind=skytollbridge at=2,255 placed=74/74 missing=0` | VERIFIED [run] |
 | 7 | Einen Boss legen | Not driven. Nothing here kills anything — the server has no player. The six rungs are in the shipped jar at the intended numbers. | `scripts/balance_check.sh`: `mutanthydra 10 320000->528000`, all rows matching the expected table | VERIFIED [jar] — **not played** |
-| 8 | Hell betreten | The far end of the realm field resolves to Hell and all four Hell buildings queue there on their own ground. | `realm check: ... 5200=hell 5800=hell`; `realmpoi funnel hell: candidates=... accepted=...` | VERIFIED [run] |
+| 8 | Hell betreten | The far end of the realm field resolves to Hell and the Hell buildings queue there on their own ground. | `realm check: scale=6000 ... 4000=ghostrealm 5200=hell 5800=hell`; `realmpoi funnel hell: candidates=704 accepted=704 splitbyregion=0 nearspire=0 badground=0`; `realmpoi kind hellborderoffice: realm=hell ... accepted=175 queued=167` | VERIFIED [run] |
 
 ### The same numbers on all six seeds
 
@@ -866,6 +870,9 @@ Before this pass, on seed 1486237612, the same three columns read `23/24`,
 
 - **Step 7 is unchanged and still the honest gap.** A boss fight needs a
   player and a client.
+- **`skytown`'s site test samples the plaza and the road ends, not the house
+  blocks.** See cause 2 above. Five samples either way; the four block centres
+  are the ones worth asking about. **OPEN.**
 - **The eight-neighbour shore rule is only guarded where it was measured.**
   `dryRing` is on the two Skyreach kinds that paint their own water. Every
   other preset relies on its site test keeping water away, and the stamp

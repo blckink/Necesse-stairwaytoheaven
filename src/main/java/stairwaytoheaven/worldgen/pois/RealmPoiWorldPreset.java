@@ -615,11 +615,23 @@ public class RealmPoiWorldPreset extends WorldPreset {
             // against -- an object standing in the cloud sea -- is now guarded
             // where it actually happens, by RealmPoiPresets.dryRing, which
             // pushes the world's water off the ring of every object the preset
-            // writes. What remains is the thing only a site test can decide:
-            // the town's four house blocks and its plaza sit along the centre
-            // cross, and they must be on real ground. Its RIM may reach a
-            // cloud-sea edge, which is what a town on a floating island looks
-            // like anyway.
+            // writes.
+            //
+            // BE PRECISE ABOUT WHAT THIS SAMPLES, because it is less than the
+            // nine points did: the centre is the plaza (RealmPoiPresets.skyTown
+            // puts it at 22,14 13x13) and the four edge midpoints are the ends
+            // of the two carriageways. The four house blocks sit in the four
+            // QUADRANTS and no sample lands on one. So the promise this test
+            // now makes is "the plaza and both roads are on real ground, and
+            // the rim may reach a cloud-sea edge" -- a town on a floating
+            // island looks like that anyway. It does NOT any longer promise
+            // that a house block is not over water: dryRing keeps such a house
+            // standing, on its own floor with a cloudturf rim, which is
+            // survivable but not what the dossier draws. Sampling the four
+            // block centres instead of the four road ends would cost the same
+            // five calls and guard the thing the sentence above claims; it is
+            // written up under Offen in this pass's handover rather than
+            // changed at the end of a delivery run.
             return skyLand(seed, x + width / 2, y + height / 2)
                     && skyLand(seed, x + width / 2, y)
                     && skyLand(seed, x + width / 2, y + height - 1)

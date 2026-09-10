@@ -50,6 +50,11 @@ each with its own ground, cast, residents and boss rung.
   there, failing the gate on a true answer to the wrong question. The probe now
   walks inward from 5280 until the realm field really says Crooked and reports
   the radius it picked as `rpeak=<r>`.
+- **An opened door counted as a missing object.** A door is two registrations
+  joined by `SwitchObject.counterID`, and the settlers these places exist to
+  house walk through their own doors long before a census runs — measured on
+  seed 1520494498, the Grange Cellar read `missing=1 10,8=1674!=1673`, which is
+  Halda having opened her cellar. The census accepts the switched counterpart.
 - **A red stamp line named four tiles and no reason.** The POI census now
   prints up to twenty-four mismatches and the tile ID under each one, so
   "deleted for standing in water" and "deleted for standing beside it" are
