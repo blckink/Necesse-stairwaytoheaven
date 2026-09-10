@@ -619,8 +619,13 @@ public class RealmPoiWorldPreset extends WorldPreset {
             case RealmDepth.REALM_EDEN: return EdenTerrainPainter.isLand(seed, x, y);
             case RealmDepth.REALM_STEINFELD: return SteinfeldTerrainPainter.isLand(seed, x, y);
             case RealmDepth.REALM_GHOST: return GhostTerrainPainter.isLand(seed, x, y);
-            case RealmDepth.REALM_CROOKED:
-            case RealmDepth.REALM_HELL: return CrookedTerrainPainter.isLand(seed, x, y);
+            case RealmDepth.REALM_CROOKED: return CrookedTerrainPainter.isLand(seed, x, y);
+            // Hell answers for itself now that it has a painter. The two
+            // methods are word for word the same -- both are the plane's shared
+            // island field against its shared waterline -- so the four Hell
+            // POIs land exactly where they did before.
+            case RealmDepth.REALM_HELL:
+                return stairwaytoheaven.realms.hell.HellTerrainPainter.isLand(seed, x, y);
             default: return false;
         }
     }

@@ -707,6 +707,14 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
                 // standing where the loot is not" bug SkyTerrainPainter.
                 // nearestSite's header records having shipped once already.
                 int siteRealm = RealmDepth.realmAt(seed, siteX, siteY, originX, originY);
+                // The Crooked/Hell exception is how Hell gets guarded at all:
+                // Hell has no pack lattice of its own, so Crooked's three reach
+                // into its band. That used to place CROOKED's guards there,
+                // because Hell painted as Crooked. It no longer does --
+                // placePackAt reads the guard off the BIOME under the site, and
+                // the biome is now Hell's own, so a site that lands on Hell
+                // ground is stood up by Hell's roster. Giving Hell a second
+                // lattice on top of this would place two packs on one site.
                 if (siteRealm != realm
                         && !(realm == RealmDepth.REALM_CROOKED && siteRealm == RealmDepth.REALM_HELL)) {
                     continue;

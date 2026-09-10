@@ -360,6 +360,13 @@ below are what `SteinfeldRealm` actually registers — see
 
 ### 2.5 Infernal Fringe + Hell (Tier 5)
 
+| borrowed sheet | what it stands in for |
+|---|---|
+| mod `objects/aetherforge`, `items/aetherforge` | Hell's boss portal (Infernal Summoning Forge) and its region key (The Infernal Seal). A lit furnace mouth is the right SHAPE for §21's Infernal Forge; the sheet is the sky's until Hell's own art lands. |
+| vanilla mob bodies `ancientarmoredskeleton`, `ashgolem`, `crazedraven`, `jackal` | Infernal Clerk, Ash Spirit, Ticket Imp and Boiler Hound. The Ash Golem is the only one that is already a hell creature; the other three are archetype stand-ins. |
+| mod tiles `blackpeat`, `ashsand`, `deadsoil`, `miststone`, `violetmud`, `crookedstripe` | Hell's two band grounds. All six are already registered by the Veil, Steinfeld and Crooked Beyond — re-used, not newly borrowed. |
+
+
 | vanilla asset | stands in for |
 |---|---|
 | `tiles/lava`, `lavapath`, `lavapath_light` | lava |

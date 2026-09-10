@@ -3,6 +3,39 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [Unreleased] — Hell becomes a place — 2026-09-10
+
+Hell was the only band on the plane with no cast of its own. It had a depth
+range, a waterline, four POI buildings and residents borrowed from Crooked
+Beyond — and nothing that lived there, no ground of its own, and the one realm
+`SkyBossLadder` answered `null` for.
+
+### Added
+- **`realms/hell/HellTerrainPainter`** — Hell's own band painter, replacing the
+  fall-through to Crooked Beyond that `SkyTerrainPainter.describeRealmTile`
+  itself asked to have deleted. Two bands: §17's **Infernal Fringe**, which is
+  literally Crooked's own violet mud and stripe mixed with black peat and ash
+  sand in a ratio that runs from 4-in-5 Crooked at the inner foot to 1-in-5 at
+  the far edge — the realm's whole transition, as a field rather than a door —
+  and A3.8's **Furnace Reach** beyond it, where the ground goes black.
+- **Four hostiles on the rung past Crooked Beyond** — Infernal Clerk
+  (standard), Ash Spirit (elite), Ticket Imp (ranged), Boiler Hound (fast),
+  §17's own roster. `HellTier` prices them one step past the END of vanilla's
+  incursion arrays (x4.45 health, x2.19 damage, the flat `undefined*ScalingPerTier`
+  step) with Hell's own §10 uplift of 165/136/155 on top: 7342 HP / 387.6
+  damage / 81 armour, drop value x2.75.
+- **The sixth rung of the boss ladder** — the Mutant Hydra, which
+  `docs/FOGKEY_AND_BOSSPORTALS.md` §B4 reserved for Hell from the start, at
+  528 000 HP and x2.92 damage. With it the sixth boss portal
+  (`bossportalhell`), the sixth region key (`regionkeyhell`) and the sixth
+  Warden quest (`HellKeyQuest`), so the ladder now runs the whole way out.
+
+### Changed
+- **`scripts/balance_check.sh` knows six bands, not five.** The four Hell rows
+  carry Crooked Beyond's same-role values in their "old" column, so the
+  script's "strictly above the value it replaced" assertion reads as "strictly
+  above the realm below" for a band that never shipped before.
+
 ## [Unreleased] — the areas, measured and filled in — 2026-09-05
 
 The question was "how full is each area of the mod, and can I test it from an

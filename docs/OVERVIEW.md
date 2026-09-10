@@ -38,7 +38,7 @@ outlands check: floor=4200 inside=0/66231 biome=Beetle Outlands
 | **Steinfeld** | 0.32–0.70 | 1920–4200 | Quiet Meadow, Slab Fields, Grave Heath | `SteinfeldTerrainPainter` | **IN** |
 | **Ghost Realm** | 0.48–0.88 | 2880–5280 | Aftergarden, Bone Orchard, Ectomarsh + **Gloomfen, Ashen Reach** (ex-Veil) | `GhostTerrainPainter` | **IN** |
 | **Crooked Beyond** | 0.70–0.94 | 4200–5640 | Checkerworks, Spiral Fields, Striped Waste + **Beetlefreak Hollow** (ex-Veil) + Beetle Outlands rim | `CrookedTerrainPainter` | **IN** |
-| **Hell** | 0.80–1.00 | 4800–6000+ | — | **falls back to Crooked** | **TODO** |
+| **Hell** | 0.80–1.00 | 4800–6000+ | Infernal Fringe, Furnace Reach | Infernal Clerk, Ash Spirit, Ticket Imp, Boiler Hound; Mutant Hydra at the portal | **works** (no materials, no demon NPCs) |
 
 20 biomes registered. The Veil is no longer a world: its three biomes moved
 into the Ghost and Crooked bands per §41.5.
@@ -429,7 +429,7 @@ unreachable.** The player had both animals in their base at the time.
 What DOES still follow: `nimbusmilk`, `aurorafleece`, `skycurd`, `cloudcustard`,
 `nimbusdraught` and `glimmerstrides` are reachable, since their animals are.
 
-1. **Hell is not built** (§17–23). The 0.80–1.00 band paints as Crooked. One
+1. **Hell is half built** (§17–23). The band has its own painter, two sub-biomes, four hostiles one rung past Crooked Beyond, a region key and a boss portal that wakes the Mutant Hydra at 528 000 HP. What it still lacks is §20's six materials, §19's three friendly demons and Clerk 666-B, §21's machines, §23's crops and §25's Auditor; its loot is Crooked Beyond's currency in Hell's quantities until they land. One
    `case` in `SkyTerrainPainter.java:1071` to delete once a painter exists.
 2. ~~**Eden gets no guard packs.**~~ **FIXED 2026-09-05.** `placeGuardPacks`
    had branches for four realms and none for Eden, so `EdenGardenBiome`,

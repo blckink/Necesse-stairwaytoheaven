@@ -202,6 +202,26 @@ public final class HellTerrainPainter {
     }
 
     /**
+     * Is this tile dry Hell ground? Asked by the POI preset placer, which has
+     * no region in hand.
+     *
+     * <p>Answered against the PLANE's shared island field and waterline — not
+     * against anything of this realm's own — so the placer and
+     * {@link #describeBand} cannot disagree about where the coast is. It is
+     * word for word {@code CrookedTerrainPainter.isLand}, which is what Hell's
+     * four POIs used to be tested with while Hell had no painter; the answer
+     * is unchanged and Hell's POIs land exactly where they always did. It
+     * exists so that no reader has to know that to be sure.
+     */
+    public static boolean isLand(int seed, int tileX, int tileY) {
+        float depth = RealmDepth.depthAt(tileX, tileY,
+                stairwaytoheaven.worldgen.SkyOrigin.originX(seed),
+                stairwaytoheaven.worldgen.SkyOrigin.originY(seed));
+        float island = SkyNoise.fbm(seed, tileX, tileY, SkyTerrainPainter.ISLAND_SCALE, 3);
+        return island > SkyTerrainPainter.waterlineAt(depth);
+    }
+
+    /**
      * One Hell tile: ground, object and sub-biome, as a pure function of the
      * seed and the position.
      *
