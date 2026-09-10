@@ -3766,3 +3766,66 @@ Skyway Passages" and "the Stormveil" in a dossier section are testable, not
 decorative. All three landmarks found a biome-matching site on the first seed
 tried, which is why the search prints its `tier` — a fallback to plain land, or
 to the band's inner edge, would otherwise be invisible.
+
+## 2026-09-10 — A guarded recruit site: vanilla takes a key item, and both sides must be told not to fight
+
+Three Skyreach settlers now live in a once-per-world building with an enemy in
+it. Four things had to be true, and each was a separate vanilla mechanism.
+
+**[run] `getRecruitItems` may return coins PLUS an arbitrary item, and vanilla's
+own recruit page handles it with no help.** The flow at line ~505 above
+(`getShopContainerData` → `canPayForRecruit`/`payForRecruit`) never assumed
+coins; it checks and takes whatever list it is handed, server-side, on the
+button press. Observed on seed 1486743578:
+
+```
+recruit check: magpiesettler price=coinx12000+bondedlockboxx1
+recruit check: haldasettler  price=coinx9000+themotherx1
+recruit check: ossiansettler price=coinx18000+stormlenscorex1
+```
+
+So "the loot is a person" costs no new UI: a boss drop becomes a hiring key by
+appending one `InventoryItem` to that list.
+
+**[jar] A settler and a boss in the same room attack each other by default, in
+both directions.** `HumanAI` runs with `attackHostiles` true, so the resident
+charges the guard; and vanilla's target stream accepts any visible human, so the
+guard spends the fight slamming an immortal courier around instead of the
+player. Both halves are vanilla switches, not custom code:
+
+- the three found-in-the-world residents pass `attackHostiles false` — exactly
+  what `FriendlyJonasHumanMob` and `FriendlyWitchHumanMob` pass;
+- `AshGolemAI` exposes its `TargetValidity` as a public field, and
+  `PlayerChaserWandererAI` declares its target stream public for the purpose, so
+  a players-only filter is a one-line override on each guard.
+
+Measured before the fix, on the 05:37 run: `haldasettler present=0` — the
+resident had been killed in her own cellar.
+
+**[jar] Two vanilla behaviours are lethal to a *place-bound* boss and must be
+switched off.** `CAN_BREAK_OBJECTS` on an Ash Golem means the guard walks out
+through the wall of the 23×19 building it is guarding; and a Stabby Bush
+*kills itself* at maximum frenzy stacks, which on a boss is a boss that dies
+before the player arrives. Holding the stack one below the cap and releasing
+adds instead is the fix.
+
+**[run] A placement flag is not loot.** `realmpoi landmark …` now reads the
+CONTAINER's inventory per expected reward and rolls each guard's loot table ten
+times, rather than trusting the table's presence:
+
+```
+skywaytollhouse … rewards=3/3  guardkey=n/a
+grangecellar    … rewards=2/2  guardkey=themother:10/10
+stormveiltestrange … rewards=1/1  guardkey=stormlenscore:10/10
+```
+
+10/10 is the assertion that matters for a recruit key: a *chance* drop is a
+world in which that settler can never be hired.
+
+**[jar] The bestiary asks the MOB for its icon, so a borrowed body can borrow its
+face.** See `BorrowedMobIcon` — `Mob.getMobIcon()` is plain and overridable, and
+`MobRegistry.loadMobIcons` would otherwise hand back `GameResources.error` for
+every mob that wears a vanilla sheet and ships no `mobs/icons/<id>.png`. The four
+new mobs answer with the 32×32 icon of the archetype whose sheet they wear,
+which is also the honest answer: same body in the world, same face in the
+journal.
