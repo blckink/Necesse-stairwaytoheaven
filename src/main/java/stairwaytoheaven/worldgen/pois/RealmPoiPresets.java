@@ -702,6 +702,11 @@ public final class RealmPoiPresets {
         private final int[] tableDecorNext = new int[LEGEND_SIZE];
         /** WALL_DECOR object, with {@link #rotation} holding where the wall is. */
         private final int[] wallDecor = new int[LEGEND_SIZE];
+        /** TILE_LAYER object -- a carpet, which is the only thing that lives there. */
+        private final int[] rug = new int[LEGEND_SIZE];
+        /** Formation characters: what is scattered, and over what share of the cells. */
+        private final int[][] formation = new int[LEGEND_SIZE][];
+        private final float[] coverage = new float[LEGEND_SIZE];
         /** Counts as connected masonry for the window and wall-decor rules. */
         private final boolean[] masonry = new boolean[LEGEND_SIZE];
         private final boolean[] isWindow = new boolean[LEGEND_SIZE];
@@ -712,6 +717,9 @@ public final class RealmPoiPresets {
         /** Single tiles where the plan's character means a second thing. */
         private final java.util.HashMap<Integer, Character> override =
                 new java.util.HashMap<>();
+        /** Single tiles where a character's piece is turned differently. */
+        private final java.util.HashMap<Integer, Byte> turn =
+                new java.util.HashMap<>();
 
         Legend(int ground) {
             this.ground = ground;
@@ -719,6 +727,7 @@ public final class RealmPoiPresets {
             java.util.Arrays.fill(this.object, -1);
             java.util.Arrays.fill(this.counter, -1);
             java.util.Arrays.fill(this.wallDecor, -1);
+            java.util.Arrays.fill(this.rug, -1);
         }
 
         private Legend mark(char c) {
@@ -942,7 +951,83 @@ public final class RealmPoiPresets {
             this.override.put((x << 16) | y, meaning);
             return this;
         }
+
+        /**
+         * One tile where the piece is turned differently from its character.
+         *
+         * <p>A legend is a per-character table; a rotation is a per-tile fact,
+         * and the dossier states it per tile in every section's object table.
+         * Most plans get away with the two being the same thing. §2.4 and §2.5
+         * do not: both draw ONE lantern character on all four inner faces of
+         * their shell, and §0.2's wall-decor rotation is where the WALL is, so
+         * the same character needs all four values. §2.4 does it again with the
+         * cabinet — the armoury's vault backs onto the north wall, the
+         * bunkroom's chest onto the south.
+         *
+         * <p>This is where those rows of the object table are transcribed. It
+         * overrides whatever the character declared, including the direction a
+         * {@link #chair} was turned and the side a {@link #pair}'s far half
+         * lands on; {@link #plan} checks the tile is really drawn.
+         */
+        Legend turns(int x, int y, int rotation) {
+            this.turn.put((x << 16) | y, (byte) rotation);
+            return this;
+        }
+
+        /**
+         * A carpet, on the one layer the engine keeps carpets on.
+         *
+         * <p>VERIFIED [jar]: {@code ModularCarpetObject}'s constructor adds
+         * {@code ObjectLayerRegistry.TILE_LAYER} and nothing else, which is
+         * also the layer {@code WardenSpirePreset} lays its own carpet on.
+         * Writing one with {@code setObject} would put it on the base layer,
+         * where it takes the tile the furniture standing on the rug needs.
+         */
+        Legend rug(char c, String objectID) {
+            floor(c);
+            this.rug[c] = layered(objectID, ObjectLayerRegistry.TILE_LAYER, "a carpet");
+            return this;
+        }
+
+        /**
+         * A formation rather than a fill: the character carries its pieces on
+         * {@code coverage} of its own cells, and only there.
+         *
+         * <p>Every other character is one tile, one object. §2.6's rim is the
+         * one place in the dossier where that is not what is drawn: 92 cells of
+         * {@code 'x'} described as "skystonerock, skyscree and skywatchrubble
+         * ... scattered as a formation, ~55% coverage". Writing a rock on all
+         * 92 would not be a denser version of that — it would <b>seal the
+         * arena</b>. VERIFIED [jar]: {@code RockObject} passes a full 32x32
+         * collision to {@code GameObject}, which sets {@code isSolid} and
+         * {@code RegionType.WALL}; the rim's only four gaps hold a
+         * {@code StreetlampObject}, itself solid on an 10x10 box. The place
+         * whose whole point is walking into it would be reachable only with a
+         * pickaxe.
+         *
+         * <p>Deterministic, from the tile's own coordinates: the same plan has
+         * to produce the same preset in {@link
+         * RealmPoiWorldPreset#onRegistryClosed}, in the census, and at every
+         * placement in the world.
+         */
+        Legend scatter(char c, float coverage, String... objectIDs) {
+            mark(c);
+            int[] pieces = new int[objectIDs.length];
+            for (int i = 0; i < objectIDs.length; i++) {
+                pieces[i] = object(objectIDs[i]);
+            }
+            this.formation[c] = pieces;
+            this.coverage[c] = coverage;
+            return this;
+        }
     }
+
+    /**
+     * The salt {@link Legend#scatter} hashes its tile coordinates with. Fixed,
+     * because a formation that moved between builds would be a different
+     * building every time the preset is asked for.
+     */
+    private static final long SCATTER_SALT = 0x5C47L;
 
     /**
      * An object that really belongs on the layer a legend wants to put it on.
