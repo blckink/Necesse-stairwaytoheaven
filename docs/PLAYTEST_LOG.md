@@ -734,7 +734,7 @@ that fix.
 
 | # | Step | One sentence | Beleg (server log, 2026-09-10) | State |
 |---|---|---|---|---|
-| 1 | Save laden | The server boots the world with the mod and reaches the console. | `Found mod: Stairway to Heaven (stairwaytoheaven, 0.7.0) from DevModProvider`, then the world loads and `skyreachstatus` answers | VERIFIED [run] |
+| 1 | Save laden | A **fresh** world boots with the mod and reaches the console; the existing-save half (`scripts/save_compat_check.sh` on a Friemliburg copy) was not run this pass. | `Found mod: Stairway to Heaven (stairwaytoheaven, 0.7.0) from DevModProvider`, then the world loads and `skyreachstatus` answers | VERIFIED [run] — fresh world only |
 | 2 | Treppe bauen | The spire and its beacon stand at fixed coordinates with the Marble Checker floor intact. | `quest: stage=0 spirePlaced=true ... spire=139,-251 beacon=139,-252`; `spire check: beaconObject=wardenbeaconoff wardenFloor=marblecheckertile` | VERIFIED [run] |
 | 3 | Aufsteigen | The Skyreach plane exists as its own level and paints without a single wrong tile. | `Veil ground OK: class=SkyLevel identifier=skyreach2 dimension=1`; `painter oracle: tileMismatches=0 (scan radius 64)` | VERIFIED [run] |
 | 4 | Sky Warden anwerben | One Warden and both cats are in the world, the settler mob is registered, and both recruit routes carry a price and a shop. | `npc check: wardens=1 cats=2`; `settler check: wardensettler=WardenSettler mobRegistered=true`; `recruit check: skywarden settler=WardenSettler price=coinx30000 shop=present` | VERIFIED [run] |
