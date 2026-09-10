@@ -360,7 +360,20 @@ These are the objects with real behaviour, as opposed to deco and furniture.
 
 ### Equipment and materials, in one glance
 
-86 items, 119 objects, 60 mobs registered.
+94 items, 119 objects, 60 mobs registered.
+
+**Point 8n (2026-09-10) added eight of those items and the mod's first art on
+its own residents.** Five band trophies — `skystoneheart` (Skyreach, 12% off a
+Skystone Golem), `bloomfang` (Eden, Bloom Maw), `mourningband` (Steinfeld,
+Stone Mourner), `soulcollar` (Ghost, Mourning Bride, the one line
+`GhostLoot.bride()` adds over `elite()`), `stripedhorn` (Crooked Beyond, 20%
+off a Door Mimic) — craft into nothing and exist to be carried home, which
+Magpie pays over broker for. Hell has none: 4n's uplift table, which is what
+"per realm band" names, lists five bands. And Magpie, Halda and Ossian Vane
+now wear `magpiecap`, `haldakerchief` and `vanecowl` instead of vanilla's
+`trapperhat`, `battlechefhat` and `runichat` — recoloured from those very
+sheets, so the silhouette the player knows is unchanged and only the art is
+ours. Each sells their spare. `[run]`, not `[game]`.
 
 | kind | what ships |
 |---|---|
@@ -381,8 +394,8 @@ These are the objects with real behaviour, as opposed to deco and furniture.
 
 ## 7. Sprites — ours vs. vanilla
 
-**378 PNGs ship with the mod**: 135 items · 107 objects · 38 mobs + 31 bestiary
-icons · 21 tiles · 16 kk-sprites · 11 armour · 5 weapons · 5 particles ·
+**389 PNGs ship with the mod**: 143 items · 107 objects · 38 mobs + 31 bestiary
+icons · 21 tiles · 16 kk-sprites · 14 armour · 5 weapons · 5 particles ·
 4 projectiles · 3 map icons · 2 statues · 2 carpets · 1 preview.
 
 The remaining literal Vanilla `GameTexture.fromFile` paths include:
