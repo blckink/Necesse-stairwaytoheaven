@@ -42,7 +42,11 @@ public final class SkyItems {
             "stormglass", "stormlenscore", "stormshard", "stormsteelbar", "stormsteelboots",
             "stormsteelchestplate", "stormsteelhelmet", "stormsteelvambrace",
             "tempestedge", "themother", "thunderhead", "veilessence", "wardenboots",
-            "wardenmantle", "wardensround", "windsilk", "zephyrharness"
+            "wardenmantle", "wardensround", "windsilk", "zephyrharness",
+            // 8n: one trophy per realm band of BALANCE.md's uplift table, and
+            // the three residents' own headwear.
+            "skystoneheart", "bloomfang", "mourningband", "soulcollar", "stripedhorn",
+            "magpiecap", "haldakerchief", "vanecowl"
     };
 
 
@@ -175,6 +179,43 @@ public final class SkyItems {
             ItemRegistry.registerItem("wardenboots",
                     new stairwaytoheaven.items.SkywatchArmor.Boots(), 0.0F, true);
         }
+        // --- 8n: one trophy per realm band -------------------------------
+        //
+        // docs/BALANCE.md's uplift table is the list of bands (Skyreach, Eden,
+        // Steinfeld, Ghost Realm, Crooked Beyond); each of these drops from one
+        // mob that only that band spawns, so the item names where it was won.
+        // They craft into nothing on purpose: a trophy's job is to be worth
+        // carrying home, and Magpie pays over broker for all five.
+        //
+        // Broker values climb with the band the way the realm ladder does, and
+        // stack size is 50 rather than a material's 250 — five hundred fangs in
+        // one slot would read as a resource, which is exactly what they are not.
+        ItemRegistry.registerItem("skystoneheart",
+                new SkyMatItem(50, Item.Rarity.UNCOMMON).setItemCategory("materials", "other"), 30.0F, true);
+        ItemRegistry.registerItem("bloomfang",
+                new SkyMatItem(50, Item.Rarity.UNCOMMON).setItemCategory("materials", "other"), 45.0F, true);
+        ItemRegistry.registerItem("mourningband",
+                new SkyMatItem(50, Item.Rarity.UNCOMMON).setItemCategory("materials", "other"), 60.0F, true);
+        ItemRegistry.registerItem("soulcollar",
+                new SkyMatItem(50, Item.Rarity.RARE).setItemCategory("materials", "other"), 85.0F, true);
+        ItemRegistry.registerItem("stripedhorn",
+                new SkyMatItem(50, Item.Rarity.RARE).setItemCategory("materials", "other"), 120.0F, true);
+
+        // --- 8n: the three Skyreach residents' own headwear ---------------
+        //
+        // Same Elder pattern as the Warden's hood above, and for the same
+        // reason: IMPLEMENTATION_RULES §3 keeps a human NPC on the native human
+        // renderer, so "his own graphic" is a garment sheet, never a bespoke
+        // body. Until now all three wore pure vanilla clothing
+        // (trapperhat / battlechefhat / runichat), which is why the mod had
+        // three residents and no art of its own on any of them.
+        ItemRegistry.registerItem("magpiecap",
+                new stairwaytoheaven.items.ResidentArmor.MagpieCap(), 0.0F, true);
+        ItemRegistry.registerItem("haldakerchief",
+                new stairwaytoheaven.items.ResidentArmor.HaldaKerchief(), 0.0F, true);
+        ItemRegistry.registerItem("vanecowl",
+                new stairwaytoheaven.items.ResidentArmor.VaneCowl(), 0.0F, true);
+
         ItemRegistry.registerItem("tempestedge", new TempestEdgeSwordToolItem(), 220.0F, true);
         ItemRegistry.registerItem("galehowl", new GalehowlProjectileToolItem(), 220.0F, true);
 

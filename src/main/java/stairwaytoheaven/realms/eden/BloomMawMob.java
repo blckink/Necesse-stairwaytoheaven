@@ -69,7 +69,9 @@ public class BloomMawMob extends EdenHostileMob {
     public static LootTable lootTable = new LootTable(
             new ChanceLootItemList(0.80F, LootItem.between("edensap",
                     EdenTiers.drop(1), EdenTiers.drop(2))),
-            new ChanceLootItemList(0.30F, LootItem.between("paradiseapple", 1, 2)));
+            new ChanceLootItemList(0.30F, LootItem.between("paradiseapple", 1, 2)),
+            // 8n: Eden's band trophy — a tooth off the flower that bites.
+            new ChanceLootItemList(0.12F, LootItem.between("bloomfang", 1, 1)));
 
     public BloomMawMob() {
         super(EdenTiers.EDEN_HP);

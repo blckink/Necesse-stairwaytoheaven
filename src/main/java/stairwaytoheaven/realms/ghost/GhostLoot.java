@@ -80,6 +80,28 @@ public final class GhostLoot {
                 new ChanceLootItemList(0.04F, LootItem.between("gravewindbow", 1, 1)));
     }
 
+    /**
+     * The Mourning Bride's own table: {@link #elite()} line for line, plus the
+     * one thing she is wearing.
+     *
+     * <p>8n needed one trophy per realm band and the Ghost band's mobs all
+     * share the four tables above, so putting the collar in {@code elite()}
+     * would have hung it on every elite in the realm. It is duplicated here
+     * rather than composed because {@code LootTable} takes its items in the
+     * constructor and offers no append; if that changes, this collapses back
+     * into one call.
+     */
+    public static LootTable bride() {
+        return new LootTable(
+                LootItem.between("ectoplasm", 4, 7),
+                new ChanceLootItemList(0.65F, LootItem.between("soulthread", 3, 6)),
+                new ChanceLootItemList(0.40F, LootItem.between("spectralore", 2, 4)),
+                new ChanceLootItemList(0.20F, LootItem.between("spiritsteelbar", 1, 1)),
+                new ChanceLootItemList(0.04F, LootItem.between("spiritsteelreaver", 1, 1)),
+                new ChanceLootItemList(0.04F, LootItem.between("gravewindbow", 1, 1)),
+                new ChanceLootItemList(0.12F, LootItem.between("soulcollar", 1, 1)));
+    }
+
     /** The ambushers: they were sitting on something, so they drop it. */
     public static LootTable ambusher() {
         return new LootTable(

@@ -88,7 +88,9 @@ public class DoorMimicMob extends MimicMob {
             LootItem.between("strangefabric", 4, 9),
             ChanceLootItem.between(0.60F, "realityshard", 1, 3),
             ChanceLootItem.between(0.45F, "warpresin", 3, 7),
-            ChanceLootItem.between(0.25F, "eyeseed", 1, 3));
+            ChanceLootItem.between(0.25F, "eyeseed", 1, 3),
+            // 8n: Crooked Beyond's band trophy. Whatever it last ate had one.
+            ChanceLootItem.between(0.20F, "stripedhorn", 1, 1));
 
     public DoorMimicMob() {
         super();

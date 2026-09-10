@@ -57,7 +57,10 @@ public class StoneMournerMob extends AncientArmoredSkeletonMob {
      */
     public static LootTable lootTable = new LootTable(
             LootItem.between("palestone", SteinfeldTier.drop(2), SteinfeldTier.drop(4)),
-            ChanceLootItem.between(0.30F, "gravesalt", 1, 3));
+            ChanceLootItem.between(0.30F, "gravesalt", 1, 3),
+            // 8n: Steinfeld's band trophy — the black trim off the mourning
+            // suit the statue is carved wearing, and the only cloth in it.
+            ChanceLootItem.between(0.12F, "mourningband", 1, 1));
 
     public StoneMournerMob() {
         super();

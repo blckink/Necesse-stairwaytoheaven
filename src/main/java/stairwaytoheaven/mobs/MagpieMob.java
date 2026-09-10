@@ -83,6 +83,28 @@ public class MagpieMob extends SkySettlerMob {
         // with a serial number on it is exactly what she buys.
         this.shop.addBuyingItem("skyparcel", new BuyingShopItem())
                 .setPriceBasedOnHappiness(140, 90, 24);
+
+        // 8n: the five band trophies, on the same salvage loop. §1 has her
+        // paying over broker for anything with a story on it, and a trophy is
+        // nothing but story — each row sits about half again above the item's
+        // own broker value (30/45/60/85/120), which is what makes carrying one
+        // home worth the inventory slot it costs.
+        this.shop.addBuyingItem("skystoneheart", new BuyingShopItem())
+                .setPriceBasedOnHappiness(45, 30, 8);
+        this.shop.addBuyingItem("bloomfang", new BuyingShopItem())
+                .setPriceBasedOnHappiness(65, 42, 11);
+        this.shop.addBuyingItem("mourningband", new BuyingShopItem())
+                .setPriceBasedOnHappiness(90, 58, 15);
+        this.shop.addBuyingItem("soulcollar", new BuyingShopItem())
+                .setPriceBasedOnHappiness(125, 80, 21);
+        this.shop.addBuyingItem("stripedhorn", new BuyingShopItem())
+                .setPriceBasedOnHappiness(175, 115, 30);
+
+        // 8n: her own spare cap, so the art the player sees on her head is
+        // also a thing they can own. One in stock, restocking slowly — it is
+        // hers, not a line of merchandise.
+        this.shop.addSellingItem("magpiecap", new SellingShopItem(1, 1))
+                .setStaticPriceBasedOnHappiness(900, 1500, 120);
     }
 
     // --- her SECOND profession: sky voyages ----------------------------
@@ -149,7 +171,10 @@ public class MagpieMob extends SkySettlerMob {
     @Override protected Color shirtColor() { return new Color(64, 62, 78); }
     @Override protected Color shoesColor() { return new Color(52, 40, 32); }
     @Override protected String[] wardrobe() {
-        return new String[]{"trapperhat", "sharpshootercoat", "leatherboots"};
+        // 8n: the cap is ours (tools/asset_generator/gen_residents.py); the
+        // coat and boots stay vanilla, so she still reads as a courier who
+        // dressed out of whatever the road offered.
+        return new String[]{"magpiecap", "sharpshootercoat", "leatherboots"};
     }
     @Override protected int recruitCost() { return 12000; }
     /**

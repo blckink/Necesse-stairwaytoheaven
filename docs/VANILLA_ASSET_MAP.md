@@ -155,6 +155,33 @@ file nobody ships is reported rather than shipped as an ERR tile.
 | Aetherwright's Casing | `items/clockworkheart` | vanilla | a machined shell that holds a charge |
 | Skywatch Signet | `items/emptypendant` | vanilla | a plain seal on a chain, distinct from the mod's own Aurora Locket |
 
+### 1.7b Point 8n — vanilla art recoloured, not borrowed whole
+
+Unlike §1.7 these do NOT point `loadItemTextures` at a vanilla file: each is a
+NEW PNG the mod ships, produced by `tools/asset_generator/gen_residents.py` from
+a vanilla sprite's own alpha and silhouette with the colour replaced by a
+per-realm luminance ramp. The row is here so the replacement pass knows which
+shape each one inherited and can judge whether it still wants it.
+
+The dump these are cut from is **not** `vanilla-sprites/` (gitignored, empty)
+and not `res.data` (not a zip) — it is the path `tools/size_audit.py` resolves,
+`/home/blackoffset/dev/Necesse sprites`.
+
+| ours | vanilla template | why that one |
+|---|---|---|
+| `items/skystoneheart` | `items/omnicrystal` | a wound, lit core, which is what a golem's heart is |
+| `items/bloomfang` | `items/crystalstone` | a jagged shard reads as a tooth once it is Eden green |
+| `items/mourningband` | `items/silk` | a bolt of cloth — the ramp is walked backwards so the lit face goes black |
+| `items/soulcollar` | `items/emptypendant` | a plain band at the throat |
+| `items/stripedhorn` | `items/bone` | the only horn-shaped thing in the dump |
+| `player/armor/magpiecap` | `player/armor/trapperhat` | the hat Magpie was already wearing |
+| `player/armor/haldakerchief` | `player/armor/battlechefhat` | the hat Halda was already wearing |
+| `player/armor/vanecowl` | `player/armor/runichat` | the hat Ossian Vane was already wearing |
+
+The three hat ITEM icons are cut from their own finished sheet (south row,
+cell 0) rather than drawn, so an icon cannot drift from the garment it stands
+for.
+
 ### 1.4 Vanilla items used as drops
 
 | vanilla item | realm | dropped by |

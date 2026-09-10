@@ -38,6 +38,10 @@ public class HaldaMob extends SkySettlerMob {
         enableProfession("fishing");
 
         // --- the worked goods, so a settlement can build before it produces ---
+        // 8n: her own spare kerchief — the mod's art on her head, and a thing
+        // the player can own. One at a time; she has two.
+        this.shop.addSellingItem("haldakerchief", new SellingShopItem(1, 1))
+                .setStaticPriceBasedOnHappiness(700, 1200, 100);
         this.shop.addSellingItem("skyweave", new SellingShopItem(20, 2))
                 .setStaticPriceBasedOnHappiness(150, 300, 30);
         this.shop.addSellingItem("stormglass", new SellingShopItem(20, 2))
@@ -67,7 +71,8 @@ public class HaldaMob extends SkySettlerMob {
     @Override protected Color shirtColor() { return new Color(122, 96, 72); }
     @Override protected Color shoesColor() { return new Color(60, 52, 46); }
     @Override protected String[] wardrobe() {
-        return new String[]{"battlechefhat", "farmershirt", "clothboots"};
+        // 8n: the kerchief is ours; shirt and boots stay vanilla.
+        return new String[]{"haldakerchief", "farmershirt", "clothboots"};
     }
     @Override protected int recruitCost() { return 9000; }
     /**

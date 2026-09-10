@@ -54,7 +54,10 @@ public class SkystoneGolemMob extends HostileMob {
     /** Skyreach drop value is x1.0 — the floor multiplies nothing. */
     public static LootTable lootTable = new LootTable(
             LootItem.between("skystone", 2, 4),
-            new ChanceLootItemList(0.4F, LootItem.between("aetheriumore", 1, 2)));
+            new ChanceLootItemList(0.4F, LootItem.between("aetheriumore", 1, 2)),
+            // 8n: Skyreach's band trophy. The lit core the golem walks on,
+            // and the only thing in it that keeps its light once it is down.
+            new ChanceLootItemList(0.12F, LootItem.between("skystoneheart", 1, 1)));
     /** Skyreach floor 1000 HP ({@code AscendedGolemMob} on CLASSIC) x1.40 elite = 1400. */
     public static final int MAX_HEALTH = SkyMobTiers.hp(SkyMobTiers.SKYREACH_HP, SkyMobTiers.ROLE_ELITE_HP);
     /** Elite takes the floor's damage unchanged: {@code CrystalGolemMob.damage}, measured 130. */

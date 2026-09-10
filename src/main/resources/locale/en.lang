@@ -1029,3 +1029,23 @@ stormlenscoretip=Still winding. Whatever it was built to power has not been told
 aetherwrightcasingtip=A machined shell that holds a charge. Vane knows what to do with it.
 skywatchsignettip=The household's seal. Wearing it, the sky stops hiding its buildings.
 skywatchsignetmap=Shows more of the world as you walk, and lights up what is worth opening
+
+# 8n - five band trophies and the three residents' own headwear
+[item]
+skystoneheart=Skystone Heart
+bloomfang=Bloom Fang
+mourningband=Mourning Band
+soulcollar=Soul Collar
+stripedhorn=Striped Horn
+magpiecap=Courier's Cap
+haldakerchief=Cellarer's Kerchief
+vanecowl=Wright's Cowl
+[itemtooltip]
+skystonehearttip=Trophy - the lit core a Skystone Golem walks on, and the only part of it that keeps its light once the rest is rubble. Magpie pays a premium.
+bloomfangtip=Trophy - a tooth off the flower that bites. Eden grows nothing that does not want something. Magpie pays a premium.
+mourningbandtip=Trophy - the black trim off a Stone Mourner's carved suit, and the only cloth in the whole statue. Magpie pays a premium.
+soulcollartip=Trophy - what the Mourning Bride still wears at the throat. Cold to hold, and it hums. Magpie pays a premium.
+stripedhorntip=Trophy - taken out of a Door Mimic. Whatever it last ate had one of these. Magpie pays a premium.
+magpiecaptip=Magpie's own peaked cap. No armour, and she will sell you her spare.
+haldakerchieftip=Halda's kerchief, knotted at the side and stained by forty years of vats.
+vanecowltip=Ossian Vane's working cowl, with the loupe he never takes off.

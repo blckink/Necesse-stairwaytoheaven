@@ -62,6 +62,10 @@ public class OssianMob extends SkySettlerMob {
         offerOnRotation("eyeofthevoid",   7, 1, 1, 12000, 20000, 1600);
 
         // --- and he takes the sky's own top tier off the player's hands ---
+        // 8n: a second cowl off his own bench — the mod's art on his head,
+        // and the one thing in his shop that is not a demonstrator.
+        this.shop.addSellingItem("vanecowl", new SellingShopItem(1, 1))
+                .setStaticPriceBasedOnHappiness(1100, 1900, 160);
         this.shop.addBuyingItem("aetheriumbar", new BuyingShopItem())
                 .setPriceBasedOnHappiness(150, 95, 22);
         this.shop.addBuyingItem("stormsteelbar", new BuyingShopItem())
@@ -78,7 +82,8 @@ public class OssianMob extends SkySettlerMob {
         // Incursion-tier robe and boots: the player invited vanilla's own
         // incursion art, and a scholar in arcanic gear reads as "he has been
         // somewhere you have not" without a single new pixel.
-        return new String[]{"runichat", "voidrobe", "arcanicboots"};
+        // 8n: the cowl is ours now; the incursion robe and boots stay.
+        return new String[]{"vanecowl", "voidrobe", "arcanicboots"};
     }
     @Override protected int recruitCost() { return 18000; }
     /**

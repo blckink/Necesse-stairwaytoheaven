@@ -21,6 +21,14 @@ sections at the bottom.
 | `infernalfringe` | biome | Hell's inner band (§17). The realm's whole transition: Crooked Beyond's violet mud and stripe mixed with Hell's black peat and ash sand, in a ratio that runs from 4-in-5 Crooked to 1-in-5 as you walk out. |
 | `regionkeyhell` | object | The Infernal Seal. Sixth and last region key, earned from the Warden for 16 Reality Shard and 24 Oddwood; unlocks Hell's boss portal. |
 | `ticketimp` | mob | Hell ranged. The Department of Eternal Processing issues numbers; this hands them out from above, at speed, whether or not you asked — 5139 HP / 329.5 damage / 81 armour. |
+| `skystoneheart` | item | Skyreach's band trophy (8n). The lit core a Skystone Golem walks on; 12% off that mob and nowhere else. Crafts into nothing — Magpie buys it over broker. |
+| `bloomfang` | item | Eden's band trophy (8n). A tooth off the Bloom Maw, 12%. Magpie buys it over broker. |
+| `mourningband` | item | Steinfeld's band trophy (8n). The black trim off a Stone Mourner, 12%. Magpie buys it over broker. |
+| `soulcollar` | item | The Ghost band's trophy (8n). What the Mourning Bride wears at the throat, 12% — the one thing `GhostLoot.bride()` adds over `elite()`. Magpie buys it over broker. |
+| `stripedhorn` | item | Crooked Beyond's band trophy (8n). Cut out of a Door Mimic, 20%. Magpie buys it over broker. |
+| `magpiecap` | item | Magpie's courier cap (8n) — the mod's own art on her head, on vanilla's helmet frame grid. Cosmetic, armour 0; she sells her spare. |
+| `haldakerchief` | item | Halda's cellar kerchief (8n), same pattern. Cosmetic, armour 0; she sells her spare. |
+| `vanecowl` | item | Ossian Vane's working cowl with its loupe (8n), same pattern. Cosmetic, armour 0; he sells a second off his bench. |
 | `aetherwrightcasing` | item | Machined shell dropped by Prototype Nine and cached in the Test Range — the gate material for the tier past Stormsteel. |
 | `bondedlockbox` | item | Sealed cargo box on the Toll-House vault stand; Magpie's recruit key, and she buys it back as part of her fee. |
 | `postledger` | item | The Toll-House's list of undelivered parcels — the reason Magpie pays a premium for every Sky Parcel found in the sky. |

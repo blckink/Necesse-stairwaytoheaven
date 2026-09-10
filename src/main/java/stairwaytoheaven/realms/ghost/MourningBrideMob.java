@@ -92,7 +92,7 @@ public class MourningBrideMob extends ForestSpectorMob {
     /** Vanilla's own duration for the haunt, unchanged. */
     public static final float HAUNT_SECONDS = 6.0F;
 
-    public static LootTable lootTable = GhostLoot.elite();
+    public static LootTable lootTable = GhostLoot.bride();
 
     /**
      * The bride is not entirely hostile about it. {@code WORLD_DESIGN} §10:

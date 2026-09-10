@@ -40,6 +40,7 @@ import gen_arsenal  # noqa: E402
 import gen_professions  # noqa: E402
 import gen_skygear  # noqa: E402
 import gen_outlands  # noqa: E402
+import gen_residents  # noqa: E402
 
 
 # Files owned by tools/convert_biome_art.py, which converts the supplied
@@ -414,6 +415,11 @@ def main():
     # only their bestiary icons, which loadIcon reads from mobs/icons/<id>.png
     # and which no sheet can supply. See tools/asset_generator/gen_outlands.py.
     gen_outlands.generate(out)
+
+    # Point 8n: the five band trophies and the three residents' own headwear.
+    # Recolours of the mod's own icons and of its own hood sheet, because the
+    # vanilla dump was not readable this session -- see gen_residents.py.
+    gen_residents.generate(out)
 
     # Mod preview
     gen_misc.gen_preview(f"{out}/preview.png")

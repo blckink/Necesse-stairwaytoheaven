@@ -1030,3 +1030,23 @@ stormlenscoretip=Läuft immer noch an. Was er antreiben sollte, hat niemand abge
 aetherwrightcasingtip=Eine gefräste Hülle, die Ladung hält. Vane weiß, was damit anzufangen ist.
 skywatchsignettip=Das Siegel des Haushalts. Wer ihn trägt, dem versteckt der Himmel seine Bauten nicht mehr.
 skywatchsignetmap=Zeigt beim Gehen mehr von der Welt und hebt hervor, was sich zu öffnen lohnt
+
+# 8n - five band trophies and the three residents' own headwear
+[item]
+skystoneheart=Himmelsstein-Herz
+bloomfang=Blütenzahn
+mourningband=Trauerflor
+soulcollar=Seelenhalsband
+stripedhorn=Gestreiftes Horn
+magpiecap=Kurierkappe
+haldakerchief=Kellermeisterin-Tuch
+vanecowl=Werkmeister-Kapuze
+[itemtooltip]
+skystonehearttip=Trophäe - der leuchtende Kern, auf dem ein Himmelsstein-Golem geht, und das Einzige an ihm, das sein Licht behält, wenn der Rest Geröll ist. Magpie zahlt über Wert.
+bloomfangtip=Trophäe - ein Zahn der Blume, die beißt. Eden wächst nichts, das nicht etwas will. Magpie zahlt über Wert.
+mourningbandtip=Trophäe - der schwarze Besatz vom gemeißelten Anzug eines Steinernen Trauernden, und der einzige Stoff an der ganzen Statue. Magpie zahlt über Wert.
+soulcollartip=Trophäe - was die Trauernde Braut immer noch am Hals trägt. Kalt in der Hand, und es summt. Magpie zahlt über Wert.
+stripedhorntip=Trophäe - aus einem Tür-Mimik geschnitten. Was immer es zuletzt gefressen hat, hatte so eines. Magpie zahlt über Wert.
+magpiecaptip=Magpies eigene Schirmkappe. Keine Rüstung, und sie verkauft dir ihre zweite.
+haldakerchieftip=Haldas Kopftuch, seitlich geknotet und von vierzig Jahren Bottichen gefärbt.
+vanecowltip=Ossian Vanes Arbeitskapuze, mit der Lupe, die er nie abnimmt.
