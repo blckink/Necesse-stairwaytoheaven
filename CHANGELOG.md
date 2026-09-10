@@ -25,14 +25,46 @@ each with its own ground, cast, residents and boss rung.
   `materials.mobdrops`, which is what they are and what the three older mob
   drops in the same file already use. `scripts/integration_test.sh` is the gate
   that caught it; it had not been run since the trophies landed.
+- **Buildings lost their walls to water they were standing beside.**
+  `LevelPresetsRegion.runGenerateRegion` runs
+  `Region.checkTilesGenerationValid` over a preset's footprint *after* the
+  preset has written it, and `GameObject.isValid` deletes every object that is
+  not `canPlaceOnShore` while standing on a shore — which in Necesse means any
+  dry tile with a liquid among its **eight** neighbours. Walls, doors and
+  furniture are all `canPlaceOnShore = false`. The Sky Toll Bridge's two toll
+  houses were built wall-to-water against the cloud stream the preset paints
+  itself, so all eighteen wall tiles were deleted the moment they were placed
+  and the place stamped `placed=50/74 missing=24`. The houses now stand one
+  row off the stream, and `RealmPoiPresets.dryRing` pushes real liquid off the
+  ring of every object a preset writes — at apply time, and only where the
+  level really holds water, so a place nowhere near a stream is unchanged.
+- **The Sky Town stood nowhere.** The nine-sample site test required the four
+  corners of a 57x41 rectangle to be dry ground, which cost the largest
+  Skyreach place all two or three lattice cells the band offers it
+  (`accepted=0 queued=0 nearest=NONE`). It is now tested on the centre cross,
+  where its four house blocks and its plaza are; the rim may reach a cloud-sea
+  edge. Measured on three fresh seeds: `accepted=2` on each.
+- **The Outlands ramp probe measured Hell.** `realmForDepth` is seed-noised, so
+  the fixed 5200-tile probe drifts out of Crooked Beyond's band — on seed
+  1486237612 it reads `5200=hell` — and correctly finds no Outland ground
+  there, failing the gate on a true answer to the wrong question. The probe now
+  walks inward from 5280 until the realm field really says Crooked and reports
+  the radius it picked as `rpeak=<r>`.
+- **A red stamp line named four tiles and no reason.** The POI census now
+  prints up to twenty-four mismatches and the tile ID under each one, so
+  "deleted for standing in water" and "deleted for standing beside it" are
+  distinguishable from the log alone.
 
 ### Verified for this release
 `scripts/java_syntax_check.sh`, `./gradlew buildModJar` against the played
-1.3.3 install, `scripts/integration_test.sh` on the 1.3.3 dedicated server,
+1.3.3 install, `scripts/integration_test.sh` on the 1.3.3 dedicated server —
+**three runs in parallel on three different worlds**, because the server picks
+its own seed and one green run cannot prove a placement fix —
+`scripts/save_compat_check.sh` on a copy of the player's own `Friemliburg.zip`,
 `scripts/balance_check.sh` (six bands, six boss rungs, monotone per role) and
 the POI census. The walkthrough and its evidence are in
 `docs/PLAYTEST_LOG.md` — headless, on a dedicated server, so **nothing here is
-player-confirmed yet**.
+player-confirmed yet**, and no boss has been fought.
 
 ## [Unreleased] — Hell becomes a place — 2026-09-10
 

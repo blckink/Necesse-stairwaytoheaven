@@ -351,6 +351,70 @@ public final class RealmPoiPresets {
         p.setObject(x, y, id);
     }
 
+    /**
+     * Keeps the world's own water out of the eight tiles around everything this
+     * preset builds.
+     *
+     * <p>Measured 2026-09-10 on seed 1486237612: the Sky Toll Bridge stamped
+     * {@code placed=50/74 missing=24}, the first four being its south wall.
+     * The engine deletes them. {@code LevelPresetsRegion.runGenerateRegion}
+     * calls {@code Region.checkTilesGenerationValid} over every preset's
+     * footprint AFTER the preset has written it (Region.java:742-761), which
+     * runs {@code GameObject.tickValid} on every object; and
+     * {@code GameObject.isValid} (GameObject.java:410-428) deletes an object
+     * that is not {@code canPlaceOnShore} while {@code Level.isShore} holds.
+     * A shore is any dry tile with a liquid among its EIGHT neighbours
+     * ({@code LiquidManager.isShore}), and in vanilla only fences, torches,
+     * street lamps and table decor set {@code canPlaceOnShore} — walls, doors
+     * and furniture do not. So a wall ONE TILE from open cloud is written and
+     * then removed, and no count taken inside the preset can see it happen.
+     *
+     * <p>Two things follow, and this method is only the second of them: a
+     * preset must not paint its own liquid against its own walls (the toll
+     * bridge's two houses were moved one row off their stream for exactly
+     * that), and the world's water must be pushed back off the ring. This runs
+     * as a pre-apply, at the real level, and only replaces tiles that are
+     * really liquid — a place that stands nowhere near water keeps every tile
+     * the painter gave it and looks exactly as it did before.
+     *
+     * <p>Tiles the preset paints itself are left alone: they are the author's
+     * decision, dry or not.
+     */
+    private static void dryRing(Preset p, int ground) {
+        p.addCustomPreApply(0, 0, 0, (level, originX, originY, dir, blackboard) -> {
+            for (int x = 0; x < p.width; x++) {
+                for (int y = 0; y < p.height; y++) {
+                    if (!carriesObject(p, x, y)) continue;
+                    for (int dx = -1; dx <= 1; dx++) {
+                        for (int dy = -1; dy <= 1; dy++) {
+                            int tx = x + dx;
+                            int ty = y + dy;
+                            if (tx >= 0 && tx < p.width && ty >= 0 && ty < p.height
+                                    && p.getTile(tx, ty) != -1) {
+                                continue;
+                            }
+                            int levelX = originX + tx;
+                            int levelY = originY + ty;
+                            if (!level.isTileWithinBounds(levelX, levelY)) continue;
+                            if (level.isLiquidTile(levelX, levelY)) {
+                                level.setTile(levelX, levelY, ground);
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+        });
+    }
+
+    /** Whether any object layer holds something on this preset tile. */
+    private static boolean carriesObject(Preset p, int x, int y) {
+        for (int layerID : ObjectLayerRegistry.getLayerIDs()) {
+            if (p.getObject(layerID, x, y) > 0) return true;
+        }
+        return false;
+    }
+
     private static void windows(Preset p, int id, int[][] positions) {
         for (int[] at : positions) p.setObject(at[0], at[1], id);
     }
@@ -453,6 +517,10 @@ public final class RealmPoiPresets {
         windows(p, window, new int[][]{{7,25},{12,35},{44,25},{49,36},{18,3},{23,3},{38,3},{45,3}});
         furnishHome(p, 5, 27, "skywatch"); furnishHome(p, 40, 27, "skywatch");
         furnishHome(p, 15, 5, "skywatch"); furnishHome(p, 37, 5, "skywatch");
+        // 57x41 is the widest footprint in the catalogue, so it is the one most
+        // likely to catch a cloud-sea edge somewhere along its rim. The rim is
+        // allowed to; the houses are not (see dryRing and validSite).
+        dryRing(p, SkyRegistry.cloudturfID);
         return p;
     }
 
@@ -463,11 +531,19 @@ public final class RealmPoiPresets {
         p.fillTile(0, 9, 31, 5, SkyRegistry.mistseaID);
         road(p, 14, 0, 3, 23, road);
         int wall = SkyCloudmarbleSet.cloudmarbleWallID, door = SkyCloudmarbleSet.cloudmarbleDoorID;
-        building(p, SkyRegistry.gloomwoodFloorID, wall, new Rectangle(3, 2, 9, 7));
-        building(p, SkyRegistry.gloomwoodFloorID, wall, new Rectangle(19, 14, 9, 7));
-        door(p, 11, 5, door); door(p, 19, 17, door);
-        road(p, 12, 5, 2, 1, road); road(p, 17, 17, 2, 1, road);
-        furnishHome(p, 4, 2, "skywatch"); furnishHome(p, 20, 14, "skywatch");
+        // One dry row between each toll house and the stream. They used to sit
+        // at y=2..8 and y=14..20, i.e. wall-to-water: every tile of both those
+        // walls was a SHORE tile, and the engine deleted all eighteen of them
+        // right after the preset wrote them (see dryRing). The houses moved,
+        // the stream did not.
+        building(p, SkyRegistry.gloomwoodFloorID, wall, new Rectangle(3, 1, 9, 7));
+        building(p, SkyRegistry.gloomwoodFloorID, wall, new Rectangle(19, 15, 9, 7));
+        door(p, 11, 4, door); door(p, 19, 18, door);
+        road(p, 12, 4, 2, 1, road); road(p, 17, 18, 2, 1, road);
+        furnishHome(p, 4, 1, "skywatch"); furnishHome(p, 20, 15, "skywatch");
+        // ...and the world's own stream, which the site rule above deliberately
+        // brings INTO the footprint, is pushed off the houses' ring.
+        dryRing(p, SkyRegistry.cloudturfID);
         return p;
     }
 

@@ -401,6 +401,29 @@ public final class RealmPoiCensus {
      * and reads as green. So every tile the preset writes an object to is
      * checked for that object, and the first few that disagree are named.
      */
+    /**
+     * Whether what stands on a tile is what the preset asked for — or the same
+     * object with its switch thrown.
+     *
+     * <p>A door is two registrations, closed and open, joined by
+     * {@code SwitchObject.counterID} ({@code SwitchObject.switchIt} writes the
+     * counter ID onto the tile). The people these places exist to house walk
+     * through their doors long before a census runs: measured 2026-09-10 on
+     * seed 1520494498, the Grange Cellar read
+     * {@code missing=1 10,8=1674!=1673}, and 1673 is the {@code D} in
+     * {@code GRANGE_PLAN} row 8 — Halda had opened her own cellar door. An
+     * opened door is not a missing object, and a gate that says it is fails on
+     * a world that is working exactly as designed.
+     */
+    private static boolean standsAsPlaced(int standing, int wanted) {
+        if (standing == wanted) return true;
+        if (standing <= 0) return false;
+        necesse.level.gameObject.GameObject placed =
+                necesse.engine.registries.ObjectRegistry.getObject(wanted);
+        return placed instanceof necesse.level.gameObject.SwitchObject
+                && ((necesse.level.gameObject.SwitchObject) placed).counterID == standing;
+    }
+
     private static void stampNearest(Level level, Site site, CommandLog logs) {
         if (site == null) {
             logs.add("realmpoi stamp: NO SITE to stamp");
@@ -426,13 +449,21 @@ public final class RealmPoiCensus {
                     continue;
                 }
                 expected++;
-                if (standing == wanted) {
+                if (standsAsPlaced(standing, wanted)) {
                     continue;
                 }
                 missing++;
-                if (missing <= 4) {
+                // Twenty-four, not four, and each one carries the TILE it
+                // stands on. The 2026-09-10 run printed four wall positions and
+                // nothing else, and the four could not say whether the wall had
+                // been dropped for standing in water, beside water, or for a
+                // reason of its own; the tile ID answers that in the log line
+                // itself. Cheap: it only ever runs on a place that is already
+                // wrong.
+                if (missing <= 24) {
                     first.append(' ').append(x - site.x).append(',').append(y - site.y)
-                            .append('=').append(standing).append("!=").append(wanted);
+                            .append('=').append(standing).append("!=").append(wanted)
+                            .append("@t").append(level.getTileID(x, y));
                 }
             }
         }
@@ -495,7 +526,7 @@ public final class RealmPoiCensus {
                     }
                     expected++;
                     int standing = level.getObjectID(site.x + x, site.y + y);
-                    if (standing == wanted) {
+                    if (standsAsPlaced(standing, wanted)) {
                         continue;
                     }
                     missing++;

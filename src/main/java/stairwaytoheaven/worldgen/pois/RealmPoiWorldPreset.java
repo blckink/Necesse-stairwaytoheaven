@@ -601,6 +601,31 @@ public class RealmPoiWorldPreset extends WorldPreset {
                     && skyLand(seed, x + width / 2, y + height - 1)
                     && (!skyLand(seed, x, middleY) || !skyLand(seed, x + width - 1, middleY));
         }
+        if (kind == RealmPoiPresets.SKY_TOWN) {
+            // The catalogue's widest footprint, 57x41, and the only kind that
+            // stood NOWHERE on 2026-09-10's run: `realmpoi kind skytown:
+            // accepted=0 queued=0 nearest=NONE`. The nine-sample test below
+            // includes the four CORNERS of the rectangle, and a 57x41 rectangle
+            // whose every corner is dry is a rare thing in a realm this wet --
+            // the band offers the town two or three lattice cells, and it lost
+            // all of them.
+            //
+            // So the corners come off the test and the cross stays: centre,
+            // and the middle of each edge. What the corners were guarding
+            // against -- an object standing in the cloud sea -- is now guarded
+            // where it actually happens, by RealmPoiPresets.dryRing, which
+            // pushes the world's water off the ring of every object the preset
+            // writes. What remains is the thing only a site test can decide:
+            // the town's four house blocks and its plaza sit along the centre
+            // cross, and they must be on real ground. Its RIM may reach a
+            // cloud-sea edge, which is what a town on a floating island looks
+            // like anyway.
+            return skyLand(seed, x + width / 2, y + height / 2)
+                    && skyLand(seed, x + width / 2, y)
+                    && skyLand(seed, x + width / 2, y + height - 1)
+                    && skyLand(seed, x, y + height / 2)
+                    && skyLand(seed, x + width - 1, y + height / 2);
+        }
         // Nine samples, rather than corners alone: a large town must not bridge
         // a cloud-sea inlet through the middle of a house block.
         for (int sx = 0; sx <= 2; sx++) {

@@ -1088,7 +1088,35 @@ public class SkyreachStatusCommand extends ModularChatCommand {
             // a probe at 5600 measures Hell and correctly finds no Outland,
             // which is a true answer to the wrong question. 5200 is inside
             // Crooked's own peak (4800-5280), so it asks about Crooked's ramp.
-            for (int radius : new int[]{4400, 5000, 5200}) {
+            // ...and the outermost probe is CHOSEN, not written down. A fixed
+            // radius cannot stay inside Crooked's band: realmForDepth is
+            // seed-noised, and the 5200 written here on 2026-09-10 reads HELL
+            // on seed 1486237612 -- that run's own "realm check" line says
+            // 5200=hell -- so the probe measured Hell's ground and truthfully
+            // found no Outland in it. That is the same mistake the note above
+            // describes at 5600, one radius further in. So walk inward from the
+            // outer edge of Crooked's nominal peak until the realm field really
+            // answers Crooked, and probe THAT. It is reported as `rpeak=<r>:`
+            // rather than as a fixed name, and reads 0 with radius `none` if
+            // the band has no Crooked radius at all, which is itself a defect
+            // worth failing on.
+            int peak = 0;
+            for (int r = 5280; r >= 4400; r -= 40) {
+                if (stairwaytoheaven.worldgen.RealmDepth.realmForDepth(outSeed,
+                        outOrigin.x + r, outOrigin.y,
+                        stairwaytoheaven.worldgen.RealmDepth.depthFor(r))
+                        == stairwaytoheaven.worldgen.RealmDepth.REALM_CROOKED) {
+                    peak = r;
+                    break;
+                }
+            }
+            int[] rampRadii = {4400, 5000, peak};
+            for (int probe = 0; probe < rampRadii.length; probe++) {
+                int radius = rampRadii[probe];
+                if (radius == 0) {
+                    ramp.append(" rpeak=none:0/0");
+                    continue;
+                }
                 int land = 0;
                 int wrong = 0;
                 for (int dx = -60; dx <= 60; dx += 2) {
@@ -1121,7 +1149,9 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                         }
                     }
                 }
-                ramp.append(String.format(" r%d=%d/%d", radius, wrong, land));
+                ramp.append(probe == rampRadii.length - 1
+                        ? String.format(" rpeak=%d:%d/%d", radius, wrong, land)
+                        : String.format(" r%d=%d/%d", radius, wrong, land));
             }
             // The realm field from WORLD_DESIGN §3, reported so the concept and
             // the code can be compared without reading either.

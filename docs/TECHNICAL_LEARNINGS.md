@@ -3859,3 +3859,52 @@ with wide molten cracks: beautiful as a picture, a repeating hook on every tile
 in the 1× field. The same prompt asked for "hundreds of small angular
 fragments" tiled cleanly. This is a property of the pipeline's arithmetic, not
 of the model.
+
+## A preset's objects are re-validated after it is written, and a SHORE deletes them — [jar] + [run]
+
+`LevelPresetsRegion.runGenerateRegion` places every world preset for a
+generation region and then, in the same method, calls
+`Region.checkTilesGenerationValid(level, rect)` over each preset's occupied
+rectangles (`Region.java:742-761`). That runs `GameObject.tickValid` on every
+object in the footprint, and `tickValid` calls `GameObject.isValid`
+(`GameObject.java:410-428`), which returns false — and therefore erases the
+object with `objectLayer.setObject(..., 0)` — when either:
+
+- the object is not `canPlaceOnLiquid` and its tile is liquid, or
+- the object is not `canPlaceOnShore` and `Level.isShore(x, y)` is true.
+
+**A shore is not a tile type.** `LiquidManager.isShore` is true for any
+non-liquid tile with a liquid among its **eight** neighbours, diagonals
+included. And `canPlaceOnShore` defaults to false: across all of vanilla only
+24 classes set it — fences and fence gates, torches, braziers, tiki torches,
+street lamps, stepping stones, minecart track, coin piles, table decor.
+**Walls, doors, beds, chairs, tables, dressers and cabinets do not.**
+
+Consequences for authored presets:
+
+1. A wall one tile from open water is written by `Preset.applyToLevel` and
+   deleted a moment later, in the same generation run. Nothing inside the
+   preset can see it: `applyToLevel` writes objects unconditionally
+   (`Preset.java:539-549`), so a count taken there is always full.
+2. This is invisible to `presetobjects=` in the POI census too, which reads the
+   preset. Only a tile-by-tile comparison against the generated world sees it —
+   that is what `realmpoi stamp: ... missing=` exists for.
+3. So a preset must not paint its own liquid against its own walls, and it must
+   push the world's liquid off the ring of everything it builds.
+   `RealmPoiPresets.dryRing` does the second half as a `Preset` pre-apply.
+
+Measured 2026-09-10, seed 1486237612: `realmpoi stamp: kind=skytollbridge
+placed=50/74 missing=24 3,8=0!=1730 ...` — the toll bridge's two south/north
+walls, eighteen tiles, plus six the world's own stream reached.
+
+## `RealmDepth.realmForDepth` is seed-noised: no fixed radius names a band — [run]
+
+The realm a distance falls in is not a function of the distance alone.
+`realm check:` printed for the same six distances on four seeds on 2026-09-10
+gives `5200=hell` on 1486237612 and `5200=crookedbeyond` on 1480667023. Any
+gate or probe that hard-codes a radius to mean "this is Crooked Beyond" is
+therefore correct on some seeds and measuring a different realm on others —
+which reads as a defect in the realm it was not asking about.
+`SkyreachStatusCommand`'s Outlands ramp probe now searches inward from 5280
+for a radius the realm field really calls Crooked and reports it as
+`rpeak=<radius>:`.

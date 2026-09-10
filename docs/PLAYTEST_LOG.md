@@ -761,6 +761,9 @@ investigated in this pass, and not fixed.** The mod boots, generates and plays;
 one of twenty-four building kinds does not appear, and the one place this run
 walked to is missing a third of its furniture.
 
+**FIXED** the same day — see the entry below. All three assertions had one
+cause each and none of them was random.
+
 ### What this run does not answer
 
 - **Step 7 is the honest gap.** A boss fight needs a player. `balance_check.sh`
@@ -774,3 +777,86 @@ walked to is missing a third of its furniture.
 - **The 2026-09-07 Friemliburg finding still stands.** On the player's own save,
   ground that was already generated does not get re-stamped, so the new places
   appear in sky he has not walked yet, not around his spire.
+
+## 2026-09-10 (2) — v0.7.0, the same eight steps, on three seeds at once
+
+The entry above ends RED. This one is the pass that closes it. Same jar
+version, same script, but **three `scripts/integration_test.sh` runs in
+parallel on three different worlds** — the server picks its own seed, so a
+single green run says nothing about a placement defect. Seeds 1480667023,
+1520494498 and 1514024314; plus one `scripts/save_compat_check.sh` on a COPY of
+the player's own `Friemliburg.zip` from `backup-saves-20260907/`, which is the
+existing-save half step 1 was missing.
+
+### The three reds, and what each one really was
+
+**1. The Sky Toll Bridge stamped 50 of 74 objects.** Not a preset that wrote
+nothing — a preset whose walls the engine deleted after it wrote them.
+`LevelPresetsRegion.runGenerateRegion` calls
+`Region.checkTilesGenerationValid` over every preset's footprint once the
+preset has been applied (`Region.java:742-761`); that runs
+`GameObject.tickValid` on every object, and `GameObject.isValid`
+(`GameObject.java:410-428`) removes any object that is not `canPlaceOnShore`
+while `Level.isShore` is true. A shore is **any dry tile with a liquid among
+its eight neighbours** (`LiquidManager.isShore`), and in vanilla only fences,
+torches, street lamps and table decor set `canPlaceOnShore` — walls, doors and
+furniture do not. The bridge's two toll houses sat wall-to-water against the
+cloud stream the preset paints itself (rows 9-13), so all eighteen tiles of
+those two walls were written and immediately deleted, and the world's own
+stream — which the site rule deliberately pulls into the footprint — took the
+remaining six. Both halves are fixed: the houses moved one row off the stream,
+and `RealmPoiPresets.dryRing` pushes real liquid off the ring of every object
+the preset writes, at apply time, only where the level really holds water.
+
+**2. `skytown` stood nowhere.** The nine-sample land test demanded the four
+CORNERS of a 57x41 rectangle be dry, which in a realm this wet is a rare
+rectangle; the band offers the town two or three lattice cells and it lost all
+of them to smaller kinds. With `dryRing` guarding the objects, the site test
+only has to decide what it alone can decide, so it now asks the centre cross —
+centre and the middle of each edge, where the four house blocks and the plaza
+are — and lets the rim touch a cloud-sea edge.
+
+**3. `r5200` asked Hell about Crooked Beyond.** `realmForDepth` is
+seed-noised, so no fixed radius stays inside Crooked's band: the failing run's
+own `realm check` line reads `5200=hell`, and the probe truthfully found no
+Outland ground in Hell. The probe now walks inward from 5280 until the realm
+field really answers Crooked and reports the radius it chose as `rpeak=<r>:`.
+
+### The eight steps, measured
+
+| # | Step | One sentence | Beleg (run b, seed 1520494498, unless noted) | State |
+|---|---|---|---|---|
+| 1 | Save laden | The player's own Friemliburg, on a copy, takes the mod and comes back up with its Skyreach — and a fresh world does too. | `scripts/save_compat_check.sh Friemliburg.zip`: `Before: skyreach2 entries=1 surfaceRegions=31 players=3 settlements=2`, then the phases below | VERIFIED [run] |
+| 2 | Treppe bauen | The spire and its beacon stand, with the Marble Checker floor intact. | `spire check: beaconObject=wardenbeaconoff wardenFloor=marblecheckertile` | VERIFIED [run] |
+| 3 | Aufsteigen | The Skyreach is its own level and paints without a wrong tile. | `Veil ground OK: class=SkyLevel identifier=skyreach2 dimension=1`; `painter oracle: tileMismatches=0` | VERIFIED [run] |
+| 4 | Sky Warden anwerben | One Warden and both cats are in the world; the settler is registered and both recruit routes carry a price and a shop. | `npc check: wardens=1 cats=2`; `recruit check: skywarden settler=WardenSettler price=coinx30000 shop=present` | VERIFIED [run] |
+| 5 | Veil oeffnen | `veilstatus` samples the Veil bands and finds their own ground. | `murkmosstile`, `hauntedgrasstile`, `ectoplasmtile` counts in the Veil sample | VERIFIED [run] |
+| 6 | Skyreach-Orte besuchen | **All twenty-four lattice kinds now stand somewhere, on every one of the three seeds, and the place each run walked to is complete to the tile.** | `realmpoi census: seed=1520494498 ... queued=1463 unnamed=0 kinds=24/24 queuedkinds=24/24 landmarks=3 nearest=skytollbridge@214` and `realmpoi stamp: kind=skytollbridge at=-40,-165 placed=74/74 missing=0` | VERIFIED [run] |
+| 7 | Einen Boss legen | Not driven. Nothing here kills anything — the server has no player. The six rungs are in the shipped jar at the intended numbers. | `scripts/balance_check.sh`: `mutanthydra 10 320000->528000`, all rows matching the expected table | VERIFIED [jar] — **not played** |
+| 8 | Hell betreten | The far end of the realm field resolves to Hell and all four Hell buildings queue there on their own ground. | `realm check: ... 5200=hell 5800=hell`; `realmpoi funnel hell: candidates=... accepted=...` | VERIFIED [run] |
+
+### The same three numbers on all three seeds
+
+| Seed | kinds | queuedkinds | skytown | stamp | rpeak |
+|---|---|---|---|---|---|
+| 1480667023 | 24/24 | 24/24 | `accepted=2 queued=2 nearest=467` | `skytower placed=184/184 missing=0` | `5280:592/2527` |
+| 1520494498 | 24/24 | 24/24 | `accepted=2 queued=2 nearest=561` | `skytollbridge placed=74/74 missing=0` | `5040:6/2481` |
+| 1514024314 | 24/24 | 24/24 | `accepted=2 queued=2 nearest=412` | `skytower placed=184/184 missing=0` | `5120:528/2234` |
+
+Before this pass, on seed 1486237612, the same three columns read `23/24`,
+`23/24`, `accepted=0 queued=0 nearest=NONE`, `placed=50/74 missing=24` and
+`r5200=0/1886`.
+
+### What this run still does not answer
+
+- **Step 7 is unchanged and still the honest gap.** A boss fight needs a
+  player and a client.
+- **The eight-neighbour shore rule is only guarded where it was measured.**
+  `dryRing` is on the two Skyreach kinds that paint their own water. Every
+  other preset relies on its site test keeping water away, and the stamp
+  assertion only ever inspects the nearest place and the reef — so another
+  kind could be carrying the same silent deletion on a seed nobody has drawn.
+- **`tools/area_census.py` still reports Hell as `biomes 0 / hostiles 0 / boss
+  none`.** Unchanged from the entry above. **OPEN.**
+- **The 2026-09-07 Friemliburg finding still stands.** Already-generated ground
+  is not re-stamped, so the new places appear in sky the player has not walked.

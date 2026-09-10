@@ -477,12 +477,17 @@ grep -qE "outlands check: floor=4200 " "$LOG1" \
 grep -qE "outlands check: .* inside=0/[1-9][0-9]*" "$LOG1" \
     || { echo "FAIL: wrong ground appears inside the 4200-tile floor (or the sweep found no land)"; STATUS=1; }
 # ...and it must actually arrive further out, or the region is unreachable.
-# 5200 is inside Crooked Beyond's own peak (4800-5280), where the ramp is at
-# full strength. It was 5600 until 2026-09-10, which is depth 0.93 -- Hell's
-# ground, not Crooked's. That probe only ever passed because Hell had no
-# painter and fell through to Crooked's; see SkyreachStatusCommand's own note.
-grep -qE "outlands check: .* r5200=[1-9][0-9]*/" "$LOG1" \
-    || { echo "FAIL: no Outland ground at 5200 tiles -- the ramp never rises"; STATUS=1; }
+# The outer probe is no longer a NUMBER. It was 5600 until 2026-09-10 and then
+# 5200, and both were wrong the same way: realmForDepth is seed-noised, so a
+# fixed radius drifts out of Crooked Beyond's band and into Hell's, where there
+# is correctly no Outland ground and the gate fails on a true answer to the
+# wrong question. Measured on seed 1486237612: `realm check: ... 5200=hell`,
+# while r5000 read 356/2342. SkyreachStatusCommand now walks inward from 5280
+# until the realm field really says Crooked and probes there, reporting the
+# radius it chose.
+grep -qE "outlands check: .* rpeak=[0-9]+:[1-9][0-9]*/" "$LOG1" \
+    || { echo "FAIL: no Outland ground at Crooked Beyond's peak -- the ramp never rises"; \
+         grep -aE "outlands check:|realm check:" "$LOG1" | tail -2; STATUS=1; }
 grep -qE "outlands check: .* biome=NOT REGISTERED" "$LOG1" \
     && { echo "FAIL: the Outlands biome is not registered"; STATUS=1; }
 
