@@ -100,6 +100,16 @@ public class BossPortalObject extends GameObject {
      */
     public static final String SPRITE_CROOKED = "objects/veilriftdown";
 
+    /**
+     * Hell's portal: this mod's own Aether Forge, a lit furnace mouth.
+     *
+     * <p>A placeholder, and named as one — WORLD_DESIGN §21 gives Hell its own
+     * Infernal Forge and A3.8 an entire Furnace sub-theme, so a forge is the
+     * right SHAPE for the landmark that wakes Hell's guardian; the sheet it
+     * wears until Hell's art pass is the sky's.
+     */
+    public static final String SPRITE_HELL = "objects/aetherforge";
+
     // ------------------------------------------------------------------
     // the worldgen lattice
     // ------------------------------------------------------------------
@@ -146,10 +156,15 @@ public class BossPortalObject extends GameObject {
     private static final int[] BY_REALM = new int[RealmDepth.REALM_COUNT];
 
     /**
-     * Registers all five portals and the scaling buff. Called once, from
+     * Registers all six portals and the scaling buff. Called once, from
      * {@code StairwayToHeavenMod.init()}.
      *
-     * <p>The five IDs are spelled out as literals rather than built from
+     * <p>Hell used to be the exception — {@code SkyBossLadder.forRealm}
+     * answered {@code null} there and §B4 merely RESERVED its boss, because
+     * the realm had no painter. It has one now, so the sixth portal is a
+     * portal like the other five.
+     *
+     * <p>The six IDs are spelled out as literals rather than built from
      * {@code RealmDepth.keyOf}: {@code tools/locale_audit.py} and
      * {@code tools/content_ledger.py} read registrations out of the SOURCE, and
      * an ID assembled at runtime is an ID neither tool can see — which is
@@ -168,8 +183,8 @@ public class BossPortalObject extends GameObject {
                 SPRITE_GHOST, new Color(120, 150, 132));
         registerPortal("bossportalcrookedbeyond", RealmDepth.REALM_CROOKED,
                 SPRITE_CROOKED, new Color(168, 96, 150));
-        // Hell gets none: SkyBossLadder.forRealm returns null there and §B4
-        // reserves its boss rather than placing it.
+        registerPortal("bossportalhell", RealmDepth.REALM_HELL,
+                SPRITE_HELL, new Color(186, 84, 52));
     }
 
     private static void registerPortal(String stringID, int realm, String sprite, Color mapColor) {
@@ -185,7 +200,7 @@ public class BossPortalObject extends GameObject {
     }
 
     /**
-     * Warms the five borrowed sheets, client-side. Called once, from
+     * Warms the six borrowed sheets, client-side. Called once, from
      * {@code StairwayToHeavenMod.initResources()} — the same hook
      * {@code GhostRealm.loadTextures} uses for the same reason.
      *
@@ -197,7 +212,7 @@ public class BossPortalObject extends GameObject {
      * loaded through a field — which {@link #loadTextures()} must do, because
      * the path differs per realm — is a sheet nothing checks, and a mistyped
      * one ships as the engine's red ERR tile standing in the world. Writing the
-     * five literals here once puts them all back under the audit.
+     * six literals here once puts them all back under the audit.
      */
     public static void loadBorrowedSheets() {
         GameTexture.fromFile("objects/wardenbeaconon");
@@ -205,6 +220,7 @@ public class BossPortalObject extends GameObject {
         GameTexture.fromFile("objects/statues/seraph");
         GameTexture.fromFile("objects/statues/gloomraven");
         GameTexture.fromFile("objects/veilriftdown");
+        GameTexture.fromFile("objects/aetherforge");
     }
 
     /** The registered string ID of a realm's portal, built the one way. */

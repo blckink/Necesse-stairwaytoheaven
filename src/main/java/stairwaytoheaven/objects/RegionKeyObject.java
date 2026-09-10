@@ -74,6 +74,8 @@ public class RegionKeyObject extends SkyDecoObject {
     public static final String SHEET_GHOST = "statues/gloomraven";
     /** Crooked Beyond: Mr. Knott's door. 32x96, mod art. */
     public static final String SHEET_CROOKED = "veilriftdown";
+    /** Hell's key: the Aether Forge, the same sheet its boss portal wears. */
+    public static final String SHEET_HELL = "aetherforge";
 
     /**
      * Inventory icons: the 32x32 cell at grid (0,0) of the named file.
@@ -101,6 +103,12 @@ public class RegionKeyObject extends SkyDecoObject {
     public static final String ICON_STEINFELD = "items/seraphstatue";
     public static final String ICON_GHOST = "items/gloomravenstatue";
     public static final String ICON_CROOKED = "objects/veilriftdown";
+    /**
+     * Hell's icon. The Aether Forge is one of the three that already owns a
+     * hand-drawn 32x32 item icon, because the mod registers an obtainable
+     * object on the same sheet, so nothing is cropped here either.
+     */
+    public static final String ICON_HELL = "items/aetherforge";
 
     // ------------------------------------------------------------------
     // registration
@@ -110,18 +118,20 @@ public class RegionKeyObject extends SkyDecoObject {
     private static final int[] BY_REALM = new int[RealmDepth.REALM_COUNT];
 
     /**
-     * Registers the five key pieces. Called once, from
+     * Registers the six key pieces. Called once, from
      * {@code StairwayToHeavenMod.registerObjects()}.
      *
-     * <p>Five literals rather than a loop over {@code RealmDepth.keyOf}, for
+     * <p>Six literals rather than a loop over {@code RealmDepth.keyOf}, for
      * the reason {@link stairwaytoheaven.bosses.BossPortalObject#register}
      * gives for its own five: {@code tools/locale_audit.py} and
      * {@code tools/content_ledger.py} read registrations out of the SOURCE, and
      * an ID assembled at runtime is an ID neither tool can see. {@link #idFor}
      * keeps the two spellings from drifting and throws if they ever do.
      *
-     * <p>Hell gets none. It has no boss portal (§B4 reserves its boss), so a
-     * key for it would unlock nothing.
+     * <p>Hell used to get none, because it had no boss portal and a key for
+     * it would have unlocked nothing. It has one now
+     * ({@link stairwaytoheaven.bosses.BossPortalObject#SPRITE_HELL}), so it
+     * has a key.
      */
     public static void register() {
         registerKey("regionkeyskyreach", RealmDepth.REALM_SKYREACH,
@@ -134,6 +144,8 @@ public class RegionKeyObject extends SkyDecoObject {
                 SHEET_GHOST, 64, ICON_GHOST, new Color(120, 150, 132));
         registerKey("regionkeycrookedbeyond", RealmDepth.REALM_CROOKED,
                 SHEET_CROOKED, 32, ICON_CROOKED, new Color(168, 96, 150));
+        registerKey("regionkeyhell", RealmDepth.REALM_HELL,
+                SHEET_HELL, 128, ICON_HELL, new Color(186, 84, 52));
     }
 
     private static void registerKey(String stringID, int realm, String worldSheet,
@@ -177,11 +189,13 @@ public class RegionKeyObject extends SkyDecoObject {
         GameTexture.fromFile("objects/statues/seraph");
         GameTexture.fromFile("objects/statues/gloomraven");
         GameTexture.fromFile("objects/veilriftdown");
+        GameTexture.fromFile("objects/aetherforge");
         // inventory icons (the two missing from this list are the two world
         // sheets above that double as their own icon)
         GameTexture.fromFile("items/skystairwaydown");
         GameTexture.fromFile("items/seraphstatue");
         GameTexture.fromFile("items/gloomravenstatue");
+        GameTexture.fromFile("items/aetherforge");
     }
 
     /** The registered string ID of a realm's key piece, built the one way. */

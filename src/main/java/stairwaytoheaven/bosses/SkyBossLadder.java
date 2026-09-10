@@ -45,12 +45,14 @@ import stairwaytoheaven.worldgen.RealmDepth;
  * <p><b>VERIFIED [jar]</b> for every line above, against the decompiled 1.3.2
  * sources.
  *
- * <h2>Hell has no portal</h2>
- * §B4 reserves {@code mutanthydra} (Scrapyard, 80 000 CLASSIC) for Hell and
- * gives it no tier, because Hell has no painter yet
- * ({@code docs/PLAN_ONE_PLANE.md}, "two known holes"). {@link #forRealm} returns
- * {@code null} there, and {@link BossPortalObject} registers no Hell portal, so
- * the reservation costs nothing until Hell exists.
+ * <h2>Hell's rung, and what it used to be</h2>
+ * §B4 reserved {@code mutanthydra} (Scrapyard, 80 000 CLASSIC) for Hell and
+ * gave it no tier, because Hell had no painter
+ * ({@code docs/PLAN_ONE_PLANE.md}, "two known holes"): {@link #forRealm}
+ * answered {@code null} there and {@link BossPortalObject} registered no Hell
+ * portal. {@link stairwaytoheaven.realms.hell.HellTerrainPainter} closed that
+ * hole, so the reservation is now a real sixth row and the ladder runs the
+ * whole way out. {@code null} remains a real answer for an out-of-range realm.
  */
 public final class SkyBossLadder {
 
@@ -177,9 +179,9 @@ public final class SkyBossLadder {
         /**
          * What the boss actually walks out with, for logs and for
          * scripts/balance_check.sh: 74 412, 171 720, 220 528, 233 595,
-         * 322 400. §B4's own column — 57 240, 127 200, 157 520, 161 100,
-         * 208 000 — is what the tier curve alone produces, i.e. these five
-         * numbers before the §10 uplift.
+         * 322 400, 528 000. §B4's own column — 57 240, 127 200, 157 520,
+         * 161 100, 208 000, 320 000 — is what the tier curve alone produces,
+         * i.e. these six numbers before the §10 uplift.
          */
         public int finalHealth() {
             return Math.round(this.baseHealthClassic * this.healthMultiplier());
@@ -189,9 +191,10 @@ public final class SkyBossLadder {
     /**
      * The ladder, indexed by realm. §B4's table, unchanged.
      *
-     * <p>It is monotone on purpose — 74k, 172k, 221k, 234k, 322k — so walking
-     * outwards is walking up. The uplift column rises outwards too (130 / 135 /
-     * 140 / 145 / 155 percent, matching each realm's own mob uplift in
+     * <p>It is monotone on purpose — 74k, 172k, 221k, 234k, 322k, 528k — so
+     * walking outwards is walking up. The uplift column rises outwards too
+     * (130 / 135 / 140 / 145 / 155 / 165 percent, matching each realm's own
+     * mob uplift in
      * {@link stairwaytoheaven.mobs.SkyMobTiers}), so the gaps widen rather than
      * close. Which other incursion bosses are left unused, and
      * why, is recorded in §B4; nothing here should grow a row without that
@@ -235,11 +238,21 @@ public final class SkyBossLadder {
                 new Boss(RealmDepth.REALM_CROOKED, "crystaldragon", "CrystalHollowIncursionBiome",
                         52000, 10, 155, 130);
 
-        // Hell: reserved, not built. §B4 holds mutanthydra (Scrapyard,
-        // ScrapyardIncursionBiome.java:28; MutantHydraBossMob.MAX_HEALTH (:105)
-        // CLASSIC = 80 000) for it and gives it no tier, so there is no row and
-        // no portal until the realm itself exists.
-        BY_REALM[RealmDepth.REALM_HELL] = null;
+        // Scrapyard -> ScrapyardIncursionBiome.java:28 super("mutanthydra").
+        // 80 000 = MutantHydraBossMob.MAX_HEALTH (:105) CLASSIC slot. Tier 10
+        // -> x4.00 = 320 000, which §B4's own reservation column already held
+        // for Hell; the realm now exists, so the row does too.
+        //
+        // Tier 10 and not 11, even though Hell's MOBS are priced one step past
+        // the arrays: the whole argument in {@link Boss#healthUplift} is that
+        // walking a boss past tier 10 buys health and almost no damage
+        // (+0.45 health, +0.04 damage per tier). A boss rung is therefore
+        // raised by its uplift column, and Hell's is the steepest one —
+        // 165 / 136, the same pair its mobs carry, continuing the outward
+        // climb the five rows above walk.
+        BY_REALM[RealmDepth.REALM_HELL] =
+                new Boss(RealmDepth.REALM_HELL, "mutanthydra", "ScrapyardIncursionBiome",
+                        80000, 10, 165, 136);
     }
 
     /**

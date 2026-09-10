@@ -432,14 +432,15 @@ public class SkyWardenMob extends HumanShop {
      *
      * <p>The order of the constants IS the order the Warden offers them, and it
      * is §B4's own boss ladder — 57k Cryo Queen, 127k Moonlight Dancer, 158k
-     * Ascended Wizard, 161k Pest Warden, 208k Crystal Dragon — so a player
-     * walking this list is walking that table. Hell has no constant because it
-     * has no boss portal to unlock.
+     * Ascended Wizard, 161k Pest Warden, 208k Crystal Dragon, 320k Mutant
+     * Hydra — so a player walking this list is walking that table. Hell used to
+     * have no constant, because it had no boss portal to unlock; it has one
+     * now, and its key is the sixth and last rung.
      *
      * <p>Each constant carries its quest CLASS (for
      * {@code SkyQuests.findHeld}) and a factory for a fresh one, because
      * {@code QuestRegistry} keys quests by class and a shared parameterised
-     * quest would collapse five journal entries into one.
+     * quest would collapse six journal entries into one.
      */
     private enum RegionKey {
         SKYREACH(stairwaytoheaven.worldgen.RealmDepth.REALM_SKYREACH,
@@ -486,6 +487,15 @@ public class SkyWardenMob extends HumanShop {
             stairwaytoheaven.quest.CrookedKeyQuest newQuest() {
                 return new stairwaytoheaven.quest.CrookedKeyQuest();
             }
+        },
+        HELL(stairwaytoheaven.worldgen.RealmDepth.REALM_HELL,
+                stairwaytoheaven.quest.HellKeyQuest.class,
+                "regionkeyhell", "spiritsteelbar", 16,
+                "wardenkeyaskhell", "wardenkeydonehell") {
+            @Override
+            stairwaytoheaven.quest.HellKeyQuest newQuest() {
+                return new stairwaytoheaven.quest.HellKeyQuest();
+            }
         };
 
         final int realm;
@@ -514,7 +524,7 @@ public class SkyWardenMob extends HumanShop {
     }
 
     /**
-     * Hands out — and takes in — the five region key pieces.
+     * Hands out — and takes in — the six region key pieces.
      *
      * <h2>Why the Warden and not the Elder</h2>
      * §B1 asks for <i>"the reward of an Elder quest"</i>, and the vanilla Elder
@@ -540,10 +550,10 @@ public class SkyWardenMob extends HumanShop {
      * <h2>The shape</h2>
      * Gated on his own chain being {@link Chapter#DONE}: the keys are what comes
      * AFTER "The Warden's Call", and a player who has not anchored the island
-     * yet does not need five more journal entries. One key is live at a time,
+     * yet does not need six more journal entries. One key is live at a time,
      * in {@link RegionKey} order.
      *
-     * <p>Turn-ins are checked across ALL five before a new one is offered, and
+     * <p>Turn-ins are checked across ALL six before a new one is offered, and
      * deliberately not only for the quest the player is "supposed" to be on:
      * the world record is what decides, so a state where somebody else's
      * turn-in advanced the world cannot strand a held quest. Every branch is

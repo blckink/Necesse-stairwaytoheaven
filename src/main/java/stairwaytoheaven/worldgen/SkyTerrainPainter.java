@@ -322,6 +322,13 @@ public final class SkyTerrainPainter {
     /** WORLD_DESIGN §41.5: the Hollows are Crooked Beyond's own wrong ground. */
     public static final int BIOME_BEETLEFREAK_HOLLOW = 19;
 
+    /**
+     * Hell's two bands (WORLD_DESIGN §17 and A3.8). Appended rather than
+     * inserted: these ordinals are read by the map dumps.
+     */
+    public static final int BIOME_HELL_FRINGE = 20;
+    public static final int BIOME_HELL_FURNACE = 21;
+
     /** Sub-biome class -> the registered biome the region layer stores. */
     public static int biomeRegistryID(int biomeClass) {
         switch (biomeClass) {
@@ -367,6 +374,11 @@ public final class SkyTerrainPainter {
                 return stairwaytoheaven.realms.crooked.CrookedRealm.checkerworks.getID();
             case BIOME_BEETLEFREAK_HOLLOW:
                 return SkyRegistry.beetlefreakHollow.getID();
+
+            case BIOME_HELL_FRINGE:
+                return stairwaytoheaven.realms.hell.HellRealm.infernalFringe.getID();
+            case BIOME_HELL_FURNACE:
+                return stairwaytoheaven.realms.hell.HellRealm.furnaceReach.getID();
 
             default:
                 return SkyRegistry.driftlands.getID();
@@ -1049,12 +1061,14 @@ public final class SkyTerrainPainter {
      * the hosting. The parameter is here so that work has one obvious hook
      * rather than inventing a seventh field later.
      *
-     * <p><b>Hell falls through to Crooked Beyond on purpose.</b>
-     * {@code WORLD_DESIGN} §17-23 is not built — there is no Infernal painter
-     * to call — and a band that painted nothing would be a hole in the world at
-     * depth 0.94-1.00. Crooked is its neighbour and its nearest relative, so
-     * the outermost band reads as the far end of Crooked until Hell lands.
-     * Delete this case the day it does.
+     * <p><b>Hell has its own painter now.</b> It used to fall through to
+     * Crooked Beyond's, because {@code WORLD_DESIGN} §17-23 was not built and a
+     * band that painted nothing would have been a hole in the world at depth
+     * 0.94-1.00. {@link stairwaytoheaven.realms.hell.HellTerrainPainter} ends
+     * that, and it keeps the fall-through's own idea rather than discarding it:
+     * §17's Infernal Fringe is Crooked's ground mixed with Hell's in a ratio
+     * that moves outwards, so the far end of Crooked is still what the inner
+     * half of Hell looks like — by design now, rather than by default.
      */
     private static long describeRealmTile(int realm, int seed, int tileX, int tileY,
             float island, float waterline, float depth, float distortion) {
@@ -1068,8 +1082,10 @@ public final class SkyTerrainPainter {
             case RealmDepth.REALM_GHOST:
                 return stairwaytoheaven.realms.ghost.GhostTerrainPainter.describeBand(
                         seed, tileX, tileY, island, waterline, depth, distortion);
-            case RealmDepth.REALM_CROOKED:
             case RealmDepth.REALM_HELL:
+                return stairwaytoheaven.realms.hell.HellTerrainPainter.describeBand(
+                        seed, tileX, tileY, island, waterline, depth, distortion);
+            case RealmDepth.REALM_CROOKED:
             default:
                 return stairwaytoheaven.realms.crooked.CrookedTerrainPainter.describeBand(
                         seed, tileX, tileY, island, waterline, depth, distortion);

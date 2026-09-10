@@ -65,6 +65,10 @@ public class StairwayToHeavenMod {
         stairwaytoheaven.realms.steinfeld.SteinfeldRealm.register();
         stairwaytoheaven.realms.crooked.CrookedRealm.register();
         stairwaytoheaven.realms.ghost.GhostRealm.register();
+        // Last of the six: Hell registers only biomes and mobs, and its
+        // painter reads tile and object IDs the four realms above have already
+        // put into the registries.
+        stairwaytoheaven.realms.hell.HellRealm.register();
         // Dense, road-connected settlements and civic POIs across all six
         // realm bands. They are one WorldPreset catalogue on the one plane,
         // not extra levels; placement shares vanilla's "villages" collision
@@ -278,6 +282,7 @@ public class StairwayToHeavenMod {
         stairwaytoheaven.realms.steinfeld.SteinfeldRealm.loadTextures();
         stairwaytoheaven.realms.crooked.CrookedRealm.loadTextures();
         stairwaytoheaven.realms.ghost.GhostRealm.loadTextures();
+        stairwaytoheaven.realms.hell.HellRealm.loadTextures();
         stairwaytoheaven.bosses.BossPortalObject.loadBorrowedSheets();
         stairwaytoheaven.objects.RegionKeyObject.loadBorrowedArt();
     }
