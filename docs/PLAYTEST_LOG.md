@@ -781,12 +781,21 @@ cause each and none of them was random.
 ## 2026-09-10 (2) — v0.7.0, the same eight steps, on three seeds at once
 
 The entry above ends RED. This one is the pass that closes it. Same jar
-version, same script, but **three `scripts/integration_test.sh` runs in
-parallel on three different worlds** — the server picks its own seed, so a
-single green run says nothing about a placement defect. Seeds 1480667023,
-1520494498 and 1514024314; plus one `scripts/save_compat_check.sh` on a COPY of
-the player's own `Friemliburg.zip` from `backup-saves-20260907/`, which is the
-existing-save half step 1 was missing.
+version, same script, but **six `scripts/integration_test.sh` runs on six
+different worlds, three at a time in parallel** — the server picks its own
+seed, so a single green run says nothing about a placement defect. Plus one
+`scripts/save_compat_check.sh` on a COPY of the player's own `Friemliburg.zip`
+from `backup-saves-20260907/`, which is the existing-save half step 1 was
+missing, and which **passed**.
+
+Five of the six are green. The sixth, seed 1520494498, was red on one line and
+it was worth having: `FAIL: grangecellar is missing objects its preset placed`,
+`missing=1 10,8=1674!=1673`. 1673 is the `D` in `GRANGE_PLAN` row 8 and 1674 is
+its open counterpart — **Halda had opened her own cellar door**, and the
+assertion counted an opened door as a missing one. `RealmPoiCensus` now accepts
+a `SwitchObject`'s `counterID` as the object it was placed as. The three runs
+after that fix (seeds 1545255801, 1478566018, 1576333831) are green end to end
+and read `grangecellar … placed=92/92 missing=0`.
 
 ### The three reds, and what each one really was
 
@@ -824,24 +833,30 @@ field really answers Crooked and reports the radius it chose as `rpeak=<r>:`.
 
 ### The eight steps, measured
 
-| # | Step | One sentence | Beleg (run b, seed 1520494498, unless noted) | State |
+| # | Step | One sentence | Beleg (seed 1576333831, unless noted) | State |
 |---|---|---|---|---|
 | 1 | Save laden | The player's own Friemliburg, on a copy, takes the mod and comes back up with its Skyreach — and a fresh world does too. | `scripts/save_compat_check.sh Friemliburg.zip`: `Before: skyreach2 entries=1 surfaceRegions=31 players=3 settlements=2`, then the phases below | VERIFIED [run] |
 | 2 | Treppe bauen | The spire and its beacon stand, with the Marble Checker floor intact. | `spire check: beaconObject=wardenbeaconoff wardenFloor=marblecheckertile` | VERIFIED [run] |
 | 3 | Aufsteigen | The Skyreach is its own level and paints without a wrong tile. | `Veil ground OK: class=SkyLevel identifier=skyreach2 dimension=1`; `painter oracle: tileMismatches=0` | VERIFIED [run] |
 | 4 | Sky Warden anwerben | One Warden and both cats are in the world; the settler is registered and both recruit routes carry a price and a shop. | `npc check: wardens=1 cats=2`; `recruit check: skywarden settler=WardenSettler price=coinx30000 shop=present` | VERIFIED [run] |
 | 5 | Veil oeffnen | `veilstatus` samples the Veil bands and finds their own ground. | `murkmosstile`, `hauntedgrasstile`, `ectoplasmtile` counts in the Veil sample | VERIFIED [run] |
-| 6 | Skyreach-Orte besuchen | **All twenty-four lattice kinds now stand somewhere, on every one of the three seeds, and the place each run walked to is complete to the tile.** | `realmpoi census: seed=1520494498 ... queued=1463 unnamed=0 kinds=24/24 queuedkinds=24/24 landmarks=3 nearest=skytollbridge@214` and `realmpoi stamp: kind=skytollbridge at=-40,-165 placed=74/74 missing=0` | VERIFIED [run] |
+| 6 | Skyreach-Orte besuchen | **All twenty-four lattice kinds now stand somewhere, on every one of the six seeds, and the place each run walked to is complete to the tile.** | `realmpoi census: seed=1576333831 ... queued=1440 unnamed=0 kinds=24/24 queuedkinds=24/24 landmarks=3 nearest=skytollbridge@366` and `realmpoi stamp: kind=skytollbridge at=2,255 placed=74/74 missing=0` | VERIFIED [run] |
 | 7 | Einen Boss legen | Not driven. Nothing here kills anything — the server has no player. The six rungs are in the shipped jar at the intended numbers. | `scripts/balance_check.sh`: `mutanthydra 10 320000->528000`, all rows matching the expected table | VERIFIED [jar] — **not played** |
 | 8 | Hell betreten | The far end of the realm field resolves to Hell and all four Hell buildings queue there on their own ground. | `realm check: ... 5200=hell 5800=hell`; `realmpoi funnel hell: candidates=... accepted=...` | VERIFIED [run] |
 
-### The same three numbers on all three seeds
+### The same numbers on all six seeds
 
-| Seed | kinds | queuedkinds | skytown | stamp | rpeak |
-|---|---|---|---|---|---|
-| 1480667023 | 24/24 | 24/24 | `accepted=2 queued=2 nearest=467` | `skytower placed=184/184 missing=0` | `5280:592/2527` |
-| 1520494498 | 24/24 | 24/24 | `accepted=2 queued=2 nearest=561` | `skytollbridge placed=74/74 missing=0` | `5040:6/2481` |
-| 1514024314 | 24/24 | 24/24 | `accepted=2 queued=2 nearest=412` | `skytower placed=184/184 missing=0` | `5120:528/2234` |
+| Seed | Run | kinds | queuedkinds | skytown | stamp of the nearest place | rpeak |
+|---|---|---|---|---|---|---|
+| 1480667023 | PASS | 24/24 | 24/24 | `accepted=2 queued=2 nearest=467` | `skytower placed=184/184 missing=0` | `5280:592/2527` |
+| 1520494498 | red, door only | 24/24 | 24/24 | `accepted=2 queued=2 nearest=561` | `skytollbridge placed=74/74 missing=0` | `5040:6/2481` |
+| 1514024314 | PASS | 24/24 | 24/24 | `accepted=2 queued=2 nearest=412` | `skytower placed=184/184 missing=0` | `5120:528/2234` |
+| 1545255801 | PASS | 24/24 | 24/24 | `accepted=2 queued=2 nearest=756` | `unopenedgate placed=89/89 missing=0` | `5160:30/2998` |
+| 1478566018 | PASS | 24/24 | 24/24 | `accepted=2 queued=2 nearest=296` | `nightfellredoubt placed=156/156 missing=0` | `5240:237/1176` |
+| 1576333831 | PASS | 24/24 | 24/24 | `accepted=2 queued=2 nearest=855` | `skytollbridge placed=74/74 missing=0` | `5120:158/1502` |
+
+The Serpent's Reef, stamped by name in every run because it is the only kind
+placed on open water, read `placed=30/30 missing=0` in all six.
 
 Before this pass, on seed 1486237612, the same three columns read `23/24`,
 `23/24`, `accepted=0 queued=0 nearest=NONE`, `placed=50/74 missing=24` and
