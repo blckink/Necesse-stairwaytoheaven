@@ -42,6 +42,9 @@ REALMS = ["Skyreach", "Eden", "Steinfeld", "Ghost Realm", "Crooked Beyond", "Hel
 #   SteinfeldTerrainPainter  -> Steinfeld's three
 #   GhostTerrainPainter      -> Ghost's three + Gloomfen + Ashen Reach (WORLD_DESIGN 41.5)
 #   CrookedTerrainPainter    -> Crooked's three + Beetlefreak Hollow + the Outlands rim
+#   HellTerrainPainter       -> Hell's two bands (added with 6n; the table was
+#                               written before Hell had any biome at all and
+#                               therefore reported the realm as empty)
 BIOME_REALM = {
     "DriftlandsBiome": 0, "StormveilBiome": 0, "SkywayBiome": 0, "AuroraShoalsBiome": 0,
     "EdenGardenBiome": 1, "EdenCanopyBiome": 1, "EdenShallowsBiome": 1,
@@ -50,6 +53,7 @@ BIOME_REALM = {
     "GloomfenBiome": 3, "AshenReachBiome": 3,
     "CheckerworksBiome": 4, "SpiralFieldsBiome": 4, "StripedWasteBiome": 4,
     "BeetlefreakHollowBiome": 4, "OutlandsBiome": 4,
+    "FurnaceReachBiome": 5, "InfernalFringeBiome": 5,
 }
 
 # NPC id -> realm they are FOUND in. SkyLevel.placeResident (Skyreach),
@@ -147,8 +151,12 @@ def bosses():
     source = read(os.path.join(JAVA, "bosses", "SkyBossLadder.java"))
     out = {}
     for match in re.finditer(
-            r"BY_REALM\[RealmDepth\.REALM_(\w+)\]\s*=\s*\n?\s*new Boss\(RealmDepth\.REALM_\w+,\s*"
-            r"\"(\w+)\",\s*\"\w+\",\s*(\d+),\s*(\d+)\)", source):
+            # The Boss constructor carries damage and armour after the tier, and
+            # the argument list is wrapped over three lines -- an older pattern
+            # that ended at the tier's closing paren matched nothing at all and
+            # printed "boss none" for every realm.
+            r"BY_REALM\[RealmDepth\.REALM_(\w+)\]\s*=\s*new Boss\(\s*RealmDepth\.REALM_\w+,\s*"
+            r"\"(\w+)\",\s*\"\w+\",\s*(\d+),\s*(\d+)\s*,", re.sub(r"\s*\n\s*", " ", source)):
         name, boss, base, tier = match.group(1), match.group(2), int(match.group(3)), int(match.group(4))
         for index, realm in enumerate(["SKYREACH", "EDEN", "STEINFELD", "GHOST", "CROOKED", "HELL"]):
             if name == realm:

@@ -9,6 +9,13 @@ disagree about a count, re-run the tool — it reads the code.
 answers the different question: **is an area full enough to be worth walking
 across.**
 
+**The pictures to go with it:** `python3 tools/area_sheets.py` writes one PNG per
+area into `build/area-sheets/` — every ground, block, enemy and NPC of that area
+as a 64px tile with its German name, plus one sheet for the building sets and one
+for every item icon. It reads the same census this file does, so the two cannot
+drift apart, and it prints what it could not place ("nicht zugeordnet") instead
+of quietly leaving it out.
+
 Measured on `master` @ 2026-09-05, Necesse 1.3.2 — **after** that day's pass,
 which closed three of the holes this document was written to find. What it
 changed is in §"What this document already fixed" at the end; everything above
