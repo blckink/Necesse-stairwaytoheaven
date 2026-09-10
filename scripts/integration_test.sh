@@ -705,13 +705,14 @@ grep -qE "realmpoi stamp: kind=serpentsreef .* missing=0 " "$LOG1" \
 # stands and the barrel really took an item. The census reads the container's
 # inventory, not the placement flag -- the flag says the code ran, and only the
 # inventory says a player can pick the thing up.
-for landmark in skywaytollhouse:magpiesettler:tollwright:3 \
-    grangecellar:haldasettler:sourvatbloom:2 \
-    stormveiltestrange:ossiansettler:prototypenine:1; do
+for landmark in skywaytollhouse:magpiesettler:tollwright:3:n/a \
+    grangecellar:haldasettler:sourvatbloom:2:themother:10/10 \
+    stormveiltestrange:ossiansettler:prototypenine:1:stormlenscore:10/10; do
     lm_key="$(echo "$landmark" | cut -d: -f1)"
     lm_who="$(echo "$landmark" | cut -d: -f2)"
     lm_guard="$(echo "$landmark" | cut -d: -f3)"
     lm_rewards="$(echo "$landmark" | cut -d: -f4)"
+    lm_drop="$(echo "$landmark" | cut -d: -f5-)"
     grep -qE "realmpoi landmark $lm_key: .* stamped=1 " "$LOG1" \
         || { echo "FAIL: the once-per-world place $lm_key was never stamped"; \
              grep -aE "realmpoi landmark $lm_key:" "$LOG1" | tail -1; STATUS=1; }
@@ -723,6 +724,12 @@ for landmark in skywaytollhouse:magpiesettler:tollwright:3 \
              grep -aE "realmpoi landmark $lm_key:" "$LOG1" | tail -1; STATUS=1; }
     grep -qE "realmpoi landmark $lm_key: .* guard=$lm_guard .* guards=1 " "$LOG1" \
         || { echo "FAIL: $lm_guard is not standing in $lm_key (the place is a container, not a fight)"; \
+             grep -aE "realmpoi landmark $lm_key:" "$LOG1" | tail -1; STATUS=1; }
+    # ...and the two recruit keys that are BOSS LOOT rather than container loot
+    # come off the table on every roll. A chance drop here is a world in which
+    # the settler can never be hired.
+    grep -qE "realmpoi landmark $lm_key: .* guardkey=$lm_drop " "$LOG1" \
+        || { echo "FAIL: $lm_guard does not hand over $lm_drop on every kill"; \
              grep -aE "realmpoi landmark $lm_key:" "$LOG1" | tail -1; STATUS=1; }
     grep -qE "realmpoi landmark $lm_key: .* rewards=$lm_rewards/$lm_rewards " "$LOG1" \
         || { echo "FAIL: $lm_key does not hold all $lm_rewards of its unique rewards"; \

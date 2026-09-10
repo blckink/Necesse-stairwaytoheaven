@@ -557,6 +557,34 @@ public final class RealmPoiCensus {
                 }
             }
 
+            // ...and, for the two guards whose loot IS a recruit key, that the
+            // key really comes off the table. Rolled rather than read: a
+            // LootTable keeps its items in a public list but a chance wrapper
+            // hides what is inside it, and "the item is somewhere in the table"
+            // is not the claim -- "every kill hands it over" is. Ten rolls of a
+            // guaranteed LootItem all carry it; one chance roll in ten would
+            // not.
+            String guardKey = SkyLandmarkPois.guardKeyOf(index);
+            String keyDrop = "n/a";
+            if (!guardKey.isEmpty()) {
+                necesse.entity.mobs.Mob probe =
+                        necesse.engine.registries.MobRegistry.getMob(guardID, level);
+                int rolls = 0;
+                if (probe != null && probe.getLootTable() != null) {
+                    for (int roll = 0; roll < 10; roll++) {
+                        for (necesse.inventory.InventoryItem dropped : probe.getLootTable()
+                                .getNewList(new necesse.engine.util.GameRandom(roll), 1.0F, probe)) {
+                            if (dropped != null && dropped.item != null
+                                    && guardKey.equals(dropped.item.getStringID())) {
+                                rolls++;
+                                break;
+                            }
+                        }
+                    }
+                }
+                keyDrop = guardKey + ":" + rolls + "/10";
+            }
+
             Point at = SkyLandmarkPois.settlerTile(index, new Point(site.x, site.y));
             Point guardAt = SkyLandmarkPois.guardTile(index, new Point(site.x, site.y));
             logs.add("realmpoi landmark " + key
@@ -574,6 +602,7 @@ public final class RealmPoiCensus {
                     + " guard=" + guardID
                     + " guardseat=" + guardAt.x + "," + guardAt.y
                     + " guards=" + guards
+                    + " guardkey=" + keyDrop
                     + " rewards=" + rewardsHeld + "/" + rewardsWanted + rewardMisses
                     + " ms=" + (System.currentTimeMillis() - started));
         }

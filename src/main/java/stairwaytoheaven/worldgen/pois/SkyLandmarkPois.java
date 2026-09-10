@@ -204,9 +204,26 @@ public final class SkyLandmarkPois {
         return SETTLERS[index];
     }
 
+    /**
+     * The recruit key each guard carries in its own loot table, or {@code ""}.
+     *
+     * <p>Two of §3's eight rewards are boss loot rather than container loot —
+     * the Mother comes out of the Sourvat Bloom and the Storm Lens Core out of
+     * Prototype Nine — and both are guaranteed drops, because they are Halda's
+     * and Vane's recruit keys and a failed roll would be a world in which they
+     * can never be hired. The Toll-House's key is on a display stand instead
+     * (§2.12), so its entry is empty. The census rolls these to prove it.
+     */
+    private static final String[] GUARD_KEYS = {"", "themother", "stormlenscore"};
+
     /** Which enemy a landmark keeps. */
     public static String guardOf(int index) {
         return GUARDS[index];
+    }
+
+    /** The recruit key that guard drops, or {@code ""} if its place holds it. */
+    public static String guardKeyOf(int index) {
+        return GUARD_KEYS[index];
     }
 
     /** The tile that guard stands on, once the landmark's corner is known. */
