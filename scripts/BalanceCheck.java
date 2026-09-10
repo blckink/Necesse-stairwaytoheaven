@@ -10,7 +10,7 @@ import java.util.List;
  * <p>See scripts/balance_check.sh for what this proves and what it does not.
  * The short version: every number below is read out of the jar by reflection,
  * so the table cannot drift from the build silently. Rows are the mobs the
- * biome spawn tables actually spawn, plus the five boss rungs.
+ * biome spawn tables actually spawn, plus the six boss rungs.
  */
 public class BalanceCheck {
 
@@ -100,6 +100,25 @@ public class BalanceCheck {
                 4000, 6200, 280.0F, 364.0F, 60, 75, 960, 960),
         r("Crooked", "stairwaytoheaven.realms.crooked.DoorMimicMob", "elite",
                 5600, 8680, 280.0F, 364.0F, 60, 75, -1, -1),
+
+        // --- Hell, floor 4450 / 285 / 65, uplift 165 / 136 / 155 % ---
+        // These four never shipped before, so there is no "old" value to read
+        // off an earlier revision. The old column therefore records THE RUNG
+        // THEY MUST EXCEED: Crooked Beyond's same-role value. That keeps every
+        // assertion in check() meaningful rather than skipped -- "above the
+        // old" reads as "above the realm below", which is exactly the claim a
+        // new outermost band has to make. Crooked has no ranged and no fast
+        // mob of its own, so those two rows use Crooked's floor with the role
+        // applied (6200x70% = 4340, 364x85% = 309.4; 6200x60% = 3720,
+        // 364x80% = 291.2) and its x1.50 aggro uplift on the same base range.
+        r("Hell", "stairwaytoheaven.realms.hell.mobs.InfernalClerkMob", "standard",
+                6200, 7342, 364.0F, 387.6F, 75, 81, 768, 793),
+        r("Hell", "stairwaytoheaven.realms.hell.mobs.AshSpiritMob", "elite",
+                8680, 10278, 364.0F, 387.6F, 75, 81, -1, -1),
+        r("Hell", "stairwaytoheaven.realms.hell.mobs.TicketImpMob", "ranged",
+                4340, 5139, 309.4F, 329.46F, 75, 81, 720, 744),
+        r("Hell", "stairwaytoheaven.realms.hell.mobs.BoilerHoundMob", "fast",
+                3720, 4405, 291.2F, 310.08F, 75, 81, 768, 793),
     };
 
     /** realm index | boss id | tier | old final HP | new final HP | old xdmg | new xdmg */
@@ -109,6 +128,11 @@ public class BalanceCheck {
         b(2, "ascendedwizard", 9, 157520, 220528, 2.0F, 2.42F),
         b(3, "pestwarden", 9, 161100, 233595, 2.0F, 2.48F),
         b(4, "crystaldragon", 10, 208000, 322400, 2.15F, 2.795F),
+        // Hell. The old column is §B4's reservation -- 80 000 x the tier-10
+        // curve of 4.00 -- because this rung had no portal before and so no
+        // shipped value; what it must beat is the number the reservation
+        // itself named.
+        b(5, "mutanthydra", 10, 320000, 528000, 2.15F, 2.924F),
     };
 
     // ===== the check ==========================================================
@@ -141,7 +165,7 @@ public class BalanceCheck {
         }
         System.out.println("OK -- every row in the jar matches the expected table, every");
         System.out.println("shipped value is above the value it replaced, and every role");
-        System.out.println("column rises monotonically outwards across the five realm bands.");
+        System.out.println("column rises monotonically outwards across the six realm bands.");
     }
 
     static void check(Row row) throws Exception {
@@ -228,12 +252,12 @@ public class BalanceCheck {
     /**
      * "damit die Kurve nicht kippt" -- measured rather than asserted.
      *
-     * <p>Per role, the five realm bands must rise strictly outwards. A uplift
+     * <p>Per role, the six realm bands must rise strictly outwards. A uplift
      * that made, say, Eden's elite tougher than Steinfeld's elite would pass
      * every row check above and still have broken the ladder.
      */
     static void checkMonotone() {
-        String[] bands = {"Skyreach", "Eden", "Steinfeld", "Veil|Ghost", "Crooked"};
+        String[] bands = {"Skyreach", "Eden", "Steinfeld", "Veil|Ghost", "Crooked", "Hell"};
         System.out.println("monotone per role, outwards across the bands:");
         for (String role : new String[]{"standard", "elite", "ranged", "fast"}) {
             StringBuilder line = new StringBuilder();

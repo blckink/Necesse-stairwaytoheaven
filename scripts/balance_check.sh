@@ -13,7 +13,7 @@
 # What it asserts, per mob and per boss:
 #   1. the value in the jar EQUALS the expected new value,
 #   2. the value in the jar is STRICTLY ABOVE the value it replaced, and
-#   3. per role, HP rises monotonically outwards across the five realm bands —
+#   3. per role, HP rises monotonically outwards across the six realm bands —
 #      "damit die Kurve nicht kippt", measured rather than asserted.
 #
 # WHAT IT DOES NOT PROVE, and saying so is the point:

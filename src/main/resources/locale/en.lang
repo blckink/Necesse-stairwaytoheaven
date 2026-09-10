@@ -655,6 +655,8 @@ crooked2=Crooked Beyond
 stripedwaste=Striped Waste
 spiralfields=Spiral Fields
 checkerworks=Checkerworks
+infernalfringe=Infernal Fringe
+furnacereach=Furnace Reach
 
 [tile]
 crookedstripetile=Crooked Stripe
@@ -699,6 +701,10 @@ realityshardtip=A sharp fragment of a rule the world no longer follows.
 [mob]
 doormimic=Door Mimic
 tongueplant=Tongue Plant
+infernalclerk=Infernal Clerk
+ashspirit=Ash Spirit
+ticketimp=Ticket Imp
+boilerhound=Boiler Hound
 stripebeetle=Stripe Beetle
 
 [misc]
@@ -888,6 +894,7 @@ bossportaleden=Eden Summoning Stone
 bossportalsteinfeld=Steinfeld Summoning Stone
 bossportalghostrealm=Aftergarden Summoning Stone
 bossportalcrookedbeyond=Crooked Summoning Stone
+bossportalhell=Infernal Summoning Forge
 [buff]
 incursionpressure=Incursion Pressure
 [misc]
@@ -931,6 +938,7 @@ regionkeyeden=Eden Garden Stair
 regionkeysteinfeld=Steinfeld Mourning Angel
 regionkeyghostrealm=Aftergarden Raven Perch
 regionkeycrookedbeyond=Knott's Crooked Door
+regionkeyhell=The Infernal Seal
 [quests]
 swhkeyskyreachtitle=The Watchfire
 swhkeyskyreachdesc=The Warden can build a watchfire that the Skyreach's own summoning stones will answer to - if you bring him the storm to light it with.
@@ -947,6 +955,9 @@ swhkeyghostrealmreward=Aftergarden Raven Perch + 10x Spiritsteel Bar
 swhkeycrookedbeyondtitle=A Door of Your Own
 swhkeycrookedbeyonddesc=Every door in the Crooked Beyond leads somewhere it should not. Bring the Warden its wood and its shards and he will hang you one that does it on purpose.
 swhkeycrookedbeyondreward=Knott's Crooked Door + 12x Spiritsteel Bar
+swhkeyhelltitle=Everything Appears to Be in Order
+swhkeyhelldesc=Hell does not open for anybody without the paperwork. The Warden cannot get you a form, so he will settle for proof you have been out that far: the Crooked Beyond, twice over.
+swhkeyhellreward=The Infernal Seal + 16x Spiritsteel Bar
 [misc]
 regionkeyneedsettlement=A key piece only holds where people live. Stand it up inside your settlement.
 regionkeyunlocked=The <key> settles into the ground,\nand somewhere far out a cold stone warms.
@@ -960,6 +971,8 @@ wardenkeyaskghostrealm=The Aftergarden, now, and you will want your chalk before
 wardenkeydoneghostrealm=A bird for the dead, and it will sit anywhere you put it. That is more than most of them will do.
 wardenkeyaskcrookedbeyond=Last one, and the worst. The Crooked Beyond has a door for everything. Bring me the wood and the shards and I will hang you one that behaves.
 wardenkeydonecrookedbeyond=There. A door of your own, and it opens on purpose. That is the whole set.
+wardenkeyaskhell=One more. There is one further out than the doors, and it keeps records. Bring me twice what the Crooked cost you and I will stamp you something it recognises.
+wardenkeydonehell=Alive, dead and unreasonable. Everything appears to be in order. Do not lose it.
 
 // --- Sky voyages: the mod's own expedition category ------------------
 // A mission board shows "<name> <type>" (ui.missionnameformat), and the
