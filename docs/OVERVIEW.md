@@ -84,30 +84,41 @@ table appears in only **2**, a bed in only **1** (the Spire), and 5 of the 9 are
 "furnished" by a light and nothing else. `SkyFurnitureSet`'s 17 pieces are still
 almost unused outside the Spire.
 
-**The inhabited catalogue adds 19 presets.** `RealmPoiWorldPreset` places ten
-in Skyreach, two in Eden, one each in Steinfeld/Ghost/Crooked, and four in the
-reserved Hell band. The large sites include actual street networks, buildings
+**The inhabited catalogue adds 22 presets.** `RealmPoiWorldPreset` places
+thirteen in Skyreach, two in Eden, one each in Steinfeld/Ghost/Crooked, and four
+in the reserved Hell band. The large sites include actual street networks, buildings
 beside rather than on those streets, non-rectangular room unions, doors,
 windows, dense functional furniture and clear circulation. Full catalogue and
 review rules: `docs/design/realm-poi-worldgen.md`.
 
-**Six of the ten Skyreach ones come from the dossier**
+**Nine of the thirteen Skyreach ones come from the dossier**
 (`docs/design/chapter-01-skyreach-pois.md`, fourteen designed places). The
 Skyway Toll-House (§2.12) was transcribed into `setObject` calls by hand on
 2026-09-09. The Skywatch Wayside (§2.1), the Dew-Keeper's Hut (§2.11), the
-Shepherd's Fold (§2.2), the Institute of Applied Falling (§2.3) and the Passage
-Wayhouse (§2.7) are not: `RealmPoiPresets.plan(Preset, String[], Legend)` reads the dossier's ASCII
+Shepherd's Fold (§2.2), the Institute of Applied Falling (§2.3), the Passage
+Wayhouse (§2.7), and — on 2026-09-10 — the Nightfell Redoubt (§2.4), the Aether
+Manufactory (§2.5) and the Sovereign's Anvil (§2.6)
+are not: `RealmPoiPresets.plan(Preset, String[], Legend)` reads the dossier's ASCII
 map character for character and implements the dossier's §0.2–§0.4 rules **once**
 — both halves of a multi-tile piece, wall decor on `WALL_DECOR` and never on
 masonry, table decorations only on a real `TableObjectInterface`, a chair turned
 toward its table, a window only mid-run in a straight wall, no lone fence post.
-Every breach throws at load, because `onRegistryClosed` builds all nineteen
+Three more rules landed with §2.4–§2.6, which the earlier plans did not exercise:
+a per-tile rotation (`Legend.turns`, because both those buildings hang ONE
+lantern character on all four inner faces of their shell), a carpet on
+`TILE_LAYER` (`Legend.rug`, §2.5's 65-tile runner) and a scattered formation
+(`Legend.scatter`, §2.6's 92-tile rim at 55% coverage — writing a rock on all 92
+would seal the arena, since `RockObject` is solid).
+Every breach throws at load, because `onRegistryClosed` builds all twenty-two
 kinds; each rule was confirmed to fire by breaking it and booting a server.
 `tools/plan_transcription_audit.py` proves the arrays in the code are still
-character-identical to the sections in the dossier. The remaining eight plans
-are unbuilt, and every §4 piece of new art the five built ones ask for — the
-steles, `cloudspringfont`, `skywaywaystone`, Wren's wardrobe — is left out
-rather than faked; each is named in the preset's own javadoc. **`[run]`, not `[game]`.**
+character-identical to the sections in the dossier. The remaining five plans
+are unbuilt, and every §4 piece of new art the eight built ones ask for — the
+steles, `cloudspringfont`, `skywaywaystone`, Wren's wardrobe, `sovereignaltar`,
+the Skywatch Revenant, the Fulgur Shade and the three `sovereignshard` — is left
+out rather than faked; each is named in the preset's own javadoc. Without the
+altar the Anvil is its rim, its ring and its Seraphs and no wave fight, which is
+what §2.6 asks for by name. **`[run]`, not `[game]`.**
 
 **And they now stand in the world — counted, not assumed.** From 2026-09-04 to
 2026-09-07 they were registered and largely absent, and no gate looked: the POI
@@ -115,10 +126,26 @@ counts in `scripts/integration_test.sh` were the SURFACE catalogue's, a
 different system. `/skyreachstatus pois` (`RealmPoiCensus`) walks the whole
 realm disc through the placement decision itself and then through the preset
 regions the world really built, and the integration test fails on anything less
-than 19/19. Measured over six seeds on 2026-09-07: **13/13 on all of them**,
+than 22/22. Measured over six seeds on 2026-09-07: **13/13 on all of them**,
 ~1,450 places in a 6144-tile disc, nearest one **126–430 tiles** from the
-arrival pad. `[run]`, not `[game]` — nothing has looked at one yet. Before the
-fix the same census read 11/13 and 419 tiles. What it does not check is whether
+arrival pad. On 2026-09-10, seed 1527996859: **22/22 accepted and 22/22
+queued**, 1,539 places, nearest one 296 tiles out. `[run]`, not `[game]` —
+nothing has looked at one yet. Before the
+fix the same census read 11/13 and 419 tiles.
+
+**How a kind gets a cell changed on 2026-09-10, and it was a real defect.**
+Outside Skyreach the rotation is a per-cell hash; that spreads the mix without
+guaranteeing it. Skyreach is the one band bounded by its own depth — `RealmDepth`
+gives it weight only below depth 0.30, i.e. 1800 tiles — and it now carries
+thirteen kinds in the **38 sites** the band offers. Thirty-eight draws over
+thirteen bins leave a bin empty about half the time, and on seed 1524204744 two
+kinds stood nowhere in the world at all (`passagewayhouse`, `sovereignsanvil`),
+with `badground=0` everywhere: the catalogue gate had been a coin flip since the
+band passed ten kinds, failing on arithmetic rather than on a defect in a place.
+`RealmPoiWorldPreset.skyreachRotate` now COUNTS instead of hashing — whether a
+cell holds a site and which realm it falls in are pure functions of the seed, so
+the band's sites can be walked in scan order and cell *n* takes kind `n % kinds`.
+Measured after: every one of the thirteen holds **2–4 accepted sites**. What it does not check is whether
 a footprint's INTERIOR is solid: `validSite` samples nine points, so a 57×41
 Sky Town can still straddle Mistsea between them.
 

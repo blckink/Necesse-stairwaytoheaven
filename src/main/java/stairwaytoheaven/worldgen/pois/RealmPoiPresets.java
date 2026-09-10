@@ -6,6 +6,11 @@ import necesse.engine.registries.ObjectLayerRegistry;
 import necesse.engine.registries.ObjectRegistry;
 import necesse.engine.registries.TileRegistry;
 import necesse.engine.util.GameRandom;
+import necesse.inventory.lootTable.LootTable;
+import necesse.inventory.lootTable.lootItem.ChanceLootItem;
+import necesse.inventory.lootTable.lootItem.ChanceLootItemList;
+import necesse.inventory.lootTable.lootItem.LootItem;
+import necesse.inventory.lootTable.lootItem.OneOfLootItems;
 import necesse.level.maps.presets.Preset;
 import stairwaytoheaven.SkyCloudmarbleSet;
 import stairwaytoheaven.SkyFurnitureSet;
@@ -13,6 +18,7 @@ import stairwaytoheaven.SkyRegistry;
 import stairwaytoheaven.realms.crooked.CrookedRealm;
 import stairwaytoheaven.realms.eden.EdenRealm;
 import stairwaytoheaven.realms.ghost.GhostRealm;
+import stairwaytoheaven.worldgen.SkyNoise;
 
 /**
  * The authored POI catalogue for the single Skyreach plane.
@@ -63,7 +69,17 @@ public final class RealmPoiPresets {
     public static final int SKY_FALLING_INSTITUTE = 17;
     /** POI 2.7 of the dossier: the inn on the Skyway. */
     public static final int SKY_PASSAGE_WAYHOUSE = 18;
-    public static final int COUNT = 19;
+    /**
+     * POI 2.4 of the dossier: the hostile compound, and the first thing worldgen
+     * has ever built out of the {@code nightfell} wall family — registered and
+     * craftable since 2026-09-02 and placed by nothing until now (§1.1).
+     */
+    public static final int SKY_NIGHTFELL_REDOUBT = 19;
+    /** POI 2.5 of the dossier: three rooms, three workstations, one long runner. */
+    public static final int SKY_AETHER_MANUFACTORY = 20;
+    /** POI 2.6 of the dossier: the arena, which is a rim, a ring and an altar. */
+    public static final int SKY_SOVEREIGNS_ANVIL = 21;
+    public static final int COUNT = 22;
 
     private static final int UP = 0, RIGHT = 1, DOWN = 2, LEFT = 3;
     /** Wall-decor rotation: where the WALL is, not where the piece faces (§0.2). */
@@ -95,6 +111,9 @@ public final class RealmPoiPresets {
             case SKY_SHEPHERDS_FOLD: return FOLD_PLAN[0].length();
             case SKY_FALLING_INSTITUTE: return INSTITUTE_PLAN[0].length();
             case SKY_PASSAGE_WAYHOUSE: return WAYHOUSE_PLAN[0].length();
+            case SKY_NIGHTFELL_REDOUBT: return REDOUBT_PLAN[0].length();
+            case SKY_AETHER_MANUFACTORY: return MANUFACTORY_PLAN[0].length();
+            case SKY_SOVEREIGNS_ANVIL: return ANVIL_PLAN[0].length();
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -120,6 +139,9 @@ public final class RealmPoiPresets {
             case SKY_SHEPHERDS_FOLD: return FOLD_PLAN.length;
             case SKY_FALLING_INSTITUTE: return INSTITUTE_PLAN.length;
             case SKY_PASSAGE_WAYHOUSE: return WAYHOUSE_PLAN.length;
+            case SKY_NIGHTFELL_REDOUBT: return REDOUBT_PLAN.length;
+            case SKY_AETHER_MANUFACTORY: return MANUFACTORY_PLAN.length;
+            case SKY_SOVEREIGNS_ANVIL: return ANVIL_PLAN.length;
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -154,6 +176,9 @@ public final class RealmPoiPresets {
             case SKY_SHEPHERDS_FOLD: return "shepherdsfold";
             case SKY_FALLING_INSTITUTE: return "fallinginstitute";
             case SKY_PASSAGE_WAYHOUSE: return "passagewayhouse";
+            case SKY_NIGHTFELL_REDOUBT: return "nightfellredoubt";
+            case SKY_AETHER_MANUFACTORY: return "aethermanufactory";
+            case SKY_SOVEREIGNS_ANVIL: return "sovereignsanvil";
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -174,7 +199,8 @@ public final class RealmPoiPresets {
             case SKY_TOWER: case SKY_TOWN: case SKY_TOLL_BRIDGE: case SKY_INN:
             case SKY_TOLL_HOUSE: case SKY_WAYSIDE_SHRINE: case SKY_DEW_KEEPERS_HUT:
             case SKY_SHEPHERDS_FOLD: case SKY_FALLING_INSTITUTE:
-            case SKY_PASSAGE_WAYHOUSE:
+            case SKY_PASSAGE_WAYHOUSE: case SKY_NIGHTFELL_REDOUBT:
+            case SKY_AETHER_MANUFACTORY: case SKY_SOVEREIGNS_ANVIL:
                 return 0;
             case EDEN_CROWN_GARDEN: case EDEN_FERMENT_HOUSE: return 1;
             case STEINFELD_MEMORIAL: return 2;
@@ -208,6 +234,12 @@ public final class RealmPoiPresets {
             case SKY_SHEPHERDS_FOLD: return shepherdsFold();
             case SKY_FALLING_INSTITUTE: return fallingInstitute();
             case SKY_PASSAGE_WAYHOUSE: return passageWayhouse();
+            // The three that carry loot take the random they fill it from. The
+            // parameter has been on this method since the catalogue landed and
+            // was ignored by every kind; Preset.addInventory is what it is for.
+            case SKY_NIGHTFELL_REDOUBT: return nightfellRedoubt(random);
+            case SKY_AETHER_MANUFACTORY: return aetherManufactory(random);
+            case SKY_SOVEREIGNS_ANVIL: return sovereignsAnvil();
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -1103,6 +1135,18 @@ public final class RealmPoiPresets {
                         + "', but the plan draws nothing there");
             }
         }
+        // Same question for a per-tile rotation: turning a piece the plan never
+        // draws would be a transcription slip nobody could see in the world.
+        for (java.util.Map.Entry<Integer, Byte> entry : legend.turn.entrySet()) {
+            int x = entry.getKey() >> 16;
+            int y = entry.getKey() & 0xFFFF;
+            char drawn = at(rows, x, y);
+            if (drawn == '.' || drawn == ' ') {
+                throw new IllegalStateException("Plan tile " + x + "," + y
+                        + " is turned to " + entry.getValue()
+                        + ", but the plan draws nothing there");
+            }
+        }
         for (int y = 0; y < rows.length; y++) {
             String row = rows[y];
             if (row.length() != rows[0].length()) {
@@ -1164,6 +1208,16 @@ public final class RealmPoiPresets {
                                 + " ChairObject.facesTable would find nothing to sit at");
                     }
                 }
+                // 0.2: a rotation is a per-tile fact and the dossier states it
+                // per tile. This is the last word on it -- over the character's
+                // own value, over the side a chair was turned to, and over the
+                // direction a pair's far half lands on -- and it reaches the
+                // wall decor below, which is the case that needs it: 2.4 and
+                // 2.5 both hang ONE lantern character on all four inner faces.
+                Byte turned = legend.turn.get((x << 16) | y);
+                if (turned != null) {
+                    rotation = turned;
+                }
 
                 if (legend.tile[c] >= 0) {
                     p.setTile(x, y, legend.tile[c]);
@@ -1199,7 +1253,7 @@ public final class RealmPoiPresets {
                 // declared; what only the plan can answer is whether the wall it
                 // names is really drawn on that side.
                 if (legend.wallDecor[c] >= 0) {
-                    int wallDir = legend.rotation[c];
+                    int wallDir = rotation;
                     int wx = x + (wallDir == WALL_RIGHT ? 1 : wallDir == WALL_LEFT ? -1 : 0);
                     int wy = y + (wallDir == WALL_BELOW ? 1 : wallDir == WALL_ABOVE ? -1 : 0);
                     if (!masonryAt(rows, legend, wx, wy)) {
@@ -1209,6 +1263,24 @@ public final class RealmPoiPresets {
                     }
                     p.setObjectLayer(ObjectLayerRegistry.WALL_DECOR, x, y,
                             legend.wallDecor[c], wallDir);
+                }
+
+                // A carpet, on TILE_LAYER, over the floor its character already
+                // wrote -- 2.5's 5x13 runner is 65 tiles of one continuous rug.
+                if (legend.rug[c] >= 0) {
+                    p.setObjectLayer(ObjectLayerRegistry.TILE_LAYER, x, y, legend.rug[c]);
+                }
+
+                // A formation rather than a fill: the character's pieces land on
+                // its own share of its own cells, decided by the tile's local
+                // coordinates so the same plan builds the same place every time.
+                int[] pieces = legend.formation[c];
+                if (pieces != null) {
+                    if (SkyNoise.hash(SCATTER_SALT, x, y) < legend.coverage[c]) {
+                        float pick = SkyNoise.hash(SCATTER_SALT + 1, x, y);
+                        int index = Math.min(pieces.length - 1, (int) (pick * pieces.length));
+                        p.setObject(x, y, pieces[index]);
+                    }
                 }
             }
         }
@@ -1532,6 +1604,342 @@ public final class RealmPoiPresets {
                 // stele, which is not built, so the apron simply runs through.
                 .reads(8, 11, ',');
         plan(p, WAYHOUSE_PLAN, legend);
+        return p;
+    }
+
+    /**
+     * POI 2.4, the Nightfell Redoubt, from the plan in §2.4 verbatim.
+     *
+     * <p>The dossier's hostile place, and the first thing this mod's worldgen
+     * has ever built out of the {@code nightfell} wall family: the dark half of
+     * the building set has been registered and craftable for four releases and
+     * §1.1 lists it under "registered and currently UNUSED by worldgen — free
+     * wins". 115 wall tiles of it, counted off the plan, plus the ten windows
+     * and six doors that go with them.
+     *
+     * <p>264 of its 625 tiles are left untouched outside the ring and 190 more
+     * are the open court, because the compound is a fight you cross rather than
+     * a room you loot. 10 lamps in 625 = 1 per 62, deliberately UNDER §0.5's
+     * 25-40 band: the ring's eight lanterns are evenly spaced and the court
+     * between them is not lit at all.
+     *
+     * <p>What is deliberately NOT built, with its reason:
+     * <ul>
+     *   <li>The four Skywatch Revenants and three Fulgur Shades. Neither mob
+     *       exists — §4 asks for one new sheet and one new icon for them — and
+     *       {@code MobRegistry.getMob} of a name nobody registered returns null,
+     *       which {@link RealmPoiWorldPreset} would swallow silently. The two
+     *       enemies that DO exist stand where §2.4 puts them.</li>
+     *   <li>{@code sovereignshard}, Shard I of III. §4 new art, and with it goes
+     *       the cross-biome chain of §3.2. The rest of the cache is written.</li>
+     * </ul>
+     *
+     * <p>The empty pedestal at (12,12) is not an omission: §2.4 leaves the
+     * display stand bare on purpose, because somebody already came for whatever
+     * stood on it.
+     */
+    private static final String[] REDOUBT_PLAN = {
+            ".........................",
+            ".........................",
+            ".........................",
+            "...#####O###D###O#####...",
+            "...###=q=========q=###...",
+            "...###=============###...",
+            "...#=#######=========#...",
+            "...#q#kk=sc#========q#...",
+            "...O=#=====#=========O...",
+            "...#=O=====#=========#...",
+            "...#=#Bb==v#====L====#...",
+            "...#=###D###=========#...",
+            "...D======S=P=S======D...",
+            "...#=====g=rrr=g=====#...",
+            "...#=========###D###=#...",
+            "...#=========#==m=r#=#...",
+            "...O====L====#eE===#=O...",
+            "...#q========#==c==#q#...",
+            "...#=========#k==eEO=#...",
+            "...###=======#########...",
+            "...###=q=========q=###...",
+            "...#####O###D###O#####...",
+            ".........................",
+            ".........................",
+            ".........................",
+    };
+
+    private static Preset nightfellRedoubt(GameRandom random) {
+        Preset p = new Preset(width(SKY_NIGHTFELL_REDOUBT), height(SKY_NIGHTFELL_REDOUBT));
+        Legend legend = new Legend(SkyRegistry.charFloorID)
+                .floor('=')
+                .wall('#', "nightfellwall")
+                .window('O', "nightfellwindow")
+                .door('D', "nightfelldoor")
+                // The ring's eight lanterns are ONE character on all four inner
+                // faces, and §0.2's wall-decor rotation is where the WALL is, so
+                // the character declares the north face and the other six tiles
+                // are turned. This is §2.4's object table, transcribed.
+                .floor('q')
+                .decor('q', "mistglasslantern", WALL_ABOVE)
+                .turns(7, 20, WALL_BELOW).turns(17, 20, WALL_BELOW)
+                .turns(4, 7, WALL_LEFT).turns(4, 17, WALL_LEFT)
+                .turns(20, 7, WALL_RIGHT).turns(20, 17, WALL_RIGHT)
+                // The vault backs onto the armoury's north wall; the bunkroom's
+                // own chest onto its south wall, which is the other direction.
+                .prop('k', "skywatchcabinet", DOWN)
+                .turns(14, 18, UP)
+                .prop('s', "skywatchbookshelf", DOWN)
+                .prop('c', "skywatchcandelabra")
+                .pair('B', 'b', "skywatchbench", RIGHT)
+                .prop('v', "barrel")
+                // Both bunkroom beds head to the east wall, rotation 3 (§2.4).
+                .pair('E', 'e', "skywatchbed", LEFT)
+                .table('m', "skywatchmodulartable", "skywatchtome")
+                // §2.4's own legend gives 'r' two meanings, "r skywatchdresser"
+                // and "r (centre, y13) skywatchrubble". The mast's three tiles
+                // are the character; the bunkroom dresser is named by
+                // coordinate, the way §2.7's stele is. 'R' is not drawn by the
+                // plan — it exists so reads() has a legend entry to point at.
+                .prop('r', "skywatchrubble")
+                .prop('R', "skywatchdresser", LEFT)
+                .reads(18, 15, 'R')
+                // Empty on purpose: the story is that somebody got here first.
+                .prop('P', "skywatchdisplay")
+                .prop('S', "stormscreed")
+                .prop('g', "chargecrystal")
+                .prop('L', "wardencandelabra");
+        plan(p, REDOUBT_PLAN, legend);
+
+        // The armoury's cache, written AFTER the plan: addInventory fills
+        // whatever container object entity stands on the tile, so the cabinets
+        // and the barrel have to be standing there first. §2.4 states ONE table
+        // for all three containers, so it is split across them rather than
+        // rolled three times over — that would be three times the cache the
+        // dossier costed. Shard I is left out with the rest of §4's art.
+        p.addInventory(new LootTable(
+                LootItem.between("stormsteelbar", 2, 5),
+                LootItem.between("aetheriumbar", 2, 4)
+        ), random, 6, 7, new Object[0]);
+        p.addInventory(new LootTable(
+                LootItem.between("stormglass", 2, 6),
+                new ChanceLootItemList(0.35F, new OneOfLootItems(
+                        new LootItem("stormdisc"),
+                        new LootItem("skyreave"),
+                        new LootItem("thunderhead")))
+        ), random, 7, 7, new Object[0]);
+        p.addInventory(new LootTable(
+                ChanceLootItem.between(0.60F, "coin", 400, 1200)
+        ), random, 10, 10, new Object[0]);
+        return p;
+    }
+
+    /**
+     * POI 2.5, the Aether Manufactory, from the plan in §2.5 verbatim.
+     *
+     * <p>The chapter's multi-room interior: one building, three rooms, and the
+     * {@code ballroom} lesson that grandeur comes from one very large continuous
+     * floor treatment rather than from more furniture. The 5x13 Skywatch carpet
+     * down the middle of the machine hall is 65 tiles — 31 percent of the hall
+     * — and nothing stands on it. It is written on {@code TILE_LAYER}, where
+     * {@code ModularCarpetObject} lives; on the base layer it would take the
+     * tile the furniture beside it needs.
+     *
+     * <p>All three profession workstations stand in a row along the west wall,
+     * which is how the room teaches them: a player who has never built an Aether
+     * Forge walks into one that is already working. 13 lights in 567 = 1 per 44,
+     * and the hall alone is 11 over 210 = 1 per 19 — the brightest interior in
+     * the chapter, because it is a building that is still in use.
+     *
+     * <p>NOT built, with the reason: of §2.5's three Skywatch Revenants and two
+     * Rime Sentries, only the Sentries are placed — the Revenant is §4 art that
+     * does not exist. {@code sovereignshard} II is §4 art too, so the display
+     * stand at (21,15) stands empty; unlike §2.4's, that one is an omission
+     * rather than the point.
+     */
+    private static final String[] MANUFACTORY_PLAN = {
+            "...........................",
+            "...........................",
+            "..####O######O######O####..",
+            "..#===q=====rq===#=kkk==#..",
+            "..#====:::::=====#====c=#..",
+            "..#F===:::::====g#======#..",
+            "..O====:::::===S=D=====vO..",
+            "..#q===:::::=XX=q#======#..",
+            "..#====:::::=====#======#..",
+            "..#K===:::::====g#=ss===#..",
+            "..D====:::::===S=###D####..",
+            "..#q===:::::====q#====n=#..",
+            "..#====:::::=====#=dh==o#..",
+            "..#W===:::::====gD======#..",
+            "..O====:::::===S=#====c=O..",
+            "..#====:::::XX===#===P==#..",
+            "..#==rr:::::=====#=mm===#..",
+            "..#===q======q===#======#..",
+            "..####O##D##########O####..",
+            "...........................",
+            "...........................",
+    };
+
+    private static Preset aetherManufactory(GameRandom random) {
+        Preset p = new Preset(width(SKY_AETHER_MANUFACTORY), height(SKY_AETHER_MANUFACTORY));
+        Legend legend = new Legend(SkyRegistry.gloomwoodFloorID)
+                .floor('=')
+                // One continuous runner, x7..11 by y4..16, over the same plank
+                // floor the rest of the hall stands on.
+                .rug(':', "skywatchcarpet")
+                .wall('#', "skystonebrickwall")
+                .window('O', "skystonebrickwindow")
+                .door('D', "skystonebrickdoor")
+                // Eight lanterns, one character, four faces (§0.2) — as §2.4.
+                .floor('q')
+                .decor('q', "mistglasslantern", WALL_ABOVE)
+                .turns(6, 17, WALL_BELOW).turns(13, 17, WALL_BELOW)
+                .turns(3, 7, WALL_LEFT).turns(3, 11, WALL_LEFT)
+                .turns(16, 7, WALL_RIGHT).turns(16, 11, WALL_RIGHT)
+                // The three professions, facing INTO the hall from its west wall.
+                .prop('F', "aetherforge", RIGHT)
+                .prop('K', "stormglasskiln", RIGHT)
+                .prop('W', "windsilkloom", RIGHT)
+                .prop('g', "chargecrystal")
+                .prop('S', "stormscreed")
+                .prop('r', "skywatchrubble")
+                // A crystal cluster is a pair, but NOT a Legend.pair: VERIFIED
+                // [jar] CrystalClusterObject.getMultiTile returns
+                // StaticMultiTile(0, 0, 2, 1, ...) whatever the rotation, so the
+                // far half is always the tile to the RIGHT, and it is a separate
+                // registration ("<id>r") rather than the "<id>2" a pair appends.
+                // The plan draws both halves as 'X'; the right-hand tile of each
+                // pair is named by coordinate, which is what keeps the map and
+                // the objects agreeing instead of merely coexisting.
+                .prop('X', "stormcrystal")
+                .prop('Z', "stormcrystalr")
+                .reads(14, 7, 'Z')
+                .reads(13, 15, 'Z')
+                .prop('k', "skywatchcabinet", DOWN)
+                .prop('s', "skywatchbookshelf", UP)
+                .prop('v', "barrel")
+                .prop('c', "skywatchcandelabra")
+                // A DeskObject IS a TableObject (VERIFIED [jar]: DeskObject
+                // extends TableObject), so the chair at (20,12) really does find
+                // a table to face, and plan() turns it there off the plan. The
+                // desk itself faces east, which is a per-tile fact.
+                .table('d', "skywatchdesk")
+                .turns(19, 12, RIGHT)
+                .chair('h', "skywatchchair")
+                .prop('o', "skywatchclock", LEFT)
+                // Two tables, one character: tome west, chalice east, handed out
+                // in the plan's own reading order.
+                .table('m', "skywatchmodulartable", "skywatchtome", "skywatchchalice")
+                // Shard II is unbuilt art (§4); the pedestal is not.
+                .prop('P', "skywatchdisplay")
+                .floor('n')
+                .decor('n', "skywatchbanner", WALL_ABOVE);
+        plan(p, MANUFACTORY_PLAN, legend);
+
+        // The deepest material cache in the mod, split across the store's three
+        // cabinets and its barrel for the reason §2.4's is split.
+        p.addInventory(new LootTable(
+                LootItem.between("aetheriumbar", 4, 9)
+        ), random, 19, 3, new Object[0]);
+        p.addInventory(new LootTable(
+                LootItem.between("stormsteelbar", 3, 7),
+                LootItem.between("skyweave", 3, 6)
+        ), random, 20, 3, new Object[0]);
+        p.addInventory(new LootTable(
+                LootItem.between("stormglass", 4, 10),
+                new ChanceLootItemList(0.50F, new OneOfLootItems(
+                        new LootItem("stormsteelvambrace"),
+                        new LootItem("auroralocket"),
+                        new LootItem("zephyrharness")))
+        ), random, 21, 3, new Object[0]);
+        p.addInventory(new LootTable(
+                ChanceLootItem.between(0.70F, "coin", 800, 2400)
+        ), random, 23, 6, new Object[0]);
+        return p;
+    }
+
+    /**
+     * POI 2.6, the Sovereign's Anvil, from the plan in §2.6 verbatim.
+     *
+     * <p>A landmark with no building in it at all: a shattered slate bowl, a
+     * balustrade, four Seraphs and a plinth. 352 of its 841 tiles are untouched
+     * and 188 more are arena floor left deliberately empty, because the place is
+     * a fight you walk into rather than a room. 12 lights in 841 = 1 per 70,
+     * dim at the rim and lit at the ring, which is what an arena wants.
+     *
+     * <p>The ring is 64 {@code cloudmarblefence} on {@code SkyLandscape.discRing}
+     * with four one-tile gates on the axes, so it stays a closed loop THROUGH
+     * the gate rather than having a hole punched in it (§0.4); {@link #plan}
+     * checks every tile of it for the lone posts the player complained about.
+     *
+     * <p>The rim is a FORMATION, not a fill. §2.6 draws 92 cells of 'x' and
+     * calls them "scattered as a formation, ~55% coverage"; writing a rock on
+     * all 92 would seal the arena, because VERIFIED [jar] {@code RockObject}
+     * passes a full 32x32 collision to {@code GameObject} and the rim's only
+     * gaps hold a {@code StreetlampObject} that is solid too. {@link
+     * Legend#scatter} lays them from the tile's own coordinates, so the same
+     * plan builds the same rim every time it is asked for.
+     *
+     * <p>NOT built, with the reason: {@code sovereignaltar} is §4 new art and is
+     * not registered, so (14,14) stays plinth inlay. Everything the altar
+     * carries goes with it — the Key, the wave fight, the repeatable arena and
+     * the top cache of §3.2 — and none of it is faked, which is what §2.6 asks
+     * for by name: "do not ship the altar with a summon it cannot honour."
+     * What stands today is the place, its rim, its ring, its Seraphs and the two
+     * Skystone Golems that patrol its terrace.
+     *
+     * <p>The terrace is written as the {@code stormslatetile} paving §2.6 names
+     * and without the stormsedge its legend line mentions: the section's own
+     * object table does not list the sedge, and a {@code GrassObject} standing
+     * on slate is a claim about the engine this build has not measured.
+     */
+    private static final String[] ANVIL_PLAN = {
+            ".............................",
+            ".............................",
+            "...........xxxLxxx...........",
+            ".........xxx;;;;;xxx.........",
+            ".......xxx;;;;;;;;;xxx.......",
+            "......xx;;;|||G|||;;;xx......",
+            ".....xx;;|||,,,,,|||;;xx.....",
+            "....xx;;||,,,,,,,,,||;;xx....",
+            "....x;;|A,,,g,,,g,,,A|;;x....",
+            "...xx;||,,,,,,,,,,,,,||;xx...",
+            "...x;;|,,,,,,,,,,,,,,,|;;x...",
+            "..xx;||,,,,,,,,,,,,,,,||;xx..",
+            "..x;;|,,g,,,+++++,,,g,,|;;x..",
+            "..x;;|,,,,,,+++++,,,,,,|;;x..",
+            "..L;;G,,,,,,++V++,,,,,,G;;L..",
+            "..x;;|,,,,,,+++++,,,,,,|;;x..",
+            "..x;;|,,g,,,+++++,,,g,,|;;x..",
+            "..xx;||,,,,,,,,,,,,,,,||;xx..",
+            "...x;;|,,,,,,,,,,,,,,,|;;x...",
+            "...xx;||,,,,,,,,,,,,,||;xx...",
+            "....x;;|A,,,g,,,g,,,A|;;x....",
+            "....xx;;||,,,,,,,,,||;;xx....",
+            ".....xx;;|||,,,,,|||;;xx.....",
+            "......xx;;;|||G|||;;;xx......",
+            ".......xxx;;;;;;;;;xxx.......",
+            ".........xxx;;;;;xxx.........",
+            "...........xxxLxxx...........",
+            ".............................",
+            ".............................",
+    };
+
+    private static Preset sovereignsAnvil() {
+        Preset p = new Preset(width(SKY_SOVEREIGNS_ANVIL), height(SKY_SOVEREIGNS_ANVIL));
+        Legend legend = new Legend(tile("charfloortile"))
+                // The arena floor, 188 tiles, and nothing on any of them.
+                .floor(',')
+                .floor(';', "stormslatetile")
+                // Accent scale, never a room: 24 tiles of inlay under the altar.
+                .floor('+', "marblecheckertile")
+                // The altar is unbuilt art; the plinth under it is not.
+                .floor('V', "marblecheckertile")
+                .scatter('x', 0.55F, "skystonerock", "skyscree", "skywatchrubble")
+                .fence('|', "cloudmarblefence")
+                .fence('G', "cloudmarblefencegate")
+                .prop('A', "seraphstatue")
+                .prop('g', "chargecrystal")
+                .loose('L', "wardencandelabra");
+        plan(p, ANVIL_PLAN, legend);
         return p;
     }
 }

@@ -300,7 +300,7 @@ sein"* — genau da liegen sie.
 
 | Gebiet | Kacheln vom Ursprung | Biome | Feinde | Critter | Tiere | NPCs | Quests | POIs | bewachte Orte / 1000×1000 |
 |---|---|---|---|---|---|---|---|---|---|
-| **Skyreach** | 0 – 1 800 | 4 | 8 | 4 | 2 | 7 | 5 | 10 ⭐ | 28,7 |
+| **Skyreach** | 0 – 1 800 | 4 | 8 | 4 | 2 | 7 | 5 | 13 ⭐ | 28,7 |
 | **Eden** | 600 – 2 880 | 3 | 5 | 0 | 0 | 1 | 3 | 2 | 11,4 ⭐ *(vorher 0)* |
 | **Steinfeld** | 1 920 – 4 200 | 3 | 4 | 0 | 0 | 1 ⭐ | 2 ⭐ | 1 | 20,3 |
 | **Ghost Realm** | 2 880 – 5 280 | 5 | 9 | 0 | 0 | 4 | 4 ⭐ | 1 | 21,8 |
@@ -318,6 +318,31 @@ unversehrtes Nimbus-Yak steht und kaut) und das **Passagen-Wegehaus** mit zwei
 echten Betten und einem Vorratsschrank. Was diesen Orten noch fehlt, sind die
 Stelen, der Wolkenquell-Brunnen und die Wegsteine: dafür gibt es noch keine
 Grafik, deshalb stehen sie nicht da, statt als Fehlertextur.
+
+**Drei weitere, und die ersten feindlichen (Stand 2026-09-10).** Die
+**Nightfell-Schanze** ist ein umwehrtes Lager mit Türen auf allen vier Achsen,
+zwei Blockhäusern und einem absichtlich leeren Hof, den du überquerst statt ihn
+zu plündern — gebaut aus dem dunklen Nightfell-Mauerwerk, das seit vier
+Versionen herstellbar ist und das die Weltenerzeugung noch nie irgendwo
+hingestellt hat. Zwei Skystone-Golems und zwei Rime-Sentries halten sie; der
+leere Sockel mitten im Hof ist die ganze Geschichte: jemand war vor dir da. In
+den beiden Schränken und dem Fass des Zeughauses liegen Stormsteel-, Aetherium-
+und Sturmglas-Vorräte und mit 35 % eine der drei schweren Waffen.
+
+Die **Aether-Manufaktur** ist das erste wirklich mehrräumige Gebäude im Mod:
+Maschinenhalle, Lager und Kontor, mit allen drei Berufs-Werkbänken in einer
+Reihe an der Westwand — wer noch nie eine Aetherschmiede gebaut hat, läuft hier
+in eine, die schon arbeitet. Ein durchgehender 5×13-Teppich liegt der Länge
+nach in der Halle, und es steht nichts darauf. Der tiefste Materialfund des Mods
+liegt in ihren drei Schränken.
+
+Der **Amboss des Souveräns** ist gar kein Gebäude: eine zersprungene
+Schieferschale, eine geschlossene Balustrade mit vier Toren, vier Seraphen und
+ein Podest. Was noch fehlt, ist der Altar — dafür gibt es keine Grafik, und das
+Dossier sagt ausdrücklich, ihn nicht mit einer Beschwörung auszuliefern, die er
+nicht einlösen kann. Ohne ihn ist es ein Ort zum Finden, noch kein Kampf. Auch
+die Skywatch-Revenants und die Fulgur-Shades, die alle drei Orte bevölkern
+sollen, warten auf ihr Sprite-Sheet.
 
 **Zur Dichte, weil die Zahl leicht falsch gelesen wird:** ein Spawn-Gewicht
 entscheidet, **was** dir entgegenkommt, nie **ob**. Das macht die Kachel selbst

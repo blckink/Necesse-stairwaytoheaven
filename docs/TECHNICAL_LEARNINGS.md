@@ -3544,3 +3544,52 @@ own `FeedingTrough1Preset` script rather than reasoned about: its `objects`
 array holds `518` at (1,1) with `519` at (2,1) and both rotations `1` (right),
 and `518` at (1,2) with `519` at (1,3) and both rotations `2` (down).
 **VERIFIED [jar]** — decompiled 1.3.3.
+
+## 2026-09-10 — A crystal cluster is a pair, and it is not the pair the furniture uses
+
+`CrystalClusterObject.registerCrystalCluster` registers `<id>` and, separately,
+`<id>r` (a `CrystalClusterRObject`) — not the `<id>2` every piece of Skywatch
+furniture uses. `getMultiTile` returns
+`StaticMultiTile(0, 0, 2, 1, true, getID(), counterID)` and takes `rotation` as
+a parameter it never reads, so a cluster is **always two tiles side by side,
+master left**, whatever rotation it is written with. Its far half returns the
+mirror, `StaticMultiTile(1, 0, 2, 1, false, counterID, getID())`.
+
+That is why §2.5's two `stormcrystal` bursts are written as two separate
+characters rather than through `Legend.pair`: `pair` appends `"2"` to the id and
+places the counter where the rotation points, and both halves of that assumption
+are wrong here.
+**VERIFIED [jar]** — decompiled 1.3.3 `CrystalClusterObject.java` /
+`CrystalClusterRObject.java`.
+
+## 2026-09-10 — A bounded band with more kinds than sites starves, and a hash cannot fix it
+
+`RealmPoiWorldPreset.survey` gives a lattice cell to one kind, chosen by a
+per-cell hash. That is a uniform draw, and a uniform draw over few sites and
+many kinds leaves kinds with nothing.
+
+Measured on seed 1524204744, whole realm disc, 169 preset regions: the Skyreach
+band offers **38 sites** and — after §2.4–§2.6 landed — carries **13 kinds**.
+Thirty-eight draws over thirteen bins leave a bin empty roughly half the time,
+and that run left two: `passagewayhouse` and `sovereignsanvil` read
+`accepted=0 queued=0 nearest=NONE` while the funnel reported
+`candidates=38 accepted=37 badground=0` — the ground said yes to everything and
+the arithmetic still lost two places. The same census had been a coin flip since
+the band passed ten kinds, so the gate's `kinds=n/n` assertion was failing on a
+number rather than on a defect. Skyreach is the only band this bites: it is
+bounded by its own depth (`RealmDepth` gives it weight only below 0.30, i.e.
+1800 tiles) while every other band runs outward for thousands of tiles with one
+to four kinds.
+
+**A rank cannot be drawn from a hash, but it can be counted.** Whether a cell
+holds a site (`hash(seed + SALT, cellX, cellY) < SITE_CHANCE`) and which realm
+its site falls in (`RealmDepth.realmAt`) are pure functions of the seed, and the
+band is bounded, so its sites can be walked in scan order from anywhere without
+state. `skyreachRotate` does exactly that and returns `rank % kinds`, turned by
+one seed-derived offset so the band's north-west corner is not the Sky Tower in
+every world. Cost: one pass over the ~400 lattice cells of the band's box per
+Skyreach site; the census's own timing moved from 2620 ms to 2648 ms.
+
+Measured after, seed 1527996859: `kinds=22/22 queuedkinds=22/22`, and each of
+the thirteen Skyreach kinds holds **2–4 accepted sites** instead of 0–6.
+**VERIFIED [run]** — `scripts/integration_test.sh`, both seeds.

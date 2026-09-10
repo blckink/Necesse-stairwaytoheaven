@@ -19,7 +19,7 @@ import stairwaytoheaven.worldgen.SkyNoise;
 import stairwaytoheaven.worldgen.SkyOrigin;
 import stairwaytoheaven.worldgen.SkyTerrainPainter;
 
-/** Places the nineteen inhabited POIs into their realm bands on {@code skyreach2}. */
+/** Places the twenty-two inhabited POIs into their realm bands on {@code skyreach2}. */
 public class RealmPoiWorldPreset extends WorldPreset {
     public static final String STRING_ID = "swh_realmpois";
     private static final String OCCUPIED_BOARD = "villages";
@@ -49,7 +49,10 @@ public class RealmPoiWorldPreset extends WorldPreset {
                     RealmPoiPresets.SKY_DEW_KEEPERS_HUT,
                     RealmPoiPresets.SKY_SHEPHERDS_FOLD,
                     RealmPoiPresets.SKY_FALLING_INSTITUTE,
-                    RealmPoiPresets.SKY_PASSAGE_WAYHOUSE},
+                    RealmPoiPresets.SKY_PASSAGE_WAYHOUSE,
+                    RealmPoiPresets.SKY_NIGHTFELL_REDOUBT,
+                    RealmPoiPresets.SKY_AETHER_MANUFACTORY,
+                    RealmPoiPresets.SKY_SOVEREIGNS_ANVIL},
             {RealmPoiPresets.EDEN_CROWN_GARDEN, RealmPoiPresets.EDEN_FERMENT_HOUSE},
             {RealmPoiPresets.STEINFELD_MEMORIAL},
             {RealmPoiPresets.GHOST_ARCHIVE},
@@ -135,17 +138,22 @@ public class RealmPoiWorldPreset extends WorldPreset {
      * could have carried a Sky Inn was thrown away for being unable to carry a
      * Sky Town — and the four-kind Skyreach and Hell bands lost three quarters
      * of their chances to a coin flip made before anyone looked at the ground.
-     * Rotating keeps the mix even across cells while letting the ground have the
-     * last word, which is also what puts the big presets where there is room.
+     * Rotating lets the ground have the last word, which is what puts the big
+     * presets where there is room.
+     *
+     * <p>Where the rotation comes from is a second question, and outside
+     * Skyreach it is a per-cell hash. That spreads the mix but does not
+     * GUARANTEE it, and Skyreach is the one band where the difference shows:
+     * see {@link #skyreachRotate}.
      */
     public static void survey(int seed, int startX, int startY, int endX, int endY, SiteVisitor visitor) {
         int originX = SkyOrigin.originX(seed);
         int originY = SkyOrigin.originY(seed);
         for (int cellX = Math.floorDiv(startX, CELL); cellX <= Math.floorDiv(endX, CELL); cellX++) {
             for (int cellY = Math.floorDiv(startY, CELL); cellY <= Math.floorDiv(endY, CELL); cellY++) {
-                if (SkyNoise.hash(seed + SALT, cellX, cellY) >= SITE_CHANCE) continue;
-                int siteX = Math.round(cellX * CELL + SkyNoise.hash(seed + SALT + 1, cellX, cellY) * CELL);
-                int siteY = Math.round(cellY * CELL + SkyNoise.hash(seed + SALT + 2, cellX, cellY) * CELL);
+                if (!hasSite(seed, cellX, cellY)) continue;
+                int siteX = siteX(seed, cellX, cellY);
+                int siteY = siteY(seed, cellX, cellY);
                 // Not this region's cell. Silent rather than a stage: the
                 // neighbour that owns it will report it, and counting it here
                 // too would make every census double-count its borders.
@@ -153,8 +161,14 @@ public class RealmPoiWorldPreset extends WorldPreset {
 
                 int realm = RealmDepth.realmAt(seed, siteX, siteY, originX, originY);
                 int[] choices = REALM_KINDS[realm];
-                int rotate = Math.min(choices.length - 1,
-                        (int) (SkyNoise.hash(seed + SALT + 3, cellX, cellY) * choices.length));
+                int rotate = -1;
+                if (realm == RealmDepth.REALM_SKYREACH) {
+                    rotate = skyreachRotate(seed, cellX, cellY, originX, originY, choices.length);
+                }
+                if (rotate < 0) {
+                    rotate = Math.min(choices.length - 1,
+                            (int) (SkyNoise.hash(seed + SALT + 3, cellX, cellY) * choices.length));
+                }
 
                 if (nearSpire(siteX - originX, siteY - originY)) {
                     // The canonical Warden Spire remains the uncluttered first landmark.
@@ -215,6 +229,84 @@ public class RealmPoiWorldPreset extends WorldPreset {
         return value < low ? low : (value > high ? high : value);
     }
 
+    // The three questions a lattice cell answers, named once. The funnel and
+    // the rank below both ask them, and a rank computed from a different site
+    // than the one the funnel places would balance a world nobody generates.
+
+    /** Whether this cell offers a site at all. */
+    private static boolean hasSite(int seed, int cellX, int cellY) {
+        return SkyNoise.hash(seed + SALT, cellX, cellY) < SITE_CHANCE;
+    }
+
+    private static int siteX(int seed, int cellX, int cellY) {
+        return Math.round(cellX * CELL + SkyNoise.hash(seed + SALT + 1, cellX, cellY) * CELL);
+    }
+
+    private static int siteY(int seed, int cellX, int cellY) {
+        return Math.round(cellY * CELL + SkyNoise.hash(seed + SALT + 2, cellX, cellY) * CELL);
+    }
+
+    /**
+     * Which kind takes a SKYREACH cell: the cell's rank among the whole band's
+     * sites, modulo the number of kinds.
+     *
+     * <p>Every other band picks its rotation from a per-cell hash, which spreads
+     * the mix without guaranteeing it. That was good enough while Skyreach held
+     * four kinds and stopped being good enough at thirteen. Measured on
+     * 2026-09-10, seed 1524204744, over the whole realm disc: the band offers
+     * <b>38 sites</b> — it is the only band bounded by its own depth
+     * ({@code RealmDepth} gives Skyreach weight only below depth 0.30, i.e.
+     * 1800 tiles) while carrying the most kinds. Thirty-eight independent draws
+     * over thirteen bins leave a bin empty about half the time, and that run
+     * left two: the Passage Wayhouse and the Sovereign's Anvil stood nowhere in
+     * the world. The catalogue gate had therefore been a coin flip since the
+     * band passed ten kinds, failing on arithmetic rather than on a defect.
+     *
+     * <p>A rank cannot be drawn from a hash, but it can be COUNTED: whether a
+     * cell holds a site and which realm that site falls in are pure functions of
+     * the seed, and Skyreach is bounded, so the band's sites can be walked in
+     * scan order from anywhere. Cell number <i>n</i> of the band takes kind
+     * {@code n % kinds}, and with 38 sites over 13 kinds every kind gets two or
+     * three. It costs one pass over the ~400 lattice cells the band's box holds,
+     * per Skyreach site, and no state.
+     *
+     * @return the rotation, or -1 if the cell is not inside the band's box at
+     *         all — in which case the caller keeps the hash rotation rather than
+     *         inventing a rank.
+     */
+    private static int skyreachRotate(int seed, int cellX, int cellY,
+            int originX, int originY, int kinds) {
+        // The band's own reach, read off RealmDepth rather than hard-coded, plus
+        // the cell a site can be jittered out of and one cell of slack.
+        int reach = (int) (RealmDepth.bandEnd(RealmDepth.REALM_SKYREACH)
+                * RealmDepth.DEPTH_SCALE) + 2 * CELL;
+        int firstX = Math.floorDiv(originX - reach, CELL);
+        int lastX = Math.floorDiv(originX + reach, CELL);
+        int firstY = Math.floorDiv(originY - reach, CELL);
+        int lastY = Math.floorDiv(originY + reach, CELL);
+        if (cellX < firstX || cellX > lastX || cellY < firstY || cellY > lastY) {
+            return -1;
+        }
+        // Turned by the seed, or the north-west corner of the band would be the
+        // Sky Tower in every world ever generated.
+        int offset = Math.min(kinds - 1,
+                (int) (SkyNoise.hash(seed + SALT + 5, 0, 0) * kinds));
+        int rank = 0;
+        for (int cx = firstX; cx <= lastX; cx++) {
+            for (int cy = firstY; cy <= lastY; cy++) {
+                if (!hasSite(seed, cx, cy)) continue;
+                if (cx == cellX && cy == cellY) {
+                    return Math.floorMod(rank + offset, kinds);
+                }
+                if (RealmDepth.realmAt(seed, siteX(seed, cx, cy), siteY(seed, cx, cy),
+                        originX, originY) == RealmDepth.REALM_SKYREACH) {
+                    rank++;
+                }
+            }
+        }
+        return -1;
+    }
+
     /**
      * The offset of one placement attempt, in tiles. Attempt 0 is always the
      * cell's own site, so a place that already stood where the old rule put it
@@ -257,7 +349,7 @@ public class RealmPoiWorldPreset extends WorldPreset {
                                 placeInhabitants(kind, level, x, y);
                             }
                         })
-                        // Which of the nineteen this rectangle is. Without it the
+                        // Which of the twenty-two this rectangle is. Without it the
                         // queue only says "swh_realmpois", and a census can count
                         // records but not tell a Sky Inn from a Hell Carnival.
                         .setDebugName(RealmPoiPresets.key(kind));
@@ -309,6 +401,42 @@ public class RealmPoiWorldPreset extends WorldPreset {
             // completely unharmed. It is the punchline, so it does not wander
             // off before the player has walked the arc down to it.
             spawn(level, SkyLivestock.NIMBUS_YAK, x + 13, y + 17);
+        }
+        if (kind == RealmPoiPresets.SKY_NIGHTFELL_REDOUBT) {
+            // Plan §2.4's garrison, minus the half of it that has no art. The
+            // four Skywatch Revenants and three Fulgur Shades are §4 work
+            // orders, and MobRegistry.getMob of an unregistered name returns
+            // null, which spawn() drops on the floor without a word. What is
+            // registered stands exactly where the section puts it: two golems
+            // on the corridor ring, two sentries flanking the north and south
+            // doors. That leaves the compound defended but under-garrisoned,
+            // which is written up rather than padded out with other mobs.
+            for (int[] at : new int[][]{{5, 13}, {19, 13}}) {
+                spawn(level, "skystonegolem", x + at[0], y + at[1]);
+            }
+            for (int[] at : new int[][]{{12, 5}, {12, 19}}) {
+                spawn(level, "rimesentry", x + at[0], y + at[1]);
+            }
+        }
+        if (kind == RealmPoiPresets.SKY_AETHER_MANUFACTORY) {
+            // Plan §2.5: the two Rime Sentries, in the machine hall. Its three
+            // Skywatch Revenants share the Redoubt's missing sheet.
+            for (int[] at : new int[][]{{5, 15}, {15, 4}}) {
+                spawn(level, "rimesentry", x + at[0], y + at[1]);
+            }
+        }
+        if (kind == RealmPoiPresets.SKY_SOVEREIGNS_ANVIL) {
+            // Plan §2.6: "2 Skystone Golems patrolling the terrace at (7,7) and
+            // (21,21); Storm Wisps drifting the rim. The arena floor is empty
+            // until the player fills it." The wisps go on the terrace rather
+            // than on the rim itself, because the rim's own tiles are the rock
+            // formation and half of them are solid.
+            for (int[] at : new int[][]{{7, 7}, {21, 21}}) {
+                spawn(level, "skystonegolem", x + at[0], y + at[1]);
+            }
+            for (int[] at : new int[][]{{14, 3}, {14, 25}}) {
+                spawn(level, "stormwisp", x + at[0], y + at[1]);
+            }
         }
     }
 
