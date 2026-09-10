@@ -3594,6 +3594,86 @@ Measured after, seed 1527996859: `kinds=22/22 queuedkinds=22/22`, and each of
 the thirteen Skyreach kinds holds **2–4 accepted sites** instead of 0–6.
 **VERIFIED [run]** — `scripts/integration_test.sh`, both seeds.
 
+## Rank-sharing fixed the draw, and then the kind count ate the margin (2026-09-10)
+
+The sequel to the section above, found the same day by adding §2.8–§2.10.
+`skyreachRotate` shares the band's sites out by rank, so no kind is starved by an
+unlucky draw — but the number of cells a kind gets is now *site count ÷ kind
+count*, and that is a divisor the next content order always makes bigger. Three
+new kinds took the Skyreach band from ~2.9 cells per kind to ~2.1.
+
+At two cells, whether a kind stands anywhere in the world is decided by whether
+those two cells pass its ground test. For fifteen of the sixteen kinds that is a
+near-certainty — they only need land. The Toll Bridge is the exception:
+`RealmPoiWorldPreset.validSite` asks it for a *terrain feature*, a strait narrow
+enough to span. Measured on seed 1485253616 it drew `accepted=0` while all
+fifteen other kinds held 2–4, with `badground=0` for the band as a whole.
+
+So the failure the rank-sharing rewrite was written to end came back one level
+down: not "the draw skipped this kind" but "this kind's two cells both happened
+to be flat water". `SITE_ATTEMPTS` went 16 → 48 — attempt 0 is still the cell's
+own site, so nothing that already stood somewhere moves, and the extra attempts
+only sample more of the same `SITE_JITTER` box before a cell is given up on. The
+cost is paid only where a kind is failing anyway.
+
+**The rule worth keeping: in a bounded band, adding a kind is a placement change
+to every kind that was already there.** The census's `kinds=n/n` assertion is
+what catches it, and only because it names every kind rather than counting them.
+
+## A `grep -q` over a log is a coin flip once two lines can satisfy it
+
+*2026-09-10, the same order — and the gate had been green for the wrong reason.*
+
+`RealmPoiCensus` began stamping **two** places (the nearest of all, and the
+Serpent's Reef by name, because §2.10 is the only kind on open water). The gate
+still asked the old question:
+
+```sh
+grep -qE "realmpoi stamp: .* missing=0 " "$LOG1"
+```
+
+With two stamp lines in the log, that is satisfied by **either one**. Measured on
+seed 1487742548: `skyinn` stamped `missing=1` and the gate stayed green, because
+the Reef's line read `missing=0`. A strict assertion had quietly become a coin
+flip the moment a second line could answer it — and it got *weaker* precisely
+because the census got better.
+
+`scripts/integration_test.sh` now loops over every `realmpoi stamp: kind=` line
+and checks each against a per-kind table of allowed window debt (the
+`WallWindowObject.getWindowDir` drops counted in the ratchet above, not a second
+defect), plus an assertion that anything was stamped at all, plus the Reef by
+name. **The general form: a `grep -q` gate is only as strict as the number of
+lines that can match it, so it must be rewritten the moment the log learns to
+emit that line twice.**
+
+### The mirror image: an assertion that was accidentally too strict
+
+Found in the same sitting, from the other end. The Surface POI gate asserted
+`placedcounter == generated`, and that equality was a seed coincidence rather
+than an invariant.
+
+**VERIFIED [jar]:** `SkySurfaceGeneration.placed` is incremented by
+`modifyPreset`, which the **engine** calls once per site it writes; `before` is
+read immediately before the loop, so nothing outside the loop can inflate the
+count; and `SkySurfaceStatusCommand.stamp` forces whole region *blocks* via
+`WorldPreset.ensureRegionsAreGenerated` while its own `generated` stops at
+`STAMP_PER_KIND = 2`.
+
+**HYPOTHESIS:** the overcount itself — that forcing one queued rectangle also
+materialises a **different** queued site of the same kind. It is the only reading
+consistent with the facts above, but it has not been seen with coordinates; it
+would be proven by a seed that reproduces two camps inside one forced block.
+
+Measured 2026-09-10 on a tree that had not touched the Surface POIs at all:
+`CampGeneration queued=16 generated=2 placedcounter=3` — a red gate with nothing
+behind it.
+
+Only `counter < generated` is a defect — a region forced without the generator
+ever running is a kind that is queued and writes nothing, which is the thing the
+gate exists to catch. It now asserts `-ge`. **Both halves of the day's lesson are
+the same: an assertion has to be written against what the engine actually
+guarantees, not against the numbers one seed happened to print.**
+
 ## A preset that writes its own water loses the objects standing beside it
 
 *2026-09-10, building POI 2.10 (the Serpent's Reef) — the catalogue's first
@@ -3640,3 +3720,7 @@ this question; `scripts/integration_test.sh` asserts
 `realmpoi stamp: kind=serpentsreef .* missing=0` separately, since the existing
 greps are satisfied by any stamp line. Seed 1524002983:
 `placed=30/30 missing=0`. **VERIFIED [run]**.
+
+Adding that second stamp then broke the gate that was reading it — see "A
+`grep -q` over a log is a coin flip once two lines can satisfy it" above. The
+per-stamp loop there is what the test asserts today.

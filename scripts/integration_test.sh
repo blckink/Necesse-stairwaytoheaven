@@ -941,7 +941,19 @@ for pair in CraterGeneration:aetheriumrock CampGeneration:aeronautwreck ShrineGe
     counter="$(echo "$LINE" | grep -oE 'placedcounter=[0-9]+' | cut -d= -f2)"
     found="$(echo "$LINE" | grep -oE "${signature}objects=[0-9]+" | cut -d= -f2)"
     [ "${gen:-0}" -ge 1 ] || { echo "FAIL: no $kind site could be generated ($LINE)"; STATUS=1; }
-    [ "${counter:-0}" -eq "${gen:-0}" ] || { echo "FAIL: $kind generated $gen site(s) but stamped $counter ($LINE)"; STATUS=1; }
+    # The counter may legitimately EXCEED generated, and equality was a seed
+    # coincidence rather than an invariant. `placed` is incremented by
+    # SkySurfaceGeneration.modifyPreset, which the ENGINE calls once per site it
+    # writes; the census forces whole region BLOCKS with
+    # ensureRegionsAreGenerated, so forcing one queued rectangle can also
+    # materialise a DIFFERENT queued site of the same kind, while this loop's own
+    # counter stops at STAMP_PER_KIND. Measured 2026-09-10:
+    # `CampGeneration queued=16 generated=2 placedcounter=3`, on a tree that had
+    # not touched the Surface POIs at all.
+    # Only the other direction is a defect: a region forced without the generator
+    # ever running means the kind is queued and writes nothing, which is what
+    # this gate exists to catch.
+    [ "${counter:-0}" -ge "${gen:-0}" ] || { echo "FAIL: $kind generated $gen site(s) but stamped only $counter ($LINE)"; STATUS=1; }
     [ "${found:-0}" -ge "${gen:-0}" ] || { echo "FAIL: $kind stamped but wrote no $signature ($LINE)"; STATUS=1; }
 done
 
