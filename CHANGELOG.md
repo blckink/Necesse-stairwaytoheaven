@@ -3,6 +3,37 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [0.7.0] — "The Whole Ladder" — 2026-09-10
+
+**This is the version that ships.** Everything in the `[Unreleased]` blocks
+below this line, down to and including 0.6.0's successor work — the ground the
+player walks on, the one plane, the endgame ladder, the fog key, the boss
+portals, the region keys, the measured areas, and Hell — is what 0.7.0 puts in
+the two SplitRoast profiles as `Stairway_to_Heaven-1.3.3-0.7.0.jar`. The world
+now runs as a single plane of six realm bands from the Skyreach out to Hell,
+each with its own ground, cast, residents and boss rung.
+
+### Fixed
+- **The mod did not start at all.** `SkyItems` registered the five band
+  trophies into `materials.other`, an item category vanilla never creates
+  (`ItemCategory.java:59–68` lists nine subcategories under `materials`, and
+  `other` is not among them). `ItemCategoryManager.getCategory` throws
+  `IllegalStateException: Must first create item category materials.other`
+  during `StairwayToHeavenMod.init`, so **every** boot with the mod installed
+  died before the world loaded — including the 0.6.0 jar that was deployed to
+  both profiles at 12:55 on 2026-09-10. The five trophies now use
+  `materials.mobdrops`, which is what they are and what the three older mob
+  drops in the same file already use. `scripts/integration_test.sh` is the gate
+  that caught it; it had not been run since the trophies landed.
+
+### Verified for this release
+`scripts/java_syntax_check.sh`, `./gradlew buildModJar` against the played
+1.3.3 install, `scripts/integration_test.sh` on the 1.3.3 dedicated server,
+`scripts/balance_check.sh` (six bands, six boss rungs, monotone per role) and
+the POI census. The walkthrough and its evidence are in
+`docs/PLAYTEST_LOG.md` — headless, on a dedicated server, so **nothing here is
+player-confirmed yet**.
+
 ## [Unreleased] — Hell becomes a place — 2026-09-10
 
 Hell was the only band on the plane with no cast of its own. It had a depth

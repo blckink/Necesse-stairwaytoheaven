@@ -191,15 +191,15 @@ public final class SkyItems {
         // stack size is 50 rather than a material's 250 — five hundred fangs in
         // one slot would read as a resource, which is exactly what they are not.
         ItemRegistry.registerItem("skystoneheart",
-                new SkyMatItem(50, Item.Rarity.UNCOMMON).setItemCategory("materials", "other"), 30.0F, true);
+                new SkyMatItem(50, Item.Rarity.UNCOMMON).setItemCategory("materials", "mobdrops"), 30.0F, true);
         ItemRegistry.registerItem("bloomfang",
-                new SkyMatItem(50, Item.Rarity.UNCOMMON).setItemCategory("materials", "other"), 45.0F, true);
+                new SkyMatItem(50, Item.Rarity.UNCOMMON).setItemCategory("materials", "mobdrops"), 45.0F, true);
         ItemRegistry.registerItem("mourningband",
-                new SkyMatItem(50, Item.Rarity.UNCOMMON).setItemCategory("materials", "other"), 60.0F, true);
+                new SkyMatItem(50, Item.Rarity.UNCOMMON).setItemCategory("materials", "mobdrops"), 60.0F, true);
         ItemRegistry.registerItem("soulcollar",
-                new SkyMatItem(50, Item.Rarity.RARE).setItemCategory("materials", "other"), 85.0F, true);
+                new SkyMatItem(50, Item.Rarity.RARE).setItemCategory("materials", "mobdrops"), 85.0F, true);
         ItemRegistry.registerItem("stripedhorn",
-                new SkyMatItem(50, Item.Rarity.RARE).setItemCategory("materials", "other"), 120.0F, true);
+                new SkyMatItem(50, Item.Rarity.RARE).setItemCategory("materials", "mobdrops"), 120.0F, true);
 
         // --- 8n: the three Skyreach residents' own headwear ---------------
         //

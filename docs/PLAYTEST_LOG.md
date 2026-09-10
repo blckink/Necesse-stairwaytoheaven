@@ -715,3 +715,44 @@ backgrounds, explicitly including Bloom Maw and Paradise Palm. All six Eden
 replacement sprites were re-extracted from untouched raw generations and
 reviewed on light and dark backgrounds. This was an asset-mask defect, not an
 intentional design change.
+
+## 2026-09-10 — v0.7.0, the whole way in one run (headless, dedicated server)
+
+The eight steps of the player's journey, driven in a single
+`scripts/integration_test.sh` run on the 1.3.3 dedicated server against the jar
+that was then deployed to both SplitRoast profiles. **This is a `[run]` pass on
+a server that never renders a frame** — no client, no player. Nothing below is
+player-confirmed.
+
+**Before any of it: the mod did not start.** The first run of this test died in
+`StairwayToHeavenMod.init` with `IllegalStateException: Must first create item
+category materials.other` — the five band trophies from 8n registered into an
+item category vanilla never creates. Every boot with the mod installed ended
+there, including the 0.6.0 jar sitting in both profiles since 12:55. Fixed by
+moving the trophies to `materials.mobdrops`; everything below is the run after
+that fix.
+
+| # | Step | One sentence | Beleg (server log, 2026-09-10) | State |
+|---|---|---|---|---|
+| 1 | Save laden | The server boots the world with the mod and reaches the console. | `Found mod: Stairway to Heaven (stairwaytoheaven, 0.7.0) from DevModProvider`, then the world loads and `skyreachstatus` answers | VERIFIED [run] |
+| 2 | Treppe bauen | The spire and its beacon stand at fixed coordinates with the Marble Checker floor intact. | `quest: stage=0 spirePlaced=true ... spire=139,-251 beacon=139,-252`; `spire check: beaconObject=wardenbeaconoff wardenFloor=marblecheckertile` | VERIFIED [run] |
+| 3 | Aufsteigen | The Skyreach plane exists as its own level and paints without a single wrong tile. | `Veil ground OK: class=SkyLevel identifier=skyreach2 dimension=1`; `painter oracle: tileMismatches=0 (scan radius 64)` | VERIFIED [run] |
+| 4 | Sky Warden anwerben | One Warden and both cats are in the world, the settler mob is registered, and both recruit routes carry a price and a shop. | `npc check: wardens=1 cats=2`; `settler check: wardensettler=WardenSettler mobRegistered=true`; `recruit check: skywarden settler=WardenSettler price=coinx30000 shop=present` | VERIFIED [run] |
+| 5 | Veil oeffnen | `veilstatus` samples the Veil bands and finds their own ground, not the Skyreach's. | `fenSampledAt=-2150,3261 hollowSurveyAt=-2579,3993`, then `murkmosstile x3239`, `hauntedgrasstile x2383`, `ectoplasmtile x625` | VERIFIED [run] |
+| 6 | Skyreach-Orte besuchen | The catalogue queues 1433 inhabited places across 23 of 24 kinds, with the nearest one 271 tiles from the arrival pad. | `realmpoi census: seed=1486237612 arrival=139,-243 ... queued=1433 unnamed=0 kinds=23/24 landmarks=3 nearest=skytollbridge@271` | VERIFIED [run] |
+| 7 | Einen Boss legen | Not driven. Nothing here kills anything — the server has no player. What the run does show is that the six rungs are in the shipped jar at the intended numbers. | `scripts/balance_check.sh`: `mutanthydra 10 320000->528000 2.15->2.9240003`, and the five rungs below it, all rows matching the expected table | VERIFIED [jar] — **not played** |
+| 8 | Hell betreten | The far end of the realm field resolves to Hell, and all four Hell buildings queue there on their own ground. | `realm check: ... 4000=ghostrealm 5200=hell 5800=hell`; `realmpoi funnel hell: candidates=753 accepted=752 badground=1`; `realmpoi kind hellborderoffice: realm=hell ... queued=205` | VERIFIED [run] |
+
+### What this run does not answer
+
+- **Step 7 is the honest gap.** A boss fight needs a player. `balance_check.sh`
+  reads the statline out of the jar; it cannot say the fight is winnable, that
+  the summoning stone is findable, or that the key quest pays out.
+- **`tools/area_census.py` still reports Hell as `biomes 0 / hostiles 0 / boss
+  none`** while `balance_check.sh` reads all four Hell mobs and the Mutant Hydra
+  rung out of the same jar. The census is a reading tool, not a gate, and it
+  evidently looks at the per-biome spawn tables rather than the realm's cast.
+  The jar is right; the census's Hell row is misleading. **OPEN.**
+- **The 2026-09-07 Friemliburg finding still stands.** On the player's own save,
+  ground that was already generated does not get re-stamped, so the new places
+  appear in sky he has not walked yet, not around his spire.
