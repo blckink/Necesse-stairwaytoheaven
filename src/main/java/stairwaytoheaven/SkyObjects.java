@@ -247,11 +247,15 @@ final class SkyObjects {
                 "cloudbell", "skytulip", "thunderbloom", "glowfern", "auroralily", "staticmoss",
                 "tallcloudgrass", "stormsedge", "prismgrass",
                 "fulguriterock", "prismshardrock",
-                // The three the list had always been missing, found on
+                // The two the list had always been missing, found on
                 // 2026-09-10 by the Serpent's Reef (POI 2.10), which is 123
                 // land tiles in 625 of open Mistsea and so is shore almost
-                // everywhere: 14 of its 30 objects were swept away between
-                // the preset writing them and the census reading them back.
+                // everywhere. Four of its rocks were swept away between the
+                // preset writing them and the census reading them back (the
+                // wreck and the balloon went the same way; they are flagged in
+                // SkyBuildingSet, beside their own registration). Other objects
+                // of the same run were lost to an unrelated rule -- see
+                // docs/TECHNICAL_LEARNINGS.md; this flag is not that one.
                 //
                 // VERIFIED [jar]: GameObject.isValid returns false for an
                 // object with canPlaceOnShore == false on a Level.isShore
@@ -268,7 +272,7 @@ final class SkyObjects {
                 // note above the first allowShore call), so without this the
                 // Skyreach's own stone cannot lie at the Skyreach's own
                 // water's edge.
-                "skystonerock", "skyscree", "aetheriumrock");
+                "skystonerock", "aetheriumrock");
     }
 
     /** GrassObject variant that drops a material when cleared. */

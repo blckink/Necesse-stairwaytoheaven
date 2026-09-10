@@ -607,17 +607,49 @@ grep -qE "realmpoi stamp: .* objects=[1-9][0-9]*/" "$LOG1" \
 # count alone passes while the engine quietly drops things after the preset
 # writes them; this compares the generated world with the preset tile by tile
 # and the log names the first few that disagree.
-grep -qE "realmpoi stamp: .* missing=0 " "$LOG1" \
-    || { echo "FAIL: the nearest inhabited place is missing objects its preset placed"; \
-         grep -aE "realmpoi stamp:" "$LOG1" | tail -1; STATUS=1; }
-# ...and the same question asked of the Serpent's Reef by name. It is the only
-# kind placed on OPEN WATER, and the only one that paints its own land into the
-# Mistsea, so it is the only one where "does an object survive beside a tile the
-# same preset just turned into water" is an open question. The census stamps it
-# in addition to the nearest place; the greps above are satisfied by any stamp
-# line, so this one names the kind.
+#
+# EVERY stamp line, checked on its own. The census stamps two places since
+# 2026-09-10 -- the nearest of all, and the Serpent's Reef by name, because
+# §2.10 is the only kind placed on OPEN WATER and so the only one where "does
+# an object survive beside a tile the same preset just turned into sea" is an
+# open question. A single `grep -q ... missing=0` over the whole log is then
+# satisfied by EITHER line, which quietly turned a strict assertion into a
+# coin flip: measured on seed 1487742548, skyinn stamped missing=1 and the gate
+# stayed green because the Reef's own line read missing=0.
+#
+# A stamp's missing count is allowed to be exactly the deletable-window debt
+# that kind already carries in the ratchet above -- those windows are dropped by
+# WallWindowObject.getWindowDir after the preset writes them, which is the same
+# defect counted there and not a second one. Anything beyond it fails.
+STAMPED=0
+while IFS= read -r stamp_line; do
+    # A command substitution that matched nothing still feeds the loop one
+    # empty line, and an empty line would otherwise count as a stamp and be
+    # reported as a kind with no name missing no objects.
+    [ -n "$stamp_line" ] || continue
+    STAMPED=$((STAMPED + 1))
+    stamp_kind="$(echo "$stamp_line" | grep -oE "kind=[a-z]+" | cut -d= -f2)"
+    stamp_missing="$(echo "$stamp_line" | grep -oE "missing=[0-9]+" | cut -d= -f2)"
+    case "$stamp_kind" in
+        ghostarchive)     stamp_allowed=6 ;;
+        crookedbazaar)    stamp_allowed=2 ;;
+        skytown|skyinn|edencrowngarden|edenfermenthouse) stamp_allowed=1 ;;
+        hellborderoffice|hellforge)                      stamp_allowed=1 ;;
+        *)                stamp_allowed=0 ;;
+    esac
+    [ "${stamp_missing:-99}" -le "$stamp_allowed" ] \
+        || { echo "FAIL: $stamp_kind is missing $stamp_missing objects its preset placed (allowed $stamp_allowed)"; \
+             echo "$stamp_line"; STATUS=1; }
+done <<EOF
+$(grep -aE "realmpoi stamp: kind=" "$LOG1" | sort -u)
+EOF
+[ "$STAMPED" -gt 0 ] \
+    || { echo "FAIL: the census stamped no inhabited place at all"; STATUS=1; }
+# ...and the Reef specifically has to be one of the places that got stamped. It
+# is the whole reason the second stamp exists, and it is 700-odd tiles out, so
+# it is almost never the nearest.
 grep -qE "realmpoi stamp: kind=serpentsreef .* missing=0 " "$LOG1" \
-    || { echo "FAIL: the Serpent's Reef is missing objects its preset placed"; \
+    || { echo "FAIL: the Serpent's Reef was not stamped clean"; \
          grep -aE "realmpoi stamp: kind=serpentsreef" "$LOG1" | tail -1; STATUS=1; }
 
 # ...and the five weapons must be real registered items with a name, not IDs.

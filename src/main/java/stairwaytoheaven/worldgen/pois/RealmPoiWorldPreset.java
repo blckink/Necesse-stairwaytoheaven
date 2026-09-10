@@ -36,8 +36,26 @@ public class RealmPoiWorldPreset extends WorldPreset {
      * shot at the cell's exact centre is a coin flip against the Mistsea: the
      * Skyreach is islands over open cloud, and measured on 2026-09-07 it threw
      * away 22 of 34 candidate cells in the home band on the first sample alone.
+     *
+     * <p><b>16 until 2026-09-10, and raised when the band reached sixteen
+     * kinds.</b> {@link #skyreachRotate} hands each kind its own cells by rank,
+     * so the number of cells a kind gets is the band's site count divided by
+     * the kind count — and §2.8, §2.9 and §2.10 took that from ~2.9 to ~2.1.
+     * With two cells, whether a kind stands anywhere in the world is decided by
+     * whether those two cells pass its ground test, and that is a coin flip for
+     * the one kind whose test wants a terrain FEATURE rather than just land:
+     * {@link #validSite} asks the Toll Bridge for a strait to span. Measured on
+     * seed 1485253616 it drew {@code accepted=0} while all fifteen other kinds
+     * held 2-4, with {@code badground=0} for the band as a whole — the same
+     * shape of failure {@code skyreachRotate} was written to end, one level
+     * further down.
+     *
+     * <p>Attempt 0 is still the cell's own site, so nothing that already stood
+     * somewhere moves; the extra attempts only sample more of the same
+     * {@link #SITE_JITTER} box before a cell is given up on. Cost is paid only
+     * where a kind is failing anyway.
      */
-    private static final int SITE_ATTEMPTS = 16;
+    private static final int SITE_ATTEMPTS = 48;
     /** How far a nudged attempt may move from the cell's own site, in tiles. */
     private static final int SITE_JITTER = CELL / 2;
 

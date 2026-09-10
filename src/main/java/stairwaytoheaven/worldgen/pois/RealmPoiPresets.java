@@ -1077,20 +1077,19 @@ public final class RealmPoiPresets {
          * one. LAYERS onto an already declared character, like {@link #decor},
          * so no existing plan's ground moves.
          *
-         * <p>Two cases, both in §2.8 and §2.10 and neither expressible before.
-         * <ul>
-         *   <li>A {@link #scatter} formation declares its PIECES and not its
-         *       ground, and §2.6's rim wants exactly that — the Anvil stands on
-         *       land and its rim is meant to keep the terrain painter's own
-         *       crag. §2.10's spine is the opposite: the Reef is placed in OPEN
-         *       Mistsea, so a cell left unwritten leaves its rock standing in
-         *       the water beside the reef instead of on it.
-         *   <li>A piece standing on paving of its own kind. §2.8 puts two
-         *       cabinets, a pedestal and two Seraphs INSIDE its chequer dais,
-         *       and {@link #prop} writes the plan's own ground under a piece —
-         *       which would punch five skyway-paved holes in the one 5% accent
-         *       surface the place has.
-         * </ul>
+         * <p>The case it exists for is a piece standing on paving of its own
+         * kind. §2.8 puts two cabinets, a pedestal and two Seraphs INSIDE its
+         * chequer dais, and {@link #prop} writes the plan's own ground under a
+         * piece — which would punch five skyway-paved holes in the one 5%
+         * accent surface the place has.
+         *
+         * <p>It is also the answer for a {@link #scatter} formation, which
+         * declares its PIECES and not its ground: on a plan whose margins are
+         * water rather than land, an unwritten formation cell leaves its piece
+         * standing in the sea. No plan needs that today — §2.6's rim wants the
+         * terrain painter's own crag and §2.10's spine ended up a plain
+         * {@link #prop} — so this is a note about the shape of the problem, not
+         * a live caller.
          */
         Legend paves(char c, String tileID) {
             if (c >= LEGEND_SIZE || !this.known[c]) {
