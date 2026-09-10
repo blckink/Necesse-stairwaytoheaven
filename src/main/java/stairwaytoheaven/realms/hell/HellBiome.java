@@ -41,12 +41,19 @@ import stairwaytoheaven.biomes.GuardedBiome;
  * <b>None of this decides WHERE a hostile may appear.</b> A4.1's instruction —
  * <i>"sie sollen mal geballt kommen und ein Gebiet z.b bewachen"</i> — is
  * answered by {@link GuardedBiome}: a pack is PLACED at generation on the
- * ground around the site it guards. Hell's packs ride the lattice Crooked
- * Beyond already walks into this band ({@code SkyLevel.placePacksOf}'s own
- * Crooked/Hell exception), and because the placer reads the guard off the
- * BIOME under the site, a site that lands on Hell ground now gets Hell's
- * guards rather than Crooked's. That is the whole of the change: no second
- * lattice, no chance of a site being handed to two of them.
+ * ground around the site it guards.
+ *
+ * <p><b>Hell has no site lattice of its own yet, so these guards are declared
+ * and not yet placed.</b> Saying so rather than implying otherwise: Crooked
+ * Beyond's three lattices used to reach into this band, and while Hell painted
+ * as Crooked that worked, because Crooked's painter stamped a house at each of
+ * those sites. It does not stamp anything on Hell ground any more, so
+ * {@code SkyLevel.placePacksOf} no longer walks Crooked's lattices in here — a
+ * pack on a site with no house is the "guards standing where the loot is not"
+ * bug that gate exists to prevent. {@code getGuard} is implemented so that
+ * Hell's own lattice, when it lands, has a roster to ask for; until then Hell's
+ * pressure is its ambient table above and its four {@code RealmPoiPresets}
+ * buildings.
  */
 public abstract class HellBiome extends Biome implements GuardedBiome {
 

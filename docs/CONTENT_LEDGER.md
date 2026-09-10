@@ -11,6 +11,14 @@ sections at the bottom.
 
 | id | kind | what it is, in one line |
 |---|---|---|
+| `ashspirit` | mob | Hell elite. What the Furnace leaves behind, standing up again — vanilla's Ash Golem body at 10 278 HP / 387.6 damage / 81 armour. Drops Reality Shard, Oddwood, Charwood. |
+| `boilerhound` | mob | Hell fast role. Lives beside the machines and comes out when the pressure drops — vanilla's Jackal body at 4405 HP / 310.1 damage / 81 armour. |
+| `bossportalhell` | object | The Infernal Summoning Forge. Hell's boss portal: unlocked by the Infernal Seal, wakes the Mutant Hydra at 528 000 HP. Scattered through the Hell band only. |
+| `furnacereach` | biome | Hell's outer band (A3.8 "The Furnace"). Black peat, ash sand, dead soil and mist stone at the far edge of the plane; Ash Spirits stop being visitors and become what the ground is made of. |
+| `infernalclerk` | mob | Hell standard. Something in brass plate that has stood at a counter long enough to be furniture and objects to you being on this side of it — 7342 HP / 387.6 damage / 81 armour. |
+| `infernalfringe` | biome | Hell's inner band (§17). The realm's whole transition: Crooked Beyond's violet mud and stripe mixed with Hell's black peat and ash sand, in a ratio that runs from 4-in-5 Crooked to 1-in-5 as you walk out. |
+| `regionkeyhell` | object | The Infernal Seal. Sixth and last region key, earned from the Warden for 16 Reality Shard and 24 Oddwood; unlocks Hell's boss portal. |
+| `ticketimp` | mob | Hell ranged. The Department of Eternal Processing issues numbers; this hands them out from above, at speed, whether or not you asked — 5139 HP / 329.5 damage / 81 armour. |
 | `aetherwrightcasing` | item | Machined shell dropped by Prototype Nine and cached in the Test Range — the gate material for the tier past Stormsteel. |
 | `bondedlockbox` | item | Sealed cargo box on the Toll-House vault stand; Magpie's recruit key, and she buys it back as part of her fee. |
 | `postledger` | item | The Toll-House's list of undelivered parcels — the reason Magpie pays a premium for every Sky Parcel found in the sky. |

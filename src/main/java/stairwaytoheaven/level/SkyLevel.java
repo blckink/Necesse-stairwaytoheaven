@@ -707,16 +707,22 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
                 // standing where the loot is not" bug SkyTerrainPainter.
                 // nearestSite's header records having shipped once already.
                 int siteRealm = RealmDepth.realmAt(seed, siteX, siteY, originX, originY);
-                // The Crooked/Hell exception is how Hell gets guarded at all:
-                // Hell has no pack lattice of its own, so Crooked's three reach
-                // into its band. That used to place CROOKED's guards there,
-                // because Hell painted as Crooked. It no longer does --
-                // placePackAt reads the guard off the BIOME under the site, and
-                // the biome is now Hell's own, so a site that lands on Hell
-                // ground is stood up by Hell's roster. Giving Hell a second
-                // lattice on top of this would place two packs on one site.
-                if (siteRealm != realm
-                        && !(realm == RealmDepth.REALM_CROOKED && siteRealm == RealmDepth.REALM_HELL)) {
+                // Crooked Beyond's three lattices used to be allowed to reach
+                // into HELL as well, and that exception is gone as of
+                // 2026-09-10. It was correct exactly as long as Hell painted as
+                // Crooked: CrookedTerrainPainter stamps the Door Yard, Inverted
+                // House and Long Table at these same sites (its own
+                // CrookedSites.siteDistance call), so a site in Hell really did
+                // carry a Crooked house for the pack to guard.
+                //
+                // realms/hell/HellTerrainPainter ended that. Crooked's painter
+                // now runs only on Crooked tiles, so a site in Hell holds no
+                // house -- and a pack placed on it would be the "guards
+                // standing where the loot is not" bug this gate's own header
+                // records having shipped once already. Hell's own guarded
+                // places are future work; its pressure today is its ambient
+                // roster and its four RealmPoiPresets buildings.
+                if (siteRealm != realm) {
                     continue;
                 }
                 placePackAt(region, siteX, siteY, saltMix, radius);
