@@ -204,6 +204,31 @@ public final class SkyLandmarkPois {
         return SETTLERS[index];
     }
 
+    /** Which enemy a landmark keeps. */
+    public static String guardOf(int index) {
+        return GUARDS[index];
+    }
+
+    /** The tile that guard stands on, once the landmark's corner is known. */
+    public static Point guardTile(int index, Point corner) {
+        return new Point(corner.x + GUARD_AT[index][0], corner.y + GUARD_AT[index][1]);
+    }
+
+    /** How many unique rewards a landmark's containers carry. */
+    public static int rewardCount(int index) {
+        return REWARDS[index].length;
+    }
+
+    /** The item ID of one of them. */
+    public static String rewardItem(int index, int slot) {
+        return REWARDS[index][slot].itemID;
+    }
+
+    /** The container tile it lies in, once the landmark's corner is known. */
+    public static Point rewardTile(int index, int slot, Point corner) {
+        return new Point(corner.x + REWARDS[index][slot].x, corner.y + REWARDS[index][slot].y);
+    }
+
     /** The tile that settler stands on, once the landmark's corner is known. */
     public static Point settlerTile(int index, Point corner) {
         return new Point(corner.x + SETTLER_AT[index][0], corner.y + SETTLER_AT[index][1]);

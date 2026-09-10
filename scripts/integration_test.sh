@@ -348,6 +348,20 @@ grep -qE "entrance check: .* clear=true" "$LOG1" || { echo "FAIL: something is s
 grep -qE "wardenFloor=marblecheckertile" "$LOG1" || { echo "FAIL: spire interior floor missing"; STATUS=1; }
 grep -qE "npc check: wardens=1 cats=2" "$LOG1" || { echo "FAIL: Warden/cat NPCs not spawned exactly once"; STATUS=1; }
 grep -qE "settler check: wardensettler=WardenSettler" "$LOG1" || { echo "FAIL: the recruited Warden is not a registered settler"; STATUS=1; }
+# The three Skyreach residents' price is COINS PLUS ONE KEY ITEM
+# (chapter-01-skyreach-cast.md §1: "the design answer to 'POIs never have
+# special loot': at three of them, the loot is a person"). The key is what makes
+# the boss fight and the recruit page one loop, so a price that has quietly
+# fallen back to coins alone is a broken chapter, not a cheaper settler.
+for price in magpiesettler:12000:bondedlockbox haldasettler:9000:themother \
+    ossiansettler:18000:stormlenscore; do
+    pr_who="$(echo "$price" | cut -d: -f1)"
+    pr_coins="$(echo "$price" | cut -d: -f2)"
+    pr_key="$(echo "$price" | cut -d: -f3)"
+    grep -qE "recruit check: $pr_who .* price=coinx$pr_coins\+${pr_key}x1 " "$LOG1" \
+        || { echo "FAIL: $pr_who does not ask coins + $pr_key at the recruit page"; \
+             grep -aE "recruit check: $pr_who " "$LOG1" | tail -1; STATUS=1; }
+done
 # The Veil is not a world any more (WORLD_DESIGN section 41.5): its ground is
 # the fen inside the Ghost band and the Hollows inside the Crooked band. What
 # still has to be true is that the ground itself survived the move and paints.
@@ -683,10 +697,21 @@ grep -qE "realmpoi stamp: kind=serpentsreef .* missing=0 " "$LOG1" \
 # runs on every skyreachstatus, so by the time this log is read SkyLandmarkPois
 # has run five times over the same world; a stamp record that did not hold, or a
 # settler seated without claiming the name, would read 2 or more here.
-for landmark in skywaytollhouse:magpiesettler grangecellar:haldasettler \
-    stormveiltestrange:ossiansettler; do
-    lm_key="${landmark%%:*}"
-    lm_who="${landmark##*:}"
+#
+# Since 2026-09-10 each line also carries the place's GUARD and the unique
+# rewards §3 puts in its containers, and both are asserted here. They are the
+# reason the place is a fight rather than a room: two of the three recruit keys
+# are boss loot, and the other three rewards are only reachable if the display
+# stands and the barrel really took an item. The census reads the container's
+# inventory, not the placement flag -- the flag says the code ran, and only the
+# inventory says a player can pick the thing up.
+for landmark in skywaytollhouse:magpiesettler:tollwright:3 \
+    grangecellar:haldasettler:sourvatbloom:2 \
+    stormveiltestrange:ossiansettler:prototypenine:1; do
+    lm_key="$(echo "$landmark" | cut -d: -f1)"
+    lm_who="$(echo "$landmark" | cut -d: -f2)"
+    lm_guard="$(echo "$landmark" | cut -d: -f3)"
+    lm_rewards="$(echo "$landmark" | cut -d: -f4)"
     grep -qE "realmpoi landmark $lm_key: .* stamped=1 " "$LOG1" \
         || { echo "FAIL: the once-per-world place $lm_key was never stamped"; \
              grep -aE "realmpoi landmark $lm_key:" "$LOG1" | tail -1; STATUS=1; }
@@ -695,6 +720,12 @@ for landmark in skywaytollhouse:magpiesettler grangecellar:haldasettler \
              grep -aE "realmpoi landmark $lm_key:" "$LOG1" | tail -1; STATUS=1; }
     grep -qE "realmpoi landmark $lm_key: .* settler=$lm_who .* present=1 " "$LOG1" \
         || { echo "FAIL: $lm_who is not standing in $lm_key (nobody to talk to)"; \
+             grep -aE "realmpoi landmark $lm_key:" "$LOG1" | tail -1; STATUS=1; }
+    grep -qE "realmpoi landmark $lm_key: .* guard=$lm_guard .* guards=1 " "$LOG1" \
+        || { echo "FAIL: $lm_guard is not standing in $lm_key (the place is a container, not a fight)"; \
+             grep -aE "realmpoi landmark $lm_key:" "$LOG1" | tail -1; STATUS=1; }
+    grep -qE "realmpoi landmark $lm_key: .* rewards=$lm_rewards/$lm_rewards " "$LOG1" \
+        || { echo "FAIL: $lm_key does not hold all $lm_rewards of its unique rewards"; \
              grep -aE "realmpoi landmark $lm_key:" "$LOG1" | tail -1; STATUS=1; }
 done
 grep -qE "realmpoi census: .* landmarks=3 " "$LOG1" \

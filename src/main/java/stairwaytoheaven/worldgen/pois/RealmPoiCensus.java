@@ -520,7 +520,45 @@ public final class RealmPoiCensus {
                 }
             }
 
+            // ...and the enemy that makes the place a fight rather than a
+            // container (chapter-01-skyreach-cast.md §2). Counted the same way
+            // the settler is: by string ID, inside the footprint. A guard that
+            // is not there is a recruit key nobody can earn, because two of the
+            // three keys are its loot.
+            String guardID = SkyLandmarkPois.guardOf(index);
+            int guards = 0;
+            for (necesse.entity.mobs.Mob mob : level.entityManager.mobs) {
+                if (!guardID.equals(mob.getStringID())) {
+                    continue;
+                }
+                int tileX = mob.getTileX();
+                int tileY = mob.getTileY();
+                if (tileX >= site.x && tileX < site.x + width
+                        && tileY >= site.y && tileY < site.y + height) {
+                    guards++;
+                }
+            }
+
+            // ...and the unique rewards §3 puts in this place's containers.
+            // Reading the container rather than the placement flag on purpose:
+            // the flag says the code ran, and only the inventory says the
+            // player can pick the thing up.
+            int rewardsWanted = SkyLandmarkPois.rewardCount(index);
+            int rewardsHeld = 0;
+            StringBuilder rewardMisses = new StringBuilder();
+            for (int slot = 0; slot < rewardsWanted; slot++) {
+                String itemID = SkyLandmarkPois.rewardItem(index, slot);
+                Point tile = SkyLandmarkPois.rewardTile(index, slot, new Point(site.x, site.y));
+                if (holds(level, tile.x, tile.y, itemID)) {
+                    rewardsHeld++;
+                } else {
+                    rewardMisses.append(' ').append(itemID)
+                            .append('@').append(tile.x).append(',').append(tile.y);
+                }
+            }
+
             Point at = SkyLandmarkPois.settlerTile(index, new Point(site.x, site.y));
+            Point guardAt = SkyLandmarkPois.guardTile(index, new Point(site.x, site.y));
             logs.add("realmpoi landmark " + key
                     + ": at=" + site.x + "," + site.y
                     + " size=" + width + "x" + height
@@ -533,8 +571,33 @@ public final class RealmPoiCensus {
                     + " settler=" + who
                     + " seat=" + at.x + "," + at.y
                     + " present=" + present
+                    + " guard=" + guardID
+                    + " guardseat=" + guardAt.x + "," + guardAt.y
+                    + " guards=" + guards
+                    + " rewards=" + rewardsHeld + "/" + rewardsWanted + rewardMisses
                     + " ms=" + (System.currentTimeMillis() - started));
         }
+    }
+
+    /** Whether the container standing on a tile holds at least one of an item. */
+    private static boolean holds(SkyLevel level, int tileX, int tileY, String itemID) {
+        necesse.entity.objectEntity.ObjectEntity entity =
+                level.entityManager.getObjectEntity(tileX, tileY);
+        if (entity == null || !entity.implementsOEInventory()) {
+            return false;
+        }
+        necesse.inventory.Inventory inventory =
+                ((necesse.entity.objectEntity.interfaces.OEInventory) entity).getInventory();
+        if (inventory == null) {
+            return false;
+        }
+        for (int slot = 0; slot < inventory.getSize(); slot++) {
+            necesse.inventory.InventoryItem item = inventory.getItem(slot);
+            if (item != null && item.item != null && itemID.equals(item.item.getStringID())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static int tileDistance(int x, int y, int toX, int toY) {
