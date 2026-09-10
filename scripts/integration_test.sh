@@ -525,23 +525,43 @@ echo "--- verifying the twenty-five inhabited places actually stand ---"
 # (2026-09-09) to 19; the Redoubt, the Manufactory and the Anvil (2026-09-10)
 # to 22; the Gate, the Choir and the Reef (2026-09-10) to 25, which is twelve
 # of the dossier's fourteen sections -- 2.13 and 2.14 are still unbuilt.
-grep -qE "realmpoi census: .* kinds=25/25 " "$LOG1" \
-    || { echo "FAIL: the placer accepts no site at all for one of the twenty-five inhabited places"; \
+grep -qE "realmpoi census: .* kinds=24/24 " "$LOG1" \
+    || { echo "FAIL: the placer accepts no site at all for one of the twenty-four lattice places"; \
          grep -aE "realmpoi kind .* accepted=0 " "$LOG1"; STATUS=1; }
-grep -qE "realmpoi census: .* queuedkinds=25/25 " "$LOG1" \
-    || { echo "FAIL: one of the twenty-five inhabited places is in no preset region in the world"; \
+grep -qE "realmpoi census: .* queuedkinds=24/24 " "$LOG1" \
+    || { echo "FAIL: one of the twenty-four lattice places is in no preset region in the world"; \
          grep -aE "realmpoi kind .* queued=0 " "$LOG1"; STATUS=1; }
 # ...named one by one, so a regression says WHICH place vanished rather than
 # only that the total slipped.
+#
+# The catalogue is TWENTY-SEVEN since 2026-09-10 and the two fractions above
+# count twenty-four, because §0.6's three ONCE-PER-WORLD places are not on the
+# lattice at all: the Toll-House, the Grange Cellar and the Test Range are
+# stamped by SkyLandmarkPois off SkyLevel.ensureWardenSpire, from a seed-derived
+# site, and a preset region never hears about them. Their evidence is the
+# "realmpoi landmark" block further down. Everything that is a property of the
+# PRESET rather than of the lattice -- the object count, the window audit --
+# still covers all twenty-seven.
 for poi in skytower skytown skytollbridge skyinn edencrowngarden edenfermenthouse \
     steinfeldmemorial ghostarchive crookedbazaar hellborderoffice helladministration \
     hellforge hellcarnival skywaytollhouse waysideshrine dewkeepershut \
     shepherdsfold fallinginstitute passagewayhouse \
     nightfellredoubt aethermanufactory sovereignsanvil \
-    unopenedgate prismchoir serpentsreef; do
-    grep -qE "realmpoi kind $poi: .* queued=[1-9][0-9]* nearest=[0-9]+" "$LOG1" \
-        || { echo "FAIL: $poi stands nowhere in the world"; \
-             grep -aE "realmpoi kind $poi:" "$LOG1" | tail -1; STATUS=1; }
+    unopenedgate prismchoir serpentsreef grangecellar stormveiltestrange; do
+    case "$poi" in
+        skywaytollhouse|grangecellar|stormveiltestrange)
+            # Once per world: it must be queued NOWHERE, or it is back on the
+            # lattice and the world holds four Magpies again.
+            grep -qE "realmpoi kind $poi: .* rarity=onceperworld .* queued=0 " "$LOG1" \
+                || { echo "FAIL: $poi is a once-per-world place but the lattice queued it"; \
+                     grep -aE "realmpoi kind $poi:" "$LOG1" | tail -1; STATUS=1; }
+            ;;
+        *)
+            grep -qE "realmpoi kind $poi: .* queued=[1-9][0-9]* nearest=[0-9]+" "$LOG1" \
+                || { echo "FAIL: $poi stands nowhere in the world"; \
+                     grep -aE "realmpoi kind $poi:" "$LOG1" | tail -1; STATUS=1; }
+            ;;
+    esac
     # ...and its preset really carries objects. Only the NEAREST place of all is
     # force-generated below, so without this every other kind could resolve to
     # an empty rectangle and still count as queued. It bites hardest on the
@@ -651,6 +671,41 @@ EOF
 grep -qE "realmpoi stamp: kind=serpentsreef .* missing=0 " "$LOG1" \
     || { echo "FAIL: the Serpent's Reef was not stamped clean"; \
          grep -aE "realmpoi stamp: kind=serpentsreef" "$LOG1" | tail -1; STATUS=1; }
+
+# ---- §0.6's three once-per-world places -------------------------------------
+# The lattice census above cannot see these, so this is the whole of their
+# gate. Each one is asked the three questions that can fail independently:
+# was it stamped, is it really standing, and is the PERSON in it -- because
+# "the loot is a person" is the entire reason these three exist, and a building
+# with an empty chair passes every count the census makes.
+#
+# present=1 EXACTLY is also the "never stamped twice" assertion. ensureWardenSpire
+# runs on every skyreachstatus, so by the time this log is read SkyLandmarkPois
+# has run five times over the same world; a stamp record that did not hold, or a
+# settler seated without claiming the name, would read 2 or more here.
+for landmark in skywaytollhouse:magpiesettler grangecellar:haldasettler \
+    stormveiltestrange:ossiansettler; do
+    lm_key="${landmark%%:*}"
+    lm_who="${landmark##*:}"
+    grep -qE "realmpoi landmark $lm_key: .* stamped=1 " "$LOG1" \
+        || { echo "FAIL: the once-per-world place $lm_key was never stamped"; \
+             grep -aE "realmpoi landmark $lm_key:" "$LOG1" | tail -1; STATUS=1; }
+    grep -qE "realmpoi landmark $lm_key: .* missing=0 " "$LOG1" \
+        || { echo "FAIL: $lm_key is missing objects its preset placed"; \
+             grep -aE "realmpoi landmark $lm_key:" "$LOG1" | tail -1; STATUS=1; }
+    grep -qE "realmpoi landmark $lm_key: .* settler=$lm_who .* present=1 " "$LOG1" \
+        || { echo "FAIL: $lm_who is not standing in $lm_key (nobody to talk to)"; \
+             grep -aE "realmpoi landmark $lm_key:" "$LOG1" | tail -1; STATUS=1; }
+done
+grep -qE "realmpoi census: .* landmarks=3 " "$LOG1" \
+    || { echo "FAIL: the census does not report three once-per-world places"; STATUS=1; }
+# ...and the record has to SURVIVE THE RESTART. This is the cheap half of the
+# report (a read of SkywatchQuestData, no region loads), which is why it is in
+# the bare command and can be asserted in phase 2: a world that re-stamps its
+# landmarks on every load is the failure §0.6 is written against.
+grep -qE "landmark stamps: 3/3 " "$LOG1" \
+    || { echo "FAIL: phase 1 did not record all three once-per-world stamps"; \
+         grep -aE "landmark stamps:" "$LOG1" | tail -1; STATUS=1; }
 
 # ...and the five weapons must be real registered items with a name, not IDs.
 for arsenal_item in skyreave thunderhead prismcaller skywatchwhistle stormdisc; do
@@ -1047,6 +1102,14 @@ fi
 grep -qE "npc check: wardens=1 cats=2" "$LOG2" \
     || { echo "FAIL: Warden or cats did not survive a save/load round trip"; STATUS=1; }
 grep -qE "catsSpawned=true" "$LOG2" || { echo "FAIL: quest data did not persist"; STATUS=1; }
+# The same question for §0.6's once-per-world places, and the only one that
+# matters after a restart: the stamp record has to have survived. If it did not,
+# ensureWardenSpire on this second boot stamped all three a SECOND time, over
+# whatever the player had built there. Their settlers must still be claimed, or
+# the world is free to grow a second Magpie beside a workshop.
+grep -qE "landmark stamps: 3/3 skywaytollhouse=1/magpiesettler=1 grangecellar=1/haldasettler=1 stormveiltestrange=1/ossiansettler=1" "$LOG2" \
+    || { echo "FAIL: the once-per-world stamps or their settler claims did not survive the restart"; \
+         grep -aE "landmark stamps:" "$LOG2" | tail -1; STATUS=1; }
 # The point of the coax pass: a cat brought home must still be AT THE BASKET
 # after the world has been written to disk and read back. Its save home is a
 # region it was never generated in, and its homesick tether has to be rebuilt

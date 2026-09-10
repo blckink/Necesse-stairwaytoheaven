@@ -124,11 +124,49 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         diagnoseNetAudit(logs);
         diagnoseWorkstations(logs);
         diagnoseVoyages(server, logs);
+        diagnoseLandmarks((SkyLevel) level, logs);
         if (mode.equals("pois")) {
             RealmPoiCensus.run((SkyLevel) level, logs);
         }
         locateFromPlayer((SkyLevel) level, serverClient, logs);
         logs.add("SKYREACH_STATUS_DONE");
+    }
+
+    /**
+     * One line for §0.6's once-per-world places: how many this Skyreach has
+     * stamped, and whether each one's person is claimed.
+     *
+     * <p>Deliberately in the BARE command rather than only in {@code pois}: the
+     * full landmark report force-loads three footprints a long way out, which
+     * is a mode's worth of work, but "has this world already stamped them" is a
+     * read of {@code SkywatchQuestData} and costs nothing. That is what makes
+     * it assertable after a restart — the question a once-per-world place has
+     * to answer is whether the record SURVIVED, and a second stamp is exactly
+     * what happens when it did not.
+     */
+    private void diagnoseLandmarks(SkyLevel level, CommandLog logs) {
+        stairwaytoheaven.quest.SkywatchQuestData quest =
+                stairwaytoheaven.quest.SkywatchQuestData.get(level);
+        StringBuilder line = new StringBuilder("landmark stamps: ");
+        int stamped = 0;
+        StringBuilder detail = new StringBuilder();
+        for (int index = 0; index < stairwaytoheaven.worldgen.pois.SkyLandmarkPois.KINDS.length; index++) {
+            String key = stairwaytoheaven.worldgen.pois.RealmPoiPresets.key(
+                    stairwaytoheaven.worldgen.pois.SkyLandmarkPois.KINDS[index]);
+            boolean has = quest.landmarksStamped.contains(key);
+            if (has) {
+                stamped++;
+            }
+            String who = stairwaytoheaven.worldgen.pois.SkyLandmarkPois.settlerOf(index);
+            boolean claimed = level.getServer() != null
+                    && stairwaytoheaven.quest.SkywatchWorldData.residentClaimed(level.getServer(), who);
+            detail.append(' ').append(key).append('=').append(has ? 1 : 0)
+                    .append('/').append(who).append('=').append(claimed ? 1 : 0);
+        }
+        line.append(stamped).append('/')
+                .append(stairwaytoheaven.worldgen.pois.SkyLandmarkPois.KINDS.length)
+                .append(detail);
+        logs.add(line.toString());
     }
 
     /**

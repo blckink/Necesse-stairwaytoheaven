@@ -85,7 +85,11 @@ public final class RealmPoiPresets {
     public static final int SKY_PRISM_CHOIR = 23;
     /** POI 2.10 of the dossier: 123 tiles of reef in 625 of open Mistsea. */
     public static final int SKY_SERPENTS_REEF = 24;
-    public static final int COUNT = 25;
+    /** POI 2.13 of the dossier: the ruin you walk through, the cellar that survived. */
+    public static final int SKY_GRANGE_CELLAR = 25;
+    /** POI 2.14 of the dossier: a lit box in a dark crater field. */
+    public static final int SKY_TEST_RANGE = 26;
+    public static final int COUNT = 27;
 
     private static final int UP = 0, RIGHT = 1, DOWN = 2, LEFT = 3;
     /** Wall-decor rotation: where the WALL is, not where the piece faces (§0.2). */
@@ -123,6 +127,8 @@ public final class RealmPoiPresets {
             case SKY_UNOPENED_GATE: return GATE_PLAN[0].length();
             case SKY_PRISM_CHOIR: return CHOIR_PLAN[0].length();
             case SKY_SERPENTS_REEF: return REEF_PLAN[0].length();
+            case SKY_GRANGE_CELLAR: return GRANGE_PLAN[0].length();
+            case SKY_TEST_RANGE: return RANGE_PLAN[0].length();
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -154,6 +160,8 @@ public final class RealmPoiPresets {
             case SKY_UNOPENED_GATE: return GATE_PLAN.length;
             case SKY_PRISM_CHOIR: return CHOIR_PLAN.length;
             case SKY_SERPENTS_REEF: return REEF_PLAN.length;
+            case SKY_GRANGE_CELLAR: return GRANGE_PLAN.length;
+            case SKY_TEST_RANGE: return RANGE_PLAN.length;
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -194,8 +202,27 @@ public final class RealmPoiPresets {
             case SKY_UNOPENED_GATE: return "unopenedgate";
             case SKY_PRISM_CHOIR: return "prismchoir";
             case SKY_SERPENTS_REEF: return "serpentsreef";
+            case SKY_GRANGE_CELLAR: return "grangecellar";
+            case SKY_TEST_RANGE: return "stormveiltestrange";
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
+    }
+
+    /**
+     * Whether this kind is one of §0.6's <b>once per world</b> places rather
+     * than a kind on the {@code SkyLandscape} lattice.
+     *
+     * <p>§0.6 gives the dossier three rarities and only two mechanisms had ever
+     * been built: everything was a lattice kind, which is the definition of
+     * <i>common</i> ("every few minutes of walking"). The three recruit sites
+     * are none of those — their loot is a person, one per world — and a lattice
+     * kind stamps as many of them as the world has cells for. They are stamped
+     * once, from a seed-derived site, by {@link SkyLandmarkPois}; this is the
+     * one place that says which is which, so {@link RealmPoiWorldPreset}'s
+     * lattice and the census cannot disagree about it.
+     */
+    public static boolean oncePerWorld(int kind) {
+        return kind == SKY_TOLL_HOUSE || kind == SKY_GRANGE_CELLAR || kind == SKY_TEST_RANGE;
     }
 
     /**
@@ -217,6 +244,7 @@ public final class RealmPoiPresets {
             case SKY_PASSAGE_WAYHOUSE: case SKY_NIGHTFELL_REDOUBT:
             case SKY_AETHER_MANUFACTORY: case SKY_SOVEREIGNS_ANVIL:
             case SKY_UNOPENED_GATE: case SKY_PRISM_CHOIR: case SKY_SERPENTS_REEF:
+            case SKY_GRANGE_CELLAR: case SKY_TEST_RANGE:
                 return 0;
             case EDEN_CROWN_GARDEN: case EDEN_FERMENT_HOUSE: return 1;
             case STEINFELD_MEMORIAL: return 2;
@@ -259,6 +287,8 @@ public final class RealmPoiPresets {
             case SKY_UNOPENED_GATE: return unopenedGate(random);
             case SKY_PRISM_CHOIR: return prismChoir();
             case SKY_SERPENTS_REEF: return serpentsReef(random);
+            case SKY_GRANGE_CELLAR: return grangeCellar(random);
+            case SKY_TEST_RANGE: return testRange(random);
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -2246,6 +2276,201 @@ public final class RealmPoiPresets {
                 LootItem.between("windsilk", 2, 5),
                 ChanceLootItem.between(0.60F, "coin", 200, 800)
         ), random, 8, 19, new Object[0]);
+        return p;
+    }
+
+    /**
+     * POI 2.13, the Grange Cellar, from the plan in §2.13 verbatim.
+     *
+     * <p>Necesse has no vertical layering inside a level, so the dossier reads
+     * the cellar horizontally: a broken {@code skystonebrick} shell the player
+     * walks through — deliberately NOT a closed shape, the collapse is the way
+     * in — and one intact {@code nightfell} room inside it that never stopped
+     * being used. Two wall families do the work of a floor below a floor.
+     *
+     * <p>ONCE PER WORLD ({@link #oncePerWorld}): the loot here is Halda, and
+     * {@link SkyLandmarkPois} stamps it from a seed-derived Driftlands site
+     * rather than the lattice.
+     *
+     * <p>Lighting is 2 wall lanterns + 1 candelabra over 63 interior tiles =
+     * 1 per 21, brighter inside than out, which §2.13 asks for by name.
+     *
+     * <p>NOT built, with the reason: {@code fermentationvat} is the chapter
+     * brief's own new station and is not registered, so the four {@code 'V'}
+     * cells keep the vat room's floor and stand empty rather than shipping an
+     * error texture (IMPLEMENTATION_RULES §5). The Sourvat Bloom at (7,8) is
+     * a mob, so its cell is floor; it is unregistered art too and
+     * {@link RealmPoiWorldPreset#placeInhabitants} says so where it would be
+     * spawned. The Warden's Round is drawn as the vanilla barrel §2.13's own
+     * legend draws, on its single {@code marblechecker} tile.
+     */
+    private static final String[] GRANGE_PLAN = {
+            ".....................",
+            ".....................",
+            ".###....######....##.",
+            ".#.......r......r..#.",
+            ".#..%%%%%%%%%%%....#.",
+            ".#..%V=V==%===%....#.",
+            ".#..%=====%=v=%....#.",
+            ".#..%V=V==%===%....#.",
+            ".#..%==Z==D===%....#.",
+            ".#..%q====%=c=%....#.",
+            ".#..%=====%==k%....#.",
+            ".#..%=q===%===%....#.",
+            ".#..%%%D%%%%%%%....#.",
+            ".#.................#.",
+            ".##....######....###.",
+            ".....................",
+            ".....................",
+            ".....................",
+            ".....................",
+    };
+
+    private static Preset grangeCellar(GameRandom random) {
+        Preset p = new Preset(width(SKY_GRANGE_CELLAR), height(SKY_GRANGE_CELLAR));
+        Legend legend = new Legend(SkyRegistry.gloomwoodFloorID)
+                .floor('=')
+                // The ruin, and the cellar that survived it.
+                .wall('#', "skystonebrickwall")
+                .wall('%', "nightfellwall")
+                .door('D', "nightfelldoor")
+                // The fallen roof, on the untouched Driftlands ground the shell
+                // encloses -- loose() rather than prop(), because §2.13 leaves
+                // everything between the two wall families as the world made it.
+                .loose('r', "skywatchrubble")
+                // The Warden's Round, on its one tile of accent chequer.
+                .prop('v', "barrel").paves('v', "marblecheckertile")
+                .prop('c', "skywatchcandelabra")
+                // Back to the east wall at x14, rot 3 (§2.13).
+                .prop('k', "skywatchcabinet", LEFT)
+                // The vat room's lantern hangs off the west wall at x4; the
+                // second one off the south wall below (6,11). §0.2's rotation
+                // is where the WALL is, so the character declares the first and
+                // the second tile is turned.
+                .floor('q')
+                .decor('q', "mistglasslantern", WALL_LEFT)
+                .turns(6, 11, WALL_BELOW)
+                // The four vats: the brief's own station, unbuilt art. The
+                // floor stays, so the room still reads as a room.
+                .pending('V', true)
+                // The Sourvat Bloom is a mob, not an object.
+                .floor('Z');
+        plan(p, GRANGE_PLAN, legend);
+
+        // The deep cell's cache. §2.13's own payout is Wild Skyyeast, Spent
+        // Grain and the Warden's Round, and none of those three items is
+        // registered -- they are the brief's art order, exactly like §2.4's
+        // Sovereign Shard. What the cabinet carries instead is the brewhouse's
+        // ordinary stock out of what the mod really has, so the room that took
+        // a partition and a locked cell to reach is not empty when it opens.
+        p.addInventory(new LootTable(
+                LootItem.between("cloudberry", 3, 8),
+                ChanceLootItem.between(0.50F, "windsilk", 2, 4),
+                ChanceLootItem.between(0.60F, "coin", 150, 600)
+        ), random, 13, 10, new Object[0]);
+        return p;
+    }
+
+    /**
+     * POI 2.14, the Test Range, from the plan in §2.14 verbatim.
+     *
+     * <p>§2.3's sequel: the Institute of Applied Falling moved its testing to
+     * the Stormveil "where the weather is more honest", and this is where it
+     * stopped being funny. Three craters and a workshop whose own security woke
+     * up and locked the door from inside — the west door at (16,7) is drawn and
+     * stays shut, and the way in is the gap at (20,3) where the north wall came
+     * down. A {@code Preset} cannot lock a door and does not need to: the
+     * preset simply never opens it, and the hole in the wall tells the story.
+     *
+     * <p>ONCE PER WORLD ({@link #oncePerWorld}): the loot here is Ossian Vane.
+     *
+     * <p>1 candelabra + 1 charge crystal over 49 interior tiles = 1 per 25, and
+     * the crater field carries no light at all: 621 tiles, two lamps. That is
+     * the "what is that over there?" §8 asks for, written as a lighting budget.
+     *
+     * <p>Two departures from the drawn legend, both engine facts:
+     * <ul>
+     *   <li>The rim is drawn as "skystonerock, skyscree, stormscreed" and ships
+     *       as rock and screed. VERIFIED [run] on 2026-09-10 (§2.10's own note):
+     *       {@code skyscree} is a {@code GrassObject} with an empty
+     *       {@code grassValidTileIDs}, so {@code runGrassCanPlace} sweeps it off
+     *       any inorganic tile — and the Stormveil's ground is stone.</li>
+     *   <li>The chair at (20,8) is two tiles from the desk at (18,8), so
+     *       {@link Legend#chair} would refuse it: {@code ChairObject.facesTable}
+     *       looks at one orthogonal tile and there is no table on any of the
+     *       four. It is written as a plain prop turned to rot 3, which is what
+     *       §2.14's object table asks for.</li>
+     * </ul>
+     *
+     * <p>NOT built: Prototype Nine at (9,15) is §4 art nobody has registered,
+     * and the Storm Lens Core and the Aetherwright's Casing cache with it. The
+     * display stand at (19,6) therefore stands empty, the way §2.5's does.
+     */
+    private static final String[] RANGE_PLAN = {
+            "...........................",
+            "...........................",
+            "...........................",
+            "................##O#.####..",
+            "................#t=====a#..",
+            "...xxxxx........O=======#..",
+            "...x:W:x........#==P====#..",
+            "...x:::x........Dk======#..",
+            "...xx:px........#=d=h==gO..",
+            "....xxxxx.......#=======#..",
+            "................#s=====c#..",
+            "................#########..",
+            "...........................",
+            "........xxxxxxx............",
+            ".......x::b:::x............",
+            ".......x:N:W::x............",
+            "..xxxx.x::::::x............",
+            ".xx::xx.xxxxxx.............",
+            ".x:W:px....................",
+            ".x::::x....................",
+            "..xxxx.....................",
+            "...........................",
+            "...........................",
+    };
+
+    private static Preset testRange(GameRandom random) {
+        Preset p = new Preset(width(SKY_TEST_RANGE), height(SKY_TEST_RANGE));
+        Legend legend = new Legend(SkyRegistry.charFloorID)
+                .floor('=')
+                .floor(':', "skystonetile")
+                .wall('#', "nightfellwall")
+                .window('O', "nightfellwindow")
+                .door('D', "nightfelldoor")
+                // The rim is a FORMATION, not a fill: writing a rock on all of
+                // its cells would wall the craters in. ~50% coverage, §2.14.
+                .scatter('x', 0.50F, "skystonerock", "stormscreed")
+                // Everything in a crater stands on the crater's own floor, not
+                // on the workshop's char plank.
+                .prop('W', "aeronautwreck").paves('W', "skystonetile")
+                .prop('b', "skyballoon").paves('b', "skystonetile")
+                .prop('p', "skyparcel").paves('p', "skystonetile")
+                // Prototype Nine is a mob; its cell is crater floor.
+                .floor('N', "skystonetile")
+                // The spares he built the spire's instruments from.
+                .prop('t', "skywatchtelescope")
+                .prop('a', "skywatchastrolabe")
+                .prop('P', "skywatchdisplay")
+                .prop('k', "skywatchcabinet", RIGHT)
+                .prop('d', "skywatchdesk", RIGHT)
+                .prop('h', "skywatchchair", LEFT)
+                .prop('s', "skywatchbookshelf", UP)
+                .prop('c', "skywatchcandelabra")
+                .prop('g', "chargecrystal");
+        plan(p, RANGE_PLAN, legend);
+
+        // The prototype cache, in the cabinet by the locked door. §2.14 pays in
+        // Aetherwright's Casings, which are §4 art and unregistered; what is
+        // written is the workshop's own stock out of registered items, so the
+        // room a player broke in through the roof for is not bare.
+        p.addInventory(new LootTable(
+                LootItem.between("stormglass", 2, 6),
+                LootItem.between("stormsteelbar", 1, 4),
+                ChanceLootItem.between(0.60F, "coin", 250, 900)
+        ), random, 17, 7, new Object[0]);
         return p;
     }
 }

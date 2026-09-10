@@ -926,6 +926,12 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
         if (quest.spirePlaced) {
             this.healQuestStructure(quest);
         }
+        // §0.6's once-per-world places, stamped exactly the way the spire above
+        // is: lazily, from a seed-derived site, remembered so they are never
+        // re-stamped. They ride this method rather than the POI lattice because
+        // a lattice kind is §0.6's "common" row by definition, and a world with
+        // four toll-houses has four Magpies. See SkyLandmarkPois.
+        stairwaytoheaven.worldgen.pois.SkyLandmarkPois.ensureAll(this);
     }
 
     /** First land spot in the right sub-biome, sweeping outward from the spire. */

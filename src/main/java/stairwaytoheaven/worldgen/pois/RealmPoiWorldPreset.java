@@ -62,7 +62,14 @@ public class RealmPoiWorldPreset extends WorldPreset {
     private static final int[][] REALM_KINDS = {
             {RealmPoiPresets.SKY_TOWER, RealmPoiPresets.SKY_TOWN,
                     RealmPoiPresets.SKY_TOLL_BRIDGE, RealmPoiPresets.SKY_INN,
-                    RealmPoiPresets.SKY_TOLL_HOUSE,
+                    // SKY_TOLL_HOUSE, SKY_GRANGE_CELLAR and SKY_TEST_RANGE are
+                    // deliberately NOT here. A kind on this lattice is §0.6's
+                    // "common" rarity -- one per 72x72 cell, two cells in three
+                    // -- and those three are the dossier's "once per world":
+                    // their loot is a person. They are stamped by
+                    // SkyLandmarkPois off SkyLevel.ensureWardenSpire instead.
+                    // The toll-house rode this array from 2026-09-09 until
+                    // 2026-09-10, which is why a world could hold four of it.
                     RealmPoiPresets.SKY_WAYSIDE_SHRINE,
                     RealmPoiPresets.SKY_DEW_KEEPERS_HUT,
                     RealmPoiPresets.SKY_SHEPHERDS_FOLD,
@@ -109,12 +116,26 @@ public class RealmPoiWorldPreset extends WorldPreset {
     public static final int STAGE_NEAR_SPIRE = 2;
     /** {@link #validSite} said no to every kind the realm offers. */
     public static final int STAGE_BAD_GROUND = 3;
+    /**
+     * On top of one of §0.6's once-per-world places.
+     *
+     * <p>{@link SkyLandmarkPois} stamps those off {@code ensureWardenSpire} and
+     * not through the preset region, so the {@code villages} occupancy board
+     * has never heard of them: without this test a Sky Town could be queued
+     * straight through the Grange Cellar and the two would overwrite each
+     * other's walls. Their sites are pure functions of the seed, which is what
+     * makes the test possible here at all.
+     */
+    public static final int STAGE_NEAR_LANDMARK = 4;
     /** How many stages there are, for a caller sizing a tally array. */
-    public static final int STAGE_COUNT = 4;
+    public static final int STAGE_COUNT = 5;
 
     /** Human-readable stage names, indexed by the STAGE_ constants. */
     public static final String[] STAGE_NAMES = {
-            "accepted", "splitbyregion", "nearspire", "badground"};
+            "accepted", "splitbyregion", "nearspire", "badground", "nearlandmark"};
+
+    /** Tiles of clear ground kept around a once-per-world place's footprint. */
+    private static final int LANDMARK_CLEARANCE = 16;
 
     /** What {@link #survey} reports for each candidate site of a preset region. */
     public interface SiteVisitor {
@@ -170,6 +191,7 @@ public class RealmPoiWorldPreset extends WorldPreset {
     public static void survey(int seed, int startX, int startY, int endX, int endY, SiteVisitor visitor) {
         int originX = SkyOrigin.originX(seed);
         int originY = SkyOrigin.originY(seed);
+        java.awt.Rectangle[] landmarks = landmarkRects(seed);
         for (int cellX = Math.floorDiv(startX, CELL); cellX <= Math.floorDiv(endX, CELL); cellX++) {
             for (int cellY = Math.floorDiv(startY, CELL); cellY <= Math.floorDiv(endY, CELL); cellY++) {
                 if (!hasSite(seed, cellX, cellY)) continue;
@@ -204,6 +226,25 @@ public class RealmPoiWorldPreset extends WorldPreset {
                 int lastX = siteX;
                 int lastY = siteY;
                 int lastStage = STAGE_BAD_GROUND;
+                // A cell whose own site sits on a once-per-world place is
+                // reported as such rather than as bad ground: the ground there
+                // is fine, it is simply taken by a building the occupancy board
+                // never saw.
+                boolean onLandmark = false;
+                for (java.awt.Rectangle rect : landmarks) {
+                    if (rect.contains(siteX, siteY)) {
+                        onLandmark = true;
+                        break;
+                    }
+                }
+                if (onLandmark) {
+                    int kind = choices[rotate];
+                    visitor.site(kind, realm, siteX - RealmPoiPresets.width(kind) / 2,
+                            siteY - RealmPoiPresets.height(kind) / 2,
+                            RealmPoiPresets.width(kind), RealmPoiPresets.height(kind),
+                            STAGE_NEAR_LANDMARK);
+                    continue;
+                }
                 kinds:
                 for (int i = 0; i < choices.length; i++) {
                     int kind = choices[(rotate + i) % choices.length];
@@ -230,6 +271,8 @@ public class RealmPoiWorldPreset extends WorldPreset {
                         int y = clamp(spotY - height / 2, startY, highY);
                         lastX = x;
                         lastY = y;
+                        // ...and a nudged footprint must not land on one either.
+                        if (intersectsLandmark(landmarks, x, y, width, height)) continue;
                         if (validSite(kind, realm, seed, x, y, width, height)) {
                             visitor.site(kind, realm, x, y, width, height, STAGE_ACCEPTED);
                             lastStage = STAGE_ACCEPTED;
@@ -347,6 +390,34 @@ public class RealmPoiWorldPreset extends WorldPreset {
         return dx * dx + dy * dy < SPIRE_CLEARANCE * SPIRE_CLEARANCE;
     }
 
+    /**
+     * The ground §0.6's once-per-world places occupy in this world, each grown
+     * by {@link #LANDMARK_CLEARANCE} so a lattice place does not end up sharing
+     * a wall with one. A pure function of the seed, like every other test here.
+     */
+    private static java.awt.Rectangle[] landmarkRects(int seed) {
+        java.awt.Rectangle[] rects = new java.awt.Rectangle[SkyLandmarkPois.KINDS.length];
+        for (int index = 0; index < rects.length; index++) {
+            SkyLandmarkPois.Site site = SkyLandmarkPois.site(seed, index);
+            int kind = SkyLandmarkPois.KINDS[index];
+            rects[index] = new java.awt.Rectangle(
+                    site.x - LANDMARK_CLEARANCE, site.y - LANDMARK_CLEARANCE,
+                    RealmPoiPresets.width(kind) + 2 * LANDMARK_CLEARANCE,
+                    RealmPoiPresets.height(kind) + 2 * LANDMARK_CLEARANCE);
+        }
+        return rects;
+    }
+
+    private static boolean intersectsLandmark(java.awt.Rectangle[] landmarks,
+            int x, int y, int width, int height) {
+        for (java.awt.Rectangle rect : landmarks) {
+            if (rect.intersects(new java.awt.Rectangle(x, y, width, height))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public void addToRegion(GameRandom random, final LevelPresetsRegion region,
             BiomeGeneratorStack generatorStack, PerformanceTimerManager timer) {
@@ -393,10 +464,13 @@ public class RealmPoiWorldPreset extends WorldPreset {
      */
     private static void placeInhabitants(int kind, Level level, int x, int y) {
         if (level.isClient()) return;
-        if (kind == RealmPoiPresets.SKY_TOLL_HOUSE) {
-            // Plan  2.12: Magpie waits at (18,5) in the ledger room.
-            spawn(level, "magpiesettler", x + 18, y + 5);
-        }
+        // The three once-per-world places have no branch here, and must not
+        // get one: they are not on this lattice any more, and their people are
+        // seated by SkyLandmarkPois, which is also the only path that CLAIMS
+        // the name in SkywatchWorldData. The branch that used to stand here
+        // spawned Magpie without claiming her, so a world could hold two -- one
+        // in a ledger room and one beside a workshop, which is exactly what
+        // residentsClaimed exists to prevent.
         if (kind == RealmPoiPresets.SKY_DEW_KEEPERS_HUT) {
             // Plan  2.11: five Dew Snails inside the run, which is the whole
             // reason to walk into the hut -- the netting loop the mod built and

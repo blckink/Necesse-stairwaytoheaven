@@ -112,6 +112,26 @@ public class SkywatchQuestData extends LevelData {
      */
     public final java.util.HashSet<Long> catMarkerAuths = new java.util.HashSet<>();
 
+    /**
+     * Which of §0.6's once-per-world places this Skyreach has already stamped,
+     * by {@code RealmPoiPresets.key}.
+     *
+     * <p>The same fact about the toll-house, the cellar and the range that
+     * {@link #spirePlaced} is about the spire, and it lives beside it for the
+     * same reason: it describes THIS level's ground. It is deliberately NOT in
+     * {@code SkywatchWorldData} even though §0.6 says "world data" — a
+     * {@code SkyRegistry.WORLD_GENERATION} bump starts a fresh Skyreach, and a
+     * world-scoped record would mean that new sky never gets the three places
+     * at all. The people in them are world-scoped, in
+     * {@code SkywatchWorldData.residentsClaimed}, because a recruited settler
+     * is on the surface. See {@code SkyLandmarkPois}.
+     *
+     * <p>Keys rather than flags, exactly like {@code residentsClaimed}: a save
+     * written before the cellar existed still loads, and a set of names cannot
+     * be silently shifted by a renumbering.
+     */
+    public final java.util.HashSet<String> landmarksStamped = new java.util.HashSet<>();
+
     @Override
     public void addSaveData(SaveData save) {
         super.addSaveData(save);
@@ -142,6 +162,8 @@ public class SkywatchQuestData extends LevelData {
         save.addLongArray("spireMarkerAuths", toLongArray(this.spireMarkerAuths));
         save.addLongArray("stairsMarkerAuths", toLongArray(this.stairsMarkerAuths));
         save.addLongArray("catMarkerAuths", toLongArray(this.catMarkerAuths));
+        save.addStringArray("landmarksStamped",
+                this.landmarksStamped.toArray(new String[0]));
         // v0.5 return-stairway bindings: auths, Xs and Ys as parallel arrays
         long[] auths = new long[this.returnStairs.size()];
         long[] xs = new long[this.returnStairs.size()];
@@ -206,6 +228,15 @@ public class SkywatchQuestData extends LevelData {
         loadLongSet(save, "spireMarkerAuths", this.spireMarkerAuths);
         loadLongSet(save, "stairsMarkerAuths", this.stairsMarkerAuths);
         loadLongSet(save, "catMarkerAuths", this.catMarkerAuths);
+        // Not cleared by either reset path below, for the reason the spire's
+        // own geometry is not: these are BUILT GROUND, and a player may have
+        // moved into one of them.
+        this.landmarksStamped.clear();
+        for (String stamped : save.getStringArray("landmarksStamped", new String[0], false)) {
+            if (stamped != null && !stamped.isEmpty()) {
+                this.landmarksStamped.add(stamped);
+            }
+        }
         // v0.5 return-stairway bindings
         this.returnStairs.clear();
         if (save.hasLoadDataByName("returnAuths")) {
