@@ -352,7 +352,7 @@ ERR-Kachel.
 
 | Gebiet | Kacheln vom Ursprung | Biome | Feinde | Critter | Tiere | NPCs | Quests | POIs | bewachte Orte / 1000×1000 |
 |---|---|---|---|---|---|---|---|---|---|
-| **Skyreach** | 0 – 1 800 | 4 | 8 | 4 | 2 | 7 | 5 | 16 ⭐ | 28,7 |
+| **Skyreach** | 0 – 1 800 | 4 | 8 | 4 | 2 | 7 | 5 | 18 ⭐ | 28,7 |
 | **Eden** | 600 – 2 880 | 3 | 5 | 0 | 0 | 1 | 3 | 2 | 11,4 ⭐ *(vorher 0)* |
 | **Steinfeld** | 1 920 – 4 200 | 3 | 4 | 0 | 0 | 1 ⭐ | 2 ⭐ | 1 | 20,3 |
 | **Ghost Realm** | 2 880 – 5 280 | 5 | 9 | 0 | 0 | 4 | 4 ⭐ | 1 | 21,8 |

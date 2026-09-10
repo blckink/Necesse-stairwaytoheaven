@@ -20,7 +20,7 @@ it is the state as it stands now.
 
 | realm | tiles out | biomes | hostiles | critters | animals | NPCs | live quests | POIs | boss |
 |---|---|---|---|---|---|---|---|---|---|
-| **Skyreach** | 0–1800 | 4 | 8 | 4 | 2 | 7 | 5 | 16 | `cryoqueen` t8 · 74 412 HP |
+| **Skyreach** | 0–1800 | 4 | 8 | 4 | 2 | 7 | 5 | 18 | `cryoqueen` t8 · 74 412 HP |
 | **Eden** | 600–2880 | 3 | 5 | **0** | 0 | 1 | 3 | 2 | `moonlightdancer` t8 · 171 720 HP |
 | **Steinfeld** | 1920–4200 | 3 | 4 | **0** | 0 | 1 | 2 | 1 | `ascendedwizard` t9 · 220 528 HP |
 | **Ghost Realm** | 2880–5280 | 5 | 9 | **0** | 0 | 4 | 4 | 1 | `pestwarden` t9 · 233 595 HP |
@@ -104,16 +104,18 @@ and Glimmergoat on aurorashoal (7.0%/region). Placed by
 *"wertvolle Tiere nicht an jeder Ecke"*.
 
 **NPCs (7).** The Warden (+ his settler form), Magpie, Halda, Ossian Vane,
-Siggi and Peanut. Magpie, Halda and Ossian need a *player-built* workstation to
-already stand within 3 tiles of a region generating for the **first** time —
-which is the opposite of how anyone builds, so in practice they are
-near-unfindable.
+Siggi and Peanut. Magpie, Halda and Ossian **used to** need a *player-built*
+workstation to already stand within 3 tiles of a region generating for the
+**first** time — the opposite of how anyone builds, so in practice they were
+near-unfindable. Since 2026-09-10 each sits in a once-per-world building of
+their own instead (Toll-House, Grange Cellar, Test Range), each with a guard,
+and two of the three guards carry the key item the hiring costs.
 
 **Quests (5 live).** `swh_findspire` → `swh_recruitwarden` → `swh_cats` →
 `swh_anchor` → `swh_keyskyreach`. Plus `swh_beacon`, registered and dead, kept
 so pre-0.5 saves deserialize.
 
-**POIs (16).** Sky Tower, Sky Town, Toll Bridge, Sky Inn — plus the Warden's
+**POIs (18).** Sky Tower, Sky Town, Toll Bridge, Sky Inn — plus the Warden's
 Spire, the richest single building in the mod. Six more came out of
 `docs/design/chapter-01-skyreach-pois.md` on 2026-09-09: the Skyway Toll-House
 (§2.12), the Skywatch Wayside (§2.1), the Dew-Keeper's Hut (§2.11), the
@@ -133,6 +135,16 @@ Mistsea and paints its own 123 land tiles into 625 of water, with a guaranteed
 Mistserpent circling it). Counted by `/skyreachstatus pois` on a real seed, not
 by reading constants; on seed 1524002983 all sixteen hold 2–4 accepted sites and
 the Reef stamps `placed=30/30 missing=0`.
+
+**Two more on 2026-09-10, which take the band to eighteen**, and they are a
+different animal from the sixteen above: the **Grange Cellar** (§2.13) and the
+**Stormveil Test Range** (§2.14) are stamped **once per world**, not scattered
+on the lattice, because each holds a named person who exists exactly once. With
+the Toll-House — which was already in the list but became the same kind of place
+— they are the mod's three *guarded recruit sites*: a resident, a guard, and the
+unique loot of `chapter-01-skyreach-cast.md` §3. Verified on seed 1486743578:
+`landmarks=3`, each `stamped=1 missing=0 present=1 guards=1`, and
+`landmark stamps: 3/3` still 3/3 after a restart.
 
 **Boss.** Cryo Queen, incursion tier 8, 18 000 base → **74 412 HP**.
 
