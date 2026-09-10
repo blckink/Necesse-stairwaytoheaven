@@ -222,9 +222,9 @@ and Orchard Ring cells still remain pressure/terrain sites rather than presets.
 | **Caspern**, Spirit Smith | Ghost, beside a gravestone | 14 000 | Nightsteel ore/bar, phantom dust, bone arrows | — |
 | **Eleanor**, Lost Soul | Ghost, beside a gravestone | 5 000 (STAY only) | flowers, lanterns | `swh_eleanor`, two endings |
 | **Mr. Knott**, Doorman | Crooked, at a Door Yard | 22 000 | void cube, runestone, 3 masks | `swh_crookeddoor` |
-| **Magpie** | Skyreach, beside a mod workstation | 12 000 | buys sky salvage above broker | — |
-| **Halda**, Cellarer | Skyreach, same | 9 000 | the mod's 3 crafted materials | — |
-| **Ossian Vane** | Skyreach, same | 18 000 | rotating incursion-exclusive loot (3 of 8) | — |
+| **Magpie** | Skyreach, **Skyway Toll-House** (once per world, guarded by the Tollwright) | 12 000 **+ Bonded Lockbox** | buys sky salvage above broker | — |
+| **Halda**, Cellarer | Skyreach, **the Grange Cellar** (once per world, guarded by the Sourvat Bloom) | 9 000 **+ The Mother** | the mod's 3 crafted materials | — |
+| **Ossian Vane** | Skyreach, **the Stormveil Test Range** (once per world, guarded by Prototype Nine) | 18 000 **+ Storm Lens Core** | rotating incursion-exclusive loot (3 of 8) | — |
 | **Ives**, Verger of the Quiet Reach | **Steinfeld**, beside a broken angel | 11 000 → **free** after his quest | the realm's four materials (buys), gravestones/candles/urn/stone fence + Pale Stone (sells) | `swh_steinfeldvigil` |
 | **Spire Cats** ×2 | Skyreach lairs | not recruitable | — | objective of `swh_cats` |
 
@@ -360,7 +360,7 @@ These are the objects with real behaviour, as opposed to deco and furniture.
 
 ### Equipment and materials, in one glance
 
-75 items, 106 objects, 55 mobs registered.
+86 items, 119 objects, 60 mobs registered.
 
 | kind | what ships |
 |---|---|
@@ -375,6 +375,7 @@ These are the objects with real behaviour, as opposed to deco and furniture.
 | **Livestock** | **Nimbus Yak** — milk, no shear · **Glimmergoat** — shear for aurora fleece, no milk. Both eat cloudberry and wheat, by hand or trough. |
 | **Food** | Nimbus milk → cheese press · Cloud custard · Sky curd · Nimbus draught · Cloudberry · Cloudpuff Treat (the cats' bait) |
 | **Quest item** | Silver Bell |
+| **Unique rewards (8)** | One per place, none of them a bigger number on an existing item. Toll-House: **Bonded Lockbox** (Magpie's key) · **Skyway Writ** · **Ledger of Undelivered Post**. Grange Cellar: **The Mother** (Halda's key, Sourvat Bloom loot) · **The Warden's Round** · **Skywatch Signet** (trinket, reveals sky structures). Test Range: **Storm Lens Core** (Vane's key, Prototype Nine loot) · **Aetherwright's Casing** ×2–4. Six sit in containers, two drop off the guard on **every** kill. All eight borrow a vanilla icon — see `VANILLA_ASSET_MAP.md` §1.7. |
 
 ---
 

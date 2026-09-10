@@ -67,9 +67,9 @@ Zehn benannte Menschen, zwei Katzen, ein beschworener Geist. Jeder existiert
 | Wer | Gebiet | Gefunden bei | Anwerbung | Beruf | Quest | Kommt von selbst in die Siedlung? |
 |---|---|---|---|---|---|---|
 | **Sky Warden** | Skyreach | Alte Wächterspitze (beim ersten Aufstieg gestempelt) | 30 000 | — | die ganze Warden's-Call-Kette **+ alle 5 Region-Keys** | nein, wird angeworben |
-| **Magpie** | Skyreach | an einer verlassenen Skywatch-Werkstatt | 12 000 | Handelsmissionen | — | nein |
-| **Halda** | Skyreach | an einer verlassenen Skywatch-Werkstatt | 9 000 | **Angeln** | — | nein |
-| **Ossian Vane** | Skyreach | an einer verlassenen Skywatch-Werkstatt | 18 000 | — | — | nein |
+| **Magpie** | Skyreach | **Skyway-Zollhaus** ⭐, einmal pro Welt · bewacht vom **Tollwright** | 12 000 **+ Verbundene Schließkassette** ⭐ | Handelsmissionen | — | nein |
+| **Halda** | Skyreach | **Grange-Keller** ⭐, einmal pro Welt · bewacht von der **Sauerbottich-Blüte** | 9 000 **+ Die Mutter** ⭐ | **Angeln** | — | nein |
+| **Ossian Vane** | Skyreach | **Sturmschleier-Testgelände** ⭐, einmal pro Welt · bewacht von **Prototyp Neun** | 18 000 **+ Sturmlinsenkern** ⭐ | — | — | nein |
 | **Eveleen** | Eden | bei einem Baum der Erkenntnis | 7 000 → **frei** | **Düngen** | `swh_edenreach`, `swh_edenplants` | ja, wenn Eden-Gras in der Siedlung wächst |
 | **Ives** ⭐ | **Steinfeld** | bei einem **zerbrochenen Engel** | 11 000 → **frei** | — | `swh_steinfeldvigil` | nein |
 | **Mortimer** | Ghost Realm | bei einem Grabstein | 8 000 → **frei** | **Jagd** | `swh_mortimerrites` ⭐ | ja, bei einem Friedhof in der Siedlung |
@@ -86,12 +86,16 @@ Zehn benannte Menschen, zwei Katzen, ein beschworener Geist. Jeder existiert
 eine kostenlose Anwerbung. Wer vorher voll bezahlt hat, kann die Quest trotzdem
 noch abschließen und bekommt die Barren.
 
-**Findbarkeit, ehrlich.** Magpie, Halda und Ossian brauchen eine **vom Spieler
-gebaute** Werkstatt, die schon innerhalb von 3 Kacheln steht, während eine
-Region zum **ersten Mal** generiert — also das Gegenteil davon, wie irgendwer
-baut. In der Praxis sind sie kaum zu finden. Die anderen sieben hängen an
-natürlich gemalten Landmarken (Baum der Erkenntnis, Grabstein, zerbrochener
-Engel, rote Tür) und sind in Ordnung.
+**Findbarkeit, ehrlich.** ⭐ Magpie, Halda und Ossian hingen früher an einer
+**vom Spieler gebauten** Werkstatt, die schon stehen musste, während eine Region
+zum **ersten Mal** generiert — in der Praxis waren sie kaum zu finden. Seit dem
+10.09.2026 sitzt jeder der drei stattdessen in einem eigenen Gebäude, das die
+Welt genau **einmal** stempelt: Zollhaus, Grange-Keller, Testgelände. Jedes
+davon hat einen Wächter, und bei zweien der drei trägt der Wächter den
+Schlüsselgegenstand, ohne den die Anwerbung nicht geht — der Ort ist also ein
+Kampf, kein Raum. Die anderen sieben hängen an natürlich gemalten Landmarken
+(Baum der Erkenntnis, Grabstein, zerbrochener Engel, rote Tür) und sind in
+Ordnung.
 
 ---
 
@@ -293,6 +297,54 @@ permanenten Buff — nie über `LevelModifiers`, das würde die ganze Ebene buff
 Die Leiter ist absichtlich monoton: nach außen laufen heißt nach oben laufen.
 Dein Wunsch war *„grundsätzlich sollen die Bosse auf Incursion Level 8–10
 sein"* — genau da liegen sie.
+
+### Die drei ortsgebundenen Wächter ⭐ — keine Bosse, aber auch kein Mob von der Wiese
+
+Nicht beschworen, nicht wandernd: jeder steht in genau **einem** Gebäude und
+gehört dazu. Alle drei erben von einem Vanilla-Archetyp und tragen dessen
+Sprite-Sheet, kosten also **kein neues Pixel**; die HP kommen aus derselben
+`SkyMobTiers`-Rollentabelle wie der Rest von Skyreach.
+
+| Wächter | steht im | Rolle | lässt fallen |
+|---|---|---|---|
+| **Tollwright** | Skyway-Zollhaus | Elite (Nahkampf, Stampfer) | — der Schlüssel liegt hier in der Tresor-Vitrine |
+| **Sauerbottich-Blüte** ＋ **Vatlinge** | Grange-Keller | Elite, ruft Vatlinge | **Die Mutter** — bei **jedem** Kill |
+| **Prototyp Neun** | Sturmschleier-Testgelände | Fernkampf | **Sturmlinsenkern** — bei **jedem** Kill |
+
+Zwei Vanilla-Verhalten sind absichtlich aus: der Tollwright kann **keine Objekte
+zerbrechen** (ein Aschegolem liefe sonst durch die Wände des Hauses, in dem
+Magpie steht), und die Blüte bleibt **eine Frenzy-Stufe unter dem Limit** und
+entlässt Vatlinge, statt zu explodieren — ein Stachelbusch tötet sich am Limit
+selbst, und das wäre ein Wächter, der vor dem Kampf stirbt. Beide greifen nur
+**Spieler** an, nie den Siedler im selben Raum.
+
+### Die acht einzigartigen Belohnungen ⭐
+
+Kein einziges Stück ist „dieselbe Waffe mit größerer Zahl". **Sechs** liegen in
+einer Truhe, Vitrine oder einem Fass am Ort, **zwei** fallen vom Wächter — und
+zwar bei jedem Kill, nicht mit einer Chance, denn beide sind Anwerbeschlüssel.
+
+| # | Belohnung | wo | wofür |
+|---|---|---|---|
+| 1 | **Verbundene Schließkassette** | Zollhaus, Tresor-Vitrine | Magpies Anwerbeschlüssel |
+| 2 | **Skyway-Freibrief** | Zollhaus, Vitrine im Kontor | dauerhafte Aufwertung von Magpies Handelsmissionen |
+| 3 | **Register unzustellbarer Post** | Zollhaus, Schrank | benennt Sky-Pakete in der Welt; Magpie zahlt dafür |
+| 4 | **Die Mutter** | in der Sauerbottich-Blüte | Haldas Anwerbeschlüssel + nie verbrauchte Zutat |
+| 5 | **Der Wächtertrunk** | Grange-Keller, das eine alte Fass | einmaliger, langer, starker Skywatch-Buff |
+| 6 | **Sturmlinsenkern** | in Prototyp Neun | Vanes Anwerbeschlüssel + Antrieb seines Zeichentischs |
+| 7 | **Aetherwright-Gehäuse** ×2–4 | Testgelände, Vitrine | Tor-Material der ersten Waffenstufe nach Sturmstahl |
+| 8 | **Skywatch-Siegel** | Grange-Keller, Schrank | Schmuck: zeigt unerforschte Skyreach-Bauten auf der Karte |
+
+**Zum Siegel, ehrlich:** die Vorlage legt es ins Archiv der Wächterspitze,
+übergeben „wenn der Haushalt vollständig ist". Dieses Story-Tor ist **nicht
+gebaut**, und die Spitze ist in jedem bestehenden Spielstand längst gestempelt —
+dort läge das Siegel also genau in den Spielständen unerreichbar, in denen es
+etwas wert wäre. Es liegt darum bei Halda im Keller: die Letzte des Haushalts
+bewahrt das Siegel des Haushalts. Wird das Tor später gebaut, zieht es um.
+
+**Alle acht borgen sich vorerst ein Vanilla-Icon** (siehe `VANILLA_ASSET_MAP.md`
+§1.7) — gezeichnet ist noch keines, und ein Item ohne Icon wäre im Inventar eine
+ERR-Kachel.
 
 ---
 
