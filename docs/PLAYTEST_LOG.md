@@ -739,9 +739,27 @@ that fix.
 | 3 | Aufsteigen | The Skyreach plane exists as its own level and paints without a single wrong tile. | `Veil ground OK: class=SkyLevel identifier=skyreach2 dimension=1`; `painter oracle: tileMismatches=0 (scan radius 64)` | VERIFIED [run] |
 | 4 | Sky Warden anwerben | One Warden and both cats are in the world, the settler mob is registered, and both recruit routes carry a price and a shop. | `npc check: wardens=1 cats=2`; `settler check: wardensettler=WardenSettler mobRegistered=true`; `recruit check: skywarden settler=WardenSettler price=coinx30000 shop=present` | VERIFIED [run] |
 | 5 | Veil oeffnen | `veilstatus` samples the Veil bands and finds their own ground, not the Skyreach's. | `fenSampledAt=-2150,3261 hollowSurveyAt=-2579,3993`, then `murkmosstile x3239`, `hauntedgrasstile x2383`, `ectoplasmtile x625` | VERIFIED [run] |
-| 6 | Skyreach-Orte besuchen | The catalogue queues 1433 inhabited places across 23 of 24 kinds, with the nearest one 271 tiles from the arrival pad. | `realmpoi census: seed=1486237612 arrival=139,-243 ... queued=1433 unnamed=0 kinds=23/24 landmarks=3 nearest=skytollbridge@271` | VERIFIED [run] |
+| 6 | Skyreach-Orte besuchen | The catalogue queues 1433 inhabited places and the nearest is 271 tiles from the arrival pad — but only 23 of 24 kinds are anywhere in the world, and the one the run stamped came up short. | `realmpoi census: seed=1486237612 ... queued=1433 unnamed=0 kinds=23/24 landmarks=3 nearest=skytollbridge@271`, and against it `FAIL: skytown stands nowhere in the world` and `realmpoi stamp: kind=skytollbridge ... placed=50/74 missing=24` | **FAILS** — see below |
 | 7 | Einen Boss legen | Not driven. Nothing here kills anything — the server has no player. What the run does show is that the six rungs are in the shipped jar at the intended numbers. | `scripts/balance_check.sh`: `mutanthydra 10 320000->528000 2.15->2.9240003`, and the five rungs below it, all rows matching the expected table | VERIFIED [jar] — **not played** |
 | 8 | Hell betreten | The far end of the realm field resolves to Hell, and all four Hell buildings queue there on their own ground. | `realm check: ... 4000=ghostrealm 5200=hell 5800=hell`; `realmpoi funnel hell: candidates=753 accepted=752 badground=1`; `realmpoi kind hellborderoffice: realm=hell ... queued=205` | VERIFIED [run] |
+
+### The test is RED, and this is why
+
+`scripts/integration_test.sh` exits 1 on seed 1486237612 with three assertions,
+all in the POI half and none of them touched by the item-category fix:
+
+```
+FAIL: one of the twenty-four lattice places is in no preset region in the world
+FAIL: skytown stands nowhere in the world
+FAIL: skytollbridge is missing 24 objects its preset placed (allowed 0)
+```
+
+`skytown` reports `accepted=0 queued=0 nearest=NONE` — the largest Skyreach
+place (57x41) finds no box it fits in. The toll bridge stamps 50 of the 74
+objects its preset carries, with four cells reading `0!=1730`. **Not
+investigated in this pass, and not fixed.** The mod boots, generates and plays;
+one of twenty-four building kinds does not appear, and the one place this run
+walked to is missing a third of its furniture.
 
 ### What this run does not answer
 
