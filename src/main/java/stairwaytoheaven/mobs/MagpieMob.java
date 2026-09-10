@@ -157,5 +157,11 @@ public class MagpieMob extends SkySettlerMob {
      * and she then buys it off the player as part of her own recruitment fee."
      */
     @Override protected String recruitKey() { return "bondedlockbox"; }
+    /**
+     * She is found, not hired to fight: the vanilla shape for a
+     * recruitable NPC standing in the world is {@code attackHostiles}
+     * false. See {@link SkySettlerMob#attacksHostiles}.
+     */
+    @Override protected boolean attacksHostiles() { return false; }
     @Override protected String talkKey() { return "magpietalk"; }
 }

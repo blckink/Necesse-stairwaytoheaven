@@ -5,7 +5,10 @@ import java.util.stream.Stream;
 import necesse.engine.modifiers.ModifierValue;
 import necesse.entity.mobs.GameDamage;
 import necesse.entity.mobs.MaxHealthGetter;
+import necesse.entity.mobs.Mob;
+import necesse.entity.mobs.ai.behaviourTree.AINode;
 import necesse.entity.mobs.ai.behaviourTree.BehaviourTreeAI;
+import necesse.entity.mobs.ai.behaviourTree.util.TargetValidity;
 import necesse.entity.mobs.buffs.BuffModifiers;
 import necesse.entity.mobs.hostile.AshGolemMob;
 import necesse.gfx.gameTexture.GameTexture;
@@ -109,7 +112,26 @@ public class TollwrightMob extends AshGolemMob {
     @Override
     public void init() {
         super.init();
-        this.ai = new BehaviourTreeAI<>(this, new AshGolemMob.AshGolemAI<>(0, 64, AGGRO_RANGE));
+        AshGolemMob.AshGolemAI<TollwrightMob> tree =
+                new AshGolemMob.AshGolemAI<>(0, 64, AGGRO_RANGE);
+        // It bills PLAYERS. VERIFIED [jar]:
+        // TargetFinderAINode.streamPlayersAndHumans (:253) accepts any visible
+        // human on a team, and Magpie is standing 7 tiles away in the ledger
+        // room — so out of the box the Tollwright leaves the vault, chases
+        // her, and cannot ever finish, because SkySettlerMob.canTakeDamage is
+        // false. What the player would then find is a golem in the wrong room
+        // and a courier who has been knocked across it. `validity` is a public
+        // mutable field on the node (TargetFinderAINode.java:24), which is the
+        // one seam that does not need vanilla's tree rebuilt around it.
+        tree.targetFinderNode.validity = new TargetValidity<TollwrightMob>() {
+            @Override
+            public boolean isValidTarget(AINode<TollwrightMob> node, TollwrightMob mob,
+                    Mob target, boolean isNewTarget) {
+                return target != null && target.isPlayer
+                        && super.isValidTarget(node, mob, target, isNewTarget);
+            }
+        };
+        this.ai = new BehaviourTreeAI<>(this, tree);
     }
 
     @Override

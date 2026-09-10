@@ -86,6 +86,12 @@ public class OssianMob extends SkySettlerMob {
      * the Core. He is the most expensive of the three and says so is fair."
      */
     @Override protected String recruitKey() { return "stormlenscore"; }
+    /**
+     * He is found, not hired to fight: the vanilla shape for a
+     * recruitable NPC standing in the world is {@code attackHostiles}
+     * false. See {@link SkySettlerMob#attacksHostiles}.
+     */
+    @Override protected boolean attacksHostiles() { return false; }
     @Override protected String talkKey() { return "ossiantalk"; }
 
     /**

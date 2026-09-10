@@ -75,5 +75,11 @@ public class HaldaMob extends SkySettlerMob {
      * the Mother. She does not haggle; she hands over the first barrel."
      */
     @Override protected String recruitKey() { return "themother"; }
+    /**
+     * She is found, not hired to fight: the vanilla shape for a
+     * recruitable NPC standing in the world is {@code attackHostiles}
+     * false. See {@link SkySettlerMob#attacksHostiles}.
+     */
+    @Override protected boolean attacksHostiles() { return false; }
     @Override protected String talkKey() { return "haldatalk"; }
 }

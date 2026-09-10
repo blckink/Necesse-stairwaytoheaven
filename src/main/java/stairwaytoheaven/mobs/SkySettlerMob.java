@@ -60,8 +60,35 @@ public abstract class SkySettlerMob extends HumanShop {
     @Override
     public void init() {
         super.init();
-        this.ai = new BehaviourTreeAI<>(this, new HumanAI<>(320, true, false, 25000),
+        this.ai = new BehaviourTreeAI<>(this, new HumanAI<>(320, this.attacksHostiles(), false, 25000),
                 new AIMover(HumanMob.humanPathIterations));
+    }
+
+    /**
+     * Whether this resident goes looking for a fight.
+     *
+     * <p>{@code HumanAI}'s second argument, and vanilla treats it as a
+     * character trait rather than a default: the Miner, the Explorer and the
+     * Hunter pass {@code true}, and the two NPCs you FIND standing in the world
+     * waiting to be recruited — {@code FriendlyJonasHumanMob} and
+     * {@code FriendlyWitchHumanMob} — pass {@code false} (VERIFIED [jar]).
+     *
+     * <p>That distinction became load-bearing on 2026-09-10, when the three
+     * recruit sites got the enemies §2 asks for. A settler with
+     * {@code attackHostiles} true charges anything hostile within 320px, and
+     * measured on seed 1443… Halda (§2.13 seat (12,10)) is 172px from the
+     * Sourvat Bloom (7,8) and Magpie (§2.12 seat (18,5)) is 233px from the
+     * Tollwright (16,12). Both walk out of the room they are supposed to be
+     * found in — and because {@link #canTakeDamage} is false they cannot lose,
+     * so they eventually kill the boss and the recruit key drops on an empty
+     * floor before the player has arrived. §2.12 says it plainly: Magpie
+     * <i>"does not come out until the Tollwright is down"</i>.
+     *
+     * <p>Default true, so the four realm residents keep the behaviour they
+     * shipped with; the three Skyreach residents override it.
+     */
+    protected boolean attacksHostiles() {
+        return true;
     }
 
     // --- professions ----------------------------------------------------

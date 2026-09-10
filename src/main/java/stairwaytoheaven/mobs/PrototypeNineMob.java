@@ -1,8 +1,11 @@
 package stairwaytoheaven.mobs;
 
+import java.awt.Point;
+
 import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
 import necesse.engine.util.GameRandom;
+import necesse.engine.util.gameAreaSearch.GameAreaStream;
 import necesse.entity.mobs.GameDamage;
 import necesse.entity.mobs.MaxHealthGetter;
 import necesse.entity.mobs.Mob;
@@ -10,6 +13,7 @@ import necesse.entity.mobs.ai.behaviourTree.BehaviourTreeAI;
 import necesse.entity.mobs.ai.behaviourTree.decorators.FailerAINode;
 import necesse.entity.mobs.ai.behaviourTree.leaves.TeleportOnProjectileHitAINode;
 import necesse.entity.mobs.ai.behaviourTree.trees.ConfusedPlayerChaserWandererAI;
+import necesse.entity.mobs.ai.behaviourTree.util.TargetFinderDistance;
 import necesse.entity.mobs.hostile.AncientSkeletonMageMob;
 import necesse.entity.projectile.AncientSkeletonMageProjectile;
 import necesse.gfx.gameTexture.GameTexture;
@@ -112,6 +116,22 @@ public class PrototypeNineMob extends AncientSkeletonMageMob {
                                 mob.getLevel(), mob, mob.x, mob.y, target.x, target.y, 120.0F, 640, DAMAGE, 50));
                         this.wanderAfterAttack = GameRandom.globalRandom.getChance(0.75F);
                         return true;
+                    }
+
+                    /**
+                     * PLAYERS only. Vanilla's default stream is
+                     * {@code streamPlayersAndHumans}, which accepts any visible
+                     * human on a team — and Ossian Vane is standing 14 tiles
+                     * away inside the same workshop. A demonstrator that spends
+                     * the fight shooting at an immortal instrumentwright is
+                     * neither the encounter §2.14 describes nor one the player
+                     * can win their way into.
+                     */
+                    @Override
+                    public GameAreaStream<Mob> streamPossibleTargets(PrototypeNineMob mob,
+                            Point base, TargetFinderDistance<PrototypeNineMob> distance) {
+                        return super.streamPossibleTargets(mob, base, distance)
+                                .filter(m -> m.isPlayer);
                     }
                 };
         chaserAI.addChildFirst(new FailerAINode<>(new TeleportOnProjectileHitAINode<PrototypeNineMob>(3000, 7) {
