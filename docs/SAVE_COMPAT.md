@@ -235,6 +235,26 @@ generates ground that never existed and leaves existing ground alone, on purpose
 your spire.** Nothing is broken by it and nothing you built is at risk; the new
 places are simply further out.
 
+### The three once-per-world places are the exception, and they reach every save
+
+2026-09-10 moved the Skyway Toll-House, the Grange Cellar and the Test Range off
+the lattice and onto `SkyLevel.ensureWardenSpire` (`SkyLandmarkPois`). That path
+force-loads its own site, exactly the way the spire does, so **an existing save
+does get all three** the next time anybody ascends or runs `/skyreachstatus` —
+they are not "further out", they are stamped on demand. Two consequences worth
+knowing before you open an old world:
+
+- **A save that already stood up a toll-house from the lattice keeps it.** It is
+  built ground and nothing removes it, so such a world can hold that one plus
+  the new once-per-world one. Only the lattice copy is legacy; the new path can
+  never stamp a second, and Magpie is claimed once either way, so there is never
+  a second Magpie.
+- **The Skyreach lattice re-rolled which kind takes which cell.** Removing the
+  toll-house from `REALM_KINDS[0]` took that band from sixteen kinds to fifteen,
+  and `skyreachRotate` hands cells out by rank modulo the kind count. Ground you
+  have already walked keeps whatever it generated; ground you have not will
+  offer a different mix than a pre-2026-09-10 build would have.
+
 ## 6. Version history, so you know what an old save is missing
 
 | shipped | content | retrofittable? |

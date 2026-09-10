@@ -84,15 +84,24 @@ table appears in only **2**, a bed in only **1** (the Spire), and 5 of the 9 are
 "furnished" by a light and nothing else. `SkyFurnitureSet`'s 17 pieces are still
 almost unused outside the Spire.
 
-**The inhabited catalogue adds 25 presets.** `RealmPoiWorldPreset` places
-sixteen in Skyreach, two in Eden, one each in Steinfeld/Ghost/Crooked, and four
-in the reserved Hell band. The large sites include actual street networks, buildings
+**The inhabited catalogue adds 27 presets, and they are no longer all the same
+rarity.** `RealmPoiWorldPreset` places **twenty-four** of them on the lattice —
+fifteen in Skyreach, two in Eden, one each in Steinfeld/Ghost/Crooked, four in
+the reserved Hell band. The other **three are once per world**
+(`SkyLandmarkPois`, 2026-09-10): the Skyway Toll-House (§2.12), the Grange
+Cellar (§2.13) and the Test Range (§2.14) are stamped lazily off
+`SkyLevel.ensureWardenSpire`, from a seed-derived site in a stated distance band
+and biome, and remembered in `SkywatchQuestData.landmarksStamped`. That is
+§0.6's third rarity, and it had never been built: a kind on the lattice IS
+§0.6's "common" row by definition — one designed place per 72×72 cell, two cells
+in three — and the toll-house rode it from 2026-09-09 to 2026-09-10, so a world
+stood up four ledger rooms for a Magpie there is one of. The large sites include actual street networks, buildings
 beside rather than on those streets, non-rectangular room unions, doors,
 windows, dense functional furniture and clear circulation. Full catalogue and
 review rules: `docs/design/realm-poi-worldgen.md`.
 
-**Twelve of the sixteen Skyreach ones come from the dossier**
-(`docs/design/chapter-01-skyreach-pois.md`, fourteen designed places). The
+**All fourteen of the dossier's designed places are now built**
+(`docs/design/chapter-01-skyreach-pois.md`). The
 Skyway Toll-House (§2.12) was transcribed into `setObject` calls by hand on
 2026-09-09. The Skywatch Wayside (§2.1), the Dew-Keeper's Hut (§2.11), the
 Shepherd's Fold (§2.2), the Institute of Applied Falling (§2.3), the Passage
@@ -114,11 +123,13 @@ would seal the arena, since `RockObject` is solid).
 none of its own — the Gate stands five pieces INSIDE its chequer dais, and
 without it each would punch a skyway-paved hole in the one accent surface it
 has).
-Every breach throws at load, because `onRegistryClosed` builds all twenty-five
+Every breach throws at load, because `onRegistryClosed` builds all twenty-seven
 kinds; each rule was confirmed to fire by breaking it and booting a server.
 `tools/plan_transcription_audit.py` proves the arrays in the code are still
-character-identical to the sections in the dossier. **Two plans are still
-unbuilt: §2.13 the Grange Cellar and §2.14 the Test Range.** Every §4 piece of
+character-identical to the sections in the dossier. §2.13 the Grange Cellar and
+§2.14 the Test Range landed on 2026-09-10 and closed the list; both are
+plan-built, and with them Magpie, Halda and Ossian each stand in a place of
+their own. Every §4 piece of
 new art the eleven built ones ask for — the
 steles, `cloudspringfont`, `skywaywaystone`, Wren's wardrobe, `sovereignaltar`,
 `prismchime`, `reefmaw`, the Skywatch Revenant, the Fulgur Shade and the three
@@ -139,7 +150,9 @@ counts in `scripts/integration_test.sh` were the SURFACE catalogue's, a
 different system. `/skyreachstatus pois` (`RealmPoiCensus`) walks the whole
 realm disc through the placement decision itself and then through the preset
 regions the world really built, and the integration test fails on anything less
-than 25/25. Measured over six seeds on 2026-09-07: **13/13 on all of them**,
+than 24/24 — the three once-per-world places are counted separately, by the
+`realmpoi landmark` lines, which check the same thing plus the one question a
+lattice census cannot ask: is the PERSON in it. Measured over six seeds on 2026-09-07: **13/13 on all of them**,
 ~1,450 places in a 6144-tile disc, nearest one **126–430 tiles** from the
 arrival pad. On 2026-09-10, seed 1524002983: **25/25 accepted and 25/25
 queued**, 1,439 places, nearest one 155 tiles out. `[run]`, not `[game]` —

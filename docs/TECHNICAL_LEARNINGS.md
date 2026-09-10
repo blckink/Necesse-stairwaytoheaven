@@ -3724,3 +3724,45 @@ greps are satisfied by any stamp line. Seed 1524002983:
 Adding that second stamp then broke the gate that was reading it — see "A
 `grep -q` over a log is a coin flip once two lines can satisfy it" above. The
 per-stamp loop there is what the test asserts today.
+
+## 2026-09-10 — A "once per world" place cannot be a kind on a worldgen lattice
+
+`chapter-01-skyreach-pois.md` §0.6 names three rarities. The mod had built one:
+every inhabited place was a kind in `RealmPoiWorldPreset.REALM_KINDS`, which is
+§0.6's **common** row by definition — `ROAD_CELL`-style lattice, one designed
+place per 220-tile cell at `SITE_CHANCE = 0.42`, i.e. hundreds per world. The
+Skyway Toll-House shipped as one on 2026-09-09 and its whole point is that the
+loot is a person: measured on seed 1561838204 before the change, the Skyreach
+band accepted 1,513 candidates and the toll-house held its share of them.
+
+Three engine facts made the fix what it is:
+
+1. **A `Preset` carries tiles and objects and nothing else.** An inhabitant
+   cannot be part of one, so the settler has to be spawned by whoever holds the
+   `Level` — for the lattice that is the place closure, for a lazily stamped
+   landmark it is the method that stamps it.
+2. **`ensureWardenSpire` is the shape a once-per-world stamp already has.**
+   `regionManager.ensureTilesAreLoaded` then `applyToLevel` on a seed-derived
+   site, with the "done" flag in `SkywatchQuestData` (LevelData). Putting that
+   flag in `SkywatchWorldData` instead would be wrong for a reason the class's
+   own header states: a `WORLD_GENERATION` bump starts a *fresh* Skyreach, and
+   a world-scoped flag would mean the new sky never gets the building at all.
+   The PERSON is world-scoped, because a recruited settler is on the surface.
+3. **The occupancy board never hears about a lazily stamped building.**
+   `LevelPresetsRegion.isRectangleOccupied` only knows rectangles that went
+   through `addPreset`, so the lattice will queue a Sky Town straight through a
+   landmark unless it is told not to. Both sites are pure functions of the seed,
+   which is what makes a `STAGE_NEAR_LANDMARK` test possible at all.
+
+VERIFIED [run], seed 1561838204: `kinds=24/24 queuedkinds=24/24 landmarks=3`,
+all three landmarks `tier=biome stamped=1 missing=0 present=1`, and
+`landmark stamps: 3/3` still 3/3 after a restart — i.e. the record survived and
+nothing was stamped twice.
+
+**And `SkyTerrainPainter` already has the biome bands a distance-band site needs**:
+`STORMVEIL_BELOW = 0.40`, `SKYWAY_BELOW = 0.47`, `AURORA_ABOVE = 0.72` over the
+same `fbm(seed + SALT_BIOME, BIOME_SCALE, 2)` the painter reads, so "the
+Skyway Passages" and "the Stormveil" in a dossier section are testable, not
+decorative. All three landmarks found a biome-matching site on the first seed
+tried, which is why the search prints its `tier` — a fallback to plain land, or
+to the band's inner edge, would otherwise be invisible.

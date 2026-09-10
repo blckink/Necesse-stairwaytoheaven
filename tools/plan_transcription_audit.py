@@ -38,6 +38,8 @@ PLANS = {
     "GATE_PLAN": "### 2.8 The Unopened Gate",
     "CHOIR_PLAN": "### 2.9 The Prism Choir",
     "REEF_PLAN": "### 2.10 The Serpent's Reef",
+    "GRANGE_PLAN": "### 2.13 The Grange Cellar",
+    "RANGE_PLAN": "### 2.14 The Test Range",
 }
 
 # The dossier draws each row as "  y12  ..#####..", the leading label being a
