@@ -27,8 +27,8 @@ sections at the bottom.
 | `soulcollar` | item | The Ghost band's trophy (8n). What the Mourning Bride wears at the throat, 12% — the one thing `GhostLoot.bride()` adds over `elite()`. Magpie buys it over broker. |
 | `stripedhorn` | item | Crooked Beyond's band trophy (8n). Cut out of a Door Mimic, 20%. Magpie buys it over broker. |
 | `magpiecap` | item | Magpie's courier cap (8n) — the mod's own art on her head, on vanilla's helmet frame grid. Cosmetic, armour 0; she sells her spare. |
-| `haldakerchief` | item | Halda's cellar kerchief (8n), same pattern. Cosmetic, armour 0; she sells her spare. |
-| `vanecowl` | item | Ossian Vane's working cowl with its loupe (8n), same pattern. Cosmetic, armour 0; he sells a second off his bench. |
+| `haldakerchief` | item | Halda's soft cellar cap (8n), same pattern. Named "Cellarer's Cap", not kerchief: the sheet it is recoloured from is vanilla's `battlechefhat`, and the name follows the silhouette rather than the id. Cosmetic, armour 0; she sells her spare. |
+| `vanecowl` | item | Ossian Vane's working circlet with its loupe (8n), same pattern. Named "Wright's Circlet", not cowl, for the same reason -- it is vanilla's `runichat` recoloured. Cosmetic, armour 0; he sells a second off his bench. |
 | `aetherwrightcasing` | item | Machined shell dropped by Prototype Nine and cached in the Test Range — the gate material for the tier past Stormsteel. |
 | `bondedlockbox` | item | Sealed cargo box on the Toll-House vault stand; Magpie's recruit key, and she buys it back as part of her fee. |
 | `postledger` | item | The Toll-House's list of undelivered parcels — the reason Magpie pays a premium for every Sky Parcel found in the sky. |

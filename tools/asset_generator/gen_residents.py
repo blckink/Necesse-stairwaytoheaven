@@ -36,9 +36,21 @@ from PIL import Image
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SHIPPED = os.path.join(REPO, "src", "main", "resources")
 
-# The vanilla sprite dump. Same path tools/size_audit.py resolves; kept as a
-# constant so a moved dump is one edit rather than eight.
-VANILLA = os.environ.get("NECESSE_SPRITE_DUMP", "/home/blackoffset/dev/Necesse sprites")
+def _vanilla_dump():
+    """Where the vanilla sprites are, resolved exactly as size_audit does.
+
+    Same order and same fallbacks as `tools/size_audit.default_vanilla`, so a
+    machine on which the audit measures something is a machine on which this
+    generator runs, and vice versa. NOT `vanilla-sprites/` in the repo: that
+    one is gitignored and empty, and the client's `res.data` is not a zip.
+    """
+    for guess in (os.path.join(REPO, "vanilla-sprites"),
+                  os.environ.get("NECESSE_SPRITE_DUMP") or "",
+                  os.path.expanduser("~/dev/Necesse sprites"),
+                  "/home/user/necesse-game/sprites"):
+        if guess and os.path.isdir(os.path.join(guess, "items")):
+            return guess
+    return None
 
 CELL = 32
 
@@ -187,15 +199,30 @@ def _cut_icon(sheet):
 
 
 def generate(out):
+    """Write the eight sprites, or say why not and leave the shipped ones be.
+
+    Without the dump this returns rather than raising. The eight PNGs are
+    committed, so a machine with no vanilla sprites still builds a correct jar
+    and `generate_assets.py` still exits 0 -- which is the gate OVERVIEW.md
+    records. Raising here would turn "this one generator cannot run" into
+    "the whole asset gate is red".
+    """
+    vanilla = _vanilla_dump()
+    if vanilla is None:
+        print("gen_residents (8n): skipped -- no vanilla sprite dump found.\n"
+              "  Point NECESSE_SPRITE_DUMP at one, or see tools/size_audit.py.\n"
+              "  The eight shipped PNGs are left untouched.")
+        return
+
     report = []
 
     for name, (template, ramp) in sorted(TROPHIES.items()):
-        src = Image.open(os.path.join(VANILLA, "items", template + ".png")).convert("RGBA")
+        src = Image.open(os.path.join(vanilla, "items", template + ".png")).convert("RGBA")
         n = _write(_recolour(src, ramp), os.path.join(out, "items", name + ".png"))
         report.append(f"  items/{name}.png  <- items/{template}.png  {n} colours")
 
     for name, (template, kind, ramp) in sorted(HATS.items()):
-        src = Image.open(os.path.join(VANILLA, "player", "armor", template + ".png")).convert("RGBA")
+        src = Image.open(os.path.join(vanilla, "player", "armor", template + ".png")).convert("RGBA")
         sheet = _accent(_recolour(src, ramp), kind)
         n = _write(sheet, os.path.join(out, "player", "armor", name + ".png"))
         m = _write(_cut_icon(sheet), os.path.join(out, "items", name + ".png"))
