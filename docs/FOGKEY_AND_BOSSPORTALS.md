@@ -95,26 +95,35 @@ which would buff the whole plane.
 | **Steinfeld** | `ascendedwizard` | Settlement Ruins | 44 000 | 9 | 157 520 |
 | **Ghost** | `pestwarden` | Swamp Deep Cave | 45 000 | 9 | 161 100 |
 | **Crooked** | `crystaldragon` | Crystal Hollow | 52 000 | 10 | 208 000 |
+| **Hell** | `mutanthydra` | Scrapyard | 80 000 | 10 | 320 000 |
 
 > **The last column is now the tier curve alone, not what ships.** Since
 > 2026-09-07 each row also carries a per-realm ascension uplift on top —
-> ×1.30 / ×1.35 / ×1.40 / ×1.45 / ×1.55 — so the five bosses actually walk out
-> with **74 412 / 171 720 / 220 528 / 233 595 / 322 400 HP**. The uplift lives
+> ×1.30 / ×1.35 / ×1.40 / ×1.45 / ×1.55 / ×1.65 — so the six bosses actually
+> walk out with **74 412 / 171 720 / 220 528 / 233 595 / 322 400 / 528 000 HP**.
+> The uplift lives
 > in `SkyBossLadder.Boss`, is derived in `docs/BALANCE.md` §10, and is checked
 > against the built jar by `scripts/balance_check.sh`. The tiers below are
 > unchanged: the uplift is a second factor, because vanilla's damage array runs
 > out at tier 10.
-| **Hell** | `mutanthydra` | Scrapyard | 80 000 | later | reserved |
+**Hell's row was a reservation until 2026-09-10.** It read *"later / reserved"*,
+because Hell had no painter and `SkyBossLadder.forRealm` answered `null` there.
+`realms/hell/HellTerrainPainter` closed that hole, so the reservation became the
+sixth real row — same boss, same base HP, at tier 10 rather than at no tier.
+Tier 10 and not higher for the reason the note above gives: past ten, vanilla's
+damage array is exhausted and a tier buys almost nothing but health, so Hell is
+raised through the steepest uplift column instead (×1.65 health, ×1.36 damage,
+the same pair its mobs carry).
 
 Base HP is the CLASSIC world-difficulty column of each boss's
 `MaxHealthGetter`. The ladder is monotone on purpose: 57k → 127k → 158k → 161k
-→ 208k. The player's floor was *"mindestens Niveau der 1. Incursion"* and
+→ 208k → 320k. The player's floor was *"mindestens Niveau der 1. Incursion"* and
 *"grundsätzlich sollen die bosse auf incursion level 8-10 sein"*.
 
 Other incursion bosses left unused for now, and why: `reaper` (11 000) and
 `motherslime` (52 000) break the ladder or the theme; `sunlightchampion`,
-`spiderempress`, `sageandgrit`, `nightswarm`, `mutanthydra` are held for Hell
-and for later regions.
+`spiderempress`, `sageandgrit` and `nightswarm` are held for later regions.
+`mutanthydra` was on that list and is not any more — it is Hell's row above.
 
 ### B4a. Coverage, measured
 

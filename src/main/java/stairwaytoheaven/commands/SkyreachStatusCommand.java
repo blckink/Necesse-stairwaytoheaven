@@ -1076,9 +1076,19 @@ public class SkyreachStatusCommand extends ModularChatCommand {
 
             // ...and the ramp, at radii far enough out that the sampling window
             // cannot reach back over the floor. All three are inside Crooked
-            // Beyond's band now (4200-5640) rather than in the old 900-3200
-            // interim window, because that is where the wrong ground lives.
-            for (int radius : new int[]{4400, 5000, 5600}) {
+            // Beyond's band (4200-5640) rather than in the old 900-3200 interim
+            // window, because that is where the wrong ground lives.
+            //
+            // The outermost probe was 5600 until 2026-09-10 and had to come in
+            // to 5200. 5600 is depth 0.93, where Crooked's trapezoid has fallen
+            // to about a tenth of its weight and HELL's is at full: measured,
+            // a 61x61 window there is entirely Hell. It read as Crooked-with-
+            // wrong-ground only because Hell had no painter and fell through to
+            // Crooked's. Now that it has one (realms/hell/HellTerrainPainter),
+            // a probe at 5600 measures Hell and correctly finds no Outland,
+            // which is a true answer to the wrong question. 5200 is inside
+            // Crooked's own peak (4800-5280), so it asks about Crooked's ramp.
+            for (int radius : new int[]{4400, 5000, 5200}) {
                 int land = 0;
                 int wrong = 0;
                 for (int dx = -60; dx <= 60; dx += 2) {

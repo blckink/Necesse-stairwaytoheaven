@@ -477,9 +477,12 @@ grep -qE "outlands check: floor=4200 " "$LOG1" \
 grep -qE "outlands check: .* inside=0/[1-9][0-9]*" "$LOG1" \
     || { echo "FAIL: wrong ground appears inside the 4200-tile floor (or the sweep found no land)"; STATUS=1; }
 # ...and it must actually arrive further out, or the region is unreachable.
-# 5600 is past Crooked's peak, where the ramp is at full strength.
-grep -qE "outlands check: .* r5600=[1-9][0-9]*/" "$LOG1" \
-    || { echo "FAIL: no Outland ground at 5600 tiles -- the ramp never rises"; STATUS=1; }
+# 5200 is inside Crooked Beyond's own peak (4800-5280), where the ramp is at
+# full strength. It was 5600 until 2026-09-10, which is depth 0.93 -- Hell's
+# ground, not Crooked's. That probe only ever passed because Hell had no
+# painter and fell through to Crooked's; see SkyreachStatusCommand's own note.
+grep -qE "outlands check: .* r5200=[1-9][0-9]*/" "$LOG1" \
+    || { echo "FAIL: no Outland ground at 5200 tiles -- the ramp never rises"; STATUS=1; }
 grep -qE "outlands check: .* biome=NOT REGISTERED" "$LOG1" \
     && { echo "FAIL: the Outlands biome is not registered"; STATUS=1; }
 
