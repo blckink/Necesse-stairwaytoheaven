@@ -30,16 +30,19 @@ public final class SkyItems {
      * the registerItem calls in the source drift apart.
      */
     public static final String[] ALL_ITEM_IDS = {
-            "aetheriumbar", "aetheriumore", "auroralocket", "aurorafleece", "aurorapetal",
+            "aetheriumbar", "aetheriumore", "aetherwrightcasing", "auroralocket",
+            "aurorafleece", "aurorapetal", "bondedlockbox",
             "charwood", "cinderpearl", "cloudberry", "cloudcustard", "cloudpufftreat",
             "cloudwood", "dewsnail", "fulgurite", "galehowl", "ghostchalk", "glimmerstrides",
-            "nimbusdraught", "nimbusmilk", "nimbuswood", "prismcaller", "prismshard",
+            "nimbusdraught", "nimbusmilk", "nimbuswood", "postledger", "prismcaller",
+            "prismshard",
             "prismwood", "seraphwood", "silverbell", "skycurd", "skyreave", "skystone",
-            "skywatchhood", "skywatchwhistle", "skyweave", "stormdisc",
-            "stormglass", "stormshard", "stormsteelbar", "stormsteelboots",
+            "skywatchhood", "skywatchsignet", "skywatchwhistle", "skywaywrit", "skyweave",
+            "stormdisc",
+            "stormglass", "stormlenscore", "stormshard", "stormsteelbar", "stormsteelboots",
             "stormsteelchestplate", "stormsteelhelmet", "stormsteelvambrace",
-            "tempestedge", "thunderhead", "veilessence", "wardenboots",
-            "wardenmantle", "windsilk", "zephyrharness"
+            "tempestedge", "themother", "thunderhead", "veilessence", "wardenboots",
+            "wardenmantle", "wardensround", "windsilk", "zephyrharness"
     };
 
 
@@ -229,7 +232,77 @@ public final class SkyItems {
                 new stairwaytoheaven.items.GhostChalkItem("seancecircle", SkyRegistry.seanceCircleID),
                 120.0F, true);
 
+        registerRewards();
         registerGear();
+    }
+
+    /**
+     * The eight unique rewards of {@code docs/design/chapter-01-skyreach-cast.md}
+     * §3 — one per special place, none of them a bigger number on an existing
+     * item.
+     *
+     * <p>Where each becomes reachable is {@code SkyLandmarkPois}: three are the
+     * recruit keys the once-per-world bosses carry, three stand in the
+     * containers §2.12-§2.14 draw, and two are the caches beside them. Three of
+     * them are then SPENT again at vanilla's recruit page — see
+     * {@code SkySettlerMob.getRecruitItems}, which is what makes a POI's loot a
+     * person.
+     *
+     * <p><b>Icons.</b> None of the eight has been drawn; they are the chapter
+     * brief's own art order (§4.2). Each therefore points at an icon that
+     * already exists, through {@link stairwaytoheaven.items.SkyRewardItem} —
+     * the {@code GhostMatItem} pattern, recorded row by row in
+     * {@code docs/VANILLA_ASSET_MAP.md} §1.7 so the eventual art pass finds
+     * them. An unpointed item would draw the engine's ERR tile, which
+     * {@code docs/IMPLEMENTATION_RULES.md} §5 calls a release blocker.
+     *
+     * <p><b>Worth.</b> The anchor for a key you are given rather than a
+     * material you farm is the mod's own {@code silverbell} at 250.0F, the
+     * category vanilla keeps all 32 of its {@code QuestItem}s in — see
+     * {@code ghostchalk} above, which is priced against exactly that. The three
+     * recruit keys sit a step above it because each is worth a settler; the
+     * Casing is a MATERIAL and is priced off {@code stormsteelbar} (58.0F),
+     * the tier it is the gate past.
+     */
+    private static void registerRewards() {
+        // 1. Bonded Lockbox — the toll-house vault. Magpie's recruit key.
+        ItemRegistry.registerItem("bondedlockbox",
+                new stairwaytoheaven.items.SkyRewardItem("ammobox", 1, Item.Rarity.RARE)
+                        .setItemCategory("misc", "questitems"), 300.0F, true);
+        // 2. Skyway Writ — the toll-house ledger room.
+        ItemRegistry.registerItem("skywaywrit",
+                new stairwaytoheaven.items.SkyRewardItem("apprenticescroll", 1, Item.Rarity.RARE)
+                        .setItemCategory("misc", "questitems"), 260.0F, true);
+        // 3. Ledger of Undelivered Post — the toll-house. Magpie buys the
+        //    parcels it names; see MagpieMob's buying shop.
+        ItemRegistry.registerItem("postledger",
+                new stairwaytoheaven.items.SkyRewardItem("skywatchtome", 1, Item.Rarity.RARE)
+                        .setItemCategory("misc", "questitems"), 220.0F, true);
+        // 4. The Mother — inside the Sourvat Bloom. Halda's recruit key.
+        ItemRegistry.registerItem("themother",
+                new stairwaytoheaven.items.SkyRewardItem("glassbottle", 1, Item.Rarity.RARE)
+                        .setItemCategory("misc", "questitems"), 300.0F, true);
+        // 5. The Warden's Round — the grange cellar's deepest cell.
+        ItemRegistry.registerItem("wardensround",
+                new stairwaytoheaven.items.WardensRoundItem(), 150.0F, true);
+        // 6. Storm Lens Core — inside Prototype Nine. Vane's recruit key.
+        ItemRegistry.registerItem("stormlenscore",
+                new stairwaytoheaven.items.SkyRewardItem("omnicrystal", 1, Item.Rarity.RARE)
+                        .setItemCategory("misc", "questitems"), 300.0F, true);
+        // 7. Aetherwright's Casing — the test range cache, then repeatable off
+        //    Prototype Nine. A material, and the only stacking one of the
+        //    eight: it is the gate material for the tier past Stormsteel.
+        ItemRegistry.registerItem("aetherwrightcasing",
+                new stairwaytoheaven.items.SkyRewardItem("clockworkheart", 250, Item.Rarity.RARE)
+                        .setItemCategory("materials", "mobdrops"), 90.0F, true);
+        // 8. Skywatch Signet — the accessory that answers "I cannot find
+        //    anything up here". Its two modifiers and their vanilla anchors are
+        //    written out in SkywatchSignetItem; the buff is registered with the
+        //    other three trinket buffs in registerBuffs().
+        ItemRegistry.registerItem("skywatchsignet",
+                new stairwaytoheaven.items.SkywatchSignetItem(
+                        Item.Rarity.EPIC, "skywatchsignettrinket", 1000)
+                        .addDisables("piratetelescope"), 280.0F, true);
     }
 
     /**
@@ -297,6 +370,21 @@ public final class SkyItems {
         BuffRegistry.registerBuff("zephyrharnesstrinket", new SimpleTrinketBuff(
                 new ModifierValue<>(BuffModifiers.SPEED, 0.20F),
                 new ModifierValue<>(BuffModifiers.STAMINA_CAPACITY, 0.50F)));
+
+        // Skywatch Signet. Shape: not a stat at all — the two exploration
+        // booleans, taken whole off their vanilla anchors. VERIFIED [jar]:
+        // `piratetelescopetrinket` (BuffRegistry.java:690) is
+        // EXTENDED_MAP_DISCOVER_RANGE and nothing else, and `treasurepotion`
+        // (:449) is TREASURE_HUNTER and nothing else. Together they are §3's
+        // "reveals unexplored Skyreach structures on the map within a radius"
+        // in the engine's own terms — a wider discover radius while walking,
+        // and the crates inside those structures lit through the wall. The
+        // tooltip key is written out rather than left to the engine because
+        // neither modifier has a number to print.
+        BuffRegistry.registerBuff("skywatchsignettrinket", new SimpleTrinketBuff(
+                "skywatchsignetmap",
+                new ModifierValue<>(BuffModifiers.EXTENDED_MAP_DISCOVER_RANGE, true),
+                new ModifierValue<>(BuffModifiers.TREASURE_HUNTER, true)));
 
         // The Stormsteel set bonus. Anchors are the incursion tier's own set
         // bonuses, VERIFIED [jar]: `ArcanicHelmetSetBonusBuff` — the arcanic

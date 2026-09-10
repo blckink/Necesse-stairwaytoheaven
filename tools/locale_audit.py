@@ -616,6 +616,15 @@ ITEM_CLASS_VANILLA_ICON = {
     # docs/VANILLA_ASSET_MAP.md §1.3b.
     "SpiritsteelReaver": ("fixed", "necroticgreatsword"),
     "GravewindBow": ("fixed", "necroticbow"),
+    # The eight unique rewards of chapter-01-skyreach-cast.md §3. Nobody has
+    # drawn them (they are §4.2 of the POI dossier's art order), so each points
+    # at an icon that already exists - constructor argument 0 for the six that
+    # share SkyRewardItem, a named constant for the drink and the accessory,
+    # which have their own classes. All eight rows are in
+    # docs/VANILLA_ASSET_MAP.md §1.7.
+    "SkyRewardItem": ("arg", 0),
+    "WardensRoundItem": ("fixed", "skywatchchalice"),
+    "SkywatchSignetItem": ("fixed", "emptypendant"),
 }
 
 # Marker prefix on a wanted-icon path that lives in the vanilla resource file
@@ -636,14 +645,25 @@ VANILLA_RECIPE_OUTPUTS = {
 
 
 def vanilla_icon_paths(class_name, ctor_args):
-    """The vanilla items/<name>.png an ITEM_CLASS_VANILLA_ICON class reads."""
+    """The items/<name>.png an ITEM_CLASS_VANILLA_ICON class reads."""
     kind, value = ITEM_CLASS_VANILLA_ICON[class_name]
     if kind == "fixed":
-        return [VANILLA + "items/%s.png" % value]
-    name = literal(ctor_args[value]) if value < len(ctor_args) else None
-    if name is None:
-        return UNRESOLVED
-    return [VANILLA + "items/%s.png" % name]
+        name = value
+    else:
+        name = literal(ctor_args[value]) if value < len(ctor_args) else None
+        if name is None:
+            return UNRESOLVED
+    path = "items/%s.png" % name
+    # A borrowed icon is not always the GAME's. Two of the chapter-01 rewards
+    # point at art this mod already ships (items/skywatchtome for the Ledger,
+    # items/skywatchchalice for the Round), and those are checkable here and
+    # now. Only a path that is nowhere in src/main/resources has to be a
+    # vanilla one, and only that has to wait for a sprite dump -- reporting
+    # our own file as "unchecked" would be a hole, which is the exact failure
+    # the comment above ITEM_CLASS_VANILLA_ICON is written about.
+    if os.path.exists(os.path.join(RESOURCES, *path.split("/"))):
+        return [path]
+    return [VANILLA + path]
 
 
 def call_sites(text, name):

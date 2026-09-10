@@ -132,6 +132,34 @@ public class SkywatchQuestData extends LevelData {
      */
     public final java.util.HashSet<String> landmarksStamped = new java.util.HashSet<>();
 
+    /**
+     * Which once-per-world place has had its guard seated, by the same key.
+     *
+     * <p>A SEPARATE set from {@link #landmarksStamped}, and that separation is
+     * the whole point of it. The three buildings landed on 2026-09-10 and were
+     * deployed; a save that has already walked its Skyreach therefore holds
+     * their names in {@code landmarksStamped} for good. Hanging the Tollwright,
+     * the Sourvat Bloom and Prototype Nine off that flag would mean they can
+     * never appear in exactly the worlds that already have the rooms for them.
+     * Asked as its own question, {@code SkyLandmarkPois.ensureAll} seats them
+     * on the next {@code /skyreachstatus} or the next ascent, in a world whose
+     * walls are already standing.
+     */
+    public final java.util.HashSet<String> landmarkGuards = new java.util.HashSet<>();
+
+    /**
+     * Which once-per-world place has had its unique rewards written into the
+     * containers §2.12-§2.14 draw, by the same key.
+     *
+     * <p>Its own question for the same reason {@link #landmarkGuards} is: the
+     * display stands and the barrel were stamped empty, and a reward that only
+     * lands when the building is first stamped is a reward no existing save can
+     * ever reach. Also its own set rather than sharing the guards': a
+     * {@code /swhreset} that puts the bosses back must not refill the vault
+     * with a second Bonded Lockbox.
+     */
+    public final java.util.HashSet<String> landmarkLoot = new java.util.HashSet<>();
+
     @Override
     public void addSaveData(SaveData save) {
         super.addSaveData(save);
@@ -164,6 +192,10 @@ public class SkywatchQuestData extends LevelData {
         save.addLongArray("catMarkerAuths", toLongArray(this.catMarkerAuths));
         save.addStringArray("landmarksStamped",
                 this.landmarksStamped.toArray(new String[0]));
+        save.addStringArray("landmarkGuards",
+                this.landmarkGuards.toArray(new String[0]));
+        save.addStringArray("landmarkLoot",
+                this.landmarkLoot.toArray(new String[0]));
         // v0.5 return-stairway bindings: auths, Xs and Ys as parallel arrays
         long[] auths = new long[this.returnStairs.size()];
         long[] xs = new long[this.returnStairs.size()];
@@ -235,6 +267,18 @@ public class SkywatchQuestData extends LevelData {
         for (String stamped : save.getStringArray("landmarksStamped", new String[0], false)) {
             if (stamped != null && !stamped.isEmpty()) {
                 this.landmarksStamped.add(stamped);
+            }
+        }
+        this.landmarkGuards.clear();
+        for (String seated : save.getStringArray("landmarkGuards", new String[0], false)) {
+            if (seated != null && !seated.isEmpty()) {
+                this.landmarkGuards.add(seated);
+            }
+        }
+        this.landmarkLoot.clear();
+        for (String filled : save.getStringArray("landmarkLoot", new String[0], false)) {
+            if (filled != null && !filled.isEmpty()) {
+                this.landmarkLoot.add(filled);
             }
         }
         // v0.5 return-stairway bindings

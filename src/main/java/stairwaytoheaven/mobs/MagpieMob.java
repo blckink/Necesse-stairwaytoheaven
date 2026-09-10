@@ -74,6 +74,15 @@ public class MagpieMob extends SkySettlerMob {
                 .setPriceBasedOnHappiness(95, 62, 16);
         this.shop.addBuyingItem("prismshard", new BuyingShopItem())
                 .setPriceBasedOnHappiness(95, 62, 16);
+        // ...and the post. §3's Ledger of Undelivered Post "names a set of sky
+        // parcels scattered across the Skyreach; each one returned to Magpie
+        // pays out". The parcels are real and already stand in the world —
+        // the Test Range alone puts two of them in its craters — and until now
+        // nobody in the game would take one. She pays a courier's premium for
+        // them, well over the object's own 4.0F broker value, because a parcel
+        // with a serial number on it is exactly what she buys.
+        this.shop.addBuyingItem("skyparcel", new BuyingShopItem())
+                .setPriceBasedOnHappiness(140, 90, 24);
     }
 
     // --- her SECOND profession: sky voyages ----------------------------
@@ -143,5 +152,10 @@ public class MagpieMob extends SkySettlerMob {
         return new String[]{"trapperhat", "sharpshootercoat", "leatherboots"};
     }
     @Override protected int recruitCost() { return 12000; }
+    /**
+     * §1: "kill the Tollwright, the vault opens, the Bonded Lockbox is hers —
+     * and she then buys it off the player as part of her own recruitment fee."
+     */
+    @Override protected String recruitKey() { return "bondedlockbox"; }
     @Override protected String talkKey() { return "magpietalk"; }
 }

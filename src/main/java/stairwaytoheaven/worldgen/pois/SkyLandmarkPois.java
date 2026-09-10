@@ -4,6 +4,8 @@ import java.awt.Point;
 
 import necesse.engine.network.server.Server;
 import necesse.engine.util.GameRandom;
+import necesse.inventory.lootTable.LootTable;
+import necesse.inventory.lootTable.lootItem.LootItem;
 import necesse.level.maps.Level;
 import stairwaytoheaven.SkyRegistry;
 import stairwaytoheaven.quest.SkywatchQuestData;
@@ -102,6 +104,90 @@ public final class SkyLandmarkPois {
 
     /** Where in each plan that settler stands (§2.12 (18,5), §2.13 (12,10), §2.14 (20,6)). */
     private static final int[][] SETTLER_AT = {{18, 5}, {12, 10}, {20, 6}};
+
+    /**
+     * The one enemy each landmark keeps, by {@link #KINDS} index.
+     *
+     * <p>{@code docs/design/chapter-01-skyreach-cast.md} §2: <i>"None of these
+     * spawn on the open map. Each lives in one structure, and each is the
+     * reason its POI is a fight instead of a container."</i> This array is the
+     * whole of "does not spawn on the open map" — none of the four new mobs is
+     * on any biome spawn table, so this is the only thing in the game that
+     * places them.
+     */
+    private static final String[] GUARDS = {"tollwright", "sourvatbloom", "prototypenine"};
+
+    /**
+     * Where each guard stands: §2.12 <i>"The Tollwright stands at (16,12), on
+     * the vault floor directly in front of the Lockbox"</i>, §2.13 <i>"The
+     * Sourvat Bloom sits at (7,8), between the four vats"</i>, §2.14
+     * <i>"Prototype Nine lies at (9,15) in the largest crater"</i>.
+     */
+    private static final int[][] GUARD_AT = {{16, 12}, {7, 8}, {9, 15}};
+
+    /**
+     * The unique rewards of {@code chapter-01-skyreach-cast.md} §3 that lie in
+     * a container rather than in a mob, as
+     * {@code {tileX, tileY, min, max}} plus the item ID.
+     *
+     * <p>Five of the eight are here; the other three are recruit keys and are
+     * carried by the guards above ({@code TollwrightMob} is the exception — its
+     * key is the Lockbox on the stand it is standing in front of, which is what
+     * §2.12's object table says). Every tile is read straight off the object
+     * table of its section:
+     *
+     * <ul>
+     *   <li>§2.12 (16,11) {@code skywatchdisplay} — <i>"the Bonded
+     *       Lockbox"</i>; (16,6) — <i>"the Skyway Writ"</i>; (19,6)
+     *       {@code skywatchcabinet} takes the Ledger of Undelivered Post,
+     *       because §2.12 draws the Ledger as the {@code skywatchtome} ON
+     *       Magpie's desk and a table decoration is scenery, not an item a
+     *       player can pick up.</li>
+     *   <li>§2.13 (12,6) the {@code barrel} on its one chequer tile —
+     *       <i>"the Warden's Round"</i>; (13,10) {@code skywatchcabinet} takes
+     *       the Skywatch Signet. §3 puts the Signet in the spire archive
+     *       "when the household is whole", which is a story gate nothing has
+     *       built and a building every existing save already stamped; the last
+     *       of the Skywatch's household keeping the household's signet in the
+     *       cell she never left is the reachable version of the same sentence.
+     *       Recorded in {@code state/decisions.json}.</li>
+     *   <li>§2.14 (19,6) {@code skywatchdisplay} — drawn as the Storm Lens Core
+     *       "after the fight", but the Core comes out of Prototype Nine, so the
+     *       stand carries the other half of what §2.14 promises: <i>"the
+     *       prototype cache of Aetherwright's Casings"</i>.</li>
+     * </ul>
+     */
+    private static final Reward[][] REWARDS = {
+            {new Reward(16, 11, "bondedlockbox", 1, 1),
+             new Reward(16, 6, "skywaywrit", 1, 1),
+             new Reward(19, 6, "postledger", 1, 1)},
+            {new Reward(12, 6, "wardensround", 1, 1),
+             new Reward(13, 10, "skywatchsignet", 1, 1)},
+            {new Reward(19, 6, "aetherwrightcasing", 2, 4)},
+    };
+
+    /** One reward, and the container tile of its own plan that holds it. */
+    private static final class Reward {
+        final int x;
+        final int y;
+        final String itemID;
+        final int min;
+        final int max;
+
+        Reward(int x, int y, String itemID, int min, int max) {
+            this.x = x;
+            this.y = y;
+            this.itemID = itemID;
+            this.min = min;
+            this.max = max;
+        }
+
+        LootTable table() {
+            return new LootTable(this.min == this.max
+                    ? new LootItem(this.itemID, this.min)
+                    : LootItem.between(this.itemID, this.min, this.max));
+        }
+    }
 
     /** The index in {@link #KINDS} of a kind, or -1 if it is a lattice kind. */
     public static int indexOf(int kind) {
@@ -307,8 +393,110 @@ public final class SkyLandmarkPois {
                         .applyToLevel(level, site.x, site.y);
                 quest.landmarksStamped.add(key);
             }
+            // Three independent questions, each with its own record. See
+            // SkywatchQuestData.landmarkGuards for why they are not one flag:
+            // the buildings were stamped and deployed before the enemies and
+            // the rewards existed, so a save that already holds the walls has
+            // to be able to receive both afterwards.
+            seatGuard(level, quest, index, site, width, height);
+            placeRewards(level, quest, index, site, width, height, seed);
             seatSettler(level, server, index, site, width, height);
         }
+    }
+
+    /**
+     * Puts a landmark's one enemy on the tile its plan draws it on.
+     *
+     * <p>{@code spawnTilePosition} is set AFTER the mob is added, and that
+     * order is not cosmetic: VERIFIED [jar], {@code Mob.onLevelChanged}
+     * (Mob.java:741) sets the field back to null, so anything written before
+     * {@code addMob} is thrown away. {@code AshGolemMob.AshGolemAI} bases both
+     * its target finder and its wanderer on that point
+     * (AshGolemMob.java:225, :249), which is the whole of §2's <i>"owns a room
+     * rather than chasing"</i> — without it the Tollwright wanders the world
+     * instead of the vault.
+     *
+     * <p>{@code canDespawn = false}, like every other placed mob here: a boss
+     * the player retreated from has to still be there on the way back.
+     */
+    private static void seatGuard(Level level, SkywatchQuestData quest, int index, Site site,
+            int width, int height) {
+        String key = RealmPoiPresets.key(KINDS[index]);
+        if (quest.landmarkGuards.contains(key)) {
+            return;
+        }
+        level.regionManager.ensureTilesAreLoaded(site.x - 1, site.y - 1,
+                site.x + width, site.y + height);
+        necesse.entity.mobs.Mob guard =
+                necesse.engine.registries.MobRegistry.getMob(GUARDS[index], level);
+        if (guard == null) {
+            return;
+        }
+        int tileX = site.x + GUARD_AT[index][0];
+        int tileY = site.y + GUARD_AT[index][1];
+        guard.canDespawn = false;
+        level.entityManager.addMob(guard, tileX * 32 + 16, tileY * 32 + 16);
+        guard.setSpawnTilePosition(tileX, tileY);
+        quest.landmarkGuards.add(key);
+    }
+
+    /**
+     * Writes §3's unique rewards into the containers §2.12-§2.14 stamp empty.
+     *
+     * <p>This is {@code Preset.addInventory}'s body without the preset: the
+     * same master-object resolution, the same {@code implementsOEInventory}
+     * test and the same {@code LootTable.applyToLevel} call
+     * (Preset.java:1717-1752). It cannot BE {@code addInventory}, because that
+     * only ever runs while a preset is being applied — i.e. never again in a
+     * world whose landmarks are already stamped, which is every save the
+     * players are carrying.
+     *
+     * <p>The random is derived from the seed and the kind, like the one the
+     * stamp itself is built with, so the Casing cache is rolled once and stays
+     * rolled.
+     */
+    private static void placeRewards(Level level, SkywatchQuestData quest, int index, Site site,
+            int width, int height, int seed) {
+        String key = RealmPoiPresets.key(KINDS[index]);
+        if (quest.landmarkLoot.contains(key)) {
+            return;
+        }
+        level.regionManager.ensureTilesAreLoaded(site.x - 1, site.y - 1,
+                site.x + width, site.y + height);
+        GameRandom random = new GameRandom(seed * 31L + KINDS[index] + 0x5EED);
+        boolean placedAll = true;
+        for (Reward reward : REWARDS[index]) {
+            if (!fill(level, site.x + reward.x, site.y + reward.y, reward.table(), random)) {
+                placedAll = false;
+            }
+        }
+        // Only claimed when every container really took its item. A half-filled
+        // landmark left claimed is a Bonded Lockbox that exists nowhere, and
+        // the player has no way to ask for it again.
+        if (placedAll) {
+            quest.landmarkLoot.add(key);
+        }
+    }
+
+    /** One container. False when there is nothing at that tile to put an item in. */
+    private static boolean fill(Level level, int tileX, int tileY, LootTable table,
+            GameRandom random) {
+        necesse.level.maps.LevelObject at = level.getLevelObject(tileX, tileY);
+        if (at == null) {
+            return false;
+        }
+        necesse.level.maps.LevelObject master = at.getMasterLevelObject().orElse(null);
+        int x = master == null ? tileX : master.tileX;
+        int y = master == null ? tileY : master.tileY;
+        necesse.entity.objectEntity.ObjectEntity entity =
+                level.entityManager.getObjectEntity(x, y);
+        if (entity == null || !entity.implementsOEInventory()) {
+            return false;
+        }
+        table.applyToLevel(random,
+                level.buffManager.getModifier(necesse.level.maps.levelBuffManager.LevelModifiers.LOOT),
+                level, x, y, level);
+        return true;
     }
 
     /**

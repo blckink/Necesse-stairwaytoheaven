@@ -465,11 +465,12 @@ public class RealmPoiWorldPreset extends WorldPreset {
     private static void placeInhabitants(int kind, Level level, int x, int y) {
         if (level.isClient()) return;
         // The three once-per-world places have no branch here, and must not
-        // get one: they are not on this lattice any more, and their people are
-        // seated by SkyLandmarkPois, which is also the only path that CLAIMS
-        // the name in SkywatchWorldData. The branch that used to stand here
-        // spawned Magpie without claiming her, so a world could hold two -- one
-        // in a ledger room and one beside a workshop, which is exactly what
+        // get one: they are not on this lattice any more, and their people,
+        // their guards and their unique rewards are all placed by
+        // SkyLandmarkPois, which is also the only path that CLAIMS the name in
+        // SkywatchWorldData. The branch that used to stand here spawned Magpie
+        // without claiming her, so a world could hold two -- one in a ledger
+        // room and one beside a workshop, which is exactly what
         // residentsClaimed exists to prevent.
         if (kind == RealmPoiPresets.SKY_DEW_KEEPERS_HUT) {
             // Plan  2.11: five Dew Snails inside the run, which is the whole

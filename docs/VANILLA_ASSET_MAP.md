@@ -53,6 +53,10 @@ behaviour, but no vanilla art reaches the screen through them.)
 | `CryoFlakeFollowingMob` | Watch Mote | Skyreach | summon behaviour |
 | `SheepMob` | Glimmergoat | Skyreach (Aurora variant) | husbandry: shears, breeding — sheets swapped 2026-09-02, see §4 |
 | `CowMob` | Nimbus Yak | Skyreach (Driftlands variant) | husbandry: bucket — sheet swapped 2026-09-02, see §4 |
+| `AshGolemMob` | Tollwright | Skyreach (Skyway Toll-House only) | the armoured golem the cast brief names by class; its AI bases wander AND target-finding on `spawnTilePosition`, which is what "owns a room rather than chasing" is in engine terms |
+| `StabbyBushMob` | Sourvat Bloom | Skyreach (Grange Cellar only) | rooted ambusher that reads as scenery until you are close — the bush silhouette IS the ambush |
+| `CryoFlakeMob` | Vatling | Skyreach (Grange Cellar only) | the small floating add the Bloom keeps letting out |
+| `AncientSkeletonMageMob` | Prototype Nine | Skyreach (Test Range only) | ranged caster that blinks away when its own bolt comes back — the same base the Cinder Cantor uses, and here with NO sheet of its own |
 
 ### 1.3 Vanilla textures loaded by literal path (recolours)
 
@@ -124,6 +128,32 @@ until the Ghost Realm ships its own, at which point only the shop line changes.
 | Bonewood furniture, coffin, urns, black candles (§11) | `bonechair`, `bonemodulartable`, `bonebookshelf`, `bonedresser`, `boneclock`, `bonechest`, `sarcophagus`, `spiritbasin`, `bonecandelabra`, `deadwoodcandles`, `candle`, `skull`, `gravestone1/2`, `cryptgravestone1/2` | Mortimer |
 | Bee Hive (§5) | `queenbee` — vanilla's `beehive` object is registered NOT obtainable | Eveleen |
 | Eleanor's "strong trinket" (§11) | `willowisplantern` | her PASS ON ending |
+
+### 1.7 The eight chapter-01 rewards — borrowed item icons
+
+`docs/design/chapter-01-skyreach-cast.md` §3 names eight unique rewards and the
+POI dossier §4.2 books their icons as new art. The gameplay landed on
+2026-09-10 and the art has not, so each of the eight points `loadItemTextures`
+at a file that already exists — `items/<name>.png`, read through the flat
+resource map, exactly the way `realms/ghost/GhostMatItem` does it. Swapping
+means dropping `src/main/resources/items/<the reward's own id>.png` in and
+deleting the icon argument; nothing else changes.
+
+`tools/locale_audit.py` checks every row through
+`ITEM_CLASS_VANILLA_ICON` — `SkyRewardItem` (argument 0), `WardensRoundItem`
+and `SkywatchSignetItem` (their own `ICON` constants) — so a row that names a
+file nobody ships is reported rather than shipped as an ERR tile.
+
+| reward | icon borrowed | whose | why that one |
+|---|---|---|---|
+| Bonded Lockbox | `items/ammobox` | vanilla | a small sealed box, which is what a bonded lockbox is |
+| Skyway Writ | `items/apprenticescroll` | vanilla | a rolled, sealed document |
+| Ledger of Undelivered Post | `items/skywatchtome` | **the mod's own** | §2.12 already draws the Ledger as the `skywatchtome` on Magpie's desk; the item is the same book taken off it |
+| The Mother | `items/glassbottle` | vanilla | a living culture is carried in a bottle |
+| The Warden's Round | `items/skywatchchalice` | **the mod's own** | the Skywatch's own cup, which is what the Round is poured into |
+| Storm Lens Core | `items/omnicrystal` | vanilla | a wound crystal core |
+| Aetherwright's Casing | `items/clockworkheart` | vanilla | a machined shell that holds a charge |
+| Skywatch Signet | `items/emptypendant` | vanilla | a plain seal on a chain, distinct from the mod's own Aurora Locket |
 
 ### 1.4 Vanilla items used as drops
 

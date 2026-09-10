@@ -982,3 +982,35 @@ skyvoyageselect=Where am I going, then?
 skyvoyagecost=I will run to <expedition> and back for <cost> coins. <chance>% says I make it.
 skyvoyagemore=Show me the rest of the road
 skyvoyagecomplete=Everything that was on the manifest, and a little that was not.
+
+// ---------------------------------------------------------------------------
+// Chapter 01 — the three enemies that belong to a place, and the eight unique
+// rewards (docs/design/chapter-01-skyreach-cast.md §2 and §3). Repeating a
+// [section] header RESUMES it, so these append to the sections above.
+// ---------------------------------------------------------------------------
+[mob]
+tollwright=Tollwright
+sourvatbloom=Sourvat Bloom
+vatling=Vatling
+prototypenine=Prototype Nine
+
+[item]
+bondedlockbox=Bonded Lockbox
+skywaywrit=Skyway Writ
+postledger=Ledger of Undelivered Post
+themother=The Mother
+wardensround=The Warden's Round
+stormlenscore=Storm Lens Core
+aetherwrightcasing=Aetherwright's Casing
+skywatchsignet=Skywatch Signet
+
+[itemtooltip]
+bondedlockboxtip=Sealed, bonded, and never collected. Magpie will want it back.
+skywaywrittip=Right of passage on every road the Skywatch kept, countersigned twice.
+postledgertip=Every parcel the road never delivered, listed by hand. Magpie pays for them.
+themothertip=The cellar's living culture. Older than the household that fed it.
+wardensroundtip=Poured for the watch at the end of a turn. There was one barrel left.
+stormlenscoretip=Still winding. Whatever it was built to power has not been told to stop.
+aetherwrightcasingtip=A machined shell that holds a charge. Vane knows what to do with it.
+skywatchsignettip=The household's seal. Wearing it, the sky stops hiding its buildings.
+skywatchsignetmap=Shows more of the world as you walk, and lights up what is worth opening

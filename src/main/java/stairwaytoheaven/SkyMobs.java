@@ -76,6 +76,21 @@ final class SkyMobs {
         MobRegistry.registerMob("crookedgolem", stairwaytoheaven.mobs.CrookedGolemMob.class, true);
         MobRegistry.registerMob("rarecrookedgolem", stairwaytoheaven.mobs.RareCrookedGolemMob.class, true);
         MobRegistry.registerMob("crookedarmadillo", stairwaytoheaven.mobs.CrookedArmadilloMob.class, true);
+        // The three enemies that belong to a place
+        // (docs/design/chapter-01-skyreach-cast.md §2), plus the Bloom's adds.
+        // None of the four is on any spawn table: SkyLandmarkPois seats them at
+        // the tile §2.12-§2.14 draws them on, and nowhere else. Each subclasses
+        // the vanilla archetype the brief names and wears that mob's own sheet
+        // (§1.3), so all four together cost zero new pixels; the bestiary face
+        // comes from BorrowedMobIcon.
+        //
+        // countKillStat = true for all four, including the Vatling: they can be
+        // killed, so they get a journal row, and a row without an icon is the
+        // hole BorrowedMobIcon exists to close.
+        MobRegistry.registerMob("tollwright", stairwaytoheaven.mobs.TollwrightMob.class, true);
+        MobRegistry.registerMob("sourvatbloom", stairwaytoheaven.mobs.SourvatBloomMob.class, true);
+        MobRegistry.registerMob("vatling", stairwaytoheaven.mobs.VatlingMob.class, true);
+        MobRegistry.registerMob("prototypenine", stairwaytoheaven.mobs.PrototypeNineMob.class, true);
     }
 
     /** Called from initResources — runs on the client only, never on servers. */

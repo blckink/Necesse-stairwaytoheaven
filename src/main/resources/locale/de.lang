@@ -983,3 +983,35 @@ skyvoyageselect=Wohin denn?
 skyvoyagecost=Ich laufe bis <expedition> und zurück, für <cost> Münzen. <chance>% sagen, ich komme an.
 skyvoyagemore=Zeig mir den Rest der Straße
 skyvoyagecomplete=Alles, was auf dem Frachtbrief stand. Und etwas, das nicht draufstand.
+
+// ---------------------------------------------------------------------------
+// Kapitel 01 — die drei ortsgebundenen Gegner und die acht Belohnungen
+// (docs/design/chapter-01-skyreach-cast.md §2 und §3). Ein wiederholter
+// [section]-Kopf SETZT den Abschnitt FORT, haengt also oben an.
+// ---------------------------------------------------------------------------
+[mob]
+tollwright=Zollwerk
+sourvatbloom=Sauerbottich-Blüte
+vatling=Bottichling
+prototypenine=Prototyp Neun
+
+[item]
+bondedlockbox=Verzollte Kassette
+skywaywrit=Himmelsweg-Freibrief
+postledger=Buch der unzustellbaren Post
+themother=Die Mutter
+wardensround=Die Runde des Wächters
+stormlenscore=Sturmlinsenkern
+aetherwrightcasing=Ätherwerker-Gehäuse
+skywatchsignet=Siegelring der Himmelswacht
+
+[itemtooltip]
+bondedlockboxtip=Versiegelt, verzollt, nie abgeholt. Magpie will sie zurück.
+skywaywrittip=Wegerecht auf jeder Straße der Himmelswacht, zweimal gegengezeichnet.
+postledgertip=Jedes Paket, das die Straße nie zustellte, von Hand aufgeführt. Magpie zahlt dafür.
+themothertip=Die lebende Kultur des Kellers. Älter als der Haushalt, der sie fütterte.
+wardensroundtip=Ausgeschenkt für die Wache am Ende einer Schicht. Ein Fass war noch übrig.
+stormlenscoretip=Läuft immer noch an. Was er antreiben sollte, hat niemand abgestellt.
+aetherwrightcasingtip=Eine gefräste Hülle, die Ladung hält. Vane weiß, was damit anzufangen ist.
+skywatchsignettip=Das Siegel des Haushalts. Wer ihn trägt, dem versteckt der Himmel seine Bauten nicht mehr.
+skywatchsignetmap=Zeigt beim Gehen mehr von der Welt und hebt hervor, was sich zu öffnen lohnt

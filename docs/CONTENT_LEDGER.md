@@ -11,6 +11,18 @@ sections at the bottom.
 
 | id | kind | what it is, in one line |
 |---|---|---|
+| `aetherwrightcasing` | item | Machined shell dropped by Prototype Nine and cached in the Test Range — the gate material for the tier past Stormsteel. |
+| `bondedlockbox` | item | Sealed cargo box on the Toll-House vault stand; Magpie's recruit key, and she buys it back as part of her fee. |
+| `postledger` | item | The Toll-House's list of undelivered parcels — the reason Magpie pays a premium for every Sky Parcel found in the sky. |
+| `prototypenine` | mob | Ossian Vane's own security demonstrator, playing dead in the Test Range's largest crater; a ranged caster that drops the Storm Lens Core. |
+| `skywatchsignet` | item | The household's seal, in the Grange Cellar's deep cell. A trinket: wider map discovery while walking, and treasure lit through walls. |
+| `skywaywrit` | item | Countersigned right of passage on the Skywatch's roads, on the Toll-House ledger-room stand. |
+| `sourvatbloom` | mob | What grew out of the burst vat in the Grange Cellar — a rooted ambusher that keeps letting Vatlings out, and holds the Mother. |
+| `stormlenscore` | item | The winding core inside Prototype Nine; Ossian Vane's recruit key and the power supply his Drafting Table will need. |
+| `themother` | item | The Skywatch cellar's living culture, recovered from the Sourvat Bloom; Halda's recruit key. |
+| `tollwright` | mob | The customs golem of the Skyway Toll-House — an armoured bruiser that owns the vault instead of chasing, and cannot break walls. |
+| `vatling` | mob | A floating flake the Sourvat Bloom keeps releasing; an add, never met on its own. |
+| `wardensround` | item | The last barrel of the Skywatch's own brew, in the Grange Cellar's deep cell — one long, strong buff, once per world. |
 
 ## Chapter 01 — the Skyreach residents
 

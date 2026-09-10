@@ -479,8 +479,17 @@ public final class RealmPoiPresets {
      * partition, and east of it the ledger room (Magpie) above the y=8
      * partition and the vault (the Bonded Lockbox) below it. The two display
      * stands are the Writ and the Lockbox; the tome on Magpie's desk is the
-     * Ledger of Undelivered Post. The mobs are placed by
-     * {@link RealmPoiWorldPreset}, which is the only caller that has a level.
+     * Ledger of Undelivered Post, and the item version of it is in the cabinet
+     * beside her, because a table decoration is scenery rather than something a
+     * player can pick up.
+     *
+     * <p>The stands are stamped EMPTY here and the Tollwright is not spawned
+     * here. Both are {@link SkyLandmarkPois}' job, and deliberately so: a
+     * preset only ever runs when a place is first stamped, and all three of
+     * these buildings were stamped and deployed on 2026-09-10, before either
+     * the enemies or the rewards existed. Anything written into the preset
+     * would therefore be unreachable in exactly the saves that already have
+     * the rooms for it.
      *
      * <p>The dossier's {@code skywatchstele} on the apron is left out: it is
      * new art this build does not have, and {@link #object} would throw at
@@ -2298,11 +2307,13 @@ public final class RealmPoiPresets {
      * <p>NOT built, with the reason: {@code fermentationvat} is the chapter
      * brief's own new station and is not registered, so the four {@code 'V'}
      * cells keep the vat room's floor and stand empty rather than shipping an
-     * error texture (IMPLEMENTATION_RULES §5). The Sourvat Bloom at (7,8) is
-     * a mob, so its cell is floor; it is unregistered art too and
-     * {@link RealmPoiWorldPreset#placeInhabitants} says so where it would be
-     * spawned. The Warden's Round is drawn as the vanilla barrel §2.13's own
-     * legend draws, on its single {@code marblechecker} tile.
+     * error texture (IMPLEMENTATION_RULES §5).
+     *
+     * <p>The Sourvat Bloom at (7,8) is a mob, so its cell is floor; it is
+     * registered since 2026-09-10 ({@code mobs/SourvatBloomMob}) and
+     * {@link SkyLandmarkPois} seats it there. The Warden's Round is drawn as
+     * the vanilla barrel §2.13's own legend draws, on its single
+     * {@code marblechecker} tile, and the same class puts the item in it.
      */
     private static final String[] GRANGE_PLAN = {
             ".....................",
@@ -2402,9 +2413,12 @@ public final class RealmPoiPresets {
      *       §2.14's object table asks for.</li>
      * </ul>
      *
-     * <p>NOT built: Prototype Nine at (9,15) is §4 art nobody has registered,
-     * and the Storm Lens Core and the Aetherwright's Casing cache with it. The
-     * display stand at (19,6) therefore stands empty, the way §2.5's does.
+     * <p>Prototype Nine at (9,15) is registered since 2026-09-10
+     * ({@code mobs/PrototypeNineMob}); it carries the Storm Lens Core, and
+     * {@link SkyLandmarkPois} both seats it and fills the display stand at
+     * (19,6) with the Aetherwright's Casing cache. Neither is written here —
+     * see {@link #skywayTollHouse} for why a preset is the wrong place for
+     * either on a world whose landmarks are already stamped.
      */
     private static final String[] RANGE_PLAN = {
             "...........................",

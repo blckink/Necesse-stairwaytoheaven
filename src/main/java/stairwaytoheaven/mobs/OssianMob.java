@@ -81,6 +81,11 @@ public class OssianMob extends SkySettlerMob {
         return new String[]{"runichat", "voidrobe", "arcanicboots"};
     }
     @Override protected int recruitCost() { return 18000; }
+    /**
+     * §1: "Kill Prototype Nine, take the Storm Lens Core out of it. Coins +
+     * the Core. He is the most expensive of the three and says so is fair."
+     */
+    @Override protected String recruitKey() { return "stormlenscore"; }
     @Override protected String talkKey() { return "ossiantalk"; }
 
     /**

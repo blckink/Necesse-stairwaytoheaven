@@ -209,6 +209,27 @@ public abstract class SkySettlerMob extends HumanShop {
     /** Coins asked at vanilla's own recruit page. */
     protected abstract int recruitCost();
 
+    /**
+     * The one item, besides coins, this resident asks for — or null.
+     *
+     * <p>{@code chapter-01-skyreach-cast.md} §1: <i>"Each recruit price is
+     * coins + one key item that only exists in that POI. That is the design
+     * answer to 'POIs never have special loot': at three of them, the loot is
+     * a person."</i> The three Skyreach residents each override this with the
+     * reward their own once-per-world place carries; every other settler on
+     * this base — the four realm residents — leaves it null and keeps the
+     * plain coin price it shipped with.
+     *
+     * <p>Nothing bespoke is needed to make vanilla take it. VERIFIED [jar]:
+     * {@code ShopContainer.canPayForRecruit} (:592) walks the WHOLE
+     * {@code recruitItems} list and asks the inventory for each item's amount,
+     * and {@code payForRecruit} (:607) removes each of them by item and
+     * amount. Coins are not a special case in either loop.
+     */
+    protected String recruitKey() {
+        return null;
+    }
+
     /** The `misc.<key>N` prefix for this resident's small talk. */
     protected abstract String talkKey();
 
@@ -250,7 +271,19 @@ public abstract class SkySettlerMob extends HumanShop {
      */
     @Override
     public List<InventoryItem> getRecruitItems(ServerClient client) {
-        return Collections.singletonList(new InventoryItem("coin", this.recruitCost()));
+        InventoryItem coins = new InventoryItem("coin", this.recruitCost());
+        String key = this.recruitKey();
+        if (key == null) {
+            return Collections.singletonList(coins);
+        }
+        // Two entries, never a merged one: the container pays each element
+        // separately. `client` is deliberately not read — SkyreachStatusCommand
+        // probes this with null to print the price from a running server, and a
+        // price that needs a player is a price nothing can check.
+        ArrayList<InventoryItem> price = new ArrayList<>(2);
+        price.add(coins);
+        price.add(new InventoryItem(key, 1));
+        return price;
     }
 
     /** Open on the recruit page until they have actually moved in. */
