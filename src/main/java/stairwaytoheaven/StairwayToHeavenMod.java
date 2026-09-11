@@ -285,6 +285,8 @@ public class StairwayToHeavenMod {
         stairwaytoheaven.realms.hell.HellRealm.loadTextures();
         stairwaytoheaven.bosses.BossPortalObject.loadBorrowedSheets();
         stairwaytoheaven.objects.RegionKeyObject.loadBorrowedArt();
+        // Vanilla crash guard, not mod art: see ControllerGlyphPreload.
+        ControllerGlyphPreload.preload();
     }
 
     public void postInit() {
