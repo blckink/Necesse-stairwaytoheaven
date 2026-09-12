@@ -11,35 +11,46 @@ import stairwaytoheaven.mobs.SkyWardenMob;
 import stairwaytoheaven.quest.SkywatchQuestData;
 
 /**
- * The Warden's Spire: the Skywatch hall at the centre of the Skyreach.
+ * The Warden's Spire: the Skywatch cathedral at the centre of the Skyreach.
  *
  * <h2>The plan</h2>
- * A double wall ring on a 21x21 plot, built to the layout the user supplied
- * (decoded in {@code docs/references/presets/warden-tower-layout.script}):
+ * A cruciform hall on a 33x33 plot, built to the cathedral the user supplied
+ * as a screenshot on 2026-09-12. Four arms of equal reach meet at a crossing;
+ * every arm ends in a chamfered tip, so the outside silhouette steps in twice
+ * instead of stopping at a flat gable:
  *
  * <pre>
- *   local 3..17   outer cloudmarble ring, 3x3 corner buttresses, four doors
- *                 on the axes, eight windows between them
- *   local 4..16   the circulation corridor, gloomwood planks
- *   the octagon   inner ring with its own four doors on the same axes
- *   the chamber   37 tiles of pale cloudstone, the beacon on a chequer
- *                 plinth at the centre
+ *   the crossing   the beacon on its chequer plinth, the chequered corner
+ *                  quarters around it, the Warden at his post
+ *   north arm      the choir: pews either side of the runner, and the apse
+ *                  with its candle staffel and two Sky Seraphs
+ *   south arm      the nave: three ranks of pews a side, the grand door,
+ *                  and the arrival apron beyond it
+ *   west arm       the refectory, and the Warden's own quarters
+ *   east arm       the council table, and the archive
  * </pre>
  *
- * The corridor's four corner pockets are the furnished rooms — refectory
- * (NW), council table (NE), the Warden's own quarters (SW), archive (SE) —
- * and the four straight galleries between them carry the benches, the lamps
- * and the way in. The central chamber stays deliberately empty apart from the
- * beacon: that is the whole point of the reference plan, and it is what makes
- * the hall read as a hall rather than a furniture shop.
+ * The processional runner is a cross of Skywatch carpet, three tiles wide,
+ * laid from door to door along both axes: it is what makes the building read
+ * as a cathedral from the map rather than as four corridors. Nothing stands
+ * on it.
  *
- * <h2>What this preset writes</h2>
- * Only local 1..19 ({@link #WRITTEN_RADIUS} tiles from the centre), and never
- * the four plot corners. Everything outside is the Warden's Forecourt, which
- * {@code SkyLandscape} composes: its lamp ring (radius 11), its chequered
- * inlay and its railing (radius 13) must survive us. The four tiles at
- * (+-9, +-9) are the railing's diagonal links — writing them would open four
- * gaps in the forecourt wall — so they are left alone on purpose.
+ * <h2>Geometry</h2>
+ * Everything is written in offsets from the plot centre {@link #C}, because
+ * every consumer of this preset works in offsets too: the quest anchors, the
+ * arrival pad ({@code SkyOrigin.ARRIVAL_OFFSET_Y}), and the painter oracle in
+ * {@code SkyreachStatusCommand}, which excludes exactly the box of
+ * {@link #WRITTEN_RADIUS} tiles around the centre. Nothing is written outside
+ * that box, so the forecourt {@code SkyLandscape} composes around the plot —
+ * chequered inlay, lamp ring, railing — begins where this preset stops.
+ * Growing the building from 21 to 33 moved those three rings outward by the
+ * same amount; see the HUB_ constants in {@code SkyLandscape}.
+ *
+ * <h2>Walls</h2>
+ * The wall ring is derived, not typed: a tile is a wall when it is outside
+ * the hall and touches the inside in any of the EIGHT directions. The eight
+ * matters — with four, each chamfer step leaves the two wall tiles meeting at
+ * a bare diagonal, which looks like a crack in the masonry.
  *
  * <h2>Multi-tile furniture</h2>
  * Benches, beds and dinner tables are pairs: {@code <id>} plus the
@@ -59,21 +70,30 @@ import stairwaytoheaven.quest.SkywatchQuestData;
  */
 public class WardenSpirePreset extends Preset {
 
-    /** Plot size. Applied centered, so local {@code SIZE/2} is the origin. */
-    public static final int SIZE = 21;
+    /** Plot size. Applied centered, so local {@link #C} is the origin. */
+    public static final int SIZE = 33;
+    /** The plot centre, in local coordinates. */
+    public static final int C = SIZE / 2;                    // 16
     /**
      * How far from the centre this preset writes anything, in tiles. The
      * painter oracle in {@code SkyreachStatusCommand} excludes exactly this
      * box, so the two must never drift apart.
      */
-    public static final int WRITTEN_RADIUS = SIZE / 2 - 1;   // 9
+    public static final int WRITTEN_RADIUS = SIZE / 2 - 1;   // 15
 
-    /** The Warden's post: on the beacon's plinth, facing whoever comes in. */
-    public static final int WARDEN_X = 10, WARDEN_Y = 11;
-    /** The dark beacon, dead centre of the chamber (and of the whole plot). */
-    public static final int BEACON_X = 10, BEACON_Y = 10;
-    /** The cats' basket: the Warden's quarters, beside his bed. Left empty. */
-    public static final int BASKET_X = 7, BASKET_Y = 16;
+    /** How far an arm reaches from the centre, to the inside of its tip. */
+    private static final int ARM_LENGTH = 13;
+    /** Half width of an arm's interior: an arm is nine tiles across inside. */
+    private static final int ARM_HALF = 5;
+    /** The wall ring stands one tile beyond the hall. */
+    private static final int DOOR_RING = ARM_LENGTH + 1;     // 14
+
+    /** The Warden's post: in front of the altar, facing the nave. */
+    public static final int WARDEN_X = C, WARDEN_Y = C + 1;
+    /** The dark beacon, dead centre of the crossing (and of the whole plot). */
+    public static final int BEACON_X = C, BEACON_Y = C;
+    /** The cats' basket: the Warden's quarters in the west arm. Left empty. */
+    public static final int BASKET_X = C - 9, BASKET_Y = C + 4;
 
     // Rotations, named. For furniture "rotation" is the direction it faces;
     // for a multi-tile pair it is also where the second half goes.
@@ -107,6 +127,9 @@ public class WardenSpirePreset extends Preset {
         final int candle = SkyFurnitureSet.skywatchCandleID;
         final int tome = SkyFurnitureSet.skywatchTomeID;
         final int cloudberry = SkyFurnitureSet.pottedCloudberryID;
+        final int bookshelf = SkyFurnitureSet.skywatchBookshelfID;
+        final int cabinet = SkyFurnitureSet.skywatchCabinetID;
+        final int display = SkyFurnitureSet.skywatchDisplayID;
         // The far halves of the multi-tile pieces. Registered for us by the
         // vanilla helpers, not obtainable, and written here because a preset
         // does no multi-tile placement of its own (see the class comment).
@@ -125,7 +148,8 @@ public class WardenSpirePreset extends Preset {
         // Any Mistsea under the footprint becomes solid ground first (the
         // ElderHousePreset liquid-fill idiom), so the hall never half-floats.
         // Bounded to what we write, so the plot's border stays the painter's.
-        this.addCustomPreApplyRectEach(1, 1, 19, 19, 0, (level, levelX, levelY, dir, blackboard) -> {
+        this.addCustomPreApplyRectEach(1, 1, SIZE - 2, SIZE - 2, 0,
+                (level, levelX, levelY, dir, blackboard) -> {
             if (level.getTile(levelX, levelY).isLiquid) {
                 level.setTile(levelX, levelY, SkyRegistry.cloudturfID);
                 level.setObject(levelX, levelY, 0);
@@ -133,14 +157,26 @@ public class WardenSpirePreset extends Preset {
             return null;
         });
 
-        // ---------------------------------------------------------- ground --
-        // The grounds: paved like the forecourt outside, so the two meet with
-        // no seam. Every layer is cleared, or a boulder the terrain painter
-        // dropped here would end up standing in the middle of the hall.
-        for (int x = 1; x <= 19; x++) {
-            for (int y = 1; y <= 19; y++) {
-                if (isPlotCorner(x, y)) {
-                    continue;
+        // --------------------------------------------------- the footprint --
+        // inside = the hall, ring = its masonry. Derived once, used by every
+        // section below, so a change to the cross shape can never leave the
+        // walls, the floor and the apron disagreeing about where the hall is.
+        boolean[][] inside = new boolean[SIZE][SIZE];
+        for (int x = 0; x < SIZE; x++) {
+            for (int y = 0; y < SIZE; y++) {
+                inside[x][y] = isHall(x - C, y - C);
+            }
+        }
+
+        // ------------------------------------------------------- the apron --
+        // Paved ground in a two-tile band around the hall, so the cathedral
+        // stands on a base rather than in the grass, and the forecourt meets
+        // it with no seam. Everything is cleared first, or a boulder the
+        // terrain painter dropped here would stand inside the building.
+        for (int x = 1; x < SIZE - 1; x++) {
+            for (int y = 1; y < SIZE - 1; y++) {
+                if (!inside[x][y] && !near(inside, x, y, 3)) {
+                    continue;                       // untouched: painter's job
                 }
                 this.setTile(x, y, paving);
                 this.setObject(x, y, 0);
@@ -149,216 +185,170 @@ public class WardenSpirePreset extends Preset {
                 this.setObjectLayer(ObjectLayerRegistry.FENCE_AND_TABLE_DECOR, x, y, 0);
             }
         }
-        // The hall's own apron: cloudmarble paving, so the building has a
-        // visible base against the forecourt's grey brick and the ground
-        // matches the walls standing on it.
-        this.fillTile(2, 2, 17, 17, cloudstone);
-        this.fillTile(4, 4, 13, 13, planks);      // the corridor floor
 
-        // ----------------------------------------------------- outer ring ---
-        for (int i = 2; i <= 18; i++) {
-            this.setObject(i, 3, wall);
-            this.setObject(i, 17, wall);
+        // ------------------------------------------------- floor and walls --
+        for (int x = 1; x < SIZE - 1; x++) {
+            for (int y = 1; y < SIZE - 1; y++) {
+                if (inside[x][y]) {
+                    this.setTile(x, y, cloudstone);
+                } else if (near(inside, x, y, 1)) {
+                    // Outside, touching the inside in any of eight directions.
+                    this.setTile(x, y, cloudstone);
+                    this.setObject(x, y, wall);
+                }
+            }
         }
-        for (int j = 4; j <= 16; j++) {
-            this.setObject(3, j, wall);
-            this.setObject(17, j, wall);
-        }
-        // 3x3 corner buttresses, so the ring reads as masonry and not a fence
-        this.fillObject(2, 2, 3, 3, wall);
-        this.fillObject(16, 2, 3, 3, wall);
-        this.fillObject(2, 16, 3, 3, wall);
-        this.fillObject(16, 16, 3, 3, wall);
-        // Windows, two per side, evenly spaced between door and buttress
-        this.setObject(6, 3, window);
-        this.setObject(14, 3, window);
-        this.setObject(6, 17, window);
-        this.setObject(14, 17, window);
-        this.setObject(3, 6, window);
-        this.setObject(3, 14, window);
-        this.setObject(17, 6, window);
-        this.setObject(17, 14, window);
-        // Doors on the four axes; the threshold under them is corridor floor
-        doorway(3, 10, door, planks);
-        doorway(17, 10, door, planks);
-        doorway(10, 3, door, planks);
-        doorway(10, 17, door, planks);
 
-        // ----------------------------------------------------- inner ring ---
-        // An octagon: a square with two-tile chamfers, so the chamber has
-        // eight faces and the corridor keeps a constant width round it.
-        int[][] octagon = {
-            {8, 6}, {9, 6}, {11, 6}, {12, 6},
-            {7, 7}, {8, 7}, {12, 7}, {13, 7},
-            {6, 8}, {7, 8}, {13, 8}, {14, 8},
-            {6, 9}, {14, 9}, {6, 11}, {14, 11},
-            {6, 12}, {7, 12}, {13, 12}, {14, 12},
-            {7, 13}, {8, 13}, {12, 13}, {13, 13},
-            {8, 14}, {9, 14}, {11, 14}, {12, 14},
-        };
-        for (int[] t : octagon) {
-            this.setObject(t[0], t[1], wall);
+        // The processional runner: a cross of carpet three tiles wide, door
+        // to door on both axes. Laid on the tile layer, so it is floor and
+        // nothing ever stands on it.
+        for (int d = -ARM_LENGTH; d <= ARM_LENGTH; d++) {
+            for (int a = -1; a <= 1; a++) {
+                carpetAt(carpet, a, d);
+                carpetAt(carpet, d, a);
+            }
         }
-        // The chamber floor: pale cloudstone, so the sanctum reads bright
-        // against the dark corridor. Rows are the octagon's own profile.
-        chamberRow(7, 9, 11, cloudstone);
-        chamberRow(8, 8, 12, cloudstone);
-        chamberRow(9, 7, 13, cloudstone);
-        chamberRow(10, 7, 13, cloudstone);
-        chamberRow(11, 7, 13, cloudstone);
-        chamberRow(12, 8, 12, cloudstone);
-        chamberRow(13, 9, 11, cloudstone);
-        // Inner doors, on the same four axes as the outer ones
-        doorway(10, 6, door, cloudstone);
-        doorway(10, 14, door, cloudstone);
-        doorway(6, 10, door, cloudstone);
-        doorway(14, 10, door, cloudstone);
+        // The four corner quarters of the crossing, chequered — the accent the
+        // screenshot puts around its altar. 3x3 each, never a whole room.
+        for (int sx = -1; sx <= 1; sx += 2) {
+            for (int sy = -1; sy <= 1; sy += 2) {
+                for (int i = 3; i <= 5; i++) {
+                    for (int j = 3; j <= 5; j++) {
+                        this.setTile(C + sx * i, C + sy * j, checker);
+                    }
+                }
+            }
+        }
+        // Gloomwood boards under the four working rooms in the side arms, so
+        // the lived-in halves read warm against the pale stone of the church.
+        fillRel(planks, -12, -4, -7, -2);
+        fillRel(planks, -12, 2, -7, 4);
+        fillRel(planks, 7, -4, 12, -2);
+        fillRel(planks, 7, 2, 12, 4);
 
-        // ------------------------------------------ the Hall of the Beacon --
-        // Deliberately near-empty: the beacon on its plinth, a lamp at each of
-        // the chamber's four inner corners, banners flanking the north and
-        // south doors and a mistglass lantern on each flat wall.
-        //
-        // Marble chequer appears ONLY here, as a 3x3 monument plinth, which is
-        // exactly the accent use SkyRegistry.skyplinthTileID names. Paving a
-        // whole room with it is the documented way to make a chequerboard
-        // swallow the screen.
-        this.fillTile(9, 9, 3, 3, checker);
+        // ------------------------------------------------ doors and windows --
+        // One door per arm, on the arm's own axis, where the runner runs out
+        // of the building. Single leaves, never a bank of them: a door only
+        // stands where a way goes through it.
+        doorway(C, C - DOOR_RING, door, cloudstone);
+        doorway(C, C + DOOR_RING, door, cloudstone);
+        doorway(C - DOOR_RING, C, door, cloudstone);
+        doorway(C + DOOR_RING, C, door, cloudstone);
+        // Windows sit mid-run in the arms' long flanks. Between the crossing
+        // and the chamfers those flanks are straight for six tiles, so every
+        // one of these has wall on both sides and none lands in a corner —
+        // a window in a corner is silently deleted (chapter 01, §0.3).
+        for (int d : new int[]{-10, -8, 8, 10}) {
+            this.setObject(C - ARM_HALF - 1, C + d, window);
+            this.setObject(C + ARM_HALF + 1, C + d, window);
+            this.setObject(C + d, C - ARM_HALF - 1, window);
+            this.setObject(C + d, C + ARM_HALF + 1, window);
+        }
+
+        // ------------------------------------- the crossing: the high altar --
+        // Deliberately near-empty. The beacon is a 180 light standing in a
+        // room that is already ringed by four candelabra; the chamber once
+        // carried thirty light sources and measured brighter than noon.
+        fillRel(checker, -1, -1, 1, 1);
         this.setObject(BEACON_X, BEACON_Y, SkyRegistry.wardenBeaconOffID);
-        this.setObject(8, 8, lamp);
-        this.setObject(12, 8, lamp);
-        this.setObject(8, 12, lamp);
-        this.setObject(12, 12, lamp);
-        wallDecor(9, 7, banner, WALL_ABOVE);
-        wallDecor(11, 7, banner, WALL_ABOVE);
-        wallDecor(9, 13, banner, WALL_BELOW);
-        wallDecor(11, 13, banner, WALL_BELOW);
-        // No wall lanterns in here. The beacon is a 180 light (vanilla's
-        // streetlamp is 200, its brazier 150) standing in a 3x3 room that is
-        // already ringed by four candelabra. Adding four 150s to that is how
-        // the chamber ended up brighter than noon -- the integration test's
-        // static-only reading at the spire was 130 of a 150 ambient, i.e.
-        // placed objects alone were nearly full daylight. VERIFIED [run].
+        rel(lamp, -2, -2); rel(lamp, 2, -2); rel(lamp, -2, 2); rel(lamp, 2, 2);
 
-        // ------------------------------------------- NW pocket: refectory ---
-        // A Skywatch dinner table with a chair on every side of it, laid out
-        // the way vanilla's DinnerTablePreset does: master + counter down the
-        // middle, chairs turned inward. The second east-side seat is left out
-        // on purpose so the pocket's inner corner stays walkable.
-        this.setObject(5, 5, dinner, DOWN);
-        this.setObject(5, 6, dinner2, DOWN);
-        this.setObject(5, 4, chair, DOWN);      // faces the table below it
-        this.setObject(5, 7, chair, UP);
-        this.setObject(4, 6, chair, RIGHT);
-        this.setObject(6, 5, chair, LEFT);
-        this.setObject(4, 5, lamp);
+        // ------------------------------------- north arm: choir and apse ----
+        // Pews either side of the runner, then the apse: two Sky Seraphs
+        // flanking the tip, a candle staffel stepping in with the chamfer.
+        for (int dy : new int[]{-9, -7}) {
+            benchPairRel(bench, bench2, -4, dy, RIGHT);
+            benchPairRel(bench, bench2, 3, dy, RIGHT);
+        }
+        rel(seraph, -3, -12); rel(seraph, 3, -12);
+        rel(lamp, -3, -10); rel(lamp, 3, -10);
+        rel(lamp, -2, -12); rel(lamp, 2, -12);
+        wallDecorRel(banner, -5, -9, WALL_LEFT);
+        wallDecorRel(banner, 5, -9, WALL_RIGHT);
 
-        // -------------------------------------- NE pocket: council table ---
-        // Two modular tables side by side make one two-tile table that the
-        // chalice and the candle stand on, with a chair on each of its four
-        // sides. Only four: a fifth would seal the pocket's inner corner off
-        // and leave a tile of floor nothing can reach.
-        this.setObject(15, 5, table);
-        this.setObject(15, 6, table);
-        tableDecor(15, 5, chalice);
-        tableDecor(15, 6, candle);
-        this.setObject(15, 4, chair, DOWN);
-        this.setObject(15, 7, chair, UP);
-        this.setObject(14, 5, chair, RIGHT);
-        this.setObject(16, 6, chair, LEFT);
-        this.setObject(16, 5, lamp);
+        // ------------------------------------------- south arm: the nave ----
+        // Three ranks of pews a side, the grand door at the end of the runner.
+        for (int dy : new int[]{7, 9, 11}) {
+            benchPairRel(bench, bench2, -4, dy, RIGHT);
+            benchPairRel(bench, bench2, 3, dy, RIGHT);
+        }
+        rel(lamp, -3, 6); rel(lamp, 3, 6);
+        rel(cloudberry, -2, 12); rel(cloudberry, 2, 12);
+        wallDecorRel(banner, -2, 13, WALL_BELOW);
+        wallDecorRel(banner, 2, 13, WALL_BELOW);
+        wallDecorRel(lantern, -3, 13, WALL_BELOW);
+        wallDecorRel(lantern, 3, 13, WALL_BELOW);
 
-        // ------------------------------- SW pocket: the Warden's quarters ---
-        // A carpet, a real bed a settler can be assigned to, his dresser, and
-        // a desk with a chair turned to it (DeskObject is a TableObject, so
-        // the chair genuinely faces a table).
-        this.fillObjectLayer(ObjectLayerRegistry.TILE_LAYER, 5, 14, 3, 3, carpet);
-        this.setObject(4, 14, desk, RIGHT);
-        this.setObject(5, 14, chair, LEFT);
-        this.setObject(4, 15, dresser, RIGHT);
-        this.setObject(6, 16, bed, LEFT);       // counter goes to (5,16)
-        this.setObject(5, 16, bed2, LEFT);
-        this.setObject(7, 14, lamp);
+        // -------------------------------- west arm, north half: refectory ---
+        // A Skywatch dinner table with a chair on every side, laid out the way
+        // vanilla's DinnerTablePreset does: master + counter, chairs inward.
+        relRot(dinner, -10, -4, DOWN);
+        relRot(dinner2, -10, -3, DOWN);
+        relRot(chair, -10, -5, DOWN);
+        relRot(chair, -11, -4, RIGHT);
+        relRot(chair, -9, -3, LEFT);
+        rel(lamp, -12, -4);
+        rel(cabinet, -12, -2);
+        wallDecorRel(lantern, -10, -5, WALL_ABOVE);
+
+        // ------------------------- west arm, south half: Warden's quarters ---
+        fillLayerRel(ObjectLayerRegistry.TILE_LAYER, carpet, -11, 3, -9, 5);
+        relRot(desk, -12, 2, RIGHT);
+        relRot(chair, -11, 2, LEFT);
+        relRot(dresser, -12, 3, RIGHT);
+        relRot(bed, -11, 4, LEFT);          // counter goes one tile west
+        relRot(bed2, -12, 4, LEFT);
+        rel(lamp, -7, 5);
         // (BASKET_X, BASKET_Y) stays empty — SkyLevel puts the cats' basket there.
 
-        // ------------------------------------------- SE pocket: archive ----
-        this.setObject(14, 16, table);
-        this.setObject(15, 16, table);
-        tableDecor(14, 16, tome);
-        tableDecor(15, 16, cloudberry);
-        this.setObject(14, 15, chair, DOWN);
-        // The desk sits in the corner beside the writing tables, back to the
-        // east wall, with its own chair turned to it. Putting it a tile north
-        // instead walls (16,15) off behind the seating.
-        this.setObject(16, 15, desk, LEFT);
-        this.setObject(15, 15, chair, RIGHT);
-        this.setObject(13, 16, dresser, UP);
-        this.setObject(13, 14, lamp);
+        // ------------------------------ east arm, north half: council table --
+        // Two modular tables make one two-tile board, a chair on each side.
+        rel(table, 10, -4); rel(table, 10, -3);
+        tableDecorRel(chalice, 10, -4);
+        tableDecorRel(candle, 10, -3);
+        relRot(chair, 10, -5, DOWN);
+        relRot(chair, 9, -4, RIGHT);
+        relRot(chair, 11, -3, LEFT);
+        rel(lamp, 12, -4);
+        rel(display, 12, -2);
+        wallDecorRel(lantern, 10, -5, WALL_ABOVE);
 
-        // --------------------------------------------------- the galleries --
-        // Benches in rows, backs to the outer wall, flanking the north and
-        // south doors: the entrance hall and the gallery opposite it.
-        benchPair(8, 4, bench, bench2, RIGHT);
-        benchPair(11, 4, bench, bench2, RIGHT);
-        benchPair(9, 16, bench, bench2, LEFT);
-        benchPair(12, 16, bench, bench2, LEFT);
-        // The side galleries are circulation: standing lamps on the rhythm the
-        // reference plan uses. Twelve candelabra in all, the same count the
-        // reference layout carries - four in the chamber, four in the side
-        // galleries, one in each corner room.
-        // One candelabra a side, not a pair. Vanilla's most-lit preset,
-        // DungeonEntrancePreset, carries FOUR light sources in the whole
-        // structure; most vanilla buildings carry one. This spire had ~30.
-        this.setObject(4, 10, lamp);
-        this.setObject(16, 10, lamp);
-        // The north and south galleries take their light off the INNER ring
-        // instead, so the outer wall behind the benches stays free for the
-        // banners. Without these two pairs the entrance hall is the one dark
-        // room in the building.
-        wallDecor(10, 5, lantern, WALL_BELOW);
-        wallDecor(10, 15, lantern, WALL_ABOVE);
-        // Skywatch heraldry over the benches in the entrance hall.
-        wallDecor(8, 16, banner, WALL_BELOW);
-        wallDecor(12, 16, banner, WALL_BELOW);
+        // ----------------------------------- east arm, south half: archive ---
+        rel(table, 10, 4); rel(table, 11, 4);
+        tableDecorRel(tome, 10, 4);
+        tableDecorRel(cloudberry, 11, 4);
+        relRot(chair, 10, 3, DOWN);
+        relRot(desk, 12, 3, LEFT);
+        relRot(chair, 11, 3, RIGHT);
+        rel(bookshelf, 12, 4);
+        rel(lamp, 7, 5);
 
         // ------------------------------------------------------- outside ----
-        // The south front is the arrival: a railed forecourt gap between two
-        // street lamps, banners either side of the grand door, a raven statue
-        // on each flank. The player materialises on the pad at (10,19) — see
-        // SkyOrigin.ARRIVAL_OFFSET_Y — and walks in through the door.
-        wallDecor(9, 18, banner, WALL_ABOVE);
-        wallDecor(11, 18, banner, WALL_ABOVE);
-        // The entrance keeps its two streetlamps below -- they are what makes
-        // the spire readable at night from a distance, which is its job. The
-        // wall lanterns beside them were lighting the same four tiles twice.
+        // The south front is the arrival: the player materialises on the apron
+        // two tiles below the grand door (SkyOrigin.ARRIVAL_OFFSET_Y) and walks
+        // straight up the runner. Street lamps flank the approach — they are
+        // what makes the cathedral readable at night from a distance — and a
+        // raven statue stands on each flank of the door.
+        rel(raven, -5, 14); rel(raven, 5, 14);
+        rel(streetlamp, -3, 15); rel(streetlamp, 3, 15);
+        rel(railing, -6, 15); rel(railing, -5, 15);
+        rel(railing, 5, 15); rel(railing, 6, 15);
+        // The Skywatch Gate: the permanent way home, on the apron beside the
+        // arrival pad. Unbreakable (see SkySideStairwayObject) — it routes each
+        // player back to the stairway they ascended from. Two tiles clear of
+        // the door axis, so it never stands in the way in.
+        rel(SkyRegistry.stairwayUpID, 4, 15);
 
-        this.setObject(6, 18, raven);
-        this.setObject(14, 18, raven);
-        this.setObject(8, 19, streetlamp);
-        this.setObject(12, 19, streetlamp);
-        this.setObject(5, 19, railing);
-        this.setObject(6, 19, railing);
-        this.setObject(7, 19, railing);
-        this.setObject(14, 19, railing);
-        this.setObject(15, 19, railing);
-        // The Skywatch Gate: the permanent way home, standing IN the railing
-        // line east of the arrival pad. Unbreakable (see SkySideStairwayObject)
-        // — it routes each player back to the stairway they ascended from.
-        this.setObject(13, 19, SkyRegistry.stairwayUpID);
-
-        // The north front is the back of the hall: two Sky Seraphs facing out
-        // over the forecourt, where nothing of the building stands behind them.
-        wallDecor(9, 2, banner, WALL_BELOW);
-        wallDecor(11, 2, banner, WALL_BELOW);
-        wallDecor(7, 2, lantern, WALL_BELOW);
-        wallDecor(13, 2, lantern, WALL_BELOW);
-        this.setObject(8, 1, seraph);
-        this.setObject(12, 1, seraph);
-        // East and west: a lantern either side of each side door.
-        wallDecor(2, 7, lantern, WALL_RIGHT);
-        wallDecor(2, 13, lantern, WALL_RIGHT);
-        wallDecor(18, 7, lantern, WALL_LEFT);
-        wallDecor(18, 13, lantern, WALL_LEFT);
+        // The north front is the back of the choir: seraphs facing out over the
+        // forecourt, where nothing of the building stands behind them.
+        rel(seraph, -5, -14); rel(seraph, 5, -14);
+        wallDecorRel(banner, -2, -15, WALL_BELOW);
+        wallDecorRel(banner, 2, -15, WALL_BELOW);
+        // East and west: a lantern either side of each side door, outside.
+        wallDecorRel(lantern, -15, -2, WALL_RIGHT);
+        wallDecorRel(lantern, -15, 2, WALL_RIGHT);
+        wallDecorRel(lantern, 15, -2, WALL_LEFT);
+        wallDecorRel(lantern, 15, 2, WALL_LEFT);
 
         // The Warden himself + quest bookkeeping, at stamp time. The lambda
         // receives the anchor's WORLD tile coordinates; the other quest
@@ -400,12 +390,43 @@ public class WardenSpirePreset extends Preset {
     }
 
     /**
-     * The four plot corners carry the forecourt railing's diagonal links
-     * (SkyLandscape.discRing at radius 13 passes through exactly these), so
-     * the preset leaves them to the landscape.
+     * The cross, in offsets from the centre: two arms crossing at right
+     * angles, each chamfered twice at its tip so the outer wall steps in
+     * rather than ending flat.
      */
-    private static boolean isPlotCorner(int x, int y) {
-        return (x == 1 || x == 19) && (y == 1 || y == 19);
+    private static boolean isHall(int dx, int dy) {
+        return arm(dx, dy) || arm(dy, dx);
+    }
+
+    /** One arm: {@code across} is the width axis, {@code along} its length. */
+    private static boolean arm(int across, int along) {
+        int a = Math.abs(across), l = Math.abs(along);
+        if (l > ARM_LENGTH || a > ARM_HALF) {
+            return false;
+        }
+        if (l == ARM_LENGTH) {
+            return a <= ARM_HALF - 2;       // the tip: five tiles across
+        }
+        if (l == ARM_LENGTH - 1) {
+            return a <= ARM_HALF - 1;       // the first step: seven
+        }
+        return true;
+    }
+
+    /**
+     * Is any tile within {@code reach} of (x,y) — Chebyshev, so diagonals
+     * count — part of the hall? Eight-way is what seals the chamfer steps;
+     * with four, every step would meet its neighbour at a bare diagonal.
+     */
+    private static boolean near(boolean[][] inside, int x, int y, int reach) {
+        for (int i = Math.max(0, x - reach); i <= Math.min(SIZE - 1, x + reach); i++) {
+            for (int j = Math.max(0, y - reach); j <= Math.min(SIZE - 1, y + reach); j++) {
+                if (inside[i][j]) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /** A doorway: the door itself plus the floor its threshold stands on. */
@@ -414,18 +435,40 @@ public class WardenSpirePreset extends Preset {
         this.setTile(x, y, floor);
     }
 
-    private void chamberRow(int y, int fromX, int toX, int floor) {
-        this.fillTile(fromX, y, toX - fromX + 1, 1, floor);
+    // ---- offset helpers: everything above speaks in tiles from the centre --
+
+    private void rel(int objectID, int dx, int dy) {
+        this.setObject(C + dx, C + dy, objectID);
+    }
+
+    private void relRot(int objectID, int dx, int dy, int rotation) {
+        this.setObject(C + dx, C + dy, objectID, rotation);
+    }
+
+    private void carpetAt(int carpet, int dx, int dy) {
+        this.setObjectLayer(ObjectLayerRegistry.TILE_LAYER, C + dx, C + dy, carpet);
+    }
+
+    private void fillRel(int tileID, int fromDx, int fromDy, int toDx, int toDy) {
+        this.fillTile(C + fromDx, C + fromDy, toDx - fromDx + 1, toDy - fromDy + 1, tileID);
+    }
+
+    private void fillLayerRel(int layer, int objectID, int fromDx, int fromDy, int toDx, int toDy) {
+        for (int x = C + fromDx; x <= C + toDx; x++) {
+            for (int y = C + fromDy; y <= C + toDy; y++) {
+                this.setObjectLayer(layer, x, y, objectID);
+            }
+        }
     }
 
     /** Painting / wall torch: its own tile stays clear, the rotation names the wall. */
-    private void wallDecor(int x, int y, int objectID, int rotation) {
-        this.setObjectLayer(ObjectLayerRegistry.WALL_DECOR, x, y, objectID, rotation);
+    private void wallDecorRel(int objectID, int dx, int dy, int rotation) {
+        this.setObjectLayer(ObjectLayerRegistry.WALL_DECOR, C + dx, C + dy, objectID, rotation);
     }
 
     /** A decoration standing on top of a modular table. */
-    private void tableDecor(int x, int y, int objectID) {
-        this.setObjectLayer(ObjectLayerRegistry.FENCE_AND_TABLE_DECOR, x, y, objectID);
+    private void tableDecorRel(int objectID, int dx, int dy) {
+        this.setObjectLayer(ObjectLayerRegistry.FENCE_AND_TABLE_DECOR, C + dx, C + dy, objectID);
     }
 
     /**
@@ -433,20 +476,12 @@ public class WardenSpirePreset extends Preset {
      * points — vanilla's BenchPreset writes exactly this pair. RIGHT puts the
      * bench's back against the wall above it, LEFT against the wall below.
      */
-    private void benchPair(int x, int y, int bench, int bench2, int rotation) {
-        this.setObject(x, y, bench, rotation);
-        this.setObject(x + DX[rotation], y + DY[rotation], bench2, rotation);
+    private void benchPairRel(int bench, int bench2, int dx, int dy, int rotation) {
+        this.setObject(C + dx, C + dy, bench, rotation);
+        this.setObject(C + dx + DX[rotation], C + dy + DY[rotation], bench2, rotation);
     }
 
     /** Rotation -> unit step, the same order the multi-tile counter uses. */
     private static final int[] DX = {0, 1, 0, -1};
     private static final int[] DY = {-1, 0, 1, 0};
-
-    private void fillObjectLayer(int layer, int x, int y, int width, int height, int objectID) {
-        for (int i = x; i < x + width; i++) {
-            for (int j = y; j < y + height; j++) {
-                this.setObjectLayer(layer, i, j, objectID);
-            }
-        }
-    }
 }

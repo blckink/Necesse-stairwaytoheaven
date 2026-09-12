@@ -31,14 +31,15 @@ public final class SkyOrigin {
     public static final int HUB_RADIUS = 56;
 
     /**
-     * The player's arrival tile when ascending: the railed pad on the spire's
-     * south front. The 21x21 spire preset is applied centered on the origin,
-     * so its grand door sits at origin + (0, +7) and the paved approach runs
-     * out to origin + (0, +9), between two street lamps and inside the
-     * forecourt railing. Grew with the hall in v0.6: at the old +6 the player
-     * materialised inside the south corridor.
+     * The player's arrival tile when ascending: the paved pad on the
+     * cathedral's south front. The spire preset is applied centered on the
+     * origin, so the grand door at the foot of the nave sits at
+     * origin + (0, +14) and the approach runs out to origin + (0, +15),
+     * between two street lamps. Grew twice with the hall: +6 put the player
+     * inside the old south corridor, +9 is inside the nave of the 33x33
+     * cathedral that replaced it.
      */
-    public static final int ARRIVAL_OFFSET_Y = 9;
+    public static final int ARRIVAL_OFFSET_Y = 15;
 
     /** Radial progression bands (distance in tiles from the origin). */
     public static final float CORE_RADIUS = 700.0F;

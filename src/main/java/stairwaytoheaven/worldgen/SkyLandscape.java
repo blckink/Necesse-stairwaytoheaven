@@ -204,12 +204,19 @@ public final class SkyLandscape {
 
     /** The Warden's Forecourt: paved apron around the spire. */
     public static final float HUB_INNER_CLEAR = 5.0F;
-    public static final float HUB_COURT_RADIUS = 13.0F;
+    /**
+     * All four rings below moved outward when the spire became the 33x33
+     * cathedral: its arms now reach 14 tiles from the origin and its apron
+     * two further, so a ring at the old radius would have been drawn UNDER
+     * the building. Read them against {@code WardenSpirePreset.WRITTEN_RADIUS}
+     * (15) — the inlay is the first thing outside the preset's own box.
+     */
+    public static final float HUB_COURT_RADIUS = 21.0F;
     /** Chequered inlay ring inside the forecourt, so it is not one flat field. */
-    public static final float HUB_INLAY_INNER = 8.5F;
-    public static final float HUB_INLAY_OUTER = 10.0F;
+    public static final float HUB_INLAY_INNER = 16.5F;
+    public static final float HUB_INLAY_OUTER = 18.0F;
     /** Radius of the ring of candelabra standing on the forecourt. */
-    public static final float HUB_LAMP_RADIUS = 11.0F;
+    public static final float HUB_LAMP_RADIUS = 19.0F;
     public static final int HUB_LAMP_COUNT = 6;
     /**
      * How far to either side of a door axis nothing from the forecourt
@@ -219,7 +226,7 @@ public final class SkyLandscape {
      */
     public static final int DOOR_AXIS_CLEARANCE = 1;
     /** No built object may stand closer than this — the spire preset owns it. */
-    public static final float HUB_PROP_MIN = 10.5F;
+    public static final float HUB_PROP_MIN = 16.5F;
 
     // Independent noise/hash layers.
     public static final long SALT_ROAD_NODE = 0x5D0A01L;
