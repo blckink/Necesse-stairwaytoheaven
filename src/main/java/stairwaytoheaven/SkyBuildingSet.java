@@ -190,10 +190,37 @@ final class SkyBuildingSet {
                 new SkyDecoObject("aeronautwreck", 48, new Color(122, 96, 72),
                         new Rectangle(8, 24, 32, 24), "objects", "decorations")
                         .setTool(ToolType.AXE), 8.0F, true);
+        // Air mail that fell out of the sky has to be worth opening (player,
+        // 2026-09-12: "soll Geld enthalten oder lustige Outfits"). A parcel the
+        // world placed breaks open into coins and, now and then, somebody's
+        // mail-order costume; one the player placed gives itself back, the
+        // same guard SkyCacheObject uses. Every vanity ID below was found as a
+        // string in the 1.3.3 game jar; "jesterhat" and "sharkmask", which the
+        // settlers use, were not, so they are left out here.
         SkyRegistry.skyParcelID = ObjectRegistry.registerObject("skyparcel",
                 new SkyDecoObject("skyparcel", 32, new Color(122, 96, 72),
-                        new Rectangle(6, 14, 20, 14), "objects", "decorations")
-                        .setTool(ToolType.ALL).setObjectHealth(1), 2.0F, true);
+                        new Rectangle(6, 14, 20, 14), "objects", "decorations") {
+                    @Override
+                    public necesse.inventory.lootTable.LootTable getLootTable(
+                            necesse.level.maps.Level level, int layerID, int tileX, int tileY) {
+                        if (level.objectLayer.isPlayerPlaced(tileX, tileY)) {
+                            return super.getLootTable(level, layerID, tileX, tileY);
+                        }
+                        return new necesse.inventory.lootTable.LootTable(
+                                necesse.inventory.lootTable.lootItem.LootItem.between("coin", 25, 90),
+                                // Same shape RealmPoiPresets uses for its prize chests.
+                                new necesse.inventory.lootTable.lootItem.ChanceLootItemList(0.40F,
+                                        new necesse.inventory.lootTable.lootItem.OneOfLootItems(
+                                                new necesse.inventory.lootTable.lootItem.LootItem("tophat"),
+                                                new necesse.inventory.lootTable.lootItem.LootItem("jestershirt"),
+                                                new necesse.inventory.lootTable.lootItem.LootItem("jesterboots"),
+                                                new necesse.inventory.lootTable.lootItem.LootItem("sunglasses"),
+                                                new necesse.inventory.lootTable.lootItem.LootItem("labcoat"),
+                                                new necesse.inventory.lootTable.lootItem.LootItem("dressshoes"))),
+                                necesse.inventory.lootTable.lootItem.ChanceLootItem.between(
+                                        0.25F, "skyweave", 1, 2));
+                    }
+                }.setTool(ToolType.ALL).setObjectHealth(1), 2.0F, true);
         // The rich container tier, on vanilla's incursion crate sheet.
         SkyRegistry.skyCacheID = ObjectRegistry.registerObject("skycache",
                 new stairwaytoheaven.objects.SkyCacheObject(), 0.0F, false);
