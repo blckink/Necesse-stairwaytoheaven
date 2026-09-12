@@ -160,16 +160,20 @@ public final class SkyLivestock {
                 "nimbusdraught", 1, RecipeTechRegistry.ALCHEMY,
                 Recipes.ingredientsFromScript("{{nimbusmilk, 2}, {aurorapetal, 1}}")));
 
-        // Vanilla's net is a Demonic Workstation recipe of 10 logs and 5 wool
-        // (jar Recipes.java:1202). The sky has no sheep, and it does have
-        // something worth catching with a net — the Dew Snail is a NetableMob.
-        // Aurora fleece stands in for the wool at vanilla's own count.
-        // Same shape, sky materials. The output is a VANILLA item: the game
-        // names and draws it, which is why tools/locale_audit.py carries it in
-        // VANILLA_RECIPE_OUTPUTS rather than looking for a mod icon.
-        Recipes.registerModRecipe(new Recipe(
-                "net", 1, RecipeTechRegistry.WORKSTATION,
-                Recipes.ingredientsFromScript("{{aurorafleece, 5}, {anylog, 10}}")));
+        // NOTE: this mod registers no recipe for vanilla's net, deliberately.
+        // An earlier version added one here (aurora fleece at a plain
+        // workstation) because the sky has no sheep. It did not replace
+        // vanilla's recipe — Recipes.registerModRecipe only ever appends
+        // (jar Recipes.java:39-44, RecipeList.java:85-94) — but it put a second
+        // entry for a VANILLA item in front of the player at a tier where the
+        // real one was not yet visible, and that reads as the mod having
+        // rewritten a vanilla recipe. It had, in effect.
+        //
+        // The rule the player set on 2026-09-12: the mod adds its own content
+        // and leaves vanilla's alone. The net stays exactly what the game
+        // makes it — 10 logs and 5 wool at a Demonic Workstation
+        // (jar Recipes.java:1253) — and it is carried up the Stairway, which
+        // costs 8 tungsten bars and therefore comes later than that anyway.
 
         // --- Aurora Fleece: the comfort line ---
         Recipes.registerModRecipe(new Recipe(

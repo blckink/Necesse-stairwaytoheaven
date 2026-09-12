@@ -26,28 +26,48 @@ import necesse.level.maps.light.GameLight;
  *
  * Subclasses exist because MobRegistry needs a distinct no-arg-constructible
  * class per stringID (same pattern as SpireCatMob.Black/Tabby).
+ *
+ * <h2>All of them are netable</h2>
+ * {@code NetableMob} sits on this base class rather than on one subclass,
+ * because the whole class is "harmless ambient wildlife" and that is exactly
+ * what a net is for. It is the entire vanilla catchability mechanism: the net
+ * checks this marker and nothing else ({@code NetToolItem.canHitMob} is
+ * {@code mob instanceof NetableMob}, jar NetToolItem.java:47), then removes the
+ * mob through the normal death path so the loot table still applies.
+ *
+ * <p>Vanilla's own net does this. The mod adds no net and no net recipe of its
+ * own -- see the note in {@code livestock/SkyLivestock.registerItems}.
  */
-public abstract class SkyCritterMob extends CritterMob {
+public abstract class SkyCritterMob extends CritterMob implements NetableMob {
 
     public static GameTexture mothTexture;
     public static GameTexture beetleTexture;
     public static GameTexture finchTexture;
     public static GameTexture snailTexture;
 
-    public static final LootTable mothLoot = new LootTable(
-            new ChanceLootItemList(0.4F, LootItem.between("aurorapetal", 1, 1)));
-    public static final LootTable beetleLoot = new LootTable(
-            new ChanceLootItemList(0.4F, LootItem.between("stormshard", 1, 1)));
-    public static final LootTable finchLoot = new LootTable(
-            new ChanceLootItemList(0.4F, LootItem.between("windsilk", 1, 1)));
     /**
-     * The snail is the one critter you catch with a net, and a net catch is
-     * just {@code target.remove(0, 0, attacker, true)} -- the mob's loot table
-     * is the entire reward. A chance-based table therefore reads as the animal
-     * vanishing for nothing, which is what a playtester reported. Vanilla's
-     * netted critters drop themselves with certainty (FireflyMob's table is one
-     * unconditional LootItem), so this one does too, with the shard kept as a
-     * bonus roll on top.
+     * Every critter here is netable, so every table below drops something with
+     * certainty. A net catch is just {@code target.remove(0, 0, attacker,
+     * true)} -- the mob's loot table is the entire reward -- so a purely
+     * chance-based table reads as the animal vanishing for nothing. That is a
+     * playtest report this mod has already received once, about the snail.
+     *
+     * <p>These three used to be 0.4F rolls, from when they could only be hunted
+     * and not caught. The roll is now gone rather than kept as a bonus on top:
+     * unlike the snail and the Stripe Beetle, these three have no item OF
+     * THEMSELVES to hand over, so the material has to be the catch reward
+     * itself. One unit, which is what the roll paid out when it paid at all.
+     */
+    public static final LootTable mothLoot = new LootTable(
+            LootItem.between("aurorapetal", 1, 1));
+    public static final LootTable beetleLoot = new LootTable(
+            LootItem.between("stormshard", 1, 1));
+    public static final LootTable finchLoot = new LootTable(
+            LootItem.between("windsilk", 1, 1));
+    /**
+     * The snail has an item of itself, so it drops that with certainty and
+     * keeps the shard as a bonus roll on top -- the shape vanilla's netted
+     * critters use (FireflyMob's table is one unconditional LootItem).
      */
     public static final LootTable snailLoot = new LootTable(
             LootItem.between("dewsnail", 1, 1),
@@ -134,13 +154,10 @@ public abstract class SkyCritterMob extends CritterMob {
     }
 
     /**
-     * Dew Snail — a slow glowing snail of the shoals (Aurora, v0.4).
-     * NetableMob is the whole vanilla catchability mechanism (the net checks
-     * exactly this marker, then removes the mob through the normal death path,
-     * so the loot table still applies) — the same pattern as vanilla
-     * butterflies and bees.
+     * Dew Snail — a slow glowing snail of the shoals (Aurora, v0.4). Netable
+     * like every other critter here; the marker is on the base class.
      */
-    public static class DewSnail extends SkyCritterMob implements NetableMob {
+    public static class DewSnail extends SkyCritterMob {
         public DewSnail() {
             super(4, 25, 8.0F);
         }

@@ -636,12 +636,11 @@ VANILLA = "vanilla:"
 # our locales nor a PNG of ours. Each entry has to be justified here, because
 # an unlisted ID is far more likely to be a typo than a deliberate vanilla
 # output, and a typo'd output is exactly what the rest of this audit is for.
-VANILLA_RECIPE_OUTPUTS = {
-    # net: vanilla's critter net, ItemRegistry + items/net.png. Ours is an
-    # alternative recipe from Aurora Fleece at a plain workstation, because the
-    # Skyreach has a netable critter (the Dew Snail) and no sheep.
-    "net",
-}
+# Empty since 2026-09-12, and meant to stay that way: the mod registers no
+# recipe whose output is a vanilla item. The one entry that used to live here
+# ("net") was removed with the recipe itself — see SkyLivestock.registerItems.
+# An addition here is a red flag, not a routine exemption.
+VANILLA_RECIPE_OUTPUTS = set()
 
 
 def vanilla_icon_paths(class_name, ctor_args):

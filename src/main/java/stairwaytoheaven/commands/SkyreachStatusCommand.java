@@ -549,7 +549,11 @@ public class SkyreachStatusCommand extends ModularChatCommand {
      */
     private void diagnoseNetAudit(CommandLog logs) {
         for (necesse.entity.mobs.Mob mob : new necesse.entity.mobs.Mob[]{
-                new stairwaytoheaven.mobs.SkyCritterMob.DewSnail()}) {
+                new stairwaytoheaven.mobs.SkyCritterMob.DewSnail(),
+                new stairwaytoheaven.mobs.SkyCritterMob.GlowMoth(),
+                new stairwaytoheaven.mobs.SkyCritterMob.SparkBeetle(),
+                new stairwaytoheaven.mobs.SkyCritterMob.ZephyrFinch(),
+                new stairwaytoheaven.realms.crooked.StripeBeetleMob()}) {
             logs.add("net " + mob.getStringID() + "="
                     + (mob instanceof necesse.entity.mobs.misc.NetableMob ? "NETABLE" : "not netable"));
         }
