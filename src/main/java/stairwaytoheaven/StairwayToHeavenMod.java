@@ -79,6 +79,12 @@ public class StairwayToHeavenMod {
         stairwaytoheaven.arsenal.SkyArsenal.register();
         stairwaytoheaven.arsenal.SkyArsenal.registerItems();
         stairwaytoheaven.settlement.SkyProfessions.register();
+        // A new PROFESSION in vanilla's own sense — a HumanShop settler type
+        // that the settlement recruit draw sprinkles in beside the Stylist, the
+        // Miner and the Angler. Registered here rather than in SkyMobs because
+        // it writes to six registries at once (mob, settler, thought, dialogue,
+        // container event, packet), all of which close after init().
+        stairwaytoheaven.settlement.SkyTherapy.register();
         // The mod's own settler special task: a fourth expedition category
         // beside vanilla's Expedition / Mining trip / Fishing trip. Registered
         // here rather than in SkyMobs beside the settlers themselves because

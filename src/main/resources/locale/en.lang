@@ -1049,3 +1049,31 @@ stripedhorntip=Trophy - taken out of a Door Mimic. Whatever it last ate had one 
 magpiecaptip=Magpie's own peaked cap. No armour, and she will sell you her spare.
 haldakerchieftip=Halda's soft cellar cap, gone pink from forty years of vats.
 vanecowltip=Ossian Vane's working circlet, with the loupe he never takes off.
+
+# Therapist - a new settler profession (docs/settlers.md)
+[mob]
+therapisthuman=Therapist
+therapisthumanname=<name> the Therapist
+[settlement]
+therapisttip=Found in villages, like any other trade
+[mobmsg]
+therapisttalk1=Nobody here is broken. Some of them are just carrying too much.
+therapisttalk2=I keep four chairs. That is not modesty, it is how much attention I have.
+therapisttalk3=Half of settling down is admitting you have settled.
+therapisttalk4=You can change a person. It costs more than people think.
+therapisttalk5=Sit if you like. I charge for the work, not for the talking.
+[misc]
+swhtherapythought=Someone listens to me
+swhtherapyoption=About the therapy places
+swhtherapyintro=I keep four places. Whoever sits in one feels <percent>% better about the life they have here, for as long as they keep the chair.
+swhtherapyslot=Place <number>: <name>
+swhtherapypick=Who should take the chair?
+swhtherapyclear=Free the chair
+swhtraitoption=Work on someone's character (<price> coins)
+swhtraitintro=Character is not fate. For <price> coins I will take one trait off anyone here - but what grows back in its place is not mine to choose, and not yours.
+swhtraitwhich=Which part of <name> should go?
+swhtraitconfirm=I will take <trait> away from <name> for <price> coins. What comes back instead, neither of us will know until it does.
+swhtraitdoit=Do it
+swhtraitdone=<name> is no longer <old>. <name> is <new> now.
+swhtraitnocoins=That is <price> coins, and you do not have them.
+swhtraitnotrait=There is nothing left in them I could turn that into. Keep your coins.

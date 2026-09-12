@@ -1050,3 +1050,31 @@ stripedhorntip=Trophäe - aus einem Tür-Mimik geschnitten. Was immer es zuletzt
 magpiecaptip=Magpies eigene Schirmkappe. Keine Rüstung, und sie verkauft dir ihre zweite.
 haldakerchieftip=Haldas weiche Kellerhaube, von vierzig Jahren Bottichen rosa geworden.
 vanecowltip=Ossian Vanes Arbeitsreif, mit der Lupe, die er nie abnimmt.
+
+# Therapeut – ein neuer Siedlerberuf (docs/settlers.md)
+[mob]
+therapisthuman=Therapeut
+therapisthumanname=<name>, der Therapeut
+[settlement]
+therapisttip=In Dörfern zu finden, wie jedes andere Handwerk
+[mobmsg]
+therapisttalk1=Hier ist niemand kaputt. Manche tragen nur zu viel mit sich herum.
+therapisttalk2=Ich habe vier Stühle. Das ist keine Bescheidenheit, so viel Aufmerksamkeit habe ich.
+therapisttalk3=Sesshaft werden heißt zur Hälfte zugeben, dass man sesshaft ist.
+therapisttalk4=Man kann einen Menschen ändern. Es kostet mehr, als die Leute denken.
+therapisttalk5=Setz dich, wenn du magst. Ich nehme Geld für die Arbeit, nicht fürs Reden.
+[misc]
+swhtherapythought=Mir hört jemand zu
+swhtherapyoption=Über die Therapieplätze
+swhtherapyintro=Ich habe vier Plätze. Wer auf einem sitzt, fühlt sich <percent>% wohler mit dem Leben hier – solange der Platz ihm gehört.
+swhtherapyslot=Platz <number>: <name>
+swhtherapypick=Wer soll den Platz bekommen?
+swhtherapyclear=Platz freigeben
+swhtraitoption=An jemandes Wesen arbeiten (<price> Münzen)
+swhtraitintro=Das Wesen ist kein Schicksal. Für <price> Münzen nehme ich jedem hier eine Eigenschaft ab – aber was stattdessen nachwächst, wählt weder ich noch du.
+swhtraitwhich=Welcher Teil von <name> soll gehen?
+swhtraitconfirm=Ich nehme <name> die Eigenschaft <trait> ab, für <price> Münzen. Was dafür zurückkommt, weiß keiner von uns beiden vorher.
+swhtraitdoit=Mach es
+swhtraitdone=<name> ist nicht mehr <old>. <name> ist jetzt <new>.
+swhtraitnocoins=Das sind <price> Münzen, und die hast du nicht.
+swhtraitnotrait=In ihm ist nichts mehr, woraus ich das machen könnte. Behalt dein Geld.
