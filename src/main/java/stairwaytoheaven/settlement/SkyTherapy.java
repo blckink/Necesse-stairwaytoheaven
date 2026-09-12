@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import necesse.engine.network.server.Server;
-import necesse.engine.registries.ContainerEventRegistry;
 import necesse.engine.registries.MobRegistry;
 import necesse.engine.registries.PacketRegistry;
 import necesse.engine.registries.SettlerDialogueRegistry;
@@ -124,8 +123,8 @@ public final class SkyTherapy {
         SettlerThoughtRegistry.registerSettlerThought("swh_therapy", THOUGHT);
         SettlerDialogueRegistry.registerSettlerDialogue("swh_therapyslots", TherapySlotsDialogue.class);
         SettlerDialogueRegistry.registerSettlerDialogue("swh_traittherapy", TraitTherapyDialogue.class);
-        ContainerEventRegistry.registerUpdate(TraitSwapResultEvent.class);
         PacketRegistry.registerPacket(PacketSettlerPersonalities.class);
+        PacketRegistry.registerPacket(PacketTraitSwapResult.class);
     }
 
     // --- the mood bonus -------------------------------------------------

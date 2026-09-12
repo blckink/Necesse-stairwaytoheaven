@@ -552,7 +552,17 @@ def human_mob_ids(text, supers):
                 humans.add(mob_id)
                 break
             name = parent
-    humans.update(re.findall(r'registerSettler\(\s*"([^"]+)"', text))
+    # A registerSettler ID is the SETTLER key, which is not always the mob's
+    # own string ID: vanilla pairs settler "stylist" with mob "stylisthuman",
+    # and TherapistSettler follows that shape. Every settler of this mod that
+    # predates the Therapist uses one literal for both, which is why taking the
+    # settler key as a mob ID worked until it did not -- it asked for
+    # mob.therapistname, a key the engine never looks up (HumanMob.getLocalization
+    # builds mob.<MOB stringID>name). So a settler key only counts here when a
+    # mob of the same name really was registered.
+    registered_mobs = set(re.findall(r'registerMob\(\s*"([^"]+)"', text))
+    humans.update(m for m in re.findall(r'registerSettler\(\s*"([^"]+)"', text)
+                  if m in registered_mobs)
     return humans
 
 
@@ -640,6 +650,15 @@ VANILLA = "vanilla:"
 # recipe whose output is a vanilla item. The one entry that used to live here
 # ("net") was removed with the recipe itself — see SkyLivestock.registerItems.
 # An addition here is a red flag, not a routine exemption.
+# Keys the GAME owns that our source uses on purpose, in sections our locale
+# files also write to. The skip above only covers sections we never touch: the
+# moment one of our own keys lands in [ui], every vanilla [ui] key our code
+# reuses starts reading as missing. Each row here was checked against the
+# game's own locale/en.lang before being added.
+VANILLA_LOCALE_KEYS = {
+    ("ui", "backbutton"),  # locale/en.lang:6246 "Back" - vanilla's own dialogues
+}                          # use it the same way (CollectorSettlerDialogue)
+
 VANILLA_RECIPE_OUTPUTS = set()
 
 
@@ -1232,6 +1251,8 @@ def main(vanilla_dump=None):
         for lang, entries in langs.items():
             if category not in entries:
                 continue  # a vanilla category (controls, ui, mobmsg, ...)
+            if (category, key) in VANILLA_LOCALE_KEYS:
+                continue  # the game's own string, borrowed on purpose
             if key not in entries[category]:
                 print("!! [%s] %s is used at %s but missing from %s.lang "
                       "-- that call would render \"%s.%s\""

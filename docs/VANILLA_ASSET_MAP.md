@@ -109,6 +109,8 @@ deliberately not used by any of this.
 | Mr. Knott | `jesterhat`, `labcoat`, `jesterboots` (worn items) | the Doorman's jester hat and lab coat — a showman testing whether a door leads anywhere |
 | Ives | `mobs/icons/elderhuman` (icon) | his settlement-screen face — vanilla registers `elderhuman` as a mob, so `mobs/icons/elderhuman` is one of its own icons; an old man who keeps a churchyard is the closest face vanilla's roster draws |
 | Ives | `leatherhood`, `clothrobe`, `clothboots` (worn items) | the Verger's hood and plain robe — the only wardrobe in the mod's cast that reads as somebody who works outdoors in fog rather than as a merchant |
+| Therapist | `mobs/icons/alchemisthuman` (icon) | the settlement-screen face of the mod's one PROFESSION (not a named person — see `docs/settlers.md`). The Alchemist is the closest thing vanilla's roster draws to somebody who tends to people rather than to ground |
+| Therapist | `blazer`, `dressshoes` (worn items, `TherapistSettler.setDefaultArmor`) | the consulting-room clothes. Two items rather than three: no vanilla headwear reads as this job, and an arbitrary hat would make the profession look like a costume |
 
 Note that the icon only shows where no mob is available:
 `Settler.getSettlerFaceDrawOptions` draws the settler's own human face from the

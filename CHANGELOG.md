@@ -3,6 +3,54 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow the ROADMAP milestones.
 
+## [Unreleased]
+
+### Added
+- **The Therapist — a new settler profession, sprinkled in like any other.**
+  Not another named resident: a profession in vanilla's own sense, registered as
+  a `HumanShop` mob (`therapisthuman`) plus a `Settler` type (`therapist`) that
+  puts **75 tickets, behind no story gate**, into the settlement recruit draw —
+  the Blacksmith's and the Miner's exact terms. A world can hold any number of
+  them, one per settlement, with vanilla's own random name and face.
+  `settlement/SkyTherapy.java`, `settlement/TherapistSettler.java`,
+  `mobs/TherapistHumanMob.java`; documented in `docs/settlers.md`.
+- **Four therapy places.** Talking to a settled Therapist offers "About the
+  therapy places": up to four settlers of the same settlement, picked from a
+  name list, each of whom then feels **50% better** for as long as they hold the
+  chair. Implemented as a registered `SettlerThought` on the patient's own
+  active thoughts — vanilla's settler-lifts-settler mechanism, the one
+  `InspiringSettlerPersonality` uses — refreshed every two seconds with a
+  60-second life, so it lapses by itself if the Therapist dies or leaves.
+  "+50%" is read as *half the distance to neutral, always upwards*: +40 becomes
+  +60, −20 becomes −10. Multiplying a negative mood by 1.5 would have made a
+  therapist something you inflict on people.
+- **Swapping a settler's traits, permanently, for 50 000 coins.** A second menu
+  entry, open for every settler of the settlement whether or not they are in
+  therapy. Pick the settler, pick one trait they have, confirm: the coins go and
+  the trait is replaced by a random other one. The player is not told what is
+  coming and cannot choose it, and never gets a trait the settler already has.
+  The replacement is drawn by asking vanilla for a *maximal legal set* for that
+  settler rather than by picking any personality, so per-trait filters
+  (`elder`, `voyager`), mutual exclusions (warrior/ranger/magician/summoner,
+  pacifist) and the bonus-perk pool are all honoured without copying vanilla's
+  rules into this repo — see `SkyTherapy.rollReplacement`. If nothing legal is
+  left, the swap is refused and nothing is charged.
+
+### Notes
+- The trait swap needs **no method patching and no shadow bookkeeping**: settler
+  personalities look seed-derived, but `HumanMob.applyLoadData` reads the saved
+  list back *after* the seed has regenerated the default and the spawn packet
+  carries the list explicitly (VERIFIED against the 1.3.3 jar), so a server-side
+  change to `getPersonalities()` is already permanent and authoritative.
+  `PacketSettlerPersonalities` exists only to refresh clients that had the
+  settler on screen at the moment of the swap.
+- The result of a swap travels as a plain `Packet`, not as a `ContainerEvent`,
+  because `ContainerEventRegistry` sits in `necesse.engine.registries` in the
+  1.3.2 server every gate runs against and in
+  `necesse.inventory.container.events` in the played 1.3.3 client. Using it
+  would have made the mod either ungatable or unplayable. `PacketRegistry` is in
+  the same place in both.
+
 ## [0.7.0] — "The Whole Ladder" — 2026-09-10
 
 **This is the version that ships.** Everything in the `[Unreleased]` blocks

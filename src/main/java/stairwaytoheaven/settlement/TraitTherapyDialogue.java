@@ -8,6 +8,7 @@ import necesse.engine.localization.message.LocalMessage;
 import necesse.engine.localization.message.StaticMessage;
 import necesse.engine.network.PacketReader;
 import necesse.engine.network.PacketWriter;
+import necesse.engine.network.server.ServerClient;
 import necesse.engine.registries.SettlerPersonalityRegistry;
 import necesse.engine.util.GameRandom;
 import necesse.engine.window.GameWindow;
@@ -37,8 +38,8 @@ import stairwaytoheaven.mobs.TherapistHumanMob;
  * the player does not get to choose and cannot see beforehand. The roll and the
  * charge both happen on the server — see {@code SkyTherapy.rollReplacement} for
  * why picking "any other personality" would be wrong — and the outcome comes
- * back as a {@link TraitSwapResultEvent}, which is the only thing that tells the
- * player what they bought.
+ * back as a {@link PacketTraitSwapResult}, which is the only thing that tells
+ * the player what they bought.
  *
  * <p>The price is checked and taken through vanilla's own recipe machinery
  * ({@code Container.canCraftRecipe} / {@code Recipe.craft}), the same path
@@ -58,7 +59,7 @@ public class TraitTherapyDialogue extends SettlerDialogue {
     protected DialogueForm confirmForm;
     protected DialogueForm resultForm;
     protected FormDialogueOption confirmButton;
-    protected TraitSwapResultEvent lastResult;
+    protected PacketTraitSwapResult lastResult;
 
     /** Client-side reconstruction. Required by {@code SettlerDialogueRegistry}. */
     public TraitTherapyDialogue(HumanMob mob) {
@@ -178,13 +179,13 @@ public class TraitTherapyDialogue extends SettlerDialogue {
         Ingredient[] cost = cost();
         if (!container.canCraftRecipe(cost, container.getCraftInventories(), true, null).canCraft()) {
             this.sendResult(container, mobUniqueID, personalityID, 0,
-                    TraitSwapResultEvent.FAILED_NO_COINS);
+                    PacketTraitSwapResult.FAILED_NO_COINS);
             return;
         }
         SettlerPersonality replacement = SkyTherapy.rollReplacement(target, replace, new GameRandom());
         if (replacement == null || !SkyTherapy.swapPersonality(target, replace, replacement)) {
             this.sendResult(container, mobUniqueID, personalityID, 0,
-                    TraitSwapResultEvent.FAILED_NO_TRAIT);
+                    PacketTraitSwapResult.FAILED_NO_TRAIT);
             return;
         }
         Recipe.craft(cost, target.getLevel(), container.client.playerMob,
@@ -193,14 +194,41 @@ public class TraitTherapyDialogue extends SettlerDialogue {
         this.sendResult(container, mobUniqueID, personalityID, replacement.getID(), 0);
     }
 
+    /** Tell the one player who asked, and nobody else. */
     protected void sendResult(ShopContainer container, int mobUniqueID, int oldID, int newID,
                               int failure) {
-        if (container.client.getServerClient() == null) {
+        ServerClient serverClient = container.client.getServerClient();
+        if (serverClient == null) {
             return;
         }
-        new TraitSwapResultEvent(mobUniqueID, oldID, newID, failure)
-                .applyAndSendToClient(container.client.getServerClient());
+        serverClient.sendPacket(new PacketTraitSwapResult(this.settlerMob.getUniqueID(),
+                mobUniqueID, oldID, newID, failure));
     }
+
+    /**
+     * The open trait menu on this client, or null.
+     *
+     * <p>{@link PacketTraitSwapResult} arrives on the network thread with no
+     * handle on the form it belongs to, so the menu leaves one here while it
+     * exists. One entry is enough: a player can have exactly one shop container
+     * open at a time, and the packet carries the Therapist's unique ID so a menu
+     * left over from a different conversation ignores an answer that is not its
+     * own.
+     */
+    private static TraitTherapyDialogue openMenu;
+
+    /** Hand a result to the menu waiting for it. Called on the client. */
+    public static void deliverResult(PacketTraitSwapResult result) {
+        TraitTherapyDialogue menu = openMenu;
+        if (menu == null || menu.resultHandler == null
+                || menu.settlerMob.getUniqueID() != result.therapistUniqueID) {
+            return;
+        }
+        menu.resultHandler.accept(result);
+    }
+
+    /** Set by {@code initForm}; draws the answer into the menu's own forms. */
+    private java.util.function.Consumer<PacketTraitSwapResult> resultHandler;
 
     /** 50 000 coins, as a recipe ingredient so vanilla can count and take them. */
     protected static Ingredient[] cost() {
@@ -235,15 +263,17 @@ public class TraitTherapyDialogue extends SettlerDialogue {
                 containerForm.width, containerForm.minHeight, containerForm.maxHeight, true));
         this.resultForm = containerForm.addComponent(new DialogueForm("swhtraitresult",
                 containerForm.width, containerForm.minHeight, containerForm.maxHeight, true));
-        container.onEvent(TraitSwapResultEvent.class, event -> {
-            this.lastResult = event;
-            if (event.failure == 0) {
-                this.rememberSwap(event.mobUniqueID, event.oldPersonalityID, event.newPersonalityID);
+        this.resultHandler = result -> {
+            this.lastResult = result;
+            if (result.failure == 0) {
+                this.rememberSwap(result.mobUniqueID, result.oldPersonalityID,
+                        result.newPersonalityID);
             }
             this.buildResultForm(container, containerForm);
             containerForm.makeCurrent(this.resultForm);
             containerForm.onWindowResized(WindowManager.getWindow());
-        });
+        };
+        openMenu = this;
     }
 
     @Override
@@ -337,7 +367,7 @@ public class TraitTherapyDialogue extends SettlerDialogue {
 
     protected void buildResultForm(final ShopContainer container,
                                    final ShopContainerForm<?> containerForm) {
-        final TraitSwapResultEvent result = this.lastResult;
+        final PacketTraitSwapResult result = this.lastResult;
         this.resultForm.reset(container.humanShop, true, container.romanceLevel,
                 (contentBox, flow) -> {
                     Runnable chatBubble = DialogueForm.startChatBubble(contentBox, flow);
@@ -351,11 +381,11 @@ public class TraitTherapyDialogue extends SettlerDialogue {
         });
     }
 
-    protected GameMessage resultMessage(TraitSwapResultEvent result) {
+    protected GameMessage resultMessage(PacketTraitSwapResult result) {
         if (result == null) {
             return new LocalMessage("misc", "swhtraitnotrait");
         }
-        if (result.failure == TraitSwapResultEvent.FAILED_NO_COINS) {
+        if (result.failure == PacketTraitSwapResult.FAILED_NO_COINS) {
             return new LocalMessage("misc", "swhtraitnocoins", "price",
                     Integer.toString(SkyTherapy.TRAIT_SWAP_PRICE));
         }

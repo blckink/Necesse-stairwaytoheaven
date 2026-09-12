@@ -207,6 +207,88 @@ found and fixed" in `docs/quests.md`.)
 
 ---
 
+## The Therapist — the mod's first PROFESSION, and not a person
+
+Everybody above is a named individual placed once per world. The Therapist is
+the other kind of thing entirely: a **profession**, in the exact sense vanilla
+uses the word for the Stylist, the Miner and the Angler. There is no Therapist;
+there are Therapists, one per settlement that draws one, with vanilla's own
+random name and face.
+
+`settlement/SkyTherapy.java` registers the whole feature;
+`settlement/TherapistSettler.java` is the settler type and
+`mobs/TherapistHumanMob.java` the shop mob.
+
+**Why not a `SkySettlers.SkyResident`.** That base is built for named people: it
+claims its name once per world (`SkywatchWorldData.residentsClaimed`), refuses
+the free move-in roll, cannot be banished and never arrives twice. A profession
+is the opposite of all four.
+
+**How often one turns up.** `TherapistSettler.addNewRecruitSettler` puts **75
+tickets, behind no story gate**, into the settlement's recruit draw — the
+Blacksmith's and the Miner's exact terms (the Angler takes 100; the Stylist and
+the Trader take theirs only after `defeatreaper` / `defeatchieftain`). That is
+the whole of "as common as the professions you already know": the same draw, the
+same weight, from the first day of a world.
+
+### Service 1 — four therapy places
+
+Talk to a Therapist who has moved in and the menu carries **"About the therapy
+places"** beside vanilla's own lines. Four slots; each holds one settler of the
+same settlement, chosen from a list of names. While a settler holds a place they
+carry the `swh_therapy` mood line and feel **50% better**.
+
+**What "+50%" means here, since Necesse's happiness is a signed sum and the
+phrase does not survive contact with a negative number unread.** The bonus is
+half the distance to neutral, always upwards: +40 becomes +60 (the obvious
+reading, x1.5) and −20 becomes −10 (half the misery). Multiplying −20 by 1.5
+would make a therapist something you inflict on people. `SkyTherapy.BONUS_PERCENT`
+and `SkyTherapy.applyTherapy` are where that lives.
+
+The effect is a registered `SettlerThought` put on the *other* settler's active
+thoughts, which is vanilla's own settler-lifts-settler mechanism
+(`InspiringSettlerPersonality` does exactly this). The Therapist refreshes it
+every two seconds with a 60-second life, so it ends by itself if the Therapist
+dies, is banished or leaves — "only while assigned" is true without a teardown
+path that could be missed. The places themselves are saved on the Therapist mob.
+
+### Service 2 — swapping a trait, for 50 000 coins
+
+The second menu entry, **"Work on someone's character"**, is open for *every*
+settler of the settlement, whether or not they hold a therapy place. Pick the
+settler, pick one trait they actually have, confirm: 50 000 coins are taken and
+that trait is permanently replaced by a random other one. **The player is not
+told what is coming and does not choose it** — that is the design, not a
+shortcut. The replacement is never a trait the settler already has.
+
+**Why the swap sticks, and why no method patching was needed.** A settler's
+traits look seed-derived (`HumanMob.setupPersonalities` builds them from
+`settlerSeed`), which suggests any change would be undone on the next load. It
+is not so, VERIFIED against the 1.3.3 jar: `addSaveData` writes the list out by
+stringID and `applyLoadData` reads it back *after* the seed has regenerated the
+default, and the spawn packet carries the list explicitly. The seed is only the
+default. Changing `mob.getPersonalities()` on the server is therefore permanent
+and authoritative all by itself; `PacketSettlerPersonalities` exists only for
+clients that already had the settler on screen when it happened.
+
+**Why the replacement is drawn the hard way.** "Any other personality" would be
+wrong three times over: vanilla filters per trait (`elder` only ever sits on the
+Elder, `voyager` only on the four settlers who travel), several traits exclude
+each other (warrior/ranger/magician/summoner are one pick between four; pacifist
+refuses all of them and bloodthirsty), and bonus perks are drawn from a separate
+pool. All of those rules live on filters the registry only hands out through a
+**protected** method, so a mod cannot read them and copying them into this repo
+would leave a second source of truth to drift. `SkyTherapy.rollReplacement`
+therefore asks the game: it calls vanilla's own draw with a count larger than
+the registry, which drains both ticket pools and returns a *maximal legal set*
+for that very settler, and accepts a candidate only out of a draw that also
+contains every trait the settler is keeping — which proves, by construction,
+that the candidate can stand beside them.
+
+If the game offers nothing legal, the swap is refused and **nothing is charged**.
+
+---
+
 ## Borrowed sprites
 
 No pixel art was drawn for this pass. Every sprite below is an existing
