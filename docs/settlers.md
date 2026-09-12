@@ -231,6 +231,14 @@ the Trader take theirs only after `defeatreaper` / `defeatchieftain`). That is
 the whole of "as common as the professions you already know": the same draw, the
 same weight, from the first day of a world.
 
+**What is deliberately NOT wired, so the tip does not lie.** Vanilla places some
+of its professions a second way as well — the Stylist's own tip reads "Found in
+villages or pirate island", and that is village *worldgen*, a separate route
+from the recruit draw. The Therapist takes the recruit draw only, so the acquire
+tip says what is true ("Moves into your settlement on their own, as readily as a
+blacksmith") rather than promising a villager who is not generated. Standing one
+in villages too is a follow-up, not a fix.
+
 ### Service 1 — four therapy places
 
 Talk to a Therapist who has moved in and the menu carries **"About the therapy
