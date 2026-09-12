@@ -129,15 +129,27 @@ def vary(base, alt, seed, tile=TILE, share=0.22):
     return out
 
 
-def cut_patches(texture, n, tile=TILE, stride=None):
+def cut_patches(texture, n, tile=TILE, stride=None, native=False):
     """Pick n distinct patches that tile well and are free of foreign objects.
 
     Scans the texture on a grid, scores every candidate, and takes the best n
     that are not near-duplicates of one another -- the variation between them
     is what stops the ground reading as one image repeated.
+
+    ``native``: the texture is already pixel art at game scale (1 px = 1 game
+    px, laid out on the 32 px grid). Then a patch is a plain 32 px crop on that
+    grid, taken as it is. The default path cuts a third of the render and
+    LANCZOS-scales it to 32 px, then cross-fades the edges -- right for a
+    painted render, ruinous for pixel art: on the Warden's Spire floor
+    (2026-09-12) it turned 1 px gold nails and plank joints into brown mush.
     """
     from PIL import Image
     w, h = texture.size
+    if native:
+        cells = [texture.crop((x, y, x + tile, y + tile)).convert("RGBA")
+                 for y in range(0, h - tile + 1, tile)
+                 for x in range(0, w - tile + 1, tile)]
+        return [cells[i % len(cells)] for i in range(n)]
     side = max(tile, min(w, h) // 3)
     stride = stride or max(tile, side // 2)
     cands = []
@@ -194,6 +206,9 @@ def main():
     ap.add_argument("--colours", type=int, default=33)
     ap.add_argument("--variants", type=int, default=4)
     ap.add_argument("--seam-report", action="store_true")
+    ap.add_argument("--native", action="store_true",
+                    help="texture is pixel art at game scale on the 32 px grid: "
+                         "cut grid cells 1:1, no scaling, no cross-fade")
     args = ap.parse_args()
 
     from PIL import Image
@@ -223,13 +238,21 @@ def main():
     nvar = max(1, args.variants)
     # Two cuts of the material: one is the base every cell is built from, the
     # other only supplies the details that get swapped in.
-    cuts = cut_patches(tex, 2)
-    base, alt = cuts[0], cuts[-1]
     patches = []
-    for by in range(blocks):
-        patches.append(base if by == 0 else vary(base, alt, 1000 + by))
-        for v in range(nvar):
-            patches.append(vary(base, alt, 2000 + by * 16 + v))
+    if args.native:
+        # Pixel art: every tile is a real grid cell of the texture. `vary`
+        # would paste fragments of one plank into another and break the joints.
+        cells = cut_patches(tex, 16, native=True)
+        for by in range(blocks):
+            for v in range(1 + nvar):
+                patches.append(cells[(by * (1 + nvar) + v) % len(cells)])
+    else:
+        cuts = cut_patches(tex, 2)
+        base, alt = cuts[0], cuts[-1]
+        for by in range(blocks):
+            patches.append(base if by == 0 else vary(base, alt, 1000 + by))
+            for v in range(nvar):
+                patches.append(vary(base, alt, 2000 + by * 16 + v))
     print("built %d tiles from one base for %d block(s) x (1 blend + %d plain)"
           % (len(patches), blocks, nvar))
     out = Image.new("RGBA", ref.size, (0, 0, 0, 0))
