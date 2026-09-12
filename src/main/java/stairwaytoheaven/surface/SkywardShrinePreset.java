@@ -98,7 +98,7 @@ public class SkywardShrinePreset extends Preset {
             boolean axisGap = (x == C && Math.abs(y - C) >= 3) || (y == C && Math.abs(x - C) >= 3);
             if (axisGap || random.getChance(0.32F)) {
                 // A fallen stone leaves its rubble behind.
-                if (!axisGap && random.getChance(0.5F)) {
+                if (!axisGap && random.getChance(0.17F)) {
                     this.setObject(x, y, rubble);
                 }
                 continue;
@@ -123,7 +123,6 @@ public class SkywardShrinePreset extends Preset {
         this.setObject(C - 1, C + 2, shrub);
         this.setObject(C + 2, C + 1, shrub);
         this.setObject(C + 3, C - 2, rubble);
-        this.setObject(C - 4, C + 1, rubble);
 
         // ------------------------------------------------------- the sign ---
         // Rotation 2 = facing down, i.e. readable by somebody walking up to the

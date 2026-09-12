@@ -291,7 +291,7 @@ Mob and Tile upload; the current files in those folders are authoritative.)*
 | `skystonebrickwall.png` | 352x128 |
 | `skystonerock.png` | 256x208 |
 | `skytulip.png` | 96x32 |
-| `skywatchastrolabe.png` | 32x56 |
+| `skywatchastrolabe.png` | 48x72 |
 | `skywatchbanner.png` | 32x128 |
 | `skywatchbed.png` | 128x128 |
 | `skywatchbed_mask.png` | 128x128 |
@@ -310,7 +310,7 @@ Mob and Tile upload; the current files in those folders are authoritative.)*
 | `skywatchdresser.png` | 128x64 |
 | `skywatchmodulartable.png` | 96x64 |
 | `skywatchrubble.png` | 48x80 |
-| `skywatchtelescope.png` | 32x72 |
+| `skywatchtelescope.png` | 48x80 |
 | `skywatchtome.png` | 32x32 |
 | `starfall.png` | 32x32 |
 | `staticmoss.png` | 64x32 |

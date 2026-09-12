@@ -608,10 +608,20 @@ public final class SkyTerrainPainter {
             case SkyLandscape.PROP_ACCENT:
                 return biomeAccent(biomeClass);
             case SkyLandscape.PROP_RUBBLE:
-                return SkyRegistry.skywatchRubbleID;
-            case SkyLandscape.PROP_INSTRUMENT:
-                return SkyNoise.tileRoll(seed, tileX, tileY, SALT_BUILT_PICK) < 0.5F
+                // Only one rubble slot in three gets the Skywatch statue: it is
+                // a find worth placing in town, not filler that fills chests.
+                return SkyNoise.tileRoll(seed, tileX, tileY, SALT_BUILT_PICK + 1) < 1.0F / 3.0F
+                        ? SkyRegistry.skywatchRubbleID : 0;
+            case SkyLandscape.PROP_INSTRUMENT: {
+                // One square centre in three keeps an instrument; the rest
+                // carry the district's statue, same plinth, same footprint.
+                float pick = SkyNoise.tileRoll(seed, tileX, tileY, SALT_BUILT_PICK);
+                if (pick >= 1.0F / 3.0F) {
+                    return builtObject(SkyLandscape.PROP_STATUE, seed, tileX, tileY, biomeClass);
+                }
+                return pick < 1.0F / 6.0F
                         ? SkyRegistry.skywatchTelescopeID : SkyRegistry.skywatchAstrolabeID;
+            }
 
             // --- the passage vocabulary: always Cloudmarble ---
             case SkyLandscape.PROP_RAIL:
@@ -788,9 +798,9 @@ public final class SkyTerrainPainter {
         float roll = SkyNoise.tileRoll(seed, tileX, tileY, SALT_WORKSHOP + 4);
         if (best < 2.4F) {
             return roll < 0.22F ? SkyRegistry.skyCrateID
-                    : (roll < 0.40F ? SkyRegistry.skywatchRubbleID : 0);
+                    : (roll < 0.28F ? SkyRegistry.skywatchRubbleID : 0);    // was 0.40: a third
         }
-        return roll < 0.14F ? SkyRegistry.skywatchRubbleID : 0;
+        return roll < 0.047F ? SkyRegistry.skywatchRubbleID : 0;                   // was 0.14: a third
     }
 
     public static int auroraColonyObject(int seed, int tileX, int tileY) {

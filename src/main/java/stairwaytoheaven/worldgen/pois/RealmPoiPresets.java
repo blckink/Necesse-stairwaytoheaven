@@ -2183,7 +2183,7 @@ public final class RealmPoiPresets {
                 .floor('+', "marblecheckertile")
                 // The altar is unbuilt art; the plinth under it is not.
                 .floor('V', "marblecheckertile")
-                .scatter('x', 0.55F, "skystonerock", "skyscree", "skywatchrubble")
+                .scatter('x', 0.55F, "skystonerock", "skyscree")
                 .fence('|', "cloudmarblefence")
                 .fence('G', "cloudmarblefencegate")
                 .prop('A', "seraphstatue")

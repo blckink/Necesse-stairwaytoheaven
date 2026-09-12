@@ -818,7 +818,7 @@ public final class SkyLandscape {
      *   <li>0 — <b>Garden Court</b>: a round fenced plot, four paved spokes, a
      *       statue on a marble plinth, quartered flower beds, corner trees.</li>
      *   <li>1 — <b>Waystation Square</b>: a paved square inside a railing, four
-     *       corner lamps, an observatory instrument at the centre, weathered
+     *       corner lamps, a statue (one square in three: an instrument) at the centre, weathered
      *       rubble and lit accents scattered over the flags.</li>
      *   <li>2 — <b>Overlook Terrace</b>: a stepped rectangle — planted apron,
      *       raised inner platform, railing all round, an instrument and lamps

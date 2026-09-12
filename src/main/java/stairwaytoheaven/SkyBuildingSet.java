@@ -136,11 +136,13 @@ final class SkyBuildingSet {
         // Spire hero accents — the observatory instruments the Spire layout
         // can build its landmark read from.
         SkyRegistry.skywatchTelescopeID = ObjectRegistry.registerObject("skywatchtelescope",
-                new SkyDecoObject("skywatchtelescope", 32, new Color(204, 160, 82),
-                        new Rectangle(8, 40, 16, 24), "objects", "decorations"), 25.0F, true);
+                // 48x80 and 48x72, one tile of pedestal like the Skywatch statue.
+                // The old rects started at y=40, below the 32-px tile.
+                new SkyDecoObject("skywatchtelescope", 48, new Color(204, 160, 82),
+                        new Rectangle(6, 12, 20, 20), "objects", "decorations"), 25.0F, true);
         SkyRegistry.skywatchAstrolabeID = ObjectRegistry.registerObject("skywatchastrolabe",
-                new SkyDecoObject("skywatchastrolabe", 32, new Color(204, 160, 82),
-                        new Rectangle(4, 40, 24, 12), "objects", "decorations"), 25.0F, true);
+                new SkyDecoObject("skywatchastrolabe", 48, new Color(204, 160, 82),
+                        new Rectangle(6, 12, 20, 20), "objects", "decorations"), 25.0F, true);
         // Stormveil environmental props — small reusable pieces worldgen can
         // compose later; craftable now so builders can place them.
         //

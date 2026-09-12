@@ -119,9 +119,6 @@ public class CrookedHousePreset extends Preset {
 
         // ===== The main room =====
         this.setObject(3, 4, SkyRegistry.gloomRavenStatueID);
-        this.setObject(10, 4, SkyRegistry.skywatchRubbleID);
-        this.setObject(4, 8, SkyRegistry.skywatchRubbleID);
-        this.setObject(3, 1, SkyRegistry.skywatchRubbleID);
         this.setObject(9, 1, SkyRegistry.veilrockID);
 
         // ===== What is left of the pantry =====

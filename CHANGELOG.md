@@ -6,6 +6,18 @@ All notable changes to this project are documented here. Format loosely follows
 ## [Unreleased]
 
 ### Changed
+- **Skywatch props are finds again, not filler.** The Skywatch statue
+  (`skywatchrubble`) now spawns about a third as often: worldgen rubble slots
+  keep it one time in three, the workshop fringe rolls drop 0.40->0.28 and
+  0.14->0.047, the shrine ring's fallen stones leave it at 0.17 instead of 0.5,
+  the Aeronaut camp keeps 1 of 2, the Crooked House 1 of 4, and the Steinfeld
+  scree scatter no longer uses it. Waystation Square and Overlook Terrace
+  centres carry the district statue two times in three; the telescope and
+  astrolabe take the remaining third between them.
+- **New Skywatch Telescope and Astrolabe art.** 48x80 brass star telescope and
+  48x72 gilded armillary sphere on skystone pedestals, drawn by Codex as a set
+  with the Skywatch statue, with new 32x32 icons. Variant width 48; their old
+  collision rects began at y=40, outside the tile, and are now (6,12,20,20).
 - **Broken Skywatch Stone is now a winged warden monument.** The old 32x40
   grey stub read as a pebble; `objects/skywatchrubble.png` is now a 48x80
   weathered hooded, winged Skywatch statue holding a star disc (new art by

@@ -502,8 +502,7 @@ def gen_prop_icons(items_dir):
         icon.alpha_composite(im, ((32 - nw) // 2, (32 - nh) // 2))
         icon.save(os.path.join(items_dir, out_name))
 
-    mini_from("skywatchtelescope.png", (0, 24, 32, 72), "skywatchtelescope.png")
-    mini_from("skywatchastrolabe.png", (2, 16, 30, 52), "skywatchastrolabe.png")
+    # skywatchtelescope/-astrolabe: hand-made 48x80/48x72 art since 2026-09-12, not generated.
     mini_from("stormscreed.png", (2, 15, 30, 29), "stormscreed.png")
     # skywatchrubble: hand-made 48x80 statue + icon since 2026-09-12, not generated.
     mini_from("chargecrystal.png", (2, 10, 30, 40), "chargecrystal.png")
@@ -516,8 +515,6 @@ def gen_prop_icons(items_dir):
 
 
 def gen_all(dir_path):
-    gen_skywatchtelescope(f"{dir_path}/skywatchtelescope.png")
-    gen_skywatchastrolabe(f"{dir_path}/skywatchastrolabe.png")
     gen_stormscreed(f"{dir_path}/stormscreed.png")
     gen_chargecrystal(f"{dir_path}/chargecrystal.png")
     gen_withershrub(f"{dir_path}/withershrub.png")

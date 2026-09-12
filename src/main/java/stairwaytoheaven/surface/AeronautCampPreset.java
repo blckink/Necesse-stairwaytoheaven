@@ -111,7 +111,6 @@ public class AeronautCampPreset extends Preset {
         this.setObject(10, 4, wreck);
         this.setObject(11, 5, balloon);
         this.setObject(9, 3, rubble);
-        this.setObject(11, 3, rubble);
 
         // ----------------------------------------------------------- the camp
         // Tent quad. Master top-left; the other three parts are written

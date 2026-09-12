@@ -100,8 +100,8 @@ OBJECTS = {
     "chargeCrystal": ("mod", "chargecrystal.png", 32),
     "auroraShards": ("mod", "aurorashards.png", 32),
     "starfall": ("mod", "starfall.png", 32),
-    "skywatchTelescope": ("mod", "skywatchtelescope.png", 32),
-    "skywatchAstrolabe": ("mod", "skywatchastrolabe.png", 32),
+    "skywatchTelescope": ("mod", "skywatchtelescope.png", 48),
+    "skywatchAstrolabe": ("mod", "skywatchastrolabe.png", 48),
     # the Skyway Passages' masonry
     "cloudmarbleFence": ("mod", "cloudmarblefence.png", "fence"),
     "cloudmarbleFenceGate": ("mod", "cloudmarblefencegate.png", "gate"),
