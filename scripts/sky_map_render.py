@@ -96,7 +96,7 @@ OBJECTS = {
     # whole sheet and the generic bottom-anchor rule lands them correctly.
     "gloomRavenStatue": ("mod", "statues/gloomraven.png", 64),
     "seraphStatue": ("mod", "statues/seraph.png", 96),
-    "skywatchRubble": ("mod", "skywatchrubble.png", 32),
+    "skywatchRubble": ("mod", "skywatchrubble.png", 48),
     "chargeCrystal": ("mod", "chargecrystal.png", 32),
     "auroraShards": ("mod", "aurorashards.png", 32),
     "starfall": ("mod", "starfall.png", 32),

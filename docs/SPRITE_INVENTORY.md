@@ -309,7 +309,7 @@ Mob and Tile upload; the current files in those folders are authoritative.)*
 | `skywatchdisplay.png` | 128x32 |
 | `skywatchdresser.png` | 128x64 |
 | `skywatchmodulartable.png` | 96x64 |
-| `skywatchrubble.png` | 32x40 |
+| `skywatchrubble.png` | 48x80 |
 | `skywatchtelescope.png` | 32x72 |
 | `skywatchtome.png` | 32x32 |
 | `starfall.png` | 32x32 |

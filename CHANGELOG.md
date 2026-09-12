@@ -5,6 +5,13 @@ All notable changes to this project are documented here. Format loosely follows
 
 ## [Unreleased]
 
+### Changed
+- **Broken Skywatch Stone is now a winged warden monument.** The old 32x40
+  grey stub read as a pebble; `objects/skywatchrubble.png` is now a 48x80
+  weathered hooded, winged Skywatch statue holding a star disc (new art by
+  Codex after the angelic/hooded-knight vanilla statues), with a matching
+  32x32 item icon. `SkyDecoObject` variant width 48, one tile of collision.
+
 ### Added
 - **The Therapist — a new settler profession, sprinkled in like any other.**
   Not another named resident: a profession in vanilla's own sense, registered as

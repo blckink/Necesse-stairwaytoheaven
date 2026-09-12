@@ -156,8 +156,10 @@ final class SkyBuildingSet {
                         null, "objects", "decorations")
                         .setTool(ToolType.ALL).setObjectHealth(1), 2.0F, true);
         SkyRegistry.skywatchRubbleID = ObjectRegistry.registerObject("skywatchrubble",
-                new SkyDecoObject("skywatchrubble", 32, new Color(126, 138, 154),
-                        new Rectangle(8, 12, 16, 20), "objects", "decorations"), 2.0F, true);
+                // A weathered winged warden monument, 48x80: one tile of
+                // pedestal, wings spilling over both neighbours.
+                new SkyDecoObject("skywatchrubble", 48, new Color(126, 138, 154),
+                        new Rectangle(6, 12, 20, 20), "objects", "decorations"), 2.0F, true);
         SkyRegistry.chargeCrystalID = ObjectRegistry.registerObject("chargecrystal",
                 new SkyDecoObject("chargecrystal", 32, new Color(122, 108, 210),
                         new Rectangle(10, 20, 12, 12), "objects", "decorations")
