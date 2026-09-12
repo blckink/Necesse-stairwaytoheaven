@@ -297,6 +297,82 @@ If the game offers nothing legal, the swap is refused and **nothing is charged**
 
 ---
 
+## The Doctor — the second profession, and what a third would cost
+
+`settlement/SkyDoctor.java` registers it; `settlement/DoctorSettler.java` is the
+settler type and `mobs/DoctorHumanMob.java` the shop mob. Same terms as the
+Therapist: **75 recruit tickets, behind no story gate**, one per settlement, with
+vanilla's own random name and face.
+
+**The shared half is now a base class.** `settlement/ProfessionSettler.java`
+holds everything two professions do identically — the recruit ticket, the
+COMPLETE_HOST opt-out, the settlement-screen icon and the clothes going on
+through `setDefaultArmor`. `TherapistSettler` and `DoctorSettler` are about
+twenty lines each on top of it. `getAcquireTip()` stays abstract on purpose so
+each writes its own key as a **literal**: `tools/locale_audit.py` follows
+literals in the source, and `SkySettlers.SkyResident`, which takes its tip key
+as a field, is already reported as "built at runtime; cannot check". One class
+paying that cost is a known trade; making it the pattern is not.
+
+So a **third** profession is: one `ProfessionSettler` subclass, one `HumanShop`
+for the shop and its services, one `SettlerDialogue` per service, a `register()`
+with three lines, one line in `StairwayToHeavenMod.init`, and the locale rows in
+both languages. The Doctor needed no packet and no container event at all — the
+Therapist needed both only because a trait swap's outcome is invisible until
+something says it out loud.
+
+### Service — patched up on the spot, 100 coins
+
+One menu entry. Full health, immediately, no cooldown: the fee is the throttle
+and the player has to be standing in front of a Doctor who lives in their own
+settlement. **Health only** — not mana, not resilience, not hunger.
+
+The healing goes through `MobHealthChangeEvent` on the level's event manager,
+which is what vanilla's own Health Potion does (`HealthPotionItem.onPlace`) and
+what makes the number float up and the new health reach every client. The fee
+comes out of the player's own inventory the way `ShopContainer.payForRecruit`
+takes a recruit price — not through `Recipe.craft` over `getCraftInventories()`,
+which happens to be the same inventory today but is a rule that should not
+quietly widen to "…or the settlement chest". A player at full health is refused
+rather than charged, server-side as well as by a greyed-out button.
+
+### Shop — the good consumables, at vanilla's own exchange rate
+
+Eleven items, every one a vanilla thing the player could already craft: six
+Greater-tier potions and five gourmet dishes. The dishes are in the list because
+in this game a cooked meal is a buff with a plate — vanilla gives each of them a
+`FoodConsumableItem` carrying real `BuffModifiers` for 20 minutes.
+
+**The prices are not invented.** Vanilla's own Alchemist sells its buff potions
+at exactly **min = 2x the item's registered broker value, max = 6x, step = 1x**
+(`speedpotion` is value 10 at `(20, 60, 10)`; `healthregenpotion` and
+`attackspeedpotion` the same). Every line applies that rule to the item's own
+value:
+
+| item | broker value | sold at | what it does |
+|---|---|---|---|
+| Superior Health Potion | 10 | 20–60 | the big heal |
+| Greater Speed Potion | 20 | 40–120 | movement |
+| Greater Attack Speed Potion | 20 | 40–120 | attack speed |
+| Greater Health Regen Potion | 20 | 40–120 | regeneration |
+| Greater Resistance Potion | 30 | 60–180 | damage taken |
+| Greater Battle Potion | 50 | 100–300 | damage dealt |
+| Pork Tenderloin | 35 | 70–210 | +80 max health, combat regen |
+| Deep Fried Chicken | 35 | 70–210 | speed, resilience, attack speed |
+| Sushi Rolls | 32 | 64–192 | damage, attack speed, max health |
+| Spaghetti Bolognese | 30 | 60–180 | damage, combat regen, max health |
+| Beef Goulash | 30 | 60–180 | +20% crit, attack speed |
+
+Stock is deliberately small — 10 potions and 5 dishes, against the Alchemist's
+50 — so the Doctor supplements a kitchen rather than replacing one. The dishes
+spoil (every vanilla gourmet meal carries `spoilDuration(120)`), which is the
+other half of the same idea: they are for the trip you are leaving on.
+
+He also buys Firemone and Ice Blossom at the Alchemist's own prices, so a player
+with a herb patch has the same outlet either way.
+
+---
+
 ## Borrowed sprites
 
 No pixel art was drawn for this pass. Every sprite below is an existing

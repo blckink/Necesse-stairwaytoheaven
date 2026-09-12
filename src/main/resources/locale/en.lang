@@ -1078,3 +1078,22 @@ swhtraitdoit=Do it
 swhtraitdone=<name> is no longer <old>. <name> is <new> now.
 swhtraitnocoins=That is <price> coins, and you do not have them.
 swhtraitnotrait=There is nothing left in them I could turn that into. Keep your coins.
+
+# Doctor - the second settler profession (docs/settlers.md)
+[mob]
+doctorhuman=Doctor
+doctorhumanname=<name> the Doctor
+[settlement]
+doctortip=Moves into your settlement on their own, as readily as a blacksmith
+[mobmsg]
+doctortalk1=Most of what kills people down there is something they could have sat out.
+doctortalk2=I sell the good potions. I also sell dinner, which works better and nobody believes me.
+doctortalk3=Come back before it is interesting. Interesting is expensive.
+doctortalk4=No, I will not look at that. Yes, I will fix it.
+doctortalk5=Eat something before you climb. That is the whole of medicine.
+[misc]
+swhdoctoroption=Patch me up (<price> coins)
+swhdoctorintro=Sit down. <price> coins and you walk out of here whole - I do not do half measures and I do not do instalments.
+swhdoctordoit=Pay <price> coins
+swhdoctordone=Done. Try to keep it that way for an hour.
+swhdoctorfine=There is nothing wrong with you. Save your coins for when there is.

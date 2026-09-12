@@ -1079,3 +1079,22 @@ swhtraitdoit=Mach es
 swhtraitdone=<name> ist nicht mehr <old>. <name> ist jetzt <new>.
 swhtraitnocoins=Das sind <price> Münzen, und die hast du nicht.
 swhtraitnotrait=In ihm ist nichts mehr, woraus ich das machen könnte. Behalt dein Geld.
+
+# Arzt – der zweite Siedlerberuf (docs/settlers.md)
+[mob]
+doctorhuman=Arzt
+doctorhumanname=<name>, der Arzt
+[settlement]
+doctortip=Zieht von selbst in deine Siedlung, so bereitwillig wie ein Schmied
+[mobmsg]
+doctortalk1=Das meiste, was die Leute da unten umbringt, hätten sie aussitzen können.
+doctortalk2=Ich verkaufe die guten Tränke. Und Abendessen, das besser wirkt – nur glaubt mir das keiner.
+doctortalk3=Komm wieder, bevor es interessant wird. Interessant ist teuer.
+doctortalk4=Nein, ich sehe mir das nicht an. Ja, ich bringe es in Ordnung.
+doctortalk5=Iss was, bevor du steigst. Das ist die ganze Medizin.
+[misc]
+swhdoctoroption=Flick mich zusammen (<price> Münzen)
+swhdoctorintro=Setz dich. <price> Münzen, und du gehst hier heil wieder raus – halbe Sachen mache ich nicht, und Raten auch nicht.
+swhdoctordoit=<price> Münzen zahlen
+swhdoctordone=Fertig. Versuch, es eine Stunde lang so zu lassen.
+swhdoctorfine=Dir fehlt nichts. Heb dir die Münzen für den Tag auf, an dem doch was fehlt.

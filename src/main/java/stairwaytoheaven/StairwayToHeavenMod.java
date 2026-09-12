@@ -85,6 +85,10 @@ public class StairwayToHeavenMod {
         // it writes to six registries at once (mob, settler, thought, dialogue,
         // container event, packet), all of which close after init().
         stairwaytoheaven.settlement.SkyTherapy.register();
+        // The second one, on the shape the first one had to invent: a shop of
+        // vanilla buff consumables and a heal-on-the-spot service. Four classes
+        // and this line -- see SkyDoctor's own note on what a third would cost.
+        stairwaytoheaven.settlement.SkyDoctor.register();
         // The mod's own settler special task: a fourth expedition category
         // beside vanilla's Expedition / Mining trip / Fishing trip. Registered
         // here rather than in SkyMobs beside the settlers themselves because

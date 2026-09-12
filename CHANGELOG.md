@@ -36,6 +36,32 @@ All notable changes to this project are documented here. Format loosely follows
   rules into this repo — see `SkyTherapy.rollReplacement`. If nothing legal is
   left, the swap is refused and nothing is charged.
 
+- **The Doctor — the second settler profession, and the one that shows a third
+  is cheap.** Same terms as the Therapist: mob `doctorhuman`, settler `doctor`,
+  **75 recruit tickets behind no story gate**. Two things it does:
+  - **patches the player up on the spot for 100 coins** — full health,
+    immediately, no cooldown (the fee is the throttle and you have to be in
+    front of a Doctor who lives in your own settlement). Health only. The
+    healing goes through `MobHealthChangeEvent`, which is what vanilla's own
+    Health Potion does, and the fee comes out of the player's own inventory the
+    way `ShopContainer.payForRecruit` takes a recruit price — not through
+    `Recipe.craft` over the container's craft inventories, which is the same
+    inventory today but a rule that should not quietly widen to "or the
+    settlement chest";
+  - **sells eleven vanilla buff consumables** the player could already craft:
+    six Greater-tier potions and five gourmet dishes (in this game a cooked meal
+    is a buff with a plate — each carries real `BuffModifiers` for 20 minutes).
+    **The prices are not invented**: vanilla's own Alchemist sells buff potions
+    at min = 2x the item's registered broker value, max = 6x, step = 1x, and
+    every line applies that rule to the item's own value. Table in
+    `docs/settlers.md`.
+- **`settlement/ProfessionSettler.java`** — the shared half of a profession
+  settler (recruit ticket, COMPLETE_HOST opt-out, icon, wardrobe), so
+  `TherapistSettler` and `DoctorSettler` are about twenty lines each.
+  `getAcquireTip()` stays abstract on purpose: `tools/locale_audit.py` follows
+  literals, and a tip key passed through a constructor is a key the audit cannot
+  name-check.
+
 ### Fixed
 - **`scripts/deploy_splitroast.sh` could leave an old jar behind and call it
   OK.** It deleted the old file before copying the new one, and `rm` fails

@@ -11,6 +11,7 @@ sections at the bottom.
 
 | id | kind | what it is, in one line |
 |---|---|---|
+| `doctorhuman` | mob | The Doctor — the mod's second settler PROFESSION, on the same terms as the Therapist (75 recruit tickets, no story gate). Patches the player back to full health on the spot for 100 coins, and sells eleven vanilla buff consumables the player could already craft — six Greater-tier potions and five gourmet dishes — priced off each item's own registered broker value by vanilla's Alchemist rule (min 2x, max 6x). `docs/settlers.md`. |
 | `therapisthuman` | mob | The Therapist — the mod's one settler PROFESSION rather than a named person, as common in the recruit draw as the Blacksmith or the Miner (75 tickets, no story gate). Sells calm (flowers, books, a music player, regen potions) and, once settled, offers two services no vanilla settler has: four therapy places that lift a settlement-mate's mood by 50%, and a permanent trait swap for 50 000 coins whose outcome nobody gets to choose. `docs/settlers.md`. |
 | `cinderashtile` | tile | Zunderasche — the pale half of Hell's floor: burnt grit and cinder dust. Painted by `HellTerrainPainter` across both bands, heaviest where the Infernal Fringe has left Crooked Beyond behind. Not obtainable; there is no hell floor to craft yet. |
 | `furnaceslagtile` | tile | Ofenschlacke — the dark half: cooled slag crust with embers still showing through. The Furnace Reach's own ground at the far edge of the plane, and the darker of Hell's two so the heat reads as specks rather than as glare. Not obtainable. |

@@ -110,6 +110,8 @@ deliberately not used by any of this.
 | Ives | `mobs/icons/elderhuman` (icon) | his settlement-screen face — vanilla registers `elderhuman` as a mob, so `mobs/icons/elderhuman` is one of its own icons; an old man who keeps a churchyard is the closest face vanilla's roster draws |
 | Ives | `leatherhood`, `clothrobe`, `clothboots` (worn items) | the Verger's hood and plain robe — the only wardrobe in the mod's cast that reads as somebody who works outdoors in fog rather than as a merchant |
 | Therapist | `mobs/icons/alchemisthuman` (icon) | the settlement-screen face of the mod's one PROFESSION (not a named person — see `docs/settlers.md`). The Alchemist is the closest thing vanilla's roster draws to somebody who tends to people rather than to ground |
+| Doctor | `mobs/icons/traderhuman` (icon) | the settlement-screen face of the mod's second profession. A plain face on purpose: the Alchemist's hooded apothecary was the obvious pick and the Therapist already wears it, and everything else vanilla draws comes with another job's hat (the Miner's lamp, the Angler's sou'wester, the Mage's point). This one has none, which is right for a profession whose identity is the mask and coat the mob itself wears |
+| Doctor | `surgicalmask`, `labcoat`, `labboots` (worn items, `DoctorSettler.wardrobe`) | the practice. All three are sold by vanilla's own Alchemist, so none of them is a stretch |
 | Therapist | `blazer`, `dressshoes` (worn items, `TherapistSettler.setDefaultArmor`) | the consulting-room clothes. Two items rather than three: no vanilla headwear reads as this job, and an arbitrary hat would make the profession look like a costume |
 
 Note that the icon only shows where no mob is available:
