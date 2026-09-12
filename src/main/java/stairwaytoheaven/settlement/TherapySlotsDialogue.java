@@ -196,12 +196,22 @@ public class TherapySlotsDialogue extends SettlerDialogue {
                 () -> containerForm.makeCurrent(containerForm.dialogueForm));
     }
 
-    /** "Place 1: Ada" or "Place 1: free". */
+    /**
+     * "Place 1: Ada" or "Place 1: free".
+     *
+     * <p>Two keys rather than one with an empty replacement: an empty chair is
+     * the state the player meets FIRST, and "Place 1: " with nothing after the
+     * colon reads as a bug rather than as an invitation.
+     */
     protected GameMessage slotLabel(int slot) {
         String name = this.nameOf(this.slots[slot]);
+        if (name == null || name.isEmpty()) {
+            return new LocalMessage("misc", "swhtherapyslotfree",
+                    "number", Integer.toString(slot + 1));
+        }
         return new LocalMessage("misc", "swhtherapyslot",
                 "number", Integer.toString(slot + 1),
-                "name", name == null ? "" : name);
+                "name", name);
     }
 
     /** The roster, for one place. */

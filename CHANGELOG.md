@@ -36,6 +36,20 @@ All notable changes to this project are documented here. Format loosely follows
   rules into this repo — see `SkyTherapy.rollReplacement`. If nothing legal is
   left, the swap is refused and nothing is charged.
 
+### Fixed
+- **`scripts/deploy_splitroast.sh` could leave an old jar behind and call it
+  OK.** It deleted the old file before copying the new one, and `rm` fails
+  reliably on these DrvFs files while `cp -f` over the same file succeeds in the
+  same second — so the script diagnosed "is Necesse still running?", skipped the
+  copy entirely, and its own check then passed because it compared *filenames*.
+  A jar two hours old shipped as fresh. It now overwrites in place (deleting
+  only files under a *different* name) and the check runs `cmp` against the
+  built jar. Caught by checksumming the deploy by hand, which is the only reason
+  this pass reached the player at all.
+- **An empty therapy place read "Place 1: " with nothing after the colon** —
+  the first thing anyone opening the menu sees. Own key now
+  (`swhtherapyslotfree`), in both locales.
+
 ### Notes
 - The trait swap needs **no method patching and no shadow bookkeeping**: settler
   personalities look seed-derived, but `HumanMob.applyLoadData` reads the saved

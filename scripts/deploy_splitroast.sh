@@ -173,20 +173,26 @@ for t in "${TARGETS[@]}"; do
     say "[dry-run] $t: ${#old[@]} alte Datei(en) loeschen, $JAR_NAME ablegen"
     continue
   fi
-  for o in "${old[@]}"; do
-    if ! rm -f "$o" 2>/dev/null || [ -e "$o" ]; then
-      # Auf DrvFs schlaegt das Loeschen fehl, solange Windows die Datei
-      # offen haelt -- also solange eine Necesse-Instanz laeuft.
-      say "kann '$(basename "$o")' nicht loeschen -- laeuft Necesse noch? Erst beide Fenster schliessen." >&2
-      FAIL=1
-      continue 2
-    fi
-  done
+  # Die neue Datei wird UEBERSCHRIEBEN, nicht geloescht-und-neu-geschrieben.
+  # Gemessen am 2026-09-12: `rm` scheitert auf diesen DrvFs-Dateien
+  # zuverlaessig, `cp -f` auf dieselbe Datei gelingt in derselben Sekunde. Die
+  # alte Fassung hat daraus "laeuft Necesse noch?" geschlossen, das Kopieren
+  # ganz uebersprungen (`continue 2`) und ein Jar von vor zwei Stunden liegen
+  # lassen -- waehrend die Nachpruefung unten "OK" sagte, weil der Dateiname
+  # stimmte. Geloescht wird deshalb nur noch, was ANDERS heisst: eine alte
+  # Versionsnummer, die sonst doppelt neben der neuen laege.
   if ! cp -f "$JAR" "$t/$JAR_NAME"; then
     say "Kopieren nach $t fehlgeschlagen." >&2
     FAIL=1
     continue
   fi
+  for o in "${old[@]}"; do
+    [ "$(basename "$o")" = "$JAR_NAME" ] && continue
+    if ! rm -f "$o" 2>/dev/null || [ -e "$o" ]; then
+      say "alte Fassung '$(basename "$o")' laesst sich nicht entfernen -- laeuft Necesse noch? Erst beide Fenster schliessen." >&2
+      FAIL=1
+    fi
+  done
 done
 
 if [ "$DRY" = "1" ]; then
@@ -201,8 +207,16 @@ for t in "${TARGETS[@]}"; do
   now=("$t"/Stairway_to_Heaven-*.jar)
   shopt -u nullglob
   n=${#now[@]}
+  # Der Dateiname ist KEIN Beweis. Eine gleichnamige Datei von vorgestern
+  # besteht jede Namenspruefung -- genau so haette am 2026-09-12 ein Jar von
+  # 13:31 als frisch ausgeliefert gegolten. Also Inhalt vergleichen.
   if [ "$n" -eq 1 ] && [ "$(basename "${now[0]}")" = "$JAR_NAME" ]; then
-    say "  OK   $t -> $n Datei ($JAR_NAME)"
+    if cmp -s "$JAR" "${now[0]}"; then
+      say "  OK   $t -> $n Datei ($JAR_NAME, Inhalt identisch)"
+    else
+      say "  FEHL $t -> $JAR_NAME liegt dort, ist aber NICHT das gebaute Jar" >&2
+      FAIL=1
+    fi
   else
     say "  FEHL $t -> $n Datei(en): ${now[*]:-keine}" >&2
     FAIL=1

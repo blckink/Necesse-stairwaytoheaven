@@ -1067,6 +1067,7 @@ swhtherapythought=Someone listens to me
 swhtherapyoption=About the therapy places
 swhtherapyintro=I keep four places. Whoever sits in one feels <percent>% better about the life they have here, for as long as they keep the chair.
 swhtherapyslot=Place <number>: <name>
+swhtherapyslotfree=Place <number>: free
 swhtherapypick=Who should take the chair?
 swhtherapyclear=Free the chair
 swhtraitoption=Work on someone's character (<price> coins)
