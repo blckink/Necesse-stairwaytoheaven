@@ -437,12 +437,80 @@ public final class RealmPoiPresets {
     }
 
     private static void furnishHome(Preset p, int x, int y, String family) {
+        furnishHome(p, x, y, family, -1);
+    }
+
+    /**
+     * The same six pieces every home needs, plus one pair of standing pieces
+     * that is different in every house.
+     *
+     * <p>{@code variant} indexes {@link #HOME_ACCENTS}; -1 leaves the two
+     * accent tiles empty, which is what every caller outside a town wants —
+     * a wayhouse is not a home. The accents go on (x+4,y+5) and (x+5,y+5),
+     * the two tiles this layout leaves free between the candelabra and the
+     * dresser, so a variant can never land on the bed or the table.
+     */
+    private static void furnishHome(Preset p, int x, int y, String family, int variant) {
         int table = object(family + "modulartable");
         int chair = object(family + "chair");
         tableForFour(p, x + 2, y + 2, table, chair);
         bed(p, x + 5, y + 2, family + "bed", DOWN);
         p.setObject(x + 6, y + 5, object(family + "dresser"));
         p.setObject(x + 2, y + 5, object(family + "candelabra"));
+        if (variant >= 0) {
+            int[][] table2 = accents();
+            int[] accent = table2[variant % table2.length];
+            p.setObject(x + 4, y + 5, accent[0]);
+            p.setObject(x + 5, y + 5, accent[1]);
+        }
+    }
+
+    /**
+     * One row per house: the pair of standing pieces that makes that house
+     * look lived in by somebody in particular. Read lazily, because the
+     * object IDs do not exist until {@code SkyFurnitureSet} has registered.
+     */
+    private static int[][] homeAccents;
+
+    private static int[][] accents() {
+        if (homeAccents == null) {
+            homeAccents = new int[][]{
+                {SkyFurnitureSet.skywatchBookshelfID, SkyFurnitureSet.pottedCloudberryID},
+                {SkyFurnitureSet.skywatchCabinetID, SkyFurnitureSet.skywatchClockID},
+                {SkyFurnitureSet.skywatchDisplayID, SkyFurnitureSet.skywatchBookshelfID},
+                {SkyFurnitureSet.skywatchClockID, SkyFurnitureSet.skywatchCabinetID},
+            };
+        }
+        return homeAccents;
+    }
+
+    /**
+     * A fenced plot — garden or pen — with exactly one gateway in its south
+     * side, two gates wide, and the two-tile path that leads to it.
+     *
+     * @param gateX left tile of the gate pair, in the plot's south run
+     */
+    private static void garden(Preset p, int x, int y, int w, int h, int gateX) {
+        int fence = SkyCloudmarbleSet.cloudmarbleFenceID;
+        int gate = SkyCloudmarbleSet.cloudmarbleFenceGateID;
+        int south = y + h - 1;
+        p.fillTile(x, y, w, h, SkyRegistry.cloudturfID);
+        for (int i = x; i < x + w; i++) {
+            p.setObject(i, y, fence);
+            p.setObject(i, south, fence);
+        }
+        for (int j = y; j <= south; j++) {
+            p.setObject(x, j, fence);
+            p.setObject(x + w - 1, j, fence);
+        }
+        p.setObject(gateX, south, gate);
+        p.setObject(gateX + 1, south, gate);
+        // The way through: from the gates down to the carriageway, as wide as
+        // the gateway itself. Without it the gates open onto nothing.
+        road(p, gateX, south + 1, 2, 2, SkyRegistry.skyroadTileID);
+        // Two beds of cloudberries inside, clear of the gateway run.
+        p.setObject(x + 2, y + 2, SkyFurnitureSet.pottedCloudberryID);
+        p.setObject(x + w - 3, y + 2, SkyFurnitureSet.pottedCloudberryID);
     }
 
     private static Preset skyTower() {
@@ -511,12 +579,32 @@ public final class RealmPoiPresets {
         building(p, floor, wall, new Rectangle(37, 25, 17, 12), new Rectangle(34, 30, 6, 7));
         building(p, floor, wall, new Rectangle(18, 3, 8, 11), new Rectangle(13, 3, 7, 7));
         building(p, floor, wall, new Rectangle(33, 3, 17, 12), new Rectangle(45, 12, 7, 5));
-        door(p, 15, 25, door); door(p, 38, 25, door); door(p, 25, 12, door); door(p, 34, 13, door);
-        road(p, 15, 22, 1, 3, road); road(p, 38, 22, 1, 3, road);
-        road(p, 26, 12, 1, 8, road); road(p, 30, 13, 4, 1, road);
+        door(p, 15, 25, door); door(p, 38, 25, door); door(p, 25, 12, door);
+        // The west house used to be entered through a hole: the path erased
+        // one wall tile and the door stood a tile INSIDE the room, so the
+        // opening itself had nothing in it. Now the pair of doors sits in the
+        // wall line where it belongs, two abreast, with the path the same
+        // width in front of them.
+        door(p, 33, 13, door); door(p, 33, 14, door);
+        // Two tiles wide, not one: a footpath two settlers can pass on is the
+        // narrowest thing that still reads as a way beside a 3-wide
+        // carriageway. Every stub runs from a carriageway to its own door and
+        // stops at the wall, so no door stands without a way through it and no
+        // wall is opened where no door closes it.
+        road(p, 14, 22, 2, 3, road); road(p, 38, 22, 2, 3, road);
+        road(p, 26, 12, 2, 8, road); road(p, 29, 13, 4, 2, road);
         windows(p, window, new int[][]{{7,25},{12,35},{44,25},{49,36},{18,3},{23,3},{38,3},{45,3}});
-        furnishHome(p, 5, 27, "skywatch"); furnishHome(p, 40, 27, "skywatch");
-        furnishHome(p, 15, 5, "skywatch"); furnishHome(p, 37, 5, "skywatch");
+        // One variant per house, so no two homes carry the same pair of
+        // standing pieces. The shell and the bed stay the same — it is the
+        // furnishing that tells the houses apart, not the masonry.
+        furnishHome(p, 5, 27, "skywatch", 0); furnishHome(p, 40, 27, "skywatch", 1);
+        furnishHome(p, 15, 5, "skywatch", 2); furnishHome(p, 37, 5, "skywatch", 3);
+        // The town garden, west of the pond: a fenced plot with its gateway on
+        // the south side, facing the carriageway two tiles below it. The
+        // gateway is a PAIR of gates -- the widest opening the user's rule
+        // allows -- and the path in front of it is the same two tiles wide,
+        // so the way through is never narrower than the opening.
+        garden(p, 2, 12, 11, 6, 7);
         // 57x41 is the widest footprint in the catalogue, so it is the one most
         // likely to catch a cloud-sea edge somewhere along its rim. The rim is
         // allowed to; the houses are not (see dryRing and validSite).
