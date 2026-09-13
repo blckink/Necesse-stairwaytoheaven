@@ -91,6 +91,20 @@ final class SkyMobs {
         MobRegistry.registerMob("sourvatbloom", stairwaytoheaven.mobs.SourvatBloomMob.class, true);
         MobRegistry.registerMob("vatling", stairwaytoheaven.mobs.VatlingMob.class, true);
         MobRegistry.registerMob("prototypenine", stairwaytoheaven.mobs.PrototypeNineMob.class, true);
+        // Striped Megashark: overworld deep water, next to vanilla's shark.
+        MobRegistry.registerMob("stripedmegashark", stairwaytoheaven.mobs.StripedMegasharkMob.class, true);
+    }
+
+    /**
+     * Puts the Striped Megashark on the overworld surface table that forest,
+     * plains, snow, desert and swamp all read (VERIFIED [jar]: each references
+     * {@code Biome.defaultSurfaceMobs}). Weight 1 against the shark entry's 10;
+     * the mob's own spawn check rejects dry land and shallow water, and
+     * {@code MobSpawnTable.getRandomMob} re-rolls without it when it does.
+     * Called from postInit, after vanilla's Biome static block ran.
+     */
+    static void registerSurfaceSpawns() {
+        necesse.level.maps.biomes.Biome.defaultSurfaceMobs.add(1, "stripedmegashark");
     }
 
     /** Called from initResources — runs on the client only, never on servers. */
@@ -127,5 +141,6 @@ final class SkyMobs {
         stairwaytoheaven.mobs.CrookedGolemMob.texture = GameTexture.fromFile("mobs/crookedgolem");
         stairwaytoheaven.mobs.RareCrookedGolemMob.texture = GameTexture.fromFile("mobs/rarecrookedgolem");
         stairwaytoheaven.mobs.CrookedArmadilloMob.texture = GameTexture.fromFile("mobs/crookedarmadillo");
+        stairwaytoheaven.mobs.StripedMegasharkMob.texture = GameTexture.fromFile("mobs/stripedmegashark");
     }
 }

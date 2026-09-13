@@ -310,6 +310,7 @@ public class StairwayToHeavenMod {
         SkyCloudmarbleSet.registerRecipes();
         stairwaytoheaven.arsenal.SkyArsenal.registerRecipes();
         SkyBuildingSet.resolveWorldgenMaterials();
+        SkyMobs.registerSurfaceSpawns();
         registerWorldGenerator();
         CommandsManager.registerServerCommand(new SkyreachStatusCommand());
         CommandsManager.registerServerCommand(new VeilStatusCommand());

@@ -5,6 +5,14 @@ All notable changes to this project are documented here. Format loosely follows
 
 ## [Unreleased]
 
+### Added
+- **Striped Megashark (Gestreifter Riesenhai).** A black-and-white striped
+  shark three times vanilla's size in deep overworld water (forest, plains,
+  snow, desert, swamp). Pirate-Captain-class: 8000 HP, armour 40, 140-damage
+  bite, but slower than a shark (20/45 vs 30/65). Weight 1 against the shark's
+  10 and at most one nearby. Drops 6-10 tungsten bars and shark scales. The
+  sheet is a striped recolour of vanilla's shark until real art lands.
+
 ### Changed
 - **Crooked and Hell grounds loop without a seam.** Crooked Beyond's four
   grounds (`crookedchecker`, `crookedspiral`, `crookedmud`, `crookedstripe`) and
