@@ -19,11 +19,10 @@ import stairwaytoheaven.tiles.SkyGroundTile;
  * other realms with it, so Hell gets its own pair instead and the shared tiles
  * stay exactly as they were.
  *
- * <p>The sheet is a stamped splat, not a generated one: only the flat texture
- * came from an image model, and {@code tools/splat_from_texture.py} pressed it
- * through {@code ashsand_splat}'s alpha, so all 21 cell shapes are still the
- * engine's own (commit 49ea020). {@code tools/splat_check.py} is the gate that
- * says so per file.
+ * <p>The sheet is a flat, seamless 128x128 texture with no {@code _splat}
+ * sibling, so {@code TerrainSplatterTile} cuts it into a 4x4 cell grid and
+ * {@link #getTerrainSprite} lays that grid world-anchored. The stamped splat it
+ * replaced cut the ember cracks at every tile edge.
  */
 public class CinderAshTile extends SkyGroundTile {
 

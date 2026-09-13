@@ -167,7 +167,7 @@ public final class HellTerrainPainter {
         if (roll < 0.64F) {
             return HellRealm.cinderAshID;
         }
-        return roll < 0.86F ? SkyRegistry.deadsoilID : SkyRegistry.miststoneID;
+        return roll < 0.86F ? HellRealm.boneGravelID : HellRealm.brimstoneCrustID;
     }
 
     /**
@@ -189,7 +189,7 @@ public final class HellTerrainPainter {
                 return CrookedRealm.teethRockID;
             }
             if (pick < 0.62F) {
-                return SkyRegistry.deadtreeID;
+                return HellRealm.charredGallowsID;
             }
             if (pick < 0.86F) {
                 return HellRealm.hellBonesID;
@@ -200,10 +200,10 @@ public final class HellTerrainPainter {
             return HellRealm.hellBonesID;
         }
         if (pick < 0.70F) {
-            return SkyRegistry.veilrockID;
+            return HellRealm.brimstoneCragID;
         }
         if (pick < 0.88F) {
-            return SkyRegistry.deadtreeID;
+            return HellRealm.charredGallowsID;
         }
         return CrookedRealm.crookedCrateID;
     }

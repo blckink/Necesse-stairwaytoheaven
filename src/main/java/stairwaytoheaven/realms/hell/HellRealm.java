@@ -88,11 +88,19 @@ public final class HellRealm {
     public static int cinderAshID;
     /** Cooled slag crust with the embers showing — the dark half. */
     public static int furnaceSlagID;
+    /** Ochre sulphur crust — the bright ground, in the Veil's miststone share. */
+    public static int brimstoneCrustID;
+    /** Wine-red grit full of teeth and bones, in the Veil's deadsoil share. */
+    public static int boneGravelID;
 
     // ===== Props only Hell has =====
 
     /** Grinning skull pile and ember-filled ribcage — Hell's own bones. */
     public static int hellBonesID;
+    /** Charred crooked tree with a caged rubber duck or an embedded pitchfork. */
+    public static int charredGallowsID;
+    /** Basalt crag with sulphur veins, a tally of days or a bone ticket dispenser. */
+    public static int brimstoneCragID;
 
     /**
      * Everything the realm puts into the registries.
@@ -144,6 +152,12 @@ public final class HellRealm {
         furnaceSlagID = TileRegistry.registerTile("furnaceslagtile",
                 new stairwaytoheaven.realms.hell.tiles.FurnaceSlagTile(),
                 0.0F, false, false, true);
+        brimstoneCrustID = TileRegistry.registerTile("brimstonecrusttile",
+                new stairwaytoheaven.realms.hell.tiles.BrimstoneCrustTile(),
+                0.0F, false, false, true);
+        boneGravelID = TileRegistry.registerTile("bonegraveltile",
+                new stairwaytoheaven.realms.hell.tiles.BoneGravelTile(),
+                0.0F, false, false, true);
     }
 
     /**
@@ -165,6 +179,18 @@ public final class HellRealm {
             }
         }.setTool(necesse.inventory.item.toolItem.ToolType.ALL).setObjectHealth(50);
         hellBonesID = ObjectRegistry.registerObject("hellbones", hellbones, 0.0F, false);
+
+        // In the Veil's dead tree's place: woody, so AXE like it.
+        stairwaytoheaven.objects.SkyDecoObject charredGallows = new stairwaytoheaven.objects.SkyDecoObject(
+                "charredgallows", 64, new java.awt.Color(44, 34, 30), null, "objects", "decorations")
+                .setTool(necesse.inventory.item.toolItem.ToolType.AXE);
+        charredGallowsID = ObjectRegistry.registerObject("charredgallows", charredGallows, 4.0F, true);
+
+        // In the Veil rock's place: mineral, so PICKAXE and 80 HP like Crooked's teeth rock.
+        stairwaytoheaven.objects.SkyDecoObject brimstoneCrag = new stairwaytoheaven.objects.SkyDecoObject(
+                "brimstonecrag", 64, new java.awt.Color(52, 44, 40), null, "objects", "decorations")
+                .setTool(necesse.inventory.item.toolItem.ToolType.PICKAXE).setObjectHealth(80);
+        brimstoneCragID = ObjectRegistry.registerObject("brimstonecrag", brimstoneCrag, 0.0F, false);
     }
 
     /**
