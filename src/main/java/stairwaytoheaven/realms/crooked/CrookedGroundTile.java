@@ -23,28 +23,23 @@ import necesse.level.maps.Level;
  * {@link CrookedPressure}. Sharing the base would have meant one of the two
  * levels silently reading the other's map.
  *
- * <h2>Borrowed sheets</h2>
- * Four of the five grounds below draw a VANILLA terrain sheet by literal name.
- * {@code TerrainSplatterTile.generateSplattingTextures} (jar 1.3.2, line 154)
- * asks for {@code tiles/<name>_splat} and falls back to {@code tiles/<name>},
- * and {@code GameTexture.fromFile} resolves both out of ONE flat resource map
- * with the mod's own files merged into it (ResourceEncoder.java:75-86) — the
- * same mechanism that lets {@code livestock/SkyPelt} read {@code items/milk}.
- * So a mod tile can wear the game's own art with no PNG of ours, which is what
- * {@code docs/WORLD_DESIGN.md} A4.3 asks for: a realm built out of borrowed
- * assets and fully populated beats a realm with bespoke art and nothing in it.
- * Every borrowed sheet is listed in {@code docs/realms/crooked.md} and in
- * {@code docs/VANILLA_ASSET_MAP.md} so the replacement pass can find them.
+ * <h2>Sheets</h2>
+ * Checker Stone, Spiral Soil, Violet Mud and the Stripe ground draw the mod's
+ * own seamless 128x128 textures ({@code crookedchecker}, {@code crookedspiral},
+ * {@code crookedmud}, {@code crookedstripe}) with no {@code _splat} sibling.
+ * {@code TerrainSplatterTile.generateOldTerrainSplatting} (jar 1.3.3) cuts such
+ * a texture into a {@code [width/32][height/32]} cell grid, cell (i,j) being
+ * texture cell (i,j), which is what lets {@link #getTerrainSprite} lay it
+ * world-anchored. The Wrong-Way ground still borrows vanilla's
+ * {@code ascendedvoid} by literal name; {@code docs/realms/crooked.md} and
+ * {@code docs/VANILLA_ASSET_MAP.md} list what is still borrowed.
  */
 public abstract class CrookedGroundTile extends TerrainSplatterTile {
-
-    private final GameRandom drawRandom;
 
     protected CrookedGroundTile(String textureName, Color mapColor) {
         super(false, textureName);
         this.mapColor = mapColor;
         this.canBeMined = true;
-        this.drawRandom = new GameRandom();
     }
 
     /**

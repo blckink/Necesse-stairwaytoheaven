@@ -382,8 +382,8 @@ below are what `SteinfeldRealm` actually registers — see
 | `tiles/arcanicfloor`, `arcanicpath` | Crooked architecture floor |
 | `tiles/spidercastlecarpet` | Stripe Carpet ground |
 | `objects/obsidianrock` | teeth-rocks |
-| `tiles/ascendedgrowth`, `ascendedcorruption`, `deepstonetiledfloor`, `ascendedvoid` | Spiral Soil, Violet Mud, Checker Stone and Wrong-Way ground in `realms/crooked` |
-| `objects/burnedbush`, `voidtrap`, `glowcoral`, `mushroom`, `witheredgrass` | Spiral Tree, Eyeball Shrub, Screaming Flower, Striped Mushroom and Bent Grass |
+| `tiles/ascendedvoid` | Wrong-Way ground in `realms/crooked`. **DONE 2026-09-13** for the other three: Spiral Soil, Violet Mud and Checker Stone draw the mod's own seamless `crookedspiral`, `crookedmud`, `crookedchecker` (and Stripe ground `crookedstripe`), world-anchored |
+| `objects/witheredgrass` | Bent Grass. **DONE 2026-09-13** for the other four: Spiral Tree, Eyeball Shrub, Screaming Flower and Striped Mushroom draw their own sheets; Teeth-Rock (`smallrunestone`, next row) too |
 | `objects/voidflame`, `boneclock`, `bonechair`, `voidcube`, `smallrunestone` | Bent Lantern, Crooked Clock, Long Chair, Ground Window and Teeth-Rock |
 | `objects/arcanicwall`, `arcanicdoor`, `arcanicwindow` | the three Crooked bazaar shop shells |
 | `mobs/mimic`, `mobs/dryadsentinel`, `mobs/scorpion` | Door Mimic, Tongue Plant and Stripe Beetle bodies |
@@ -395,7 +395,7 @@ below are what `SteinfeldRealm` actually registers — see
 |---|---|
 | mod `objects/aetherforge`, `items/aetherforge` | Hell's boss portal (Infernal Summoning Forge) and its region key (The Infernal Seal). A lit furnace mouth is the right SHAPE for §21's Infernal Forge; the sheet is the sky's until Hell's own art lands. |
 | vanilla mob bodies `ancientarmoredskeleton`, `ashgolem`, `crazedraven`, `jackal` | Infernal Clerk, Ash Spirit, Ticket Imp and Boiler Hound. The Ash Golem is the only one that is already a hell creature; the other three are archetype stand-ins. |
-| mod tiles `deadsoil`, `miststone`, `violetmud`, `crookedstripe` | The Furnace's two other grounds and the Fringe's Crooked share. All four are already registered by Steinfeld and Crooked Beyond — re-used, not newly borrowed. `blackpeat` and `ashsand` stood in here until 2026-09-10 and no longer do: **DONE 2026-09-10**, replaced by Hell's own `cinderash` and `furnaceslag` (§4). |
+| mod tiles `violetmud`, `crookedstripe`; mod objects `teethrock`, `crookedcrate` | The Fringe's Crooked share (on purpose: the transition from Crooked Beyond) and the crate in both bands. **DONE 2026-09-13:** `deadsoil`, `miststone`, `ashbones`, `deadtree` and `veilrock` no longer stand in; Hell draws its own `brimstonecrust`, `bonegravel`, `hellbones`, `charredgallows` and `brimstonecrag`. Before that: All four are already registered by Steinfeld and Crooked Beyond — re-used, not newly borrowed. `blackpeat` and `ashsand` stood in here until 2026-09-10 and no longer do: **DONE 2026-09-10**, replaced by Hell's own `cinderash` and `furnaceslag` (§4). |
 
 
 | vanilla asset | stands in for |

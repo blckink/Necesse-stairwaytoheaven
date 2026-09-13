@@ -18,9 +18,9 @@ art and literal vanilla-resource paths only; no new pixel art was generated.
 
 | what it is | source path | what it stands in for |
 |---|---|---|
-| terrain | `tiles/ascendedgrowth`, `tiles/ascendedcorruption`, `tiles/deepstonetiledfloor`, `tiles/ascendedvoid` | Spiral Soil, Violet Mud, Checker Stone and Wrong-Way ground |
+| terrain | `tiles/ascendedvoid` | Wrong-Way ground. Spiral Soil, Violet Mud, Checker Stone and the Stripe ground draw the mod's own seamless `crookedspiral`, `crookedmud`, `crookedchecker`, `crookedstripe` since 2026-09-13, world-anchored (`CrookedGroundTile.getTerrainSprite`) |
 | liquid | vanilla liquid texture selected by `SpillTile` | the Spill between islands |
-| flora | `objects/burnedbush`, `voidtrap`, `glowcoral`, `mushroom`, `witheredgrass` | Spiral Tree, Eyeball Shrub, Screaming Flower, Striped Mushroom and Bent Grass |
+| flora | `objects/witheredgrass` | Bent Grass. Spiral Tree, Eyeball Shrub, Screaming Flower and Striped Mushroom have their own sheets since 2026-09-13 (so does Teeth-Rock) |
 | structures | `objects/voidflame`, `boneclock`, `bonechair`, `voidcube`, `smallrunestone` | Bent Lantern, Crooked Clock, Long Chair, Ground Window and Teeth-Rock |
 | hostile bodies | `mobs/mimic`, `mobs/dryadsentinel` | Door Mimic and Tongue Plant |
 | critter body | `mobs/scorpion` | Stripe Beetle |

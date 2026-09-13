@@ -130,8 +130,8 @@ public final class HellRealm {
     }
 
     /**
-     * The two grounds §17 and A3.8 describe, and the only sheets this realm
-     * owns.
+     * Hell's four grounds: the two §17 and A3.8 describe, plus Brimstone Crust
+     * and Bone Gravel, which replaced the Veil's miststone and deadsoil.
      *
      * <p>Registered the way Crooked Beyond registers its six and the way
      * vanilla registers {@code spidernesttile}: {@code brokerValue 0}, not
@@ -140,8 +140,8 @@ public final class HellRealm {
      * economy pass, and it has not happened — so an obtainable ground would put
      * two tiles in a building menu with no recipe behind them.
      *
-     * <p>They take over exactly the share {@code ashsand} and {@code blackpeat}
-     * held in {@link HellTerrainPainter#groundAt}; those two are the Veil's and
+     * <p>Cinder Ash and Furnace Slag take over exactly the share {@code ashsand}
+     * and {@code blackpeat} held in {@link HellTerrainPainter#groundAt}; those two are the Veil's and
      * the Gloomfen's and also floor the Ghost band, Crooked Beyond and the
      * Outlands, so they are left untouched rather than repainted.
      */

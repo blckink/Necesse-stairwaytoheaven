@@ -52,13 +52,14 @@ import stairwaytoheaven.worldgen.SkyTerrainPainter;
  * world agree, and the pressure field and preset placers can ask the same
  * question the painter will answer later.
  *
- * <h2>Two of its own sheets, and no others</h2>
- * The hell share of {@link #groundAt} is {@link HellRealm#cinderAshID} and
- * {@link HellRealm#furnaceSlagID}, the realm's own two grounds since
- * {@code docs/STATUS.md} 7n. They took over the exact share the Veil's
- * {@code ashsand} and the Gloomfen's {@code blackpeat} held as stand-ins — the
- * ratios below did not move — and those two tiles are untouched, because they
- * also floor the Ghost band, Crooked Beyond and the Outlands.
+ * <h2>Its own sheets</h2>
+ * The hell share of {@link #groundAt} is Hell's own four grounds:
+ * {@link HellRealm#cinderAshID} and {@link HellRealm#furnaceSlagID} (since
+ * {@code docs/STATUS.md} 7n, in the share {@code ashsand} and {@code blackpeat}
+ * held) and, since 2026-09-13, {@link HellRealm#boneGravelID} and
+ * {@link HellRealm#brimstoneCrustID} in the share the Veil's {@code deadsoil}
+ * and {@code miststone} held. The ratios did not move, and the borrowed tiles
+ * are untouched in the realms they belong to.
  *
  * <p>Everything else here is still a tile or object THIS MOD ALREADY
  * REGISTERS, reached by its existing {@code SkyRegistry} /
@@ -173,10 +174,11 @@ public final class HellTerrainPainter {
     /**
      * The prop on one tile, or 0 for open ground.
      *
-     * <p>All five are objects the mod already registers. The Fringe keeps
-     * Crooked's teeth rock and the Veil's dead tree — the last things still
-     * standing from the realm behind you — and the Furnace keeps only what
-     * survives a furnace: bones, rock and the crate that makes a find a find.
+     * <p>Bones, gallows tree and crag are Hell's own sheets
+     * ({@link HellRealm#hellBonesID}, {@link HellRealm#charredGallowsID},
+     * {@link HellRealm#brimstoneCragID}). The Fringe keeps Crooked's teeth rock —
+     * the last thing still standing from the realm behind you — and both bands
+     * keep Crooked's crate, the one borrowed prop left.
      */
     public static int propAt(int seed, int tileX, int tileY, int band) {
         float roll = SkyNoise.hash(seed + (int) SALT_PROP, tileX, tileY);
