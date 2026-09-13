@@ -834,7 +834,7 @@ public final class RealmPoiPresets {
 
     private static Preset borderOffice() {
         Preset p = blank(HELL_BORDER_OFFICE);
-        int floor = tile("factoryfloor"), wall = object("factorywall"), door = object("factorydoor"), window = object("factorywindow");
+        int floor = tile("hellbrickfloortile"), wall = object("hellbrickwall"), door = object("hellbrickdoor"), window = object("hellbrickwindow");
         road(p, 10, 0, 3, 19, tile("scrapfloor"));
         building(p, floor, wall, new Rectangle(2, 3, 19, 13), new Rectangle(16, 2, 5, 7));
         door(p, 11, 15, door); door(p, 11, 3, door); door(p, 16, 8, door);
@@ -848,8 +848,8 @@ public final class RealmPoiPresets {
 
     private static Preset hellAdministration() {
         Preset p = blank(HELL_ADMINISTRATION);
-        int road = tile("scrapfloor"), floor = tile("factoryfloor");
-        int wall = object("factorywall"), door = object("factorydoor"), window = object("factorywindow");
+        int road = tile("scrapfloor"), floor = tile("hellbrickfloortile");
+        int wall = object("hellbrickwall"), door = object("hellbrickdoor"), window = object("hellbrickwindow");
         road(p, 29, 0, 3, 45, road); road(p, 0, 21, 61, 3, road);
         // Four dense wings around a public cross; none occupies the road.
         building(p, floor, wall, new Rectangle(4, 4, 21, 14), new Rectangle(18, 14, 8, 5));
@@ -868,8 +868,8 @@ public final class RealmPoiPresets {
 
     private static Preset hellForge() {
         Preset p = blank(HELL_FORGE);
-        int road = tile("scrapfloor"), floor = tile("basaltfloor");
-        int wall = object("basaltwall"), door = object("basaltdoor"), window = object("basaltwindow");
+        int road = tile("scrapfloor"), floor = tile("hellbrickfloortile");
+        int wall = object("hellbrickwall"), door = object("hellbrickdoor"), window = object("hellbrickwindow");
         road(p, 13, 0, 3, 23, road);
         building(p, floor, wall, new Rectangle(2, 4, 25, 15), new Rectangle(20, 2, 7, 7));
         door(p, 14, 18, door); door(p, 14, 4, door); door(p, 20, 8, door);
@@ -892,11 +892,11 @@ public final class RealmPoiPresets {
         for (int y = 10; y <= 20; y++) { p.setObject(14, y, fence); p.setObject(24, y, fence); }
         p.setObject(19, 9, 0); p.setObject(19, 21, 0); p.setObject(14, 15, 0); p.setObject(24, 15, 0);
         p.setObject(19, 15, object("chieftainsthrone"));
-        int wall = object("factorywall"), door = object("factorydoor");
-        building(p, tile("factoryfloor"), wall, new Rectangle(3, 3, 9, 7));
-        building(p, tile("factoryfloor"), wall, new Rectangle(27, 3, 9, 7));
-        building(p, tile("factoryfloor"), wall, new Rectangle(3, 21, 9, 7));
-        building(p, tile("factoryfloor"), wall, new Rectangle(27, 21, 9, 7));
+        int wall = object("hellbrickwall"), door = object("hellbrickdoor");
+        building(p, tile("hellbrickfloortile"), wall, new Rectangle(3, 3, 9, 7));
+        building(p, tile("hellbrickfloortile"), wall, new Rectangle(27, 3, 9, 7));
+        building(p, tile("hellbrickfloortile"), wall, new Rectangle(3, 21, 9, 7));
+        building(p, tile("hellbrickfloortile"), wall, new Rectangle(27, 21, 9, 7));
         door(p, 7, 9, door); door(p, 31, 9, door); door(p, 7, 21, door); door(p, 31, 21, door);
         for (int[] at : new int[][]{{6,6},{9,6},{30,6},{33,6},{6,24},{9,24},{30,24},{33,24}}) p.setObject(at[0], at[1], object("crate"));
         for (int[] at : new int[][]{{12,12},{26,12},{12,18},{26,18}}) p.setObject(at[0], at[1], object("scraplamp"));

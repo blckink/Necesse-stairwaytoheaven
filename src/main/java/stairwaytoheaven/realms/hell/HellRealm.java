@@ -102,6 +102,15 @@ public final class HellRealm {
     /** Basalt crag with sulphur veins, a tally of days or a bone ticket dispenser. */
     public static int brimstoneCragID;
 
+    // ===== Hell's building set =====
+
+    /** Oxblood brick with bone-white joints and a charred crown: wall, door, window. */
+    public static int hellBrickWallID;
+    public static int hellBrickDoorID;
+    public static int hellBrickWindowID;
+    /** Near-black basalt tiles with ember joints, laid world-anchored. */
+    public static int hellBrickFloorID;
+
     /**
      * Everything the realm puts into the registries.
      *
@@ -158,6 +167,11 @@ public final class HellRealm {
         boneGravelID = TileRegistry.registerTile("bonegraveltile",
                 new stairwaytoheaven.realms.hell.tiles.BoneGravelTile(),
                 0.0F, false, false, true);
+        // The building set's floor: one seamless 128x128 texture, world-anchored
+        // like the marble checker, so the joints run on across a whole room.
+        hellBrickFloorID = TileRegistry.registerTile("hellbrickfloortile",
+                new stairwaytoheaven.tiles.CheckerFloorTile("hellbrickfloor", new java.awt.Color(36, 22, 24)),
+                0.0F, false);
     }
 
     /**
@@ -192,6 +206,16 @@ public final class HellRealm {
                 "brimstonecrag", 64, new java.awt.Color(52, 44, 40), null, "objects", "decorations")
                 .setTool(necesse.inventory.item.toolItem.ToolType.PICKAXE).setObjectHealth(80);
         brimstoneCragID = ObjectRegistry.registerObject("brimstonecrag", brimstoneCrag, 0.0F, false);
+
+        // Hell's own wall set for its four places, which stood in the vanilla
+        // factory and basalt sets. One 352x128 sheet read by vanilla WallObject,
+        // conformed with tools/conform_wall_sheet.py. registerWallObjects returns
+        // {wall, doorClosed, doorOpen, window} (WallObject.java:481).
+        int[] hellBrick = necesse.level.gameObject.WallObject.registerWallObjects(
+                "hellbrick", "hellbrickwall", 2.0F, new java.awt.Color(120, 36, 30), -0.25F, -1.0F);
+        hellBrickWallID = hellBrick[0];
+        hellBrickDoorID = hellBrick[1];
+        hellBrickWindowID = hellBrick[3];
     }
 
     /**

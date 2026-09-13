@@ -22,6 +22,7 @@ mistseatile=Nebelmeer
 
 gloomwoodfloortile=Düsterholz-Boden
 marblecheckertile=Schachbrett-Marmor
+hellbrickfloortile=Höllenfliesen
 skywaytile=Himmelspflaster
 [object]
 paradisepalm=Paradiespalme
@@ -113,6 +114,10 @@ nightfellwall=Nightfell-Wand
 nightfelldoor=Nightfell-Tür
 nightfelldoorlocked=Verschlossene Nightfell-Tür
 nightfellwindow=Nightfell-Fenster
+hellbrickwall=Höllenziegel-Wand
+hellbrickdoor=Höllenziegel-Tür
+hellbrickdoorlocked=Verschlossene Höllenziegel-Tür
+hellbrickwindow=Höllenziegel-Fenster
 beetlewall=Käferwahn-Wand
 beetledoor=Käferwahn-Tür
 beetledoorlocked=Verschlossene Käferwahn-Tür
