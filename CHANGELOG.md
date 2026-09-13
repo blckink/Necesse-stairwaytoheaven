@@ -6,6 +6,18 @@ All notable changes to this project are documented here. Format loosely follows
 ## [Unreleased]
 
 ### Changed
+- **Crooked and Hell grounds loop without a seam.** Crooked Beyond's four
+  grounds (`crookedchecker`, `crookedspiral`, `crookedmud`, `crookedstripe`) and
+  Hell's `cinderash`/`furnaceslag` are seamless 128x128 textures now, and the
+  tiles pick their cell from absolute tile coordinates (`floorMod`, as
+  `CheckerFloorTile` does). The random row pick cut every motif at every tile
+  edge; Hell's stamped splats are gone for the same reason.
+- **Hell has its own sprites instead of the Veil's placeholders.** Brimstone
+  Crust and Bone Gravel replace `miststone` and `deadsoil` in the Furnace Reach;
+  Hell Bones, Charred Gallows and Brimstone Crag replace `ashbones`, `deadtree`
+  and `veilrock`. The Veil keeps its own art untouched.
+
+### Changed
 - **Crooked Beyond's sea is a crawling sea of beetles.** Inside the Crooked band
   the Mistsea tile draws `crookedmist_shallow`/`crookedmist_deep`: muted violet,
   petrol and moss beetles and woodlice that crawl 4 px per frame on a 32-px
