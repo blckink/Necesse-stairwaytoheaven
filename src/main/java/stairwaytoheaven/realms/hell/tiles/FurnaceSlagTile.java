@@ -22,7 +22,7 @@ public class FurnaceSlagTile extends SkyGroundTile {
 
     public FurnaceSlagTile() {
         super(false, "furnaceslag");
-        this.mapColor = new Color(38, 40, 50);
+        this.mapColor = new Color(64, 30, 22);
     }
 
     /** One above {@link CinderAshTile}: inside Hell, the slag wins the seam. */
