@@ -6,6 +6,19 @@ All notable changes to this project are documented here. Format loosely follows
 ## [Unreleased]
 
 ### Changed
+- **Crooked Beyond's sea is a crawling sea of beetles.** Inside the Crooked band
+  the Mistsea tile draws `crookedmist_shallow`/`crookedmist_deep`: muted violet,
+  petrol and moss beetles and woodlice that crawl 4 px per frame on a 32-px
+  period. Still the same liquid ID, so the Mistserpent, POI placement and the
+  status command behave as before.
+- **Crooked Beyond's plants and rocks have their own art.** Spiral tree, eyeball
+  shrub, screaming flower, striped mushroom and teeth rock no longer borrow
+  vanilla sheets; sizes and variant counts are unchanged.
+- **Hell's ground glows.** `cinderash` is near-black cinder with ember cracks and
+  the odd skull, `furnaceslag` dark slag slabs with molten seams. Both are
+  restamped through their own splat alpha, and both map colours follow suit.
+
+### Changed
 - **Skywatch props are finds again, not filler.** The Skywatch statue
   (`skywatchrubble`) now spawns about a third as often: worldgen rubble slots
   keep it one time in three, the workshop fringe rolls drop 0.40->0.28 and
