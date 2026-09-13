@@ -1,6 +1,10 @@
 package stairwaytoheaven.realms.hell.tiles;
 
 import java.awt.Color;
+import java.awt.Point;
+
+import necesse.gfx.gameTexture.GameTextureSection;
+import necesse.level.maps.Level;
 
 import stairwaytoheaven.tiles.SkyGroundTile;
 
@@ -37,5 +41,19 @@ public class CinderAshTile extends SkyGroundTile {
     @Override
     public int getTerrainPriority() {
         return 206;
+    }
+
+    /**
+     * World-anchored: the ground is one seamless 128x128 texture laid over 4x4
+     * tiles, so its cracks and seams run on across tiles instead of being cut at
+     * every tile edge the way {@code SkyGroundTile}'s random row pick cuts them.
+     * Same idiom and same {@code floorMod} guard as
+     * {@link stairwaytoheaven.tiles.CheckerFloorTile}.
+     */
+    @Override
+    public Point getTerrainSprite(GameTextureSection terrainTexture, Level level, int tileX, int tileY) {
+        int columns = Math.max(1, terrainTexture.getWidth() / 32);
+        int rows = Math.max(1, terrainTexture.getHeight() / 32);
+        return new Point(Math.floorMod(tileX, columns), Math.floorMod(tileY, rows));
     }
 }

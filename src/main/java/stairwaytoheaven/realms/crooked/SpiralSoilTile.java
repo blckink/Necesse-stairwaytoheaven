@@ -23,7 +23,7 @@ import java.awt.Color;
 public class SpiralSoilTile extends CrookedGroundTile {
 
     public SpiralSoilTile() {
-        super("ascendedgrowth", new Color(96, 62, 140));
+        super("crookedspiral", new Color(96, 62, 140));
         this.isOrganic = true;
     }
 }

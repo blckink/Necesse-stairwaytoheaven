@@ -2,6 +2,7 @@ package stairwaytoheaven.realms.hell;
 
 import necesse.engine.registries.BiomeRegistry;
 import necesse.engine.registries.MobRegistry;
+import necesse.engine.registries.ObjectRegistry;
 import necesse.engine.registries.TileRegistry;
 import stairwaytoheaven.realms.hell.mobs.AshSpiritMob;
 import stairwaytoheaven.realms.hell.mobs.BoilerHoundMob;
@@ -88,6 +89,11 @@ public final class HellRealm {
     /** Cooled slag crust with the embers showing — the dark half. */
     public static int furnaceSlagID;
 
+    // ===== Props only Hell has =====
+
+    /** Grinning skull pile and ember-filled ribcage — Hell's own bones. */
+    public static int hellBonesID;
+
     /**
      * Everything the realm puts into the registries.
      *
@@ -98,6 +104,7 @@ public final class HellRealm {
     public static void register() {
         registerBiomes();
         registerTiles();
+        registerObjects();
         registerMobs();
     }
 
@@ -137,6 +144,27 @@ public final class HellRealm {
         furnaceSlagID = TileRegistry.registerTile("furnaceslagtile",
                 new stairwaytoheaven.realms.hell.tiles.FurnaceSlagTile(),
                 0.0F, false, false, true);
+    }
+
+    /**
+     * Props drawn for Hell and placed nowhere else.
+     *
+     * <p>Until now Hell borrowed the Veil's {@code ashbones}; repainting that
+     * sheet would have repainted the Veil with it, so Hell gets its own. Same
+     * harvest as the Ash Bones it replaces (one Cinder Pearl, any tool, 50 HP),
+     * so the realm's economy does not move.
+     */
+    private static void registerObjects() {
+        stairwaytoheaven.objects.SkyDecoObject hellbones = new stairwaytoheaven.objects.SkyDecoObject(
+                "hellbones", 32, new java.awt.Color(232, 220, 192), null, "objects", "decorations") {
+            @Override
+            public necesse.inventory.lootTable.LootTable getLootTable(
+                    necesse.level.maps.Level level, int layerID, int tileX, int tileY) {
+                return new necesse.inventory.lootTable.LootTable(
+                        necesse.inventory.lootTable.lootItem.LootItem.between("cinderpearl", 1, 1));
+            }
+        }.setTool(necesse.inventory.item.toolItem.ToolType.ALL).setObjectHealth(50);
+        hellBonesID = ObjectRegistry.registerObject("hellbones", hellbones, 0.0F, false);
     }
 
     /**

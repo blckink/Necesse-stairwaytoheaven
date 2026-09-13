@@ -192,12 +192,12 @@ public final class HellTerrainPainter {
                 return SkyRegistry.deadtreeID;
             }
             if (pick < 0.86F) {
-                return SkyRegistry.ashbonesID;
+                return HellRealm.hellBonesID;
             }
             return CrookedRealm.crookedCrateID;
         }
         if (pick < 0.40F) {
-            return SkyRegistry.ashbonesID;
+            return HellRealm.hellBonesID;
         }
         if (pick < 0.70F) {
             return SkyRegistry.veilrockID;

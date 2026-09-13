@@ -21,6 +21,6 @@ import java.awt.Color;
 public class CheckerStoneTile extends CrookedGroundTile {
 
     public CheckerStoneTile() {
-        super("deepstonetiledfloor", new Color(58, 62, 70));
+        super("crookedchecker", new Color(58, 62, 70));
     }
 }

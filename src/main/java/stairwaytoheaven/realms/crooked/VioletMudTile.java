@@ -26,7 +26,7 @@ import necesse.entity.mobs.buffs.BuffModifiers;
 public class VioletMudTile extends CrookedGroundTile {
 
     public VioletMudTile() {
-        super("ascendedcorruption", new Color(72, 40, 96));
+        super("crookedmud", new Color(72, 40, 96));
         this.isOrganic = true;
     }
 

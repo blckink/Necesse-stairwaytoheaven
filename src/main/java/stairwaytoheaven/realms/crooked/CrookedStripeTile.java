@@ -18,7 +18,7 @@ import java.awt.Color;
 public class CrookedStripeTile extends CrookedGroundTile {
 
     public CrookedStripeTile() {
-        super("beetlefreak", "splattingmaskwide", new Color(118, 46, 158));
+        super("crookedstripe", new Color(118, 46, 158));
         this.isOrganic = true;
     }
 

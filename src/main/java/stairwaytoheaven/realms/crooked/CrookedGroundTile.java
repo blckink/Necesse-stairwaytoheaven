@@ -65,17 +65,19 @@ public abstract class CrookedGroundTile extends TerrainSplatterTile {
     }
 
     /**
-     * Vanilla's {@code RockTile}/{@code MudTile} idiom: one variant row per
-     * tile, chosen from the tile position so the ground is stable across
-     * save/load and identical on every client.
+     * World-anchored, the way {@link stairwaytoheaven.tiles.CheckerFloorTile}
+     * draws the marble checker: the realm's grounds are seamless 128x128
+     * textures, and a cell picked from absolute tile coordinates makes the whole
+     * texture run on across 4x4 tiles and on into the next copy without a seam.
+     * The random row pick this replaced cut every motif larger than one tile at
+     * every tile edge. {@code floorMod}, not {@code %}: negative coordinates
+     * returned -1 and killed the client once already.
      */
     @Override
     public Point getTerrainSprite(GameTextureSection terrainTexture, Level level, int tileX, int tileY) {
-        int tile;
-        synchronized (this.drawRandom) {
-            tile = this.drawRandom.seeded(getTileSeed(tileX, tileY)).nextInt(terrainTexture.getHeight() / 32);
-        }
-        return new Point(0, tile);
+        int columns = Math.max(1, terrainTexture.getWidth() / 32);
+        int rows = Math.max(1, terrainTexture.getHeight() / 32);
+        return new Point(Math.floorMod(tileX, columns), Math.floorMod(tileY, rows));
     }
 
     /**
