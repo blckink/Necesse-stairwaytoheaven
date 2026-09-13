@@ -10,8 +10,11 @@ All notable changes to this project are documented here. Format loosely follows
   shark three times vanilla's size in deep overworld water (forest, plains,
   snow, desert, swamp). Pirate-Captain-class: 8000 HP, armour 40, 140-damage
   bite, but slower than a shark (20/45 vs 30/65). Weight 1 against the shark's
-  10 and at most one nearby. Drops 6-10 tungsten bars and shark scales. The
-  sheet is a striped recolour of vanilla's shark until real art lands.
+  10 and at most one nearby. Drops 6-10 tungsten bars and shark scales. Its
+  own 288 px sheet (drawn natively at three vanilla cells, no upscaling) shows
+  a crazy grinning Beetlejuice-style monster: head, ridge and fin break the
+  surface with foam while belly and tail stay translucent underwater. Own
+  bestiary icon.
 
 ### Changed
 - **Crooked and Hell grounds loop without a seam.** Crooked Beyond's four

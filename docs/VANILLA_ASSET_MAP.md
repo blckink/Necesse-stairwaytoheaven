@@ -57,6 +57,7 @@ behaviour, but no vanilla art reaches the screen through them.)
 | `StabbyBushMob` | Sourvat Bloom | Skyreach (Grange Cellar only) | rooted ambusher that reads as scenery until you are close — the bush silhouette IS the ambush |
 | `CryoFlakeMob` | Vatling | Skyreach (Grange Cellar only) | the small floating add the Bloom keeps letting out |
 | `AncientSkeletonMageMob` | Prototype Nine | Skyreach (Test Range only) | ranged caster that blinks away when its own bolt comes back — the same base the Cinder Cantor uses, and here with NO sheet of its own |
+| `SharkMob` | Striped Megashark | Overworld surface (deep water, all five biomes) | swim AI, deep-water spawn check and bite behaviour; stats, 3x body and loot are the subclass's own — own 288 px sheet and bestiary icon since 2026-09-13, no vanilla art reaches the screen |
 
 ### 1.3 Vanilla textures loaded by literal path (recolours)
 

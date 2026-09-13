@@ -79,12 +79,6 @@ public class StripedMegasharkMob extends SharkMob {
         this.setKnockbackModifier(0.05F);
     }
 
-    /** No icon of its own yet: the journal shows the vanilla shark's face. */
-    @Override
-    public GameTexture getMobIcon() {
-        return BorrowedMobIcon.from("shark", super.getMobIcon());
-    }
-
     @Override
     public LootTable getLootTable() {
         return megaLoot;
@@ -132,15 +126,21 @@ public class StripedMegasharkMob extends SharkMob {
         if (texture == null) {
             return;
         }
+        // Gib strip: three 64 px chunks in the row under the 4x288 grid (y 1152).
         for (int i = 0; i < 3; i++) {
             this.getLevel().entityManager.addParticle(
-                    new FleshParticle(this.getLevel(), texture, i, 12, 32, this.x, this.y, 20.0F,
+                    new FleshParticle(this.getLevel(), texture, i, 18, 64, this.x, this.y, 20.0F,
                             knockbackX, knockbackY),
                     Particle.GType.IMPORTANT_COSMETIC);
         }
     }
 
-    /** SharkMob.addDrawables with our sheet, drawn at three times the cell size. */
+    /**
+     * SharkMob.addDrawables with our sheet. The cells are drawn natively at
+     * 288 px (three vanilla shark cells), so nothing is upscaled; the sheet
+     * layout is vanilla's: column 0 idle, 1-4 swimming, rows Up/Right/Down/Left.
+     * Parts under the waterline carry partial alpha in the sheet itself.
+     */
     @Override
     public void addDrawables(List<MobDrawable> list, OrderableDrawables tileList, OrderableDrawables topList,
             Level level, int x, int y, TickManager tickManager, GameCamera camera, PlayerMob perspective) {
@@ -152,8 +152,7 @@ public class StripedMegasharkMob extends SharkMob {
         int drawY = camera.getDrawY(y) - 144;
         Point sprite = this.getAnimSprite(x, y, this.getDir());
         final DrawOptions options = texture.initDraw()
-                .sprite(sprite.x, sprite.y, 96)
-                .size(288, 288)
+                .sprite(sprite.x, sprite.y, 288)
                 .startGlowOptions(level, (long) this.getID())
                 .light(light)
                 .applyEnemyTracker(this, perspective)

@@ -438,6 +438,26 @@ strength it was summoned at. Only a newly summoned boss is harder.
 Boss **aggression range is unchanged**: all five are vanilla mobs spawned by
 string ID, and their AI trees are built by vanilla code the mod never enters.
 
+### Overworld: the Striped Megashark (2026-09-13)
+
+Not a realm mob and not on the tier ladder: it lives on vanilla's surface table,
+so its numbers are flat and pinned to the **Pirate Captain** (vanilla
+`PirateCaptainMob.MAX_HEALTH` 6 250 / 7 750 / 8 500 / 9 250 / 10 750, collision
+55). Player-set difficulty still scales it the way it scales every hostile mob.
+
+| | Shark (vanilla) | Striped Megashark |
+|---|---|---|
+| health | 500 | **8 000** |
+| armour | 0 | **40** |
+| bite | 24 (hard-coded in `SharkAI`) | **140** (rewritten on that AI node) |
+| speed cruise / chase | 30 / 65 | **20 / 45** — outswimmable |
+| knockback modifier | 0.5 | 0.05 |
+| spawn weight on `Biome.defaultSurfaceMobs` | 10 (incl. fake shark) | **1**, max one within 6 spawn radii |
+| loot | fish, scales, meat, tooth | **6 tungsten bars + 50 % 4 more**, 3 shark scales |
+
+Tungsten is deep-cave material, so the drop is the gate: a player who can kill
+it already out-geared the ore, and one who cannot simply rows away from it.
+
 ### How to check it
 
 ```bash
