@@ -22,11 +22,25 @@ public class MistseaTile extends LiquidTile {
     private static final Color MIST_COLOR = new Color(188, 202, 214);
 
     public MistseaTile() {
-        super(MIST_COLOR, "mistsea_shallow", "mistsea_deep");
+        super(MIST_COLOR, "mistsea_shallow", "mistsea_deep",
+                "crookedmist_shallow", "crookedmist_deep");
     }
 
+    /**
+     * Crooked Beyond's stretch of the sea is a crawling mass of beetles.
+     *
+     * <p>Same tile, other textures -- not a second liquid, because
+     * {@code SkyRegistry.mistseaID} is compared in nine places (the Mistserpent,
+     * POI and landmark placement, the status command) and a second ID would
+     * silently break all of them inside the Crooked band.
+     */
     @Override
     public TextureIndexes getTextureIndexes(Level level, int tileX, int tileY, Biome biome) {
+        if (level instanceof stairwaytoheaven.level.SkyLevel
+                && ((stairwaytoheaven.level.SkyLevel) level).realmAt(tileX, tileY)
+                        == stairwaytoheaven.worldgen.RealmDepth.REALM_CROOKED) {
+            return new TextureIndexes(2, 3, 2, 3);
+        }
         return new TextureIndexes(0, 1, 0, 1);
     }
 
