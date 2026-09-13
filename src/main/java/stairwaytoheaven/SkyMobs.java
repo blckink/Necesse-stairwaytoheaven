@@ -101,10 +101,14 @@ final class SkyMobs {
      * {@code Biome.defaultSurfaceMobs}). Weight 1 against the shark entry's 10;
      * the mob's own spawn check rejects dry land and shallow water, and
      * {@code MobSpawnTable.getRandomMob} re-rolls without it when it does.
-     * Called from postInit, after vanilla's Biome static block ran.
+     * Called from postInit, after vanilla's Biome static block ran. The result
+     * is assigned back so this holds whether {@code add} appends in place or
+     * returns a copy; the biomes read the static field on every spawn roll
+     * (ForestBiome.getMobSpawnTable returns it directly).
      */
     static void registerSurfaceSpawns() {
-        necesse.level.maps.biomes.Biome.defaultSurfaceMobs.add(1, "stripedmegashark");
+        necesse.level.maps.biomes.Biome.defaultSurfaceMobs =
+                necesse.level.maps.biomes.Biome.defaultSurfaceMobs.add(1, "stripedmegashark");
     }
 
     /** Called from initResources — runs on the client only, never on servers. */
