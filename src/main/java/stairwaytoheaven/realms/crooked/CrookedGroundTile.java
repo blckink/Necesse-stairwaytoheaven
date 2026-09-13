@@ -3,7 +3,6 @@ package stairwaytoheaven.realms.crooked;
 import java.awt.Color;
 import java.awt.Point;
 
-import necesse.engine.util.GameRandom;
 import necesse.gfx.gameTexture.GameTextureSection;
 import necesse.inventory.lootTable.LootTable;
 import necesse.level.gameTile.TerrainSplatterTile;
@@ -56,7 +55,6 @@ public abstract class CrookedGroundTile extends TerrainSplatterTile {
         super(false, textureName, alphaMaskTextureName);
         this.mapColor = mapColor;
         this.canBeMined = true;
-        this.drawRandom = new GameRandom();
     }
 
     /**
