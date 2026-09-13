@@ -180,11 +180,12 @@ public final class HellRealm {
         }.setTool(necesse.inventory.item.toolItem.ToolType.ALL).setObjectHealth(50);
         hellBonesID = ObjectRegistry.registerObject("hellbones", hellbones, 0.0F, false);
 
-        // In the Veil's dead tree's place: woody, so AXE like it.
+        // In the Veil's dead tree's place: woody, so AXE like it. Not obtainable,
+        // like the Spiral Tree: an obtainable object needs an items/ icon of its own.
         stairwaytoheaven.objects.SkyDecoObject charredGallows = new stairwaytoheaven.objects.SkyDecoObject(
                 "charredgallows", 64, new java.awt.Color(44, 34, 30), null, "objects", "decorations")
                 .setTool(necesse.inventory.item.toolItem.ToolType.AXE);
-        charredGallowsID = ObjectRegistry.registerObject("charredgallows", charredGallows, 4.0F, true);
+        charredGallowsID = ObjectRegistry.registerObject("charredgallows", charredGallows, 0.0F, false);
 
         // In the Veil rock's place: mineral, so PICKAXE and 80 HP like Crooked's teeth rock.
         stairwaytoheaven.objects.SkyDecoObject brimstoneCrag = new stairwaytoheaven.objects.SkyDecoObject(
