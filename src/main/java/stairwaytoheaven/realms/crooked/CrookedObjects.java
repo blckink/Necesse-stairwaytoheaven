@@ -67,7 +67,7 @@ public final class CrookedObjects {
         // mod's own Dead Tree. 40 HP -- between the Dead Tree's default and a
         // vanilla trunk, so felling one is a few swings rather than a chore.
         CrookedRealm.spiralTreeID = ObjectRegistry.registerObject("spiraltree",
-                new SkyDecoObject("burnedbush", 64, new Color(38, 30, 44), null, CATEGORY) {
+                new SkyDecoObject("spiraltree", 64, new Color(38, 30, 44), null, CATEGORY) {
                     @Override
                     public LootTable getLootTable(Level level, int layerID, int tileX, int tileY) {
                         return SPIRAL_TREE_LOOT;
@@ -81,7 +81,7 @@ public final class CrookedObjects {
         // middle of each. ALL + 1 HP, the mod's audited pattern for soft flora
         // (see the Gloomshroom, where the GameObject pickaxe default was wrong).
         CrookedRealm.eyeballShrubID = ObjectRegistry.registerObject("eyeballshrub",
-                new SkyDecoObject("voidtrap", 32, new Color(150, 60, 180), null, CATEGORY) {
+                new SkyDecoObject("eyeballshrub", 32, new Color(150, 60, 180), null, CATEGORY) {
                     @Override
                     public LootTable getLootTable(Level level, int layerID, int tileX, int tileY) {
                         return EYEBALL_SHRUB_LOOT;
@@ -94,7 +94,7 @@ public final class CrookedObjects {
         // fronds. Soft flora: ALL, 1 HP.
         // It glows faintly red; the Fields are otherwise all violet.
         CrookedRealm.screamingFlowerID = ObjectRegistry.registerObject("screamingflower",
-                new SkyDecoObject("glowcoral", 32, new Color(196, 58, 62), null, CATEGORY) {
+                new SkyDecoObject("screamingflower", 32, new Color(196, 58, 62), null, CATEGORY) {
                     @Override
                     public LootTable getLootTable(Level level, int layerID, int tileX, int tileY) {
                         return SCREAMING_FLOWER_LOOT;
@@ -107,7 +107,7 @@ public final class CrookedObjects {
         // objects/mushroom.png (224x64, seven 32-wide growth variants). Soft
         // flora: ALL, 1 HP.
         CrookedRealm.stripedMushroomID = ObjectRegistry.registerObject("stripedmushroom",
-                new SkyDecoObject("mushroom", 32, new Color(168, 140, 108), null, CATEGORY) {
+                new SkyDecoObject("stripedmushroom", 32, new Color(168, 140, 108), null, CATEGORY) {
                     @Override
                     public LootTable getLootTable(Level level, int layerID, int tileX, int tileY) {
                         return STRIPED_MUSHROOM_LOOT;
@@ -187,7 +187,7 @@ public final class CrookedObjects {
         // PICKAXE and 80 HP, because it is the one mineral formation here and
         // IMPLEMENTATION_RULES §4 puts rock and mineral on the pickaxe.
         CrookedRealm.teethRockID = ObjectRegistry.registerObject("teethrock",
-                new SkyDecoObject("smallrunestone", 32, new Color(150, 140, 190), null, CATEGORY) {
+                new SkyDecoObject("teethrock", 32, new Color(150, 140, 190), null, CATEGORY) {
                     @Override
                     public LootTable getLootTable(Level level, int layerID, int tileX, int tileY) {
                         return TEETH_ROCK_LOOT;
