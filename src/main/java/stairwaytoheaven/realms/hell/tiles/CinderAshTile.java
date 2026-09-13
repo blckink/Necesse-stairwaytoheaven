@@ -25,7 +25,7 @@ public class CinderAshTile extends SkyGroundTile {
 
     public CinderAshTile() {
         super(false, "cinderash");
-        this.mapColor = new Color(74, 78, 86);
+        this.mapColor = new Color(46, 24, 20);
     }
 
     /**
