@@ -189,7 +189,7 @@ python3 tools/size_audit.py
 python3 tools/locale_audit.py
 ```
 
-Also run generator reproducibility and gallery/visual QA tools relevant to the changed domain.
+Also run generator reproducibility and gallery/visual QA tools relevant to the changed domain — then actually open and look at whatever they render. A numeric or byte-identical round-trip pass (e.g. `--selftest`) proves the underlying data mapping only; it does not prove the rendered layout is readable, unclipped, or non-overlapping. Both checks are required before a visual claim, not one or the other.
 
 A dedicated-server pass does **not** prove client rendering or player UX. State the verification level accurately.
 

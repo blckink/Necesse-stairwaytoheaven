@@ -117,6 +117,43 @@ Only write things you actually observed. Mark anything unproven as a hypothesis.
 Say which one you have. Use the verification states defined in
 `docs/IMPLEMENTATION_RULES.md`.
 
+## Before you say it's done
+
+This project has repeatedly lost time to claims that turned out false: a PR
+body, a subagent report, or a "should work now" that nobody actually checked
+— livestock reported unreachable when it wasn't, settler professions reported
+impossible when they weren't, a spacing fix that passed its automated
+round-trip test 35/35 while the image it produced had text clipped off-canvas
+and overlapping labels. If you cannot point to the evidence below, you have
+not verified the claim — say that instead of claiming it.
+
+**Match the claim to what actually proves it:**
+
+| you are about to say | required evidence | does NOT count |
+|---|---|---|
+| "fixed" / "works" / "passes" | ran the exact gate and can quote its literal output | it passed before, or the code "should" fix it |
+| a sprite/sheet/UI looks right | opened the actual rendered image and looked at it | a numeric/round-trip gate passing alone — that checks structure, not layout, clipping or overlap |
+| "PR #N already does/handles X" | fetched and read that PR's real diff | the PR's title, description, or its own commit message |
+| a game mechanic behaves like X | read the decompiled source, or ran it and observed the behaviour | a class/method name, or "vanilla probably does it this way" |
+| an earlier handoff said it was done | re-verified it yourself against the repo as it is right now | treating a summary or another agent's report as ground truth |
+
+**Quote the evidence, don't summarize it.** "Ran `--selftest`, all green" is a
+claim; pasting the actual `35 sheet(s) checked, 0 mismatch(es).` line is
+evidence. Do the same in commit messages and PR bodies.
+
+**A green automated gate is necessary, never sufficient, for anything a
+player will look at.** Passing `size_audit`, `--selftest`, `tile_sprite_check`
+etc. is not permission to skip actually looking at the rendered result —
+those tools catch what they were built to catch and nothing else.
+
+**Use `docs/IMPLEMENTATION_RULES.md` §14's states on every claim, not just at
+handoff:** `VERIFIED [jar]`, `VERIFIED [run]`, `VERIFIED [game]`, or
+`HYPOTHESIS`. If you only read a PR description or repeated what an earlier
+message said, none of those apply — say what it actually is.
+
+**When you were wrong, say so plainly and explain the mechanism** — what you
+checked, what you missed, why the check missed it. Not a silent edit.
+
 ## Build and test
 
 ```bash
