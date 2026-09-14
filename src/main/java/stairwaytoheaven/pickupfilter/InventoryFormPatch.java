@@ -45,7 +45,7 @@ public class InventoryFormPatch {
                 Localization.translate("ui", "swh_pickupfiltertip"),
                 4, oldHeight, manager.inventory.getWidth() - 8, FormInputSize.SIZE_24, ButtonColor.BASE));
 
-        PickupFilterForm filterForm = manager.addComponent(new PickupFilterForm(client));
+        PickupFilterForm filterForm = manager.addComponent(new PickupFilterForm(client, manager.inventory));
         filterForm.setHidden(true);
         filterForm.setPosition(new FormRelativePosition(manager.inventory, 0, -PickupFilterForm.HEIGHT - 4));
 
