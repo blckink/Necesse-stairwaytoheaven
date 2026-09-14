@@ -28,6 +28,8 @@ public class InventoryFormPatch {
 
     public static final int BUTTON_HEIGHT = 28;
 
+    private static PickupFilterForm lastFilterForm;
+
     @Advice.OnMethodExit
     static void onExit(@Advice.This MainGameFormManager manager) {
         InventoryFormPatch.attach(manager);
@@ -45,7 +47,13 @@ public class InventoryFormPatch {
                 Localization.translate("ui", "swh_pickupfiltertip"),
                 4, oldHeight, manager.inventory.getWidth() - 8, FormInputSize.SIZE_24, ButtonColor.BASE));
 
+        // The inventory form is rebuilt (e.g. when the inventory is extended),
+        // so drop the menu that belonged to the previous one.
+        if (lastFilterForm != null) {
+            manager.removeComponent(lastFilterForm);
+        }
         PickupFilterForm filterForm = manager.addComponent(new PickupFilterForm(client, manager.inventory));
+        lastFilterForm = filterForm;
         filterForm.setHidden(true);
         filterForm.setPosition(new FormRelativePosition(manager.inventory, 0, -PickupFilterForm.HEIGHT - 4));
 
