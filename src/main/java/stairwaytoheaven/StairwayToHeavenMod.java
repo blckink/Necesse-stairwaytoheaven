@@ -85,6 +85,10 @@ public class StairwayToHeavenMod {
         // it writes to six registries at once (mob, settler, thought, dialogue,
         // container event, packet), all of which close after init().
         stairwaytoheaven.settlement.SkyTherapy.register();
+        // Per-player pickup filter: the packet that carries it to the server.
+        // The two @ModMethodPatch classes in stairwaytoheaven.pickupfilter are
+        // found by the mod loader on their own.
+        necesse.engine.registries.PacketRegistry.registerPacket(stairwaytoheaven.pickupfilter.PacketPickupFilter.class);
         // The second one, on the shape the first one had to invent: a shop of
         // vanilla buff consumables and a heal-on-the-spot service. Four classes
         // and this line -- see SkyDoctor's own note on what a third would cost.
