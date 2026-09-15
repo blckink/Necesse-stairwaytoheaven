@@ -54,7 +54,10 @@ public class SkyfallShardObject extends SkyDecoObject {
         // small ground debris does (docs/IMPLEMENTATION_RULES.md rule 4).
         this.setTool(ToolType.ALL);
         this.setObjectHealth(1);
-        this.setLight(80, 0.50F, 0.40F);
+        // A freshly fallen star has to read as glowing from a screen away, and
+        // it is gone when the shower ends, so it may outshine the permanent
+        // starfall decoration (80): warm gold instead of that one's teal.
+        this.setLight(140, 0.12F, 0.65F);
     }
 
     @Override
