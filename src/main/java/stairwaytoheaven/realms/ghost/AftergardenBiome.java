@@ -29,7 +29,9 @@ public class AftergardenBiome extends GhostBiome {
             .addLimited(40, "lanternwidow", 2, RANGE_RANGED)
             // Fast. The hound is the reason the open garden is not a stroll,
             // and it is the only thing here that closes distance quickly.
-            .addLimited(30, "soulhound", 2, RANGE_STANDARD);
+            .addLimited(30, "soulhound", 2, RANGE_STANDARD)
+            // The fog flower: a grave bed that grew teeth and breathes mist.
+            .addLimited(30, VeilBloomMob.ID, 2, RANGE_STANDARD);
 
     @Override
     public MobSpawnTable getMobSpawnTable(Level level) {

@@ -198,6 +198,7 @@ public final class GhostRealm {
         MobRegistry.registerMob("mourningbride", MourningBrideMob.class, true);
         MobRegistry.registerMob("possessedchair", PossessedChairMob.class, true);
         MobRegistry.registerMob("soulhound", SoulHoundMob.class, true);
+        MobRegistry.registerMob(VeilBloomMob.ID, VeilBloomMob.class, true);
         MobRegistry.registerMob("coffincrawler", CoffinCrawlerMob.class, true);
     }
 

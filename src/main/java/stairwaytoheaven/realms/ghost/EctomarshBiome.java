@@ -28,7 +28,10 @@ public class EctomarshBiome extends GhostBiome {
             // the surprise from becoming a minefield.
             .addLimited(45, "coffincrawler", 2, RANGE_STANDARD)
             // Elite. One bride, drowned in her own garden.
-            .addLimited(25, "mourningbride", 1, RANGE_ELITE);
+            .addLimited(25, "mourningbride", 1, RANGE_ELITE)
+            // The fog flower. The marsh is the deepest wet ground, and a bloom
+            // breathing mist into short sightlines is what makes it a maze.
+            .addLimited(40, VeilBloomMob.ID, 2, RANGE_STANDARD);
 
     @Override
     public MobSpawnTable getMobSpawnTable(Level level) {
