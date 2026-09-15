@@ -188,7 +188,7 @@ second configuration rather than a second code path. See
 | id | kind | what it is, in one line |
 |---|---|---|
 | `soulexposure` | buff | Soul Exposure: what the Veil's fog does to anyone crossing it without the Veil Mark — one stack per second in the fog, dimming the view, then slowing you, then draining life, then killing you outright at thirteen seconds, and giving a stack back per second once you are out. |
-| `veilfog` | buff | The Veil's fog itself: an invisible marker the server puts on anyone standing past the fog line, which draws the drifting mist on their screen. It stays after the Veil Mark is earned, so the border between Steinfeld and the Ghost Realm remains something you can see rather than something you only remember. |
+| `veilfog` | buff | The Veil's fog itself: an invisible marker the server puts on anyone standing past the fog line, which draws a screen-filling wall of drifting mist on their screen (Steinfeld and Ghost Realm ground only, twice as thick on Ghost Realm ground). It stays after the Veil Mark is earned, so the border between Steinfeld and the Ghost Realm remains something you can see rather than something you only remember. |
 
 ### The fog key — chalk, circle, guide
 
@@ -286,6 +286,7 @@ own object item and its workbench recipe — are gone with it.
 | `mourningbride` | mob | Elite anchor for all three authored-site guard packs. |
 | `possessedchair` | mob | Mimic-style furniture ambusher used in marsh guard packs. |
 | `soulhound` | mob | Fast melee pursuer used where sightlines are short. |
+| `veilbloom` | mob | Veil Bloom / Nebelblüte: a rooted grave flower in the Ectomarsh and Aftergarden that breathes its own cloud of Geisternebel and bites whoever walks into it. Wears the Stabby Bush sheet and icon until it has its own art. |
 | `coffincrawler` | mob | Buried ambusher concentrated in the Ectomarsh. |
 | `spiritsteelreaver` | item | Ghost-tier two-handed greatsword, traded by the Ghost Guide and dropped in the Aftergarden. |
 | `gravewindbow` | item | Ghost-tier bow, traded by the Ghost Guide and dropped in the Aftergarden. |

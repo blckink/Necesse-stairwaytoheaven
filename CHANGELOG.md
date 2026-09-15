@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format loosely follows
 ## [Unreleased]
 
 ### Added
+- **Impenetrable Geisternebel and the Veil Bloom (Nebelblüte).** The Veil's
+  fog used to be about eleven faint wisps; it is now a few hundred large,
+  grave-green swathes across the whole screen, twice as thick on Ghost Realm
+  ground, and only drawn on Steinfeld and Ghost Realm ground. The Veil Bloom
+  is a Stabby Bush-type grave flower in the Ectomarsh and Aftergarden that
+  breathes its own cloud of fog. It still wears the Stabby Bush sheet.
 - **Striped Megashark (Gestreifter Riesenhai).** A black-and-white striped
   shark three times vanilla's size in deep overworld water (forest, plains,
   snow, desert, swamp). Pirate-Captain-class: 8000 HP, armour 40, 140-damage
