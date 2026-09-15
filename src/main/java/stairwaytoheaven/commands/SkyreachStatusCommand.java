@@ -723,19 +723,22 @@ public class SkyreachStatusCommand extends ModularChatCommand {
             // four doors sit on the axes through the origin, and the forecourt
             // lamp ring once put a candelabra on the south one -- so the way in
             // is asserted here rather than assumed. originY is the beacon row;
-            // the south wall is +7 from it, and the approach runs out to the
-            // arrival pad and past it to the lamp ring's radius.
+            // the south wall stands on the preset's door ring from it (+14
+            // since the cathedral rebuild; the old +7 found air), and the
+            // approach runs out over the arrival pad two tiles below the door
+            // and past it.
             int ox = quest.beaconX;
             int oy = quest.beaconY;
+            int doorDy = stairwaytoheaven.worldgen.WardenSpirePreset.DOOR_RING;
             StringBuilder approach = new StringBuilder();
             String doorObj = "?";
-            for (int dy = 7; dy <= 11; dy++) {
+            for (int dy = doorDy; dy <= doorDy + 4; dy++) {
                 level.regionManager.ensureTileIsLoaded(ox, oy + dy);
                 String id = level.getObject(ox, oy + dy).getStringID();
-                if (dy == 7) {
+                if (dy == doorDy) {
                     doorObj = id;
                 } else {
-                    approach.append(dy == 8 ? "" : " ").append(id);
+                    approach.append(dy == doorDy + 1 ? "" : " ").append(id);
                 }
             }
             boolean doorIsDoor = doorObj.contains("door");

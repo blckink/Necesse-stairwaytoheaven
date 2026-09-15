@@ -85,8 +85,11 @@ public class WardenSpirePreset extends Preset {
     private static final int ARM_LENGTH = 13;
     /** Half width of an arm's interior: an arm is nine tiles across inside. */
     private static final int ARM_HALF = 5;
-    /** The wall ring stands one tile beyond the hall. */
-    private static final int DOOR_RING = ARM_LENGTH + 1;     // 14
+    /**
+     * The wall ring stands one tile beyond the hall. Public because
+     * {@code skyreachstatus} looks for the grand door on it.
+     */
+    public static final int DOOR_RING = ARM_LENGTH + 1;      // 14
 
     /** The Warden's post: in front of the altar, facing the nave. */
     public static final int WARDEN_X = C, WARDEN_Y = C + 1;
