@@ -1017,6 +1017,8 @@ longroundvoyage=The Long Round
 skyvoyagelocked=That road is not open yet
 
 [ui]
+swh_pickupfilter=Pickup filter
+swh_pickupfiltertip=Choose which items you do not want to collect automatically
 skyvoyagemission=Sky voyage
 skyvoyageask=I want to send you back out on the old road
 skyvoyageselect=Where am I going, then?

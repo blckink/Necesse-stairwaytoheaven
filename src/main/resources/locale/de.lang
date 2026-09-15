@@ -1018,6 +1018,8 @@ longroundvoyage=Die Große Runde
 skyvoyagelocked=Diese Straße ist noch nicht offen
 
 [ui]
+swh_pickupfilter=Aufsammel-Filter
+swh_pickupfiltertip=Lege fest, welche Gegenstände du nicht automatisch einsammeln möchtest
 skyvoyagemission=Himmelsfahrt
 skyvoyageask=Ich will dich wieder auf die alte Straße schicken
 skyvoyageselect=Wohin denn?
