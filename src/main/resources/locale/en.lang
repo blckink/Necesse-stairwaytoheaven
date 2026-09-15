@@ -520,6 +520,8 @@ soulexposure=Soul Exposure
 
 [bufftooltip]
 soulexposuretip=The Veil is weighing you. Turn back before it finishes.
+siggicuddletip=Siggi approves of you. For today.
+peanutcuddletip=Peanut's zoomies are contagious.
 soulexposureband1=Sight failing - the fog is closing in
 soulexposureband2=Sight failing, limbs slowing
 soulexposureband3=Sight failing, limbs slowing, life draining

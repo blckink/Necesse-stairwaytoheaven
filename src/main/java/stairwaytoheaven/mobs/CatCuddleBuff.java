@@ -2,12 +2,15 @@ package stairwaytoheaven.mobs;
 
 import java.io.FileNotFoundException;
 
+import necesse.engine.localization.Localization;
+import necesse.engine.util.GameBlackboard;
 import necesse.engine.world.WorldEntity;
 import necesse.entity.mobs.buffs.ActiveBuff;
 import necesse.entity.mobs.buffs.BuffEventSubscriber;
 import necesse.entity.mobs.buffs.BuffModifiers;
 import necesse.entity.mobs.buffs.staticBuffs.Buff;
 import necesse.gfx.gameTexture.GameTexture;
+import necesse.gfx.gameTooltips.ListGameTooltips;
 
 /**
  * What a player carries away from petting a spire cat that lives in town.
@@ -54,6 +57,13 @@ public class CatCuddleBuff extends Buff {
             buff.setModifier(BuffModifiers.HEALTH_REGEN_FLAT, 0.5F);
             buff.setModifier(BuffModifiers.MINING_SPEED, 0.10F);
         }
+    }
+
+    @Override
+    public ListGameTooltips getTooltip(ActiveBuff ab, GameBlackboard blackboard) {
+        ListGameTooltips tooltips = super.getTooltip(ab, blackboard);
+        tooltips.add(Localization.translate("bufftooltip", this.siggi ? "siggicuddletip" : "peanutcuddletip"));
+        return tooltips;
     }
 
     @Override
