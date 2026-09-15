@@ -64,7 +64,12 @@ public class BossPortalObject extends GameObject {
      * ({@code src/main/resources/objects/wardenbeaconon.png}). The one thing
      * the Skyreach already draws that reads as "something happens here".
      */
-    public static final String SPRITE_SKYREACH = "objects/wardenbeaconon";
+    // 2026-09-15: every portal now wears its own 64x96 arch
+    // (objects/bossportals/<realm>.png, one picture, no sheet). The borrowed
+    // sheets below were drawn whole, so Hell showed all four Aether Forge
+    // frames plus their icons; the notes on each constant say where the old
+    // borrowed look came from.
+    public static final String SPRITE_SKYREACH = "objects/bossportals/skyreach";
 
     /**
      * Eden: the stairway sheet the Eden Gate itself wears. 32x96, mod art
@@ -72,7 +77,7 @@ public class BossPortalObject extends GameObject {
      * {@code "skystairway"} to {@code LadderDownObject}, which reads exactly
      * this file, so Eden's doorway already looks like this.
      */
-    public static final String SPRITE_EDEN = "objects/skystairwaydown";
+    public static final String SPRITE_EDEN = "objects/bossportals/eden";
 
     /**
      * Steinfeld: the seraph statue. 96x192, mod art
@@ -81,7 +86,7 @@ public class BossPortalObject extends GameObject {
      * {@code brokenangel} ({@code SteinfeldRealm}: {@code StatueObject("seraph",
      * 32, 1)}), so the portal and the key piece are the same silhouette.
      */
-    public static final String SPRITE_STEINFELD = "objects/statues/seraph";
+    public static final String SPRITE_STEINFELD = "objects/bossportals/steinfeld";
 
     /**
      * Ghost Realm: the Gloom Raven statue. 64x96, mod art
@@ -89,7 +94,7 @@ public class BossPortalObject extends GameObject {
      * statue, which {@code SkyTerrainPainter} already scatters through the
      * realms the Skyway does not reach.
      */
-    public static final String SPRITE_GHOST = "objects/statues/gloomraven";
+    public static final String SPRITE_GHOST = "objects/bossportals/ghost";
 
     /**
      * Crooked Beyond: the door. 32x96, mod art
@@ -98,7 +103,7 @@ public class BossPortalObject extends GameObject {
      * Knott's door as far as the shipped mod is concerned, which is exactly the
      * key piece §B1 names for this realm.
      */
-    public static final String SPRITE_CROOKED = "objects/veilriftdown";
+    public static final String SPRITE_CROOKED = "objects/bossportals/crooked";
 
     /**
      * Hell's portal: this mod's own Aether Forge, a lit furnace mouth.
@@ -108,7 +113,7 @@ public class BossPortalObject extends GameObject {
      * right SHAPE for the landmark that wakes Hell's guardian; the sheet it
      * wears until Hell's art pass is the sky's.
      */
-    public static final String SPRITE_HELL = "objects/aetherforge";
+    public static final String SPRITE_HELL = "objects/bossportals/hell";
 
     // ------------------------------------------------------------------
     // the worldgen lattice
@@ -215,12 +220,12 @@ public class BossPortalObject extends GameObject {
      * six literals here once puts them all back under the audit.
      */
     public static void loadBorrowedSheets() {
-        GameTexture.fromFile("objects/wardenbeaconon");
-        GameTexture.fromFile("objects/skystairwaydown");
-        GameTexture.fromFile("objects/statues/seraph");
-        GameTexture.fromFile("objects/statues/gloomraven");
-        GameTexture.fromFile("objects/veilriftdown");
-        GameTexture.fromFile("objects/aetherforge");
+        GameTexture.fromFile("objects/bossportals/skyreach");
+        GameTexture.fromFile("objects/bossportals/eden");
+        GameTexture.fromFile("objects/bossportals/steinfeld");
+        GameTexture.fromFile("objects/bossportals/ghost");
+        GameTexture.fromFile("objects/bossportals/crooked");
+        GameTexture.fromFile("objects/bossportals/hell");
     }
 
     /** The registered string ID of a realm's portal, built the one way. */

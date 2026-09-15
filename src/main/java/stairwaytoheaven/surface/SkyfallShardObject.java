@@ -48,7 +48,9 @@ public class SkyfallShardObject extends SkyDecoObject {
             new ChanceLootItem(0.10F, "aurorapetal", 1));
 
     public SkyfallShardObject() {
-        super("starfall", 32, new Color(136, 216, 206), new Rectangle(10, 16, 12, 12),
+        // Own glowing sprite since 2026-09-15; the placed starfall decoration
+        // keeps objects/starfall.
+        super("skyfallshard", 32, new Color(136, 216, 206), new Rectangle(10, 16, 12, 12),
                 "objects", "decorations");
         // Clutter, not masonry: it breaks with anything, the way vanilla's
         // small ground debris does (docs/IMPLEMENTATION_RULES.md rule 4).

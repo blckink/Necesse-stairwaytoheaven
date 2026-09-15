@@ -614,7 +614,11 @@ public class SkyWardenMob extends HumanShop {
             give(client, step.keyItemID, 1);
             give(client, step.barItemID, step.bars);
             for (String special : step.specialItemIDs) {
-                give(client, special, 1);
+                // The Skywatch set only registers when its armor sheets ship
+                // (WardenIdentity.armorSheetsExist); skip a piece that did not.
+                if (necesse.engine.registries.ItemRegistry.getItemID(special) >= 0) {
+                    give(client, special, 1);
+                }
             }
             // His doneKey line already tells the player where the piece goes
             // ("Set it down at home, where the walls are yours"), and
