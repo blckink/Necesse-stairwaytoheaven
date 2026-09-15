@@ -46,7 +46,8 @@ public final class TwilightWares {
     /** Object IDs of the furniture he sells. */
     public static final String[] DECOR = {
             "coffinbed", "eyepainting", "hauntedclock", "hangingtree", "skullcandelabra",
-            "thingbox", "shrunkenheadtrophy", "witchcauldron", "sandwormtombstone", "electricchair"
+            "thingbox", "shrunkenheadtrophy", "witchcauldron", "sandwormtombstone", "electricchair",
+            "hauntedwallclock", "magicmirror"
     };
 
     private static final String[] CATEGORY = {"objects", "furniture", "twilight"};
@@ -124,6 +125,14 @@ public final class TwilightWares {
         }
         if (AVAILABLE_DECOR.contains("shrunkenheadtrophy")) {
             ObjectRegistry.registerObject("shrunkenheadtrophy", new PaintingObject(Item.Rarity.RARE), 20.0F, true);
+        }
+        // Free-form wall pieces on the same wall-decor frame: the sheet is an
+        // unframed shape with transparent surroundings.
+        if (AVAILABLE_DECOR.contains("hauntedwallclock")) {
+            ObjectRegistry.registerObject("hauntedwallclock", new PaintingObject(Item.Rarity.RARE), 20.0F, true);
+        }
+        if (AVAILABLE_DECOR.contains("magicmirror")) {
+            ObjectRegistry.registerObject("magicmirror", new PaintingObject(Item.Rarity.EPIC), 20.0F, true);
         }
         if (AVAILABLE_DECOR.contains("hangingtree")) {
             ObjectRegistry.registerObject("hangingtree", new SkyDecoObject("hangingtree", 128, MAP_COFFIN, null, CATEGORY), 20.0F, true);
