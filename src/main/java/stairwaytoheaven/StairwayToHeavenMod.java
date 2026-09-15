@@ -61,6 +61,7 @@ public class StairwayToHeavenMod {
         SkyCloudmarbleSet.register();
         SkyMobs.register();
         SkyItems.register();
+        TwilightWares.register();
         stairwaytoheaven.realms.eden.EdenRealm.register();
         stairwaytoheaven.realms.steinfeld.SteinfeldRealm.register();
         stairwaytoheaven.realms.crooked.CrookedRealm.register();

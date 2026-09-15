@@ -1110,3 +1110,64 @@ swhdoctorintro=Setz dich. <price> Münzen, und du gehst hier heil wieder raus �
 swhdoctordoit=<price> Münzen zahlen
 swhdoctordone=Fertig. Versuch, es eine Stunde lang so zu lassen.
 swhdoctorfine=Dir fehlt nichts. Heb dir die Münzen für den Tag auf, an dem doch was fehlt.
+
+[item]
+twilightsuithead=Zwielicht-Perücke
+twilightsuitchest=Gestreifter Jenseits-Anzug
+twilightsuitboots=Abgewetzte Streifenschuhe
+skeletonhead=Grinsender Schädel
+skeletonchest=Rippen-Torso
+skeletonboots=Knochenbeine
+grinclownhead=Grinseclown-Gesicht
+grinclownchest=Rüschen-Clownsanzug
+grinclownboots=Clownsschuhe
+hockeyslasherhead=Schlitzer-Hockeymaske
+hockeyslasherchest=Zerrissene Schlitzerjacke
+hockeyslasherboots=Schlitzerstiefel
+dreamstalkerhead=Traumjäger-Hut
+dreamstalkerchest=Geringelter Albtraumpullover
+dreamstalkerboots=Traumjäger-Hose
+screamrobehead=Schreimaske
+screamrobechest=Zerfetzte Schreikutte
+screamrobeboots=Schattenfüße
+pincushionhead=Nadelkissenkopf
+pincushionchest=Lederrobe mit Haken
+pincushionboots=Lederstiefel mit Haken
+widowgownhead=Witwenschleier
+widowgownchest=Witwenkleid
+widowgownboots=Spitze Witwenschuhe
+stitchedmonsterhead=Genähter Monsterkopf
+stitchedmonsterchest=Flickenjackett
+stitchedmonsterboots=Monster-Plateaustiefel
+pumpkinscarecrowhead=Kürbis-Sackkopf
+pumpkinscarecrowchest=Stroh-Vogelscheuchenhemd
+pumpkinscarecrowboots=Strohstiefel
+hauntedpuppethead=Verfluchter Puppenkopf
+hauntedpuppetchest=Puppen-Latzhose
+hauntedpuppetboots=Puppen-Turnschuhe
+
+[object]
+coffinbed=Sargbett
+eyepainting=Wachendes Auge
+hauntedclock=Spukuhr
+hangingtree=Galgenbaum
+skullcandelabra=Totenkopf-Kandelaber
+thingbox=Händchen-Kiste
+shrunkenheadtrophy=Schrumpfkopf-Trophäe
+witchcauldron=Hexenkessel
+sandwormtombstone=Sandwurm-Grabstein
+electricchair=Elektrischer Stuhl
+
+[itemcategory]
+twilight=Zwielicht
+
+[mob]
+twilightmerchant=Zwielichtiger Händler
+twilightmerchanthuman=Zwielichtiger Händler
+
+[misc]
+twilightmerchanttalk1=Psst. Hier drüben. Nein, der andere Schatten.
+twilightmerchanttalk2=Alles gebraucht. Die Vorbesitzer beschweren sich nicht mehr.
+twilightmerchanttalk3=Sag dreimal meinen Namen und ich geb dir Rabatt. Lieber doch nicht.
+twilightmerchanttalk4=Das Sargbett? Schläft sich wie tot. Garantiert.
+twilightmerchanttalk5=Ich bin nur bis Sonnenuntergang da. Oder -aufgang. Vergess ich immer.

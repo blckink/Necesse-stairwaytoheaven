@@ -1109,3 +1109,64 @@ swhdoctorintro=Sit down. <price> coins and you walk out of here whole - I do not
 swhdoctordoit=Pay <price> coins
 swhdoctordone=Done. Try to keep it that way for an hour.
 swhdoctorfine=There is nothing wrong with you. Save your coins for when there is.
+
+[item]
+twilightsuithead=Twilight Wig
+twilightsuitchest=Striped Afterlife Suit
+twilightsuitboots=Scuffed Striped Shoes
+skeletonhead=Grinning Skull
+skeletonchest=Ribcage Torso
+skeletonboots=Bony Legs
+grinclownhead=Grin Clown Face
+grinclownchest=Ruffled Clown Suit
+grinclownboots=Clown Shoes
+hockeyslasherhead=Slasher Hockey Mask
+hockeyslasherchest=Torn Slasher Jacket
+hockeyslasherboots=Slasher Boots
+dreamstalkerhead=Dream Stalker Hat
+dreamstalkerchest=Striped Nightmare Sweater
+dreamstalkerboots=Dream Stalker Trousers
+screamrobehead=Scream Mask
+screamrobechest=Tattered Scream Robe
+screamrobeboots=Shadow Feet
+pincushionhead=Pincushion Head
+pincushionchest=Hooked Leather Robe
+pincushionboots=Hooked Leather Boots
+widowgownhead=Widow's Veil
+widowgownchest=Widow's Gown
+widowgownboots=Widow's Pointed Shoes
+stitchedmonsterhead=Stitched Monster Head
+stitchedmonsterchest=Patchwork Jacket
+stitchedmonsterboots=Platform Monster Boots
+pumpkinscarecrowhead=Pumpkin Sack Head
+pumpkinscarecrowchest=Straw Scarecrow Shirt
+pumpkinscarecrowboots=Straw Boots
+hauntedpuppethead=Haunted Puppet Head
+hauntedpuppetchest=Puppet Overalls
+hauntedpuppetboots=Puppet Sneakers
+
+[object]
+coffinbed=Coffin Bed
+eyepainting=Watching Eye
+hauntedclock=Haunted Clock
+hangingtree=Hanging Tree
+skullcandelabra=Skull Candelabra
+thingbox=Handy Box
+shrunkenheadtrophy=Shrunken Head Trophy
+witchcauldron=Witch's Cauldron
+sandwormtombstone=Sandworm Tombstone
+electricchair=Electric Chair
+
+[itemcategory]
+twilight=Twilight
+
+[mob]
+twilightmerchant=Twilight Merchant
+twilightmerchanthuman=Twilight Merchant
+
+[misc]
+twilightmerchanttalk1=Psst. Over here. No, the other shadow.
+twilightmerchanttalk2=Everything's used. Previous owners don't complain anymore.
+twilightmerchanttalk3=Say my name three times and I'll give you a discount. Don't, actually.
+twilightmerchanttalk4=The coffin bed? Sleeps like the dead. Guaranteed.
+twilightmerchanttalk5=I'm only here till sundown. Or sunup. I forget which.
