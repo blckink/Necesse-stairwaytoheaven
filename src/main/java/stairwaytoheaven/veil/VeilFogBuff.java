@@ -8,7 +8,9 @@ import necesse.entity.mobs.buffs.staticBuffs.Buff;
 import necesse.entity.particle.Particle;
 import necesse.gfx.GameResources;
 import necesse.level.maps.Level;
+import necesse.level.maps.biomes.Biome;
 import stairwaytoheaven.realms.ghost.GhostBiome;
+import stairwaytoheaven.realms.steinfeld.SteinfeldBiome;
 
 /**
  * The fog itself — {@code docs/WORLD_DESIGN.md} §8's "permanent fog effect".
@@ -122,7 +124,15 @@ public class VeilFogBuff extends Buff {
         if (!owner.isVisible()) {
             return;
         }
-        boolean deep = owner.getLevel().getBiome(owner.getTileX(), owner.getTileY()) instanceof GhostBiome;
+        // VeilRegion has no far edge, so the buff also rides along into
+        // Crooked Beyond and Hell. The Geisternebel belongs to the Steinfeld
+        // side of the line and the Ghost Realm behind it; deeper bands keep
+        // their own look.
+        Biome biome = owner.getLevel().getBiome(owner.getTileX(), owner.getTileY());
+        boolean deep = biome instanceof GhostBiome;
+        if (!deep && !(biome instanceof SteinfeldBiome)) {
+            return;
+        }
         int attempts = deep ? FOG_ATTEMPTS * DEEP_MULTIPLIER : FOG_ATTEMPTS;
         for (int i = 0; i < attempts; i++) {
             if (!GameRandom.globalRandom.getChance(FOG_CHANCE)) {
