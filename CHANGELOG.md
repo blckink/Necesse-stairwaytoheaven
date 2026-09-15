@@ -28,6 +28,14 @@ All notable changes to this project are documented here. Format loosely follows
   answer to vanilla's sarcophagus: Beetlejuice stripes, moss and a grinning
   face with green eyes, on vanilla's SarcophagusObject in all four
   rotations, converted from the player's own four-view reference.
+- **Twilight Merchant art, third pass (night run).** New shaded heads for
+  all eleven outfits (skull, clown, hockey mask, burned face, scream hood,
+  pinhead, widow, Frankenstein, pumpkin sack, puppet, afterlife hair); new
+  legs for scream robe, widow's gown, pincushion, haunted puppet and hockey
+  slasher; new Hanging Tree, Witch Cauldron, Sandworm Tombstone, Thing Box;
+  the Haunted Mirror now ships as a two-tile wall piece. Torsos, the other
+  legs, coffin bed, clock, candelabra, electric chair, twisted wall clock and
+  shrunken heads failed review and keep their previous sheets.
 - **Eye in the Wall (Auge in der Wand).** The first of the Twilight Merchant's
   free-form wall pieces: a bloodshot eye bulging out of the wall, on vanilla's
   two-tile large painting frame, converted from the player's own reference
