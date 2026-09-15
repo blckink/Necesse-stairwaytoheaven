@@ -82,9 +82,11 @@ public class SkystoneGolemMob extends HostileMob {
         this.setArmor(ARMOR);
         this.setKnockbackModifier(0.25F);
         // vanilla spawn-light rules: lit areas are safe (see ZephyrRayMob note)
-        this.collision = new Rectangle(-12, -8, 24, 16);
-        this.hitBox = new Rectangle(-16, -14, 32, 28);
-        this.selectBox = new Rectangle(-16, -44, 32, 52);
+        // Boxes follow the 128px sheet: the body is ~86x100 px, as big as
+        // vanilla's ash and furnace golems, not the 64px crystal golem.
+        this.collision = new Rectangle(-18, -12, 36, 24);
+        this.hitBox = new Rectangle(-30, -36, 60, 48);
+        this.selectBox = new Rectangle(-32, -96, 64, 104);
     }
 
     @Override
@@ -125,15 +127,16 @@ public class SkystoneGolemMob extends HostileMob {
             return;
         }
         GameLight light = level.getLightLevel(getTileCoordinate(x), getTileCoordinate(y));
-        int drawX = camera.getDrawX(x) - 32;
-        int drawY = camera.getDrawY(y) - 51;
+        // 128px cells; feet sit at cell row 116, drawn 7px below the mob's y.
+        int drawX = camera.getDrawX(x) - 64;
+        int drawY = camera.getDrawY(y) - 109;
         int dir = this.getDir();
         Point sprite = this.getAnimSprite(x, y, dir);
         drawY += this.getBobbing(x, y);
         drawY += level.getTile(getTileCoordinate(x), getTileCoordinate(y)).getMobSinkingAmount(this);
         final TextureDrawOptionsEnd drawOptions = texture
                 .initDraw()
-                .sprite(sprite.x, sprite.y, 64)
+                .sprite(sprite.x, sprite.y, 128)
                 .startGlowOptions(this, (long) this.getID())
                 .light(light)
                 .applyEnemyTracker(this, perspective)

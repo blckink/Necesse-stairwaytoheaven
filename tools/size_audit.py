@@ -71,8 +71,8 @@ PAIRS = [
      "mobs/sandworm.png", ("auto", 64, 64), "worm mob (densest 64px frame)"),
     ("mobs/galehound.png", ("auto", 64, 64),
      "mobs/boar.png", ("auto", 64, 64), "quadruped mob (densest 64px frame)"),
-    ("mobs/skystonegolem.png", ("auto", 64, 64),
-     "mobs/boar.png", ("auto", 64, 64), "heavy mob (densest 64px frame)"),
+    ("mobs/skystonegolem.png", ("auto", 128, 128),
+     "mobs/ashgolem.png", ("auto", 128, 128), "big golem (densest 128px frame)"),
     # The Beetle Outlands' three. Supplied art rather than generated, but ours
     # all the same, and each answers to the vanilla sheet it replaced cell for
     # cell -- same dimensions, same 6x5 (or 8x5) layout, same gib strip. Nothing
