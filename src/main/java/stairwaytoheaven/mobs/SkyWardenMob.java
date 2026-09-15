@@ -445,8 +445,9 @@ public class SkyWardenMob extends HumanShop {
     private enum RegionKey {
         SKYREACH(stairwaytoheaven.worldgen.RealmDepth.REALM_SKYREACH,
                 stairwaytoheaven.quest.SkyreachKeyQuest.class,
-                "regionkeyskyreach", "stormsteelbar", 6,
-                "wardenkeyaskskyreach", "wardenkeydoneskyreach") {
+                "regionkeyskyreach", "stormsteelbar", 4,
+                "wardenkeyaskskyreach", "wardenkeydoneskyreach",
+                "stormdisc", "skywatchhood") {
             @Override
             stairwaytoheaven.quest.SkyreachKeyQuest newQuest() {
                 return new stairwaytoheaven.quest.SkyreachKeyQuest();
@@ -454,8 +455,9 @@ public class SkyWardenMob extends HumanShop {
         },
         EDEN(stairwaytoheaven.worldgen.RealmDepth.REALM_EDEN,
                 stairwaytoheaven.quest.EdenKeyQuest.class,
-                "regionkeyeden", "stormsteelbar", 8,
-                "wardenkeyaskeden", "wardenkeydoneeden") {
+                "regionkeyeden", "stormsteelbar", 5,
+                "wardenkeyaskeden", "wardenkeydoneeden",
+                "galehowl", "wardenmantle") {
             @Override
             stairwaytoheaven.quest.EdenKeyQuest newQuest() {
                 return new stairwaytoheaven.quest.EdenKeyQuest();
@@ -463,8 +465,9 @@ public class SkyWardenMob extends HumanShop {
         },
         STEINFELD(stairwaytoheaven.worldgen.RealmDepth.REALM_STEINFELD,
                 stairwaytoheaven.quest.SteinfeldKeyQuest.class,
-                "regionkeysteinfeld", "stormsteelbar", 10,
-                "wardenkeyasksteinfeld", "wardenkeydonesteinfeld") {
+                "regionkeysteinfeld", "stormsteelbar", 6,
+                "wardenkeyasksteinfeld", "wardenkeydonesteinfeld",
+                "tempestedge", "wardenboots") {
             @Override
             stairwaytoheaven.quest.SteinfeldKeyQuest newQuest() {
                 return new stairwaytoheaven.quest.SteinfeldKeyQuest();
@@ -472,8 +475,9 @@ public class SkyWardenMob extends HumanShop {
         },
         GHOST(stairwaytoheaven.worldgen.RealmDepth.REALM_GHOST,
                 stairwaytoheaven.quest.GhostKeyQuest.class,
-                "regionkeyghostrealm", "spiritsteelbar", 10,
-                "wardenkeyaskghostrealm", "wardenkeydoneghostrealm") {
+                "regionkeyghostrealm", "spiritsteelbar", 6,
+                "wardenkeyaskghostrealm", "wardenkeydoneghostrealm",
+                "skyreave", "stormsteelvambrace") {
             @Override
             stairwaytoheaven.quest.GhostKeyQuest newQuest() {
                 return new stairwaytoheaven.quest.GhostKeyQuest();
@@ -481,8 +485,9 @@ public class SkyWardenMob extends HumanShop {
         },
         CROOKED(stairwaytoheaven.worldgen.RealmDepth.REALM_CROOKED,
                 stairwaytoheaven.quest.CrookedKeyQuest.class,
-                "regionkeycrookedbeyond", "spiritsteelbar", 12,
-                "wardenkeyaskcrookedbeyond", "wardenkeydonecrookedbeyond") {
+                "regionkeycrookedbeyond", "spiritsteelbar", 8,
+                "wardenkeyaskcrookedbeyond", "wardenkeydonecrookedbeyond",
+                "prismcaller", "auroralocket") {
             @Override
             stairwaytoheaven.quest.CrookedKeyQuest newQuest() {
                 return new stairwaytoheaven.quest.CrookedKeyQuest();
@@ -490,8 +495,9 @@ public class SkyWardenMob extends HumanShop {
         },
         HELL(stairwaytoheaven.worldgen.RealmDepth.REALM_HELL,
                 stairwaytoheaven.quest.HellKeyQuest.class,
-                "regionkeyhell", "spiritsteelbar", 16,
-                "wardenkeyaskhell", "wardenkeydonehell") {
+                "regionkeyhell", "spiritsteelbar", 10,
+                "wardenkeyaskhell", "wardenkeydonehell",
+                "thunderhead", "zephyrharness") {
             @Override
             stairwaytoheaven.quest.HellKeyQuest newQuest() {
                 return new stairwaytoheaven.quest.HellKeyQuest();
@@ -508,9 +514,14 @@ public class SkyWardenMob extends HumanShop {
         final int bars;
         final String askKey;
         final String doneKey;
+        /** One of each, on top of the key and the bars: a weapon and a piece
+         *  to wear, so the six rungs do not all pay out the same steel. Every
+         *  ID is a registered SkyItems/SkyArsenal item with its own sprite. */
+        final String[] specialItemIDs;
 
         RegionKey(int realm, Class<? extends necesse.engine.quest.DeliverItemsQuest> questClass,
-                String keyItemID, String barItemID, int bars, String askKey, String doneKey) {
+                String keyItemID, String barItemID, int bars, String askKey, String doneKey,
+                String... specialItemIDs) {
             this.realm = realm;
             this.questClass = questClass;
             this.keyItemID = keyItemID;
@@ -518,6 +529,7 @@ public class SkyWardenMob extends HumanShop {
             this.bars = bars;
             this.askKey = askKey;
             this.doneKey = doneKey;
+            this.specialItemIDs = specialItemIDs;
         }
 
         abstract necesse.engine.quest.DeliverItemsQuest newQuest();
@@ -601,6 +613,9 @@ public class SkyWardenMob extends HumanShop {
             SkywatchWorldData.markRegionKeyEarned(server, step.realm);
             give(client, step.keyItemID, 1);
             give(client, step.barItemID, step.bars);
+            for (String special : step.specialItemIDs) {
+                give(client, special, 1);
+            }
             // His doneKey line already tells the player where the piece goes
             // ("Set it down at home, where the walls are yours"), and
             // RegionKeyObject.onPlaceFail answers the same question again, in
