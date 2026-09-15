@@ -20,6 +20,7 @@ import necesse.level.gameObject.furniture.BedObject;
 import necesse.level.gameObject.furniture.CandelabraObject;
 import necesse.level.gameObject.furniture.ChairObject;
 import necesse.level.gameObject.furniture.ClockObject;
+import necesse.level.gameObject.happinessObject.SarcophagusObject;
 import necesse.level.maps.levelData.settlementData.ServerSettlementData;
 import necesse.level.maps.levelData.settlementData.SettlementVisitorOdds;
 import necesse.level.maps.levelData.settlementData.SettlementVisitorSpawner;
@@ -48,7 +49,7 @@ public final class TwilightWares {
     public static final String[] DECOR = {
             "coffinbed", "hauntedclock", "hangingtree", "skullcandelabra",
             "thingbox", "witchcauldron", "sandwormtombstone", "electricchair",
-            "walleye", "hauntedwallclock", "magicmirror", "shrunkenheads"
+            "walleye", "hauntedwallclock", "magicmirror", "shrunkenheads", "twilightsarcophagus"
     };
 
     /**
@@ -128,6 +129,12 @@ public final class TwilightWares {
         }
         if (AVAILABLE_DECOR.contains("thingbox")) {
             ObjectRegistry.registerObject("thingbox", new TableDecorationObject("thingbox", MAP_COFFIN, 16, 14), 20.0F, true);
+        }
+        // The merchant's own sarcophagus on vanilla's SarcophagusObject: one
+        // 32 px column per rotation in objects/<id>.png, standing on its tile.
+        if (AVAILABLE_DECOR.contains("twilightsarcophagus")) {
+            ObjectRegistry.registerObject("twilightsarcophagus",
+                    new SarcophagusObject("twilightsarcophagus", MAP_COFFIN, CATEGORY), 50.0F, true);
         }
         // PaintingObject reads objects/paintings/<id>.png (32x128, one 32x32
         // cell per wall direction) and hangs on WALL_DECOR.
