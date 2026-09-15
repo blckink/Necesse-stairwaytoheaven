@@ -6,6 +6,16 @@ All notable changes to this project are documented here. Format loosely follows
 ## [Unreleased]
 
 ### Added
+- **The Twilight Merchant (Zwielichtiger Händler).** A settlement visitor on
+  the Exotic Merchant's frame, in a Beetlejuice-striped suit. Each visit
+  rolls three of eleven cosmetic outfits (head, chest, boots: striped
+  afterlife suit, skeleton, grin clown, hockey slasher, dream stalker, scream
+  robe, pincushion, widow's gown, stitched monster, pumpkin scarecrow,
+  haunted puppet) and five of ten gloomy furniture pieces (coffin bed that
+  settlers can be assigned to, watching-eye painting, haunted clock, hanging
+  tree, skull candelabra, handy box, shrunken-head trophy, witch's cauldron,
+  sandworm tombstone, electric chair). None of it is craftable.
+  `TwilightWares` registers only wares whose sheets are in the jar.
 - **Siggi and Peanut have a life in town.** Once a coaxed cat lives in a
   basket the player placed, petting it gives a one-in-game-day buff (Siggi's
   Purr: +8% crit, +5% damage, +4 armour; Peanut's Purr: +12% speed, +0.5
