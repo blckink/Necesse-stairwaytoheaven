@@ -37,16 +37,16 @@ public class TwilightMerchantHumanMob extends HumanShop {
         this.setSwimSpeed(1.0F);
         this.equipmentInventory.setItem(6, new InventoryItem("ironsword"));
 
-        for (String outfit : TwilightWares.OUTFITS) {
-            SellingShopItem.ShopItemRequirement brought = picked("decidedOutfits", TwilightWares.OUTFITS,
+        for (String outfit : TwilightWares.AVAILABLE_OUTFITS) {
+            SellingShopItem.ShopItemRequirement brought = picked("decidedOutfits", TwilightWares.AVAILABLE_OUTFITS,
                     OUTFITS_PER_VISIT, outfit);
             this.shop.addSellingItem(outfit + "head", new SellingShopItem()).setRandomPrice(300, 500).addRequirement(brought);
             this.shop.addSellingItem(outfit + "chest", new SellingShopItem()).setRandomPrice(350, 600).addRequirement(brought);
             this.shop.addSellingItem(outfit + "boots", new SellingShopItem()).setRandomPrice(250, 450).addRequirement(brought);
         }
-        for (String decor : TwilightWares.DECOR) {
+        for (String decor : TwilightWares.AVAILABLE_DECOR) {
             this.shop.addSellingItem(decor, new SellingShopItem()).setRandomPrice(400, 900)
-                    .addRequirement(picked("decidedDecor", TwilightWares.DECOR, DECOR_PER_VISIT, decor));
+                    .addRequirement(picked("decidedDecor", TwilightWares.AVAILABLE_DECOR, DECOR_PER_VISIT, decor));
         }
     }
 
@@ -55,12 +55,11 @@ public class TwilightMerchantHumanMob extends HumanShop {
      * {@code pool} for this shop roll. The draw happens on the first call and
      * is kept in the blackboard, so all entries agree on one shelf.
      */
-    private static SellingShopItem.ShopItemRequirement picked(String key, String[] pool, int count, String id) {
+    private static SellingShopItem.ShopItemRequirement picked(String key, java.util.List<String> pool, int count, String id) {
         return (GameRandom random, ServerClient client, HumanShop mob, GameBlackboard blackboard) -> {
             String decided = blackboard.getString(key);
             if (decided == null) {
-                ArrayList<String> shuffled = new ArrayList<>();
-                Collections.addAll(shuffled, pool);
+                ArrayList<String> shuffled = new ArrayList<>(pool);
                 Collections.shuffle(shuffled, random);
                 decided = "," + String.join(",", shuffled.subList(0, Math.min(count, shuffled.size()))) + ",";
                 blackboard.set(key, decided);

@@ -4,6 +4,7 @@ import necesse.gfx.HumanLook;
 import necesse.gfx.drawOptions.human.HumanDrawOptions;
 import necesse.inventory.InventoryItem;
 import necesse.level.maps.levelData.settlementData.settler.Settler;
+import stairwaytoheaven.TwilightWares;
 
 /**
  * Settlement type of the Twilight Merchant, after vanilla's
@@ -19,6 +20,11 @@ public class TwilightMerchantSettler extends Settler {
 
     @Override
     public void setDefaultArmor(HumanDrawOptions drawOptions, int settlerSeed, HumanLook look, boolean customLook) {
+        // Until his own suit is drawn he visits in his plain body rather than
+        // in an item that is not registered.
+        if (!TwilightWares.AVAILABLE_OUTFITS.contains("twilightsuit")) {
+            return;
+        }
         drawOptions.helmet(new InventoryItem("twilightsuithead"));
         drawOptions.chestplate(new InventoryItem("twilightsuitchest"));
         drawOptions.boots(new InventoryItem("twilightsuitboots"));

@@ -54,7 +54,29 @@ public final class TwilightWares {
     private static final Color MAP_BONE = new Color(214, 206, 180);
     private static final Color MAP_SLIME = new Color(120, 200, 60);
 
+    /**
+     * The outfits and furniture whose sheets are actually in the jar. The
+     * wares arrive in batches as they are drawn; an entry without its sheet is
+     * neither registered nor sold, so the merchant never shelves a missing
+     * texture. IDs only ever get added, so a later batch is save-compatible.
+     */
+    public static final java.util.List<String> AVAILABLE_OUTFITS = new java.util.ArrayList<>();
+    public static final java.util.List<String> AVAILABLE_DECOR = new java.util.ArrayList<>();
+
     private TwilightWares() {
+    }
+
+    private static boolean inJar(String path) {
+        return TwilightWares.class.getClassLoader().getResource(path) != null;
+    }
+
+    public static boolean outfitDrawn(String outfit) {
+        return inJar("player/armor/" + outfit + "head.png") && inJar("player/armor/" + outfit + "chest.png")
+                && inJar("player/armor/" + outfit + "arms_left.png") && inJar("player/armor/" + outfit + "boots.png");
+    }
+
+    private static boolean decorDrawn(String id) {
+        return inJar("objects/" + id + ".png") || inJar("objects/paintings/" + id + ".png");
     }
 
     public static void register() {
@@ -62,25 +84,57 @@ public final class TwilightWares {
         ItemCategory.craftingManager.createCategory("E-B-Q", "objects", "furniture", "twilight");
 
         for (String outfit : OUTFITS) {
+            if (outfitDrawn(outfit)) {
+                AVAILABLE_OUTFITS.add(outfit);
+            }
+        }
+        for (String decor : DECOR) {
+            if (decorDrawn(decor)) {
+                AVAILABLE_DECOR.add(decor);
+            }
+        }
+
+        for (String outfit : AVAILABLE_OUTFITS) {
             ItemRegistry.registerItem(outfit + "head", new Head(outfit + "head"), 0.0F, true);
             ItemRegistry.registerItem(outfit + "chest", new Chest(outfit), 0.0F, true);
             ItemRegistry.registerItem(outfit + "boots", new Boots(outfit + "boots"), 0.0F, true);
         }
 
         // A real BedObject, so a settler can be assigned to the coffin.
-        BedObject.registerBed("coffinbed", "coffinbed", MAP_COFFIN, 100.0F, CATEGORY);
-        ObjectRegistry.registerObject("hauntedclock", new ClockObject("hauntedclock", MAP_COFFIN, CATEGORY), 10.0F, true);
-        ObjectRegistry.registerObject("skullcandelabra",
-                new CandelabraObject("skullcandelabra", MAP_BONE, 50.0F, 0.12F, CATEGORY), 10.0F, true);
-        ObjectRegistry.registerObject("electricchair", new ChairObject("electricchair", MAP_COFFIN, CATEGORY), 5.0F, true);
-        ObjectRegistry.registerObject("thingbox", new TableDecorationObject("thingbox", MAP_COFFIN, 16, 14), 20.0F, true);
-        // PaintingObject reads objects/paintings/<id>.png and hangs on WALL_DECOR.
-        ObjectRegistry.registerObject("eyepainting", new PaintingObject(Item.Rarity.RARE), 20.0F, true);
-        ObjectRegistry.registerObject("shrunkenheadtrophy", new PaintingObject(Item.Rarity.RARE), 20.0F, true);
-        ObjectRegistry.registerObject("hangingtree", new SkyDecoObject("hangingtree", 128, MAP_COFFIN, null, CATEGORY), 20.0F, true);
-        ObjectRegistry.registerObject("witchcauldron", new SkyDecoObject("witchcauldron", 64, MAP_SLIME, null, CATEGORY), 20.0F, true);
-        ObjectRegistry.registerObject("sandwormtombstone",
-                new SkyDecoObject("sandwormtombstone", 32, MAP_BONE, null, CATEGORY), 20.0F, true);
+        if (AVAILABLE_DECOR.contains("coffinbed")) {
+            BedObject.registerBed("coffinbed", "coffinbed", MAP_COFFIN, 100.0F, CATEGORY);
+        }
+        if (AVAILABLE_DECOR.contains("hauntedclock")) {
+            ObjectRegistry.registerObject("hauntedclock", new ClockObject("hauntedclock", MAP_COFFIN, CATEGORY), 10.0F, true);
+        }
+        if (AVAILABLE_DECOR.contains("skullcandelabra")) {
+            ObjectRegistry.registerObject("skullcandelabra",
+                    new CandelabraObject("skullcandelabra", MAP_BONE, 50.0F, 0.12F, CATEGORY), 10.0F, true);
+        }
+        if (AVAILABLE_DECOR.contains("electricchair")) {
+            ObjectRegistry.registerObject("electricchair", new ChairObject("electricchair", MAP_COFFIN, CATEGORY), 5.0F, true);
+        }
+        if (AVAILABLE_DECOR.contains("thingbox")) {
+            ObjectRegistry.registerObject("thingbox", new TableDecorationObject("thingbox", MAP_COFFIN, 16, 14), 20.0F, true);
+        }
+        // PaintingObject reads objects/paintings/<id>.png (32x128, one 32x32
+        // cell per wall direction) and hangs on WALL_DECOR.
+        if (AVAILABLE_DECOR.contains("eyepainting")) {
+            ObjectRegistry.registerObject("eyepainting", new PaintingObject(Item.Rarity.RARE), 20.0F, true);
+        }
+        if (AVAILABLE_DECOR.contains("shrunkenheadtrophy")) {
+            ObjectRegistry.registerObject("shrunkenheadtrophy", new PaintingObject(Item.Rarity.RARE), 20.0F, true);
+        }
+        if (AVAILABLE_DECOR.contains("hangingtree")) {
+            ObjectRegistry.registerObject("hangingtree", new SkyDecoObject("hangingtree", 128, MAP_COFFIN, null, CATEGORY), 20.0F, true);
+        }
+        if (AVAILABLE_DECOR.contains("witchcauldron")) {
+            ObjectRegistry.registerObject("witchcauldron", new SkyDecoObject("witchcauldron", 64, MAP_SLIME, null, CATEGORY), 20.0F, true);
+        }
+        if (AVAILABLE_DECOR.contains("sandwormtombstone")) {
+            ObjectRegistry.registerObject("sandwormtombstone",
+                    new SkyDecoObject("sandwormtombstone", 32, MAP_BONE, null, CATEGORY), 20.0F, true);
+        }
 
         MobRegistry.registerMob("twilightmerchanthuman", TwilightMerchantHumanMob.class, false);
         SettlerRegistry.registerSettler("twilightmerchant", new TwilightMerchantSettler());
