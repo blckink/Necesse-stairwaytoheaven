@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format loosely follows
 ## [Unreleased]
 
 ### Added
+- **Pickup filter (Aufsammel-Filter) is back.** A gear button beside the
+  inventory's sort buttons opens a chest-style category/item menu per player;
+  filtered items stay on the ground instead of flying to that player (own
+  death drops and quest items are never filtered). It had been finished on
+  `feature/pickup-filter` but never merged, so jars built from `master`
+  dropped it.
 - **Region keys pay gear, not just steel.** Each of the Warden's six key
   quests now adds a weapon and a piece to wear on top of the key: Skyreach
   Stormdisc + Skywatch Hood, Eden Galehowl + Warden's Mantle, Steinfeld
