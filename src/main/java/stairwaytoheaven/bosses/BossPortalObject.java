@@ -266,8 +266,9 @@ public class BossPortalObject extends GameObject {
         // Fixed rather than derived from the sheet: loadTextures() never runs on
         // a dedicated server, so `texture` is null there and a hitbox computed
         // from it would be a crash on the one machine that matters. One tile
-        // plus one tile of headroom covers every borrowed sheet's footprint.
-        this.hoverHitbox = new Rectangle(0, -32, 32, 64);
+        // Sized to the 64x96 arches in objects/bossportals/, drawn centred on
+        // the tile and standing on its bottom edge (addDrawables).
+        this.hoverHitbox = new Rectangle(-16, -64, 64, 96);
         this.setItemCategory("objects", "misc");
         this.setCraftingCategory("objects", "misc");
     }
