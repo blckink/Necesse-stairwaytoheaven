@@ -311,6 +311,16 @@ catbasketready=The basket is ready, and empty.\nSiggi and Peanut are still up in
 catbasketmovedin=The cats know a good basket when they see one:\n<count> cat(s) just moved in at <x>, <y>.
 catbasketmoved=The newest basket wins:\n<count> cat(s) left the old one and moved into this one at <x>, <y>.
 catbasketremoved=The basket is gone, so the cats went back to the basket in the Warden's Spire.\nPut another one down and they will come to it.
+siggipetted=Siggi leans into your hand and rumbles like a small thunderstorm.\nSiggi's Purr: sharper and tougher for a whole day.
+peanutpetted=Peanut flops over, all four paws in the air.\nPeanut's Purr: quicker on your feet for a whole day.
+siggigiftfish=*drops a roasted fish at your feet* Mrrrp.
+siggigiftfeather=*presents a raven feather. Enormously proud.*
+peanutgiftfish=*drags in a whole salmon. Nobody knows from where.*
+peanutgiftcheese=*has "found" some cheese. Do not ask.*
+siggihunt=*stares at a moth... wiggles... POUNCE!* ...missed.
+peanutbutterfly=*chases a butterfly in circles, and loses*
+siggipoop=*digs a hole, keeps eye contact the whole time*\n(it left fertilizer)
+peanutpoop=*leaves a little something behind the flowers*\n(it left fertilizer)
 wardentalk1=The wind up here has no manners. You get used to it.
 wardentalk2=Four hundred years the Skywatch kept this sky. Now it keeps me.
 wardentalk3=Every lamp in that tower, I lit myself. Twice, some nights.
@@ -656,7 +666,7 @@ swhspeaktocaspern=Speak with Caspern.
 // --- Mr. Knott, the Crooked chain (continued) ---
 swhcrookeddoortitle=Convince the Door
 swhcrookeddoordesc=Mr. Knott has spent longer than anyone believing one of these doors can be convinced to lead somewhere. Bring him what a door like that would need.
-swhcrookeddoorreward=Zephyr Harness + 12x Stormsteel Bar + 6x Reality Shard
+swhcrookeddoorreward=Zephyr Harness + 12x Spiritsteel Bar + 6x Reality Shard
 
 // ============================================================
 // Crooked Beyond
@@ -911,6 +921,8 @@ bossportalcrookedbeyond=Crooked Summoning Stone
 bossportalhell=Infernal Summoning Forge
 [buff]
 incursionpressure=Incursion Pressure
+siggicuddle=Siggi's Purr
+peanutcuddle=Peanut's Purr
 [misc]
 bossportallocked=The stone is cold.\nBuild this realm's key piece at home, and it will answer.
 bossportalbusy=Its guardian is already awake.\nFinish that fight first.

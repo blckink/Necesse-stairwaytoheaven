@@ -163,6 +163,10 @@ public abstract class SpireCatMob extends CritterMob {
         ServerClient client = player.getServerClient();
         Level level = this.getLevel();
 
+        if (this.livesInTown(level)) {
+            this.pet(player, client);
+            return;
+        }
         if (this.isCoaxedHome()) {
             // He lives here now. Saying so matters: the whole reason a player
             // reported "Siggi gefunden und Snack gegeben aber danach nie wieder
@@ -241,6 +245,85 @@ public abstract class SpireCatMob extends CritterMob {
         stairwaytoheaven.quest.SkyMapMarkers.onLocator(client, quest);
         this.bubble("wardencatfound1");
         this.sendHome(level);
+    }
+
+    // ------------------------------------------------------------------
+    // life in town
+    //
+    // A cat whose basket the player put down, standing on that basket's level,
+    // "lives in town". Only there does it do anything besides sleep: petting
+    // gives a one-day buff, and now and then it brings a gift, chases a moth or
+    // leaves fertilizer behind. The spire basket in the Skyreach stays quiet on
+    // purpose — the reward is for giving them a home, not for coaxing them.
+
+    /** One town-life roll per second (20 server ticks). */
+    private static final int TOWN_ROLL_TICKS = 20;
+    /** 1 in 480 per second: about one moment every eight minutes per cat. */
+    private static final int TOWN_MOMENT_ODDS = 480;
+
+    private int townLifeTicks;
+
+    private boolean livesInTown(Level level) {
+        if (level == null || !level.isServer() || !this.isCoaxedHome()) {
+            return false;
+        }
+        stairwaytoheaven.quest.CatHome.Spot home = stairwaytoheaven.quest.CatHome.placed(level.getServer());
+        return home != null && home.isOn(level);
+    }
+
+    @Override
+    public void serverTick() {
+        super.serverTick();
+        if (++this.townLifeTicks < TOWN_ROLL_TICKS) {
+            return;
+        }
+        this.townLifeTicks = 0;
+        Level level = this.getLevel();
+        if (GameRandom.globalRandom.nextInt(TOWN_MOMENT_ODDS) != 0 || !this.livesInTown(level)) {
+            return;
+        }
+        this.townMoment(level);
+    }
+
+    /** Petting: purr, and a buff for one in-game day. Petting again refreshes it. */
+    private void pet(PlayerMob player, ServerClient client) {
+        necesse.entity.mobs.buffs.staticBuffs.Buff buff = necesse.engine.registries.BuffRegistry.getBuff(
+                this.isBlackCat ? CatCuddleBuff.SIGGI_ID : CatCuddleBuff.PEANUT_ID);
+        if (buff != null) {
+            player.buffManager.addBuff(new necesse.entity.mobs.buffs.ActiveBuff(
+                    buff, player, CatCuddleBuff.durationMs(), null), true);
+        }
+        this.bubble("wardencatpurr");
+        TileText.at(client, this.getTileX(), this.getTileY(),
+                new LocalMessage("misc", this.isBlackCat ? "siggipetted" : "peanutpetted"));
+    }
+
+    /** A gift, a hunt, or a little something behind the flowers. */
+    private void townMoment(Level level) {
+        int roll = GameRandom.globalRandom.nextInt(3);
+        if (roll == 0) {
+            boolean rare = GameRandom.globalRandom.nextInt(4) == 0;
+            if (this.isBlackCat) {
+                this.dropNearby(level, rare ? "ravenfeather" : "roastedfish");
+                this.bubble(rare ? "siggigiftfeather" : "siggigiftfish");
+            } else {
+                this.dropNearby(level, rare ? "cheese" : "salmon");
+                this.bubble(rare ? "peanutgiftcheese" : "peanutgiftfish");
+            }
+        } else if (roll == 1) {
+            this.bubble(this.isBlackCat ? "siggihunt" : "peanutbutterfly");
+        } else {
+            this.dropNearby(level, "fertilizer");
+            this.bubble(this.isBlackCat ? "siggipoop" : "peanutpoop");
+        }
+    }
+
+    private void dropNearby(Level level, String itemID) {
+        if (ItemRegistry.getItem(itemID) == null) {
+            return;
+        }
+        level.entityManager.pickups.add(new necesse.inventory.InventoryItem(itemID, 1)
+                .getPickupEntity(level, this.x, this.y));
     }
 
     private static int tileDistance(int fromX, int fromY, int toX, int toY) {

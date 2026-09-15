@@ -173,14 +173,15 @@ small down payment on it). Handed out and turned in by `KnottMob.interact` →
 
 **Reward.** 1x Zephyr Harness (one of the mod's three EPIC trinkets, already
 registered in `SkyItems`, reused here rather than inventing a Crooked-native
-one) + 12x Stormsteel Bar + 6x Reality Shard (a small seed fund back, for
+one) + 12x Spiritsteel Bar + 6x Reality Shard (a small seed fund back, for
 whichever future pass builds the Stitcher).
 
 **Benchmark.** Crooked Beyond sits at incursion tier 10 on
 `docs/BALANCE.md`'s own realm ladder — the ceiling the Skyreach itself topped
 out at before the mod's endgame rescale — so its chain is the largest of the
-three this pass adds: 12 Stormsteel Bar, above the Skyreach finale's 10, plus
-the Reality Shard seed fund on top of the trinket.
+three this pass adds: 12 Spiritsteel Bar, above the Skyreach finale's 10
+Stormsteel, plus the Reality Shard seed fund on top of the trinket. (It paid
+Stormsteel until 2026-09-15, a tier below what the Ghost Realm before it pays.)
 
 **Important: this chain is not a recruitment gate.** Unlike Eveleen, Knott is
 recruitable from the moment he is found, regardless of whether the chain is

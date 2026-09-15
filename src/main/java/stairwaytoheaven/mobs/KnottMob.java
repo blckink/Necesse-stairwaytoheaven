@@ -141,7 +141,9 @@ public class KnottMob extends SkySettlerMob {
         SkyQuests.removeAllOfType(server, CrookedDoorQuest.class);
         SkywatchWorldData.markCrookedDoorwayOpened(server);
         give(client, "zephyrharness", 1);
-        give(client, "stormsteelbar", 12);
+        // Spiritsteel, not Stormsteel: the Crooked Beyond comes after the Ghost
+        // Realm, whose residents already pay Spiritsteel.
+        give(client, "spiritsteelbar", 12);
         give(client, "realityshard", 6);
         // His own voice over his own head, not a chat line. The bubble is the
         // LAST thing said in this method for a reason: ChatBubbleText.init

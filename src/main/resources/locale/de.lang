@@ -311,6 +311,16 @@ catbasketready=Der Korb steht bereit, und leer.\nSiggi und Peanut sind noch oben
 catbasketmovedin=Katzen erkennen einen guten Korb:\n<count> Katze(n) sind gerade bei <x>, <y> eingezogen.
 catbasketmoved=Der neueste Korb gewinnt:\n<count> Katze(n) haben den alten verlassen und sind bei <x>, <y> eingezogen.
 catbasketremoved=Der Korb ist weg, also sind die Katzen zurück in den Korb im Turm des Wardens gegangen.\nStell einen neuen auf, dann kommen sie dorthin.
+siggipetted=Siggi drückt sich in deine Hand und brummt wie ein kleines Gewitter.\nSiggis Schnurren: einen ganzen Tag schärfer und zäher.
+peanutpetted=Peanut wirft sich auf den Rücken, alle vier Pfoten in der Luft.\nPeanuts Schnurren: einen ganzen Tag flinker auf den Beinen.
+siggigiftfish=*legt dir einen gebratenen Fisch vor die Füße* Mrrrp.
+siggigiftfeather=*überreicht eine Rabenfeder. Unfassbar stolz.*
+peanutgiftfish=*schleppt einen ganzen Lachs an. Woher, weiß keiner.*
+peanutgiftcheese=*hat Käse "gefunden". Nicht fragen.*
+siggihunt=*fixiert eine Motte... wackelt... SPRUNG!* ...daneben.
+peanutbutterfly=*jagt einen Schmetterling im Kreis und verliert*
+siggipoop=*buddelt ein Loch und hält dabei die ganze Zeit Blickkontakt*\n(hat Dünger hinterlassen)
+peanutpoop=*hinterlässt etwas hinter den Blumen*\n(hat Dünger hinterlassen)
 wardencatnotreat=Die Katze beäugt dich misstrauisch.\nSie erwartet eindeutig einen Snack.
 wardentalk1=Der Wind hier oben hat keine Manieren. Man gewöhnt sich daran.
 wardentalk2=Vierhundert Jahre hat die Himmelswacht diesen Himmel gehütet. Jetzt hütet sie mich.
@@ -657,7 +667,7 @@ swhspeaktocaspern=Sprich mit Caspern.
 // --- Mr. Knott, die Krümmungs-Kette (Fortsetzung) ---
 swhcrookeddoortitle=Überzeug die Tür
 swhcrookeddoordesc=Mr. Knott glaubt schon länger als jeder andere, dass sich eine dieser Türen überzeugen lässt, irgendwohin zu führen. Bring ihm, was eine solche Tür brauchen würde.
-swhcrookeddoorreward=Zephyr-Gurtzeug + 12x Sturmstahlbarren + 6x Realitätssplitter
+swhcrookeddoorreward=Zephyr-Gurtzeug + 12x Geisterstahlbarren + 6x Realitätssplitter
 
 // ============================================================
 // Das Krumme Jenseits
@@ -912,6 +922,8 @@ bossportalcrookedbeyond=Rufstein der Krümmung
 bossportalhell=Höllische Rufesse
 [buff]
 incursionpressure=Inkursionsdruck
+siggicuddle=Siggis Schnurren
+peanutcuddle=Peanuts Schnurren
 [misc]
 bossportallocked=Der Stein bleibt kalt.\nBau das Schlüsselstück dieses Reiches daheim auf, dann antwortet er.
 bossportalbusy=Sein Wächter ist bereits erwacht.\nBeende erst diesen Kampf.

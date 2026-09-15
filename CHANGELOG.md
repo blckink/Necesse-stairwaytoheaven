@@ -6,6 +6,22 @@ All notable changes to this project are documented here. Format loosely follows
 ## [Unreleased]
 
 ### Added
+- **Siggi and Peanut have a life in town.** Once a coaxed cat lives in a
+  basket the player placed, petting it gives a one-in-game-day buff (Siggi's
+  Purr: +8% crit, +5% damage, +4 armour; Peanut's Purr: +12% speed, +0.5
+  health regen, +10% mining speed), and about every eight minutes it brings a
+  gift (roasted fish / raven feather, salmon / cheese), chases a moth or a
+  butterfly, or leaves Fertilizer behind. The spire basket stays quiet.
+
+### Fixed
+- **The Hell region key could not be handed out cleanly.** `HellKeyQuest` was
+  given by the Warden after the Crooked key but never registered in
+  `QuestRegistry`; it is now `swh_keyhell`, appended last.
+- **Mr. Knott's chain paid a lower-tier bar than the realm before it.** Crooked
+  Beyond comes after the Ghost Realm, whose residents pay Spiritsteel, yet
+  "Convince the Door" paid 12 Stormsteel; it now pays 12 Spiritsteel.
+
+### Added
 - **Impenetrable Geisternebel and the Veil Bloom (Nebelblüte).** The Veil's
   fog used to be about eleven faint wisps; it is now a wall of large,
   grave-green swathes drawn as a 160-tile ring on the line between Steinfeld

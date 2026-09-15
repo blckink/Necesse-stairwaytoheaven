@@ -149,6 +149,15 @@ public class StairwayToHeavenMod {
         necesse.engine.registries.QuestRegistry.registerQuest("swh_steinfeldvigil", stairwaytoheaven.quest.SteinfeldVigilQuest.class);
         necesse.engine.registries.QuestRegistry.registerQuest("swh_mortimerrites", stairwaytoheaven.quest.MortimerRitesQuest.class);
         necesse.engine.registries.QuestRegistry.registerQuest("swh_caspernforge", stairwaytoheaven.quest.CaspernForgeQuest.class);
+        // The sixth region key. SkyWardenMob.RegionKey.HELL hands this out after
+        // the Crooked key, and it was the one quest class never registered —
+        // appended last so every earlier quest keeps its numeric ID.
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_keyhell", stairwaytoheaven.quest.HellKeyQuest.class);
+        // Petting a cat that lives in town (SpireCatMob.pet).
+        necesse.engine.registries.BuffRegistry.registerBuff(stairwaytoheaven.mobs.CatCuddleBuff.SIGGI_ID,
+                new stairwaytoheaven.mobs.CatCuddleBuff(true));
+        necesse.engine.registries.BuffRegistry.registerBuff(stairwaytoheaven.mobs.CatCuddleBuff.PEANUT_ID,
+                new stairwaytoheaven.mobs.CatCuddleBuff(false));
         // World-map icons for the auto-placed markers (spire + return
         // stairway). Textures load client-side via GameResources; the
         // registration itself is texture-free and server-safe.
