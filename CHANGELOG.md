@@ -6,6 +6,18 @@ All notable changes to this project are documented here. Format loosely follows
 ## [Unreleased]
 
 ### Added
+- **Region keys pay gear, not just steel.** Each of the Warden's six key
+  quests now adds a weapon and a piece to wear on top of the key: Skyreach
+  Stormdisc + Skywatch Hood, Eden Galehowl + Warden's Mantle, Steinfeld
+  Tempest Edge + Warden's Boots, Aftergarden Skyreave + Stormsteel Vambrace,
+  Crooked Prismcaller + Aurora Locket, Hell Thunderhead + Zephyr Harness. Bars
+  drop to 4-5-6 Stormsteel / 6-8-10 Spiritsteel. The Warden's set had no
+  source before this.
+- **Boss portals are portals.** Six own 64x96 arches with a glowing swirl
+  per realm (`objects/bossportals/`), replacing borrowed statues, doors and
+  the Aether Forge.
+- **Skyfall shards glow.** Own sprite (`objects/skyfallshard.png`, white-hot
+  core, gold and cyan rim) and warm-gold light 140 instead of teal 80.
 - **The Twilight Merchant (Zwielichtiger Händler).** A settlement visitor on
   the Exotic Merchant's frame, in a Beetlejuice-striped suit. Each visit
   rolls three of eleven cosmetic outfits (head, chest, boots: striped
@@ -24,6 +36,8 @@ All notable changes to this project are documented here. Format loosely follows
   butterfly, or leaves Fertilizer behind. The spire basket stays quiet.
 
 ### Fixed
+- **The Hell boss portal drew the whole Aether Forge sheet**, four frames and
+  their icons at once; every portal now draws a single picture.
 - **The Hell region key could not be handed out cleanly.** `HellKeyQuest` was
   given by the Warden after the Crooked key but never registered in
   `QuestRegistry`; it is now `swh_keyhell`, appended last.
