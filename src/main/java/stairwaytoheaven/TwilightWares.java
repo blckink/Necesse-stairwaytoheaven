@@ -13,6 +13,7 @@ import necesse.inventory.item.armorItem.ArmorItem;
 import necesse.inventory.item.armorItem.BootsArmorItem;
 import necesse.inventory.item.armorItem.ChestArmorItem;
 import necesse.inventory.item.armorItem.HelmetArmorItem;
+import necesse.level.gameObject.LargePaintingObject;
 import necesse.level.gameObject.PaintingObject;
 import necesse.level.gameObject.TableDecorationObject;
 import necesse.level.gameObject.furniture.BedObject;
@@ -45,10 +46,20 @@ public final class TwilightWares {
 
     /** Object IDs of the furniture he sells. */
     public static final String[] DECOR = {
-            "coffinbed", "eyepainting", "hauntedclock", "hangingtree", "skullcandelabra",
-            "thingbox", "shrunkenheadtrophy", "witchcauldron", "sandwormtombstone", "electricchair",
-            "hauntedwallclock", "magicmirror"
+            "coffinbed", "hauntedclock", "hangingtree", "skullcandelabra",
+            "thingbox", "witchcauldron", "sandwormtombstone", "electricchair",
+            "walleye", "hauntedwallclock", "magicmirror", "shrunkenheads"
     };
+
+    /**
+     * The two framed 1-tile paintings of the first batch. They are no longer
+     * sold, but stay registered while their sheet ships so that pieces already
+     * hanging in a world keep loading.
+     */
+    private static final String[] RETIRED_PAINTINGS = {"eyepainting", "shrunkenheadtrophy"};
+
+    /** Free-form wall pieces on vanilla's 2-tile large painting frame (64x256 sheet). */
+    private static final String[] LARGE_WALL_PIECES = {"walleye", "hauntedwallclock", "magicmirror", "shrunkenheads"};
 
     private static final String[] CATEGORY = {"objects", "furniture", "twilight"};
     private static final Color MAP_COFFIN = new Color(52, 36, 44);
@@ -120,19 +131,18 @@ public final class TwilightWares {
         }
         // PaintingObject reads objects/paintings/<id>.png (32x128, one 32x32
         // cell per wall direction) and hangs on WALL_DECOR.
-        if (AVAILABLE_DECOR.contains("eyepainting")) {
-            ObjectRegistry.registerObject("eyepainting", new PaintingObject(Item.Rarity.RARE), 20.0F, true);
+        for (String retired : RETIRED_PAINTINGS) {
+            if (decorDrawn(retired)) {
+                ObjectRegistry.registerObject(retired, new PaintingObject(Item.Rarity.RARE), 20.0F, true);
+            }
         }
-        if (AVAILABLE_DECOR.contains("shrunkenheadtrophy")) {
-            ObjectRegistry.registerObject("shrunkenheadtrophy", new PaintingObject(Item.Rarity.RARE), 20.0F, true);
-        }
-        // Free-form wall pieces on the same wall-decor frame: the sheet is an
-        // unframed shape with transparent surroundings.
-        if (AVAILABLE_DECOR.contains("hauntedwallclock")) {
-            ObjectRegistry.registerObject("hauntedwallclock", new PaintingObject(Item.Rarity.RARE), 20.0F, true);
-        }
-        if (AVAILABLE_DECOR.contains("magicmirror")) {
-            ObjectRegistry.registerObject("magicmirror", new PaintingObject(Item.Rarity.EPIC), 20.0F, true);
+        // The free-form wall pieces use vanilla's large painting frame: two
+        // tiles wide, registered as <id> and its far half <id>2. The sheet is
+        // an unframed shape with transparent surroundings.
+        for (String piece : LARGE_WALL_PIECES) {
+            if (AVAILABLE_DECOR.contains(piece)) {
+                LargePaintingObject.registerLargePainting(piece, Item.Rarity.EPIC, 20.0F, true, true);
+            }
         }
         if (AVAILABLE_DECOR.contains("hangingtree")) {
             ObjectRegistry.registerObject("hangingtree", new SkyDecoObject("hangingtree", 128, MAP_COFFIN, null, CATEGORY), 20.0F, true);
