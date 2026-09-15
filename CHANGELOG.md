@@ -7,9 +7,11 @@ All notable changes to this project are documented here. Format loosely follows
 
 ### Added
 - **Impenetrable Geisternebel and the Veil Bloom (Nebelblüte).** The Veil's
-  fog used to be about eleven faint wisps; it is now a few hundred large,
-  grave-green swathes across the whole screen, twice as thick on Ghost Realm
-  ground, and only drawn on Steinfeld and Ghost Realm ground. The Veil Bloom
+  fog used to be about eleven faint wisps; it is now a wall of large,
+  grave-green swathes drawn as a 160-tile ring on the line between Steinfeld
+  and the Ghost Realm, visible from outside it. Behind the ring the dead
+  realms are clear again; Soul Exposure still judges the whole region, so a
+  player without the Veil Mark is not safe past it. The Veil Bloom
   is a Stabby Bush-type grave flower in the Ectomarsh and Aftergarden that
   breathes its own cloud of fog. It still wears the Stabby Bush sheet.
 - **Striped Megashark (Gestreifter Riesenhai).** A black-and-white striped

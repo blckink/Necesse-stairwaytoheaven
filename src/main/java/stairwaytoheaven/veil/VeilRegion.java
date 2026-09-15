@@ -162,4 +162,35 @@ public final class VeilRegion {
     public static float wallDistanceTiles() {
         return VEIL_DEPTH * RealmDepth.DEPTH_SCALE;
     }
+
+    /**
+     * How thick the visible fog wall is, in tiles.
+     *
+     * <p>The user, 2026-09-15: the Geisternebel is "nur so ein Ring", the one
+     * band that divides the starting realms from the dead ones — not a haze
+     * over the whole Ghost Realm, Crooked Beyond and Hell behind it. So the
+     * DRAWN fog is this ring. Soul Exposure is still judged on
+     * {@link #isInside}, the whole region past the line, because a player
+     * without the Mark who teleports past the ring must not be safe on the
+     * far side (§8's teleport rule).
+     */
+    public static final int FOG_RING_TILES = 160;
+
+    /** How far outside the ring a player already gets the fog buff, so the wall is seen before it is entered. */
+    public static final int FOG_SIGHT_TILES = 18;
+
+    private static final float FOG_RING_DEPTH = FOG_RING_TILES / RealmDepth.DEPTH_SCALE;
+    private static final float FOG_SIGHT_DEPTH = FOG_SIGHT_TILES / RealmDepth.DEPTH_SCALE;
+
+    /** Is this depth inside the drawn fog ring? Pure, so the client can ask it too. */
+    public static boolean isInFogRing(float depth) {
+        return depth >= VEIL_DEPTH && depth < VEIL_DEPTH + FOG_RING_DEPTH;
+    }
+
+    /** Is this depth close enough to the ring that its fog should be on screen? */
+    public static boolean isNearFogRing(float depth) {
+        return depth >= 0.0F
+                && depth >= VEIL_DEPTH - FOG_SIGHT_DEPTH
+                && depth < VEIL_DEPTH + FOG_RING_DEPTH + FOG_SIGHT_DEPTH;
+    }
 }

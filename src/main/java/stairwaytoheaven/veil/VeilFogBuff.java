@@ -7,10 +7,9 @@ import necesse.entity.mobs.buffs.BuffEventSubscriber;
 import necesse.entity.mobs.buffs.staticBuffs.Buff;
 import necesse.entity.particle.Particle;
 import necesse.gfx.GameResources;
+import necesse.engine.network.gameNetworkData.GNDItemMap;
 import necesse.level.maps.Level;
-import necesse.level.maps.biomes.Biome;
-import stairwaytoheaven.realms.ghost.GhostBiome;
-import stairwaytoheaven.realms.steinfeld.SteinfeldBiome;
+import stairwaytoheaven.worldgen.RealmDepth;
 
 /**
  * The fog itself — {@code docs/WORLD_DESIGN.md} §8's "permanent fog effect".
@@ -74,14 +73,12 @@ public class VeilFogBuff extends Buff {
      * not as a wall. At 2.5 wisps a tick and five seconds each, roughly 250
      * stand at once.
      */
-    private static final int FOG_ATTEMPTS = 5;
+    private static final int FOG_ATTEMPTS = 10;
     private static final float FOG_CHANCE = 0.5F;
 
-    /**
-     * Deeper in — on Ghost Realm ground proper — the fog doubles. The client
-     * knows the biome of every loaded tile, so this needs no server packet.
-     */
-    private static final int DEEP_MULTIPLIER = 2;
+    /** GND keys the server writes the realm origin under (see VeilWorldData.refreshFog). */
+    public static final String GND_ORIGIN_X = "swhFogOriginX";
+    public static final String GND_ORIGIN_Y = "swhFogOriginY";
 
     /** Milliseconds a fog wisp lives. */
     private static final int FOG_LIFETIME_MIN_MS = 4000;
@@ -124,17 +121,16 @@ public class VeilFogBuff extends Buff {
         if (!owner.isVisible()) {
             return;
         }
-        // VeilRegion has no far edge, so the buff also rides along into
-        // Crooked Beyond and Hell. The Geisternebel belongs to the Steinfeld
-        // side of the line and the Ghost Realm behind it; deeper bands keep
-        // their own look.
-        Biome biome = owner.getLevel().getBiome(owner.getTileX(), owner.getTileY());
-        boolean deep = biome instanceof GhostBiome;
-        if (!deep && !(biome instanceof SteinfeldBiome)) {
-            return;
-        }
-        int attempts = deep ? FOG_ATTEMPTS * DEEP_MULTIPLIER : FOG_ATTEMPTS;
-        for (int i = 0; i < attempts; i++) {
+        // The Geisternebel is a ring, not a haze over everything behind it
+        // (VeilRegion.FOG_RING_TILES). The server sends the realm origin with
+        // the buff; every wisp whose tile falls outside the ring is dropped,
+        // so from outside the fog stands as a wall with an edge. Without the
+        // origin (an older server) the wisps fall around the player as before.
+        GNDItemMap gnd = buff.getGndData();
+        boolean hasOrigin = gnd != null && gnd.hasKey(GND_ORIGIN_X) && gnd.hasKey(GND_ORIGIN_Y);
+        int ox = hasOrigin ? gnd.getInt(GND_ORIGIN_X) : 0;
+        int oy = hasOrigin ? gnd.getInt(GND_ORIGIN_Y) : 0;
+        for (int i = 0; i < FOG_ATTEMPTS; i++) {
             if (!GameRandom.globalRandom.getChance(FOG_CHANCE)) {
                 continue;
             }
@@ -142,7 +138,11 @@ public class VeilFogBuff extends Buff {
                     -FOG_RADIUS_X_TILES * 32.0F, FOG_RADIUS_X_TILES * 32.0F);
             float py = owner.y + GameRandom.globalRandom.getFloatBetween(
                     -FOG_RADIUS_Y_TILES * 32.0F, FOG_RADIUS_Y_TILES * 32.0F);
-            spawnWisp(owner.getLevel(), px, py, deep);
+            if (hasOrigin && !VeilRegion.isInFogRing(
+                    RealmDepth.depthAt((int) (px / 32.0F), (int) (py / 32.0F), ox, oy))) {
+                continue;
+            }
+            spawnWisp(owner.getLevel(), px, py, true);
         }
     }
 

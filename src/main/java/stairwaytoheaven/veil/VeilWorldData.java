@@ -1,5 +1,6 @@
 package stairwaytoheaven.veil;
 
+import java.awt.Point;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,6 +16,7 @@ import necesse.entity.mobs.buffs.ActiveBuff;
 import necesse.entity.mobs.buffs.staticBuffs.Buff;
 import necesse.level.maps.Level;
 import stairwaytoheaven.util.TileText;
+import stairwaytoheaven.worldgen.SkyOrigin;
 
 /**
  * The Veil's clock and its ledger of who may cross.
@@ -326,17 +328,23 @@ public class VeilWorldData extends WorldData {
         if (level == null || !level.isServer()) {
             return;
         }
-        if (!VeilRegion.isInside(level, player.getTileX(), player.getTileY())) {
+        float depth = VeilRegion.depthAt(level, player.getTileX(), player.getTileY());
+
+        // The fog is scenery and applies to everyone near the ring, Mark or no
+        // Mark: WORLD_DESIGN §9 keeps it visible after the unlock so the border
+        // stays legible. Only the ring is drawn (VeilRegion.FOG_RING_TILES);
+        // the buff carries the realm origin so the client can tell which of
+        // its wisps fall inside it.
+        if (VeilRegion.isNearFogRing(depth)) {
+            refreshFog(player, level);
+        }
+
+        if (depth < VeilRegion.VEIL_DEPTH) {
             // Outside: nothing to do. The stacks already on the player drain
             // themselves through SoulExposureBuff.getRemainingStacksDuration,
             // and the fog buff expires on its own within APPLY_DURATION_MS.
             return;
         }
-
-        // The fog is scenery and applies to everyone inside, Mark or no Mark:
-        // WORLD_DESIGN §9 keeps it visible after the unlock so the border stays
-        // legible.
-        refresh(player, VeilGate.fog());
 
         // ...and this is the moment FOGKEY A1 calls "the first time that player
         // has stood in Soul Exposure fog". It is recorded for EVERYONE inside,
@@ -347,7 +355,7 @@ public class VeilWorldData extends WorldData {
         this.markTouchedFog(client.authentication);
 
         if (this.hasMark(client.authentication)) {
-            if (!player.isOnGenericCooldown(COOLDOWN_PARTED)) {
+            if (VeilRegion.isInFogRing(depth) && !player.isOnGenericCooldown(COOLDOWN_PARTED)) {
                 player.startGenericCooldown(COOLDOWN_PARTED, MESSAGE_COOLDOWN_MS);
                 // Over the tile the player is standing on: the fog is what is
                 // speaking, and the fog is right there. UniqueFloatText's
@@ -383,6 +391,24 @@ public class VeilWorldData extends WorldData {
             return;
         }
         player.buffManager.addBuff(new ActiveBuff(buff, player, APPLY_DURATION_MS, VeilGate.ATTACKER), true);
+    }
+
+    /**
+     * The fog buff, with the realm origin in its GND data. {@code ActiveBuff}
+     * writes that map into its content packet (VERIFIED [jar]:
+     * ActiveBuff.setupContentPacket reads gndData), so the client gets the
+     * one fact it cannot derive safely on its own and draws the ring from it.
+     */
+    private static void refreshFog(PlayerMob player, Level level) {
+        Buff buff = VeilGate.fog();
+        if (buff == null) {
+            return;
+        }
+        Point origin = SkyOrigin.compute(VeilRegion.seedOf(level));
+        ActiveBuff active = new ActiveBuff(buff, player, APPLY_DURATION_MS, VeilGate.ATTACKER);
+        active.getGndData().setInt(VeilFogBuff.GND_ORIGIN_X, origin.x);
+        active.getGndData().setInt(VeilFogBuff.GND_ORIGIN_Y, origin.y);
+        player.buffManager.addBuff(active, true);
     }
 
     // ------------------------------------------------------------------

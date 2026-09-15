@@ -188,7 +188,7 @@ second configuration rather than a second code path. See
 | id | kind | what it is, in one line |
 |---|---|---|
 | `soulexposure` | buff | Soul Exposure: what the Veil's fog does to anyone crossing it without the Veil Mark — one stack per second in the fog, dimming the view, then slowing you, then draining life, then killing you outright at thirteen seconds, and giving a stack back per second once you are out. |
-| `veilfog` | buff | The Veil's fog itself: an invisible marker the server puts on anyone standing past the fog line, which draws a screen-filling wall of drifting mist on their screen (Steinfeld and Ghost Realm ground only, twice as thick on Ghost Realm ground). It stays after the Veil Mark is earned, so the border between Steinfeld and the Ghost Realm remains something you can see rather than something you only remember. |
+| `veilfog` | buff | The Veil's fog itself: an invisible marker the server puts on anyone near the fog ring, carrying the realm origin so the client draws a wall of drifting mist only inside the 160-tile ring on the fog line (`VeilRegion.FOG_RING_TILES`); the realms behind it stay clear. It stays after the Veil Mark is earned, so the border between Steinfeld and the Ghost Realm remains something you can see rather than something you only remember. |
 
 ### The fog key — chalk, circle, guide
 
