@@ -24,6 +24,10 @@ All notable changes to this project are documented here. Format loosely follows
   the Aether Forge.
 - **Skyfall shards glow.** Own sprite (`objects/skyfallshard.png`, white-hot
   core, gold and cyan rim) and warm-gold light 140 instead of teal 80.
+- **Eye in the Wall (Auge in der Wand).** The first of the Twilight Merchant's
+  free-form wall pieces: a bloodshot eye bulging out of the wall, on vanilla's
+  two-tile large painting frame, converted from the player's own reference
+  render (front, both side walls and the back).
 - **The Twilight Merchant (Zwielichtiger Händler).** A settlement visitor on
   the Exotic Merchant's frame, in a Beetlejuice-striped suit. Each visit
   rolls three of eleven cosmetic outfits (head, chest, boots: striped
