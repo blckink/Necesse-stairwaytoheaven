@@ -126,6 +126,13 @@ public class MistserpentHead extends HostileWormMobHead<MistserpentBody, Mistser
     public static final int DRAW_OFFSET = 112;
     /** How far below the body its shadow is laid down (jar, drawY + 40). */
     public static final int SHADOW_DROP = 40;
+    /**
+     * The death gibs: the sheet's right-hand strip read as a 64px grid, column
+     * 4 (x 256-319), rows 0-15 — FleshParticle(texture, 4, row, 64) in both
+     * CrystalDragonHead and CrystalDragonBody (VERIFIED [jar]).
+     */
+    public static final int GIB_COLUMN = 4;
+    public static final int GIB_CELL = 64;
 
     /**
      * 1400 = the mod's 1000 HP floor x 1.4 for an elite.
@@ -333,6 +340,24 @@ public class MistserpentHead extends HostileWormMobHead<MistserpentBody, Mistser
             tileList.add(shadow::draw);
         }
         drawShoulder(list, tileList, level, camera, perspective);
+    }
+
+    /**
+     * The Crystal Dragon's death gib, ported: one piece from the sheet's small
+     * 64px column (x 256, rows 0-5) — VERIFIED [jar],
+     * CrystalDragonHead.java:295-313. Without this override those pieces on the
+     * sheet are never shown.
+     */
+    @Override
+    public void spawnDeathParticles(float knockbackX, float knockbackY) {
+        if (texture == null) {
+            return;
+        }
+        this.getLevel().entityManager.addParticle(
+                new necesse.entity.particle.FleshParticle(this.getLevel(), texture, GIB_COLUMN,
+                        necesse.engine.util.GameRandom.globalRandom.nextInt(6), GIB_CELL,
+                        this.x, this.y, 20.0F, knockbackX, knockbackY),
+                necesse.entity.particle.Particle.GType.IMPORTANT_COSMETIC);
     }
 
     /**

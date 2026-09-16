@@ -78,6 +78,27 @@ public class MistserpentBody extends HostileWormMobBody<MistserpentHead, Mistser
     }
 
     /**
+     * The Crystal Dragon's body gibs, ported: four pieces from the sheet's 64px
+     * column, row {@code spriteY + 0..1} — VERIFIED [jar],
+     * CrystalDragonBody.java:110-116. Coil 7 therefore reaches row 8, the
+     * last gib on the strip.
+     */
+    @Override
+    public void spawnDeathParticles(float knockbackX, float knockbackY) {
+        if (MistserpentHead.texture == null || !this.isVisible()) {
+            return;
+        }
+        for (int i = 0; i < 4; i++) {
+            this.getLevel().entityManager.addParticle(
+                    new necesse.entity.particle.FleshParticle(this.getLevel(), MistserpentHead.texture,
+                            MistserpentHead.GIB_COLUMN,
+                            this.sprite.y + necesse.engine.util.GameRandom.globalRandom.getIntBetween(0, 1),
+                            MistserpentHead.GIB_CELL, this.x, this.y, 20.0F, knockbackX, knockbackY),
+                    necesse.entity.particle.Particle.GType.IMPORTANT_COSMETIC);
+        }
+    }
+
+    /**
      * The Crystal Dragon's body draw, ported: {@code sprite(0, spriteY, 224)}
      * at 130px from {@code camX - 112}, angled toward the NEXT segment, with
      * the shadow sheet 40px lower and the body lit through
