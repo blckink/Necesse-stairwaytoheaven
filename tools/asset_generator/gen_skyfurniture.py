@@ -1456,7 +1456,7 @@ def _icon_carpet(path):
 
 def gen_item_icons(items_dir):
     _icon_chair(f"{items_dir}/skywatchchair.png")
-    _icon_bench(f"{items_dir}/skywatchbench.png")
+    # items/skywatchbench.png is Codex art (build/spire5, CONVERTED).
     _icon_modulartable(f"{items_dir}/skywatchmodulartable.png")
     _icon_dinnertable(f"{items_dir}/skywatchdinnertable.png")
     _icon_desk(f"{items_dir}/skywatchdesk.png")
@@ -1484,7 +1484,7 @@ def generate(objects_dir, items_dir):
     os.makedirs(carpets_dir, exist_ok=True)
 
     gen_chair(f"{objects_dir}/skywatchchair.png")
-    gen_bench(f"{objects_dir}/skywatchbench.png")
+    # objects/skywatchbench.png is Codex art (build/spire5, CONVERTED).
     gen_modulartable(f"{objects_dir}/skywatchmodulartable.png")
     gen_dinnertable(f"{objects_dir}/skywatchdinnertable.png")
     gen_desk(f"{objects_dir}/skywatchdesk.png")

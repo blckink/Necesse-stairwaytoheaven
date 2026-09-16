@@ -102,6 +102,8 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              "objects/skystonebrickwall.png", "objects/nightfellwall.png",
              "tiles/nimbusfloor_splat.png", "tiles/prismfloor_splat.png",
              "tiles/gloomwoodfloor_splat.png",
+             "objects/skywatchbench.png", "items/skywatchbench.png",
+             "tiles/skywaypath.png",
              # Our own art for the three Outland mobs, which used to wear
              # vanilla's sheets by string ID.
              # Fen Wraith's body, composed by tools/resheet_mob.py from the
