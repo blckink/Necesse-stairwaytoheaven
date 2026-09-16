@@ -44,8 +44,9 @@ import necesse.level.maps.light.GameLight;
 public class VeteranTurretObject extends GameObject {
 
     public GameTexture texture;
-    private static final int FRAME_W = 32;
-    private static final int FRAME_H = 48;
+    /** Cells follow vanilla's makeshiftturret proportions: the gun overhangs its one tile sideways. */
+    private static final int FRAME_W = 64;
+    private static final int FRAME_H = 64;
 
     public VeteranTurretObject() {
         this.mapColor = new Color(90, 90, 80);
@@ -81,7 +82,7 @@ public class VeteranTurretObject extends GameObject {
         }
         int rotation = level.getObjectRotation(tileX, tileY) & 3;
         int row = this.texture.getHeight() >= 4 * FRAME_H ? rotation : 0;
-        int drawX = camera.getTileDrawX(tileX);
+        int drawX = camera.getTileDrawX(tileX) - (FRAME_W - 32) / 2;
         int drawY = camera.getTileDrawY(tileY) - (FRAME_H - 32);
         final TextureDrawOptionsEnd options = this.texture.initDraw()
                 .section(frame * FRAME_W, (frame + 1) * FRAME_W, row * FRAME_H, (row + 1) * FRAME_H)
@@ -106,7 +107,7 @@ public class VeteranTurretObject extends GameObject {
             return;
         }
         int row = this.texture.getHeight() >= 4 * FRAME_H ? (rotation & 3) : 0;
-        int drawX = camera.getTileDrawX(tileX);
+        int drawX = camera.getTileDrawX(tileX) - (FRAME_W - 32) / 2;
         int drawY = camera.getTileDrawY(tileY) - (FRAME_H - 32);
         this.texture.initDraw()
                 .section(0, FRAME_W, row * FRAME_H, (row + 1) * FRAME_H)
