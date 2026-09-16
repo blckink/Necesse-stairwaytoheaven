@@ -460,4 +460,6 @@ NIGHTFELL_WALL = {
 def gen_walls(out_dir):
     # objects/skystonebrickwall.png is Codex art since 2026-09-16
     # (tools/codex_wall.py, CONVERTED in generate_assets.py).
-    _build_wall(NIGHTFELL_WALL, 0x5A22).save(f"{out_dir}/nightfellwall.png")
+    # objects/nightfellwall.png is Codex art as well (same route).
+    # _build_wall stays as the record of the old drawn sets.
+    pass

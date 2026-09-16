@@ -99,7 +99,7 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              "objects/hauntedclock.png",
              # Codex art through tools/codex_wall.py and tools/codex_splat.py
              # (docs/art/RUNS.md, 2026-09-16).
-             "objects/skystonebrickwall.png",
+             "objects/skystonebrickwall.png", "objects/nightfellwall.png",
              "tiles/nimbusfloor_splat.png", "tiles/prismfloor_splat.png",
              # Our own art for the three Outland mobs, which used to wear
              # vanilla's sheets by string ID.
