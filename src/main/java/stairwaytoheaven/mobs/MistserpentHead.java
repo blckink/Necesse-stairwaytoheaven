@@ -104,17 +104,23 @@ public class MistserpentHead extends HostileWormMobHead<MistserpentBody, Mistser
             LootItem.between("aetheriumore", 1, 3));
 
     /**
-     * Segment spacing, wave length and segment count are the Crystal Dragon's,
-     * because the sheet is: {@code CrystalDragonHead}'s constructor is
-     * {@code super(100, waveLength, 100.0F, 7, 0.0F, -5.0F)} and its
-     * {@code createNewBodyPart} sets {@code spriteY = index + 1} (VERIFIED
-     * [jar], CrystalDragonHead.java:117 and 197-201). Seven coils against eight
+     * Segment spacing and segment count are the Crystal Dragon's, because the
+     * sheet is: {@code lengthPerBodyPart = 60}, and
+     * {@code getDistToBodyPart} returns 60 for the first coil and 70 for every
+     * later one; {@code createNewBodyPart} sets {@code spriteY = index + 1}
+     * (VERIFIED [jar], CrystalDragonHead.java:100, 191-201). The 100 in its
+     * {@code super(100, waveLength, 100.0F, 7, 0.0F, -5.0F)} is the move-sound
+     * distance, not the spacing — reading it as spacing left a gap between
+     * every coil, because a coil cell drawn at 130px is only ~50px long.
+     * Seven coils against eight
      * sheet rows is not an off-by-one: row 0 is the head, row 1 is the SHOULDER
      * the head draws for itself, and the seven coils take rows 1..7 — so row 1
      * is drawn twice, once by the head and once by the first coil, which is
      * what makes the neck read as continuous.
      */
-    public static final float LENGTH_PER_BODY_PART = 100.0F;
+    public static final float LENGTH_PER_BODY_PART = 60.0F;
+    /** Extra spacing for every coil after the first (jar, +10). */
+    public static final float LATER_BODY_PART_EXTRA = 10.0F;
     /** How far the body wave travels; larger reads as a longer, lazier coil. */
     public static final float WAVE_LENGTH = 380.0F;
     public static final int TOTAL_BODY_PARTS = 7;
@@ -251,7 +257,7 @@ public class MistserpentHead extends HostileWormMobHead<MistserpentBody, Mistser
 
     @Override
     protected float getDistToBodyPart(MistserpentBody bodyPart, int index, float lastDistance) {
-        return LENGTH_PER_BODY_PART;
+        return index >= 1 ? LENGTH_PER_BODY_PART + LATER_BODY_PART_EXTRA : LENGTH_PER_BODY_PART;
     }
 
     @Override
