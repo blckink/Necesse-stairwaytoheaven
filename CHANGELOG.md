@@ -24,6 +24,10 @@ All notable changes to this project are documented here. Format loosely follows
   the empty `vanilla-sprites/`.
 
 ### Added
+- `tools/scene_preview.py`: two in-context scenes (Skyreach meadow with the
+  Cloudmarble house; the Twilight Merchant's room with all furniture, wall
+  pieces and all eleven outfits worn) so art can be judged together, not
+  sheet by sheet.
 - **Pickup filter (Aufsammel-Filter) is back.** A gear button beside the
   inventory's sort buttons opens a chest-style category/item menu per player;
   filtered items stay on the ground instead of flying to that player (own
