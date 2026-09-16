@@ -28,6 +28,9 @@ All notable changes to this project are documented here. Format loosely follows
   uploads go to `art-inbox/`.
 
 ### Fixed
+- **Coffin bed redrawn on the oak bed's layout.** Lying views are a flat side
+  view on a low stand instead of a squat diagonal box with an open lid;
+  standing views are a top-down open coffin that stays inside its columns.
 - **Nightfell and Skystone walls: windows.** The nightfell window front was a
   free-standing figure with no wall around it; it is now vanilla stonewall's
   window opening (posts, sill, bars with see-through gaps) in nightfell
