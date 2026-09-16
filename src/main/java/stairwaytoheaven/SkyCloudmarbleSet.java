@@ -11,6 +11,7 @@ import necesse.level.gameObject.FenceGateObject;
 import necesse.level.gameObject.FenceObject;
 import necesse.level.gameObject.StatueObject;
 import necesse.level.gameObject.WallObject;
+import necesse.level.gameTile.PathTiledTile;
 import stairwaytoheaven.tiles.SkywayTile;
 
 /**
@@ -39,6 +40,13 @@ public final class SkyCloudmarbleSet {
     public static int cloudmarbleFenceID;
     public static int cloudmarbleFenceGateID;
     public static int skywayTileID;
+    /**
+     * The same cloudstone as a laid path ({@code PathTiledTile}): clean framed
+     * edges instead of the splat's frayed ones. The Warden's spire paves its
+     * inside with it. Registered only when {@code tiles/skywaypath.png} ships;
+     * until then this is {@link #skywayTileID}, so the spire still builds.
+     */
+    public static int skywayPathTileID;
     public static int seraphStatueID;
 
     private SkyCloudmarbleSet() {
@@ -72,6 +80,9 @@ public final class SkyCloudmarbleSet {
      */
     static void registerTiles() {
         skywayTileID = TileRegistry.registerTile("skywaytile", new SkywayTile(), 1.0F, true);
+        skywayPathTileID = SkyCloudmarbleSet.class.getClassLoader().getResource("tiles/skywaypath.png") != null
+                ? TileRegistry.registerTile("skywaypathtile", new PathTiledTile("skywaypath", MAP_CLOUDMARBLE), 1.0F, true)
+                : skywayTileID;
     }
 
     static void registerRecipes() {

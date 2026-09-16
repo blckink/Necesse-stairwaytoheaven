@@ -112,7 +112,7 @@ public class WardenSpirePreset extends Preset {
         final int checker = SkyRegistry.marbleCheckerID;
         final int planks = SkyRegistry.gloomwoodFloorID;
         final int paving = SkyRegistry.skyroadTileID;
-        final int cloudstone = SkyCloudmarbleSet.skywayTileID;
+        final int cloudstone = SkyCloudmarbleSet.skywayPathTileID;
 
         final int wall = SkyCloudmarbleSet.cloudmarbleWallID;
         final int door = SkyCloudmarbleSet.cloudmarbleDoorID;
