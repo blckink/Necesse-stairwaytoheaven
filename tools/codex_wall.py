@@ -105,10 +105,12 @@ vorgegebenen Umrisse gemalt, auch nicht "damit es zusammenhaengt".
   build/codexwall/{name}/filled.png, exakte Pixelmasse wie paint.png.
 
 ## Nicht vergessen
-- Jede Form ist eine EIGENSTAENDIGE Ansicht -- Dach/Kappe-Form, Saeule,
-  Ecke/Junction usw. duerfen sich unterscheiden, solange das Material klar
-  dasselbe ist (Necesse-Waende zeigen oben eine Deckflaeche, vorn die
-  Mauerwerksfront).
+- Jede Form ist eine eigene Ansicht, ABER: eine 16px-Zelle, die im guide
+  dieselbe Bezeichnung traegt, wird im Spiel aus EINEM Blattfeld gezeichnet.
+  Sie muss in jeder Form PIXELGLEICH sein (sonst verweigert der Zuschnitt,
+  z. B. notch gegen junction). Male jede Zellbezeichnung einmal und kopiere
+  sie in alle Formen, die sie enthalten. Oben Deckflaeche, vorn
+  Mauerwerksfront.
 - Die "junction"-Form hat ausgegraute Bereiche (fremdes Material) -- die
   bleiben UNVERAENDERT ausgegraut, du malst nur die eigenen (nicht-grauen)
   Zellen.

@@ -46,6 +46,12 @@ dark, gothic, Beetlejuice/Addams — but still readable on a dark floor.
 
 ## Lessons (newest first — append, do not rewrite)
 
+- 2026-09-16 · **Walls through a hard mask work.** Painting whole shapes on the
+  `wall_from_layout` canvas next to the same canvas filled with vanilla
+  stonewall gave the first wall the player had not seen as a cut-up picture,
+  in under three minutes. Trap: a 16 px cell that appears in two shapes must
+  be pixel-identical in both, or the cut refuses (notch vs junction).
+
 - 2026-09-16 · **One view per master image** beat whole sheets: clock back/side
   views, candelabra, coffin bed and chair all came right within two rounds.
 - 2026-09-16 · **Rotation columns break silently.** A side view fell apart into
