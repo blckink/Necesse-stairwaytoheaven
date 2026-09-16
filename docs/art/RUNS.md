@@ -21,6 +21,8 @@ One row per job. Minutes come from `build/codex_runs.tsv` (written by
 | 2026-09-15 | twilight3 night run | 11 outfits, furniture | — | outfits later 11/11 | furniture PIL shapes rejected | outfits "mega gut" |
 | 2026-09-15 | twilight decor/outfits (1st) | all | — | 0/all | PIL rectangles as final art | "riesen Rückschritt" |
 
+| 2026-09-16 | veteran siege set (9 assets, hard time limit) | catapult+turret sheets, barbed wire, barricade, stone, 4 icons | ~1.5 | 9/9 (masters) | catapult 4-frame sheet: 1 extra codex round asked for "same base, only arm moves" on top of the idle master; base still drifts slightly between frame 0 and frames 1-3 (wheel spacing, stance) — shipped anyway, time-boxed | shipped |
+
 ## What this says so far
 
 - Per asset, a Codex round costs about two minutes including its own checks;

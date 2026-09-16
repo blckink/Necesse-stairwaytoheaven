@@ -1198,3 +1198,29 @@ twilightmerchanttalk5=Ich bin nur bis Sonnenuntergang da. Oder -aufgang. Vergess
 [personalities]
 twilightmerchant=Zwielichtiger Händler
 twilightmerchant_desc=<name> kommt nur auf der Durchreise und verkauft, was sonst niemand hat.
+
+[mob]
+warveteranhuman=Kriegsveteran
+warveteranhumanname=<name>, der Kriegsveteran
+
+[settlement]
+warveterantip=Zieht von selbst in deine Siedlung ein, genau wie ein Schmied
+
+[mobmsg]
+warveterantalk1=Ich hab schon schlimmere Postenrunden gedreht als diese hier.
+warveterantalk2=Barrikaden gewinnen keinen Kampf. Sie kaufen dir Zeit dafuer.
+warveterantalk3=Jeder Ueberfall, den ich gesehen hab, fing gleich an: Einer hat aufgehoert, die Mauer zu beobachten.
+warveterantalk4=Kauf den Stacheldraht. Ich hab gesehen, was der mit einem Ansturm macht.
+warveterantalk5=Halt die Munition voll, dann sorg ich dafuer, dass sie was bringt.
+
+[object]
+veteranbarricade=Barrikade
+barbedwirefence=Stacheldrahtzaun
+veteranturret=Selbstschussanlage
+veterancatapult=Katapult
+
+[item]
+veteranbarricade=Barrikade
+barbedwirefence=Stacheldrahtzaun
+veteranturret=Selbstschussanlage
+veterancatapult=Katapult

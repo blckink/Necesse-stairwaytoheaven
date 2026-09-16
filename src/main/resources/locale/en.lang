@@ -1197,3 +1197,29 @@ twilightmerchanttalk5=I'm only here till sundown. Or sunup. I forget which.
 [personalities]
 twilightmerchant=Twilight Merchant
 twilightmerchant_desc=<name> is only passing through and sells what nobody else has.
+
+[mob]
+warveteranhuman=War Veteran
+warveteranhumanname=<name> the War Veteran
+
+[settlement]
+warveterantip=Moves into your settlement on their own, as readily as a blacksmith
+
+[mobmsg]
+warveterantalk1=I've walked worse perimeters than this one.
+warveterantalk2=Barricades don't win fights. They buy you time to.
+warveterantalk3=Every raid I've seen started the same way: someone stopped watching the wall.
+warveterantalk4=Buy the barbed wire. I've seen what it does to a charge.
+warveterantalk5=Keep your ammo stocked and I'll make sure it's put to use.
+
+[object]
+veteranbarricade=Barricade
+barbedwirefence=Barbed Wire Fence
+veteranturret=Auto Turret
+veterancatapult=Catapult
+
+[item]
+veteranbarricade=Barricade
+barbedwirefence=Barbed Wire Fence
+veteranturret=Auto Turret
+veterancatapult=Catapult

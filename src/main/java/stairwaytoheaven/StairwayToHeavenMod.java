@@ -94,6 +94,10 @@ public class StairwayToHeavenMod {
         // vanilla buff consumables and a heal-on-the-spot service. Four classes
         // and this line -- see SkyDoctor's own note on what a third would cost.
         stairwaytoheaven.settlement.SkyDoctor.register();
+        // Soldier profession: mob, settler type, shop and the two defense
+        // structures he sells. See WarVeteran's class note for what shipped
+        // and what was cut under the session time limit.
+        stairwaytoheaven.settlement.WarVeteran.register();
         // The mod's own settler special task: a fourth expedition category
         // beside vanilla's Expedition / Mining trip / Fishing trip. Registered
         // here rather than in SkyMobs beside the settlers themselves because
