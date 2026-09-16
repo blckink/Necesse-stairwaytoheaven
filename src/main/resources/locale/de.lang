@@ -1194,3 +1194,7 @@ twilightmerchanttalk2=Alles gebraucht. Die Vorbesitzer beschweren sich nicht meh
 twilightmerchanttalk3=Sag dreimal meinen Namen und ich geb dir Rabatt. Lieber doch nicht.
 twilightmerchanttalk4=Das Sargbett? Schläft sich wie tot. Garantiert.
 twilightmerchanttalk5=Ich bin nur bis Sonnenuntergang da. Oder -aufgang. Vergess ich immer.
+
+[personalities]
+twilightmerchant=Zwielichtiger Händler
+twilightmerchant_desc=<name> kommt nur auf der Durchreise und verkauft, was sonst niemand hat.

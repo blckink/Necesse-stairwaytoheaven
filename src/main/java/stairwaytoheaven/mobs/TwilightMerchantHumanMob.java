@@ -71,7 +71,7 @@ public class TwilightMerchantHumanMob extends HumanShop {
     @Override
     protected void setupPersonalities() {
         this.personalities = new ArrayList<>(Collections.singletonList(
-                SettlerPersonalityRegistry.getNewSettlerPersonality("exoticmerchant", (HumanMob) this)));
+                SettlerPersonalityRegistry.getNewSettlerPersonality("twilightmerchant", (HumanMob) this)));
     }
 
     @Override

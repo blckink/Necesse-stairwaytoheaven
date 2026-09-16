@@ -5,6 +5,7 @@ import java.awt.Color;
 import necesse.engine.registries.ItemRegistry;
 import necesse.engine.registries.MobRegistry;
 import necesse.engine.registries.ObjectRegistry;
+import necesse.engine.registries.SettlerPersonalityRegistry;
 import necesse.engine.registries.SettlerRegistry;
 import necesse.entity.mobs.friendly.human.HumanMob;
 import necesse.inventory.item.Item;
@@ -24,8 +25,10 @@ import necesse.level.gameObject.happinessObject.SarcophagusObject;
 import necesse.level.maps.levelData.settlementData.ServerSettlementData;
 import necesse.level.maps.levelData.settlementData.SettlementVisitorOdds;
 import necesse.level.maps.levelData.settlementData.SettlementVisitorSpawner;
+import necesse.level.maps.levelData.settlementData.settler.personalities.SimplePersonalityFilter;
 import stairwaytoheaven.mobs.TwilightMerchantHumanMob;
 import stairwaytoheaven.objects.SkyDecoObject;
+import stairwaytoheaven.settlement.TwilightMerchantPersonality;
 import stairwaytoheaven.settlement.TwilightMerchantSettler;
 
 /**
@@ -169,6 +172,11 @@ public final class TwilightWares {
                     new SkyDecoObject("sandwormtombstone", 32, MAP_BONE, null, CATEGORY), 20.0F, true);
         }
 
+        // Only the merchant himself may roll this personality, as vanilla
+        // whitelists "exoticmerchant" to the Exotic Merchant.
+        SettlerPersonalityRegistry.registerSettlerPersonality("twilightmerchant", TwilightMerchantPersonality.class,
+                new SimplePersonalityFilter(100).makeSettlerStringIDsWhitelist().filterSettlerStringID("twilightmerchant"),
+                false);
         MobRegistry.registerMob("twilightmerchanthuman", TwilightMerchantHumanMob.class, false);
         SettlerRegistry.registerSettler("twilightmerchant", new TwilightMerchantSettler());
         ServerSettlementData.visitorOdds.add(new SettlementVisitorOdds("twilightmerchant") {
