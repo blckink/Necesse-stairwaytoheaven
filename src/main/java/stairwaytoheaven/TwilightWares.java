@@ -79,8 +79,15 @@ public final class TwilightWares {
     private TwilightWares() {
     }
 
-    private static boolean inJar(String path) {
-        return TwilightWares.class.getClassLoader().getResource(path) != null;
+    /**
+     * The mod jar keeps its textures under {@code resources/}, not at the jar
+     * root. Checking the bare path found nothing, so on 2026-09-16 the merchant
+     * arrived with no wares and without his suit; both forms are accepted so
+     * the check also holds when resources sit at the root (IDE runs).
+     */
+    static boolean inJar(String path) {
+        ClassLoader loader = TwilightWares.class.getClassLoader();
+        return loader.getResource("resources/" + path) != null || loader.getResource(path) != null;
     }
 
     public static boolean outfitDrawn(String outfit) {

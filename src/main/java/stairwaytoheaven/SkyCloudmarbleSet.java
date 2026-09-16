@@ -80,7 +80,7 @@ public final class SkyCloudmarbleSet {
      */
     static void registerTiles() {
         skywayTileID = TileRegistry.registerTile("skywaytile", new SkywayTile(), 1.0F, true);
-        skywayPathTileID = SkyCloudmarbleSet.class.getClassLoader().getResource("tiles/skywaypath.png") != null
+        skywayPathTileID = TwilightWares.inJar("tiles/skywaypath.png")
                 ? TileRegistry.registerTile("skywaypathtile", new PathTiledTile("skywaypath", MAP_CLOUDMARBLE), 1.0F, true)
                 : skywayTileID;
     }
