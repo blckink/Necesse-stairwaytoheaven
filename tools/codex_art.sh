@@ -31,7 +31,9 @@ run_job() {
 
 $(cat "$d/brief.md")" > "$d/codex.log" 2>&1
     end=$(date +%s)
-    if grep -q "usage limit" "$d/codex.log"; then result=QUOTA
+    # the log echoes the prompt, and CODEX_ART.md mentions "usage limit" -- match
+    # only the real message
+    if grep -q "hit your usage limit" "$d/codex.log"; then result=QUOTA
     elif [ -s "$d/codex_last.txt" ]; then result=done
     else result=FAILED; fi
     printf '%s\t%.1f\t%s\t%s\n' "$(date -d @"$start" '+%F %T')" \
