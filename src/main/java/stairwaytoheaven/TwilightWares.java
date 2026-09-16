@@ -51,7 +51,7 @@ public final class TwilightWares {
     /** Object IDs of the furniture he sells. */
     public static final String[] DECOR = {
             "coffinbed", "hauntedclock", "hangingtree", "skullcandelabra",
-            "thingbox", "witchcauldron", "sandwormtombstone", "electricchair",
+            "thingbox", "twilightcauldron", "sandwormtombstone", "electricchair",
             "walleye", "hauntedwallclock", "magicmirror", "shrunkenheads", "twilightsarcophagus"
     };
 
@@ -164,8 +164,10 @@ public final class TwilightWares {
         if (AVAILABLE_DECOR.contains("hangingtree")) {
             ObjectRegistry.registerObject("hangingtree", new SkyDecoObject("hangingtree", 128, MAP_COFFIN, null, CATEGORY), 20.0F, true);
         }
-        if (AVAILABLE_DECOR.contains("witchcauldron")) {
-            ObjectRegistry.registerObject("witchcauldron", new SkyDecoObject("witchcauldron", 64, MAP_SLIME, null, CATEGORY), 20.0F, true);
+        // Not "witchcauldron": vanilla already registers that ID, and the
+        // duplicate stopped the whole mod from loading.
+        if (AVAILABLE_DECOR.contains("twilightcauldron")) {
+            ObjectRegistry.registerObject("twilightcauldron", new SkyDecoObject("twilightcauldron", 64, MAP_SLIME, null, CATEGORY), 20.0F, true);
         }
         if (AVAILABLE_DECOR.contains("sandwormtombstone")) {
             ObjectRegistry.registerObject("sandwormtombstone",

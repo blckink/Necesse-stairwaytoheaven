@@ -247,7 +247,7 @@ def twilight():
         tx, ty = 15 + (i % 5) * 2, 2 + (i // 5) * 3
         st.put(figure(o), tx, ty, o)
     st.put(cell("objects/hangingtree.png", 0, 0, 128, 128), 21, 10, "hangingtree")
-    st.put(img("objects/witchcauldron.png").crop((0, 0, 64, 64)), 3, 10, "witchcauldron")
+    st.put(img("objects/twilightcauldron.png").crop((0, 0, 64, 64)), 3, 10, "twilightcauldron")
     st.put(cell("objects/sandwormtombstone.png", 0, 0, 32, 64), 9, 10, "sandwormtombstone")
     return st.render()
 
