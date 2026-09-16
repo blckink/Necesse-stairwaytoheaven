@@ -92,12 +92,13 @@ vorgegebenen Umrisse gemalt, auch nicht "damit es zusammenhaengt".
   Farben scheitern; gute Wandblaetter haben 19-38 Farben).
 - Alpha hart auf 0 oder 255 setzen, keine Halbtransparenz, keine
   Anti-Aliasing-Raender.
-- 1px Kontur in (34,34,46) um jede undurchsichtige Flaeche, wie bei
+- 1px Kontur im dunkleren Eigenton (x0.5) der Flaeche daneben, nie Schwarz/Grau,
+  um jede undurchsichtige Flaeche, wie bei
   vanilla-filled.png zu sehen.
 - Zeichne die Endkunst NICHT mit PIL-Formen (draw.rectangle, draw.ellipse
   etc.) -- das sieht man sofort als Vektor-Look. Der Weg ist immer:
   image_gen-Master -> Modalfarben-Downscale -> <=40 Farben -> Alpha hart
-  0/255 -> 1px-Kontur (34,34,46).
+  0/255 -> 1px-Kontur im dunklen Eigenton.
 - Falls du mit PIL arbeitest (Zuschnitt, Kanal-Arbeit, Farbreduktion):
   PYTHONPATH=/home/blackoffset/dev/pylib python3 -- kein venv, nichts
   nachladen.

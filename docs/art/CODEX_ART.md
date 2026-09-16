@@ -12,7 +12,9 @@ it is **updated after every art round** (see "Lessons" at the bottom and
 2. Make a **master with the built-in image_gen**: one pose / view per image,
    large, plain background, light from top left, Necesse 3/4 top-down view.
 3. Down to the target size by **modal colour per block** (not bilinear),
-   **≤ 40 colours**, **alpha hard 0/255**, 1 px outline `(34,34,46)`.
+   **≤ 40 colours**, **alpha hard 0/255**, 1 px outline in a darker shade (×0.5) of the colour
+   beside it, as vanilla — never black or one flat grey. Measure it: no band
+   thicker than 1 px.
    `tools/convert_reference.py --native WxH` does this.
 4. Small pixel fixes by hand are fine. **Shapes drawn with PIL
    (`draw.rectangle`, `ellipse`, `line`) are never the final art** — that is

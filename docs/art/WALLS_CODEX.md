@@ -61,7 +61,7 @@ Fensterslot-Regel) via `conform_wall_sheet.py`.
   Alpha 0.
 - Technikkette PFLICHT: image_gen-Master -> Modalfarben-Downscale (kein
   simples Resize!) -> hoechstens 40 Farben -> Alpha hart 0/255 -> 1px-Kontur
-  (34,34,46). Keine PIL-Formen (`draw.rectangle` etc.) fuer die Endkunst --
+  in dunklerem Eigenton (x0.5), nie Schwarz/Grau. Keine PIL-Formen (`draw.rectangle` etc.) fuer die Endkunst --
   das sieht man sofort als Vektor-Look.
 - PIL nur mit `PYTHONPATH=/home/blackoffset/dev/pylib python3`, kein venv.
 - Nur unterhalb von `build/` schreiben.

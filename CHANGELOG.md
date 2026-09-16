@@ -28,6 +28,14 @@ All notable changes to this project are documented here. Format loosely follows
   uploads go to `art-inbox/`.
 
 ### Fixed
+- **Nightfell and Skystone walls: windows.** The nightfell window front was a
+  free-standing figure with no wall around it; it is now vanilla stonewall's
+  window opening (posts, sill, bars with see-through gaps) in nightfell
+  tones. Both sets get their roof window slot rebuilt and their junction
+  seams blended (`conform_wall_sheet.py --fix --rebuild-roof-slot`).
+- Art briefs asked for a flat (34,34,46) contour and said armour row 0
+  faces down; both were wrong (vanilla: darker shade of the neighbour
+  colour; row 0 faces up) and are corrected in `docs/art/`.
 - **The Twilight Merchant came naked, nameless and with an empty shop.**
   Texture checks looked at the jar root instead of `resources/`, so none of
   his wares registered; his name line was missing too. Once they did, the
