@@ -6,13 +6,17 @@ All notable changes to this project are documented here. Format loosely follows
 ## [Unreleased]
 
 ### Changed
-- **Twilight Merchant art cleaned up.** Outfits, their icons and his
-  furniture lose the painted ~9 px dark contour (now a 1 px rim or none) and
-  are lifted in brightness (`tools/twilight_cleanup.py`). Every outfit head
-  had north and south swapped (face when walking away); rows 0 and 2 are
-  swapped back. His dialogue subtitle is his own ("Twilight Merchant")
-  instead of the Exotic Merchant's. He still brings three outfits and five
-  pieces per visit.
+- **Twilight Merchant art cleaned up.** Outfits and their icons lose the
+  painted dark contour down to a 1 px rim; furniture keeps its 1 px inner
+  contour. Every remaining contour is a darker shade of the colour beside
+  it, as in vanilla, not black or slate, and all sheets are lifted in
+  brightness (`tools/twilight_cleanup.py`, run on the original sheets). A
+  first pass removed the whole contour and tore the Hanging Tree apart,
+  whose twigs and crow were drawn in contour colour; they are back. Every
+  outfit head had north and south swapped (face when walking away); rows 0
+  and 2 are swapped back. His dialogue subtitle is his own ("Twilight
+  Merchant") instead of the Exotic Merchant's. He still brings three
+  outfits and five pieces per visit.
 - **Hand recolours from the player (2026-09-16).** Cloudmarble wall,
   Cloudturf and Stormslate grounds, Windwheat, Sky Reeds, Tall Cloud Grass,
   Prism Grass, Prisma Birch, Skyseraph tree, Skystone Golem, Striped

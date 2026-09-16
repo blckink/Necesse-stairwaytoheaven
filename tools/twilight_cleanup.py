@@ -7,15 +7,19 @@ too dark in game; every head sheet also had its north and south rows swapped
 (vanilla: row 0 = facing up / back of head, row 2 = facing down / face).
 
 This script
-  * removes the slate band where it touches transparency,
-  * peels the near-black band down to a 1 px rim,
-  * lifts the remaining colours with a mild gamma,
+  * outfits: removes the slate band and peels the near-black band under it
+    to a 1 px rim,
+  * furniture (--no-peel): keeps the inner slate layer, drops the outer one,
+  * lifts the colours with a mild gamma,
+  * recolours the remaining contour like vanilla: a darker shade of the
+    motif colour beside it, not black (2026-09-17: removing the whole contour
+    tore the hanging tree apart, its twigs were drawn in contour colour),
   * with --swap-head-rows, swaps rows 0 and 2 (64 px cells) of head sheets.
 
 --no-peel keeps the dark band (furniture: thin black legs and rims are part
 of the motif and were eaten).
 
-Usage: twilight_cleanup.py [--swap-head-rows] [--no-peel] FILE...   (edits in place)
+Usage: twilight_cleanup.py [--swap-head-rows] [--no-peel] FILE...   (edits in place; run it on the ORIGINAL sheets, e.g. from git 70946f7)
 """
 import sys
 
@@ -25,6 +29,7 @@ SLATE = (34, 34, 46)
 DARK_LUMA = 34
 PEEL_PASSES = 3
 GAMMA = 0.75
+SELOUT = 0.5
 
 
 def luma(p):
@@ -42,55 +47,95 @@ def touches_air(px, x, y, w, h):
     return any(px[n][3] == 0 for n in neighbours(x, y, w, h)) or x in (0, w - 1) or y in (0, h - 1)
 
 
+def selout(px, rim, w, h):
+    """Vanilla-style contour: each rim pixel takes a darker shade of the
+    motif colour next to it instead of black/slate. Rim pixels with no motif
+    neighbour (thin twigs drawn only in contour) inherit from the nearest
+    coloured rim pixel."""
+    base = {}
+    for k in rim:
+        cols = [px[n] for n in neighbours(*k, w, h) if px[n][3] and n not in rim]
+        if cols:
+            base[k] = tuple(sum(c[i] for c in cols) // len(cols) for i in range(3))
+    frontier = list(base)
+    while frontier:
+        nxt = []
+        for k in frontier:
+            for n in neighbours(*k, w, h):
+                if n in rim and n not in base:
+                    base[n] = base[k]
+                    nxt.append(n)
+        frontier = nxt
+    for k in rim:
+        c = base.get(k, (60, 45, 50))
+        px[k] = (int(c[0] * SELOUT), int(c[1] * SELOUT), int(c[2] * SELOUT), 255)
+
+
 def clean(im, peel=True):
     w, h = im.size
     px = {(x, y): im.getpixel((x, y)) for y in range(h) for x in range(w)}
 
-    # 1. Slate band: flood from the air through exact slate pixels.
-    stack = [(x, y) for (x, y), p in px.items() if p[3] and p[:3] == SLATE and touches_air(px, x, y, w, h)]
-    seen = set(stack)
-    while stack:
-        x, y = stack.pop()
-        px[(x, y)] = (0, 0, 0, 0)
-        for n in neighbours(x, y, w, h):
-            if n not in seen and px[n][3] and px[n][:3] == SLATE:
-                seen.add(n)
-                stack.append(n)
-
-    # 2. The dark band is only what lay right under the slate band: dark
-    #    pixels at most PEEL_PASSES+1 steps in from it. Dark motifs (black
-    #    robes, dark wood) without a slate band are left alone. Peeling
-    #    PEEL_PASSES layers of a 4 px band leaves a 1 px rim.
-    band = set()
-    frontier = [n for s in seen for n in neighbours(*s, w, h)
-                if px[n][3] and luma(px[n]) < DARK_LUMA]
-    for _ in range(PEEL_PASSES + 1 if peel else 0):
+    # 1. Slate contour (1-2 px): distance of every slate pixel from the motif.
+    slate = {k for k, p in px.items() if p[3] and p[:3] == SLATE}
+    dist = {}
+    frontier = [k for k in slate if any(px[n][3] and n not in slate for n in neighbours(*k, w, h))]
+    for k in frontier:
+        dist[k] = 1
+    while frontier:
         nxt = []
-        for n in frontier:
-            if n not in band:
-                band.add(n)
-                nxt.extend(m for m in neighbours(*n, w, h)
-                           if m not in band and px[m][3] and luma(px[m]) < DARK_LUMA)
+        for k in frontier:
+            for n in neighbours(*k, w, h):
+                if n in slate and n not in dist:
+                    dist[n] = dist[k] + 1
+                    nxt.append(n)
         frontier = nxt
-    for _ in range(PEEL_PASSES if peel else 0):
-        drop = []
-        for (x, y) in band:
-            p = px[(x, y)]
-            if not p[3] or not touches_air(px, x, y, w, h):
-                continue
-            inner = [px[n] for n in neighbours(x, y, w, h) if px[n][3]]
-            if any(luma(q) < DARK_LUMA for q in inner):
-                drop.append((x, y))
-        if not drop:
-            break
-        for k in drop:
-            px[k] = (0, 0, 0, 0)
 
-    # 3. Lift the colours; alpha stays hard.
+    if peel:
+        # Outfits: the slate goes entirely, the 4 px near-black band under it
+        # is peeled to a 1 px rim (dark motifs without slate stay untouched).
+        for k in slate:
+            px[k] = (0, 0, 0, 0)
+        band = set()
+        frontier = [n for s in slate for n in neighbours(*s, w, h)
+                    if px[n][3] and luma(px[n]) < DARK_LUMA]
+        for _ in range(PEEL_PASSES + 1):
+            nxt = []
+            for n in frontier:
+                if n not in band:
+                    band.add(n)
+                    nxt.extend(m for m in neighbours(*n, w, h)
+                               if m not in band and px[m][3] and luma(px[m]) < DARK_LUMA)
+            frontier = nxt
+        for _ in range(PEEL_PASSES):
+            drop = [k for k in band if px[k][3] and touches_air(px, *k, w, h)
+                    and any(px[n][3] and luma(px[n]) < DARK_LUMA for n in neighbours(*k, w, h))]
+            if not drop:
+                break
+            for k in drop:
+                px[k] = (0, 0, 0, 0)
+        # Stray rim specks left by the peel: at most one opaque neighbour.
+        for _ in range(2):
+            for k in [k for k in band if px[k][3]
+                      and sum(1 for n in neighbours(*k, w, h) if px[n][3]) <= 1]:
+                px[k] = (0, 0, 0, 0)
+        rim = {k for k in band if px[k][3] and touches_air(px, *k, w, h)}
+    else:
+        # Furniture: keep the inner contour layer (it carries thin twigs and
+        # legs), drop only the outer one.
+        for k in slate:
+            if dist.get(k, 1) > 1:
+                px[k] = (0, 0, 0, 0)
+        rim = {k for k in slate if px[k][3]}
+
+    # 2. Lift the colours (alpha stays hard), then recolour the rim.
     lut = [round(255 * (v / 255) ** GAMMA) for v in range(256)]
+    for k, p in px.items():
+        if p[3]:
+            px[k] = (lut[p[0]], lut[p[1]], lut[p[2]], 255)
+    selout(px, rim, w, h)
+
     out = Image.new("RGBA", (w, h))
-    out.putdata([(lut[p[0]], lut[p[1]], lut[p[2]], 255) if p[3] else (0, 0, 0, 0)
-                 for p in (px[(x, y)] for y in range(h) for x in range(w))])
+    out.putdata([px[(x, y)] if px[(x, y)][3] else (0, 0, 0, 0) for y in range(h) for x in range(w)])
     return out
 
 
