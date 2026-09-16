@@ -5,6 +5,24 @@ All notable changes to this project are documented here. Format loosely follows
 
 ## [Unreleased]
 
+### Changed
+- **Hand recolours from the player (2026-09-16).** Cloudmarble wall,
+  Cloudturf and Stormslate grounds, Windwheat, Sky Reeds, Tall Cloud Grass,
+  Prism Grass, Prisma Birch, Skyseraph tree, Skystone Golem, Striped
+  Megashark and the Haunted Clock now ship the player's sheets. The Sky Reeds
+  and Windwheat icons and the Skyseraph tree icon are cut from the new
+  sheets. The generators no longer write any of them.
+- **Supplied source art left the jar.** `src/main/resources/kk-sprites/`
+  shipped every source sheet inside the mod; it is now `art/supplied/`, and
+  uploads go to `art-inbox/`.
+
+### Fixed
+- `convert_biome_art.py` no longer puts the first Eden seed icon back over
+  the player's replacement, and no longer rebuilds the Skyseraph tree from its
+  old reference.
+- `conform_wall_sheet.py` finds the vanilla sprite dump instead of dying on
+  the empty `vanilla-sprites/`.
+
 ### Added
 - **Pickup filter (Aufsammel-Filter) is back.** A gear button beside the
   inventory's sort buttons opens a chest-style category/item menu per player;

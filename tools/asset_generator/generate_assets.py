@@ -75,18 +75,28 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              # Once a file is here the generator must stop producing it, or the
              # next full run silently overwrites the supplied art.
              #
-             # objects/beetlewall.png and objects/cloudmarblewall.png are
-             # deliberately NOT in this list, though kk-sprites/ holds a file
-             # for each. Both are continuous illustrations (16,001 and 10,855
-             # distinct colours, against 37 and 23 in the drawn sheets) painted
+             # objects/beetlewall.png is deliberately NOT in this list, though
+             # art/supplied/ holds a file for it: a continuous illustration
+             # (16,001 distinct colours against 37 in the drawn sheet) painted
              # straight across a body block the engine reads as tile HALVES
              # whose column-to-half mapping changes by row -- see
-             # gen_beetlewall's header. They were copied in once and reverted;
-             # the cloudmarble one is the exact sheet the player saw in game
-             # and rejected ("die Waende blenden fast ... die Fenster sind
-             # seitlich falsch"), recorded at gen_cloudmarble.generate(). They
-             # stay the design source of record for those sets' IDENTITY and
-             # are not the shipped sheets.
+             # gen_beetlewall's header. It stays the design source of record
+             # for the set's IDENTITY and is not the shipped sheet.
+             #
+             # The player's hand recolours of 2026-09-16, on the exact layout
+             # the generator drew (the wall carries 16 colours, not the
+             # illustration's 10,855): the sheets are theirs now and no
+             # generator may write them. The plant icons for skyreeds and
+             # windwheat are cut 1:1 from the recoloured sheets
+             # (asset_intake --overwrite-icons), so they belong here too.
+             "objects/cloudmarblewall.png",
+             "tiles/stormslate_splat.png",
+             "objects/windwheat.png", "items/windwheat.png",
+             "objects/skyreeds.png", "items/skyreeds.png",
+             "objects/prismabirch.png",
+             "objects/tallcloudgrass.png", "objects/prismgrass.png",
+             "mobs/skystonegolem.png", "mobs/stripedmegashark.png",
+             "objects/hauntedclock.png",
              # Our own art for the three Outland mobs, which used to wear
              # vanilla's sheets by string ID.
              # Fen Wraith's body, composed by tools/resheet_mob.py from the
@@ -183,8 +193,7 @@ def main():
     # cloudturf_splat and aurorashoal_splat are supplied art (CONVERTED above).
     gen_splats.build_splat(f"{out}/tiles/skystone_splat.png", gen_splats.material_skystone, 5, 0x51,
                            features=gen_splats.features_skystone)
-    gen_splats.build_splat(f"{out}/tiles/stormslate_splat.png", gen_splats.material_stormslate, 6, 0x57,
-                           features=gen_splats.features_stormslate)
+    # stormslate_splat is the player's recolour (CONVERTED above).
     gen_splats.build_splat(f"{out}/tiles/gloomwoodfloor_splat.png", gen_splats.material_gloomwood, 2, 0x6D,
                            features=gen_splats.features_gloomwood)
     gen_splats.build_splat(f"{out}/tiles/mistsea_shallow_splat.png", gen_splats.material_mist(False), 1, 0x315E, frames=8)
@@ -212,7 +221,8 @@ def main():
     # Objects
     gen_objects.gen_stairway_down(f"{out}/objects/skystairwaydown.png")
     gen_objects.gen_stairway_up(f"{out}/objects/skystairwayup.png")
-    gen_objects.gen_windwheat(f"{out}/objects/windwheat.png")
+    # windwheat, skyreeds, tallcloudgrass and prismgrass are the player's
+    # recolours (CONVERTED above); their gen_* functions stay as the record.
     # objects/cloudberrybush.png and objects/cloudberrysapling.png are the
     # supplied art (CONVERTED above) and are NOT written here. gen_objects
     # still carries the drawn versions; the item icons stay derived --
@@ -229,18 +239,18 @@ def main():
     gen_veil.gen_deadtree(f"{out}/objects/deadtree.png")
     gen_objects.gen_crystal_cluster(f"{out}/objects/stormcrystal.png", palette.STORMCRYSTAL, 0x57C7)
     gen_objects.gen_aurorabloom(f"{out}/objects/aurorabloom.png")
-    gen_objects.gen_skyreeds(f"{out}/objects/skyreeds.png")
     gen_objects.gen_mapicons(f"{out}/ui/mapicons")
 
     # ===== v0.4 "The Living Sky": per-biome fill =====
     # Trees (vanilla TreeObject 128px cells) + leaf particles + saplings
     # objects/nimbuswillow.png is NOT generated: it is supplied art, kept in
-    # src/main/resources/kk-sprites/ and copied in as-is. gen_nimbuswillow
+    # art/supplied/ and copied in as-is. gen_nimbuswillow
     # stays available in gen_trees for reference, but calling it here would
     # overwrite the supplied sheet on the next run. Its sapling, leaves and log
     # icon are still ours and are still generated below.
     gen_trees.gen_fulgurpine(f"{out}/objects/fulgurpine.png")
-    gen_trees.gen_prismabirch(f"{out}/objects/prismabirch.png")
+    # objects/prismabirch.png is the player's recolour (CONVERTED above); its
+    # leaves, sapling and log icon are still generated.
     gen_trees.gen_nimbuswillow_leaves(f"{out}/particles/nimbusleaves.png")
     gen_trees.gen_fulgurpine_leaves(f"{out}/particles/fulgurleaves.png")
     gen_trees.gen_prismabirch_leaves(f"{out}/particles/prismaleaves.png")
@@ -255,9 +265,7 @@ def main():
     gen_objects.gen_thunderbloom(f"{out}/objects/thunderbloom.png")
     gen_objects.gen_glowfern(f"{out}/objects/glowfern.png")
     gen_objects.gen_auroralily(f"{out}/objects/auroralily.png")
-    gen_objects.gen_tallcloudgrass(f"{out}/objects/tallcloudgrass.png")
     gen_objects.gen_stormsedge(f"{out}/objects/stormsedge.png")
-    gen_objects.gen_prismgrass(f"{out}/objects/prismgrass.png")
     gen_objects.gen_fulguriteore(f"{out}/objects/fulguriteore.png")
     gen_objects.gen_prismshardore(f"{out}/objects/prismshardore.png")
     gen_objects.gen_cloudbell_item(f"{out}/items/cloudbell.png")
@@ -285,7 +293,7 @@ def main():
     gen_mobs.gen_zephyrray(f"{out}/mobs/zephyrray.png")
     # mobs/stormwisp.png is supplied art now; gen_mobs.gen_stormwisp stays as
     # the record of the generated one. Its bestiary icon is still drawn.
-    gen_mobs.gen_skystonegolem(f"{out}/mobs/skystonegolem.png")
+    # mobs/skystonegolem.png is the player's recolour (CONVERTED above).
     gen_mobs.gen_icons(f"{out}/mobs/icons")
     # The Mistserpent: worm sheet, dive mask, shadow and bestiary icon.
     gen_serpent.gen_mistserpent(f"{out}/mobs", f"{out}/mobs/icons")
@@ -323,9 +331,7 @@ def main():
     gen_items.gen_tempestedge_icon(f"{out}/items/tempestedge.png")
     gen_items.gen_galehowl_icon(f"{out}/items/galehowl.png")
     gen_items.gen_skystonerock_item(f"{out}/items/skystonerock.png")
-    gen_items.gen_skyreeds_item(f"{out}/items/skyreeds.png")
     gen_items.gen_stairway_item(f"{out}/items/skystairwaydown.png")
-    gen_items.gen_windwheat_item(f"{out}/items/windwheat.png")
     gen_items.gen_cloudberrybush_item(f"{out}/items/cloudberrybush.png")
     gen_items.gen_cloudberry_item(f"{out}/items/cloudberry.png")
     gen_veil.gen_veil_item_icons(f"{out}/items")
@@ -371,12 +377,11 @@ def main():
     gen_skyfurniture.generate(f"{out}/objects", f"{out}/items")
     # Cloudmarble masonry. The Skyway ground it used to draw now comes from
     # tools/convert_biome_art.py instead — see the note in gen_cloudmarble.
-    # The WALL, however, is drawn here again: shipping the supplied
-    # illustration as the sheet put 10,858 colours and a near-white cap into a
-    # format vanilla builds out of ~20, which is what "die Wände blenden fast"
-    # was. Same call the Beetlefreak wall already makes, same reason.
+    # The WALL sheet is the player's recolour of the drawn one (CONVERTED
+    # above); generate() no longer writes it, but still draws the fence,
+    # gate and item icons.
     gen_cloudmarble.generate(f"{out}/objects", f"{out}/items", f"{out}/tiles")
-    # Beetlefreak masonry. The supplied sheet in kk-sprites/ is a continuous
+    # Beetlefreak masonry. The supplied sheet in art/supplied/ is a continuous
     # illustration, not an auto-tile blob, so it could not tile however it was
     # repacked; tools/convert_biome_art.py no longer produces this wall and
     # gen_beetlewall redraws it on the layout the engine actually reads. See
@@ -390,7 +395,7 @@ def main():
     gen_trees.gen_skyseraphsapling(f"{out}/objects", f"{out}/items")
     gen_trees.gen_seraphwood_item(f"{out}/items/seraphwood.png")
     gen_trees.gen_skyseraphtree_leaves(f"{out}/particles/seraphleaves.png")
-    # Cloud Tree companions (the tree itself is supplied art, see kk-sprites)
+    # Cloud Tree companions (the tree itself is supplied art, see art/supplied)
     gen_trees.gen_cloudsapling(f"{out}/objects", f"{out}/items")
     gen_trees.gen_cloudwood_item(f"{out}/items/cloudwood.png")
     gen_trees.gen_cloudtree_leaves(f"{out}/particles/cloudleaves.png")

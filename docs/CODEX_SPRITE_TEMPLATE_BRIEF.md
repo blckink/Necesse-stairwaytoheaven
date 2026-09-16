@@ -26,7 +26,7 @@ the right size, with the cells the engine slices marked, and a card that says
 which vanilla class reads it and what each cell means.
 
 The repo already has half of this convention in
-`src/main/resources/kk-sprites/readme.md`:
+`art/supplied/readme.md`:
 
 > `<vanilla-name>-new-<our-name>.png` — the first half is not a replacement
 > target, it names the vanilla asset the sheet was drawn on, so the setup can be
@@ -109,7 +109,7 @@ Paste this to Codex verbatim.
 > your output contract) · `docs/research/asset-formats.md` ·
 > `docs/assets-style-guide.md` · `docs/research/structures-furniture.md` ·
 > `docs/research/furniture-formats.md` · `docs/research/splat-format.md` ·
-> `src/main/resources/kk-sprites/readme.md` (the naming convention you are
+> `art/supplied/readme.md` (the naming convention you are
 > extending) · `docs/TECHNICAL_LEARNINGS.md` (search it for the family you are
 > working on before you write its card — it records the traps).
 >

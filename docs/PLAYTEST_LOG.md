@@ -286,7 +286,7 @@ the response is a sweep plus a gate, not a single-object patch.
 
 Three reports, all three real, and the first two had one root cause between
 them: `objects/cloudmarblewall.png` was not generated at all. It was the
-supplied illustration from `kk-sprites/`, copied in as-is.
+supplied illustration from `art/supplied/`, copied in as-is.
 
 | Area | Observation | Status |
 |---|---|---|

@@ -2385,7 +2385,7 @@ slot's shape and its reveals read as an opening.
 ## A supplied illustration is a source of record, not a sheet (v0.9)
 
 **[sprites]** `objects/cloudmarblewall.png` shipped as the hand-made art from
-`kk-sprites/`, copied in as-is, with `gen_cloudmarble_wall` deliberately not
+`art/supplied/`, copied in as-is, with `gen_cloudmarble_wall` deliberately not
 called. Measured against the three walls that are drawn:
 
 | sheet | distinct colours | cap mean luminance | cap dominant tone |

@@ -74,7 +74,7 @@ FLOOR, TERRAIN, LIQUID = "floor", "terrain", "liquid"
 ROLES = {
     "cloudturftile": TERRAIN,
     # Eden grass: natural ground on vanilla's overgrowngrass setup, from the
-    # supplied art (kk-sprites), plantable via its seed.
+    # supplied art (art/supplied), plantable via its seed.
     "overgrownedentile": TERRAIN,
     "aurorashoaltile": TERRAIN,
     # Eden. paradisesand and edensoil are natural ground; edenmoss is the

@@ -442,7 +442,7 @@ zwischen Orten ist wirklich still, genau wie gewünscht.
 | `mobs/` | 33 | Lauf-Sheets der Kreaturen |
 | `mobs/icons/` | 26 | Bestiarium-/Siedlungs-Gesichter |
 | `tiles/` | 21 | Boden + `_splat`-Autotile-Atlanten |
-| `kk-sprites/` | 16 | Generator-Zwischenstufen |
+| `art/supplied/` | 16 | Generator-Zwischenstufen |
 | `player/armor/` | 12 | getragene Rüstung auf dem Spielerkörper |
 | `player/weapons/` | 5 | Waffen in der Hand |
 | `particles/` · `projectiles/` | 5 · 4 | Effekte |
@@ -529,7 +529,7 @@ das die einzigen zwei Icons, die dieser Mod wirklich schuldet.
 
 Alle 341 einzeln abbildbaren Sprites stecken in der Handy-Seite oben —
 originalgroß, mit Pixelraster, auf Schachbrett damit Transparenz sichtbar
-bleibt. Nicht dabei: `kk-sprites/` (Generator-Zwischenstufen) und das
+bleibt. Nicht dabei: `art/supplied/` (Generator-Zwischenstufen) und das
 Vorschaubild.
 
 ---

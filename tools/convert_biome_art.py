@@ -26,7 +26,10 @@ from px import Canvas  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REFS = os.path.join(ROOT, "docs/references")
-REFS_KK = os.path.join(ROOT, "src/main/resources/kk-sprites")
+# The supplied sheets that tools still convert from. They used to sit in
+# art/supplied/ and so shipped inside the jar; they are
+# source material, not runtime, and live outside the resources now.
+REFS_KK = os.path.join(ROOT, "art/supplied")
 OBJECTS = os.path.join(ROOT, "src/main/resources/objects")
 ITEMS = os.path.join(ROOT, "src/main/resources/items")
 MOBS = os.path.join(ROOT, "src/main/resources/mobs")
@@ -258,7 +261,7 @@ def repack_kk_tree(src_name, out_name):
     the lower half of a single-column sheet and SkyTreeObject picks the half
     from the ground. Nothing about the artwork changes; only its arrangement.
     """
-    src = Image.open(os.path.join(ROOT, "src/main/resources/kk-sprites", src_name)).convert("RGBA")
+    src = Image.open(os.path.join(REFS_KK, src_name)).convert("RGBA")
     w, h = src.size
     rows = h // 128
     sheet = Image.new("RGBA", (128, 128 * rows * 2))
@@ -364,7 +367,7 @@ def copy_kk(src_name, out_dir, out_name):
 
     The convert step still owns the file (one producer per path -- see
     generate_assets.py's CONVERTED guard) so the copy is reproducible from
-    kk-sprites/ rather than being an opaque binary someone once placed.
+    art/supplied/ rather than being an opaque binary someone once placed.
     """
     src = Image.open(os.path.join(REFS_KK, src_name)).convert("RGBA")
     path = os.path.join(out_dir, out_name)
@@ -373,9 +376,14 @@ def copy_kk(src_name, out_dir, out_name):
 
 
 def main():
-    path, sheet = build_skyseraph_tree()
+    # objects/skyseraphtree.png is the player's hand recolour of 2026-09-16
+    # and is no longer rebuilt from docs/references (build_skyseraph_tree stays
+    # as the record of how the first sheet was made). The icon still follows
+    # the sheet.
+    path = os.path.join(OBJECTS, "skyseraphtree.png")
+    sheet = Image.open(path).convert("RGBA")
     opaque = sum(1 for p in sheet.get_flattened_data() if p[3] > 0)
-    print(f"{path}  128x1024  opaque {opaque}")
+    print(f"{path}  {sheet.size}  opaque {opaque}")
     icon = icon_from(sheet.crop((0, 0, 128, 128)), os.path.join(ITEMS, "skyseraphtree.png"))
     print(f"{os.path.join(ITEMS, 'skyseraphtree.png')}  32x32  "
           f"opaque {sum(1 for p in icon.get_flattened_data() if p[3] > 0)}")
@@ -392,7 +400,7 @@ def main():
     # with a column-to-half mapping that changes between row groups. No repack
     # of those pixels can tile; the sheet had to be redrawn on the real layout,
     # which tools/asset_generator/gen_beetlewall.py now does. The supplied file
-    # stays in kk-sprites/ as the source of record for the set's identity, and
+    # stays in art/supplied/ as the source of record for the set's identity, and
     # fit_door_cells / beetle_item_icons stay below because the next supplied
     # sheet may well need them.
 
@@ -401,9 +409,11 @@ def main():
     # so both are verbatim copies. The doubled t in the supplied splat's name
     # is the player's typo and is normalised here -- the shipped file matches
     # the tile's texture name "overgrowneden".
+    # items/overgrownedenseed.png is NOT copied any more: the player replaced
+    # the icon in c5792a1 (2026-09-03), and copying the first supplied file
+    # silently put the old one back on every run.
     for src, out_dir, out in (
-            ("overgrowngrass_splat-overgrowneden_splatt.png", TILES, "overgrowneden_splat.png"),
-            ("overgrowngrassseed-overgrownedenseed.png", ITEMS, "overgrownedenseed.png")):
+            ("overgrowngrass_splat-overgrowneden_splatt.png", TILES, "overgrowneden_splat.png"),):
         path, im = copy_kk(src, out_dir, out)
         print(f"{path}  {im.size}")
 

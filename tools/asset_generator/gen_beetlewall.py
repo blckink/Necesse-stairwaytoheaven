@@ -1,6 +1,6 @@
 """Beetlefreak masonry — the Veil's purple building set — redrawn at sheet format.
 
-Design source: src/main/resources/kk-sprites/beetlewall.png, the supplied art.
+Design source: art/supplied/beetlewall.png, the supplied art.
 That sheet is the source of record for the set's IDENTITY and stays untouched:
 
   * deep violet stone with a lighter violet SWIRL embossed into it

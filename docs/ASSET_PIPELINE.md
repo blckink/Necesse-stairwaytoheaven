@@ -72,7 +72,7 @@ instruction in the whole brief.
 
 ## Step 2 — drop the file in and check it
 
-Put the file in `src/main/resources/kk-sprites/` and name it after the sprite
+Put the file in `art/supplied/` and name it after the sprite
 it replaces:
 
 ```

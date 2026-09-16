@@ -6,10 +6,10 @@ Photoshop, guess the grid, nudge cells by hand, drop it in, find out in game
 that it was wrong. The player's own words: "ohne manuelles rumgebastel in
 Photoshop wie bisher".
 
-What this does instead, per file in src/main/resources/kk-sprites/:
+What this does instead, per file in art-inbox/:
 
   1. READS THE NAME. The folder's convention already carries the intent
-     (see kk-sprites/readme.md):
+     (see art/supplied/readme.md):
          <name>.png                      replaces our sprite of that name
          <name>-new-<ourname>.png        our <ourname>, drawn on vanilla <name>
          <folder>-<name>-now-<ourname>   same, with a folder hint
@@ -60,7 +60,9 @@ from PIL import Image
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, "tools"))
 RES = os.path.join(REPO, "src", "main", "resources")
-KK = os.path.join(RES, "kk-sprites")
+# The upload inbox. Supplied sheets that are kept as source material live in
+# art/supplied/ (see its readme.md); art/supplied/ is gone.
+KK = os.path.join(REPO, "art-inbox")
 QA = os.path.join(REPO, "build", "qa", "intake")
 
 # Where a bare name is looked for, in order. First hit wins.
@@ -74,7 +76,7 @@ def candidates_for(stem):
     The convention is read left to right; only the LAST name in a `-new-` /
     `-now-` chain is ours -- the earlier ones name the vanilla asset the art
     was drawn ON, which is a format reference, not a target. A folder prefix
-    may be glued on the front and, per kk-sprites/readme.md, IS NOT TRUSTED:
+    may be glued on the front and, per art/supplied/readme.md, IS NOT TRUSTED:
     the evilwall pair arrived with `items-` on the 128x208 object sheet and
     `objects-` on the 32x32 icon. So every plausible reading is collected and
     the SIZE decides, because size cannot lie.
@@ -374,7 +376,7 @@ def process(path, apply_it, overwrite_icons=False):
         if near:
             print("   Did you mean one of: %s" % ", ".join(near))
         print("   Otherwise this is NEW art: say where it goes, or name the file")
-        print("   after the sprite it replaces (see kk-sprites/readme.md).")
+        print("   after the sprite it replaces (see art/supplied/readme.md).")
         return 1
     print("   target   %s   class %s   wants %dx%d" % (rel, klass, want[0], want[1]))
     if len(cands) > 1:
@@ -467,7 +469,7 @@ def process(path, apply_it, overwrite_icons=False):
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("files", nargs="*",
-                    help="image files (default: everything in kk-sprites/)")
+                    help="image files (default: everything in art-inbox/)")
     ap.add_argument("--apply", action="store_true",
                     help="write passing files into src/main/resources")
     ap.add_argument("--overwrite-icons", action="store_true",

@@ -34,7 +34,7 @@ from an image editor, so this tool applies it mechanically:
 
   It cannot fix a sheet that is one continuous illustration — that class of
   fault is structural and the report says "redraw" (measured colour count is
-  the tell: shipped wall sets carry 19-38 colours; see kk-sprites/readme.md).
+  the tell: shipped wall sets carry 19-38 colours; see art/supplied/readme.md).
 
 Usage:
     python3 tools/conform_wall_sheet.py IN.png                # report only
@@ -55,10 +55,14 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, "tools"))
 sys.path.insert(0, os.path.join(REPO, "tools", "asset_generator"))
 
-os.environ.setdefault("NECESSE_SPRITES", os.path.join(REPO, "vanilla-sprites"))
+from size_audit import default_vanilla  # noqa: E402
+
+# vanilla-sprites/ is gitignored and usually empty; size_audit knows where the
+# dump really lives, and without it the seam check dies on a missing file.
+os.environ.setdefault("NECESSE_SPRITES", default_vanilla())
 import wall_render_preview as wrp  # noqa: E402  (the engine port)
 
-VANILLA_STONEWALL = os.path.join(REPO, "vanilla-sprites", "objects", "stonewall.png")
+VANILLA_STONEWALL = os.path.join(os.environ["NECESSE_SPRITES"], "objects", "stonewall.png")
 
 W, H = 352, 128
 C = 16
@@ -558,7 +562,7 @@ def conform(path, out_path, fix, rebuild_slot, quantize):
     if len(cols) > 64:
         note = ("%d distinct colours - shipped wall sets carry 19-38. Four "
                 "figures means an illustration; no automatic fix makes an "
-                "illustration tile (see kk-sprites/readme.md)." % len(cols))
+                "illustration tile (see art/supplied/readme.md)." % len(cols))
         if quantize:
             if fix:
                 from convert_reference import quantize_opaque

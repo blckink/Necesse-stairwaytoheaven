@@ -125,7 +125,7 @@ instead of by a door. See `docs/CURRENT_STATE.md` and
 ## The Garden of Eden — first brick
 
 The player supplied the ground pair on 2026-09-01
-(`kk-sprites/overgrowngrass_splat-overgrowneden_splatt.png` + seed icon,
+(`art/supplied/overgrowngrass_splat-overgrowneden_splatt.png` + seed icon,
 drawn on vanilla's overgrowngrass). The realm ships later as a complete
 chapter; the ground is real now.
 

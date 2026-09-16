@@ -118,7 +118,7 @@ no dominant tone at all is not a set, it is a photograph — see below.
 
 ## Supplied art is a source of record, not a sheet
 
-`src/main/resources/kk-sprites/` holds hand-made reference art and it is the
+`art/supplied/` holds hand-made reference art and it is the
 source of record for a piece's identity. It is **not** the shipped sheet.
 
 Measured: `cloudmarblewall.png` copied in as-is carried **10,858 distinct
@@ -132,7 +132,7 @@ is repacked.
 
 So the identity comes from the supplied art and the **pixels come from the
 generator**. Both cloudmarble and Beetlefreak are now drawn; the references
-stay in `docs/references/` and `kk-sprites/` for what the material *is*.
+stay in `docs/references/` and `art/supplied/` for what the material *is*.
 
 ## Worldgen is art direction too
 

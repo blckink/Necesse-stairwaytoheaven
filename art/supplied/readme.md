@@ -1,5 +1,17 @@
 new assets manually created
 
+## Where this folder is, and where uploads go
+
+This folder used to be `src/main/resources/kk-sprites/`, which put every
+source sheet into the mod jar. On 2026-09-16 it moved here: it is source
+material for `tools/convert_biome_art.py`, not runtime. **New uploads go to
+`art-inbox/`** (see its README). A supplied sheet that ships verbatim does not
+need to stay here -- the shipped file is its record, and the generator's
+`CONVERTED` guard keeps it from being overwritten. The twelve hand recolours of
+2026-09-16 (cloudmarble wall, cloudturf and stormslate splats, four grasses,
+prismabirch, skyseraph tree, skystone golem, striped megashark, haunted clock)
+went that way and are not kept here.
+
 ## Naming and what happens to these
 
 `<vanilla-name>-new-<our-name>.png`, e.g. `birchtree-new-cloudtree.png`. The
@@ -20,7 +32,7 @@ repack is reproducible from this folder.
 | `items-crystalwall-now-evilwall.png` 128×208 | `objects/evilwall.png` | copied in as-is. Already exactly vanilla `RockObject` format — 4 variants (`randomWidth = width/32`), each two 16px sprite columns wide, over the 13 sprite rows `addRockDrawables` reads. Nothing to repack. |
 | `objects-crystalwall-now-evilwall.png` 32×32 | `items/evilwall.png` | the item icon. `RockObject.rockTextureName` feeds **both** `objects/<name>.png` and `items/<name>.png`, which is why one name covers the pair. |
 | `overgrowngrass_splat-overgrowneden_splatt.png` 224×576 | `tiles/overgrowneden_splat.png` | copied in as-is — already vanilla's splat layout (the doubled `t` in the supplied name is normalised). Registered as `overgrownedentile` on vanilla's `OvergrownGrassTile` setup: grows grass tufts, spreads to dirt, seeds back 4%. Grain is per-pixel rather than 2×2 (density 713, mean dRGB 48.2), exempted in `tile_behaviour_audit` as converted art — the player judges it in game. |
-| `overgrowngrassseed-overgrownedenseed.png` 32×32 | `items/overgrownedenseed.png` | the seed's icon. `overgrownedenseed` is vanilla's `GrassSeedItem` plus one override so it plants on Cloudturf as well as dirt; found in sky crates. |
+| `overgrowngrassseed-overgrownedenseed.png` 32×32 | `items/overgrownedenseed.png` | the seed's icon, **superseded**: the player replaced `items/overgrownedenseed.png` in c5792a1 and the converter no longer copies this file. `overgrownedenseed` is vanilla's `GrassSeedItem` plus one override so it plants on Cloudturf as well as dirt; found in sky crates. |
 
 ## A second naming form, and the trap in it
 
@@ -67,14 +79,14 @@ supplied sheet changes hands.
 
 ## The exception: a supplied sheet is only adopted if it is drawn ON the format
 
-Two files here are **design sources only** and are deliberately not shipped,
+Two supplied walls were **design sources only** and are deliberately not shipped,
 even though their names carry no `-new-` and the rule above would otherwise
 adopt them:
 
 | supplied | shipped instead | why |
 |---|---|---|
 | `beetlewall.png` 352×128, 16,001 colours | `tools/asset_generator/gen_beetlewall.py`, 37 colours | one continuous illustration painted across the 4×8 body block, which the engine reads as tile HALVES whose column-to-half mapping changes by row. No cell can meet its neighbour. The player saw exactly this in game: *"da stimmt kein Rand, Fenster oder sonst was von Layout"*. |
-| `cloudmarblewall.png` 352×128, 10,855 colours | `tools/asset_generator/gen_cloudmarble.py`, 23 colours | same fault, plus a cap band at mean luminance 228 against skystone's 52 and a front-facing pane in the strip that draws the wall's ROOF. Also seen in game: *"die ganzen Wände blenden fast ... die Fenster sind seitlich falsch"*. |
+| `cloudmarblewall.png` 352×128, 10,855 colours | `tools/asset_generator/gen_cloudmarble.py`, 23 colours | (the illustration itself is in git history before 2026-09-16; the file of that name was then overwritten by the player's 16-colour recolour of the generated sheet, which now ships) same fault, plus a cap band at mean luminance 228 against skystone's 52 and a front-facing pane in the strip that draws the wall's ROOF. Also seen in game: *"die ganzen Wände blenden fast ... die Fenster sind seitlich falsch"*. |
 
 Both were copied in once on 2026-09-01 and reverted the same day. The check
 that catches it is cheap and worth doing before adopting any wall sheet:

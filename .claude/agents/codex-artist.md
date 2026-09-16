@@ -63,7 +63,7 @@ from the draft's palette and silhouette rather than trying to rescue the pixels.
 **4 — Port into the generator.** The shipped PNG is written by
 `tools/asset_generator/`, always (`IMPLEMENTATION_RULES.md` §6). Either the
 converted sheet is committed as supplied art *and the generator stops producing
-it* (the `kk-sprites` path, with the `CONVERTED` guard updated), or — better,
+it* (the `art/supplied` path, with the `CONVERTED` guard updated), or — better,
 and what the Beetlefreak and Cloudmarble walls both ended up doing — you rebuild
 it in the generator on the draft's identity. A supplied illustration shipped as
 a sheet is how the spire came out white and blinding: 10,858 colours and a cap

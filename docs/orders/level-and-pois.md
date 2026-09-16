@@ -91,7 +91,7 @@ am 2026-09-05 um 22:08.
   `src/main/resources/tiles/**`, `src/main/resources/mobs/**` — **der Lead
   arbeitet dort parallel an Sprites und Tiles.**
 - `docs/AGENT_BOARD.md`, `docs/orders/` — gehören dem Lead
-- `src/main/resources/kk-sprites/_incoming/` — Zulieferung des Nutzers
+- `art/supplied/_incoming/` — Zulieferung des Nutzers
 - Keine Entscheidung aus `docs/DESIGN_DECISIONS.md` stillschweigend umdrehen.
   Insbesondere **`docs/PLAN_ONE_PLANE.md` ist Architekturgesetz**: eine
   Änderung, die eine Dimension hinzufügt, bricht es.

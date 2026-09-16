@@ -38,7 +38,7 @@ beiden Auftraege nacheinander.>
 - `docs/AGENT_BOARD.md` und `docs/orders/` — gehoeren dem Lead
 - `CHANGELOG.md` und die geteilten Doks — gehoeren dem Lead
   (`docs/AGENT_WORKFLOW.md`, "Shared files belong to the coordinator")
-- `src/main/resources/kk-sprites/_incoming/` — Zulieferung des Nutzers, Quelle
+- `art/supplied/_incoming/` — Zulieferung des Nutzers, Quelle
   und nie Zwischenstand
 - alles, was `docs/DESIGN_DECISIONS.md` festhaelt: nicht stillschweigend
   umdrehen. Wer es fuer falsch haelt, sagt es und wartet.

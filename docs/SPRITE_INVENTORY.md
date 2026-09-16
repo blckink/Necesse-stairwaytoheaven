@@ -13,7 +13,7 @@ written by `tools/asset_generator/`. Editing a PNG by hand is silently reverted
 on the next generator run. The exceptions are the supplied files listed in
 `generate_assets.py`'s `CONVERTED` guard, which are copied in as-is.
 
-`src/main/resources/kk-sprites/` (supplied reference art, not itself a shipped
+`art/supplied/` (supplied reference art, not itself a shipped
 sprite sheet) is excluded from the counts below; see `docs/VANILLA_ASSET_MAP.md`
 and `docs/ART_DIRECTION.md` for what it holds.
 

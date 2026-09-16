@@ -14,7 +14,7 @@ How the target is resolved, in order:
   1. The file's own name against every sprite the mod ships. `cloudturf_splat`
      resolves to `tiles/cloudturf_splat.png`.
   2. `<name>-new-<ourname>` -- new art drawn on a vanilla sheet, the naming
-     the kk-sprites folder already uses.
+     the art/supplied folder already uses.
   3. Nothing. It is reported as unresolved and left alone, because guessing
      which sprite a file replaces is exactly how art gets overwritten.
 

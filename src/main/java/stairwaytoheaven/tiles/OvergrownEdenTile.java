@@ -13,7 +13,7 @@ import necesse.level.maps.regionSystem.SimulatePriorityList;
 
 /**
  * Eden grass: the first ground of the Garden of Eden, from the player's own
- * supplied art (kk-sprites/overgrowngrass_splat-overgrowneden_splatt.png).
+ * supplied art (art/supplied/overgrowngrass_splat-overgrowneden_splatt.png).
  *
  * <p>{@code docs/WORLD_DESIGN.md} §5: Eden is <i>"an exaggerated biological
  * explosion: big, lush, dense, warm, colourful, alive"</i>, and this is its

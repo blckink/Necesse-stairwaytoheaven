@@ -1694,9 +1694,12 @@ def gen_skyway_icon(path):
 # ---------------------------------------------------------------------------
 
 def generate(objects_dir, items_dir, tiles_dir):
-    # objects/cloudmarblewall.png IS written here again (v0.9).
+    # objects/cloudmarblewall.png is NOT written here any more. On 2026-09-16
+    # the player recoloured the sheet this module drew, on its exact layout
+    # (16 colours), and that recolour ships; gen_cloudmarble_wall stays as
+    # the record of the layout. The history below is why the layout exists.
     #
-    # It used to be the supplied illustration from kk-sprites/, copied in
+    # The sheet used to be the supplied illustration from art/supplied/, copied in
     # as-is. Measured against the three walls that are drawn: that sheet
     # carried 10,858 distinct colours where skystonebrick and nightfell carry
     # 19 and the Beetlefreak wall 38, its cap band had no dominant tone at all
@@ -1717,7 +1720,6 @@ def generate(objects_dir, items_dir, tiles_dir):
     # swirls, the gold arcade, the four-point stars -- is what _build_wall
     # draws; the reference renders stay the source of record in
     # docs/references/.
-    gen_cloudmarble_wall(os.path.join(objects_dir, "cloudmarblewall.png"))
     gen_cloudmarble_fence(os.path.join(objects_dir, "cloudmarblefence.png"))
     gen_cloudmarble_fencegate(os.path.join(objects_dir, "cloudmarblefencegate.png"))
     # tiles/skyway.png and tiles/skyway_splat.png are NOT written here.

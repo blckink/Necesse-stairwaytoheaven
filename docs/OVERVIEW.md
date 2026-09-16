@@ -395,7 +395,7 @@ ours. Each sells their spare. `[run]`, not `[game]`.
 ## 7. Sprites — ours vs. vanilla
 
 **389 PNGs ship with the mod**: 143 items · 107 objects · 38 mobs + 31 bestiary
-icons · 21 tiles · 16 kk-sprites · 14 armour · 5 weapons · 5 particles ·
+icons · 21 tiles · 16 art/supplied · 14 armour · 5 weapons · 5 particles ·
 4 projectiles · 3 map icons · 2 statues · 2 carpets · 1 preview.
 
 The remaining literal Vanilla `GameTexture.fromFile` paths include:

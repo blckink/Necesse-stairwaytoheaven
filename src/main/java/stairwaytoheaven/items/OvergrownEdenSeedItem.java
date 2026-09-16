@@ -14,7 +14,7 @@ import stairwaytoheaven.SkyRegistry;
 /**
  * The Eden grass seed, on vanilla's own {@code GrassSeedItem} — which is the
  * class vanilla registers {@code overgrowngrassseed} with, the asset the
- * supplied icon (kk-sprites/overgrowngrassseed-overgrownedenseed.png) names as
+ * supplied icon (art/supplied/overgrowngrassseed-overgrownedenseed.png) names as
  * its source. Everything is inherited: the compostable/seed ingredient tags,
  * the seed tooltip, the place handler, the death penalty.
  *

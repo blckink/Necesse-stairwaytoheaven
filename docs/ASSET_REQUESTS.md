@@ -19,7 +19,7 @@ Three-way split used throughout:
 - **OURS** — a file already under `src/main/resources/`, generated or
   hand-drawn, not vanilla's. Not in this list; nothing to do.
 - **PLAYER** — one of the sheets you already supplied (see
-  `src/main/resources/kk-sprites/readme.md` and `docs/VANILLA_ASSET_MAP.md`
+  `art/supplied/readme.md` and `docs/VANILLA_ASSET_MAP.md`
   §4). Also not in this list.
 - **BORROWED** — resolves to a file under `vanilla-sprites/` and nothing
   under `src/main/resources/` shadows it. This is what the tables below are.
@@ -37,7 +37,7 @@ Steinfeld isn't here: it has no merged code yet (`docs/OVERVIEW.md` §1 —
   `skystone.png`).
 - **`<vanillaname>-new-<ourname>.png`** is new art drawn on a vanilla sheet's
   layout, where `<ourname>` is a name the mod already ships (a generated
-  placeholder waiting to be replaced). `kk-sprites/readme.md` has worked
+  placeholder waiting to be replaced). `art/supplied/readme.md` has worked
   examples.
 
 **The catch, specific to this list.** `tools/inbox_fix.py` resolves a target

@@ -10,7 +10,7 @@ was a correct picture in a wrong layout.
 That only works if the cards are real. This checks:
 
   * folder layout, and the `<vanilla-ref>-new-<our-id>.png` naming the repo
-    already uses in src/main/resources/kk-sprites/
+    already uses in art/supplied/
   * the blank template is EXACTLY the size its card claims, and is fully
     transparent — a template with opaque pixels is finished art in the wrong
     place, and it would be overwritten by the generator anyway
