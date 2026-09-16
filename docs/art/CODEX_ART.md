@@ -46,6 +46,17 @@ dark, gothic, Beetlejuice/Addams — but still readable on a dark floor.
 
 ## Lessons (newest first — append, do not rewrite)
 
+- 2026-09-16 · **Floors: one pattern with a 32 px period.** The gloomwood weave
+  and the nimbus herringbone passed first time because every cell shares the
+  same structure; a second gloomwood round with 24 different cells failed.
+- 2026-09-16 · **Check the edge rows, not only the look.** Cloudturf's top
+  row carried hill tips across the cell edge; the seam audit caught it and a
+  one-row copy fixed it. Motifs should also not all sit low in the cell, or
+  the field shows rows.
+- 2026-09-16 · **Wall sheets out of the canvas need `conform_wall_sheet --fix
+  --rebuild-roof-slot --quantize 38`** — blending seams alone pushed one
+  sheet from 40 to 357 colours.
+
 - 2026-09-16 · **Ground cells: no frame.** Keeping motifs 2 px off the cell
   edge fixed the seams, but Codex filled that margin with a flat colour while
   the interior was mottled — the flat frame drew a faint grid. The base
