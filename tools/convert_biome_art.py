@@ -27,7 +27,7 @@ from px import Canvas  # noqa: E402
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REFS = os.path.join(ROOT, "docs/references")
 # The supplied sheets that tools still convert from. They used to sit in
-# art/supplied/ and so shipped inside the jar; they are
+# the resources folder (kk-sprites) and so shipped inside the jar; they are
 # source material, not runtime, and live outside the resources now.
 REFS_KK = os.path.join(ROOT, "art/supplied")
 OBJECTS = os.path.join(ROOT, "src/main/resources/objects")

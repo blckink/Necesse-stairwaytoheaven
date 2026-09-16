@@ -13,7 +13,8 @@ WAS ECHT IST UND WAS NICHT:
   * Boden: die glatte Kachel jeder Variante aus dem `_splat`-Atlas. Übergänge
     zwischen zwei Böden zeichnet das Werkzeug NICHT; die Kante ist hart.
   * Objekte: die Unterkanten-Regel, die jede Objektklasse benutzt
-    (`drawX - w/2 + 16`, `drawY - h + 32`), erste Drehung bzw. Variante.
+    (`drawX - w/2 + 16`, `drawY - h + 32`), erste Variante; Uhr, Stuhl und
+    Kandelaber in Spalte 2, der Frontansicht (`sprite(rotation % 4, ...)`).
   * Figuren: Vanilla-Haut aus dem Sprite-Dump (Grundton, nicht eingefärbt),
     darüber Stiefel, Brust, Kopf und Arme des Outfits, Frame 0 der
     Blickrichtung nach unten.
@@ -233,9 +234,9 @@ def twilight():
             st.extra.append((1 * 32 + 21, front, tx * 32, 1 * 32 - 44))
             st.labels.append((piece, tx * 32 + 32, 1 * 32 + 6))
     st.put(cell("objects/coffinbed.png", 0, 0, 64, 64), 1, 3, "coffinbed", dx=8)
-    st.put(cell("objects/hauntedclock.png", 0, 0, 32, 64), 6, 2, "hauntedclock")
-    st.put(cell("objects/skullcandelabra.png", 0, 0, 32, 64), 12, 2, "skullcandelabra")
-    st.put(cell("objects/electricchair.png", 0, 0, 32, 64), 11, 5, "electricchair")
+    st.put(cell("objects/hauntedclock.png", 64, 0, 32, 64), 6, 2, "hauntedclock")
+    st.put(cell("objects/skullcandelabra.png", 64, 0, 32, 64), 12, 2, "skullcandelabra")
+    st.put(cell("objects/electricchair.png", 64, 0, 32, 64), 11, 5, "electricchair")
     st.put(cell("objects/twilightsarcophagus.png", 0, 0, 32, 96), 12, 7, "twilightsarcophagus")
     st.put(img("objects/thingbox.png"), 8, 4, "thingbox")
     st.put(figure("twilightsuit"), 6, 5, "Haendler (twilightsuit)")
