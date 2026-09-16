@@ -46,6 +46,10 @@ dark, gothic, Beetlejuice/Addams — but still readable on a dark floor.
 
 ## Lessons (newest first — append, do not rewrite)
 
+- 2026-09-16 · **Ground cells: no frame.** Keeping motifs 2 px off the cell
+  edge fixed the seams, but Codex filled that margin with a flat colour while
+  the interior was mottled — the flat frame drew a faint grid. The base
+  texture (speckle, mottling) must run to the edge; only the motifs keep off.
 - 2026-09-16 · **Walls through a hard mask work.** Painting whole shapes on the
   `wall_from_layout` canvas next to the same canvas filled with vanilla
   stonewall gave the first wall the player had not seen as a cut-up picture,

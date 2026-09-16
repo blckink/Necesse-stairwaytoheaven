@@ -7,6 +7,9 @@ One row per job. Minutes come from `build/codex_runs.tsv` (written by
 
 | date | job | assets | min | first pass | fix | player |
 |---|---|---|---|---|---|---|
+| 2026-09-16 | codexwall nightfell | wall set | ~6 | 0/1 | cut clean, but flat: near-uniform roof, little detail → redo with more shading | not shown yet |
+| 2026-09-16 | codexsplat cloudturf r1 | 24 ground cells | 3.2 | 0/1 | seams gone, but flat 2 px frame draws a faint grid, colours too dark → cloudturf_v2 | not shown yet |
+| 2026-09-16 | codexwall skystonebrick | wall set | 2.8 | 1/1 (review) | notch/junction cells differed → harmonised in code; window seams over tolerance | not shown yet |
 | 2026-09-16 | twilight4 m3 | clock side view, electric chair | 4.5 | 2/2 | — | shipped for play |
 | 2026-09-16 | twilight4 m2 | coffin bed + mask, wall eye | 5.6 | 1/2 | eye side rows shifted to wall edge (code) | shipped for play |
 | 2026-09-16 | twilight4 m1 | clock back/sides, candelabra, electric chair | 6.4 | 1/3 | clock col 1 broken, chair unreadable on dark floor → m3 | candelabra shipped |
