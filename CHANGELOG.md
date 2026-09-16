@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format loosely follows
 ## [Unreleased]
 
 ### Changed
+- **The Twilight Merchant brings his whole shelf.** Every visit offers all
+  eleven outfits (head, chest, boots) and every piece of furniture and wall
+  art that shipped (eleven of thirteen; the twisted wall clock and the
+  shrunken heads still have no sheet that passed review). Only prices roll.
+  His dialogue subtitle is his own ("Twilight Merchant") instead of the
+  Exotic Merchant's.
 - **Hand recolours from the player (2026-09-16).** Cloudmarble wall,
   Cloudturf and Stormslate grounds, Windwheat, Sky Reeds, Tall Cloud Grass,
   Prism Grass, Prisma Birch, Skyseraph tree, Skystone Golem, Striped
@@ -17,6 +23,11 @@ All notable changes to this project are documented here. Format loosely follows
   uploads go to `art-inbox/`.
 
 ### Fixed
+- **The Twilight Merchant came naked, nameless and with an empty shop.**
+  Texture checks looked at the jar root instead of `resources/`, so none of
+  his wares registered; his name line was missing too. Once they did, the
+  Witch's Cauldron collided with vanilla's `witchcauldron` and stopped the
+  mod from loading; it is now `twilightcauldron` (Twilight Cauldron).
 - `convert_biome_art.py` no longer puts the first Eden seed icon back over
   the player's replacement, and no longer rebuilds the Skyseraph tree from its
   old reference.
