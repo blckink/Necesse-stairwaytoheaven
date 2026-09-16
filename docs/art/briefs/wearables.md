@@ -12,3 +12,13 @@
   helmet, arms) — `tools/scene_preview.py` `figure()` does this.
 - Player verdict 2026-09-16: the eleven Twilight outfits are the reference for
   "good".
+- Twilight outfits: chest and boots must show THE costume of the head, named
+  in every job (2026-09-17: a generic brown coat replaced Freddy's sweater):
+  twilightsuit = black/white vertical stripes suit; skeleton = ribcage and
+  spine on black; grinclown = white ruffled clown suit, red pompoms;
+  hockeyslasher = worn olive work jacket; dreamstalker = red/green
+  horizontal striped sweater, brown trousers; screamrobe = black hooded robe;
+  pincushion = black leather cassock; widowgown = black lace mourning dress;
+  stitchedmonster = too-short black jacket, grey-green skin, bolts;
+  pumpkinscarecrow = patched burlap, straw tufts; hauntedpuppet = striped
+  shirt under blue denim overalls, red sneakers.
