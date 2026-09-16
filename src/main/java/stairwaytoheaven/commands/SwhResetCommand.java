@@ -13,6 +13,7 @@ import necesse.engine.network.server.ServerClient;
 import necesse.engine.quest.Quest;
 import necesse.entity.mobs.Mob;
 import necesse.level.maps.Level;
+import stairwaytoheaven.SkyCloudmarbleSet;
 import stairwaytoheaven.SkyRegistry;
 import stairwaytoheaven.level.SkyLevel;
 import stairwaytoheaven.quest.SkywatchQuestData;
@@ -20,6 +21,7 @@ import stairwaytoheaven.quest.SkywatchWorldData;
 import stairwaytoheaven.veil.VeilWorldData;
 import stairwaytoheaven.worldgen.RealmDepth;
 import stairwaytoheaven.worldgen.SkyOrigin;
+import stairwaytoheaven.worldgen.WardenSpirePreset;
 
 /**
  * {@code /swhreset [status|quests|world|all] [confirm]} — play an EXISTING save
@@ -269,8 +271,40 @@ public class SwhResetCommand extends ModularChatCommand {
         if (report.mobsAdded == 0 && report.portalsAdded == 0) {
             logs.add("  nothing was missing here - this ground already matches the current build");
         }
+        int repaved = repaveSpire(sky, SkywatchQuestData.get(sky));
+        if (repaved > 0) {
+            logs.add("  spire floor: " + repaved + " skyway tile(s) relaid as skyway path");
+        }
         logs.add("  terrain, buildings and POI presets are NOT retrofitted: they write ground, and");
         logs.add("  explored ground may be somebody's base. Walk further out for those.");
+    }
+
+    /**
+     * Relays the Warden's spire floor with the skyway path tile. Spires stamped
+     * before the path tile existed are paved with the skyway splat, whose
+     * frayed edges the player asked to be rid of. Only skyway tiles inside the
+     * spire's own square change, and only loaded ones; nothing else is touched.
+     */
+    private static int repaveSpire(SkyLevel sky, SkywatchQuestData quest) {
+        int from = SkyCloudmarbleSet.skywayTileID;
+        int to = SkyCloudmarbleSet.skywayPathTileID;
+        if (!quest.spirePlaced || from == to) {
+            return 0;
+        }
+        int left = quest.spireX - WardenSpirePreset.WARDEN_X;
+        int top = quest.spireY - WardenSpirePreset.WARDEN_Y;
+        int changed = 0;
+        for (int tileX = left; tileX < left + WardenSpirePreset.SIZE; tileX++) {
+            for (int tileY = top; tileY < top + WardenSpirePreset.SIZE; tileY++) {
+                if (!sky.regionManager.isTileLoaded(tileX, tileY) || sky.getTileID(tileX, tileY) != from) {
+                    continue;
+                }
+                sky.setTile(tileX, tileY, to);
+                sky.sendTileUpdatePacket(tileX, tileY);
+                changed++;
+            }
+        }
+        return changed;
     }
 
     // ------------------------------------------------------------------

@@ -59,6 +59,10 @@ original generation would have, so the world ends up as if the content had
 always been there. That is what `/swhreset world` does, and it is a retrofit
 rather than a re-roll.
 
+One ground exception (2026-09-16): `/swhreset world` also relays the Warden's
+spire floor from the skyway splat to the skyway path tile, inside the spire's
+own 33x33 square and only on loaded tiles — stand in or near the spire.
+
 ## 2. What each mode does
 
 ### `/swhreset` — status
