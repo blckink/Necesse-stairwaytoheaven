@@ -69,5 +69,13 @@ public class VeteranCatapultObjectEntity extends stairwaytoheaven.objects.Vetera
                 mob.isServerHit(new GameDamage(damage), mob.x, mob.y, 0.0F, null);
             }
         }
+
+        // Visible cosmetic stone: splash damage above is already applied at
+        // fire time (not on this projectile's arrival), so it does no hit
+        // detection of its own (canHitMobs=false, see CatapultStoneProjectile).
+        float originX = this.tileX * 32 + 48;
+        float originY = this.tileY * 32 + 16;
+        CatapultStoneProjectile stone = new CatapultStoneProjectile(originX, originY, tx, ty, 220.0F, 900);
+        level.entityManager.projectiles.add(stone);
     }
 }

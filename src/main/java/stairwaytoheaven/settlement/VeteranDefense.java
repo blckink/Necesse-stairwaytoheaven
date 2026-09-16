@@ -12,16 +12,15 @@ import necesse.level.maps.Level;
  * turrets and catapults: higher-grade ammo handed to him raises this level,
  * which scales every turret/catapult's damage.
  *
- * <h2>What shipped in this pass, and what did not</h2>
+ * <h2>The player-facing half</h2>
  *
- * The level itself, its save/load and the multiplier the turret already
- * reads are real. The player-facing HALF of the feature — a shop/dialogue
- * action that consumes a stack of {@code stonearrow}/{@code ironarrow}/
- * {@code firearrow}/bombs and calls {@link #raiseLevel} — was CUT under the
- * session's hard time limit: building a correct custom
- * {@code SettlerDialogue} needs its button/render API read from source, which
- * this pass had no time left for after the turret. {@link #raiseLevel} is
- * public and ready for that dialogue to call.
+ * The level, its save/load and the multiplier the turret/catapult read are
+ * defined here. {@link #raiseLevel} is called from
+ * {@code VeteranAmmoDialogue}, the War Veteran's "hand over ammunition" talk
+ * option: it takes a rising stack of arrows (stone/iron/fire/frost/poison)
+ * plus bombs (iron bomb, then dynamite stick) out of the player's inventory
+ * through vanilla's own {@code Ingredient}/{@code Recipe.craft}, then raises
+ * this level by one. See that class for the exact tiers.
  *
  * <p>{@code WorldData} rather than {@code LevelData}, following
  * {@code SkywatchWorldData}'s own reasoning: a settlement's defense effort is

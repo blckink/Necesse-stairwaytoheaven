@@ -20,9 +20,12 @@ import necesse.level.maps.light.GameLight;
 /**
  * The War Veteran's Catapult ({@code veterancatapult}).
  *
- * <p>Sheet {@code objects/veterancatapult.png}: 4 frames horizontal, each
- * 96x128 (0 idle, 1 cocked, 2 mid-swing, 3 released) — real, delivered by the
- * art pass and used as specified.
+ * <p>Sheet {@code objects/veterancatapult.png}: 4 rows (rotation: 0 up/north,
+ * 1 right/east, 2 down/south, 3 left/west) x 4 columns (0 idle, 1-3 firing),
+ * each cell 96x128. Row = {@code level.getObjectRotation(tileX, tileY)}
+ * directly, same convention as {@link VeteranTurretObject}. If the delivered
+ * texture is still the old 1-row sheet (height &lt; 4*128), row 0 is used
+ * defensively.
  *
  * <p>CUT under the session's time limit: the true 3x3 {@code MultiTile}
  * footprint. Necesse's multi-tile registration (master/slave objects tied
@@ -74,10 +77,12 @@ public class VeteranCatapultObject extends GameObject {
         if (hostile != null) {
             frame = 1 + (int) ((System.currentTimeMillis() / 250L) % 3L);
         }
+        int rotation = level.getObjectRotation(tileX, tileY) & 3;
+        int row = this.texture.getHeight() >= 4 * FRAME_H ? rotation : 0;
         int drawX = camera.getTileDrawX(tileX) - (FRAME_W - 32) / 2;
         int drawY = camera.getTileDrawY(tileY) - FRAME_H + 32;
         final TextureDrawOptionsEnd options = this.texture.initDraw()
-                .section(frame * FRAME_W, (frame + 1) * FRAME_W, 0, FRAME_H)
+                .section(frame * FRAME_W, (frame + 1) * FRAME_W, row * FRAME_H, (row + 1) * FRAME_H)
                 .light(light)
                 .pos(drawX, drawY);
         list.add(new LevelSortedDrawable(this, tileX, tileY) {
@@ -98,10 +103,11 @@ public class VeteranCatapultObject extends GameObject {
         if (this.texture == null) {
             return;
         }
+        int row = this.texture.getHeight() >= 4 * FRAME_H ? (rotation & 3) : 0;
         int drawX = camera.getTileDrawX(tileX) - (FRAME_W - 32) / 2;
         int drawY = camera.getTileDrawY(tileY) - FRAME_H + 32;
         this.texture.initDraw()
-                .section(0, FRAME_W, 0, FRAME_H)
+                .section(0, FRAME_W, row * FRAME_H, (row + 1) * FRAME_H)
                 .alpha(alpha)
                 .draw(drawX, drawY);
     }

@@ -1224,3 +1224,9 @@ veteranbarricade=Barrikade
 barbedwirefence=Stacheldrahtzaun
 veteranturret=Selbstschussanlage
 veterancatapult=Katapult
+
+[misc]
+swhveteranoption=Verteidigungsausbau (Stufe <level>/5)
+swhveteranintro=Die Verteidigung der Siedlung ist auf Stufe <level> von <max>.\nNaechste Stufe braucht: <req>.
+swhveterandoit=Munition uebergeben
+swhveteranmax=Die Verteidigung ist bereits auf der hoechsten Stufe. Da ist nichts mehr zu uebergeben.

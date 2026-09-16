@@ -13,6 +13,10 @@ import necesse.entity.mobs.friendly.human.HumanMob;
 import necesse.entity.mobs.friendly.human.humanShop.HumanShop;
 import necesse.entity.mobs.friendly.human.humanShop.SellingShopItem;
 import necesse.inventory.InventoryItem;
+import necesse.level.maps.levelData.settlementData.ServerSettlementData;
+import necesse.level.maps.levelData.settlementData.settler.dialogues.SettlerDialogue;
+import stairwaytoheaven.settlement.VeteranAmmoDialogue;
+import stairwaytoheaven.settlement.VeteranDefense;
 
 /**
  * The War Veteran (Kriegsveteran) — a soldier profession, in the sense of
@@ -70,5 +74,23 @@ public class WarVeteranHumanMob extends HumanShop {
     @Override
     public List<InventoryItem> getRecruitItems(ServerClient client) {
         return Collections.singletonList(new InventoryItem("coin", 900));
+    }
+
+    /**
+     * The one extra line in the talk menu: hand over ammunition to raise
+     * {@link VeteranDefense#level}. Same gate as the Therapist/Doctor
+     * services — only the settlement's own owner sees it, and only once he
+     * has actually moved in.
+     */
+    @Override
+    public ArrayList<SettlerDialogue> getDialogues(ServerClient client, ServerSettlementData data,
+                                                   boolean clientHasAccess) {
+        ArrayList<SettlerDialogue> out = super.getDialogues(client, data, clientHasAccess);
+        if (clientHasAccess && this.isSettler() && this.getLevel() != null) {
+            VeteranDefense defense = VeteranDefense.get(this.getLevel().getServer());
+            int level = defense == null ? 0 : defense.level;
+            out.add(new VeteranAmmoDialogue(this, level));
+        }
+        return out;
     }
 }

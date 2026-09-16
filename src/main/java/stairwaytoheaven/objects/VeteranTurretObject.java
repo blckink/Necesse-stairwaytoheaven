@@ -22,13 +22,24 @@ import necesse.level.maps.light.GameLight;
  * {@link VeteranTurretObjectEntity}; this class is the placed object and its
  * sprite.
  *
- * <p>Sheet {@code objects/veteranturret.png}: 4 frames horizontal, each
- * 32x48 (0 idle, 1 muzzle flash, 2 recoil, 3 flash). Which frame draws is
- * decided client-side, purely from "is a hostile mob currently in range" —
- * this pass had no time budget left to add a synced "just fired" network
- * field, so the animation approximates firing state rather than following
- * the server's exact shot timing. Good enough to read as "this turret is
- * active" at the table it sits on; not frame-accurate to the server shot.
+ * <p>Sheet {@code objects/veteranturret.png}: 4 rows (rotation: 0 up/north,
+ * 1 right/east, 2 down/south, 3 left/west) x 4 columns (0 idle, 1-3 firing),
+ * each cell 32x48. Row = {@code level.getObjectRotation(tileX, tileY)}
+ * directly — no remap — per the mod's existing bed/clock rotation-column
+ * convention (column/row 0 = back = facing away from viewer = north). If the
+ * delivered texture is still the old 1-row sheet (height &lt; 4*48), row 0 is
+ * used defensively so nothing crashes. Placement rotation itself needs no
+ * extra code: Necesse's base {@code GameObject} already rotates on
+ * placement via the rotate key for any object that doesn't set
+ * {@code replaceRotations = false}, exactly like
+ * {@code StormglassKilnObject}/{@code WindsilkLoomObject} in this mod.
+ *
+ * <p>Which frame draws is decided client-side, purely from "is a hostile mob
+ * currently in range" — this pass had no time budget left to add a synced
+ * "just fired" network field, so the animation approximates firing state
+ * rather than following the server's exact shot timing. Good enough to read
+ * as "this turret is active" at the table it sits on; not frame-accurate to
+ * the server shot.
  */
 public class VeteranTurretObject extends GameObject {
 
@@ -68,10 +79,12 @@ public class VeteranTurretObject extends GameObject {
         if (hostile != null) {
             frame = 1 + (int) ((System.currentTimeMillis() / 100L) % 3L);
         }
+        int rotation = level.getObjectRotation(tileX, tileY) & 3;
+        int row = this.texture.getHeight() >= 4 * FRAME_H ? rotation : 0;
         int drawX = camera.getTileDrawX(tileX);
         int drawY = camera.getTileDrawY(tileY) - (FRAME_H - 32);
         final TextureDrawOptionsEnd options = this.texture.initDraw()
-                .section(frame * FRAME_W, (frame + 1) * FRAME_W, 0, FRAME_H)
+                .section(frame * FRAME_W, (frame + 1) * FRAME_W, row * FRAME_H, (row + 1) * FRAME_H)
                 .light(light)
                 .pos(drawX, drawY);
         list.add(new LevelSortedDrawable(this, tileX, tileY) {
@@ -92,10 +105,11 @@ public class VeteranTurretObject extends GameObject {
         if (this.texture == null) {
             return;
         }
+        int row = this.texture.getHeight() >= 4 * FRAME_H ? (rotation & 3) : 0;
         int drawX = camera.getTileDrawX(tileX);
         int drawY = camera.getTileDrawY(tileY) - (FRAME_H - 32);
         this.texture.initDraw()
-                .section(0, FRAME_W, 0, FRAME_H)
+                .section(0, FRAME_W, row * FRAME_H, (row + 1) * FRAME_H)
                 .alpha(alpha)
                 .draw(drawX, drawY);
     }

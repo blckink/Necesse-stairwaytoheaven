@@ -1223,3 +1223,9 @@ veteranbarricade=Barricade
 barbedwirefence=Barbed Wire Fence
 veteranturret=Auto Turret
 veterancatapult=Catapult
+
+[misc]
+swhveteranoption=Defense upgrades (Level <level>/5)
+swhveteranintro=The settlement's defenses are at level <level> of <max>.\nNext tier needs: <req>.
+swhveterandoit=Hand over ammunition
+swhveteranmax=The defenses are already at their maximum level. Nothing more to hand over.

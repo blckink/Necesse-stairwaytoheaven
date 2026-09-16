@@ -22,6 +22,7 @@ One row per job. Minutes come from `build/codex_runs.tsv` (written by
 | 2026-09-15 | twilight decor/outfits (1st) | all | — | 0/all | PIL rectangles as final art | "riesen Rückschritt" |
 
 | 2026-09-16 | veteran siege set (9 assets, hard time limit) | catapult+turret sheets, barbed wire, barricade, stone, 4 icons | ~1.5 | 9/9 (masters) | catapult 4-frame sheet: 1 extra codex round asked for "same base, only arm moves" on top of the idle master; base still drifts slightly between frame 0 and frames 1-3 (wheel spacing, stance) — shipped anyway, time-boxed | shipped |
+| 2026-09-16 | veteran catapult+turret → 4-direction sheets (hard 23:20 stop) | 2 object sheets, 384x512 + 128x192 | ~2 | 4/4 rows after 1 extra call | one Codex call per new direction (not per object) keeps a row's 4 frames on one shared base — worked for catapult up/down, turret up/right in a single generation each; rotating a non-square 32x48 cell 90° in PIL to fake a missing direction squashes the round sandbag ring into an oval (naive pad-to-square-then-crop-back loses the post-rotation offset) — do not rotate asymmetric cells to fake a direction; asked Codex for the real turret DOWN view instead (1 more ~1.5 min call) and it landed clean on the first try | shipped |
 
 ## What this says so far
 
