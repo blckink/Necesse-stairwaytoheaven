@@ -101,6 +101,7 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              # (docs/art/RUNS.md, 2026-09-16).
              "objects/skystonebrickwall.png", "objects/nightfellwall.png",
              "tiles/nimbusfloor_splat.png", "tiles/prismfloor_splat.png",
+             "tiles/gloomwoodfloor_splat.png",
              # Our own art for the three Outland mobs, which used to wear
              # vanilla's sheets by string ID.
              # Fen Wraith's body, composed by tools/resheet_mob.py from the
@@ -198,8 +199,7 @@ def main():
     gen_splats.build_splat(f"{out}/tiles/skystone_splat.png", gen_splats.material_skystone, 5, 0x51,
                            features=gen_splats.features_skystone)
     # stormslate_splat is the player's recolour (CONVERTED above).
-    gen_splats.build_splat(f"{out}/tiles/gloomwoodfloor_splat.png", gen_splats.material_gloomwood, 2, 0x6D,
-                           features=gen_splats.features_gloomwood)
+    # gloomwoodfloor_splat is Codex art (CONVERTED above).
     gen_splats.build_splat(f"{out}/tiles/mistsea_shallow_splat.png", gen_splats.material_mist(False), 1, 0x315E, frames=8)
     gen_splats.build_splat(f"{out}/tiles/mistsea_deep_splat.png", gen_splats.material_mist(True), 1, 0xD1EE, frames=8)
     gen_furniture.gen_marblechecker(f"{out}/tiles/marblechecker.png")
