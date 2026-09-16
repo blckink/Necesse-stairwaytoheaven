@@ -55,7 +55,7 @@ def cell(rel, x, y, w, h):
 
 def hash01(x, y, salt):
     h = hashlib.md5(("%d,%d,%s" % (x, y, salt)).encode()).digest()
-    return h[0] / 255.0
+    return h[0] / 256.0
 
 
 def ground_tile(splat, tx, ty):
