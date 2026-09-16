@@ -3,6 +3,13 @@
 Every agent — Claude, Codex, Ox, or anything else — reads this file before
 modifying anything in this repository.
 
+## Art job? Read ONE file, not the list below
+
+If your task is to draw or fix a sprite, texture, sheet or icon (the usual
+Codex job), read **`docs/art/CODEX_ART.md`** and the one brief under
+`docs/art/briefs/` for your asset kind, and skip the reading list below. The
+list costs minutes and changes nothing about a picture.
+
 ## Read these first, in order
 
 1. `AGENTS.md` (this file)
