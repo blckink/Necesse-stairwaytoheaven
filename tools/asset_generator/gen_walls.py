@@ -458,5 +458,6 @@ NIGHTFELL_WALL = {
 
 
 def gen_walls(out_dir):
-    _build_wall(SKYSTONE_WALL, 0x5A11).save(f"{out_dir}/skystonebrickwall.png")
+    # objects/skystonebrickwall.png is Codex art since 2026-09-16
+    # (tools/codex_wall.py, CONVERTED in generate_assets.py).
     _build_wall(NIGHTFELL_WALL, 0x5A22).save(f"{out_dir}/nightfellwall.png")

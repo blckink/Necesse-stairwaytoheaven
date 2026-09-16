@@ -97,6 +97,10 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              "objects/tallcloudgrass.png", "objects/prismgrass.png",
              "mobs/skystonegolem.png", "mobs/stripedmegashark.png",
              "objects/hauntedclock.png",
+             # Codex art through tools/codex_wall.py and tools/codex_splat.py
+             # (docs/art/RUNS.md, 2026-09-16).
+             "objects/skystonebrickwall.png",
+             "tiles/nimbusfloor_splat.png", "tiles/prismfloor_splat.png",
              # Our own art for the three Outland mobs, which used to wear
              # vanilla's sheets by string ID.
              # Fen Wraith's body, composed by tools/resheet_mob.py from the
@@ -277,11 +281,8 @@ def main():
     gen_objects.gen_fulgurite_item(f"{out}/items/fulgurite.png")
     gen_objects.gen_prismshard_item(f"{out}/items/prismshard.png")
     # Buildable wood floors
-    gen_splats.build_splat(f"{out}/tiles/nimbusfloor_splat.png", gen_splats.material_nimbusfloor, 2, 0x81B,
-                           features=gen_splats.features_nimbusfloor)
+    # nimbusfloor_splat and prismfloor_splat are Codex art (CONVERTED above).
     # charfloor_splat is supplied art (CONVERTED above).
-    gen_splats.build_splat(f"{out}/tiles/prismfloor_splat.png", gen_splats.material_prismfloor, 2, 0x981,
-                           features=gen_splats.features_prismfloor)
     # Fauna: two critters, two enemies, bestiary icons
     gen_critters.gen_critters_v04(f"{out}/mobs")
     gen_critters.gen_critter_icons_v04(f"{out}/mobs/icons")
