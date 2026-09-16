@@ -10,7 +10,8 @@ Spielgröße mal zwei.
 WAS ECHT IST UND WAS NICHT:
   * Wände laufen durch `wall_render_preview.WallRenderer`, den Zeile-für-Zeile-
     Nachbau von `WallObject.addWallDrawOptions` samt Türen und Fenstern.
-  * Boden: die glatte Kachel jeder Variante aus dem `_splat`-Atlas. Übergänge
+  * Boden: je Kachel ein gewürfelter Block und eine der vier vollen Zellen,
+    wie `TerrainSplatterTile.getTerrainTexture`. Übergänge
     zwischen zwei Böden zeichnet das Werkzeug NICHT; die Kante ist hart.
   * Objekte: die Unterkanten-Regel, die jede Objektklasse benutzt
     (`drawX - w/2 + 16`, `drawY - h + 32`), erste Variante; Uhr, Stuhl und
@@ -57,13 +58,14 @@ def hash01(x, y, salt):
     return h[0] / 255.0
 
 
-def ground_tile(splat, variant):
-    """Die glatte 32x32-Kachel einer Variante: Spalte 3, Zeile 0 jedes
-    96 px hohen Variantenblocks."""
+def ground_tile(splat, tx, ty):
+    """Wie TerrainSplatterTile.getTerrainTexture (neues Splatting): ein
+    zufälliger 96 px hoher Block, darin zufällig eine der vier vollen Zellen
+    (3..6, 0) -- 24 Varianten bei sechs Blöcken, je Kachel neu gewürfelt."""
     atlas = img("tiles/%s_splat.png" % splat)
-    variants = atlas.height // 96
-    v = variant % variants
-    return atlas.crop((96, v * 96, 128, v * 96 + 32))
+    block = int(hash01(tx, ty, splat + "5") * (atlas.height // 96))
+    col = 3 + int(hash01(tx, ty, splat + "9") * 4)
+    return atlas.crop((col * 32, block * 96, col * 32 + 32, block * 96 + 32))
 
 
 class Stage:
@@ -97,8 +99,7 @@ class Stage:
                 splat = self.legend.get(ch)
                 if splat is None:
                     continue
-                v = int(hash01(tx, ty, splat) * 6)
-                canvas.alpha_composite(ground_tile(splat, v), (tx * 32, ty * 32 + top_pad))
+                canvas.alpha_composite(ground_tile(splat, tx, ty), (tx * 32, ty * 32 + top_pad))
         r = self.renderer or wrp.WallRenderer(None)
         if self.renderer:
             r.render_scene(self.scene, 0, top_pad)
