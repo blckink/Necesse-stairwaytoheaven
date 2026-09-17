@@ -6,6 +6,12 @@ All notable changes to this project are documented here. Format loosely follows
 ## [Unreleased]
 
 ### Changed
+- **Twilight Merchant outfits finished.** Nine outfits get redrawn chest,
+  boots, sleeves and icons in their own costume (Codex, reviewed worn in all
+  four facings); the Beetlejuice suit keeps its striped sheets. The
+  Beetlejuice mask is rebuilt from vanilla parts (skin head, eyes, hair36,
+  recoloured, plus a grin), so size and eye position are vanilla's. The
+  Twisted Wall Clock ships and joins his shelf.
 - **Cloudmarble and Nightfell walls redrawn by the player (2026-09-17).**
   Cloudmarble is white marble on vanilla's ancient ruin wall layout,
   Nightfell is violet brick on the spider castle wall layout; both sheets
