@@ -7,6 +7,7 @@ One row per job. Minutes come from `build/codex_runs.tsv` (written by
 
 | date | job | assets | min | first pass | fix | player |
 |---|---|---|---|---|---|---|
+| 2026-09-17 | veteran4 wire + codexwall veteranbarricade | fence 160x64, gate 192x64, 2 icons; wall set | ~5 / ~4 | 2/2 | brief named the vanilla sheet as a HARD MASK ("build with a script that uses ref1/ref2 as masks") → posts pixel-exact, rails became wire strands on the first try; the old barricade (417 colours, 39 seams) could not be conformed — codex_wall canvas + "20-38 colours, rows on fixed y" came back at 37 colours, 0 seams over tolerance | shipped |
 | 2026-09-16 | codexsplat gloomwoodfloor_v2 | 8 floor cells | 3.1 | 1/1 | — (one 32 px periodic weave, seam audit 0.00) | shipped |
 | 2026-09-16 | codexsplat cloudturf_v3 | 24 ground cells | 4.1 | 0/1 | top pixel row carried hill tips → replaced by row below (audit 4.81 → 0.83); bushes all sit low → faint rows remain | shipped |
 | 2026-09-16 | codexwall nightfell2 | wall set | ~3 | 1/1 | conform --fix --rebuild-roof-slot | shipped |
