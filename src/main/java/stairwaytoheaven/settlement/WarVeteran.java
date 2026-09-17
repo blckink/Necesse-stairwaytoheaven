@@ -7,7 +7,6 @@ import necesse.engine.registries.ObjectRegistry;
 import necesse.engine.registries.ProjectileRegistry;
 import necesse.engine.registries.SettlerRegistry;
 import necesse.inventory.item.toolItem.ToolType;
-import necesse.level.gameObject.FenceGateObject;
 import necesse.level.gameObject.WallObject;
 import stairwaytoheaven.objects.BarbedWireFenceObject;
 import stairwaytoheaven.objects.CatapultStoneProjectile;
@@ -28,8 +27,8 @@ import stairwaytoheaven.objects.VeteranTurretObject;
  * ({@link VeteranDefense}, raised in {@link VeteranAmmoDialogue}); firing
  * frames follow the server's shots.</li>
  * <li>{@code veteranbarricade}: a vanilla {@link WallObject};
- * {@code barbedwirefence}: a vanilla fence that cuts hostiles touching it,
- * with a matching gate. Both six times a plain wall's
+ * {@code barbedwirefence}: a vanilla fence that cuts hostiles touching it.
+ * Both six times a plain wall's
  * {@code objectHealth} (100 -> 600).</li>
  * </ul>
  */
@@ -67,13 +66,8 @@ public final class WarVeteran {
         // BarbedWireFenceObject adds the entity that cuts hostiles touching it.
         BarbedWireFenceObject wire = new BarbedWireFenceObject("barbedwirefence", MAP_WIRE, 24, 16);
         wire.objectHealth = DEFENSE_OBJECT_HEALTH;
-        int wireID = ObjectRegistry.registerObject("barbedwirefence", wire, 35.0F, true);
-        // Matching gate, vanilla's own pair helper (closed + "open" twin,
-        // both connect to the wire) — the same call woodfencegate uses.
-        int[] gateIDs = FenceGateObject.registerGatePair(wireID, "barbedwiregate", "barbedwiregate", MAP_WIRE, 24, 16, 40.0F);
-        for (int gateID : gateIDs) {
-            ObjectRegistry.getObject(gateID).objectHealth = DEFENSE_OBJECT_HEALTH;
-        }
+        // No gate: barbed wire is not something you swing open.
+        ObjectRegistry.registerObject("barbedwirefence", wire, 35.0F, true);
 
         // Auto Turret: 1x1, ObjectEntity target-scan and fire loop — see
         // VeteranTurretObjectEntity.

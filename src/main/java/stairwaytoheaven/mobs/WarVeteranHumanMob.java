@@ -49,8 +49,6 @@ public class WarVeteranHumanMob extends HumanShop {
                 .setStaticPriceBasedOnHappiness(120, 220, 20);
         this.shop.addSellingItem("barbedwirefence", new SellingShopItem())
                 .setStaticPriceBasedOnHappiness(90, 160, 15);
-        this.shop.addSellingItem("barbedwiregate", new SellingShopItem())
-                .setStaticPriceBasedOnHappiness(110, 190, 15);
         this.shop.addSellingItem("veteranturret", new SellingShopItem())
                 .setStaticPriceBasedOnHappiness(600, 950, 60);
         this.shop.addSellingItem("veterancatapult", new SellingShopItem())
