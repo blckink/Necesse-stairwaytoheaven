@@ -33,6 +33,7 @@ import sys
 from px import Canvas, Rng, mix, with_alpha
 import palette
 import wall_window_slot
+import wall_icon_remap
 import gen_splats
 
 # ---------------------------------------------------------------------------
@@ -1696,7 +1697,8 @@ def gen_skyway_icon(path):
 def generate(objects_dir, items_dir, tiles_dir):
     # objects/cloudmarblewall.png is NOT written here any more. On 2026-09-16
     # the player recoloured the sheet this module drew, on its exact layout
-    # (16 colours), and that recolour ships; gen_cloudmarble_wall stays as
+    # (16 colours), and on 2026-09-17 replaced it with a white-marble redraw
+    # on vanilla's ancientruinwall layout (15 colours), which ships; gen_cloudmarble_wall stays as
     # the record of the layout. The history below is why the layout exists.
     #
     # The sheet used to be the supplied illustration from art/supplied/, copied in
@@ -1729,9 +1731,14 @@ def generate(objects_dir, items_dir, tiles_dir):
     # gen_skyway_tile / gen_skyway_splat below, but the pipeline no longer calls
     # them. If you want the drawn ground back, drop the conversion instead of
     # calling both.
-    gen_wall_icon(os.path.join(items_dir, "cloudmarblewall.png"))
-    gen_door_icon(os.path.join(items_dir, "cloudmarbledoor.png"))
-    gen_window_icon(os.path.join(items_dir, "cloudmarblewindow.png"))
+    # Wall, door and window icons are vanilla ancientruin's, in this sheet's
+    # colours: since 2026-09-17 the sheet is the player's redraw on that
+    # layout, so its icons take that wall's framing (wall_icon_remap).
+    # gen_wall_icon / gen_door_icon / gen_window_icon stay as the record.
+    # Here vanilla's dark brown outline (saturation 0.62, value 39) has to
+    # count as an accent, or the marble loses its blue.
+    wall_icon_remap.gen_wall_icons(objects_dir, items_dir, "ancientruin", "cloudmarble",
+                                   vanilla_accent=(40, 0.45))
     gen_fence_icon(os.path.join(items_dir, "cloudmarblefence.png"))
     gen_fencegate_icon(os.path.join(items_dir, "cloudmarblefencegate.png"))
     gen_skyway_icon(os.path.join(items_dir, "skywaytile.png"))

@@ -460,6 +460,7 @@ NIGHTFELL_WALL = {
 def gen_walls(out_dir):
     # objects/skystonebrickwall.png is Codex art since 2026-09-16
     # (tools/codex_wall.py, CONVERTED in generate_assets.py).
-    # objects/nightfellwall.png is Codex art as well (same route).
+    # objects/nightfellwall.png was Codex art as well (same route); since
+    # 2026-09-17 it is the player's redraw on vanilla's spidercastlewall layout.
     # _build_wall stays as the record of the old drawn sets.
     pass

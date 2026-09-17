@@ -10,6 +10,7 @@ import math
 
 from px import Canvas, Rng, with_alpha
 import palette
+import wall_icon_remap
 
 
 # --- Warden's Candelabra (streetlamp format) --------------------------------
@@ -520,21 +521,22 @@ def gen_set_icons(dir_path):
     mini_from(f"{obj}/skywatchbanner.png", (0, 64, 32, 96), "skywatchbanner.png")
     mini_from(f"{base}/objects/statues/gloomraven.png", (8, 34, 56, 92), "gloomravenstatue.png")
     # walls: crop a front-face piece; doors: rotation-0 closed leaf
-    for wall in ("skystonebrickwall", "nightfellwall"):
-        mini_from(f"{obj}/{wall}.png", (0, 64, 32, 96), f"{wall}.png")
+    mini_from(f"{obj}/skystonebrickwall.png", (0, 64, 32, 96), "skystonebrickwall.png")
+    # Nightfell is the player's redraw on vanilla spidercastlewall's layout
+    # (2026-09-17), so its wall, door and window icons are that vanilla
+    # wall's icons in this sheet's colours -- see wall_icon_remap.
+    wall_icon_remap.gen_wall_icons(obj, dir_path, "spidercastle", "nightfell")
     # Door icon: crop the rotation-0 CLOSED cell, which occupies y88..127 of the
     # sheet and nothing above it -- the same 40px the engine draws. The old crop
     # started at y24 because the generator used to paint doors over the full
     # 128px cell; against a correctly sized cell that crop is 64px of empty air.
     mini_from(f"{obj}/skystonebrickwall.png", (96, 88, 128, 128), "skystonebrickdoor.png")
-    mini_from(f"{obj}/nightfellwall.png", (96, 88, 128, 128), "nightfelldoor.png")
     # Windows: the pane insert sits at x 64-96 of the wall sheet. Vanilla ships
     # items/stonewindow.png alongside its wall and door, and WallObject's
     # registerWallObjects creates a <prefix>window object for every set -- an ID
     # that appears nowhere in our source, which is how both of these went
-    # missing and showed the engine error icon in the crafting menu.
+    # missing and showed the engine error icon.
     mini_from(f"{obj}/skystonebrickwall.png", (64, 0, 96, 32), "skystonebrickwindow.png")
-    mini_from(f"{obj}/nightfellwall.png", (64, 0, 96, 32), "nightfellwindow.png")
     # Veil pieces: both are craftable and both were falling through to the
     # engine's error icon.
     # The lantern head only: the full 80px post scaled into a 32px icon left a

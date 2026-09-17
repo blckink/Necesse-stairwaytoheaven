@@ -23,8 +23,8 @@ import stairwaytoheaven.objects.SkyDecoObject;
 import stairwaytoheaven.objects.SkyWallLightObject;
 
 /**
- * The "Nightfell & Skylight" building set (v0.2): walls with doors and
- * windows, floors, fence + gate, lights, and gothic-sky deco. Craftable
+ * The "Nightfell & Skylight" building set (v0.2): walls with doors (the
+ * window is vanilla's shared wallwindow), floors, fence + gate, lights, and gothic-sky deco. Craftable
  * pieces use sky materials; garland, cat basket and banner stay
  * quest-exclusive rewards.
  */
@@ -40,7 +40,7 @@ final class SkyBuildingSet {
     }
 
     static void register() {
-        // ===== Walls (wall + door + window each, vanilla helper) =====
+        // ===== Walls (wall + door each; windows are vanilla's wallwindow) =====
         //
         // The wall broker value is -0.25F, not -1.0F, and the quarter is load
         // bearing. A NEGATIVE value means "compute from the recipe", and
@@ -301,24 +301,22 @@ final class SkyBuildingSet {
         // Walls & floors: cheap in sky materials, workstation tier
         Recipes.registerModRecipe(new Recipe("skystonebrickwall", 4, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{skystone, 2}}")));
-        // Doors and windows complete the wall kits (the objects/items already
-        // exist via WallObject.registerWallObjects — they were just uncraftable)
+        // Each wall kit sells its wall and its door, nothing else. There is no
+        // per-wall window recipe, as in vanilla: the one vanilla `wallwindow`
+        // (WallWindowPlaceObject) places whatever WallObject.windowID the wall
+        // under the cursor carries, and a broken window drops `wallwindow`
+        // again. registerWallObjects still registers the <prefix>window object
+        // for that lookup and for worldgen presets; it is just not an item.
         Recipes.registerModRecipe(new Recipe("skystonebrickdoor", 1, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{skystone, 3}}")));
-        Recipes.registerModRecipe(new Recipe("skystonebrickwindow", 1, RecipeTechRegistry.WORKSTATION,
-                Recipes.ingredientsFromScript("{{skystone, 2}}")));
         Recipes.registerModRecipe(new Recipe("nightfellwall", 4, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{skystone, 2}, {stormshard, 1}}")));
         Recipes.registerModRecipe(new Recipe("beetlewall", 4, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{veilrock, 4}, {cinderpearl, 1}}")));
         Recipes.registerModRecipe(new Recipe("beetledoor", 1, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{veilrock, 6}, {cinderpearl, 2}}")));
-        Recipes.registerModRecipe(new Recipe("beetlewindow", 1, RecipeTechRegistry.WORKSTATION,
-                Recipes.ingredientsFromScript("{{veilrock, 4}, {veilessence, 1}}")));
         Recipes.registerModRecipe(new Recipe("nightfelldoor", 1, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{skystone, 2}, {stormshard, 1}}")));
-        Recipes.registerModRecipe(new Recipe("nightfellwindow", 1, RecipeTechRegistry.WORKSTATION,
-                Recipes.ingredientsFromScript("{{skystone, 1}, {stormshard, 1}}")));
         Recipes.registerModRecipe(new Recipe("marblecheckertile", 6, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{skystone, 2}}")));
         Recipes.registerModRecipe(new Recipe("gloomwoodfloortile", 6, RecipeTechRegistry.WORKSTATION,

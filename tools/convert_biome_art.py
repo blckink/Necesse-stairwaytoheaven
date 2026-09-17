@@ -387,8 +387,9 @@ def main():
     icon = icon_from(sheet.crop((0, 0, 128, 128)), os.path.join(ITEMS, "skyseraphtree.png"))
     print(f"{os.path.join(ITEMS, 'skyseraphtree.png')}  32x32  "
           f"opaque {sum(1 for p in icon.get_flattened_data() if p[3] > 0)}")
-    splat = build_skyway_ground()
-    print(f"{splat}  {Image.open(splat).size}")
+    # tiles/skyway_splat.png is NOT built here any more: since 2026-09-17 the
+    # player's own sheet ships verbatim (same alpha mask). build_skyway_ground
+    # stays as the record of how the reference field was turned into a splat.
 
     # objects/beetlewall.png is NOT produced here any more.
     #

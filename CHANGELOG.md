@@ -6,6 +6,30 @@ All notable changes to this project are documented here. Format loosely follows
 ## [Unreleased]
 
 ### Changed
+- **Cloudmarble and Nightfell walls redrawn by the player (2026-09-17).**
+  Cloudmarble is white marble on vanilla's ancient ruin wall layout,
+  Nightfell is violet brick on the spider castle wall layout; both sheets
+  ship as supplied. The one exception: 69 Cloudmarble pixels in the window
+  insert's rows 2-4 were cleared, because the engine draws those rows two
+  tiles above the wall. Their wall, door and window icons are now vanilla's
+  icons for those two walls, recoloured into the new palettes
+  (`tools/asset_generator/wall_icon_remap.py`).
+- **Ground and floor splats redrawn by the player (2026-09-17), shipped
+  verbatim.** Skystone, Cloudturf, Stormslate, Aurora Shoal, Overgrown Eden,
+  Mistsea (shallow and deep), Crooked mist (shallow and deep), the Skyway
+  ground and path and the four plank floors (Charwood, Nimbus, Prism,
+  Gloomwood). The plank floors now take vanilla `woodfloor_splat`'s alpha
+  shape: the floor ends
+  along the plank ends with soft edge pixels, where ours used to end in a
+  round blob. That shape is deliberate and stays. The generator no longer
+  writes Skystone or either Mistsea sheet, and `convert_biome_art.py` no
+  longer builds the Skyway ground.
+- **Walls sell only the wall and the door.** The four per-wall window
+  recipes (Skystone Brick, Nightfell, Beetlefreak, Cloudmarble) are gone,
+  as in vanilla: vanilla's one `wallwindow` takes on the look of whatever
+  wall it is set into, and a broken window gives `wallwindow` back. The
+  window objects stay registered for that lookup and for worldgen, now
+  under vanilla's own "Window (wall)" name.
 - **Twilight Merchant art cleaned up.** Outfits and their icons lose the
   painted dark contour down to a 1 px rim; furniture keeps its 1 px inner
   contour. Every remaining contour is a darker shade of the colour beside

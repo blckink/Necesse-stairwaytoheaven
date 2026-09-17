@@ -393,9 +393,16 @@ typed.
 
 **[jar]** Vanilla names only three of the six in its own `en.lang` — the wall,
 the door and the locked door. The open and unlocked states inherit their name
-from their counterpart at runtime, and vanilla leaves its window unnamed
-because vanilla windows are not separately craftable. Ours are, so ours are
-named.
+from their counterpart at runtime, and the window needs no name at all:
+`WallWindowObject.getNewLocalization` builds "wallwindow (<wall>)" itself.
+
+**[jar]** There is exactly one craftable window, `wallwindow`
+(`{{glass, 5}}` at the workstation). It is a `WallWindowPlaceObject`, whose
+`getPlaceOptions` reads `WallObject.windowID` of the wall under the cursor and
+places that window, so it fits every wall a mod registers through
+`registerWallObjects`. A broken `WallWindowObject` drops `wallwindow`.
+Per-wall window recipes are therefore wrong: until 2026-09-17 four of ours
+sold windows that turned back into vanilla's window when mined.
 
 **[jar]** Vanilla ships `items/` icons for exactly the three obtainable pieces:
 `stonewall.png`, `stonedoor.png`, `stonewindow.png`.
@@ -3908,3 +3915,15 @@ which reads as a defect in the realm it was not asking about.
 `SkyreachStatusCommand`'s Outlands ramp probe now searches inward from 5280
 for a radius the realm field really calls Crooked and reports it as
 `rpeak=<radius>:`.
+
+## 2026-09-17 — A supplied splat keeps its vanilla template's edge, even where ours was different
+
+**[player]** The player redraws grounds and floors 1:1 on the vanilla splat
+they name (`woodfloor_splat-now-charfloor_splat.png`), alpha included. Vanilla
+`woodfloor_splat` ends a floor along the plank ends, with semi-transparent
+edge pixels; our generated plank floors ended in a round blob, which was
+wrong. So when a supplied splat's alpha differs from the sheet it replaces,
+that is the fix, not a defect: `splat_check.py --like <shipped>` will report
+the alpha change, and the answer is to ship the supplied file verbatim.
+Compare it against the vanilla template instead (the remaining differences
+against vanilla are the soft edge pixels, a few hundred per sheet).

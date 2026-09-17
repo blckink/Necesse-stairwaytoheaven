@@ -71,12 +71,13 @@ REGISTRARS = {
 #
 # The suffixes follow vanilla's own en.lang: it names the wall, the door, the
 # locked door and the closed gate, and leaves the open/unlocked counterparts
-# unnamed because the player never sees them in a list. Ours additionally names
-# the window, because ours is craftable.
+# unnamed because the player never sees them in a list. The window is unnamed
+# too: WallWindowObject.getNewLocalization builds "wallwindow (<wall>)" itself,
+# and the only window item is vanilla's shared `wallwindow`.
 MULTI_OBJECT_REGISTRARS = {
     # WallObject.registerWallObjects(prefix, ...) -> prefix+wall, prefix+door,
     # prefix+dooropen, prefix+doorlocked, prefix+doorunlocked, prefix+window
-    "registerWallObjects": (0, ("wall", "door", "doorlocked", "window")),
+    "registerWallObjects": (0, ("wall", "door", "doorlocked")),
     # FenceGateObject.registerGatePair(fenceID, prefix, ...) -> prefix,
     # prefix+open. The ID is the SECOND argument, after the fence it connects to.
     "registerGatePair": (1, ("",)),
@@ -922,8 +923,7 @@ def held_content(recipes):
 
     # A recipe reaches the player whatever the registration flags say, so
     # anything craftable that no registration row already covers is added here
-    # with the engine default. This is how the wall windows are covered: they
-    # are registered unobtainable and are still sold in the crafting menu.
+    # with the engine default.
     covered = {row[2] for row in rows}
     for output in sorted(recipes - covered - VANILLA_RECIPE_OUTPUTS):
         rows.append(("recipe", "object", output, [], "Recipe"))

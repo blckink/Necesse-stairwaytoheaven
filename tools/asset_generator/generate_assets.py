@@ -57,6 +57,13 @@ CONVERTED = ("tiles/skyway.png", "tiles/skyway_splat.png",
              "tiles/cloudturf_splat.png", "tiles/aurorashoal_splat.png",
              "tiles/blackpeat_splat.png", "tiles/ashsand_splat.png",
              "tiles/charfloor_splat.png",
+             # The player's Skystone redraw (2026-09-17), byte-identical alpha
+             # to the generated sheet it replaces.
+             "tiles/skystone_splat.png",
+             # The player's Mistsea and Crooked mist redraws (2026-09-17),
+             # eight frames each like the generated ones.
+             "tiles/mistsea_shallow_splat.png", "tiles/mistsea_deep_splat.png",
+             "tiles/crookedmist_shallow_splat.png", "tiles/crookedmist_deep_splat.png",
              # Hell's own two grounds (STATUS.md 7n). Stamped by
              # tools/splat_from_texture.py: only the flat texture was
              # generated, the 21 cell shapes are ashsand's and blackpeat's own
@@ -198,12 +205,12 @@ def main():
     # v0.5 art sprint: sky grounds ship 6 variants like vanilla grass (was 3) —
     # richer repetition breakup across large meadows.
     # cloudturf_splat and aurorashoal_splat are supplied art (CONVERTED above).
-    gen_splats.build_splat(f"{out}/tiles/skystone_splat.png", gen_splats.material_skystone, 5, 0x51,
-                           features=gen_splats.features_skystone)
+    # skystone_splat is the player's redraw on the same mask (CONVERTED above,
+    # 2026-09-17); material_skystone / features_skystone stay as the record.
     # stormslate_splat is the player's recolour (CONVERTED above).
     # gloomwoodfloor_splat is Codex art (CONVERTED above).
-    gen_splats.build_splat(f"{out}/tiles/mistsea_shallow_splat.png", gen_splats.material_mist(False), 1, 0x315E, frames=8)
-    gen_splats.build_splat(f"{out}/tiles/mistsea_deep_splat.png", gen_splats.material_mist(True), 1, 0xD1EE, frames=8)
+    # mistsea_shallow_splat and mistsea_deep_splat are the player's redraws
+    # (CONVERTED above, 2026-09-17); material_mist stays as the record.
     gen_furniture.gen_marblechecker(f"{out}/tiles/marblechecker.png")
 
     # v0.3: the Veil — terrain, water, flora, rift, lantern, shade

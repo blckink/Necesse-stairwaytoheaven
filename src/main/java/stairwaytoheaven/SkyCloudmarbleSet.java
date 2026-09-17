@@ -92,8 +92,6 @@ public final class SkyCloudmarbleSet {
                 Recipes.ingredientsFromScript("{{skystone, 4}, {windsilk, 1}, {goldbar, 1}}")));
         Recipes.registerModRecipe(new Recipe("cloudmarbledoor", 1, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{skystone, 6}, {windsilk, 2}, {goldbar, 1}}")));
-        Recipes.registerModRecipe(new Recipe("cloudmarblewindow", 1, RecipeTechRegistry.WORKSTATION,
-                Recipes.ingredientsFromScript("{{skystone, 4}, {stormshard, 1}, {goldbar, 1}}")));
         Recipes.registerModRecipe(new Recipe("cloudmarblefence", 4, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{skystone, 2}, {goldbar, 1}}")));
         Recipes.registerModRecipe(new Recipe("cloudmarblefencegate", 1, RecipeTechRegistry.WORKSTATION,
