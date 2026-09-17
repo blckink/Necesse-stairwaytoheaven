@@ -66,6 +66,11 @@ run "content_ledger"       python3 tools/content_ledger.py --check
 # dossier draws. A dropped character shifts a whole building and the game
 # generates the shifted one without complaint.
 run "plan_transcription"   python3 tools/plan_transcription_audit.py
+# Registry classes that resolve their ID in their own constructor (WorldData,
+# LevelData, SettlerDialogue, GameQuest). An unregistered one builds green and
+# then throws in the player's face -- talking to the War Veteran did exactly
+# that on 2026-09-17.
+run "registry_gate"        python3 tools/registry_gate.py
 run "buildModJar"          ./gradlew buildModJar -q
 
 # locale_audit is reported but does not gate: it stands at 33 known problems
