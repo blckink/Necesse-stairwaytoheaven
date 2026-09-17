@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.util.List;
 
 import necesse.engine.gameLoop.tickManager.TickManager;
-import necesse.entity.mobs.Mob;
 import necesse.entity.mobs.PlayerMob;
 import necesse.entity.objectEntity.ObjectEntity;
 import necesse.gfx.camera.GameCamera;
@@ -34,12 +33,9 @@ import necesse.level.maps.light.GameLight;
  * {@code replaceRotations = false}, exactly like
  * {@code StormglassKilnObject}/{@code WindsilkLoomObject} in this mod.
  *
- * <p>Which frame draws is decided client-side, purely from "is a hostile mob
- * currently in range" — this pass had no time budget left to add a synced
- * "just fired" network field, so the animation approximates firing state
- * rather than following the server's exact shot timing. Good enough to read
- * as "this turret is active" at the table it sits on; not frame-accurate to
- * the server shot.
+ * <p>The firing frames follow the server's real shots: the entity's synced
+ * shot counter stamps each shot on the client (see
+ * {@link VeteranTurretObjectEntity#firingFrame}).
  */
 public class VeteranTurretObject extends GameObject {
 
@@ -75,11 +71,8 @@ public class VeteranTurretObject extends GameObject {
             return;
         }
         GameLight light = level.getLightLevel(tileX, tileY);
-        int frame = 0;
-        Mob hostile = VeteranTurretObjectEntity.findNearestHostile(level, tileX, tileY, VeteranTurretObjectEntity.RANGE_PX);
-        if (hostile != null) {
-            frame = 1 + (int) ((System.currentTimeMillis() / 100L) % 3L);
-        }
+        // Shots come every 200 ms: three 60 ms frames of muzzle flash, then idle.
+        int frame = VeteranTurretObjectEntity.firingFrame(level, tileX, tileY, 60L);
         int rotation = level.getObjectRotation(tileX, tileY) & 3;
         int row = this.texture.getHeight() >= 4 * FRAME_H ? rotation : 0;
         int drawX = camera.getTileDrawX(tileX) - (FRAME_W - 32) / 2;

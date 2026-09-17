@@ -1,11 +1,10 @@
 package stairwaytoheaven.objects;
 
 import java.awt.Color;
-import java.awt.Rectangle;
 import java.util.List;
 
 import necesse.engine.gameLoop.tickManager.TickManager;
-import necesse.entity.mobs.Mob;
+import necesse.engine.registries.ObjectRegistry;
 import necesse.entity.mobs.PlayerMob;
 import necesse.entity.objectEntity.ObjectEntity;
 import necesse.gfx.camera.GameCamera;
@@ -16,41 +15,68 @@ import necesse.gfx.gameTexture.GameTexture;
 import necesse.level.gameObject.GameObject;
 import necesse.level.maps.Level;
 import necesse.level.maps.light.GameLight;
+import necesse.level.maps.multiTile.MultiTile;
+import necesse.level.maps.multiTile.StaticMultiTile;
 
 /**
- * The War Veteran's Catapult ({@code veterancatapult}).
+ * The War Veteran's Catapult ({@code veterancatapult}), a real 3x3 multi-tile
+ * object built the way vanilla's {@code StaticMultiObject} /
+ * {@code BlacksmithStatueObject} are: nine registered pieces sharing one ID
+ * array, the top-left piece is the master. Only the master carries the
+ * firing entity and draws the sprite; the other eight only block.
  *
  * <p>Sheet {@code objects/veterancatapult.png}: 4 rows (rotation: 0 up/north,
  * 1 right/east, 2 down/south, 3 left/west) x 4 columns (0 idle, 1-3 firing),
- * each cell 96x128. Row = {@code level.getObjectRotation(tileX, tileY)}
- * directly, same convention as {@link VeteranTurretObject}. If the delivered
- * texture is still the old 1-row sheet (height &lt; 4*128), row 0 is used
- * defensively.
- *
- * <p>CUT under the session's time limit: the true 3x3 {@code MultiTile}
- * footprint. Necesse's multi-tile registration (master/slave objects tied
- * together per rotation) is its own API surface this pass had no time left
- * to read and verify after the turret and the splash logic. This registers
- * as a SINGLE solid tile with an oversized, bottom-anchored sprite (the same
- * overhang idiom {@code SkyDecoObject} already uses) — it reads as a large
- * object and fires correctly, but a player can walk into the two tiles the
- * art implies rather than being blocked by them. A later pass should give it
- * a real {@code MultiTile} before calling this shippable as a true 3x3.
+ * each cell 96x128 — three tiles wide, the top 32 px overhang the footprint.
+ * The footprint is square, so {@link StaticMultiTile} keeps it unrotated and
+ * only the drawn row follows the placement rotation.
  */
 public class VeteranCatapultObject extends GameObject {
 
-    public GameTexture texture;
+    public static final int SIZE = 3;
     private static final int FRAME_W = 96;
     private static final int FRAME_H = 128;
+    /** Each firing frame lasts this long after a shot (3 frames, then idle). */
+    private static final long FRAME_MS = 250L;
 
-    public VeteranCatapultObject() {
+    public GameTexture texture;
+    private final int multiX;
+    private final int multiY;
+    private final int[] multiIDs;
+
+    private VeteranCatapultObject(int multiX, int multiY, int[] multiIDs) {
+        this.multiX = multiX;
+        this.multiY = multiY;
+        this.multiIDs = multiIDs;
         this.mapColor = new Color(110, 95, 70);
         this.isLightTransparent = true;
         this.isSolid = true;
         this.objectHealth = 250;
-        this.collision = new Rectangle(-32, 0, 64, 32);
         this.setItemCategory("objects", "decorations");
         this.setCraftingCategory("objects", "decorations");
+    }
+
+    /** Registers the nine pieces; the master keeps the ID {@code veterancatapult}. */
+    public static int[] register(float brokerValue) {
+        int[] ids = new int[SIZE * SIZE];
+        for (int y = 0; y < SIZE; y++) {
+            for (int x = 0; x < SIZE; x++) {
+                int i = y * SIZE + x;
+                String id = i == 0 ? "veterancatapult" : "veterancatapult" + (i + 1);
+                ids[i] = ObjectRegistry.registerObject(id, new VeteranCatapultObject(x, y, ids),
+                        i == 0 ? brokerValue : 0.0F, i == 0);
+            }
+        }
+        return ids;
+    }
+
+    private boolean isMaster() {
+        return this.multiX == 0 && this.multiY == 0;
+    }
+
+    @Override
+    public MultiTile getMultiTile(int rotation) {
+        return new StaticMultiTile(this.multiX, this.multiY, SIZE, SIZE, this.isMaster(), this.multiIDs);
     }
 
     @Override
@@ -61,26 +87,24 @@ public class VeteranCatapultObject extends GameObject {
 
     @Override
     public ObjectEntity getNewObjectEntity(Level level, int x, int y) {
-        return new VeteranCatapultObjectEntity(level, this.getStringID(), x, y);
+        return this.isMaster() ? new VeteranCatapultObjectEntity(level, this.getStringID(), x, y) : null;
+    }
+
+    private int row(int rotation) {
+        return this.texture.getHeight() >= 4 * FRAME_H ? (rotation & 3) : 0;
     }
 
     @Override
     public void addDrawables(List<LevelSortedDrawable> list, OrderableDrawables tileList, Level level,
             int tileX, int tileY, TickManager tickManager, GameCamera camera, PlayerMob perspective) {
-        if (this.texture == null) {
+        if (!this.isMaster() || this.texture == null) {
             return;
         }
-        GameLight light = level.getLightLevel(tileX, tileY);
-        int frame = 0;
-        Mob hostile = stairwaytoheaven.objects.VeteranTurretObjectEntity.findNearestHostile(
-                level, tileX, tileY, VeteranCatapultObjectEntity.CATAPULT_RANGE_PX);
-        if (hostile != null) {
-            frame = 1 + (int) ((System.currentTimeMillis() / 250L) % 3L);
-        }
-        int rotation = level.getObjectRotation(tileX, tileY) & 3;
-        int row = this.texture.getHeight() >= 4 * FRAME_H ? rotation : 0;
-        int drawX = camera.getTileDrawX(tileX) - (FRAME_W - 32) / 2;
-        int drawY = camera.getTileDrawY(tileY) - FRAME_H + 32;
+        GameLight light = level.getLightLevel(tileX + 1, tileY + 1);
+        int frame = VeteranTurretObjectEntity.firingFrame(level, tileX, tileY, FRAME_MS);
+        int row = this.row(level.getObjectRotation(tileX, tileY));
+        int drawX = camera.getTileDrawX(tileX);
+        int drawY = camera.getTileDrawY(tileY) - (FRAME_H - SIZE * 32);
         final TextureDrawOptionsEnd options = this.texture.initDraw()
                 .section(frame * FRAME_W, (frame + 1) * FRAME_W, row * FRAME_H, (row + 1) * FRAME_H)
                 .light(light)
@@ -88,7 +112,8 @@ public class VeteranCatapultObject extends GameObject {
         list.add(new LevelSortedDrawable(this, tileX, tileY) {
             @Override
             public int getSortY() {
-                return 16;
+                // Sort with the footprint's bottom row, not the master's top row.
+                return (SIZE - 1) * 32 + 16;
             }
 
             @Override
@@ -100,12 +125,12 @@ public class VeteranCatapultObject extends GameObject {
 
     @Override
     public void drawPreview(Level level, int tileX, int tileY, int rotation, float alpha, PlayerMob player, GameCamera camera) {
-        if (this.texture == null) {
+        if (!this.isMaster() || this.texture == null) {
             return;
         }
-        int row = this.texture.getHeight() >= 4 * FRAME_H ? (rotation & 3) : 0;
-        int drawX = camera.getTileDrawX(tileX) - (FRAME_W - 32) / 2;
-        int drawY = camera.getTileDrawY(tileY) - FRAME_H + 32;
+        int row = this.row(rotation);
+        int drawX = camera.getTileDrawX(tileX);
+        int drawY = camera.getTileDrawY(tileY) - (FRAME_H - SIZE * 32);
         this.texture.initDraw()
                 .section(0, FRAME_W, row * FRAME_H, (row + 1) * FRAME_H)
                 .alpha(alpha)

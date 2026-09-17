@@ -11,11 +11,8 @@ import stairwaytoheaven.settlement.VeteranDefense;
  * {@link VeteranTurretObjectEntity} — see its class note for why targets are
  * hand-picked instead of routed through a hit-scanning projectile.
  *
- * <p>CUT under the session's time limit: a true 3x3 {@code MultiTile}
- * footprint (this object is registered 1x1 — see {@code WarVeteran}) and a
- * custom lobbed {@code projectiles/catapultstone.png} visual (this pass had
- * no time left to write a {@code Projectile} subclass with its own sprite
- * draw code after the turret). The splash damage itself is real.
+ * <p>Lives on the master (top-left) tile of the 3x3 catapult, so range is
+ * measured from the footprint's centre tile.
  */
 public class VeteranCatapultObjectEntity extends stairwaytoheaven.objects.VeteranTurretObjectEntity {
 
@@ -46,12 +43,12 @@ public class VeteranCatapultObjectEntity extends stairwaytoheaven.objects.Vetera
         if (level == null) {
             return;
         }
-        Mob target = findNearestHostile(level, this.tileX, this.tileY, CATAPULT_RANGE_PX);
+        Mob target = findNearestHostile(level, this.tileX + 1, this.tileY + 1, CATAPULT_RANGE_PX);
         if (target == null) {
             return;
         }
         this.nextCatapultFire = now + CATAPULT_INTERVAL_MS;
-        this.lastShotTime = now;
+        this.markShot(now);
         float damage = CATAPULT_BASE_DAMAGE * VeteranDefense.catapultMultiplier(level);
         float tx = target.x;
         float ty = target.y;

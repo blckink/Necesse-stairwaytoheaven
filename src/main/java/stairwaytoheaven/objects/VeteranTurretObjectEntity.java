@@ -2,6 +2,7 @@ package stairwaytoheaven.objects;
 
 import necesse.entity.mobs.GameDamage;
 import necesse.entity.mobs.Mob;
+import necesse.entity.mobs.networkField.IntNetworkField;
 import necesse.entity.objectEntity.ObjectEntity;
 import necesse.entity.projectile.TrapArrowProjectile;
 import necesse.level.maps.Level;
@@ -15,8 +16,7 @@ import necesse.level.maps.Level;
  *
  * That helper (used by e.g. {@code MakeshiftTurretMob}) is built around an
  * attacking MOB's own team, and this turret has no owning mob to hand it —
- * it is a placed object. Rather than fabricate one under this session's time
- * limit, target selection here is a direct scan of
+ * it is a placed object. Rather than fabricate one, target selection here is a direct scan of
  * {@code level.entityManager.mobs} filtered on the same {@code isHostile}
  * flag {@code MakeshiftTurretMob}'s own filter checks, and damage is applied
  * directly through {@code Mob.isServerHit(...)} on the one mob this code
@@ -33,8 +33,20 @@ public class VeteranTurretObjectEntity extends ObjectEntity {
     private static final float BASE_DAMAGE = 6.0F;
 
     private long nextFireTime;
-    /** Wall-clock time of the last shot, for the client-only firing frame. */
+    /**
+     * Local wall-clock time of the last shot. On the client it is set when the
+     * server's shot counter below arrives, so the firing frames follow the
+     * real shots instead of "a hostile is in range".
+     */
     public long lastShotTime;
+    /** Server-side shot counter, synced to clients; every change is one shot. */
+    public final IntNetworkField shotCount = this.registerNetworkField(new IntNetworkField(0) {
+        @Override
+        public void onChanged(Integer value) {
+            super.onChanged(value);
+            VeteranTurretObjectEntity.this.lastShotTime = System.currentTimeMillis();
+        }
+    });
 
     public VeteranTurretObjectEntity(Level level, String type, int tileX, int tileY) {
         super(level, type, tileX, tileY);
@@ -60,7 +72,7 @@ public class VeteranTurretObjectEntity extends ObjectEntity {
             return;
         }
         this.nextFireTime = now + FIRE_INTERVAL_MS;
-        this.lastShotTime = now;
+        this.markShot(now);
         float damage = BASE_DAMAGE * stairwaytoheaven.settlement.VeteranDefense.turretMultiplier(level);
         target.isServerHit(new GameDamage(damage), target.x, target.y, 0.0F, null);
 
@@ -74,6 +86,28 @@ public class VeteranTurretObjectEntity extends ObjectEntity {
         // and its target must never take this arrow's damage.
         visual.canHitMobs = false;
         level.entityManager.projectiles.add(visual);
+    }
+
+    /** Records one shot locally and tells the clients about it. */
+    protected void markShot(long now) {
+        this.lastShotTime = now;
+        this.shotCount.set(this.shotCount.get() + 1);
+    }
+
+    /**
+     * Firing frame (1-3) for {@code frameMs} per frame after the last shot,
+     * idle frame 0 otherwise. Looked up by the object's draw code.
+     */
+    public static int firingFrame(Level level, int tileX, int tileY, long frameMs) {
+        ObjectEntity entity = level.entityManager.getObjectEntity(tileX, tileY);
+        if (!(entity instanceof VeteranTurretObjectEntity)) {
+            return 0;
+        }
+        long since = System.currentTimeMillis() - ((VeteranTurretObjectEntity) entity).lastShotTime;
+        if (since < 0 || since >= 3 * frameMs) {
+            return 0;
+        }
+        return 1 + (int) (since / frameMs);
     }
 
     /**

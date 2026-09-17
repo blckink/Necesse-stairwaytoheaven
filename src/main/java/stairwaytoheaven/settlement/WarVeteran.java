@@ -7,8 +7,9 @@ import necesse.engine.registries.ObjectRegistry;
 import necesse.engine.registries.ProjectileRegistry;
 import necesse.engine.registries.SettlerRegistry;
 import necesse.inventory.item.toolItem.ToolType;
-import necesse.level.gameObject.FenceObject;
+import necesse.level.gameObject.FenceGateObject;
 import necesse.level.gameObject.WallObject;
+import stairwaytoheaven.objects.BarbedWireFenceObject;
 import stairwaytoheaven.objects.CatapultStoneProjectile;
 import stairwaytoheaven.objects.VeteranCatapultObject;
 import stairwaytoheaven.objects.VeteranTurretObject;
@@ -17,31 +18,20 @@ import stairwaytoheaven.objects.VeteranTurretObject;
  * The War Veteran (Kriegsveteran): a recruitable soldier settler and the two
  * defense structures he sells.
  *
- * <h2>What shipped in this pass, and what did not</h2>
- *
- * The settler, his soldier look, his patrol/combat AI (vanilla's
- * {@code HumanAI} with {@code attackHostiles=true}, the same flag the Miner
- * and Explorer use — see {@code WarVeteranHumanMob}) and his shop selling
- * {@code veteranbarricade}/{@code barbedwirefence} are real, registered
- * content. The turret ({@code veteranturret}), catapult
- * ({@code veterancatapult}) and the ammo-upgrade defense-level system were
- * CUT under the session's hard time limit: they need a ticking entity with
- * hostile-only targeting and a projectile, an API surface this pass had no
- * time to read from source rather than guess. Building that without reading
- * the real target-acquisition/projectile-spawn API first is exactly the kind
- * of guess that turns a build red, which the task explicitly said to avoid.
- * A later pass should read {@code necesse.entity.mobs.Mob} targeting and
- * {@code necesse.entity.projectile} before attempting them.
- *
- * <p>{@code veteranbarricade} is a real {@link WallObject} (sandbags + heavy
- * timber + riveted iron plates, vanilla's 352x128 wall-sheet format) and
- * {@code barbedwirefence} a real {@link FenceObject} (vanilla's 160x64,
- * 5x32-column post/rail format) — both connect to neighbouring pieces and
- * get correct side/front views the way vanilla walls and fences do, instead
- * of the single static 32x48 sprite this pass shipped with before. Both are
- * six times a plain wall's {@code objectHealth} (100 -> 600); "barbed wire
- * damages hostiles on touch" is still cut — no time to read the on-touch
- * damage API this pass.
+ * <ul>
+ * <li>{@code warveteranhuman}/{@code warveteran}: always in iron armour, patrols
+ * with vanilla's {@code HumanAI} ({@code attackHostiles=true}); settlement
+ * raiders extend {@code HostileItemAttackerMob}, which sets
+ * {@code isHostile}, so he and every defense below engage them.</li>
+ * <li>{@code veteranturret} (1x1) and {@code veterancatapult} (3x3
+ * multi-tile): hostile-only targeting, damage scaled by the ammo level
+ * ({@link VeteranDefense}, raised in {@link VeteranAmmoDialogue}); firing
+ * frames follow the server's shots.</li>
+ * <li>{@code veteranbarricade}: a vanilla {@link WallObject};
+ * {@code barbedwirefence}: a vanilla fence that cuts hostiles touching it,
+ * with a matching gate. Both six times a plain wall's
+ * {@code objectHealth} (100 -> 600).</li>
+ * </ul>
  */
 public final class WarVeteran {
 
@@ -74,19 +64,24 @@ public final class WarVeteran {
         // connects to neighbouring fences/walls/rocks (FenceObject.attachesToObject)
         // and draws post + rail pieces instead of one static sprite. Collision
         // box is narrower than a full wall — wire strands, not a solid plate.
-        FenceObject wire = new FenceObject("barbedwirefence", MAP_WIRE, 24, 16);
+        // BarbedWireFenceObject adds the entity that cuts hostiles touching it.
+        BarbedWireFenceObject wire = new BarbedWireFenceObject("barbedwirefence", MAP_WIRE, 24, 16);
         wire.objectHealth = DEFENSE_OBJECT_HEALTH;
-        ObjectRegistry.registerObject("barbedwirefence", wire, 35.0F, true);
+        int wireID = ObjectRegistry.registerObject("barbedwirefence", wire, 35.0F, true);
+        // Matching gate, vanilla's own pair helper (closed + "open" twin,
+        // both connect to the wire) — the same call woodfencegate uses.
+        int[] gateIDs = FenceGateObject.registerGatePair(wireID, "barbedwiregate", "barbedwiregate", MAP_WIRE, 24, 16, 40.0F);
+        for (int gateID : gateIDs) {
+            ObjectRegistry.getObject(gateID).objectHealth = DEFENSE_OBJECT_HEALTH;
+        }
 
-        // Auto Turret: 1x1, real ObjectEntity target-scan and fire loop —
-        // see VeteranTurretObjectEntity. Catapult (veterancatapult) and the
-        // ammo-upgrade dialogue (VeteranDefense.raiseLevel) were cut under
-        // the session's time limit; see those classes' notes.
+        // Auto Turret: 1x1, ObjectEntity target-scan and fire loop — see
+        // VeteranTurretObjectEntity.
         ObjectRegistry.registerObject("veteranturret", new VeteranTurretObject(), 60.0F, true);
 
-        // Catapult: registered 1x1 (see VeteranCatapultObject's class note
-        // on the cut 3x3 MultiTile footprint), long range, splash.
-        ObjectRegistry.registerObject("veterancatapult", new VeteranCatapultObject(), 150.0F, true);
+        // Catapult: real 3x3 multi-tile (nine pieces, master keeps the ID),
+        // long range, splash.
+        VeteranCatapultObject.register(150.0F);
         // Cosmetic lobbed stone the catapult fires on each shot — no shadow
         // texture shipped with this art drop, so registered with a null
         // shadow path; see CatapultStoneProjectile's own addDrawables note.
