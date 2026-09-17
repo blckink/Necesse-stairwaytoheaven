@@ -118,6 +118,16 @@ public class StairwayToHeavenMod {
         necesse.engine.registries.WorldDataRegistry.registerWorldData(
                 stairwaytoheaven.quest.SkywatchWorldData.KEY,
                 stairwaytoheaven.quest.SkywatchWorldData.class);
+        // The War Veteran's ammo-upgrade level. WorldData subclasses must be
+        // registered BEFORE the first `new` of them: WorldData's own
+        // constructor resolves its registry ID and throws
+        // "Cannot construct unregistered WorldData class" otherwise — which
+        // is what killed the server the moment a player talked to the
+        // veteran (his shop builds his dialogues, and one of them reads the
+        // defense level).
+        necesse.engine.registries.WorldDataRegistry.registerWorldData(
+                stairwaytoheaven.settlement.VeteranDefense.KEY,
+                stairwaytoheaven.settlement.VeteranDefense.class);
         // The Crooked House, scattered through the Beetlefreak Hollows by
         // vanilla's own world-preset machinery. The Hollows are now a band of
         // the sky plane (WORLD_DESIGN §41.5) and SkyLevel.generateRegion

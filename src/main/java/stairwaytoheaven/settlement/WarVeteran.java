@@ -5,6 +5,7 @@ import java.awt.Color;
 import necesse.engine.registries.MobRegistry;
 import necesse.engine.registries.ObjectRegistry;
 import necesse.engine.registries.ProjectileRegistry;
+import necesse.engine.registries.SettlerDialogueRegistry;
 import necesse.engine.registries.SettlerRegistry;
 import necesse.inventory.item.toolItem.ToolType;
 import necesse.level.gameObject.WallObject;
@@ -46,6 +47,12 @@ public final class WarVeteran {
     public static void register() {
         MobRegistry.registerMob("warveteranhuman", stairwaytoheaven.mobs.WarVeteranHumanMob.class, false);
         SettlerRegistry.registerSettler("warveteran", new WarVeteranSettler());
+        // The "hand over ammunition" talk, the same way SkyDoctor registers
+        // its own: a SettlerDialogue resolves its registry ID in its
+        // constructor, so an unregistered one throws the moment the shop
+        // builds this settler's dialogue list. VeteranDefense (WorldData) is
+        // registered in StairwayToHeavenMod for the same reason.
+        SettlerDialogueRegistry.registerSettlerDialogue("swh_veteranammo", VeteranAmmoDialogue.class);
 
         // veteranbarricade is a real vanilla-style WallObject now (sandbags +
         // heavy timber + riveted iron plates), registered directly under its
