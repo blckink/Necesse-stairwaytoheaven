@@ -127,10 +127,12 @@ def clean(im, peel=True):
                 px[k] = (0, 0, 0, 0)
         rim = {k for k in slate if px[k][3]}
 
-    # 2. Lift the colours (alpha stays hard), then recolour the rim.
+    # 2. Lift the colours, then recolour the rim. Semi-transparent pixels
+    #    (ground shadows) keep their colour and alpha: lifted and made opaque
+    #    they turned into a teal slab under the sarcophagus.
     lut = [round(255 * (v / 255) ** GAMMA) for v in range(256)]
     for k, p in px.items():
-        if p[3]:
+        if p[3] == 255:
             px[k] = (lut[p[0]], lut[p[1]], lut[p[2]], 255)
     selout(px, rim, w, h)
 

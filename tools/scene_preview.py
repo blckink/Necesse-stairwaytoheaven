@@ -119,7 +119,7 @@ class Stage:
 
 
 def figure(outfit=None, row=0):
-    """Ein Mensch, Frame 0, Blickrichtung `row` (0 = nach unten)."""
+    """Ein Mensch, Frame 0, Blickrichtung `row` (0 = nach oben/Rücken, 2 = nach unten/Gesicht)."""
     f = Image.new("RGBA", (64, 64))
 
     def layer(path):
