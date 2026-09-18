@@ -77,14 +77,37 @@ def off_grid(im):
     return bad / total if total else 0.0
 
 
-def widest(im):
-    """Widest content box over all cells -- what the shared factor comes from."""
+#: Share of the content height, measured up from the chin, that counts as
+#: face. Everything above it is hat, hair or hood.
+FACE_BAND = 0.45
+
+
+def cell_width(cell, band=False):
+    """Content width of one cell -- whole box, or only the face band.
+
+    The distinction is the point of this tool. Vanilla's own `magehat` is
+    40 px wide against `ironhelmet`'s 24, so a brim or a mane is ALLOWED to
+    be big; what has to sit at helmet size is the face under it. Taking the
+    factor off the whole box is what crushed Freddy's eyes to nothing in the
+    first run: his hat set the scale, and the face came along for the ride.
+    """
+    px = cell.load()
+    bb = cell.split()[3].getbbox()
+    if not bb:
+        return 0
+    top = bb[3] - int((bb[3] - bb[1]) * FACE_BAND) if band else bb[1]
     out = 0
-    for _, _, box in cells(im):
-        bb = im.crop(box).split()[3].getbbox()
-        if bb:
-            out = max(out, bb[2] - bb[0])
+    for y in range(top, bb[3]):
+        xs = [x for x in range(cell.width) if px[x, y][3] > 0]
+        if xs:
+            out = max(out, max(xs) - min(xs) + 1)
     return out
+
+
+def widest(im, band=False):
+    """Widest cell of the sheet -- what the shared factor comes from."""
+    return max((cell_width(im.crop(box), band) for _, _, box in cells(im)),
+               default=0)
 
 
 def half_res(crop, tw, th):
@@ -119,8 +142,8 @@ def anchors(path):
     return out
 
 
-def fit(im, target_w, ref):
-    wide = widest(im)
+def fit(im, target_w, ref, band=True):
+    wide = widest(im, band)
     if not wide:
         return im, 1.0
     scale = target_w / float(wide)
@@ -155,6 +178,8 @@ def main():
     ap.add_argument("--target-width", type=int, default=DEFAULT_TARGET_W)
     ap.add_argument("--ref", default=VANILLA_REF, help="vanilla head sheet to take anchors from")
     ap.add_argument("--check", action="store_true", help="report only, write nothing")
+    ap.add_argument("--whole-box", action="store_true",
+                    help="take the factor off the whole content box instead of the face band")
     args = ap.parse_args()
 
     if args.out and len(args.files) != 1:
@@ -168,14 +193,14 @@ def main():
         im = Image.open(path).convert("RGBA")
         name = os.path.basename(path)
         if args.check:
-            print("%-28s %5.1f%% off-grid, widest cell %2d px"
-                  % (name, 100 * off_grid(im), widest(im)))
+            print("%-28s %5.1f%% off-grid, box %2d px, face %2d px"
+                  % (name, 100 * off_grid(im), widest(im), widest(im, True)))
             continue
-        out, scale = fit(im, args.target_width, ref)
+        out, scale = fit(im, args.target_width, ref, not args.whole_box)
         dest = args.out or path
         out.save(dest)
-        print("%-28s x%.2f -> %5.1f%% off-grid, widest cell %2d px"
-              % (name, scale, 100 * off_grid(out), widest(out)))
+        print("%-28s x%.2f -> %5.1f%% off-grid, box %2d px, face %2d px"
+              % (name, scale, 100 * off_grid(out), widest(out), widest(out, True)))
 
 
 if __name__ == "__main__":
