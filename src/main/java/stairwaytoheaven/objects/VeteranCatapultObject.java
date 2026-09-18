@@ -1,6 +1,8 @@
 package stairwaytoheaven.objects;
 
 import java.awt.Color;
+import java.awt.Rectangle;
+import java.util.Collections;
 import java.util.List;
 
 import necesse.engine.gameLoop.tickManager.TickManager;
@@ -44,13 +46,46 @@ public class VeteranCatapultObject extends GameObject {
     private final int multiY;
     private final int[] multiIDs;
 
+    /**
+     * The machine as drawn, in footprint pixels (0,0 = top-left tile of the
+     * 3x3). Measured off the idle frame: the body covers x 15..79, y 27..94 of
+     * the 96x96 footprint, i.e. the bottom two tile rows. The top row is bare
+     * art, so the box starts at y=32 and leaves it open — blocking all nine
+     * tiles would put a wall where the player sees floor. Vanilla insets the
+     * same way ({@code BlacksmithStatueObject} blocks 80x54 of its 96x64).
+     */
+    private static final Rectangle FULL_COLLISION = new Rectangle(12, 32, 72, 64);
+
+    /**
+     * This piece's share of {@link #FULL_COLLISION}, in its own tile's
+     * coordinates — the split {@code StaticMultiObject} does. The three
+     * top-row pieces intersect the box at zero height, so they keep a
+     * degenerate rectangle, {@code GameObject} leaves their {@code isSolid}
+     * false and the bare top row stays walkable; the six pieces below block.
+     */
+    private static Rectangle pieceCollision(int multiX, int multiY) {
+        Rectangle piece = FULL_COLLISION.intersection(new Rectangle(multiX * 32, multiY * 32, 32, 32));
+        if (piece.width < 0) {
+            piece.width = 0;
+        }
+        if (piece.height < 0) {
+            piece.height = 0;
+        }
+        piece.x -= multiX * 32;
+        piece.y -= multiY * 32;
+        return piece;
+    }
+
     private VeteranCatapultObject(int multiX, int multiY, int[] multiIDs) {
+        // Through the constructor, not after it: GameObject reads the
+        // rectangle to set isSolid and regionType and never looks again, so
+        // assigning isSolid later left every piece walk-through.
+        super(pieceCollision(multiX, multiY));
         this.multiX = multiX;
         this.multiY = multiY;
         this.multiIDs = multiIDs;
         this.mapColor = new Color(110, 95, 70);
         this.isLightTransparent = true;
-        this.isSolid = true;
         this.objectHealth = 250;
         this.setItemCategory("objects", "decorations");
         this.setCraftingCategory("objects", "decorations");
@@ -88,6 +123,17 @@ public class VeteranCatapultObject extends GameObject {
     @Override
     public ObjectEntity getNewObjectEntity(Level level, int x, int y) {
         return this.isMaster() ? new VeteranCatapultObjectEntity(level, this.getStringID(), x, y) : null;
+    }
+
+    /**
+     * Solid to feet, open to shots — as in {@link VeteranTurretObject}. The
+     * stone spawns at the footprint's own centre-top ({@code tileX * 32 + 48},
+     * {@code tileY * 32 + 16}), so a projectile-blocking hull would drop every
+     * shot the moment it left the arm.
+     */
+    @Override
+    public List<Rectangle> getProjectileCollisions(Level level, int x, int y, int rotation) {
+        return Collections.emptyList();
     }
 
     private int row(int rotation) {

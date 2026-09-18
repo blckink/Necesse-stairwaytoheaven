@@ -1,6 +1,8 @@
 package stairwaytoheaven.objects;
 
 import java.awt.Color;
+import java.awt.Rectangle;
+import java.util.Collections;
 import java.util.List;
 
 import necesse.engine.gameLoop.tickManager.TickManager;
@@ -45,9 +47,16 @@ public class VeteranTurretObject extends GameObject {
     private static final int FRAME_H = 64;
 
     public VeteranTurretObject() {
+        // The collision has to go through the constructor: GameObject derives
+        // isSolid and regionType from it right there (line 121-123 of the
+        // decompiled class), so a later `isSolid = true` leaves the object
+        // walk-through and its region OPEN — which is exactly what happened.
+        // Box = the mount as drawn on its own tile (sheet rows below: the body
+        // covers tile-local y 0..26 and overhangs sideways; the overhang is
+        // not blocked, only the tile itself).
+        super(new Rectangle(2, 4, 28, 24));
         this.mapColor = new Color(90, 90, 80);
         this.isLightTransparent = true;
-        this.isSolid = true;
         this.objectHealth = 150;
         this.setItemCategory("objects", "decorations");
         this.setCraftingCategory("objects", "decorations");
@@ -62,6 +71,17 @@ public class VeteranTurretObject extends GameObject {
     @Override
     public ObjectEntity getNewObjectEntity(Level level, int x, int y) {
         return new VeteranTurretObjectEntity(level, this.getStringID(), x, y);
+    }
+
+    /**
+     * Solid to feet, open to shots — vanilla's {@code AscendedPylonObject}
+     * makes the same split. A defensive emplacement that blocked projectiles
+     * would swallow its own cosmetic tracer (it spawns inside this very tile)
+     * and every arrow the settlers fire from behind it.
+     */
+    @Override
+    public List<Rectangle> getProjectileCollisions(Level level, int x, int y, int rotation) {
+        return Collections.emptyList();
     }
 
     @Override
