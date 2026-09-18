@@ -48,6 +48,9 @@ public class VeteranCatapultObjectEntity extends stairwaytoheaven.objects.Vetera
             return;
         }
         this.nextCatapultFire = now + CATAPULT_INTERVAL_MS;
+        // Pivot is the footprint's centre tile, the same point the target
+        // scan above uses, so arm and scan agree on where "the catapult" is.
+        this.aimAt(target, this.tileX * 32 + 48, this.tileY * 32 + 48);
         this.markShot(now);
         float damage = CATAPULT_BASE_DAMAGE * VeteranDefense.catapultMultiplier(level);
         float tx = target.x;

@@ -48,9 +48,56 @@ public class VeteranTurretObjectEntity extends ObjectEntity {
         }
     });
 
+    /**
+     * Sheet row the emplacement is currently facing, or -1 while it has never
+     * had a target. Written by the server when a shot is taken, synced like
+     * {@link #shotCount}; the object's draw code prefers it over the
+     * placement rotation. Not the placement rotation itself: that is build
+     * data, it is what the multi-tile footprint was laid out with, and
+     * rewriting it every time a mob walks past would fight the footprint.
+     */
+    public final IntNetworkField aimRow = this.registerNetworkField(new IntNetworkField(-1));
+
     public VeteranTurretObjectEntity(Level level, String type, int tileX, int tileY) {
         super(level, type, tileX, tileY);
         this.shouldSave = false;
+    }
+
+    /**
+     * Turns the emplacement towards {@code target}, snapped to the four
+     * directions the sheet holds. {@code (centreX, centreY)} is the pivot in
+     * world pixels — the tile centre for the turret, the 3x3 footprint's
+     * centre for the catapult.
+     *
+     * <p>Row numbering is the sheet's, documented on
+     * {@code VeteranTurretObject}: 0 north, 1 east, 2 south, 3 west. World y
+     * grows downwards, so a target below the emplacement is south.
+     */
+    protected void aimAt(Mob target, float centreX, float centreY) {
+        float dx = target.x - centreX;
+        float dy = target.y - centreY;
+        int row;
+        if (Math.abs(dx) > Math.abs(dy)) {
+            row = dx > 0 ? 1 : 3;
+        } else {
+            row = dy > 0 ? 2 : 0;
+        }
+        if (this.aimRow.get() != row) {
+            this.aimRow.set(row);
+        }
+    }
+
+    /**
+     * The row the emplacement at this tile is facing, or {@code fallback}
+     * (the placement rotation) while it has not aimed at anything yet.
+     */
+    public static int aimRow(Level level, int tileX, int tileY, int fallback) {
+        ObjectEntity entity = level.entityManager.getObjectEntity(tileX, tileY);
+        if (!(entity instanceof VeteranTurretObjectEntity)) {
+            return fallback;
+        }
+        int row = ((VeteranTurretObjectEntity) entity).aimRow.get();
+        return row < 0 || row > 3 ? fallback : row;
     }
 
     @Override
@@ -72,6 +119,7 @@ public class VeteranTurretObjectEntity extends ObjectEntity {
             return;
         }
         this.nextFireTime = now + FIRE_INTERVAL_MS;
+        this.aimAt(target, this.tileX * 32 + 16, this.tileY * 32 + 16);
         this.markShot(now);
         float damage = BASE_DAMAGE * stairwaytoheaven.settlement.VeteranDefense.turretMultiplier(level);
         target.isServerHit(new GameDamage(damage), target.x, target.y, 0.0F, null);

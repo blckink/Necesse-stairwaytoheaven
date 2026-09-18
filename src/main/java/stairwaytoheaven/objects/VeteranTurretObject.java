@@ -93,7 +93,11 @@ public class VeteranTurretObject extends GameObject {
         GameLight light = level.getLightLevel(tileX, tileY);
         // Shots come every 200 ms: three 60 ms frames of muzzle flash, then idle.
         int frame = VeteranTurretObjectEntity.firingFrame(level, tileX, tileY, 60L);
-        int rotation = level.getObjectRotation(tileX, tileY) & 3;
+        // Facing follows the last target, not the placement rotation: the
+        // turret turns towards what it shoots. Until it has seen anything it
+        // keeps the rotation it was built with.
+        int rotation = VeteranTurretObjectEntity.aimRow(level, tileX, tileY,
+                level.getObjectRotation(tileX, tileY) & 3);
         int row = this.texture.getHeight() >= 4 * FRAME_H ? rotation : 0;
         int drawX = camera.getTileDrawX(tileX) - (FRAME_W - 32) / 2;
         int drawY = camera.getTileDrawY(tileY) - (FRAME_H - 32);

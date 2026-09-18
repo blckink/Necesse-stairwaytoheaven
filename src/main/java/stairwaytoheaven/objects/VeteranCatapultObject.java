@@ -148,7 +148,10 @@ public class VeteranCatapultObject extends GameObject {
         }
         GameLight light = level.getLightLevel(tileX + 1, tileY + 1);
         int frame = VeteranTurretObjectEntity.firingFrame(level, tileX, tileY, FRAME_MS);
-        int row = this.row(level.getObjectRotation(tileX, tileY));
+        // The arm swings towards the target it last threw at; the placement
+        // rotation is only the starting pose.
+        int row = this.row(VeteranTurretObjectEntity.aimRow(level, tileX, tileY,
+                level.getObjectRotation(tileX, tileY) & 3));
         int drawX = camera.getTileDrawX(tileX);
         int drawY = camera.getTileDrawY(tileY) - (FRAME_H - SIZE * 32);
         final TextureDrawOptionsEnd options = this.texture.initDraw()
