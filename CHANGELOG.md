@@ -59,7 +59,11 @@ All notable changes to this project are documented here. Format loosely follows
   and vanilla's crypt-bat sheet, so it costs no art either.
   He travels to any settlement that keeps a coffin — vanilla's `sarcophagus`,
   or the Twilight Merchant's `twilightsarcophagus` or `coffinbed`, which are
-  the two a player can actually buy (`SkyArrivals.COFFIN`) — and
+  the two a player can actually buy (`SkyArrivals.COFFIN`) — and, alone among
+  the mod's arrivals, he does not also wait for the world's Sky Warden: that
+  shared precondition exists so a stranger from the SKY has a reason to know
+  the town, and he was never up there. `SkyResident` gained a
+  `requiresWarden` flag, default true, false for him only. He is
   is placed by worldgen nowhere. Zero new art: vanilla's own `mobs/icons/vampire`
   is his settlement face, `items/healthpotion` stands in for the Blood Vial and
   `buffs/bleeding` for the fever (all three in `docs/VANILLA_ASSET_MAP.md`).
