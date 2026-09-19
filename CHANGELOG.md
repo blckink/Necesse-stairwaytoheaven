@@ -57,7 +57,9 @@ All notable changes to this project are documented here. Format loosely follows
   **One drained animal in six gets up again** as a `bloodthrall` — a hostile
   `CryptBatMob` subclass with its own loot (Blood Vial x1-2, leather at 35%)
   and vanilla's crypt-bat sheet, so it costs no art either.
-  He travels to any settlement that keeps a coffin (`SkyArrivals.COFFIN`) and
+  He travels to any settlement that keeps a coffin — vanilla's `sarcophagus`,
+  or the Twilight Merchant's `twilightsarcophagus` or `coffinbed`, which are
+  the two a player can actually buy (`SkyArrivals.COFFIN`) — and
   is placed by worldgen nowhere. Zero new art: vanilla's own `mobs/icons/vampire`
   is his settlement face, `items/healthpotion` stands in for the Blood Vial and
   `buffs/bleeding` for the fever (all three in `docs/VANILLA_ASSET_MAP.md`).

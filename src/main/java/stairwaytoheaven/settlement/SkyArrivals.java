@@ -96,12 +96,13 @@ public final class SkyArrivals {
     public static final Gate GRAVEYARD = data -> countObjects(data, graveObjects(), 3) >= 3;
 
     /**
-     * Dorian arrives once the settlement keeps a coffin.
+     * Dorian arrives once the settlement keeps a coffin — vanilla's
+     * sarcophagus or either of the Twilight Merchant's two.
      *
-     * One sarcophagus, not three: it is a single expensive object rather than a
-     * row of headstones, and a player who has stood one up has said plainly
-     * enough what kind of town this is. It is also the thing he will sleep in
-     * at dawn, which is the story reason he comes at all.
+     * One coffin, not three: it is a single expensive object rather than a row
+     * of headstones, and a player who has stood one up has said plainly enough
+     * what kind of town this is. It is also the thing he would like to sleep
+     * in, which is the story reason he comes at all.
      */
     public static final Gate COFFIN = data -> countObjects(data, coffinObjects(), 1) >= 1;
 
@@ -139,16 +140,39 @@ public final class SkyArrivals {
             "gravestone1", "gravestone2", "cryptgravestone1", "cryptgravestone2", "sarcophagus",
     };
 
-    /** The coffin {@link #COFFIN} looks for, resolved the same way. */
+    /** The coffins {@link #COFFIN} looks for, resolved the same way. */
     private static int[] coffinObjectIDs;
+
+    /**
+     * Every coffin a player can actually own, not just vanilla's.
+     *
+     * <p>Vanilla registers exactly one, {@code sarcophagus}, and it is not in
+     * any vanilla shop — the coffin a player is overwhelmingly likely to have
+     * standing in their town is one of the Twilight Merchant's two
+     * ({@code TwilightWares}): the {@code twilightsarcophagus} and the
+     * {@code coffinbed}, which is a real bed shaped like a coffin and the one
+     * Dorian would actually like to be assigned. Listing only vanilla's here
+     * was a gate that read "build a coffin" and meant "build the one coffin the
+     * game does not sell you".
+     *
+     * <p>Unregistered IDs resolve to a negative number and {@link #countObjects}
+     * skips those, so a decor piece the build left out is simply not counted.
+     */
+    private static final String[] COFFIN_OBJECT_IDS = {
+            "sarcophagus", "twilightsarcophagus", "coffinbed",
+    };
 
     private static int[] coffinObjects() {
         int[] cached = coffinObjectIDs;
         if (cached != null) {
             return cached;
         }
-        coffinObjectIDs = new int[]{ObjectRegistry.getObjectID("sarcophagus")};
-        return coffinObjectIDs;
+        int[] ids = new int[COFFIN_OBJECT_IDS.length];
+        for (int i = 0; i < ids.length; i++) {
+            ids[i] = ObjectRegistry.getObjectID(COFFIN_OBJECT_IDS[i]);
+        }
+        coffinObjectIDs = ids;
+        return ids;
     }
 
     private static int[] graveObjects() {
