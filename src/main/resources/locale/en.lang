@@ -147,6 +147,7 @@ skyseraphsapling=Sky Seraph Sapling
 cloudtree=Cloud Tree
 cloudsapling=Cloud Tree Sapling
 [itemcategory]
+salon=Salon
 // sub-category of objects>furniture holding the Skywatch family
 skywatch=Skywatch
 
@@ -1176,6 +1177,12 @@ shrunkenheadtrophy=Shrunken Head Trophy
 twilightcauldron=Twilight Cauldron
 sandwormtombstone=Sandworm Tombstone
 electricchair=Electric Chair
+salonchair=Salon Chair
+salonmirror=Lit Salon Mirror
+salonsign=Salon Shop Sign
+saloncashregister=Salon Cash Register
+salonproducts=Salon Products Tray
+salonbarberpole=Barber Pole
 
 [itemcategory]
 twilight=Twilight

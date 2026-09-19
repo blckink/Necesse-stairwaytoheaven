@@ -147,6 +147,7 @@ skyseraphsapling=Himmelsseraph-Setzling
 cloudtree=Wolkenbaum
 cloudsapling=Wolkenbaum-Setzling
 [itemcategory]
+salon=Friseursalon
 // sub-category of objects>furniture holding the Skywatch family
 skywatch=Himmelswacht
 
@@ -1177,6 +1178,12 @@ shrunkenheadtrophy=Schrumpfkopf-Trophäe
 twilightcauldron=Zwielicht-Hexenkessel
 sandwormtombstone=Sandwurm-Grabstein
 electricchair=Elektrischer Stuhl
+salonchair=Friseurstuhl
+salonmirror=Beleuchteter Friseurspiegel
+salonsign=Friseurladen-Schild
+saloncashregister=Friseurladen-Kasse
+salonproducts=Pflegemittel-Tablett
+salonbarberpole=Barbier-Säule
 
 [itemcategory]
 twilight=Zwielicht

@@ -62,6 +62,9 @@ public class StairwayToHeavenMod {
         SkyMobs.register();
         SkyItems.register();
         TwilightWares.register();
+        // The Stylist's salon shop. Must run while the mob registry is still
+        // open — it puts a subclass behind the "stylisthuman" string ID.
+        SalonWares.register();
         stairwaytoheaven.realms.eden.EdenRealm.register();
         stairwaytoheaven.realms.steinfeld.SteinfeldRealm.register();
         stairwaytoheaven.realms.crooked.CrookedRealm.register();
