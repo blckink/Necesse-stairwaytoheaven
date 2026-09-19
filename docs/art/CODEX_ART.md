@@ -48,6 +48,30 @@ dark, gothic, Beetlejuice/Addams — but still readable on a dark floor.
 
 ## Lessons (newest first — append, do not rewrite)
 
+- 2026-09-19 · **Replacing an asset: hand over the old one AND say what not to
+  inherit.** The catapult→cannon brief passed the old sheet as `ref1.png` with
+  "this is the asset we are REPLACING — use it only for camera, scale and
+  palette; draw NO catapult: no throwing arm, no rope winding, no bucket".
+  All three directions came back as real cannons on the first try. Without that
+  sentence Codex inherits the silhouette, same failure as the woodfence mask.
+- 2026-09-19 · **Say the size as a number.** "must span ≥ 90 % of the cell
+  width" plus "the machine in image 1 is too small, draw it chunkier" moved the
+  art from 65–84 px to 86–92 px of 96 in one round. A 3x3 object whose art only
+  fills 2x2 is what the player notices first.
+- 2026-09-19 · **`slice_strip.py` leaves a white fringe.** It only keys out
+  pixels above 225 in every channel, so the antialiased edge of a generated
+  image survives as a halo on dark ground. A blanket threshold cannot fix it —
+  gun smoke is near-white too. What works: drop a near-white pixel when it has
+  **≥ 3 empty neighbours AND ≤ 2 near-white neighbours**. A smoke body has many
+  white neighbours and survives; the contour does not. 424 px went, the smoke
+  stayed whole.
+- 2026-09-19 · **`palette_reduce.py` after every `slice_strip`.** The NEAREST
+  downscale of an AI image carried **34 299** colours into the sheet;
+  `--colours 38` brought it to 39 without losing the brass bands or the
+  muzzle flash.
+- 2026-09-19 · **Mirror a row cell by cell, never as a whole row.** Flipping the
+  full 384 px row reverses the frame order — `build/veteran_art2/assemble.py`
+  does exactly that.
 - 2026-09-16 · **Floors: one pattern with a 32 px period.** The gloomwood weave
   and the nimbus herringbone passed first time because every cell shares the
   same structure; a second gloomwood round with 24 different cells failed.

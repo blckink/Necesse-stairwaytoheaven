@@ -1213,13 +1213,13 @@ warveterantalk5=Keep your ammo stocked and I'll make sure it's put to use.
 veteranbarricade=Barricade
 barbedwirefence=Barbed Wire Fence
 veteranturret=Auto Turret
-veterancatapult=Catapult
+veterancatapult=Cannon
 
 [item]
 veteranbarricade=Barricade
 barbedwirefence=Barbed Wire Fence
 veteranturret=Auto Turret
-veterancatapult=Catapult
+veterancatapult=Cannon
 
 [misc]
 swhveteranoption=Defense upgrades (Level <level>/5)
