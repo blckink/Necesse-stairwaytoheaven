@@ -48,6 +48,14 @@ dark, gothic, Beetlejuice/Addams — but still readable on a dark floor.
 
 ## Lessons (newest first — append, do not rewrite)
 
+- 2026-09-19 · **`convert_reference.py --bg` keys by colour, not by
+  connectivity.** Codex draws the specular glint of a metal ball near-white, so
+  keying the white background out took the glint with it — 131 instead of 156
+  opaque px, a bite out of the upper left. Lowering `--tol` does **not** help
+  (20 and 40 gave the same result as 90): the glint simply *is* the key colour.
+  What works is a flood fill from the image border — the background is
+  connected, a glint enclosed by dark ball pixels is not. Applies to any round
+  metal object with a highlight.
 - 2026-09-19 · **Replacing an asset: hand over the old one AND say what not to
   inherit.** The catapult→cannon brief passed the old sheet as `ref1.png` with
   "this is the asset we are REPLACING — use it only for camera, scale and
