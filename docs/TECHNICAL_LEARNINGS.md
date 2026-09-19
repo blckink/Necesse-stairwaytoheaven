@@ -3927,3 +3927,63 @@ that is the fix, not a defect: `splat_check.py --like <shipped>` will report
 the alpha change, and the answer is to ship the supplied file verbatim.
 Compare it against the vanilla template instead (the remaining differences
 against vanilla are the soft edge pixels, a few hundred per sheet).
+
+## Einem Vanilla-NPC Ware ins Regal legen (2026-09-19)
+
+**VERIFIED [jar].** Der Shop eines `HumanShop` laesst sich nur im Konstruktor
+befuellen. `HumanShop.init()` ruft `ShopManager.init()`, und das ruft
+`closeRegistry()` auf `sellingShop` und `buyingShop`
+(`ShopManager.java:167/168`); jedes spaetere `addSellingItem` wirft
+`RegistryClosedException`. Ein Lauscher auf `MobInteractEvent` — der
+naheliegende "wenn man mit ihm spricht"-Haken — kommt also zu spaet.
+
+Die Artikel-IDs waeren dabei kein Hindernis: `ShopContainer` loest gekaufte
+Posten ueber `serverShopManager` auf, also nur serverseitig; der Client
+bekommt fertige `NetworkSellingShopItem`. Ein rein serverseitiger Nachtrag
+scheitert trotzdem an der geschlossenen Registry.
+
+**`MobRegistry` ist die einzige grosse Registry ohne oeffentliches
+`replace…`** (`ItemRegistry`, `ObjectRegistry`, `TileRegistry`,
+`SettlerRegistry`, `SettlerDialogueRegistry` haben es). `MobRegistry.instance`
+ist aber `public static final`, also geht `GameRegistry.replaceObj` per
+Reflection, solange die Registry offen ist (also aus `init()`).
+
+**Zwei Fallen dabei:**
+
+1. **`createSpawnItem` muss beim Ersetzen `false` sein.**
+   `MobRegistry.onRegister` laeuft auf dem Ersetzungspfad erneut und wuerde
+   `<id>spawnitem` ein zweites Mal registrieren — doppelte Item-ID, der Mod
+   laedt nicht mehr.
+2. **Die Mob-String-ID nicht wechseln.** `Mob.getStringID()` liest
+   `this.idData`, gefuellt von `MobRegistry.instance.applyIDData(getClass(), …)`;
+   `ClassedGameRegistry.onRegister` traegt `aClass -> id` auch beim Ersetzen in
+   die `classToIDMap` ein (`ClassedGameRegistry.java:22`), die Unterklasse
+   liefert also weiter die alte String-ID. Das ist entscheidend, weil Vanilla
+   seine NPCs ueber den String sucht: fuer die Stylistin an fuenf Stellen
+   (`PirateVillageBossPreset`, `VillageHouse5Preset`, `StylistSettler`,
+   `FreeStylistJournalChallenge`, `RescueSettlerRewardPerk`). Ein neuer
+   Mob-String ueber `SettlerRegistry.replaceSettler` waere oeffentliche API,
+   liesse aber vier dieser fuenf ins Leere zeigen.
+
+**Persoenlichkeiten taugen nicht als Ersatzweg.**
+`HumanMob.setupPersonalities` wuerfelt 2–5 Stueck aus dem gefilterten Topf; eine
+eigene Persoenlichkeit mit Whitelist auf den Siedler haette den Laden nur
+manchmal gegeben.
+
+## Wandstuecke: Zeilenreihenfolge und Anker gegen Vanilla messen (2026-09-19)
+
+**VERIFIED [jar].** Bei `WallTorchObject` ist **Spalte 0 der eingeschaltete
+Zustand** (`sprite(active ? 0 : 1, sprite, 32)`, `WallTorchObject.java:122`).
+Die vier Zeilen sind Anbau-Ausrichtungen, und ihre Reihenfolge ist nicht frei:
+gemessen an `objects/walllantern.png` haengt Zeile 0 an der Wand **oben**
+(Masse an der Zellenoberkante), Zeile 1 ist **buendig rechts**, Zeile 3
+**buendig links**. Ein Blatt mit vertauschten Zeilen laeuft durch jeden
+Formatcheck und haengt im Spiel falsch herum — `tools/rotation_preview.py`
+zeigt es, aber nur wenn das Stueck in seiner Job-Liste steht (die ist fest
+verdrahtet).
+
+Dasselbe fuer `PaintingObject` (32x128, eine 32x32-Zelle je Wandrichtung),
+gemessen an `paintingabstract`/`paintingapple`/`paintingbroken`: rot0 unten
+buendig und waagerecht mittig, rot1 **buendig an der rechten** Zellkante, rot2
+mittig, rot3 **buendig an der linken**. Vanillas Seitenansichten sind dabei nur
+etwa 6 px breit.

@@ -206,6 +206,27 @@ ein Spieler, der nie handelt, sie trotzdem findet.
 
 ---
 
+### Stylistin (Vanilla-NPC) — der Friseurladen ⭐ **NEU**
+
+Die Vanilla-Stylistin verkauft jetzt zusätzlich die Einrichtung für ihren
+eigenen Laden. Keins der sechs Stücke hat ein Rezept — sie ist die einzige
+Quelle. Preise sinken mit der Zufriedenheit der Siedlung (wie bei ihrer
+Kleidung).
+
+| Stück | Preis (gut → schlecht) | was es ist |
+|---|---|---|
+| Friseurstuhl | 900 → 1400 | hydraulischer Salonsessel, vier Richtungen, ein Siedler kann darin sitzen |
+| Beleuchteter Friseurspiegel | 700 → 1100 | hängt an der Wand, Birnenkranz, leuchtet, zählt als Lichtquelle |
+| Friseurladen-Schild | 600 → 950 | wird wie eine Lampe an die Wand gehängt, an/aus, leuchtet rosé |
+| Friseurladen-Kasse | 800 → 1250 | Messingkasse für den Tisch, vier Richtungen |
+| Pflegemittel-Tablett | 250 → 400 | Flaschen, Schere, Kamm, Bürste — Tischdeko, vier Richtungen |
+| Barbier-Säule | 450 → 700 | rot-weiß-blaue Wendel, steht auf dem Boden, leuchtet leicht |
+
+**Alle sechs erhöhen die Zufriedenheit der Siedler** (Vanillas
+`HappinessObject`, 40–50 Punkte je Stück — dieselbe Mechanik wie hinter
+Schafsstuhl und Holzente). Spiegel und Schild zählen zusätzlich als Licht für
+die Raumwertung.
+
 ## 4. Alle Quests — 18 registriert, 17 aktiv
 
 ### Skyreach — „The Warden's Call"
