@@ -142,7 +142,7 @@ def anchors(path):
     return out
 
 
-def fit(im, target_w, ref, band=True):
+def fit(im, target_w, ref, band=True, use_ref=False):
     wide = widest(im, band)
     if not wide:
         return im, 1.0
@@ -160,8 +160,15 @@ def fit(im, target_w, ref, band=True):
         th = max(1, int(round(crop.height * scale / 2.0)))
         small = half_res(crop, tw, th)
         big = small.resize((tw * 2, th * 2), Image.NEAREST)
-        # Vanilla's anchor for this very cell; its own box only as fallback.
-        cx, by = ref.get((row, col), ((bb[0] + bb[2]) / 2.0, bb[3]))
+        # Default: leave the cell where it was drawn. These masks hang hair
+        # and hoods BELOW the jaw, so their content bottom is not the chin --
+        # measured 2026-09-19, five pixels under ironhelmet's in the back and
+        # side rows but only one in the front row. Pinning the content bottom
+        # to vanilla's would lift the back views off the neck and make the
+        # head jump as the player turns. Vanilla's anchor is worth having
+        # only when the content is being shrunk and has to be re-seated.
+        cx, by = (ref.get((row, col), ((bb[0] + bb[2]) / 2.0, bb[3]))
+                  if use_ref else ((bb[0] + bb[2]) / 2.0, bb[3]))
         px = int(round(cx - big.width / 2.0)) & ~1
         py = int(round(by - big.height)) & ~1
         px = max(0, min(px, CELL_W - big.width))
@@ -178,6 +185,8 @@ def main():
     ap.add_argument("--target-width", type=int, default=DEFAULT_TARGET_W)
     ap.add_argument("--ref", default=VANILLA_REF, help="vanilla head sheet to take anchors from")
     ap.add_argument("--check", action="store_true", help="report only, write nothing")
+    ap.add_argument("--anchor-vanilla", action="store_true",
+                    help="re-seat each cell on ironhelmet's chin line (only sensible when shrinking)")
     ap.add_argument("--whole-box", action="store_true",
                     help="take the factor off the whole content box instead of the face band")
     args = ap.parse_args()
@@ -196,7 +205,7 @@ def main():
             print("%-28s %5.1f%% off-grid, box %2d px, face %2d px"
                   % (name, 100 * off_grid(im), widest(im), widest(im, True)))
             continue
-        out, scale = fit(im, args.target_width, ref, not args.whole_box)
+        out, scale = fit(im, args.target_width, ref, not args.whole_box, args.anchor_vanilla)
         dest = args.out or path
         out.save(dest)
         print("%-28s x%.2f -> %5.1f%% off-grid, box %2d px, face %2d px"
