@@ -21,17 +21,24 @@ import necesse.level.maps.multiTile.MultiTile;
 import necesse.level.maps.multiTile.StaticMultiTile;
 
 /**
- * The War Veteran's Catapult ({@code veterancatapult}), a real 3x3 multi-tile
+ * The War Veteran's Cannon ({@code veterancatapult}), a real 3x3 multi-tile
  * object built the way vanilla's {@code StaticMultiObject} /
  * {@code BlacksmithStatueObject} are: nine registered pieces sharing one ID
  * array, the top-left piece is the master. Only the master carries the
  * firing entity and draws the sprite; the other eight only block.
  *
+ * <p>The machine was a catapult until 2026-09-19 and is now drawn as a wheeled
+ * field cannon (the player: a cannon "passt besser zu restlichen Spiel"). Only
+ * the art changed — the registry ID, the class name and the entity stay
+ * {@code catapult}, because renaming the ID would lose the object out of every
+ * existing save.
+ *
  * <p>Sheet {@code objects/veterancatapult.png}: 4 rows (rotation: 0 up/north,
- * 1 right/east, 2 down/south, 3 left/west) x 4 columns (0 idle, 1-3 firing),
- * each cell 96x128 — three tiles wide, the top 32 px overhang the footprint.
- * The footprint is square, so {@link StaticMultiTile} keeps it unrotated and
- * only the drawn row follows the placement rotation.
+ * 1 right/east, 2 down/south, 3 left/west) x 4 columns (0 idle, 1-3 firing:
+ * muzzle flash, smoke cloud, trailing wisps), each cell 96x128 — three tiles
+ * wide, the top 32 px overhang the footprint. The footprint is square, so
+ * {@link StaticMultiTile} keeps it unrotated and only the drawn row follows
+ * the placement rotation.
  */
 public class VeteranCatapultObject extends GameObject {
 
@@ -48,13 +55,24 @@ public class VeteranCatapultObject extends GameObject {
 
     /**
      * The machine as drawn, in footprint pixels (0,0 = top-left tile of the
-     * 3x3). Measured off the idle frame: the body covers x 15..79, y 27..94 of
-     * the 96x96 footprint, i.e. the bottom two tile rows. The top row is bare
-     * art, so the box starts at y=32 and leaves it open — blocking all nine
-     * tiles would put a wall where the player sees floor. Vanilla insets the
-     * same way ({@code BlacksmithStatueObject} blocks 80x54 of its 96x64).
+     * 3x3). Re-measured off the cannon's four idle frames on 2026-09-19; the
+     * old catapult numbers (x 15..79) belonged to a narrower machine.
+     *
+     * <p>Idle extents, footprint coordinates (cell y minus the 32 px overhang):
+     * north x 4..91 y -9..94, east x 5..91 y 37..94, south x 2..94 y -8..94,
+     * west x 5..91 y 37..94. The box has to serve all four at once: the
+     * footprint is square, {@link StaticMultiTile} keeps it unrotated, and
+     * {@code GameObject} reads the rectangle once in the constructor, so it
+     * cannot differ per rotation.
+     *
+     * <p>Hence x 5..91 — the width the cannon actually has in every rotation,
+     * 14 px wider than the catapult's box. The top tile row stays open even
+     * though north and south now draw into it: east and west have nothing
+     * above y=37, and an invisible wall in front of visible floor reads worse
+     * than a barrel the player can walk under. Vanilla insets the same way
+     * ({@code BlacksmithStatueObject} blocks 80x54 of its 96x64).
      */
-    private static final Rectangle FULL_COLLISION = new Rectangle(12, 32, 72, 64);
+    private static final Rectangle FULL_COLLISION = new Rectangle(5, 32, 86, 64);
 
     /**
      * This piece's share of {@link #FULL_COLLISION}, in its own tile's

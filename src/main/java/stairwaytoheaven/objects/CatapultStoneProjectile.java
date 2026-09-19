@@ -16,7 +16,10 @@ import necesse.level.maps.Level;
 import necesse.level.maps.light.GameLight;
 
 /**
- * Purely cosmetic lobbed stone fired by {@link VeteranCatapultObjectEntity}.
+ * Purely cosmetic cannonball fired by {@link VeteranCatapultObjectEntity}.
+ * It was a lobbed stone until 2026-09-19, when the machine became a cannon;
+ * only {@code projectiles/catapultstone.png} changed, the ID stays so that
+ * existing saves keep resolving it.
  * Built on vanilla's {@link CannonBallProjectile}, which already gives the
  * exact shape a lobbed shot needs: {@code heightBasedOnDistance} arcs it up
  * and back down over its flight, and {@code addDrawables} spins
