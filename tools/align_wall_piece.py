@@ -3,26 +3,34 @@
 
 WOZU. `LargePaintingObject` schneidet aus dem 64x256-Blatt vier feste Felder
 und zeichnet sie mit festen Versaetzen. Wer die Kunst frei ins Band malt,
-haengt sie im Spiel neben die Wand: `pos(drawX, drawY-64)` bedeutet, dass
-Inhalt oberhalb von Band-y 16 ueber die Wandkrone hinausragt und auf dem
-Boden dahinter landet -- "halb auf Wand, halb auf Decke".
+haengt sie im Spiel neben die Wand: Band 0 wird bei `pos(drawX, drawY-64)`
+gezeichnet, Inhalt oberhalb von Band-y 32 liegt also nicht mehr auf der
+Wandvorderseite -- "halb auf Wand, halb auf Decke".
 
-DIE MASSE, gemessen an paintinglargeabstract/castle/ship/flatgrass:
+WIE BREIT DIE WAND WIRKLICH IST. Eine Wandkachel zeichnet drei 16er-Reihen
+ab `drawY-16`: die oberste ist die *Oberseite* des Blocks (die Flaeche, die
+in der Schraegsicht nach oben zeigt), die zwei darunter sind die
+*Vorderseite*. Angeschlagen wird nur auf der Vorderseite, und die ist genau
+32 px hoch: `PaintingObject` zeichnet fuer Rotation 2 eine 32x32-Zelle bei
+`drawY-32`, und Vanillas einkachelige Gemaelde fuellen diese Zelle von y2 bis
+y32 randvoll. Wer hoeher baut, klebt auf der Oberseite -- das sieht aus, als
+haenge das Stueck halb an der Decke. Ein Buecherregal darf das, ein Bild nie.
 
-    Band 0 (y 0..64)    Vorderseite, Wand im Norden   Inhalt y 30..60
+DIE MASSE, gemessen an paintinglargeabstract/castle/ship/flatgrass/worldmap:
+
+    Band 0 (y 0..64)    Vorderseite, Wand im Norden   Inhalt y 34..62
     Band 1 (y 64..128)  Seitenblick Ost               buendig rechts, Mitte y32
-    Band 2 (y 128..192) Rueckseite, Wand im Sueden    Inhalt y 24..56
+    Band 2 (y 128..192) Rueckseite, Wand im Sueden    Inhalt y 28..56
     Band 3 (y 192..256) Seitenblick West              buendig links, Mitte y32
 
-Die Wandflaeche selbst ist 48 px hoch (`WallObject` zeichnet drei 16er-Reihen
-ab `drawY-16`), Vanilla nutzt davon nur die unteren 30. Fuer hohe Stuecke --
-eine Standuhr ist keine Postkarte -- darf `--hoehe` bis 46 gehen; darueber
-steht das Stueck wieder auf dem Boden hinter der Wand. Skaliert wird immer
-gleichmaessig, das Blatt wird also nicht verzerrt.
+Band 0 wird bei `drawY-64` gezeichnet, die Wandvorderseite liegt also bei
+Band-y 32..64. Deshalb der Deckel: `--hoehe` darf 30 nicht ueberschreiten,
+sonst ragt das Stueck ueber die Kante von Wand zu Oberseite. Skaliert wird
+immer gleichmaessig, das Blatt wird also nicht verzerrt.
 
 Aufruf:
     PYTHONPATH=/home/blackoffset/dev/pylib python3 tools/align_wall_piece.py \
-        hauntedwallclock --hoehe 42
+        walleye hauntedwallclock magicmirror
 """
 import argparse
 import os
@@ -32,9 +40,9 @@ from PIL import Image
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PAINTINGS = os.path.join(REPO, "src", "main", "resources", "objects", "paintings")
 
-VANILLA_HEIGHT = 30     # hoechstes Vanilla-Gemaelde (castle), y30..60
-WALL_FACE = 46          # was die Wandflaeche noch traegt
-FRONT_BOTTOM = 60       # Unterkante Band 0 bei Vanilla
+VANILLA_HEIGHT = 28     # Vanillas grosse Gemaelde: y34..62
+WALL_FACE = 30          # mehr passt nicht auf die Vorderseite (Band-y 32..64)
+FRONT_BOTTOM = 62       # Unterkante Band 0 bei Vanilla
 BACK_BOTTOM = 56        # Unterkante Band 2 bei Vanilla
 CENTRE_X = 31           # waagerechte Mitte bei Vanilla (nicht 32)
 
@@ -97,12 +105,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("ids", nargs="+", help="Objekt-IDs unter objects/paintings/")
     ap.add_argument("--hoehe", type=int, default=VANILLA_HEIGHT,
-                    help="Hoehe der Vorderansicht in px (Vanilla 30, hoechstens %d)" % WALL_FACE)
+                    help="Hoehe der Vorderansicht in px (Vanilla 28, hoechstens %d)" % WALL_FACE)
     ap.add_argument("--probe", action="store_true", help="nur rechnen, nichts schreiben")
     args = ap.parse_args()
     if args.hoehe > WALL_FACE:
-        raise SystemExit("--hoehe %d ragt ueber die Wandkrone (hoechstens %d)"
-                         % (args.hoehe, WALL_FACE))
+        raise SystemExit("--hoehe %d ragt ueber die Kante von Vorderseite zu "
+                         "Oberseite (hoechstens %d)" % (args.hoehe, WALL_FACE))
 
     for oid in args.ids:
         path = os.path.join(PAINTINGS, oid + ".png")
