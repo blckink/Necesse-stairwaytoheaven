@@ -52,7 +52,8 @@ public final class TwilightWares {
     public static final String[] DECOR = {
             "coffinbed", "hauntedclock", "hangingtree", "skullcandelabra",
             "thingbox", "twilightcauldron", "sandwormtombstone", "electricchair",
-            "walleye", "hauntedwallclock", "magicmirror", "shrunkenheads", "twilightsarcophagus"
+            "walleye", "hauntedwallclock", "magicmirror", "shrunkenheads", "twilightsarcophagus",
+            "hauntedscarecrow"
     };
 
     /**
@@ -69,6 +70,7 @@ public final class TwilightWares {
     private static final Color MAP_COFFIN = new Color(52, 36, 44);
     private static final Color MAP_BONE = new Color(214, 206, 180);
     private static final Color MAP_SLIME = new Color(120, 200, 60);
+    private static final Color MAP_PUMPKIN = new Color(214, 106, 32);
 
     /**
      * The outfits and furniture whose sheets are actually in the jar. The
@@ -168,6 +170,17 @@ public final class TwilightWares {
         // duplicate stopped the whole mod from loading.
         if (AVAILABLE_DECOR.contains("twilightcauldron")) {
             ObjectRegistry.registerObject("twilightcauldron", new SkyDecoObject("twilightcauldron", 64, MAP_SLIME, null, CATEGORY), 20.0F, true);
+        }
+        // The scarecrow for the fields: one tile, and its eyes keep burning.
+        // The light is GameObject's own (lightLevel/lightHue/lightSat through
+        // SkyDecoObject.setLight): 100 is vanilla's CandlePedestalObject, a
+        // glow around the post rather than a torch's 150, and hue 25 at 0.9
+        // saturation is pumpkin orange. No collision, like the hanging tree —
+        // a scarecrow that blocks the tile would fight the farm it stands in.
+        if (AVAILABLE_DECOR.contains("hauntedscarecrow")) {
+            ObjectRegistry.registerObject("hauntedscarecrow",
+                    new SkyDecoObject("hauntedscarecrow", 32, MAP_PUMPKIN, null, CATEGORY)
+                            .setLight(100, 25.0F, 0.9F), 20.0F, true);
         }
         if (AVAILABLE_DECOR.contains("sandwormtombstone")) {
             ObjectRegistry.registerObject("sandwormtombstone",
