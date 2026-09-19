@@ -233,7 +233,12 @@ def main():
             ("wardencandelabra", streetlamp_strip("objects/wardencandelabra.png")),
             ("ghostlantern", streetlamp_strip("objects/ghostlantern.png")),
             ("skyironfencegate", gate_strip("objects/skyironfencegate.png")),
-            ("cloudmarblefencegate", gate_strip("objects/cloudmarblefencegate.png"))]
+            ("cloudmarblefencegate", gate_strip("objects/cloudmarblefencegate.png")),
+            # The Stylist's salon: the mirror rides vanilla's PaintingObject
+            # frame, so it answers "does it hang ON the wall"; the shop sign is
+            # a WallTorchObject like the lanterns above it.
+            ("salonmirror", painting_strip("objects/paintings/salonmirror.png")),
+            ("salonsign", wall_light_strip("objects/salonsign.png"))]
     for rel, anchor in sorted(ROTATION_ANCHORS.items()):
         jobs.append((os.path.basename(rel)[:-4], rotation_strip(rel, anchor)))
 

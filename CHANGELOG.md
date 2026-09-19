@@ -5,6 +5,32 @@ All notable changes to this project are documented here. Format loosely follows
 
 ## [Unreleased]
 
+### Added
+- **The Stylist runs a salon.** Her talk menu now stocks six pieces of shop
+  fit-out that match her trade: Friseurstuhl (`salonchair`, vanilla
+  `ChairObject`, four facings), beleuchteter Friseurspiegel (`salonmirror`,
+  `PaintingObject` on the wall face, one cell per wall direction, side views
+  narrow), beleuchtetes Ladenschild (`salonsign`, `WallTorchObject` — attaches
+  like a lamp, lit/unlit column, four attach orientations), Kasse
+  (`saloncashregister`) and Pflegemittel-Tablett (`salonproducts`), both
+  `TableDecorationObject` with four facings, and the Barbier-Säule
+  (`salonbarberpole`, floor-standing, glows). All six are `HappinessObject`,
+  so they raise settler happiness the way vanilla's Sheep Chair and Wooden
+  Duck do; mirror and sign also count as `lights`.
+  She is a vanilla NPC, so the wares had to be added in the mob's constructor
+  — `ShopManager.init()` closes both shop registries, which rules out every
+  later hook. `SalonWares.replaceVanillaStylist()` therefore puts
+  `SalonStylistMob extends StylistHumanMob` behind the **unchanged** mob string
+  ID `stylisthuman` (reflection over `GameRegistry.replaceObj`, with
+  `createSpawnItem=false` so `stylisthumanspawnitem` is not registered twice).
+  Keeping the string ID is what lets the five vanilla lookups by that string —
+  `PirateVillageBossPreset`, `VillageHouse5Preset`, `StylistSettler`,
+  `FreeStylistJournalChallenge`, `RescueSettlerRewardPerk` — keep working, and
+  what makes stylists in existing worlds load as salon owners.
+  Sheets and item icons drawn by Codex and reviewed at 1:1
+  (`docs/art/briefs/salon/`); `buildModJar` green against 1.3.2, not yet seen
+  in game, and the chair's base still wants a redraw.
+
 ### Changed
 - **Twilight Merchant outfits finished.** Nine outfits get redrawn chest,
   boots, sleeves and icons in their own costume (Codex, reviewed worn in all
