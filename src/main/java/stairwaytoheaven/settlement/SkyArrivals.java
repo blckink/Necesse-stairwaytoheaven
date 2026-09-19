@@ -96,6 +96,16 @@ public final class SkyArrivals {
     public static final Gate GRAVEYARD = data -> countObjects(data, graveObjects(), 3) >= 3;
 
     /**
+     * Dorian arrives once the settlement keeps a coffin.
+     *
+     * One sarcophagus, not three: it is a single expensive object rather than a
+     * row of headstones, and a player who has stood one up has said plainly
+     * enough what kind of town this is. It is also the thing he will sleep in
+     * at dawn, which is the story reason he comes at all.
+     */
+    public static final Gate COFFIN = data -> countObjects(data, coffinObjects(), 1) >= 1;
+
+    /**
      * §11: Caspern arrives once the Spirit Forge is built. The mod has no
      * Spirit Forge yet; the Aether Forge is its forge, it is already a
      * {@code SettlementWorkstationObject}, and it is the station Caspern would
@@ -128,6 +138,18 @@ public final class SkyArrivals {
     private static final String[] GRAVE_OBJECT_IDS = {
             "gravestone1", "gravestone2", "cryptgravestone1", "cryptgravestone2", "sarcophagus",
     };
+
+    /** The coffin {@link #COFFIN} looks for, resolved the same way. */
+    private static int[] coffinObjectIDs;
+
+    private static int[] coffinObjects() {
+        int[] cached = coffinObjectIDs;
+        if (cached != null) {
+            return cached;
+        }
+        coffinObjectIDs = new int[]{ObjectRegistry.getObjectID("sarcophagus")};
+        return coffinObjectIDs;
+    }
 
     private static int[] graveObjects() {
         int[] cached = graveObjectIDs;

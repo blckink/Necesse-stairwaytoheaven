@@ -1234,3 +1234,35 @@ swhveteranoption=Defense upgrades (Level <level>/5)
 swhveteranintro=The settlement's defenses are at level <level> of <max>.\nNext tier needs: <req>.
 swhveterandoit=Hand over ammunition
 swhveteranmax=The defenses are already at their maximum level. Nothing more to hand over.
+
+[mob]
+vampiresettler=Dorian
+vampiresettlername=Dorian <name>, the Nightbound
+
+[item]
+bloodvial=Blood Vial
+
+[itemtooltip]
+bloodvialtip=Mob drop - drawn from something that was grazing an hour ago. Still warm, which is the part nobody mentions.
+
+[buff]
+bloodfever=Blood Fever
+
+[bufftooltip]
+bloodfevertip=Bitten in the night. Pale, slow, and off their food until it passes.
+
+[misc]
+vampiresettlertip=Travels to a settlement that keeps a coffin. Sleeps through the day and works the night; hunts wild animals outside the walls, never your livestock.
+vampiretalkpitch=You keep a coffin and no one in it. I find that either an invitation or an oversight, and I am hoping for the first.
+vampiretalk1=Your people work in the light and sleep in the dark. I have never understood the arrangement, but I keep the other half of it.
+vampiretalk2=There is a deer two fields over that has not noticed me yet. Give it an hour.
+vampiretalk3=I take nothing that wears your brand. That is not politeness. It is the agreement.
+vampiretalk4=Leave a vial out if you would rather I did not go looking. I am not proud.
+vampiredrained=...
+vampirebite=Forgive me. Nobody left anything out.
+swhdoctorcure=Treat the bitten (<price> coins)
+swhdoctorcured=They will be themselves by morning. Keep that one fed.
+vampireturned=That one is not finished. Stand back.
+
+[mob]
+bloodthrall=Blood Thrall

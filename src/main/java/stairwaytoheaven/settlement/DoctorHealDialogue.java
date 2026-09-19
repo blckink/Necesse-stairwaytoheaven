@@ -58,6 +58,20 @@ public class DoctorHealDialogue extends SettlerDialogue {
     /** Set once the fee has been taken, so the menu can say thank you. */
     protected boolean healedThisVisit;
 
+    /**
+     * The second service: treating residents the vampire has bitten.
+     *
+     * <p>It rides on the same form and the same fee rather than opening a
+     * screen of its own, and it treats EVERYONE on the level at once instead of
+     * asking the player to pick a patient — a settlement-wide bite is a
+     * settlement-wide problem, and a per-settler picker would be a second
+     * {@code TherapySlotsDialogue} for one debuff that wears off by itself in a
+     * day anyway.
+     */
+    protected EmptyCustomAction cureAction;
+    protected FormDialogueOption cureButton;
+    protected boolean curedThisVisit;
+
     /** Client-side reconstruction. Required by {@code SettlerDialogueRegistry}. */
     public DoctorHealDialogue(HumanMob mob) {
         super(mob);
@@ -93,6 +107,50 @@ public class DoctorHealDialogue extends SettlerDialogue {
                 DoctorHealDialogue.this.healedThisVisit = true;
             }
         });
+        this.cureAction = container.registerAction(new EmptyCustomAction() {
+            @Override
+            protected void run() {
+                if (DoctorHealDialogue.this.settlerMob.isServer()) {
+                    DoctorHealDialogue.this.runCure(container);
+                }
+                DoctorHealDialogue.this.curedThisVisit = true;
+            }
+        });
+    }
+
+    /**
+     * Take the fee and lift {@code bloodfever} off every settler on this level.
+     *
+     * <p>Server-side only, and it charges nothing if there is nobody to treat —
+     * the button is hidden in that case, but a client can send any action, so
+     * the decision is made here.
+     */
+    protected void runCure(ShopContainer container) {
+        if (!container.hasSettlerAccess) {
+            return;
+        }
+        PlayerMob player = container.client.playerMob;
+        if (player == null || player.getLevel() == null || !canPay(container)) {
+            return;
+        }
+        necesse.level.maps.Level level = this.settlerMob.getLevel();
+        if (level == null || !hasFeverPatients(level)) {
+            return;
+        }
+        player.getInv().main.removeItems(player.getLevel(), player,
+                necesse.engine.registries.ItemRegistry.getItem("coin"), this.price, "doctorfee");
+        level.entityManager.mobs.stream()
+                .filter(m -> m.isHuman && m.buffManager.hasBuff(
+                        stairwaytoheaven.mobs.BloodFeverBuff.ID))
+                .forEach(m -> m.buffManager.removeBuff(
+                        stairwaytoheaven.mobs.BloodFeverBuff.ID, true));
+    }
+
+    /** Whether anyone on this level is carrying the bite. */
+    protected static boolean hasFeverPatients(necesse.level.maps.Level level) {
+        return level != null && level.entityManager.mobs.stream()
+                .anyMatch(m -> m.isHuman && m.buffManager.hasBuff(
+                        stairwaytoheaven.mobs.BloodFeverBuff.ID));
     }
 
     /**
@@ -174,6 +232,7 @@ public class DoctorHealDialogue extends SettlerDialogue {
                 new LocalMessage("misc", "swhdoctoroption", "price", Integer.toString(this.price)),
                 () -> {
                     this.healedThisVisit = false;
+                    this.curedThisVisit = false;
                     this.buildHealForm(container, containerForm);
                     containerForm.makeCurrent(this.healForm);
                 });
@@ -185,7 +244,10 @@ public class DoctorHealDialogue extends SettlerDialogue {
         this.healForm.reset(container.humanShop, true, container.romanceLevel,
                 (contentBox, flow) -> {
                     Runnable chatBubble = DialogueForm.startChatBubble(contentBox, flow);
-                    if (healed) {
+                    if (this.curedThisVisit) {
+                        DialogueForm.addText(contentBox, flow,
+                                new LocalMessage("misc", "swhdoctorcured"), true);
+                    } else if (healed) {
                         DialogueForm.addText(contentBox, flow,
                                 new LocalMessage("misc", "swhdoctordone"), true);
                     } else if (!this.needsHealing(container)) {
@@ -206,6 +268,16 @@ public class DoctorHealDialogue extends SettlerDialogue {
                         this.buildHealForm(container, containerForm);
                     });
             this.updateHealButton(container);
+        }
+        this.cureButton = null;
+        if (!this.curedThisVisit && hasFeverPatients(this.settlerMob.getLevel())) {
+            this.cureButton = this.healForm.addDialogueOption(
+                    new LocalMessage("misc", "swhdoctorcure", "price", Integer.toString(this.price)),
+                    () -> {
+                        this.cureAction.runAndSend();
+                        this.buildHealForm(container, containerForm);
+                    });
+            this.cureButton.setActive(this.canPay(container));
         }
         this.healForm.addDialogueOption(new LocalMessage("ui", "backbutton"),
                 () -> containerForm.makeCurrent(containerForm.dialogueForm));

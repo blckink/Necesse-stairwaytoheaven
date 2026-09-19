@@ -823,7 +823,12 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         // profession quietly becomes decoration.
         for (String mobID : new String[]{"skywarden", "wardensettler",
                 "magpiesettler", "haldasettler", "ossiansettler",
-                "eveleensettler", "mortimersettler", "caspernsettler", "eleanorsettler"}) {
+                "eveleensettler", "mortimersettler", "caspernsettler", "eleanorsettler",
+                // The nocturnal one. His schedule is four overrides deep
+                // (VampireSettlerMob), and none of them would stop a broken
+                // settler registration from shipping -- the recruit page is
+                // still the only way he ever moves in.
+                "vampiresettler"}) {
             necesse.entity.mobs.Mob probe = necesse.engine.registries.MobRegistry.getMob(mobID, level);
             String settlerName = "NOT A HUMAN";
             String recruitPrice = "n/a";
@@ -888,7 +893,12 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         // on our type at all.
         for (String settlerID : new String[]{"wardensettler",
                 "magpiesettler", "haldasettler", "ossiansettler",
-                "eveleensettler", "mortimersettler", "caspernsettler", "eleanorsettler"}) {
+                "eveleensettler", "mortimersettler", "caspernsettler", "eleanorsettler",
+                // The nocturnal one. His schedule is four overrides deep
+                // (VampireSettlerMob), and none of them would stop a broken
+                // settler registration from shipping -- the recruit page is
+                // still the only way he ever moves in.
+                "vampiresettler"}) {
             necesse.level.maps.levelData.settlementData.settler.Settler s =
                     necesse.engine.registries.SettlerRegistry.getSettler(settlerID);
             String arrival;

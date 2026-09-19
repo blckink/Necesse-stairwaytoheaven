@@ -412,6 +412,19 @@ echo "--- verifying Steinfeld has an inhabitant and the resident chains exist --
 grep -qE "Loaded mods:.*Stairway to Heaven|Stairway to Heaven" "$LOG1" \
     || { echo "FAIL: the mod did not load (SkySettlers.assertWired would crash the boot on a settler drift)"; STATUS=1; }
 
+# The vampire. His whole character is four overrides of vanilla's day/night
+# decisions, but NONE of that matters if the recruit page is dead -- he is the
+# one resident with no worldgen seat at all, so arriving as a visitor and being
+# recruited is his only way into a game. Assert the live wiring the same way the
+# Warden's is asserted: settler type resolved from the mob, price present.
+grep -qE "recruit check: vampiresettler settler=SkyResident price=coinx11000" "$LOG1" \
+    || { echo "FAIL: the vampire settler is not wired for recruitment"; STATUS=1; }
+# ...and that he is the settlement's hunter. A profession is not a field: it is
+# which JobTypeHandler priorities have disabledBySettler false, so this line is
+# the only proof from a running server that the night hunter can hunt at all.
+grep -qE "profession check: vampiresettler .*hunting" "$LOG1" \
+    || { echo "FAIL: the vampire lost his hunting profession"; STATUS=1; }
+
 echo "--- verifying the harvest-tool audit ---"
 # Every custom deco/prop object must report the tool type and HP decided in
 # the audit (vanilla archetypes: flora/clutter ALL, trees AXE, stone/crystal

@@ -179,6 +179,14 @@ public class StairwayToHeavenMod {
                 new stairwaytoheaven.mobs.CatCuddleBuff(true));
         necesse.engine.registries.BuffRegistry.registerBuff(stairwaytoheaven.mobs.CatCuddleBuff.PEANUT_ID,
                 new stairwaytoheaven.mobs.CatCuddleBuff(false));
+        // What a bitten resident carries for a day (VampireSettlerMob). The ID
+        // is a LITERAL, not BloodFeverBuff.ID: tools/locale_audit.py matches
+        // registerBuff("<id>" to name-check the [buff] entry, and a visible
+        // buff registered through a constant prints "buff.<id>" in the HUD
+        // without anything noticing. BloodFeverBuff.ID carries the same string
+        // and names this line in its own comment.
+        necesse.engine.registries.BuffRegistry.registerBuff("bloodfever",
+                new stairwaytoheaven.mobs.BloodFeverBuff());
         // World-map icons for the auto-placed markers (spire + return
         // stairway). Textures load client-side via GameResources; the
         // registration itself is texture-free and server-safe.

@@ -6,6 +6,40 @@ All notable changes to this project are documented here. Format loosely follows
 ## [Unreleased]
 
 ### Added
+- **Dorian, the Nightbound — a settler who sleeps by day and works by night.**
+  `vampiresettler`, the first inverted schedule in the mod. Necesse has no
+  "nocturnal" flag, so all four of vanilla's day/night decisions are turned
+  around: the sleep node (`VampireSleepAINode`, swapped into the tree by
+  `VampireAI` through the protected `children` list — no reflection),
+  `findJob`'s night lock (`HumanMob.java:3353`; his returns null by DAY and
+  rebuilds vanilla's guards plus the `EntityJobWorker.findJob` body for the
+  night branch, since `super` IS the lock), `wandererAINode.hideInside`, and
+  `tickHunger` — which only drains by day, so an inverted settler would
+  otherwise starve in his sleep. Note found on the way: `doesEatFood()` does
+  NOT stop the hunger meter; it is read by `SettlerDietData` and
+  `HungrySettlementNotification` only.
+  He is 1.45x as fast in the dark and ordinary in daylight (a ticking sunburn
+  was not available — every settler here is immortal). Taking him into the
+  player's adventure party keeps him up through the day, which is vanilla's own
+  exception to the night lock rather than an invention; party membership sets
+  no command orders, so the sleep node had to be told about it separately.
+  **Night hunt** (`VampireHuntAINode`): he walks up to a non-hostile, non-human
+  mob OUTSIDE the settlement bounds and drains it — a Blood Vial always, raw
+  meat 40% of the time. Deliberately not the vanilla `hunting` profession,
+  which `getJobRestrictZone()` fences to the settlement, i.e. to the player's
+  own livestock. **Blood thirst** replaces his hunger; empty and unfed, he
+  bites the nearest resident, who carries `bloodfever` (pale, slow, weaker) for
+  one in-game day. The Doctor's heal screen gained "Treat the bitten", which
+  clears it from everyone on the level for his usual fee.
+  **One drained animal in six gets up again** as a `bloodthrall` — a hostile
+  `CryptBatMob` subclass with its own loot (Blood Vial x1-2, leather at 35%)
+  and vanilla's crypt-bat sheet, so it costs no art either.
+  He travels to any settlement that keeps a coffin (`SkyArrivals.COFFIN`) and
+  is placed by worldgen nowhere. Zero new art: vanilla's own `mobs/icons/vampire`
+  is his settlement face, `items/healthpotion` stands in for the Blood Vial and
+  `buffs/bleeding` for the fever (all three in `docs/VANILLA_ASSET_MAP.md`).
+  The Daywalk quest from the plan — daylight immunity and sleep on a tiredness
+  meter instead of a clock — is NOT built yet.
 - **The Stylist runs a salon.** Her talk menu now stocks six pieces of shop
   fit-out that match her trade: Friseurstuhl (`salonchair`, vanilla
   `ChairObject`, four facings), beleuchteter Friseurspiegel (`salonmirror`,

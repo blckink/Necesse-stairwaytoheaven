@@ -46,7 +46,9 @@ public final class SkyItems {
             // 8n: one trophy per realm band of BALANCE.md's uplift table, and
             // the three residents' own headwear.
             "skystoneheart", "bloomfang", "mourningband", "soulcollar", "stripedhorn",
-            "magpiecap", "haldakerchief", "vanecowl"
+            "magpiecap", "haldakerchief", "vanecowl",
+            // What the vampire's night hunt pays in.
+            "bloodvial"
     };
 
 
@@ -159,6 +161,13 @@ public final class SkyItems {
         // below. Anchor: `slimeessence`, the tier-2 essence, at brokerValue
         // 30.0F (ItemRegistry.java:1001): a clear step above the Skyreach's
         // 25.0F crystals and below the Veil Essence above it.
+        // What Dorian carries home from a night hunt, and what the player can
+        // hand him instead of letting him get thirsty. Anchor: vanilla's
+        // `bloodessence` sits at the same tier of "red thing in a bottle"; this
+        // lands just under Veil Essence at 22.0F because it is a nightly drop
+        // from ordinary animals rather than a boss-band material.
+        ItemRegistry.registerItem("bloodvial",
+                new stairwaytoheaven.items.BloodVialItem(), 22.0F, true);
         ItemRegistry.registerItem("cinderpearl",
                 new SkyMatItem(250, Item.Rarity.UNCOMMON).setItemCategory("materials", "minerals"), 30.0F, true);
 

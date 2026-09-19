@@ -1235,3 +1235,35 @@ swhveteranoption=Verteidigungsausbau (Stufe <level>/5)
 swhveteranintro=Die Verteidigung der Siedlung ist auf Stufe <level> von <max>.\nNaechste Stufe braucht: <req>.
 swhveterandoit=Munition uebergeben
 swhveteranmax=Die Verteidigung ist bereits auf der hoechsten Stufe. Da ist nichts mehr zu uebergeben.
+
+[mob]
+vampiresettler=Dorian
+vampiresettlername=Dorian <name>, der Nachtgebundene
+
+[item]
+bloodvial=Blutfaeschchen
+
+[itemtooltip]
+bloodvialtip=Kreaturenbeute - vor einer Stunde hat das noch gegrast. Noch warm, und darueber redet niemand gern.
+
+[buff]
+bloodfever=Blutfieber
+
+[bufftooltip]
+bloodfevertip=Nachts gebissen. Blass, langsam und ohne Appetit, bis es vorbei ist.
+
+[misc]
+vampiresettlertip=Kommt in eine Siedlung, in der ein Sarg steht. Schlaeft tagsueber und arbeitet nachts; jagt Wildtiere ausserhalb der Mauern, niemals euer Vieh.
+vampiretalkpitch=Ihr haltet einen Sarg und niemanden darin. Das ist entweder eine Einladung oder ein Versehen, und ich hoffe auf das Erste.
+vampiretalk1=Eure Leute arbeiten im Licht und schlafen im Dunkeln. Ich habe das nie verstanden, aber ich uebernehme die andere Haelfte.
+vampiretalk2=Zwei Felder weiter steht ein Reh, das mich noch nicht bemerkt hat. Gib ihm eine Stunde.
+vampiretalk3=Ich nehme nichts, was euer Zeichen traegt. Das ist keine Hoeflichkeit. Das ist die Abmachung.
+vampiretalk4=Stellt ein Flaeschchen raus, wenn ihr lieber nicht habt, dass ich losziehe. Ich bin nicht stolz.
+vampiredrained=...
+vampirebite=Verzeih. Es hat niemand etwas rausgestellt.
+swhdoctorcure=Die Gebissenen behandeln (<price> Muenzen)
+swhdoctorcured=Bis morgen frueh sind sie wieder sie selbst. Und fuettert den da.
+vampireturned=Das da ist noch nicht fertig. Zurueck.
+
+[mob]
+bloodthrall=Blutknecht

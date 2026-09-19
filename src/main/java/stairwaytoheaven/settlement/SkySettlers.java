@@ -70,6 +70,7 @@ public final class SkySettlers {
     public static final String ELEANOR = "eleanorsettler";
     public static final String KNOTT = "knottsettler";
     public static final String IVES = "ivessettler";
+    public static final String VAMPIRE = "vampiresettler";
 
     /** The Skyreach's own three: placed beside a derelict workshop. */
     public static final String[] SKY_RESIDENTS = {MAGPIE, HALDA, OSSIAN};
@@ -108,6 +109,10 @@ public final class SkySettlers {
         MobRegistry.registerMob("eleanorsettler", stairwaytoheaven.mobs.EleanorMob.class, false);
         MobRegistry.registerMob("knottsettler", stairwaytoheaven.mobs.KnottMob.class, false);
         MobRegistry.registerMob("ivessettler", stairwaytoheaven.mobs.IvesMob.class, false);
+        // The nocturnal one. `vampire`, `vampireraider` and `cryptvampire` are
+        // all vanilla mob IDs, so his is `vampiresettler` — a duplicate ID
+        // stops the whole mod from loading.
+        MobRegistry.registerMob("vampiresettler", stairwaytoheaven.mobs.VampireSettlerMob.class, false);
 
         // The three found in the Skyreach. No arrival ticket: see the class
         // note above.
@@ -166,6 +171,15 @@ public final class SkySettlers {
                 new SkyResident("ivessettler", () -> GameTexture.fromFile("mobs/icons/elderhuman"),
                         "ivessettlertip", null, 0));
 
+        // Dorian, the Nightbound. He TRAVELS — a vampire looking for a town
+        // that already keeps a coffin is a condition the player can build
+        // towards and can see, which is the same test every other arrival here
+        // has to pass. The icon is vanilla's own vampire face by literal path,
+        // the way Eveleen wears the Farmer's; row in docs/VANILLA_ASSET_MAP.md.
+        SettlerRegistry.registerSettler("vampiresettler",
+                new SkyResident("vampiresettler", () -> GameTexture.fromFile("mobs/icons/vampire"),
+                        "vampiresettlertip", SkyArrivals.COFFIN, 90));
+
         assertWired();
     }
 
@@ -180,7 +194,8 @@ public final class SkySettlers {
      */
     private static void assertWired() {
         for (String[] group : new String[][]{SKY_RESIDENTS, VEIL_RESIDENTS, STEINFELD_RESIDENTS,
-                {EVELEEN, MAGPIE, HALDA, OSSIAN, MORTIMER, CASPERN, ELEANOR, KNOTT, IVES}}) {
+                {EVELEEN, MAGPIE, HALDA, OSSIAN, MORTIMER, CASPERN, ELEANOR, KNOTT, IVES,
+                        VAMPIRE}}) {
             for (String id : group) {
                 if (MobRegistry.getMobID(id) < 0) {
                     throw new IllegalStateException(

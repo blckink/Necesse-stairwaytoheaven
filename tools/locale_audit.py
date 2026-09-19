@@ -636,6 +636,10 @@ ITEM_CLASS_VANILLA_ICON = {
     "SkyRewardItem": ("arg", 0),
     "WardensRoundItem": ("fixed", "skywatchchalice"),
     "SkywatchSignetItem": ("fixed", "emptypendant"),
+    # The vampire's night-hunt drop. Nobody has drawn a vial yet, so the item
+    # points its loadItemTextures at vanilla's red potion; the class names the
+    # file in its own BORROWED_ICON constant. Row in docs/VANILLA_ASSET_MAP.md.
+    "BloodVialItem": ("fixed", "healthpotion"),
 }
 
 # Marker prefix on a wanted-icon path that lives in the vanilla resource file

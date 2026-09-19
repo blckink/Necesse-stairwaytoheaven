@@ -41,6 +41,7 @@ other refuses it forever after.
 | Caspern, the Spirit Smith | Crafting only (refuses Farming/Forestry) | Ghost Realm / Aftergarden, beside a gravestone | once the settlement has an Aether Forge (`SkyArrivals.FORGE`) | 14000 coins |
 | Eleanor, the Lost Soul | **Husbandry** (STAY ending only) | Ghost Realm / Aftergarden, beside a gravestone | never — §11 makes this a choice, not a timer | 5000 coins (STAY), or 12x Veil Essence (PASS ON, no coins) |
 | Mr. Knott, the Doorman | **Trading** (refuses Farming/Forestry) | Crooked Beyond, at the Door Yard | never — §15 names no condition | 22000 coins |
+| Dorian, the Nightbound | **Hunting** (refuses Farming/Forestry) | nowhere — worldgen never places him | once the settlement keeps a coffin (`SkyArrivals.COFFIN`) | 11000 coins |
 
 Mortimer, Caspern and Eleanor are still called "the Veil trio" in one class's
 own name (`settlement/VeilResidents.java`) even though they moved to the Ghost
@@ -204,6 +205,71 @@ recruitable from the moment he is found regardless of quest progress, and the
 chain is a separate reward track layered on top. (An earlier version of his
 `interact()` accidentally coupled the two anyway — see "A dead end this pass
 found and fixed" in `docs/quests.md`.)
+
+---
+
+## Dorian, the Nightbound
+
+`vampiresettler` — `mobs/VampireSettlerMob.java`
+
+**What is new about him.** He is the first settler in this repository whose DAY
+is inverted: asleep while the sun is up, at work after dark. Necesse has no
+"nocturnal" flag — the schedule is four separate decisions in vanilla, and all
+four are turned around:
+
+| what | vanilla | his |
+|---|---|---|
+| sleeping | `HumanSleepAINode.shouldSleep` = `isNight()` | `VampireSleepAINode`, swapped into the tree by `VampireAI` (`CompositeTypedAINode.children` is protected, so no reflection) |
+| working | `HumanMob.findJob` returns null at night (HumanMob.java:3353) | `VampireSettlerMob.findJob`: null by day, normal work at night. The night branch cannot call `super` (super IS the lock) and rebuilds vanilla's guards plus the `EntityJobWorker.findJob` body — all public API |
+| idling | `wandererAINode.hideInside` = `isNight() \|\| isCave \|\| isHiding` | reversed; the field is public |
+| hunger | `tickHunger` only drains by day — he would starve in his sleep | replaced by **blood thirst**. `doesEatFood()` is false too, but note that flag does NOT stop the hunger meter: it is read by `SettlerDietData` and `HungrySettlementNotification` only |
+
+**The player's group is vanilla's own escape hatch.** `findJob`'s night lock
+already exempts `adventureParty.isInAdventureParty()`, so "take him along and
+he keeps going" is the shape the game itself offers; it is mirrored here for
+the day. Party membership sets no command orders (`hasCommandOrders()` is
+guardPoint / followMob / attackMob), which is why `VampireSleepAINode.canSleep`
+has to ask about the party separately — otherwise he goes to bed at noon in the
+middle of an expedition.
+
+**Sunlight** costs him speed, not health: every settler here is immortal
+(`SkySettlerMob.canTakeDamage` is false), so a ticking sunburn was never
+available. In the dark he is 1.45x a normal settler; out in the sun he is
+ordinary. The planned Daywalk quest (see the plan in the job folder, not yet
+built) removes exactly that penalty and puts his sleep on a tiredness meter.
+
+**The night hunt** is `VampireHuntAINode`, and deliberately NOT the vanilla
+`hunting` profession: settler jobs are fenced in by `getJobRestrictZone()` to
+the settlement bounds, so vanilla's hunting job would kill the player's own
+livestock. The node walks him to a non-hostile, non-human mob **outside** the
+settlement rectangle, within 640px, and drains it: always a Blood Vial, 40% of
+the time some raw meat — an animal he has emptied is worth less at the table.
+Hard limit worth knowing: only mobs in loaded regions exist, so "around the
+base" means the loaded ring, not the map.
+
+**One in six gets up again.** Instead of a carcass, the drain leaves a
+`bloodthrall` (`BloodThrallMob`) — hostile, and carrying loot no ordinary
+animal drops (Blood Vial x1-2, leather at 35%). It is a `CryptBatMob` subclass
+that overrides nothing but the loot table, so it wears vanilla's crypt-bat
+sheet and bestiary face and costs no art. Keeping a vampire has a cost, and
+this is the visible half of it.
+
+**Blood thirst, and the bite.** The meter drains only while he is awake, one
+full meter per twenty minutes of shift. Empty and unattended, he bites the
+nearest resident every three minutes: the victim carries `bloodfever`
+(`BloodFeverBuff` — pale, slow, weaker) for one in-game day. That is on
+purpose short of a conversion; turning a resident into a second nocturnal
+settler would mean replacing the mob of somebody the player has already
+furnished a room for. The mod's Doctor can lift it early —
+"Treat the bitten" on his existing heal screen clears the fever from everyone
+on the level for the same fee.
+
+**Found.** Nowhere. He is the first resident with no worldgen seat at all: he
+travels, and only to a settlement that keeps a **coffin** (`SkyArrivals.COFFIN`
+— one sarcophagus inside the bounds, which is also the thing he will sleep in),
+on top of the precondition every arrival here shares: the world has recruited
+its Sky Warden. He beds down in an ordinary assigned bed like anyone else; the
+coffin is the invitation, not the bedroom.
 
 ---
 

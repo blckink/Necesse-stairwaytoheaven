@@ -91,6 +91,11 @@ final class SkyMobs {
         MobRegistry.registerMob("sourvatbloom", stairwaytoheaven.mobs.SourvatBloomMob.class, true);
         MobRegistry.registerMob("vatling", stairwaytoheaven.mobs.VatlingMob.class, true);
         MobRegistry.registerMob("prototypenine", stairwaytoheaven.mobs.PrototypeNineMob.class, true);
+        // What gets up again after the vampire has fed (VampireSettlerMob.drain,
+        // one animal in six). A CryptBatMob subclass with its own loot table and
+        // vanilla's own crypt-bat sheet and bestiary face -- countKillStat true
+        // because the player can and should kill it.
+        MobRegistry.registerMob("bloodthrall", stairwaytoheaven.mobs.BloodThrallMob.class, true);
         // Striped Megashark: overworld deep water, next to vanilla's shark.
         MobRegistry.registerMob("stripedmegashark", stairwaytoheaven.mobs.StripedMegasharkMob.class, true);
     }
