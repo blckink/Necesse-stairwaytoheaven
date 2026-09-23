@@ -99,6 +99,18 @@ ROLES = {
     # near PRIORITY_FLOOR, and neither has a recipe -- worldgen paints them.
     "cinderashtile": TERRAIN,
     "furnaceslagtile": TERRAIN,
+    # Hell's second pair, the same shape: isFloor=false, not obtainable, no
+    # recipe, painted by HellTerrainPainter.
+    "brimstonecrusttile": TERRAIN,
+    "bonegraveltile": TERRAIN,
+    # Hell's building-set floor (CheckerFloorTile, isFloor=true). Registered
+    # unobtainable with no recipe, so the FLOOR rule below reports it until
+    # the set is made craftable -- a real gap, not a misclassification.
+    "hellbrickfloortile": FLOOR,
+    # The cloudmarble road on vanilla PathTiledTile (EdgedTiledTexture,
+    # super(true, ...), PathTiledTile.java:29): a floor. Obtainable but with no
+    # recipe, which the FLOOR rule reports.
+    "skywaypathtile": FLOOR,
     "murkwatertile": LIQUID,
     "marblecheckertile": FLOOR,
     "gloomwoodfloortile": FLOOR,
@@ -146,6 +158,9 @@ VANILLA_BASES = {
     "SimpleTerrainTile": (False, 0),
     "TerrainSplatterTile": (None, None),
     "LiquidTile": (False, None),
+    # PathTiledTile -> EdgedTiledTexture(true, textureName); not a
+    # TerrainSplatterTile, so it has no terrain priority at all.
+    "PathTiledTile": (True, None),
 }
 
 # TerrainSplatterTile.PRIORITY_FLOOR_BOT — anything at or above this draws over
@@ -296,6 +311,61 @@ def read_tile_class(name, sources):
     return None, None, None, []
 
 
+# stringID -> the class whose getTerrainSprite picks the tile's cell, filled by
+# audit_java and read by audit_sheets.
+TERRAIN_SPRITE_SAFE = {}
+
+
+def documented_borrow(names):
+    """docs/VANILLA_ASSET_MAP.md names this texture (see locale_audit)."""
+    try:
+        from locale_audit import documented_borrow as check
+    except ImportError:
+        return False
+    return check(names)
+
+
+def terrain_sprite_safe(cls, sources, seen=None):
+    """True when the cell `cls` draws cannot be a negative index.
+
+    The legacy (no `_splat`) path of TerrainSplatterTile indexes
+    splattingTextures[x][y] with whatever getTerrainSprite returns
+    (TerrainSplatterTile.java:117-118, decompiled 1.3.2). The base method
+    returns (0, 0); vanilla's SimpleTiledFloorTile returns `tileX % width`,
+    which goes negative on most of a map -- that is the crash CheckerFloorTile
+    exists for. So a missing `_splat` is only dangerous when the override that
+    wins uses `%` without Math.floorMod. SkyGroundTile, EdenGroundTile and the
+    GhostGroundTile family pick a row with GameRandom.nextInt (never negative);
+    CrookedGroundTile and the four Hell grounds use floorMod. Reporting those
+    as crashes buried the one rule this check exists for under 23 false
+    alarms on 2026-09-23.
+    """
+    seen = seen or set()
+    if cls in seen:
+        return False
+    seen.add(cls)
+    if cls == "SimpleTiledFloorTile":
+        return False
+    for path, text in sources.items():
+        if os.path.basename(path) != cls + ".java":
+            continue
+        text = strip_comments(text)
+        m = re.search(r"Point\s+getTerrainSprite\s*\([^)]*\)\s*\{(.*?)\n    \}", text, re.S)
+        if m:
+            body = m.group(1)
+            return "%" not in body or "floorMod" in body
+        base = re.search(r"class\s+" + re.escape(cls) + r"\s+extends\s+([\w.]+)", text)
+        if base is None:
+            return False
+        return terrain_sprite_safe(base.group(1).split(".")[-1], sources, seen)
+    # A vanilla base other than SimpleTiledFloorTile that we did not override:
+    # TerrainSplatterTile.getTerrainSprite is `return new Point(0, 0)`.
+    # PathTiledTile is an EdgedTiledTexture, not a TerrainSplatterTile: it
+    # never reads a `_splat` sheet, so there is no legacy path to fall into.
+    return cls in ("TerrainSplatterTile", "SimpleTerrainTile", "SimpleFloorTile",
+                   "PathTiledTile")
+
+
 def resolve_tile(cls, ctor_strings, sources):
     """(isFloor, priority, [texture names]) for a registered tile class."""
     if cls in VANILLA_BASES:
@@ -347,6 +417,7 @@ def audit_java(sources, problems):
             problems.append(f"{string_id}: cannot resolve its tile class from `{expr}`")
             continue
         is_floor, priority, textures = resolve_tile(cls, ctor_strings, sources)
+        TERRAIN_SPRITE_SAFE[string_id] = terrain_sprite_safe(cls, sources)
 
         if role == LIQUID:
             if is_floor is not LIQUID:
@@ -431,6 +502,20 @@ def audit_sheets(tiles, problems, vanilla_tiles=None):
                     continue
             if not os.path.exists(splat):
                 if texture in LEGACY_SPLAT_OK:
+                    continue
+                if role != LIQUID and TERRAIN_SPRITE_SAFE.get(string_id):
+                    # No `_splat`, but the class cannot index negatively (see
+                    # terrain_sprite_safe) -- a seamless world-anchored sheet
+                    # of ours, or a vanilla sheet this run cannot see.
+                    continue
+                if (role == LIQUID and not (vanilla_tiles and os.path.isdir(vanilla_tiles))
+                        and not os.path.exists(os.path.join(TILES, texture + ".png"))
+                        and documented_borrow([texture])):
+                    # A vanilla liquid sheet borrowed by name, as the ledger
+                    # records. LiquidTile loads it exactly as vanilla's own
+                    # liquid of that name does (LiquidTile.java:101-107,
+                    # FileNotFoundException -> legacy), so it is as safe as
+                    # vanilla; its geometry needs the dump to be measured.
                     continue
                 problems.append(
                     f"{string_id}: tiles/{texture}_splat.png missing and {texture} is not in "

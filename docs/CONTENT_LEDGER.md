@@ -379,6 +379,114 @@ Elder.
 | `regionkeyghostrealm` | object | Aftergarden Raven Perch — the Gloom Raven grave marker; unlocks the Ghost Realm's summoning stones. Paid by `swh_keyghostrealm` for 12x Bonewood + 8x Spectral Ore, which means walking the fog first. |
 | `regionkeycrookedbeyond` | object | Knott's Crooked Door — §B1's *"Mr. Knott's red door for Crooked"*, on the sheet `CrookedDoorObject` already wears; unlocks the Crooked Beyond's summoning stones. Paid by `swh_keycrookedbeyond` for 16x Oddwood + 8x Reality Shard. |
 
+## The Twilight Merchant and his wares
+
+`TwilightWares`, `mobs/TwilightMerchantHumanMob`. A travelling visitor on
+vanilla's Exotic Merchant frame, drawn from the same settlement visitor lottery;
+each visit shelves 3 whole outfits and 5 pieces of furniture. Nothing here has a
+recipe — he is the only source. Every outfit and every furniture piece is
+registered only once its sheet ships (`AVAILABLE_OUTFITS` / `AVAILABLE_DECOR`),
+so an undrawn entry is neither registered nor sold. Outfits are cosmetic: armour
+0, EPIC rarity, head + chest (with arms) + boots on vanilla's armour frames.
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `twilightmerchanthuman` | mob | The Twilight Merchant — a settlement visitor who sells only the mod's gloomy cosmetics and furniture, a different shelf every visit. Never recruitable; only he may roll the `twilightmerchant` personality. |
+| `twilightsuithead` | item | Twilight Wig — head of the merchant's own striped afterlife suit. Cosmetic, armour 0. |
+| `twilightsuitchest` | item | Striped Afterlife Suit — chest and arms of the same outfit. Cosmetic, armour 0. |
+| `twilightsuitboots` | item | Scuffed Striped Shoes — boots of the same outfit. Cosmetic, armour 0. |
+| `skeletonhead` | item | Grinning Skull — head of the Skeleton outfit. Cosmetic, armour 0. |
+| `skeletonchest` | item | Ribcage Torso — chest and arms of the Skeleton outfit. Cosmetic, armour 0. |
+| `skeletonboots` | item | Bony Legs — boots of the Skeleton outfit. Cosmetic, armour 0. |
+| `grinclownhead` | item | Grin Clown Face — head of the clown outfit. Cosmetic, armour 0. |
+| `grinclownchest` | item | Ruffled Clown Suit — chest and arms of the clown outfit. Cosmetic, armour 0. |
+| `grinclownboots` | item | Clown Shoes — boots of the clown outfit. Cosmetic, armour 0. |
+| `hockeyslasherhead` | item | Slasher Hockey Mask — head of the slasher outfit. Cosmetic, armour 0. |
+| `hockeyslasherchest` | item | Torn Slasher Jacket — chest and arms of the slasher outfit. Cosmetic, armour 0. |
+| `hockeyslasherboots` | item | Slasher Boots — boots of the slasher outfit. Cosmetic, armour 0. |
+| `dreamstalkerhead` | item | Dream Stalker Hat — head of the striped-sweater nightmare outfit. Cosmetic, armour 0. |
+| `dreamstalkerchest` | item | Striped Nightmare Sweater — chest and arms of the same outfit. Cosmetic, armour 0. |
+| `dreamstalkerboots` | item | Dream Stalker Trousers — boots of the same outfit. Cosmetic, armour 0. |
+| `screamrobehead` | item | Scream Mask — head of the scream-robe outfit. Cosmetic, armour 0. |
+| `screamrobechest` | item | Tattered Scream Robe — chest and arms of the same outfit. Cosmetic, armour 0. |
+| `screamrobeboots` | item | Shadow Feet — boots of the same outfit. Cosmetic, armour 0. |
+| `pincushionhead` | item | Pincushion Head — head of the hooked-leather outfit. Cosmetic, armour 0. |
+| `pincushionchest` | item | Hooked Leather Robe — chest and arms of the same outfit. Cosmetic, armour 0. |
+| `pincushionboots` | item | Hooked Leather Boots — boots of the same outfit. Cosmetic, armour 0. |
+| `widowgownhead` | item | Widow's Veil — head of the widow outfit. Cosmetic, armour 0. |
+| `widowgownchest` | item | Widow's Gown — chest and arms of the widow outfit. Cosmetic, armour 0. |
+| `widowgownboots` | item | Widow's Pointed Shoes — boots of the widow outfit. Cosmetic, armour 0. |
+| `stitchedmonsterhead` | item | Stitched Monster Head — head of the patchwork-monster outfit. Cosmetic, armour 0. |
+| `stitchedmonsterchest` | item | Patchwork Jacket — chest and arms of the same outfit. Cosmetic, armour 0. |
+| `stitchedmonsterboots` | item | Platform Monster Boots — boots of the same outfit. Cosmetic, armour 0. |
+| `pumpkinscarecrowhead` | item | Pumpkin Sack Head — head of the scarecrow outfit. Cosmetic, armour 0. |
+| `pumpkinscarecrowchest` | item | Straw Scarecrow Shirt — chest and arms of the scarecrow outfit. Cosmetic, armour 0. |
+| `pumpkinscarecrowboots` | item | Straw Boots — boots of the scarecrow outfit. Cosmetic, armour 0. |
+| `hauntedpuppethead` | item | Haunted Puppet Head — head of the puppet outfit. Cosmetic, armour 0. |
+| `hauntedpuppetchest` | item | Puppet Overalls — chest and arms of the puppet outfit. Cosmetic, armour 0. |
+| `hauntedpuppetboots` | item | Puppet Sneakers — boots of the puppet outfit. Cosmetic, armour 0. |
+| `coffinbed` | object | Coffin bed on vanilla's `BedObject` — a settler can be assigned to sleep in it. |
+| `hauntedclock` | object | Haunted Clock — a standing clock on vanilla's `ClockObject`. |
+| `skullcandelabra` | object | Skull Candelabra — a lit candelabra on vanilla's `CandelabraObject`. |
+| `electricchair` | object | Electric Chair — a sittable chair on vanilla's `ChairObject`. |
+| `thingbox` | object | Handy Box — table decoration on vanilla's `TableDecorationObject`. |
+| `twilightsarcophagus` | object | Grinning Sarcophagus — the merchant's own sarcophagus on vanilla's `SarcophagusObject`, one column per rotation. |
+| `hangingtree` | object | Hanging Tree — a tall bare tree prop (`SkyDecoObject`, 128 px), no collision. |
+| `twilightcauldron` | object | Twilight Cauldron — a bubbling green cauldron prop (`SkyDecoObject`). Not `witchcauldron`: vanilla owns that ID. |
+| `hauntedscarecrow` | object | Grinning Scarecrow — a one-tile field prop whose eyes glow pumpkin-orange (light 100). Registered only once `objects/hauntedscarecrow.png` ships; until then it is neither registered nor sold. |
+| `sandwormtombstone` | object | Sandworm Tombstone — a one-tile grave prop (`SkyDecoObject`). |
+| `walleye` | object | Eye in the Wall — wall piece on vanilla's two-tile large painting frame (`<id>` and `<id>2`). |
+| `hauntedwallclock` | object | Twisted Wall Clock — wall piece on the large painting frame. |
+| `magicmirror` | object | Haunted Mirror — wall piece on the large painting frame. |
+| `shrunkenheads` | object | Hanging Shrunken Heads — wall piece on the large painting frame; in `DECOR` but not drawn yet, so not registered or sold. |
+| `eyepainting` | object | Watching Eye — framed one-tile painting of the first batch. No longer sold; stays registered while its sheet ships so pieces already hanging keep loading. |
+| `shrunkenheadtrophy` | object | Shrunken Head Trophy — the other retired first-batch painting, kept for the same reason. |
+
+## The War Veteran
+
+`settlement/WarVeteran`, `mobs/WarVeteranHumanMob`. A recruitable soldier
+settler and the defences he sells; turret and cannon only target hostiles, and
+their damage scales with the ammo level raised through `VeteranAmmoDialogue`.
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `warveteranhuman` | mob | The War Veteran — recruitable soldier settler, always in iron armour, patrols with vanilla's `HumanAI` and fights settlement raiders. Sells the four defences below. |
+| `veteranturret` | object | Auto Turret — 1x1 defence that fires at hostiles only; damage follows the Veteran's ammo level. Sold by him. |
+| `veterancatapult` | object | Cannon — 3x3 multi-tile defence (master piece; `veterancatapult2`..`9` are its unobtainable other tiles) that fires an iron ball at hostiles only. Sold by him. |
+| `veteranbarricade` | object | Barricade — a vanilla `WallObject` with six times a plain wall's health (600). Sold by him. |
+| `barbedwirefence` | object | Barbed Wire Fence — a fence that cuts hostiles touching it, six times a plain wall's health. Sold by him. |
+
+## Dorian, the Nightbound
+
+`mobs/VampireSettlerMob`. The settlement's vampire: sleeps by day, works and
+hunts by night, drinks instead of eating.
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `vampiresettler` | mob | Dorian — the first settler with an inverted day. Recruit price 11 000 coins; hunting profession; brings Blood Vials home from night hunts. |
+| `bloodvial` | item | Blood Vial — what Dorian carries home from a hunt; hand him one instead of letting him go thirsty. Ordinary material (broker 22), icon borrowed from vanilla's health potion. |
+| `bloodthrall` | mob | Blood Thrall — one animal in six that Dorian drains gets up again as this hostile. Crypt bat body; drops 1-2 Blood Vial and sometimes leather. |
+| `bloodfever` | buff | Blood Fever — what a bitten resident carries for a day: 20% slow, -15% mining and building speed, -10% max health. Runs out on its own; the Doctor can end it early. |
+
+## Smaller additions
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `siggicuddle` | buff | Siggi's Purr — petting Siggi, the black spire cat living in town: +8% crit chance, +5% damage, +4 armour for one in-game day. |
+| `peanutcuddle` | buff | Peanut's Purr — petting Peanut, the tabby: +12% speed, +0.5 health regen, +10% mining speed for one in-game day. |
+| `stripedmegashark` | mob | Striped Megashark — a black-and-white shark three times vanilla's size in deep overworld surface water; boss-class health, slow, drops tungsten bars. Rare (weight 1 against the shark's 10), at most one near the player. |
+| `skywaypathtile` | tile | Skyway Path — the cloudmarble road on vanilla's `PathTiledTile` edging; the Warden's Spire lays it as its approach. Registered only when `tiles/skywaypath.png` ships, otherwise the ID falls back to the Skyway tile. |
+| `hellbrickfloortile` | tile | Hellbrick Floor — Hell's building-set floor, one seamless world-anchored 128x128 texture. |
+| `hellbrickwall` | object | Hellbrick Wall — Hell's own wall set (vanilla `WallObject`, one 352x128 sheet), standing in the four Hell places that used vanilla factory and basalt walls. |
+| `hellbrickdoor` | object | Hellbrick Door — the same set's door. |
+| `hellbrickdoorlocked` | object | Locked Hellbrick Door — the locked variant vanilla's door pair registers. |
+| `brimstonecrusttile` | tile | Brimstone Crust — ochre sulphur with bubbling vents, the bright ground of the Furnace Reach. Not obtainable. |
+| `bonegraveltile` | tile | Bone Gravel — wine-red grit strewn with teeth and vertebrae, Hell ground in the Veil dead soil's old share. Not obtainable. |
+| `hellbones` | object | Hell Bones — Hell's own bone pile (replaces the borrowed Veil `ashbones`): any tool, 50 HP, drops one Cinder Pearl. |
+| `charredgallows` | object | Charred Gallows — Hell's dead-tree prop, axe to clear. Not obtainable. |
+| `brimstonecrag` | object | Brimstone Crag — Hell's rock prop, pickaxe, 80 HP. Not obtainable. |
+| `skywatchbed` | object | Skywatch Bed — the Skywatch furniture set's bed on vanilla's `BedObject`, so a settler can be assigned to it. Workstation: 6 Skystone + 8 Windsilk. |
+
 ## Baseline — registered before the ledger existed
 
 These predate the ledger and are described in `CHANGELOG.md`,

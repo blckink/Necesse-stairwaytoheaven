@@ -198,7 +198,9 @@ public final class GhostRealm {
         MobRegistry.registerMob("mourningbride", MourningBrideMob.class, true);
         MobRegistry.registerMob("possessedchair", PossessedChairMob.class, true);
         MobRegistry.registerMob("soulhound", SoulHoundMob.class, true);
-        MobRegistry.registerMob(VeilBloomMob.ID, VeilBloomMob.class, true);
+        // Literal, equal to VeilBloomMob.ID: tools/locale_audit.py name-checks
+        // registerMob("<id>" and cannot see an ID behind a constant.
+        MobRegistry.registerMob("veilbloom", VeilBloomMob.class, true);
         MobRegistry.registerMob("coffincrawler", CoffinCrawlerMob.class, true);
     }
 

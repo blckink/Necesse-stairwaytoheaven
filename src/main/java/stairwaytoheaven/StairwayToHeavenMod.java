@@ -174,10 +174,12 @@ public class StairwayToHeavenMod {
         // the Crooked key, and it was the one quest class never registered —
         // appended last so every earlier quest keeps its numeric ID.
         necesse.engine.registries.QuestRegistry.registerQuest("swh_keyhell", stairwaytoheaven.quest.HellKeyQuest.class);
-        // Petting a cat that lives in town (SpireCatMob.pet).
-        necesse.engine.registries.BuffRegistry.registerBuff(stairwaytoheaven.mobs.CatCuddleBuff.SIGGI_ID,
+        // Petting a cat that lives in town (SpireCatMob.pet). Literal IDs for
+        // the same reason as "bloodfever" below; they must stay equal to
+        // CatCuddleBuff.SIGGI_ID / PEANUT_ID.
+        necesse.engine.registries.BuffRegistry.registerBuff("siggicuddle",
                 new stairwaytoheaven.mobs.CatCuddleBuff(true));
-        necesse.engine.registries.BuffRegistry.registerBuff(stairwaytoheaven.mobs.CatCuddleBuff.PEANUT_ID,
+        necesse.engine.registries.BuffRegistry.registerBuff("peanutcuddle",
                 new stairwaytoheaven.mobs.CatCuddleBuff(false));
         // What a bitten resident carries for a day (VampireSettlerMob). The ID
         // is a LITERAL, not BloodFeverBuff.ID: tools/locale_audit.py matches

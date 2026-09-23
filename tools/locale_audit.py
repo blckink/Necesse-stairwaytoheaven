@@ -84,6 +84,11 @@ MULTI_OBJECT_REGISTRARS = {
     # CrystalClusterObject.registerCrystalCluster(id, ...) -> id, id+"r"
     # (the "r" object is the mined-out remains, and it IS shown to the player).
     "registerCrystalCluster": (0, ("", "r")),
+    # BedObject.registerBed(id, texture, ...) -> id (obtainable) and id+"2",
+    # the unobtainable foot half (BedObject.java:481-482, decompiled 1.3.2).
+    # Unlisted, coffinbed and skywatchbed were invisible to every check here
+    # and to tools/content_ledger.py, which reuses registered_ids().
+    "registerBed": (0, ("",)),
 }
 
 # Our own registration wrappers: they call ObjectRegistry.registerObject with a
@@ -98,6 +103,87 @@ LOCAL_REGISTRARS = {
     "registerPortal": "object",       # BossPortalObject: one per realm
     "registerKey": "object",          # RegionKeyObject: one per realm
 }
+
+# Registrations inside a LOOP, keyed by (file, owning method). Their IDs are
+# built at runtime, so this audit expands them rather than giving up on the
+# call. Each row is (section, source, suffixes, held): `source` is the name of
+# a String[] literal in the same file, or a list of IDs written out here;
+# every element + suffix is name-checked like a literal. `held` marks rows
+# whose IDs the player can hold, so their icon is checked as well (check 6).
+#
+# TwilightWares' rows are not held: those registrations are gated at runtime
+# on their own sheets (AVAILABLE_OUTFITS / decorDrawn), so an undrawn entry is
+# never registered and demanding its icon would be a false alarm; naming every
+# entry is still demanded, which is stricter than needed and keeps a later
+# batch honest. VeteranCatapultObject.register registers nine pieces, but only
+# i == 0, the master "veterancatapult", is obtainable -- pieces 2..9 are
+# registered false exactly like vanilla's multi-tile halves, which carry no
+# name or icon of their own.
+EXPANDED_REGISTRATIONS = {
+    ("TwilightWares.java", "register"): [
+        ("item", "OUTFITS", ("head", "chest", "boots"), False),
+        ("object", "RETIRED_PAINTINGS", ("",), False),
+        ("object", "LARGE_WALL_PIECES", ("",), False),
+    ],
+    ("VeteranCatapultObject.java", "register"): [
+        ("object", ["veterancatapult"], ("",), True),
+    ],
+}
+
+
+# TwilightWares registers a piece of furniture only when its sheet is in the
+# jar: `if (AVAILABLE_DECOR.contains("<id>")) { ...registerObject... }`, and
+# AVAILABLE_DECOR holds exactly the DECOR entries whose objects/<id>.png or
+# objects/paintings/<id>.png ships (TwilightWares.decorDrawn). An entry whose
+# sheet is not drawn yet is therefore never registered, and demanding its icon
+# and world sheet reported the hauntedscarecrow as ERR art it can never show.
+DECOR_GATE = re.compile(r'if\s*\(\s*AVAILABLE_DECOR\.contains\(\s*"(\w+)"\s*\)\s*\)\s*\{[^{}]*$')
+
+
+def gated_off(text, offset):
+    """True when the registration at `offset` sits directly inside an
+    AVAILABLE_DECOR gate whose sheet does not ship, i.e. it never runs."""
+    match = DECOR_GATE.search(strip_comments(text[max(0, offset - 400):offset]))
+    if match is None:
+        return False
+    decor = match.group(1)
+    return not any(os.path.exists(os.path.join(RESOURCES, *p.split("/")))
+                   for p in ("objects/%s.png" % decor, "objects/paintings/%s.png" % decor))
+
+
+def string_array(text, name):
+    """The literals of `NAME = { "a", "b" }` in `text`, or []."""
+    match = re.search(r'\b' + name + r'\s*=\s*\{([^}]*)\}', text)
+    return re.findall(r'"([^"]+)"', match.group(1)) if match else []
+
+
+def expanded_rows(path, owner=None):
+    """[(section, id, held)] for the EXPANDED_REGISTRATIONS rows of one file
+    (and one owning method, when given)."""
+    base = os.path.basename(path)
+    rows = [r for (f, m), rs in EXPANDED_REGISTRATIONS.items()
+            if f == base and owner in (None, m) for r in rs]
+    if not rows:
+        return []
+    text = open(path, encoding="utf-8").read()
+    out = []
+    for section, source, suffixes, held in rows:
+        names = source if isinstance(source, list) else string_array(text, source)
+        if not names:
+            print("!! %s: EXPANDED_REGISTRATIONS names %s, which is no longer a "
+                  "String[] literal there -- its IDs went unchecked" % (base, source))
+        out.extend((section, name + suffix, held) for name in names for suffix in suffixes)
+    return out
+
+
+def expanded_ids():
+    """{section: set(ids)} for every EXPANDED_REGISTRATIONS row."""
+    found = {}
+    for path in source_files():
+        for section, string_id, _held in expanded_rows(path):
+            found.setdefault(section, set()).add(string_id)
+    return found
+
 
 # Registry calls whose ID argument is legitimately a variable, keyed by the
 # method that owns them. Anything else means a new wrapper was added and the
@@ -184,6 +270,14 @@ ITEM_TEXTURE_BY_CLASS = {
     "TerrainSplatterTile": ("tiles", 1),
     "SimpleFloorTile": ("tiles", 0),
     "SimpleTiledFloorTile": ("tiles", 0),
+    # EdgedTiledTexture.generateItemTexture (EdgedTiledTexture.java:180-184,
+    # decompiled 1.3.2) crops cell (1,0) of tiles/<textureName>.png -- no
+    # items/ file at all. The name is argument 1 of EdgedTiledTexture(isFloor,
+    # textureName) and argument 0 of the PathTiledTile(textureName, mapColor)
+    # subclass that skywaypathtile uses. Without these rows the audit asked for
+    # items/skywaypathtile.png, a file the engine never opens.
+    "EdgedTiledTexture": ("tiles", 1),
+    "PathTiledTile": ("tiles", 0),
     # LiquidTile.generateItemTexture (LiquidTile.java:76) tints vanilla's
     # tiles/bucket with the liquid colour - nothing of ours is involved.
     "LiquidTile": None,
@@ -216,6 +310,9 @@ MULTI_OBJECT_HELD_SUFFIXES = {
     "registerWallObjects": (0, ("wall", "door")),
     "registerGatePair": (1, ("",)),
     "registerCrystalCluster": (0, ("",)),
+    # registerBed hands the player the head half only; its icon is the
+    # GameObject default, items/<id>.png.
+    "registerBed": (0, ("",)),
 }
 
 # --------------------------------------------------------------------------
@@ -371,6 +468,9 @@ def registered_ids(text):
         args = r'\(\s*' + r'\s*,\s*'.join([r'[^,()]+'] * index + [r'"([^"]+)"'])
         for match in re.finditer(call + args, text):
             found["object"].update(match.group(1) + suffix for suffix in suffixes)
+
+    for section, extra in expanded_ids().items():
+        found.setdefault(section, set()).update(extra)
 
     # LevelIdentifier.getLocalization() reads [level] by the identifier's own
     # string ID, which is NOT the ID passed to LevelRegistry.registerLevel.
@@ -646,6 +746,44 @@ ITEM_CLASS_VANILLA_ICON = {
 # rather than in src/main/resources.
 VANILLA = "vanilla:"
 
+# docs/VANILLA_ASSET_MAP.md is the ledger of every vanilla file the mod
+# borrows (AGENTS.md: "a borrowed asset that is not in that file breaks the
+# swap"). Without a sprite dump a path that is not ours cannot be proven to be
+# the game's, but a path the ledger NAMES is a documented borrow, and reporting
+# it as a missing file of ours is a false alarm: 26 of them drowned the real
+# findings on 2026-09-23. A path that is neither ours nor in the ledger is still
+# an error -- it is either a typo or an undocumented borrow, and both are bugs.
+VANILLA_ASSET_MAP = os.path.join(REPO, "docs", "VANILLA_ASSET_MAP.md")
+_documented = None
+
+
+def documented_borrow(paths):
+    """True when one of `paths` (resource paths, with or without .png) names a
+    file the ledger lists. The ledger writes `tiles/ravenfloor` in one cell and
+    bare `willowfloor` beside it, so a token matches on its last path part."""
+    global _documented
+    if _documented is None:
+        _documented = set()
+        try:
+            text = open(VANILLA_ASSET_MAP, encoding="utf-8").read()
+        except OSError:
+            text = ""
+        for token in re.findall(r'`([^`]+)`', text):
+            for part in re.split(r'[\s,()]+', token):
+                name = part.rsplit("/", 1)[-1]
+                if name.endswith(".png"):
+                    name = name[:-4]
+                if name:
+                    _documented.add(name)
+    for path in paths:
+        name = path.rsplit("/", 1)[-1]
+        if name.endswith(".png"):
+            name = name[:-4]
+        if name in _documented:
+            return True
+    return False
+
+
 # Recipe outputs that are VANILLA items. A mod recipe may produce one - the
 # game names it, draws it and ships its icon - so it needs neither an entry in
 # our locales nor a PNG of ours. Each entry has to be justified here, because
@@ -662,7 +800,15 @@ VANILLA = "vanilla:"
 # game's own locale/en.lang before being added.
 VANILLA_LOCALE_KEYS = {
     ("ui", "backbutton"),  # locale/en.lang:6246 "Back" - vanilla's own dialogues
-}                          # use it the same way (CollectorSettlerDialogue)
+                           # use it the same way (CollectorSettlerDialogue)
+    # Checked against the 1.3.2 server's locale/en.lang and de.lang on
+    # 2026-09-23: [ui] searchtip=Search / Suchen (en:6244, de:5918), the tip
+    # vanilla's own search boxes show; PickupFilterForm reuses it.
+    ("ui", "searchtip"),
+    # [mob] stylisthuman=Stylist / Stilistin (en:3626, de:3623). SalonWares
+    # re-registers vanilla's Stylist under her own ID and keeps her own name.
+    ("mob", "stylisthuman"),
+}
 
 VANILLA_RECIPE_OUTPUTS = set()
 
@@ -696,6 +842,14 @@ def call_sites(text, name):
     and anonymous subclasses, so the arguments cannot be split with a regex -
     the parser below tracks bracket depth and string literals.
     """
+    # Split on the CODE, not on the prose around it. A comment between two
+    # arguments -- "A weathered winged warden monument, 48x80: one tile of
+    # pedestal, wings spilling over both neighbours." above skywatchrubble's
+    # `new SkyDecoObject(...)` -- carries commas of its own, and every one of
+    # them split an "argument" here, so the registration read as built from
+    # "wings spilling over ... new SkyDecoObject(...)" and was reported as
+    # unfollowable. strip_comments keeps every offset.
+    text = strip_comments(text)
     out = []
     for match in re.finditer(r'\b' + name + r'\s*\(', text):
         i, depth, in_string = match.end(), 1, False
@@ -788,8 +942,16 @@ def our_constructor(class_name):
     """
     for path in source_files():
         text = open(path, encoding="utf-8").read()
-        for offset, params in call_sites(text, r'(?:public|protected|private)\s+'
+        # The access modifier is optional: SalonWares.SalonPoleObject() is a
+        # package-private constructor of a nested class, and requiring
+        # "public|protected|private" made its super("salonbarberpole", ...)
+        # unreachable. Without a modifier the same pattern also matches a
+        # `new X(...)` or `Outer.X(...)` call, so those are skipped by what
+        # stands in front of the name.
+        for offset, params in call_sites(text, r'(?:(?:public|protected|private)\s+)?'
                                          + re.escape(class_name)):
+            if re.search(r'(?:\bnew\s+|\.)$', text[max(0, offset - 16):offset]):
+                continue
             tail = text[offset:]
             supers = call_sites(tail[:tail.find("}")], "super")
             if supers:
@@ -874,11 +1036,25 @@ def held_content(recipes):
             for offset, args in call_sites(text, call):
                 if len(args) < 4:
                     continue
+                if gated_off(text, offset):
+                    continue  # never registered until its sheet is drawn
                 spot = where(path, text, offset)
                 ids = [literal(args[0])] if literal(args[0]) else None
                 if ids is None:
                     owners = method.findall(text[:offset])
-                    ids = wrapper_ids.get(owners[-1] if owners else "", [])
+                    owner = owners[-1] if owners else ""
+                    expanded = expanded_rows(path, owner)
+                    if expanded:
+                        # A loop registration: only the rows marked held can
+                        # reach the inventory (see EXPANDED_REGISTRATIONS).
+                        class_name, ctor = construction(args[1], text)
+                        for section, string_id, held in expanded:
+                            if held and section == kind:
+                                rows.append((spot, kind, string_id,
+                                             icon_paths(class_name, ctor, supers),
+                                             class_name))
+                        continue
+                    ids = wrapper_ids.get(owner, [])
                 if args[3] not in ("true", "false"):
                     rows.append((spot, kind, literal(args[0]) or args[0],
                                  UNRESOLVED, args[3]))
@@ -1006,6 +1182,8 @@ def check_world_textures(vanilla_dump=None):
         for offset, args in call_sites(text, "registerObject"):
             if len(args) < 2:
                 continue
+            if gated_off(text, offset):
+                continue  # see DECOR_GATE: never registered, never drawn
             class_name, ctor = construction(args[1], text)
             if class_name is None:
                 continue
@@ -1034,6 +1212,11 @@ def check_world_textures(vanilla_dump=None):
                 continue
             if vanilla_dump is not None and os.path.exists(
                     os.path.join(vanilla_dump, *wanted.split("/"))):
+                continue
+            if vanilla_dump is None and documented_borrow([wanted]):
+                print("-- note: the object registered at %s (%s) draws %s, a "
+                      "borrow docs/VANILLA_ASSET_MAP.md lists; pass --vanilla "
+                      "/path/to/sprite/dump to verify it" % (spot, class_name, wanted))
                 continue
             print("!! the object registered at %s (%s) draws %s in the world, which "
                   "does not exist -- GameTexture.fromFile hands back the engine's ERR "
@@ -1208,6 +1391,8 @@ def check_registration_wrappers():
             owner = owners[-1] if owners else "<unknown>"
             if owner in KNOWN_INDIRECT_METHODS:
                 continue
+            if (os.path.basename(path), owner) in EXPANDED_REGISTRATIONS:
+                continue  # expanded from its String[] by expanded_ids()
             print("!! %s builds an ID for %s that this audit cannot see -- add %s "
                   "to LOCAL_REGISTRARS so its IDs get name-checked"
                   % (where(path, text, match.start()), match.group(1), owner))
@@ -1334,6 +1519,10 @@ def main(vanilla_dump=None):
                 os.path.exists(os.path.join(vanilla_dump, *path.split("/")))
                 for path in wanted):
             borrowed += 1
+            continue
+        if vanilla_dump is None and documented_borrow(wanted):
+            borrowed += 1
+            unchecked.extend(wanted)
             continue
         print("!! %s %s (%s, registered at %s) has no %s -- the player can hold "
               "it and the inventory would draw the engine's ERR texture"
