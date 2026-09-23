@@ -148,7 +148,7 @@ the building is broken. Every POI below states its count and its ratio.
 
 | word | mechanism | how often the player meets one |
 |---|---|---|
-| **common** | a new *kind* on the existing `SkyLandscape` node lattice. `ROAD_CELL = 72`, `STATION_CHANCE = 0.66`, and ~66% of cells find land, so roughly **one designed place per 72×72-tile cell, two cells out of three** — the roads already lead to them. | every few minutes of walking |
+| **common** | a new *kind* on the existing `SkyLandscape` node lattice. `ROAD_CELL = 72`, `STATION_CHANCE = 0.42` (0.66 until 2026-09-23), and ~66% of cells find land, so roughly **one designed place in every three or four 72×72-tile cells** — the roads already lead to them. | every few minutes of walking |
 | **per region** | a lattice-cell roll at ~1 in 8 cells, i.e. one per ~576×576 tiles | a handful per world; a reason to explore outward |
 | **once per world** | a seed-derived site in a stated distance band from `SkyOrigin`, stamped lazily exactly the way `SkyLevel.ensureWardenSpire` stamps the Spire, and recorded in world data so it is never re-stamped | one, and the Ledger tells you where |
 

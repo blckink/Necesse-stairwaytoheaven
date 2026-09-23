@@ -92,6 +92,11 @@ public final class SkyLandscape {
      * monument they were built to reach.
      */
     public static final int SURFACE_PLINTH = 6;
+    /**
+     * A small basin of open cloud sea at the heart of a designed place: the
+     * Skyreach's own well. Highest of all, so nothing paves over it.
+     */
+    public static final int SURFACE_POOL = 7;
 
     public static final int PROP_NONE = 0;
     /** Deliberately empty: a designed place needs its open ground. */
@@ -136,6 +141,10 @@ public final class SkyLandscape {
     public static final int PROP_BUTTRESS = 15;
     /** A Sky Seraph on the verge, marking a stage along the passage. */
     public static final int PROP_MONUMENT = 16;
+    /** A fruiting bush in an orchard row. */
+    public static final int PROP_BUSH = 17;
+    /** A crate standing in a market square. */
+    public static final int PROP_CRATE = 18;
 
     public static int surfaceOf(int packed) {
         return packed & 0xFF;
@@ -192,15 +201,43 @@ public final class SkyLandscape {
     public static final float WAYPOINT_LAMP = 0.54F;
     public static final float WAYPOINT_MILESTONE = 0.74F;
 
-    /** Chance a node carries a designed place at all. */
-    public static final float STATION_CHANCE = 0.66F;
+    /**
+     * Chance a node carries a designed place at all.
+     *
+     * <p>Was 0.66, i.e. two junctions in three were a plaza. The player, after
+     * walking the Skyreach (2026-09-23): "zu oft wiederholte Anordnungen wie
+     * diese Plätze bei denen in der Mitte immer random Deko Objekt steht das man
+     * dann viel zu oft findet". A place stops being a place once the next one is
+     * over the next hill; most junctions are now just junctions.
+     */
+    public static final float STATION_CHANCE = 0.42F;
     public static final int STATION_MIN_RADIUS = 7;
     public static final int STATION_RADIUS_SPAN = 4;
+    /** How many designed-place kinds {@link #station} knows. */
+    public static final int STATION_KINDS = 4;
 
-    /** Gate stands this far outside the place it guards. */
-    public static final float GATE_OFFSET = 3.5F;
-    /** Half depth of a gate along the road: 0.85 gives a 2-tile-deep gate. */
+    /**
+     * Straight paving laid outward from a used entrance before the road is
+     * allowed to turn toward its neighbour. Without it a road leaving at an
+     * angle clips the railing beside its own gateway.
+     */
+    public static final int SPOKE_STUB = 3;
+
+    /** Half depth of a border gateway along the road: 0.85 gives a 2-tile-deep gate. */
     public static final float GATE_DEPTH = 0.85F;
+    /**
+     * A border gateway stands only on a road at least this long, and only this
+     * far from a designed place's entrance. Short edges between two plazas were
+     * where three gateways used to stack up inside twenty tiles.
+     */
+    public static final float BORDER_GATE_MIN_LENGTH = 44.0F;
+    public static final float BORDER_GATE_CLEARANCE = 18.0F;
+
+    /** Link bits: which of a node's four roads exist. +x, +y, -x, -y. */
+    public static final int LINK_E = 1;
+    public static final int LINK_S = 2;
+    public static final int LINK_W = 4;
+    public static final int LINK_N = 8;
 
     /** The Warden's Forecourt: paved apron around the spire. */
     public static final float HUB_INNER_CLEAR = 5.0F;
@@ -272,6 +309,7 @@ public final class SkyLandscape {
         float[] nodeRadius = new float[NODES];
         int[] nodeKind = new int[NODES];
         int[] nodeBiome = new int[NODES];
+        int[] nodeLinks = new int[NODES];
         float clearance = Float.MAX_VALUE;
 
         for (int i = 0; i < NODES; i++) {
@@ -296,7 +334,7 @@ public final class SkyLandscape {
                 nodeKind[i] = -1;
                 nodeRadius[i] = HUB_COURT_RADIUS;
             } else if (SkyNoise.hash(seed + SALT_STATION, cx, cy) < STATION_CHANCE) {
-                nodeKind[i] = (int) (SkyNoise.hash(seed + SALT_STATION + 1, cx, cy) * 3.0F);
+                nodeKind[i] = stationKind(seed, cx, cy);
                 nodeRadius[i] = STATION_MIN_RADIUS
                         + (int) (SkyNoise.hash(seed + SALT_STATION + 2, cx, cy) * STATION_RADIUS_SPAN);
             } else {
@@ -304,6 +342,7 @@ public final class SkyLandscape {
                 nodeRadius[i] = 0.0F;
             }
             nodeBiome[i] = biomeClassAt(seed, px, py, originX, originY);
+            nodeLinks[i] = links(seed, cx, cy, hubCellX, hubCellY);
 
             float dx = tileX - px;
             float dy = tileY - py;
@@ -339,9 +378,21 @@ public final class SkyLandscape {
                         continue;
                     }
                     int b = dir == 0 ? nodeIndex(ox + 1, oy) : nodeIndex(ox, oy + 1);
+                    // The road runs between the two ENTRANCES it uses, not
+                    // between the two centres. A road aimed at a plaza's
+                    // centre crossed its railing wherever the angle put it --
+                    // five to seven fence gates abreast on a diagonal -- and
+                    // then a second gateway stood 3.5 tiles further out on
+                    // the same road. Now each place is entered through the
+                    // one gate on the side the road comes from.
+                    float reachA = mouthReach(nodeKind[a], nodeRadius[a], dir == 0 ? LINK_E : LINK_S);
+                    float reachB = mouthReach(nodeKind[b], nodeRadius[b], dir == 0 ? LINK_W : LINK_N);
+                    float sx = nodeX[a] + (dir == 0 ? reachA : 0.0F);
+                    float sy = nodeY[a] + (dir == 0 ? 0.0F : reachA);
+                    float bx = nodeX[b] - (dir == 0 ? reachB : 0.0F);
+                    float by = nodeY[b] - (dir == 0 ? 0.0F : reachB);
                     int packed = alongEdge(seed, cx, cy, dir, wx, wy,
-                            nodeX[a], nodeY[a], nodeRadius[a], nodeBiome[a],
-                            nodeX[b], nodeY[b], nodeRadius[b], nodeBiome[b],
+                            sx, sy, nodeBiome[a], bx, by, nodeBiome[b],
                             tileX, tileY);
                     if (packed != 0) {
                         surface = Math.max(surface, surfaceOf(packed));
@@ -358,7 +409,10 @@ public final class SkyLandscape {
             if (nodeKind[i] < 0) {
                 continue;
             }
-            int packed = station(seed, nodeKind[i], (int) nodeRadius[i],
+            int cx = cellX + (i >> 2) - 1;
+            int cy = cellY + (i & 3) - 1;
+            int packed = station(seed, nodeKind[i], (int) nodeRadius[i], nodeLinks[i],
+                    SkyNoise.hash(seed + SALT_STATION + 3, cx, cy),
                     tileX - Math.round(nodeX[i]), tileY - Math.round(nodeY[i]), tileX, tileY);
             if (packed != 0) {
                 surface = Math.max(surface, surfaceOf(packed));
@@ -369,7 +423,14 @@ public final class SkyLandscape {
         }
 
         // --- the Warden's Forecourt ---
-        if (hubDist <= HUB_COURT_RADIUS + 0.5F) {
+        int hubEntrance = entrance((int) hubDx, (int) hubDy, Math.round(HUB_COURT_RADIUS),
+                LINK_E | LINK_S | LINK_W | LINK_N);
+        if (hubEntrance != 0) {
+            // The four roads meet the forecourt wall on the spire's own door
+            // axes, through one framed gateway each.
+            surface = Math.max(surface, surfaceOf(hubEntrance));
+            prop = propOf(hubEntrance);
+        } else if (hubDist <= HUB_COURT_RADIUS + 0.5F) {
             boolean onRail = discRing((int) hubDx, (int) hubDy, HUB_COURT_RADIUS);
             int hubSurface;
             if (onRail) {
@@ -394,19 +455,13 @@ public final class SkyLandscape {
         if (surface == SURFACE_NONE) {
             return SURFACE_NONE;
         }
-        // The carriageway stays walkable, always. This is also what opens every
-        // fence ring exactly where a road runs through it, for free — and a
-        // ring opened by a road is where the GATE belongs. Leaving a bare gap
-        // is what made the rings read as broken fences rather than as places
-        // with a way in; a fence gate is a door, so the road stays walkable.
-        if (surface == SURFACE_ROAD) {
-            if (prop == PROP_FENCE) {
-                prop = PROP_GATE;
-            } else if (prop == PROP_RAIL) {
-                prop = PROP_RAIL_GATE;               // the same rule, in Cloudmarble
-            } else {
-                prop = PROP_NONE;
-            }
+        // The carriageway stays walkable, always. The only gates are the ones a
+        // designed place puts in its own entrances (see #entrance); a fence or
+        // balustrade that some OTHER road happens to cross is simply opened.
+        // Turning every such crossing into a gate is what stood gates across
+        // junctions, beside gateways and in rows along diagonal roads.
+        if (surface == SURFACE_ROAD && prop != PROP_GATE) {
+            prop = PROP_NONE;
         }
         // Never build inside the spire preset's reach.
         if (hubDist < HUB_PROP_MIN && prop != PROP_CLEAR) {
@@ -499,7 +554,7 @@ public final class SkyLandscape {
                 if (SkyNoise.hash(seed + SALT_STATION, cx, cy) >= STATION_CHANCE) {
                     continue;
                 }
-                int kind = (int) (SkyNoise.hash(seed + SALT_STATION + 1, cx, cy) * 3.0F);
+                int kind = stationKind(seed, cx, cy);
                 int radius = STATION_MIN_RADIUS
                         + (int) (SkyNoise.hash(seed + SALT_STATION + 2, cx, cy) * STATION_RADIUS_SPAN);
                 long packedNode = nodeSite(seed, cx, cy);
@@ -605,9 +660,13 @@ public final class SkyLandscape {
     // One road edge: carriageway, gates, roadside furniture
     // ------------------------------------------------------------------
 
+    /**
+     * One road between two points: the entrances it uses at a designed place,
+     * or the node itself at a plain junction.
+     */
     private static int alongEdge(int seed, int cx, int cy, int dir, float wx, float wy,
-                                 float ax, float ay, float ar, int abiome,
-                                 float bx, float by, float br, int bbiome,
+                                 float ax, float ay, int abiome,
+                                 float bx, float by, int bbiome,
                                  int tileX, int tileY) {
         float ex = bx - ax;
         float ey = by - ay;
@@ -642,10 +701,11 @@ public final class SkyLandscape {
         boolean passage = abiome == SkyTerrainPainter.BIOME_SKYWAY
                 && bbiome == SkyTerrainPainter.BIOME_SKYWAY;
 
-        // --- gates: at the approach to a designed place, and where the road
-        // --- crosses from one sub-biome into another.
-        int gate = gateAt(s, len, ar, br, abiome != bbiome);
-        if (gate != 0) {
+        // --- the border gateway: where the road crosses from one sub-biome
+        // --- into another, and nowhere else. The approach gateway that used
+        // --- to stand 3.5 tiles outside every plaza is gone: the plaza's own
+        // --- entrance IS its gate, and two in a row read as a mistake.
+        if (abiome != bbiome && isBorderGate(s, len)) {
             // A gate is: opening, pillar, WING, lit end — in that order,
             // outward from the road. The wing has to START at the pillar,
             // because a fence attaches to a wall: the old layout put the lamp
@@ -678,7 +738,7 @@ public final class SkyLandscape {
         // railings, and roadside furniture crowding into it was the first
         // calibration render's worst failure. The balustrade observes the same
         // clearance, so it stops short of a court instead of running into it.
-        if (s < Math.max(ar, 4.0F) + 8.0F || s > len - (Math.max(br, 4.0F) + 8.0F)) {
+        if (s < 12.0F || s > len - 12.0F) {
             return 0;
         }
         int steps = Math.round(len / WAYPOINT_SPACING);
@@ -783,27 +843,14 @@ public final class SkyLandscape {
     }
 
     /**
-     * Is arc position {@code s} inside a gate on an edge of length {@code len}?
-     * Gates stand just outside whatever they guard, and one more stands where
-     * the road crosses a sub-biome border.
+     * Is arc position {@code s} inside the border gateway of an edge of length
+     * {@code len}? One gateway, at the middle, and only on a road long enough
+     * that it stands well clear of the entrances at both ends.
      */
-    private static int gateAt(float s, float len, float startRadius, float endRadius, boolean biomeChange) {
-        if (startRadius > 0.0F) {
-            float g = startRadius + GATE_OFFSET;
-            if (g < len * 0.4F && Math.abs(s - g) <= GATE_DEPTH) {
-                return 1;
-            }
-        }
-        if (endRadius > 0.0F) {
-            float g = len - (endRadius + GATE_OFFSET);
-            if (g > len * 0.6F && Math.abs(s - g) <= GATE_DEPTH) {
-                return 1;
-            }
-        }
-        if (biomeChange && Math.abs(s - len * 0.5F) <= GATE_DEPTH) {
-            return 1;
-        }
-        return 0;
+    private static boolean isBorderGate(float s, float len) {
+        return len >= BORDER_GATE_MIN_LENGTH
+                && len * 0.5F >= BORDER_GATE_CLEARANCE
+                && Math.abs(s - len * 0.5F) <= GATE_DEPTH;
     }
 
     // ------------------------------------------------------------------
@@ -811,133 +858,351 @@ public final class SkyLandscape {
     // ------------------------------------------------------------------
 
     /**
-     * The three designed places, laid out in world-aligned tile geometry
-     * (the warp is attenuated to nothing here, so these stay crisp):
+     * Which designed place stands at the node of cell (cx, cy). Shares, from
+     * the hash: Garden Court 30%, Waystation Square 25%, Overlook Terrace 20%,
+     * Orchard 25%.
+     */
+    public static int stationKind(int seed, int cx, int cy) {
+        float k = SkyNoise.hash(seed + SALT_STATION + 1, cx, cy);
+        if (k < 0.30F) {
+            return 0;
+        }
+        if (k < 0.55F) {
+            return 1;
+        }
+        if (k < 0.75F) {
+            return 2;
+        }
+        return 3;
+    }
+
+    /**
+     * Which of the node's four roads exist, as {@link #LINK_E} | {@link #LINK_S}
+     * | {@link #LINK_W} | {@link #LINK_N}. The east and south roads are the
+     * node's own; the west and north ones belong to its neighbours.
+     */
+    private static int links(int seed, int cx, int cy, int hubCellX, int hubCellY) {
+        int mask = 0;
+        if (linkExists(seed, cx, cy, 0, hubCellX, hubCellY)) {
+            mask |= LINK_E;
+        }
+        if (linkExists(seed, cx, cy, 1, hubCellX, hubCellY)) {
+            mask |= LINK_S;
+        }
+        if (linkExists(seed, cx - 1, cy, 0, hubCellX, hubCellY)) {
+            mask |= LINK_W;
+        }
+        if (linkExists(seed, cx, cy - 1, 1, hubCellX, hubCellY)) {
+            mask |= LINK_N;
+        }
+        return mask;
+    }
+
+    /**
+     * How far from its node a road meets a designed place on the side
+     * {@code link} names: the railing's distance on that axis, plus the
+     * straight stub laid outward from the gate. 0 for a plain junction.
+     */
+    private static float mouthReach(int kind, float radius, int link) {
+        if (radius <= 0.0F) {
+            return 0.0F;
+        }
+        return railDistance(kind, Math.round(radius), link) + SPOKE_STUB;
+    }
+
+    /**
+     * Distance from the centre to the enclosure's railing along the axis of
+     * {@code link}. Only the Overlook Terrace is not square: its short sides
+     * are {@code radius - 2} out.
+     */
+    private static int railDistance(int kind, int radius, int link) {
+        if (kind == 2 && (link == LINK_N || link == LINK_S)) {
+            return radius - 2;
+        }
+        return radius;
+    }
+
+    /** The side a tile lies on, as a link bit, if it is within the 3-wide axis band; else 0. */
+    private static int axisSide(int dx, int dy) {
+        if (Math.abs(dy) <= 1 && dx != 0 && Math.abs(dx) > Math.abs(dy)) {
+            return dx > 0 ? LINK_E : LINK_W;
+        }
+        if (Math.abs(dx) <= 1 && dy != 0 && Math.abs(dy) > Math.abs(dx)) {
+            return dy > 0 ? LINK_S : LINK_N;
+        }
+        return 0;
+    }
+
+    /**
+     * The entrance of an enclosure whose railing stands {@code rail} tiles out
+     * on every axis the mask opens: the three-wide gate in the railing, a wall
+     * pillar framing it on each side, and the straight stub of road outside it.
+     *
+     * <p>ONE gateway per road. The pillars are what make three fence gates
+     * abreast read as a single gate rather than a gap in a fence, and a fence
+     * attaches to a wall, so the railing runs straight into them.
+     *
+     * @return packed surface/prop, or 0 when the tile is not part of an entrance
+     */
+    private static int entrance(int dx, int dy, int rail, int mask) {
+        int ax = Math.abs(dx);
+        int ay = Math.abs(dy);
+        int along;
+        int across;
+        int side;
+        if (ax >= ay) {
+            along = ax;
+            across = ay;
+            side = dx > 0 ? LINK_E : LINK_W;
+        } else {
+            along = ay;
+            across = ax;
+            side = dy > 0 ? LINK_S : LINK_N;
+        }
+        if ((mask & side) == 0 || across > 2 || along < rail || along > rail + SPOKE_STUB) {
+            return 0;
+        }
+        if (along == rail) {
+            return across <= 1 ? pack(SURFACE_ROAD, PROP_GATE) : pack(SURFACE_APRON, PROP_PILLAR);
+        }
+        return across <= 1 ? pack(SURFACE_ROAD, PROP_NONE) : 0;
+    }
+
+    /**
+     * The designed places, laid out in world-aligned tile geometry (the warp
+     * is attenuated to nothing here, so these stay crisp). Each one opens a
+     * gate only on the sides a road actually arrives from; the others stay
+     * closed railing.
      *
      * <ul>
-     *   <li>0 — <b>Garden Court</b>: a round fenced plot, four paved spokes, a
-     *       statue on a marble plinth, quartered flower beds, corner trees.</li>
-     *   <li>1 — <b>Waystation Square</b>: a paved square inside a railing, four
-     *       corner lamps, a statue (one square in three: an instrument) at the centre, weathered
-     *       rubble and lit accents scattered over the flags.</li>
-     *   <li>2 — <b>Overlook Terrace</b>: a stepped rectangle — planted apron,
-     *       raised inner platform, railing all round, an instrument and lamps
-     *       looking out over the edge.</li>
+     *   <li>0 — <b>Garden Court</b>: a round fenced plot, quartered flower
+     *       beds, corner trees. Its heart is a statue, a single great tree, a
+     *       cloud-sea basin or one lamp, chosen per court.</li>
+     *   <li>1 — <b>Waystation Square</b>: a paved square inside a railing with
+     *       four corner lamps. Its heart is an instrument, a basin, or a
+     *       market of crates round a lamp -- or it is left open.</li>
+     *   <li>2 — <b>Overlook Terrace</b>: a planted apron round a raised
+     *       platform; the instrument stands at one end looking out, never in
+     *       the middle.</li>
+     *   <li>3 — <b>Orchard</b>: trees in rows with fruiting bushes between them
+     *       inside a fence, crossed by the paths the roads bring in.</li>
      * </ul>
      *
-     * @param dx tile position relative to the (integer-snapped) node
+     * <p>Until 2026-09-23 there were three kinds and every one of them stood a
+     * statue or an instrument on its centre tile, and two nodes in three had
+     * one: the player met the same composition around every corner.
+     *
+     * @param links    which sides have a road ({@link #LINK_E} etc.)
+     * @param variant  the place's own hash in [0,1), for its per-place choices
+     * @param dx       tile position relative to the (integer-snapped) node
      */
-    private static int station(int seed, int kind, int radius, int dx, int dy, int tileX, int tileY) {
+    private static int station(int seed, int kind, int radius, int links, float variant,
+                               int dx, int dy, int tileX, int tileY) {
         int ax = Math.abs(dx);
         int ay = Math.abs(dy);
         int mx = Math.max(ax, ay);
         int mn = Math.min(ax, ay);
+        int side = axisSide(dx, dy);
+        boolean openSpoke = side != 0 && (links & side) != 0;
+
+        // Entrances first: the gate, its pillars and the stub outside. The
+        // railing's distance depends on the axis only for the terrace.
+        int facing = ax >= ay ? (dx > 0 ? LINK_E : LINK_W) : (dy > 0 ? LINK_S : LINK_N);
+        int gate = entrance(dx, dy, railDistance(kind, radius, facing), links);
+        if (gate != 0) {
+            return gate;
+        }
+
         if (kind == 0) {
+            // --- Garden Court ---
             float d = (float) Math.sqrt(dx * dx + dy * dy);
             if (d > radius + 0.5F) {
                 return 0;
             }
+            int heart = heartOf(0, variant);
+            if (heart == HEART_POOL && mx <= 2) {
+                return mx <= 1 ? pack(SURFACE_POOL, PROP_NONE) : pack(SURFACE_PLINTH, PROP_CLEAR);
+            }
             if (mx <= 1) {
-                return dx == 0 && dy == 0
-                        ? pack(SURFACE_PLINTH, PROP_STATUE)
-                        : pack(SURFACE_PLINTH, PROP_CLEAR);
+                if (heart == HEART_TREE) {
+                    return dx == 0 && dy == 0 ? pack(SURFACE_GARDEN, PROP_TREE)
+                            : pack(SURFACE_GARDEN, PROP_CLEAR);
+                }
+                if (dx == 0 && dy == 0) {
+                    return pack(SURFACE_PLINTH, heart == HEART_LAMP ? PROP_LAMP : PROP_STATUE);
+                }
+                return pack(SURFACE_PLINTH, PROP_CLEAR);
             }
-            boolean onRail = discRing(dx, dy, radius);
-            if (mn <= 1) {
-                // The four spokes are the way in. Where a spoke crosses the
-                // ring the fence becomes a gate instead of simply stopping.
-                return onRail ? pack(SURFACE_ROAD, PROP_FENCE)
-                        : pack(SURFACE_ROAD, PROP_NONE);
-            }
-            if (onRail) {
+            if (discRing(dx, dy, radius)) {
                 return pack(SURFACE_GARDEN, PROP_FENCE);
+            }
+            if (openSpoke) {
+                return pack(SURFACE_ROAD, PROP_NONE);
             }
             if (ax == ay && ax == radius - 3) {
                 return pack(SURFACE_GARDEN, PROP_TREE);
             }
-            if (mn == 2 && mx == radius - 2) {
-                return pack(SURFACE_APRON, PROP_LAMP);           // spoke mouths
+            if (mn == 2 && mx == radius - 2 && (links & sideOfSpokeMouth(dx, dy)) != 0) {
+                return pack(SURFACE_APRON, PROP_LAMP);           // beside a used way in
             }
-            float fill = SkyNoise.tileRoll(seed, tileX, tileY, SALT_BED);
-            if (fill < 0.42F) {
-                return pack(SURFACE_GARDEN, PROP_FLOWER);
-            }
-            if (fill < 0.62F) {
-                return pack(SURFACE_GARDEN, PROP_GRASS);
-            }
-            return pack(SURFACE_GARDEN, PROP_CLEAR);
+            return bed(seed, tileX, tileY, 0.42F, 0.62F);
         }
+
         if (kind == 1) {
+            // --- Waystation Square ---
             if (mx > radius) {
                 return 0;
             }
-            if (mx <= 1) {
-                return dx == 0 && dy == 0
-                        ? pack(SURFACE_PLINTH, PROP_INSTRUMENT)
-                        : pack(SURFACE_PLINTH, PROP_CLEAR);
-            }
             if (mx == radius) {
-                // The spokes cut the railing, and the cut carries a gate. The
-                // railing used to be tested first, so a square whose node had
-                // no road link was sealed shut with no way in at all.
-                return mn <= 1 ? pack(SURFACE_ROAD, PROP_FENCE)
-                        : pack(SURFACE_APRON, PROP_FENCE);       // railing
+                return pack(SURFACE_APRON, PROP_FENCE);           // railing
             }
-            if (mn <= 1) {
+            int heart = heartOf(1, variant);
+            if (heart == HEART_POOL && mx <= 2) {
+                return mx <= 1 ? pack(SURFACE_POOL, PROP_NONE) : pack(SURFACE_PLINTH, PROP_CLEAR);
+            }
+            if (mx <= 1) {
+                if (dx == 0 && dy == 0 && heart == HEART_INSTRUMENT) {
+                    return pack(SURFACE_PLINTH, PROP_INSTRUMENT);
+                }
+                if (dx == 0 && dy == 0 && heart == HEART_MARKET) {
+                    return pack(SURFACE_PLINTH, PROP_LAMP);
+                }
+                return pack(heart == HEART_OPEN ? SURFACE_INLAY : SURFACE_PLINTH, PROP_CLEAR);
+            }
+            if (openSpoke) {
                 return pack(SURFACE_ROAD, PROP_NONE);
             }
             if (ax == ay && ax == radius - 2) {
                 return pack(SURFACE_APRON, PROP_LAMP);
             }
             int field = mx <= radius - 4 ? SURFACE_INLAY : SURFACE_COURT;
-            float fill = SkyNoise.tileRoll(seed, tileX, tileY, SALT_COURT);
-            if (fill < 0.055F) {
-                return pack(field, PROP_RUBBLE);
-            }
-            if (fill < 0.095F) {
-                return pack(field, PROP_ACCENT);
+            if (heart == HEART_MARKET && mn >= 2 && mx <= radius - 3) {
+                // Stalls: a short row of crates in two opposite quadrants,
+                // standing back from the paths so the square stays walkable.
+                boolean quadrant = (dx > 0) == (dy > 0);
+                if (quadrant == (variant < 0.5F) && ay == 3 && ax >= 3 && ax <= 4) {
+                    return pack(field, PROP_CRATE);
+                }
             }
             return pack(field, PROP_CLEAR);
         }
-        // kind 2 — Overlook Terrace
-        int w = radius;
-        int h = radius - 2;
-        if (ax > w || ay > h) {
+
+        if (kind == 2) {
+            // --- Overlook Terrace ---
+            int w = radius;
+            int h = radius - 2;
+            if (ax > w || ay > h) {
+                return 0;
+            }
+            if (ax == w || ay == h) {
+                return pack(SURFACE_APRON, PROP_FENCE);           // railing
+            }
+            if (ax <= w - 3 && ay <= h - 2) {
+                // The platform. Its middle is left open and so are the paths
+                // across it; the instrument stands at the end that looks out,
+                // beside the path rather than on it, and a pair of lamps
+                // answers it at the other end.
+                int end = variant < 0.5F ? 1 : -1;
+                if (ay == 2 && ax == w - 4) {
+                    return dx * end > 0
+                            ? (dy > 0 ? pack(SURFACE_PLINTH, PROP_INSTRUMENT) : pack(SURFACE_PLINTH, PROP_CLEAR))
+                            : pack(SURFACE_APRON, PROP_LAMP);
+                }
+                return pack(ay <= h - 4 ? SURFACE_INLAY : SURFACE_COURT, PROP_CLEAR);
+            }
+            if (openSpoke) {
+                return pack(SURFACE_ROAD, PROP_NONE);           // the way in, across the apron
+            }
+            return bed(seed, tileX, tileY, 0.34F, 0.48F);
+        }
+
+        // --- kind 3: Orchard ---
+        if (mx > radius) {
             return 0;
         }
-        if (ax == w || ay == h) {
-            // Same as the square: the terrace's long axis is its way in, and
-            // the railing carries a gate there rather than simply stopping.
-            return ax == w && ay <= 1 ? pack(SURFACE_ROAD, PROP_FENCE)
-                    : pack(SURFACE_APRON, PROP_FENCE);           // railing
+        if (mx == radius) {
+            return pack(SURFACE_GARDEN, PROP_FENCE);
         }
-        if (ax <= w - 3 && ay <= h - 2) {
-            if (ax <= 1 && ay <= 1) {
-                return dx == 0 && dy == 0
-                        ? pack(SURFACE_PLINTH, PROP_INSTRUMENT)
-                        : pack(SURFACE_PLINTH, PROP_CLEAR);
-            }
-            if (ay == 0 && ax == w - 4) {
-                return pack(SURFACE_APRON, PROP_LAMP);
-            }
-            if (ax == w - 5 && ay == h - 3) {
-                return pack(SURFACE_COURT, PROP_ACCENT);
-            }
-            int field = ay <= h - 4 ? SURFACE_INLAY : SURFACE_COURT;
-            float fill = SkyNoise.tileRoll(seed, tileX, tileY, SALT_COURT);
-            if (fill < 0.05F) {
-                return pack(field, PROP_RUBBLE);
-            }
-            return pack(field, PROP_CLEAR);
+        if (openSpoke) {
+            return pack(SURFACE_ROAD, PROP_NONE);
         }
-        if (ay == 0) {
-            return pack(SURFACE_ROAD, PROP_NONE);                // the way in
+        if (mx <= 1) {
+            return pack(SURFACE_ROAD, PROP_NONE);                // where the paths cross
         }
+        if (mx == radius - 1) {
+            return pack(SURFACE_GARDEN, PROP_CLEAR);             // headland inside the fence
+        }
+        // Rows: a tree every third tile along a row, the rows three apart,
+        // a bush midway between two trees. Offset by one so no tree lands on
+        // the paths' edge.
+        int rx = Math.floorMod(dx + 1, 3);
+        int ry = Math.floorMod(dy + 1, 3);
+        if (ry == 0 && rx == 0 && mn >= 2) {
+            return pack(SURFACE_GARDEN, PROP_TREE);
+        }
+        if (ry == 0 && rx == 2 && mn >= 2) {
+            return pack(SURFACE_GARDEN, PROP_BUSH);
+        }
+        return SkyNoise.tileRoll(seed, tileX, tileY, SALT_BED) < 0.25F
+                ? pack(SURFACE_GARDEN, PROP_GRASS)
+                : pack(SURFACE_GARDEN, PROP_CLEAR);
+    }
+
+    /** What stands at the heart of a place. */
+    private static final int HEART_STATUE = 0;
+    private static final int HEART_TREE = 1;
+    private static final int HEART_POOL = 2;
+    private static final int HEART_LAMP = 3;
+    private static final int HEART_INSTRUMENT = 4;
+    private static final int HEART_MARKET = 5;
+    private static final int HEART_OPEN = 6;
+
+    /**
+     * The heart of a Garden Court (kind 0) or Waystation Square (kind 1),
+     * from the place's own hash. Rescaled from the upper part of the hash so it
+     * is independent of the market's quadrant choice, which reads the lower.
+     */
+    private static int heartOf(int kind, float variant) {
+        float v = (variant * 7.0F) % 1.0F;
+        if (kind == 0) {
+            if (v < 0.30F) {
+                return HEART_STATUE;
+            }
+            if (v < 0.60F) {
+                return HEART_TREE;
+            }
+            if (v < 0.85F) {
+                return HEART_POOL;
+            }
+            return HEART_LAMP;
+        }
+        if (v < 0.30F) {
+            return HEART_INSTRUMENT;
+        }
+        if (v < 0.50F) {
+            return HEART_POOL;
+        }
+        if (v < 0.75F) {
+            return HEART_MARKET;
+        }
+        return HEART_OPEN;
+    }
+
+    /** The side whose spoke mouth the lamp tile at |mn|==2 flanks. */
+    private static int sideOfSpokeMouth(int dx, int dy) {
+        if (Math.abs(dx) > Math.abs(dy)) {
+            return dx > 0 ? LINK_E : LINK_W;
+        }
+        return dy > 0 ? LINK_S : LINK_N;
+    }
+
+    /** A planted bed: flowers below {@code flower}, grass below {@code grass}, else bare. */
+    private static int bed(int seed, int tileX, int tileY, float flower, float grass) {
         float fill = SkyNoise.tileRoll(seed, tileX, tileY, SALT_BED);
-        if (fill < 0.34F) {
+        if (fill < flower) {
             return pack(SURFACE_GARDEN, PROP_FLOWER);
         }
-        if (fill < 0.48F) {
+        if (fill < grass) {
             return pack(SURFACE_GARDEN, PROP_GRASS);
         }
         return pack(SURFACE_GARDEN, PROP_CLEAR);

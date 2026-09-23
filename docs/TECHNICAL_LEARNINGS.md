@@ -3987,3 +3987,43 @@ gemessen an `paintingabstract`/`paintingapple`/`paintingbroken`: rot0 unten
 buendig und waagerecht mittig, rot1 **buendig an der rechten** Zellkante, rot2
 mittig, rot3 **buendig an der linken**. Vanillas Seitenansichten sind dabei nur
 etwa 6 px breit.
+
+## Skywatch-Strassen: Tore nur am Eingang, Strassen enden am Eingang (2026-09-23)
+
+**VERIFIED [run]** mit `scripts/SkyMapDump.java` gegen den gebauten Jar, alt
+(HEAD vor dem Umbau) gegen neu, je 600x600 Felder um den Hub, Seeds 12345 / 777
+/ 20260827. Gezaehlt als 8-zusammenhaengende Komponenten von Zauntor-Objekten:
+
+| | Tor-Gruppen | davon 4–7 breit | Wandbloecke (Torpfeiler) |
+|---|---|---|---|
+| alt | 99 / 132 / 124 | 40 / 39 / 40 | 422 / 540 / 459 |
+| neu | 50 / 57 / 35 | 0 / 0 / 0 | 189 / 190 / 144 |
+
+Drei Mechanismen hatten die Tore gestapelt, alle in `SkyLandscape`:
+
+1. `gateAt` stellte 3,5 Felder VOR jeden Platz ein Pfeilertor auf jede Strasse,
+   und der Platz hatte im Zaunring dahinter sein eigenes Tor — zwei Tore
+   hintereinander an jedem Eingang, drei auf kurzen Kanten mit Biomwechsel.
+2. Die Strassen zielten auf die Platzmitte. Wo eine Strasse den Ring schraeg
+   kreuzte, machte die Regel "Zaun auf Strasse wird Tor" daraus 4–7 Tore
+   nebeneinander.
+3. Dieselbe Regel machte jede Kreuzung einer fremden Strasse mit einem
+   Beet- oder Balustradenzaun zum Tor.
+
+Jetzt: eine Strasse laeuft von Eingang zu Eingang (`mouthReach`: Ringabstand
+plus `SPOKE_STUB` gerade Strecke), ein Platz oeffnet nur die Seiten, von denen
+eine Strasse kommt (`links`), und jedes Tor ist genau drei Tore breit mit einem
+Wandpfeiler auf jeder Seite (`entrance`). Ein Zaun, den eine fremde Strasse
+kreuzt, wird geoeffnet, nicht vergittert. Das Grenztor bei Biomwechsel bleibt,
+aber nur auf Kanten ab 44 Feldern Laenge.
+
+Die Plaetze selbst: `STATION_CHANCE` 0.66 -> 0.42, vier Arten statt drei (neu:
+Obsthain mit Baumreihen und Wolkenbeerbueschen), und die Mitte wechselt pro
+Platz (Statue / grosser Baum / Wolkensee-Becken / Laterne bzw. Instrument /
+Becken / Marktstaende / offen). Gezaehlt auf Seed 777: Raben-/Seraphstatuen auf
+Plaetzen 29 -> 10, verstreute Truemmer-/Kristall-Akzente in Plaetzen 94 -> 0.
+
+**Nicht verifiziert [game]:** wie die neuen Becken (`SURFACE_POOL`, Mistsea)
+im Spiel aussehen, und ob an bereits generierten Regionen eine Naht entsteht —
+schon erkundeter Himmel wird nicht neu gezeichnet, dort kann eine alte Strasse
+an einer neuen Regionsgrenze auf einen Platz ohne Tor treffen.

@@ -7,6 +7,20 @@ Status values: **KEEP** · **OPEN** · **FIXED** · **REDESIGN** · **FEATURE**
 
 ---
 
+## 2026-09-23 — Skyreach walk: gates in a row, repeated plazas, plain houses
+
+Player report (first part of the current area only): *"dort waren wieder
+unnötig angeordnete Tore (mehrere hintereinander), keine schönen angeordneten
+Häuser mit vielen Details und sinnvoller Einrichtung, zu oft wiederholte
+Anordnungen wie diese Plätze bei denen in der Mitte immer random Deko Objekt
+steht das man dann viel zu oft findet"*
+
+| Area | Finding | State |
+|---|---|---|
+| Gates in a row | Three causes in `SkyLandscape`: an approach gateway 3.5 tiles before every plaza on top of the plaza's own gate, roads aimed at the plaza centre crossing its ring at an angle (4–7 gates abreast), and every fence a road crossed becoming a gate. Measured before/after in `docs/TECHNICAL_LEARNINGS.md` (2026-09-23): gate groups 99/132/124 -> 50/57/35 on three seeds, 4–7-wide rows 40/39/40 -> 0. | **FIXED — NOT YET PLAYER CONFIRMED** |
+| Repeated plazas with a random piece in the middle | Two junctions in three were a plaza and every plaza had a statue or instrument on its centre tile plus scattered rubble/crystals. Now 0.42, four kinds (new: orchard), per-plaza heart (statue, tree, basin, lamp, instrument, market, open) and no scatter. | **FIXED — NOT YET PLAYER CONFIRMED** |
+| Houses plain, same furniture | See the commit that rebuilds the Skyreach town, inn and toll bridge presets. | see git log |
+
 ## 2026-09-05 — "Übersicht pro Gebiet", and testing an existing save
 
 Not a play session — a request, in the player's own words:

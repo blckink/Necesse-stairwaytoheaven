@@ -538,6 +538,10 @@ public final class SkyTerrainPainter {
         if (surface == SkyLandscape.SURFACE_INLAY || surface == SkyLandscape.SURFACE_PLINTH) {
             return SkyRegistry.skyplinthTileID != 0 ? SkyRegistry.skyplinthTileID : naturalTileID;
         }
+        if (surface == SkyLandscape.SURFACE_POOL) {
+            // A well of the Skyreach's own cloud sea at the heart of a place.
+            return SkyRegistry.mistseaID != 0 ? SkyRegistry.mistseaID : naturalTileID;
+        }
         return naturalTileID;                    // SURFACE_GARDEN keeps its soil
     }
 
@@ -622,6 +626,11 @@ public final class SkyTerrainPainter {
                 return pick < 1.0F / 6.0F
                         ? SkyRegistry.skywatchTelescopeID : SkyRegistry.skywatchAstrolabeID;
             }
+
+            case SkyLandscape.PROP_BUSH:
+                return SkyRegistry.cloudberryBushID;
+            case SkyLandscape.PROP_CRATE:
+                return SkyRegistry.skyCrateID;
 
             // --- the passage vocabulary: always Cloudmarble ---
             case SkyLandscape.PROP_RAIL:

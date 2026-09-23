@@ -968,7 +968,7 @@ fi
 # A raw string ID here would mean the road paves itself with nothing.
 grep -qE "roadtile=snowstonepathtile" "$LOG1" \
     || { echo "FAIL: the road paving material did not resolve"; STATUS=1; }
-grep -qE "designed place: kind=[0-2] radius=[0-9]+" "$LOG1" \
+grep -qE "designed place: kind=[0-3] radius=[0-9]+" "$LOG1" \
     || { echo "FAIL: no designed place within three lattice cells of the hub"; STATUS=1; }
 
 echo "--- verifying the Skyway Passages generate ---"
