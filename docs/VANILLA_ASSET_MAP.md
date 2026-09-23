@@ -113,10 +113,12 @@ deliberately not used by any of this.
 | Dorian | `mobs/icons/vampire` (icon) | his settlement-screen face — vanilla registers `vampire` as a hostile mob, so this is one of its own icons, and it is the one face in the game's roster that already reads as what he is |
 | Dorian | `thiefscloak`, `dressshoes` (worn items) | the black cloak. No hat on purpose: Mortimer already wears vanilla's top hat with the same cloak, and the two would be twins from behind |
 | Blood Vial | `items/healthpotion` (item icon, `BloodVialItem.BORROWED_ICON`) | a small red bottle, standing in until a vial is drawn. Taught to `tools/locale_audit.py` via `ITEM_CLASS_VANILLA_ICON` so the audit checks the vanilla file rather than reporting a missing one of ours |
-| Blood Thrall | vanilla's `cryptbat` sheet and bestiary face (inherited, `BloodThrallMob extends CryptBatMob` overrides nothing about drawing) | the animal that gets up again after the vampire has fed. Only the loot table is ours |
+| Blood Thrall | vanilla's `cryptbat` sheet and bestiary face (sheet inherited from `CryptBatMob`; the bestiary face through `BorrowedMobIcon.from("cryptbat")`, since the inherited `getMobIcon` asked for a nonexistent `mobs/icons/bloodthrall`) | the animal that gets up again after the vampire has fed. Only the loot table is ours |
 | Blood Fever | `buffs/bleeding` (buff icon, `BloodFeverBuff.BORROWED_ICON`) | the debuff icon on a bitten resident — the closest thing in vanilla's own buff set |
 | Therapist | `mobs/icons/alchemisthuman` (icon) | the settlement-screen face of the mod's one PROFESSION (not a named person — see `docs/settlers.md`). The Alchemist is the closest thing vanilla's roster draws to somebody who tends to people rather than to ground |
 | Doctor | `mobs/icons/traderhuman` (icon) | the settlement-screen face of the mod's second profession. A plain face on purpose: the Alchemist's hooded apothecary was the obvious pick and the Therapist already wears it, and everything else vanilla draws comes with another job's hat (the Miner's lamp, the Angler's sou'wester, the Mage's point). This one has none, which is right for a profession whose identity is the mask and coat the mob itself wears |
+| War Veteran | `mobs/icons/guardhuman` (icon, `WarVeteranSettler.iconPath`) | the settlement-screen face of the soldier profession — vanilla's Guard. `WarVeteranSettler` pointed at this row before it existed; added 2026-09-23 |
+| Twilight Merchant | `mobs/icons/exoticmerchanthuman` (icon, `TwilightMerchantSettler.loadTextures`) | the visitor's settlement-screen face — vanilla's Exotic Merchant, the visitor he is built after. Before 2026-09-23 the settler asked for a nonexistent `mobs/icons/twilightmerchanthuman` and fell through to the ERR tile |
 | Doctor | `surgicalmask`, `labcoat`, `labboots` (worn items, `DoctorSettler.wardrobe`) | the practice. All three are sold by vanilla's own Alchemist, so none of them is a stretch |
 | Therapist | `blazer`, `dressshoes` (worn items, `TherapistSettler.setDefaultArmor`) | the consulting-room clothes. Two items rather than three: no vanilla headwear reads as this job, and an arbitrary hat would make the profession look like a costume |
 
@@ -314,6 +316,7 @@ realm sections say so; the remaining rows are the future shopping list.
 | `tiles/overgrowngrass`, `tiles/overgrownplainsgrass` | Eden Grass — the densest green vanilla has |
 | `tiles/swampgrass` | Eden Moss |
 | `tiles/sand` | White Paradise Sand |
+| `tiles/mud` (`mud_splat`) | Eden Soil (`EdenSoilTile`) — the row was missing although the class has borrowed it all along; added 2026-09-23 |
 | `tiles/saltwater_shallow` | Turquoise Shallow Water |
 | `tiles/dryadfloor`, `tiles/dryadpath` | Root Floor |
 | `tiles/ancientroots` | the Knowledge Tree's ground |
@@ -369,6 +372,7 @@ below are what `SteinfeldRealm` actually registers — see
 | `objects/cryptgravestone1/2`, `cryptcolumn`, `cryptfence`, `cryptfencegate` | the graveyard kit — complete |
 | `objects/cryptcoffin`, `stonecoffin`, `basaltcoffin` | coffins and sarcophagi |
 | `objects/cryptwall` | mausoleum walls |
+| `objects/vases` (object ID `vase`, `RandomVaseObject`) | the Mausoleum's two corner urns (`MausoleumPreset`) — the preset asked for ID `vases` until 2026-09-23 and so placed nothing |
 | `objects/ravenskull`, `mosscoveredskull`, `skull` | bone deco |
 | `objects/deadwoodcandles`, `waterlantern`, `swampcandlestand` | floating candles, lanterns |
 | the whole `bone*` furniture family (bed, bench, bookshelf, clock, chest, …) | Bonewood furniture — a complete set already exists |

@@ -4057,3 +4057,40 @@ shows every `ldc "id"` followed by the `new` of its class, which answered
 plain `GameObject`). The decompiled `Necesse-sources.jar` has one corrupt entry
 (`StartPlatformClient.java`) that makes a full `unzip` abort; `unzip -p <jar>
 <path>` of a single class still works.
+
+## Integration traps found by a cross-check of IDs against the decompiled 1.3.2 source (2026-09-23)
+
+All of the following are **read from the decompiled source** (`Necesse-sources.jar`
+from `decompileToSources`), not observed in a running client, unless marked.
+
+- **`new InventoryItem("unknownid")` throws.** `InventoryItem(String)` passes
+  `ItemRegistry.getItem(id)` — `null` for an unknown ID (`ItemRegistry.java:3562-3581`)
+  — into `Objects.requireNonNull` (`InventoryItem.java:61`). There is no
+  `rawmeat` in 1.3.2; the raw meats are `rawmutton`, `rawpork`, `rawchickenleg`
+  (`ItemRegistry.java:2015-2035`, global ingredient `anyrawmeat`). The vampire's
+  drain asked for `rawmeat` on 40 % of its kills.
+- **A preset object ID of -1 is silently skipped.** `ObjectRegistry.getObjectID`
+  returns -1 for an unknown ID and every `Preset` apply path tests
+  `objectID != -1` (`Preset.java:197/276/355`). Vanilla's vase is registered as
+  `vase`; `vases` is only its TEXTURE (`ObjectRegistry.java:2063`). No error, the
+  object is just missing.
+- **Every registered mob loads `mobs/icons/<id>`** (`MobRegistry.loadMobIcons`,
+  `:950-953`), and the journal draws `mob.getMobIcon()` — a mob that subclasses a
+  vanilla body does NOT inherit that body's journal face; `Mob.getMobIcon` asks the
+  registry for its OWN ID. Override it (`BorrowedMobIcon.from(...)`).
+- **A `Settler` looks for `mobs/icons/<settlerID>human`, then
+  `mobs/icons/<settlerID>`, then `settlers/<settlerID>`** (`Settler.java:232-289`),
+  and the last is a plain `fromFile` → ERR. Vanilla's own visitors work only because
+  their mob is `<settlerID>human` and has an icon; a mod settler needs its own
+  `loadTextures` unless it ships that file.
+- **`EdgedTiledTexture`/`PathTiledTile` draw their item icon from
+  `tiles/<textureName>`** (cell (1,0), `EdgedTiledTexture.java:180-184`), not from
+  `items/`; `PathTiledTile` is `isFloor=true` and never reads a `_splat` sheet.
+- **`TerrainSplatterTile`'s legacy (no `_splat`) path indexes
+  `splattingTextures[x][y]` with `getTerrainSprite`** (`:117-118`); the base returns
+  (0,0). Only an override that uses `%` on tile coordinates can go negative — the
+  `SimpleTiledFloorTile` crash — so `nextInt`/`floorMod` subclasses are safe without
+  a `_splat`.
+- **`BedObject.registerBed(id, …)` registers `id` (obtainable) and `id + "2"`
+  (unobtainable)** (`BedObject.java:481-482`); `LargePaintingObject.registerLargePainting`
+  the same with `id + "2"` (`:241-242`).

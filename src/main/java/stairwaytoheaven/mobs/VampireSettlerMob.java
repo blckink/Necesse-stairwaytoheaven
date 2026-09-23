@@ -348,7 +348,13 @@ public class VampireSettlerMob extends SkySettlerMob {
         if (!turns) {
             dropAt(level, prey, new InventoryItem("bloodvial", 1));
             if (random.getChance(0.4F)) {
-                dropAt(level, prey, new InventoryItem("rawmeat", 1));
+                // "rawmeat" is not an item in 1.3.2 -- vanilla's raw meats are
+                // rawmutton, rawpork and rawchickenleg (ItemRegistry.java:2015-
+                // 2035, grouped under the "anyrawmeat" global ingredient) -- and
+                // new InventoryItem(String) passes ItemRegistry.getItem's null
+                // straight into Objects.requireNonNull (InventoryItem.java:61),
+                // so four drains in ten threw instead of dropping meat.
+                dropAt(level, prey, new InventoryItem("rawmutton", 1));
             }
         }
         prey.remove();

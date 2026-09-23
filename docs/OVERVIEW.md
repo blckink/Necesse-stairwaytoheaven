@@ -70,7 +70,7 @@ None is orphaned: every `Preset` subclass has a live call site.
 | `InvertedHousePreset` | Crooked | 4 long chairs, 2 lanterns, clock, window, barrel | chair + light |
 | `LongTablePreset` | Crooked | **34 chairs**, 4 lanterns, 2 clocks — and **zero actual tables** | chair + light |
 | `DoorYardPreset` | Crooked | 8 free-standing doors, 4 bent lanterns, clock, 2 ground windows | light only |
-| `MausoleumPreset` | Ghost | 4 columns, coffin, 4 candles, 2 urns, 4 gravestones | light only |
+| `MausoleumPreset` | Ghost | 4 columns, coffin, 4 candles, 2 urns (vanilla `vase`; asked for the nonexistent `vases` and placed none until 2026-09-23), 4 gravestones | light only |
 | `CrookedHousePreset` | Beetlefreak Hollow | 3 ghost lanterns, 2 raven statues, rubble | light only |
 | `AeronautCampPreset` | **Surface** | wreck, balloon, 4 tents, campfire, chest, lantern | light only |
 | `SkywardShrinePreset` | **Surface** | seraph statue, 2 lamps, railings, crystals | light only |

@@ -42,4 +42,16 @@ public class BloodThrallMob extends CryptBatMob {
     public LootTable getLootTable() {
         return thrallLoot;
     }
+
+    /**
+     * The crypt bat's face. The class note promised it, but the journal asks
+     * {@code Mob.getMobIcon()}, whose default is the REGISTRY icon for this
+     * mob's own ID -- mobs/icons/bloodthrall, which does not exist -- so a
+     * countKillStat mob wearing a bat showed the ERR tile in the bestiary.
+     * See {@link BorrowedMobIcon}.
+     */
+    @Override
+    public GameTexture getMobIcon() {
+        return BorrowedMobIcon.from("cryptbat", super.getMobIcon());
+    }
 }

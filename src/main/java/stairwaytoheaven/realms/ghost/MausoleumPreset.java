@@ -72,7 +72,11 @@ public class MausoleumPreset extends Preset {
         final int coffin = ObjectRegistry.getObjectID("cryptcoffin");
         final int column = ObjectRegistry.getObjectID("cryptcolumn");
         final int candle = ObjectRegistry.getObjectID("candle");
-        final int urn = ObjectRegistry.getObjectID("vases");
+        // "vase", not "vases": vanilla registers the object as "vase" and only
+        // its TEXTURE is "vases" (ObjectRegistry.java:2063, new
+        // RandomVaseObject("vases")). getObjectID("vases") answered -1, so
+        // both corner urns were silently never placed.
+        final int urn = ObjectRegistry.getObjectID("vase");
         final int chest = ObjectRegistry.getObjectID("bonechest");
         final int gravestone = ObjectRegistry.getObjectID("cryptgravestone1");
 
