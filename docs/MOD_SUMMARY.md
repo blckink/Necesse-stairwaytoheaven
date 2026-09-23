@@ -392,6 +392,25 @@ echten Betten und einem Vorratsschrank. Was diesen Orten noch fehlt, sind die
 Stelen, der Wolkenquell-Brunnen und die Wegsteine: dafür gibt es noch keine
 Grafik, deshalb stehen sie nicht da, statt als Fehlertextur.
 
+**Stadt, Gasthaus und Zollbrücke neu eingerichtet (Stand 2026-09-23).** Nach
+deinem Test ("keine schönen angeordneten Häuser … zu oft wiederholte
+Anordnungen") hat die **Himmelsstadt** jetzt fünf verschiedene Häuser statt vier
+gleicher: eine **Bäckerei** (Vorratskammer mit Fässern und Mehlsäcken,
+Backstube mit Kochtopf, Arbeitstisch, Verkaufstheke und Kundentisch, Kammer des
+Bäckers), einen **Laden** an der Nordstraße (Lager, Theke, vier Auslagen), das
+**Haus des Gelehrten** (Studierzimmer voller Regale um einen Lesetisch auf dem
+Teppich, zwei Schreibpulte, Instrumentenzimmer mit Fernrohr und Astrolabium,
+Schlafzimmer), das **Weberhaus** (Werkstatt mit zwei Webstühlen und
+Tuch-Auslage, Schlafzimmer, Küchenecke) und das **Familienhaus** (Stube mit
+Esstisch für sechs auf dem Teppich und Teeecke, Küche, Elternzimmer,
+Kinderzimmer mit zwei Betten und Spieltisch). Der Platz in der Mitte ist ein
+Teich mit vier Bänken und Blumenbeeten an den Ecken; die beiden Gärten haben
+je genau ein Tor, dort wo der Weg hineinführt. Das **Gasthaus** hat zwei
+Gästezimmer, eine Küche und eine Gaststube für sechzehn mit Theke, Hockern und
+zwei Fässern; die **Zollbrücke** hat ein Geländer, und ihre zwei Häuser sind
+jetzt ein Zollkontor und eine Wächterstube statt zweimal dasselbe Zimmer. Gilt
+für Gegenden, die neu erzeugt werden.
+
 **Drei weitere, und die ersten feindlichen (Stand 2026-09-10).** Die
 **Nightfell-Schanze** ist ein umwehrtes Lager mit Türen auf allen vier Achsen,
 zwei Blockhäusern und einem absichtlich leeren Hof, den du überquerst statt ihn

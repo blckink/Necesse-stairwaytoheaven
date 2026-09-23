@@ -11,9 +11,9 @@ they only enter unexplored regions and cannot overlap another reserved POI.
 | Realm | In-game preset | Size | Layout purpose |
 |---|---|---:|---|
 | Skyreach | Skyrealm Arch Tower | 49×55 | stepped arch silhouette, central aisle, furnished wings |
-| Skyreach | Wolkenhain district | 57×41 | road cross, plaza, pond/bench, four irregular occupied parcels |
-| Skyreach | Cloudstream toll bridge | 31×23 | 3-wide bridge continues the road across a 5-wide stream |
-| Skyreach | Last Updraft Inn | 17×15 | L-plan, two entrances, tables/chairs, counter, kitchen, bedroom |
+| Skyreach | Wolkenhain district | 57×41 | ASCII plan (`TOWN_PLAN`, 2026-09-23): road cross into a square round a pond with four benches; bakery, general store, scholar's house, weaver's house and family home, each multi-room and furnished for its trade; two one-gate gardens |
+| Skyreach | Cloudstream toll bridge | 31×23 | ASCII plan (`TOLL_BRIDGE_PLAN`, 2026-09-23): railed 3-wide deck across a 5-wide stream; toll office north, keepers' quarters south |
+| Skyreach | Last Updraft Inn | 17×15 | ASCII plan (`INN_PLAN`, 2026-09-23): two guest rooms and a kitchen behind a common room seating sixteen, bar with kegs and stools |
 | Skyreach | Skyway Toll-House | 23×19 | dossier §2.12, transcribed by hand: weighing hall, ledger room (Magpie), vault |
 | Skyreach | Skywatch Wayside | 11×9 | dossier §2.1, read from its ASCII plan: paved pocket, balustrade, benches, offering cabinet |
 | Skyreach | Dew-Keeper's Hut | 13×13 | dossier §2.11, read from its ASCII plan: one-room dwelling, two windows, snail run with 5 Dew Snails |

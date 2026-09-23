@@ -623,7 +623,7 @@ for poi in skytower skytown skytollbridge skyinn edencrowngarden edenfermenthous
     case "$poi" in
         ghostarchive)     allowed=6 ;;
         crookedbazaar)    allowed=2 ;;
-        skytown|skyinn|edencrowngarden|edenfermenthouse) allowed=1 ;;
+        edencrowngarden|edenfermenthouse) allowed=1 ;;
         hellborderoffice|hellforge)                      allowed=1 ;;
         *)                allowed=0 ;;
     esac
@@ -688,7 +688,7 @@ while IFS= read -r stamp_line; do
     case "$stamp_kind" in
         ghostarchive)     stamp_allowed=6 ;;
         crookedbazaar)    stamp_allowed=2 ;;
-        skytown|skyinn|edencrowngarden|edenfermenthouse) stamp_allowed=1 ;;
+        edencrowngarden|edenfermenthouse) stamp_allowed=1 ;;
         hellborderoffice|hellforge)                      stamp_allowed=1 ;;
         *)                stamp_allowed=0 ;;
     esac

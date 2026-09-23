@@ -100,6 +100,20 @@ beside rather than on those streets, non-rectangular room unions, doors,
 windows, dense functional furniture and clear circulation. Full catalogue and
 review rules: `docs/design/realm-poi-worldgen.md`.
 
+**Sky Town, Sky Inn and Sky Toll Bridge are plans since 2026-09-23** (the
+player: "keine schönen angeordneten Häuser … zu oft wiederholte Anordnungen").
+They were the last Skyreach kinds built from `building()` rectangles plus the
+same `furnishHome` six pieces in every house; now `TOWN_PLAN`, `INN_PLAN` and
+`TOLL_BRIDGE_PLAN` go through `plan()` and its §0.2–0.4 checks. Five trades in
+the town (bakery, store, scholar, weaver, family), each multi-room; an inn with
+two guest rooms, kitchen and a 16-seat common room; two different toll houses.
+Footprints unchanged (57×41, 17×15, 31×23). **VERIFIED [run]** on the dedicated
+server: `realmpoi stamp: kind=skytown … placed=557/557 missing=0`, and with a
+one-off local census tweak (not committed) `kind=skyinn … placed=128/128
+missing=0` and `kind=skytollbridge … placed=92/92 missing=0`; `badwindows=0`
+for all three, so their old one-window debt is gone from the integration
+ratchet. **Not seen in a client** — no screenshot yet.
+
 **All fourteen of the dossier's designed places are now built**
 (`docs/design/chapter-01-skyreach-pois.md`). The
 Skyway Toll-House (§2.12) was transcribed into `setObject` calls by hand on

@@ -206,7 +206,12 @@ object of the same role in the preset's own legend; nothing else changes.
 
 | vanilla ID | realm | placed by | why that one |
 |---|---|---|---|
-| `cookingpot` | Skyreach | `RealmPoiPresets.dewKeepersHut` (dossier §2.11) | the hut's cooking loop, on site: a working pot beside the cabinet's food starter kit, so a player who has never used the mod's food chain can cook something on the spot. The mod has no cooking station of its own |
+| `cookingpot` | Skyreach | `RealmPoiPresets.dewKeepersHut` (dossier §2.11); since 2026-09-23 also `skyTown` (bakery, weaver, family kitchen), `skyInn` (kitchen), `tollBridge` (keepers' quarters) | the hut's cooking loop, on site: a working pot beside the cabinet's food starter kit, so a player who has never used the mod's food chain can cook something on the spot. The mod has no cooking station of its own |
+| `barrel` | Skyreach | `RealmPoiPresets.skywayTollHouse`, `nightfellRedoubt`, `aetherManufactory` and the other dossier plans that stock a store; since 2026-09-23 `skyTown`, `skyInn`, `tollBridge` | storage barrel in pantries, stock rooms and behind the inn bar. The mod has no barrel of its own |
+| `sack` | Skyreach | `RealmPoiPresets.skyTown` (bakery pantry, store, family kitchen), `skyInn` (kitchen) — 2026-09-23 | flour/grain sack. `StorageBoxInventoryObject`, one tile (VERIFIED [jar]: `javap` of `ObjectRegistry`) |
+| `largekeg` | Skyreach | `RealmPoiPresets.skyInn` behind the bar — 2026-09-23 | the inn's two kegs. `KegObject extends GameObject`, one tile (VERIFIED [jar], decompiled `KegObject.java`) |
+| `cuttingboard`, `plate`, `stewpot`, `mug`, `teapot`, `stackedbooks`, `quillandparchment` | Skyreach | `RealmPoiPresets.skyTown`, `skyInn`, `tollBridge` table decorations — 2026-09-23 | the kitchen, bar, tea-table and study detail the Skywatch family has no piece for (it ships chalice, candle, tome and potted cloudberry only). All seven are `TableDecorationObject` (VERIFIED [jar]: `javap` of `ObjectRegistry`), and `Legend.table` re-checks the layer at load |
+| `snowstonepathtile` (tile) | Skyreach | `SkyBuildingSet` as `SkyRegistry.skyroadTileID`; by string ID in `RealmPoiPresets.skyTown` and `tollBridge` plans — 2026-09-23 | the Skyway carriageway. It was already the town's and the bridge's road through `skyroadTileID`; the plans now name it directly |
 
 *(This subsection covers `RealmPoiPresets` only. The older presets'
 vanilla furniture — `barrel`, `crate`, the `oak*` and `palm*` families — is

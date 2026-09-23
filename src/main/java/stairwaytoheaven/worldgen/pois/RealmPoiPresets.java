@@ -101,9 +101,9 @@ public final class RealmPoiPresets {
     public static int width(int kind) {
         switch (kind) {
             case SKY_TOWER: return 49;
-            case SKY_TOWN: return 57;
-            case SKY_TOLL_BRIDGE: return 31;
-            case SKY_INN: return 17;
+            case SKY_TOWN: return TOWN_PLAN[0].length();
+            case SKY_TOLL_BRIDGE: return TOLL_BRIDGE_PLAN[0].length();
+            case SKY_INN: return INN_PLAN[0].length();
             case EDEN_CROWN_GARDEN: return 45;
             case EDEN_FERMENT_HOUSE: return 19;
             case STEINFELD_MEMORIAL: return 23;
@@ -136,9 +136,9 @@ public final class RealmPoiPresets {
     public static int height(int kind) {
         switch (kind) {
             case SKY_TOWER: return 55;
-            case SKY_TOWN: return 41;
-            case SKY_TOLL_BRIDGE: return 23;
-            case SKY_INN: return 15;
+            case SKY_TOWN: return TOWN_PLAN.length;
+            case SKY_TOLL_BRIDGE: return TOLL_BRIDGE_PLAN.length;
+            case SKY_INN: return INN_PLAN.length;
             case EDEN_CROWN_GARDEN: return 35;
             case EDEN_FERMENT_HOUSE: return 17;
             case STEINFELD_MEMORIAL: return 23;
@@ -436,81 +436,19 @@ public final class RealmPoiPresets {
         p.setObject(x + dx, y + dy, counter, rotation);
     }
 
-    private static void furnishHome(Preset p, int x, int y, String family) {
-        furnishHome(p, x, y, family, -1);
-    }
-
     /**
-     * The same six pieces every home needs, plus one pair of standing pieces
-     * that is different in every house.
-     *
-     * <p>{@code variant} indexes {@link #HOME_ACCENTS}; -1 leaves the two
-     * accent tiles empty, which is what every caller outside a town wants —
-     * a wayhouse is not a home. The accents go on (x+4,y+5) and (x+5,y+5),
-     * the two tiles this layout leaves free between the candelabra and the
-     * dresser, so a variant can never land on the bed or the table.
+     * The six pieces of a one-room home. Only Eden's Crown Garden still uses
+     * it; the Skyreach houses that did (town, toll bridge) are plans now,
+     * because the same six pieces in the same corner of every house is the
+     * "zu oft wiederholte Anordnungen" the player reported on 2026-09-23.
      */
-    private static void furnishHome(Preset p, int x, int y, String family, int variant) {
+    private static void furnishHome(Preset p, int x, int y, String family) {
         int table = object(family + "modulartable");
         int chair = object(family + "chair");
         tableForFour(p, x + 2, y + 2, table, chair);
         bed(p, x + 5, y + 2, family + "bed", DOWN);
         p.setObject(x + 6, y + 5, object(family + "dresser"));
         p.setObject(x + 2, y + 5, object(family + "candelabra"));
-        if (variant >= 0) {
-            int[][] table2 = accents();
-            int[] accent = table2[variant % table2.length];
-            p.setObject(x + 4, y + 5, accent[0]);
-            p.setObject(x + 5, y + 5, accent[1]);
-        }
-    }
-
-    /**
-     * One row per house: the pair of standing pieces that makes that house
-     * look lived in by somebody in particular. Read lazily, because the
-     * object IDs do not exist until {@code SkyFurnitureSet} has registered.
-     */
-    private static int[][] homeAccents;
-
-    private static int[][] accents() {
-        if (homeAccents == null) {
-            homeAccents = new int[][]{
-                {SkyFurnitureSet.skywatchBookshelfID, SkyFurnitureSet.pottedCloudberryID},
-                {SkyFurnitureSet.skywatchCabinetID, SkyFurnitureSet.skywatchClockID},
-                {SkyFurnitureSet.skywatchDisplayID, SkyFurnitureSet.skywatchBookshelfID},
-                {SkyFurnitureSet.skywatchClockID, SkyFurnitureSet.skywatchCabinetID},
-            };
-        }
-        return homeAccents;
-    }
-
-    /**
-     * A fenced plot — garden or pen — with exactly one gateway in its south
-     * side, two gates wide, and the two-tile path that leads to it.
-     *
-     * @param gateX left tile of the gate pair, in the plot's south run
-     */
-    private static void garden(Preset p, int x, int y, int w, int h, int gateX) {
-        int fence = SkyCloudmarbleSet.cloudmarbleFenceID;
-        int gate = SkyCloudmarbleSet.cloudmarbleFenceGateID;
-        int south = y + h - 1;
-        p.fillTile(x, y, w, h, SkyRegistry.cloudturfID);
-        for (int i = x; i < x + w; i++) {
-            p.setObject(i, y, fence);
-            p.setObject(i, south, fence);
-        }
-        for (int j = y; j <= south; j++) {
-            p.setObject(x, j, fence);
-            p.setObject(x + w - 1, j, fence);
-        }
-        p.setObject(gateX, south, gate);
-        p.setObject(gateX + 1, south, gate);
-        // The way through: from the gates down to the carriageway, as wide as
-        // the gateway itself. Without it the gates open onto nothing.
-        road(p, gateX, south + 1, 2, 2, SkyRegistry.skyroadTileID);
-        // Two beds of cloudberries inside, clear of the gateway run.
-        p.setObject(x + 2, y + 2, SkyFurnitureSet.pottedCloudberryID);
-        p.setObject(x + w - 3, y + 2, SkyFurnitureSet.pottedCloudberryID);
     }
 
     private static Preset skyTower() {
@@ -559,52 +497,149 @@ public final class RealmPoiPresets {
         return p;
     }
 
+    /**
+     * The Sky Town, rebuilt as a plan on 2026-09-23 after the player's review:
+     * "keine schoenen angeordneten Haeuser mit vielen Details und sinnvoller
+     * Einrichtung" and "zu oft wiederholte Anordnungen". The code-built town
+     * stamped four identical shells with the same six pieces of
+     * {@code furnishHome} in the same corner of each.
+     *
+     * <p>Now five houses, each with a trade and a room plan of its own, and no
+     * two alike: the <b>bakery</b> (north-west: pantry of barrels and flour
+     * sacks, a bakehouse with the pot, a work island, a sales counter and a
+     * customer table, the baker's bedroom), the <b>general store</b> fronting
+     * the north road (stock room, shop floor behind a counter, four display
+     * stands), the <b>scholar's house</b> (a study lined with shelves round a
+     * carpeted reading table, two writing desks, an instrument room with the
+     * telescope and astrolabe, a bedroom), the <b>weaver's house</b>
+     * (workshop with two looms and a cloth showroom on a rug, a bedroom, a
+     * kitchen nook with a dinner table) and the <b>family home</b> (hall with a
+     * six-seat dining set on a carpet and a tea corner, kitchen, the parents'
+     * room, the children's room with two beds and a play table). Stone and
+     * marble alternate between neighbours so the quadrants do not read as
+     * copies of each other.
+     *
+     * <p>The square is a pond with four benches facing it, a flower bed and a
+     * lamp at each corner -- the streets run into it and round the water, so
+     * nothing stands in the middle for its own sake. Every door has its own
+     * path to a street; the two fenced gardens each have exactly ONE gate, on
+     * the path that enters them. Benches stand two tiles off the pond: a tile
+     * with water among its eight neighbours is shore, and the engine deletes
+     * furniture from shore (see {@link #dryRing}).
+     *
+     * <p>57x41 exactly as before, and the carriageway cross stays on the
+     * centre lines, because {@code RealmPoiWorldPreset.validSite} samples the
+     * centre and the four edge midpoints for this kind.
+     */
+    private static final String[] TOWN_PLAN = {
+            "...........................,,,...........................",
+            "...........................,,,...........................",
+            "...........................,,,.....############O###......",
+            ".###O####O###O##..........L,,,L....#SS^SSS^SS#X=^A#..4...",
+            ".#ll^Cs#ok^=^kl#.HHQHHHQHH.,,,.....#=========#====O......",
+            ".Os====#=======#.HlsCHPCPH.,,,.....#=:::::::=D====#......",
+            ".#=====D=kkk===O.H===H===Q.,,,.....O=:iJJi::=#=jh=#....4.",
+            ".#ll=ss#=======#.Hl==d===H.,,,.....#=:::i:::=######......",
+            ".#######=======#.Qs==Hyy=H.,,,.....#=:::::::=#E^RK#......",
+            ".#E=^RK#kkkk=P=#.H===H===d,,,,.....O=========#e===#..4...",
+            ".#e====#=======#.Hl==H<=>H.,,,.....#c========D====O......",
+            ".O==:::D=hmh=c=O.Hv=sHP=PH.,,,L....#=h====h==#=:::#......",
+            ".#==:::#=======#.HHQHHHQHH.,,,.....#<x====x=>#c:::#....4.",
+            ".#c==mh#<=====>#...........,,,.....###O#D##O####O##......",
+            ".###O####O#D#O##...........,,,..........,................",
+            ".|_________,___|.....L_;;;;;;;;;;;_L....,...........4....",
+            ".|1_2_1_2__,_31|....._1;;;;;;;;;;;2_....,................",
+            ".||||||||||g||||.....;;;Nn;;;;;Nn;;;....,................",
+            "....L......,.........;;;;;;;;;;;;;;;....,.....L..........",
+            ",,,,,,,,,,,,,,,,,,,,,;;;;;~~~~~;;;;;,,,,,,,,,,,,,,,,,,,,,",
+            ",,,,,,,,,,,,,,,,,,,,,;;;;;~~~~~;;;;;,,,,,,,,,,,,,,,,,,,,,",
+            ",,,,,,,,,,,,,,,,,,,,,;;;;;~~~~~;;;;;,,,,,,,,,,,,,,,,,,,,,",
+            ".......,..........L..;;;;;;;;;;;;;;;......,...........L..",
+            ".......,.............;;;nN;;;;;nN;;;......,..............",
+            ".......,............._2;;;;;;;;;;;1_......,..............",
+            ".......,.............L_;;;;;;;;;;;_L......,..............",
+            "...HHQHdHQHHHHQHH......,...,,,.......##O##D##O#####O##O##",
+            "...HC=^=^=CHR^=EH......,...,,,.......#S=^===^=KS#okk^kkl#",
+            "...H=======H=::eH.|||||g||.,,,.......#==========D=======#",
+            "...HP=:::==d=::=H.|______|.,,,.......#=::ii::===#C======O",
+            "...Q==:::==H====Q.|_3___3|.,,,.......O=:iUui:=mh#=======#",
+            "...HP=:::=PHc=mhH.|___4__|.,,,.......#=::ii::=h=#C======#",
+            "...H=======HHHHHH.|_3___3|L,,,.......#==========#=======#",
+            "...Hl=====lHo=^kH.|______|.,,,.......#<========>#ss=l=ll#",
+            "...H=======d====Q.|_12_12|.,,,.......#######D##D#########",
+            "...Q=======H=hT=H.||||||||.,,,.......#R=EE=^==#=E^E===RK#",
+            "...H<W=mm=WH==thH..........,,,.......O==ee===c#=e=e=====O",
+            "...HHHQHHHHHHQHHH..........,,,.......#=::::===#====hmh==#",
+            "...........................,,,L......#<::::===#<=======>#",
+            "..4..........4.............,,,.......####O#########O#####",
+            "......4....................,,,...........................",
+    };
+
     private static Preset skyTown() {
-        Preset p = blank(SKY_TOWN);
-        int road = SkyRegistry.skyroadTileID;
-        int floor = SkyRegistry.gloomwoodFloorID;
-        int wall = SkyCloudmarbleSet.cloudmarbleWallID;
-        int door = SkyCloudmarbleSet.cloudmarbleDoorID;
-        int window = SkyCloudmarbleSet.cloudmarbleWindowID;
-        road(p, 0, 19, 57, 3, road);
-        road(p, 27, 0, 3, 41, road);
-        road(p, 22, 14, 13, 13, road); // plaza
-        // Pond and bench are beside the road, never on it.
-        p.fillTile(4, 5, 9, 6, SkyRegistry.mistseaID);
-        p.setObject(14, 8, SkyFurnitureSet.skywatchBenchID, DOWN);
-        p.setObject(14, 9, object("skywatchbench2"), DOWN);
-        p.setObject(28, 20, SkyCloudmarbleSet.seraphStatueID);
-        // Five occupied parcels, all at least two tiles away from a carriageway.
-        building(p, floor, wall, new Rectangle(3, 25, 14, 11), new Rectangle(12, 32, 8, 6));
-        building(p, floor, wall, new Rectangle(37, 25, 17, 12), new Rectangle(34, 30, 6, 7));
-        building(p, floor, wall, new Rectangle(18, 3, 8, 11), new Rectangle(13, 3, 7, 7));
-        building(p, floor, wall, new Rectangle(33, 3, 17, 12), new Rectangle(45, 12, 7, 5));
-        door(p, 15, 25, door); door(p, 38, 25, door); door(p, 25, 12, door);
-        // The west house used to be entered through a hole: the path erased
-        // one wall tile and the door stood a tile INSIDE the room, so the
-        // opening itself had nothing in it. Now the pair of doors sits in the
-        // wall line where it belongs, two abreast, with the path the same
-        // width in front of them.
-        door(p, 33, 13, door); door(p, 33, 14, door);
-        // Two tiles wide, not one: a footpath two settlers can pass on is the
-        // narrowest thing that still reads as a way beside a 3-wide
-        // carriageway. Every stub runs from a carriageway to its own door and
-        // stops at the wall, so no door stands without a way through it and no
-        // wall is opened where no door closes it.
-        road(p, 14, 22, 2, 3, road); road(p, 38, 22, 2, 3, road);
-        road(p, 26, 12, 2, 8, road); road(p, 29, 13, 4, 2, road);
-        windows(p, window, new int[][]{{7,25},{12,35},{44,25},{49,36},{18,3},{23,3},{38,3},{45,3}});
-        // One variant per house, so no two homes carry the same pair of
-        // standing pieces. The shell and the bed stay the same — it is the
-        // furnishing that tells the houses apart, not the masonry.
-        furnishHome(p, 5, 27, "skywatch", 0); furnishHome(p, 40, 27, "skywatch", 1);
-        furnishHome(p, 15, 5, "skywatch", 2); furnishHome(p, 37, 5, "skywatch", 3);
-        // The town garden, west of the pond: a fenced plot with its gateway on
-        // the south side, facing the carriageway two tiles below it. The
-        // gateway is a PAIR of gates -- the widest opening the user's rule
-        // allows -- and the path in front of it is the same two tiles wide,
-        // so the way through is never narrower than the opening.
-        garden(p, 2, 12, 11, 6, 7);
+        Preset p = new Preset(width(SKY_TOWN), height(SKY_TOWN));
+        Legend legend = new Legend(SkyRegistry.gloomwoodFloorID)
+                .floor('=')
+                // The carriageways are the Skyway's own road (= snowstonepathtile,
+                // SkyRegistry.skyroadTileID), the square is cloudstone paving.
+                .floor(',', "snowstonepathtile")
+                .floor(';', "skywaytile")
+                .floor('_', "cloudturftile")
+                .floor('~', "mistseatile")
+                .rug(':', "skywatchcarpet")
+                .wall('#', "cloudmarblewall")
+                .window('O', "cloudmarblewindow")
+                .door('D', "cloudmarbledoor")
+                .wall('H', "skystonebrickwall")
+                .window('Q', "skystonebrickwindow")
+                .door('d', "skystonebrickdoor")
+                .fence('|', "cloudmarblefence")
+                .fence('g', "cloudmarblefencegate")
+                .loose('L', "wardencandelabra")
+                // Planting stands on turf, never on the plank ground.
+                .prop('1', "skytulip").paves('1', "cloudturftile")
+                .prop('2', "cloudbell").paves('2', "cloudturftile")
+                .prop('3', "cloudberrybush").paves('3', "cloudturftile")
+                .prop('4', "cloudtree").paves('4', "cloudturftile")
+                // The square's benches all face the pond: the north pair at
+                // rotation 1 (far half east), the south pair turned to 3.
+                .pair('N', 'n', "skywatchbench", RIGHT)
+                .paves('N', "skywaytile").paves('n', "skywaytile")
+                .turns(25, 23, LEFT).turns(32, 23, LEFT)
+                .pair('E', 'e', "skywatchbed", DOWN)
+                .pair('T', 't', "skywatchdinnertable", DOWN)
+                .pair('U', 'u', "skywatchdinnertable", RIGHT)
+                .carpet('U', "skywatchcarpet").carpet('u', "skywatchcarpet")
+                .floor('^').decor('^', "mistglasslantern", WALL_ABOVE)
+                .floor('v').decor('v', "mistglasslantern", WALL_BELOW)
+                .floor('<').decor('<', "mistglasslantern", WALL_LEFT)
+                .floor('>').decor('>', "mistglasslantern", WALL_RIGHT)
+                .chair('h', "skywatchchair")
+                .chair('i', "skywatchchair").carpet('i', "skywatchcarpet")
+                // Kinds of table, told apart by what stands on them.
+                .table('k', "skywatchmodulartable", "cuttingboard", "plate", "stewpot", "mug")
+                .table('m', "skywatchmodulartable",
+                        "skywatchcandle", "pottedcloudberry", "teapot", "skywatchchalice")
+                .table('j', "skywatchmodulartable", "quillandparchment")
+                .table('J', "skywatchmodulartable", "stackedbooks", "skywatchtome")
+                .carpet('J', "skywatchcarpet")
+                .table('y', "skywatchmodulartable", "skywatchchalice", "skywatchcandle")
+                // Writing desks against the study's south wall, facing the room.
+                .table('x', "skywatchdesk", "skywatchtome", "quillandparchment")
+                .prop('S', "skywatchbookshelf", DOWN)
+                .prop('C', "skywatchcabinet", DOWN)
+                // The family kitchen's two cabinets back onto the hall partition.
+                .turns(49, 29, RIGHT).turns(49, 31, RIGHT)
+                .prop('R', "skywatchdresser", DOWN)
+                .prop('K', "skywatchclock", DOWN)
+                .prop('P', "skywatchdisplay")
+                .prop('c', "skywatchcandelabra")
+                .prop('o', "cookingpot")
+                .prop('l', "barrel")
+                .prop('s', "sack")
+                .prop('W', "windsilkloom", UP)
+                .prop('X', "skywatchtelescope")
+                .prop('A', "skywatchastrolabe");
+        plan(p, TOWN_PLAN, legend);
         // 57x41 is the widest footprint in the catalogue, so it is the one most
         // likely to catch a cloud-sea edge somewhere along its rim. The rim is
         // allowed to; the houses are not (see dryRing and validSite).
@@ -612,24 +647,81 @@ public final class RealmPoiPresets {
         return p;
     }
 
+    /**
+     * The Sky Toll Bridge: the road on a railed deck across the cloud stream,
+     * with a toll house at each end, each with a job of its own (2026-09-23;
+     * both used to be the same {@code furnishHome} room).
+     *
+     * <p>North, the <b>toll office</b>: the collector's desk turned to the
+     * door with the ledger on it, shelves and a strongbox cabinet under the
+     * windows, a waiting bench for travellers and a display stand of what was
+     * confiscated. South, the <b>keepers' quarters</b>: two beds, a dresser,
+     * the pot and a barrel, a table for two and a rug.
+     *
+     * <p>Both houses keep one dry row between their walls and the stream -- a
+     * wall on a shore tile is deleted by the engine (see {@link #dryRing}) --
+     * and the rails on the deck are fences, which the engine does allow on
+     * shore. They are paved as deck, because a fence keeps the ground under
+     * it and on the stream rows that ground would be water.
+     */
+    private static final String[] TOLL_BRIDGE_PLAN = {
+            "..............,,,..............",
+            "...##O###O##..,,,..............",
+            "...#SS=^=CCO..,,,..............",
+            "...#=======#..,,,..............",
+            "...O=hx====D,,,,,..............",
+            "...#=======#..,,,..............",
+            "...#nN=P==>#..,,,..............",
+            "...####O####L.,,,..............",
+            ".............|,,,|.............",
+            "~~~~~~~~~~~~~|,,,|~~~~~~~~~~~~~",
+            "~~~~~~~~~~~~~|,,,|~~~~~~~~~~~~~",
+            "~~~~~~~~~~~~~|,,,|~~~~~~~~~~~~~",
+            "~~~~~~~~~~~~~|,,,|~~~~~~~~~~~~~",
+            "~~~~~~~~~~~~~|,,,|~~~~~~~~~~~~~",
+            ".............|,,,|.............",
+            "..............,,,.L##O###O##...",
+            "..............,,,..#RE^E=loO...",
+            "..............,,,..#=e=e===#...",
+            "..............,,,,,D=======#...",
+            "..............,,,..#===hmh=#...",
+            "..............,,,..#<=:::=c#...",
+            "..............,,,..####O####...",
+            "..............,,,..............",
+    };
+
     private static Preset tollBridge() {
-        Preset p = blank(SKY_TOLL_BRIDGE);
-        int road = SkyRegistry.skyroadTileID;
-        // A cloud stream links the east and west edges; the north/south road crosses it.
-        p.fillTile(0, 9, 31, 5, SkyRegistry.mistseaID);
-        road(p, 14, 0, 3, 23, road);
-        int wall = SkyCloudmarbleSet.cloudmarbleWallID, door = SkyCloudmarbleSet.cloudmarbleDoorID;
-        // One dry row between each toll house and the stream. They used to sit
-        // at y=2..8 and y=14..20, i.e. wall-to-water: every tile of both those
-        // walls was a SHORE tile, and the engine deleted all eighteen of them
-        // right after the preset wrote them (see dryRing). The houses moved,
-        // the stream did not.
-        building(p, SkyRegistry.gloomwoodFloorID, wall, new Rectangle(3, 1, 9, 7));
-        building(p, SkyRegistry.gloomwoodFloorID, wall, new Rectangle(19, 15, 9, 7));
-        door(p, 11, 4, door); door(p, 19, 18, door);
-        road(p, 12, 4, 2, 1, road); road(p, 17, 18, 2, 1, road);
-        furnishHome(p, 4, 1, "skywatch"); furnishHome(p, 20, 15, "skywatch");
-        // ...and the world's own stream, which the site rule above deliberately
+        Preset p = new Preset(width(SKY_TOLL_BRIDGE), height(SKY_TOLL_BRIDGE));
+        Legend legend = new Legend(SkyRegistry.gloomwoodFloorID)
+                .floor('=')
+                .floor(',', "snowstonepathtile")
+                .floor('~', "mistseatile")
+                .rug(':', "skywatchcarpet")
+                .wall('#', "cloudmarblewall")
+                .window('O', "cloudmarblewindow")
+                .door('D', "cloudmarbledoor")
+                .fence('|', "cloudmarblefence").paves('|', "snowstonepathtile")
+                .loose('L', "wardencandelabra")
+                .floor('^').decor('^', "mistglasslantern", WALL_ABOVE)
+                .floor('<').decor('<', "mistglasslantern", WALL_LEFT)
+                .floor('>').decor('>', "mistglasslantern", WALL_RIGHT)
+                // The collector faces the door: desk turned east, chair behind it.
+                .table('x', "skywatchdesk", "skywatchtome")
+                .turns(6, 4, RIGHT)
+                .chair('h', "skywatchchair")
+                .table('m', "skywatchmodulartable", "mug")
+                // The waiting bench, back to the south wall (far half west).
+                .pair('N', 'n', "skywatchbench", LEFT)
+                .pair('E', 'e', "skywatchbed", DOWN)
+                .prop('S', "skywatchbookshelf", DOWN)
+                .prop('C', "skywatchcabinet", DOWN)
+                .prop('R', "skywatchdresser", DOWN)
+                .prop('P', "skywatchdisplay")
+                .prop('c', "skywatchcandelabra")
+                .prop('o', "cookingpot")
+                .prop('l', "barrel");
+        plan(p, TOLL_BRIDGE_PLAN, legend);
+        // ...and the world's own stream, which the site rule deliberately
         // brings INTO the footprint, is pushed off the houses' ring.
         dryRing(p, SkyRegistry.cloudturfID);
         return p;
@@ -732,23 +824,63 @@ public final class RealmPoiPresets {
         return p;
     }
 
+    /**
+     * The Sky Inn (2026-09-23): a row of three back rooms and one big common
+     * room in front of them, the way an inn reads from its door.
+     *
+     * <p>Back row, left to right: two guest rooms (a bed, a dresser, a
+     * candelabra and a lantern each, mirrored) and the kitchen (pot, two
+     * counters, barrel, flour sack, cabinet). The common room seats sixteen:
+     * two tables for four, the long table for six, and three stools at the
+     * bar. Behind the bar stand two kegs and two barrels, and the kitchen door
+     * opens straight onto the bartender's side of the counter. Lamps and a
+     * paved step outside the front door.
+     */
+    private static final String[] INN_PLAN = {
+            "###O####O####O###",
+            "#E^=R#R^=E#okk^l#",
+            "#e===#===e#=====O",
+            "#c===#===c#s===C#",
+            "##D#####D####D###",
+            "#==h===h===lG=Gl#",
+            "O=hmh=hmh=======O",
+            "#==h===h===yyy=y#",
+            "#==========hhh==#",
+            "#==hh=====c=h===#",
+            "O=hUuh=====hmh==O",
+            "#<=hh=======h==>#",
+            "####O###D###O####",
+            ".L.....;;;.....L.",
+            ".......;;;.......",
+    };
+
     private static Preset skyInn() {
-        Preset p = blank(SKY_INN);
-        int floor = SkyRegistry.gloomwoodFloorID, wall = SkyCloudmarbleSet.cloudmarbleWallID;
-        int door = SkyCloudmarbleSet.cloudmarbleDoorID, window = SkyCloudmarbleSet.cloudmarbleWindowID;
-        building(p, floor, wall, new Rectangle(1, 1, 15, 13), new Rectangle(11, 0, 5, 4));
-        door(p, 8, 1, door); door(p, 8, 13, door);
-        windows(p, window, new int[][]{{4,1},{12,1},{1,5},{15,5},{4,13},{12,13}});
-        // x=8 is the straight north-south one-tile aisle between both doors.
-        int table = SkyFurnitureSet.skywatchTableID, chair = SkyFurnitureSet.skywatchChairID;
-        tableForFour(p, 4, 5, table, chair); tableForFour(p, 12, 5, table, chair);
-        // Counter, kitchen and storage in the west rear; private room east rear.
-        for (int x = 2; x <= 6; x++) p.setObject(x, 9, table);
-        p.setObject(2, 11, stairwaytoheaven.settlement.SkyProfessions.stormglassKilnID, RIGHT);
-        p.setObject(6, 11, SkyFurnitureSet.skywatchCabinetID);
-        door(p, 11, 9, door);
-        bed(p, 13, 10, "skywatchbed", DOWN);
-        p.setObject(10, 11, SkyFurnitureSet.skywatchDresserID);
+        Preset p = new Preset(width(SKY_INN), height(SKY_INN));
+        Legend legend = new Legend(SkyRegistry.gloomwoodFloorID)
+                .floor('=')
+                .floor(';', "skywaytile")
+                .wall('#', "cloudmarblewall")
+                .window('O', "cloudmarblewindow")
+                .door('D', "cloudmarbledoor")
+                .loose('L', "wardencandelabra")
+                .floor('^').decor('^', "mistglasslantern", WALL_ABOVE)
+                .floor('<').decor('<', "mistglasslantern", WALL_LEFT)
+                .floor('>').decor('>', "mistglasslantern", WALL_RIGHT)
+                .pair('E', 'e', "skywatchbed", DOWN)
+                .pair('U', 'u', "skywatchdinnertable", RIGHT)
+                .chair('h', "skywatchchair")
+                .table('m', "skywatchmodulartable", "mug", "skywatchcandle", "teapot")
+                .table('k', "skywatchmodulartable", "cuttingboard", "stewpot")
+                // The bar: mugs set out for the stools in front of it.
+                .table('y', "skywatchmodulartable", "mug", "mug", "plate", "mug")
+                .prop('G', "largekeg")
+                .prop('R', "skywatchdresser", DOWN)
+                .prop('C', "skywatchcabinet", DOWN)
+                .prop('c', "skywatchcandelabra")
+                .prop('o', "cookingpot")
+                .prop('l', "barrel")
+                .prop('s', "sack");
+        plan(p, INN_PLAN, legend);
         return p;
     }
 
@@ -1239,6 +1371,30 @@ public final class RealmPoiPresets {
          */
         Legend rug(char c, String objectID) {
             floor(c);
+            this.rug[c] = layered(objectID, ObjectLayerRegistry.TILE_LAYER, "a carpet");
+            return this;
+        }
+
+        /**
+         * A carpet UNDER a piece that is already declared -- the dining table
+         * and the chairs that stand on the rug, rather than a rug with holes
+         * cut where the furniture is.
+         *
+         * <p>LAYERS onto an existing character, like {@link #decor}. The carpet
+         * lives on {@code TILE_LAYER} and the chair on the base layer, so the
+         * two never compete for the tile; that is the whole reason {@link #rug}
+         * writes the carpet there. Without this a {@code ModularCarpetObject}
+         * autotiles a hole around every chair, which is what a rug with a
+         * dining set on it must not look like.
+         */
+        Legend carpet(char c, String objectID) {
+            if (c >= LEGEND_SIZE || !this.known[c]) {
+                throw new IllegalStateException("Carpet under '" + c
+                        + "' must first be declared as the piece standing on it");
+            }
+            if (this.masonry[c]) {
+                throw new IllegalStateException("Carpet under '" + c + "' would lie under masonry");
+            }
             this.rug[c] = layered(objectID, ObjectLayerRegistry.TILE_LAYER, "a carpet");
             return this;
         }

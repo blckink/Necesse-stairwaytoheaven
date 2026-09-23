@@ -4027,3 +4027,33 @@ Plaetzen 29 -> 10, verstreute Truemmer-/Kristall-Akzente in Plaetzen 94 -> 0.
 im Spiel aussehen, und ob an bereits generierten Regionen eine Naht entsteht —
 schon erkundeter Himmel wird nicht neu gezeichnet, dort kann eine alte Strasse
 an einer neuen Regionsgrenze auf einen Platz ohne Tor treffen.
+
+## Bench facing, and a carpet under furniture (2026-09-23)
+
+**Read from the decompiled source, not observed in a client.**
+`BenchObject.getPlaceOptions` stores `playerDir - 1` and
+`getModifiedRotation` adds the 1 back, so a bench's stored rotation is its
+FACING minus one: stored 1 (far half east) faces down, stored 3 (far half west)
+faces up, stored 2 (far half south) faces left, stored 0 (far half north) faces
+right. `SideMultiTile(0, 1, 1, 2, rotation, …)` puts the far half in the stored
+rotation's direction, which is what `RealmPoiPresets.Legend.pair` already
+assumes. The Sky Town's square uses 1 for the benches north of the pond and 3
+for the ones south of it, so all four face the water.
+
+**A carpet under a chair or table is a separate layer, so it can be written.**
+`ModularCarpetObject` lives on `TILE_LAYER` only (see the `Legend.rug` note),
+and chairs and tables on the base layer, so `Legend.carpet(char, id)` layers a
+carpet under an already declared piece. Without it a rug drawn round a dining
+set autotiles a hole under every chair. VERIFIED [run] only as far as the stamp
+count goes (`kind=skytown placed=557/557 missing=0`); how the carpet reads
+under the chairs has not been seen in a client.
+
+**Vanilla object classes can be read off `Server.jar` without the decompiler.**
+`javap -c -p -classpath Server.jar necesse.engine.registries.ObjectRegistry`
+shows every `ldc "id"` followed by the `new` of its class, which answered
+"is `mug` a `TableDecorationObject`?" (yes; also `plate`, `teapot`, `stewpot`,
+`cuttingboard`, `stackedbooks`, `quillandparchment`), "is `sack` one tile?"
+(`StorageBoxInventoryObject`) and "is `largekeg` a multi-tile?" (`KegObject`,
+plain `GameObject`). The decompiled `Necesse-sources.jar` has one corrupt entry
+(`StartPlatformClient.java`) that makes a full `unzip` abort; `unzip -p <jar>
+<path>` of a single class still works.

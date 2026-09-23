@@ -896,3 +896,24 @@ Before this pass, on seed 1486237612, the same three columns read `23/24`,
   none`.** Unchanged from the entry above. **OPEN.**
 - **The 2026-09-07 Friemliburg finding still stands.** Already-generated ground
   is not re-stamped, so the new places appear in sky the player has not walked.
+
+## 2026-09-23 — Skyreach houses: "keine schönen angeordneten Häuser"
+
+**Reported by the player** after walking the Skyreach: "keine schönen
+angeordneten Häuser mit vielen Details und sinnvoller Einrichtung" and "zu oft
+wiederholte Anordnungen".
+
+**Cause, read off the code:** the Sky Town's four houses, both toll houses and
+the Sky Inn were still the pre-dossier `building()` shells. Every town house got
+the same `furnishHome` six pieces (table for four, bed, dresser, candelabra) at
+the same offset, and two accent pieces; most of each room was empty floor.
+
+**Changed:** all three kinds are ASCII plans read by `plan()` now (see
+`docs/OVERVIEW.md` §2 and `RealmPoiPresets.TOWN_PLAN` / `INN_PLAN` /
+`TOLL_BRIDGE_PLAN`). Headless result on the dedicated server:
+`realmpoi stamp: kind=skytown … placed=557/557 missing=0`, inn `128/128`, toll
+bridge `92/92`, `badwindows=0` for all three.
+
+**Still open:** nobody has looked at them in a client. Whether the rooms READ
+well — the bakery counter, the square's pond, the carpeted dining set — is the
+player's call, and only applies to regions generated after this change.
