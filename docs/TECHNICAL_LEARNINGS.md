@@ -4459,3 +4459,10 @@ Full audit and table: `docs/ITEM_CATEGORIES.md`.
   VERIFIED [run]: `SHOWROOM_CHECK exhibits=69 expected=9189 missing=0
   signs=69/69 mobs=0` — all 33 RealmPoiPresets kinds, 13 standalone presets
   and the galleries, compared object layer by object layer after build.
+- **Gate record for this change.** VERIFIED [run]: first integration run on the
+  pre-rebase branch read `FAIL: aethermanufactory is missing 127 objects its
+  preset placed` (a realm-POI stamp near the spire, at -257,-153, nowhere near
+  the showroom); the run after rebasing read `PASS: mod loads, Skyreach
+  generates, world survives a restart, no errors.` Another seed-dependent POI
+  defect of the kind listed above, not caused by the showroom — HYPOTHESIS as
+  to its cause, not investigated.
