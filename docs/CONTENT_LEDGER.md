@@ -521,6 +521,20 @@ normal play: it exists only inside the showroom rectangle far past Hell.
 |---|---|---|
 | `swhshowroom` | biome | Ausstellung / Showroom — the floor of the `/swhshowroom` exhibition hall; empty spawn tables, spawn cap 0, no rain, so nothing spawns among the exhibits. |
 
+## The Adventurer's Journal (2026-09-24)
+
+One book that shows, per realm chapter, the story steps and quests with their
+status, who gives them and where they live, region keys, Summoning Stones and
+bosses, the residents and places the player has found, and lore unlocked by
+progress. Server-built summary, sent by `journal/PacketJournalOpen`; the step
+list sits behind `journal/JournalStepSource` so the Spire Village quest ladder
+can replace `LegacyQuestSource` with one call. Icon borrowed from vanilla's
+recipe book (`docs/VANILLA_ASSET_MAP.md` §1.7c).
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `adventurersjournal` | item | Abenteurer-Tagebuch / Adventurer's Journal — handed to every player the first time they stand in the Skyreach (and once, retroactively, to anyone in an existing save who has started the mod's story); right-click in the inventory or use from the hotbar to open the journal window; not craftable, the Sky Warden sells a replacement for 100 coins. |
+
 ## Baseline — registered before the ledger existed
 
 These predate the ledger and are described in `CHANGELOG.md`,

@@ -217,6 +217,9 @@ public class StairwayToHeavenMod {
         // §42.4 asks for ONE gate mechanic rather than a second code path when
         // the Infernal Visa lands — see stairwaytoheaven.veil.VeilGate.
         stairwaytoheaven.veil.VeilGate.register();
+        // The Adventurer's Journal: item, its two packets, its world record and
+        // /swhjournal. One call; see stairwaytoheaven.journal.AdventurerJournal.
+        stairwaytoheaven.journal.AdventurerJournal.register();
         // The showroom's floor (/swhshowroom): a biome in which nothing spawns.
         // Registered LAST so it shifts no biome ID any earlier build handed out.
         stairwaytoheaven.showroom.ShowroomBiome.instance = BiomeRegistry.registerBiome("swhshowroom",

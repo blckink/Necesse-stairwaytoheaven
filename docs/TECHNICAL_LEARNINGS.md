@@ -4466,3 +4466,34 @@ Full audit and table: `docs/ITEM_CATEGORIES.md`.
   generates, world survives a restart, no errors.` Another seed-dependent POI
   defect of the kind listed above, not caused by the showroom — HYPOTHESIS as
   to its cause, not investigated.
+
+## The Adventurer's Journal: what the server gate proves, and what it cannot (2026-09-24)
+
+`journal/` builds each player's journal on the server and ships it in one plain
+packet (`PacketJournalOpen`); `/swhjournal` is its gate in
+`scripts/integration_test.sh`.
+
+- **A `GameMessage` tree survives `writePacket` / `GameMessage.fromPacket`,
+  nested replacements included** (`LocalMessage` with a `LocalMessage` or an
+  `ItemRegistry.getLocalization` inside it). VERIFIED [run]: the world-only book
+  (6 chapters, 20 steps, 256 messages, 15 919 bytes) round-trips with identical
+  status codes and every message translates with `isMissingKey(English) == false`.
+  So the server can say WHICH key and the client translates it in its own
+  language — no translated strings on the wire.
+- **`DeliverItemsQuest.objectives` / `ItemObjective.item` / `.itemsAmount` are
+  readable by reflection on 1.3.2** (`journal/QuestAsks`): `asks=12/12`,
+  VERIFIED [run]. The journal reads the asks from the quest classes instead of
+  keeping a second copy. On a version that renames those fields the read fails
+  soft (no item lines) and the gate prints `asks=N/12` with N < 12.
+- **Server console lines carry an ANSI colour prefix** (`ESC[39m[date] ...`), so
+  a gate regex must not anchor on `^`; the trailing end is not guaranteed
+  either — the journal assertions anchor on neither.
+- `World.getLevel(SKYREACH_IDENTIFIER)` **generates** the level when it does not
+  exist (decompiled 1.3.2 `World.getLevel(LevelIdentifier, Supplier)`, VERIFIED [jar]); the journal reads the
+  Skyreach record through it like every other reader in the mod, and is only
+  handed out once a player has stood in the Skyreach.
+
+HYPOTHESIS, not observed: the window itself (`JournalForm` — layout, wrapping,
+colours, Escape closing it without opening the pause menu), opening from the
+hotbar (`onAttack`), and the item/packet code on the 1.3.3 client. A dedicated
+server never renders and has no client, so none of this can be seen headless.

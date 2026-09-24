@@ -295,6 +295,14 @@ for _ in $(seq 1 60); do
     sleep 1
 done
 
+# The Adventurer's Journal: item and packets registered, every delivery quest's
+# asks readable, and the summary built for this world, round-tripped through
+# its own packet and translated with no missing key. Nobody is connected, so it
+# builds the world-only book.
+echo "Running swhjournal (the Adventurer's Journal summary)..."
+echo "swhjournal" >&3
+wait_for "SWH_JOURNAL_DONE" 120
+
 stop_server
 LOG1="$WORK_DIR/server.log"
 
@@ -342,6 +350,9 @@ start_server "$WORK_DIR/server3.log"
 # A bare status is a pure read, so it cannot repair what it is checking.
 echo "swhreset" >&3
 wait_for "SWH_RESET_DONE" 120
+# ...and the journal must read that reset world as the very start of the story.
+echo "swhjournal" >&3
+wait_for "SWH_JOURNAL_DONE" 120
 stop_server
 LOG3="$WORK_DIR/server3.log"
 
@@ -429,6 +440,21 @@ grep -qE "story  stage=0 recruited=false cats=00" "$LOG3" \
     || { echo "FAIL: the quest reset did not survive the save/load round trip"; STATUS=1; }
 grep -qE "keys   earned=\[\] portalsUnlocked=\[\]" "$LOG3" \
     || { echo "FAIL: the region-key/portal unlock records survived a reset they should not have"; STATUS=1; }
+# The Adventurer's Journal (stairwaytoheaven.journal, /swhjournal).
+grep -qE "journal check: item=adventurersjournal id=[0-9]+ class=AdventurersJournalItem packets=OK asks=12/12 " "$LOG1" \
+    || { echo "FAIL: the journal item/packets are not registered, or a delivery quest's asks cannot be read"; STATUS=1; }
+grep -qE "journal book: reader=world chapters=6 steps=[1-9][0-9]* bytes=[1-9][0-9]* roundtrip=OK messages=[1-9][0-9]* missing=0" "$LOG1" \
+    || { echo "FAIL: the journal summary did not build, round-trip or translate cleanly"; STATUS=1; }
+grep -qF "journal check: FAIL" "$LOG1" "$LOG3" \
+    && { echo "FAIL: /swhjournal threw"; STATUS=1; }
+# After /swhreset quests the book must read as the start of the story: the
+# first ascent available, everything after it locked, the resident asks that
+# no one gates available, and nothing beyond the fog open without the Mark.
+grep -qE "journal state: reader=world skyreach=ALLLL eden=AAL steinfeld=AL ghostrealm=ALLAAAL crookedbeyond=LL hell=L" "$LOG3" \
+    || { echo "FAIL: the journal does not read a reset world as the start of the story"; \
+         grep -E "journal state:" "$LOG3"; STATUS=1; }
+grep -qE "journal book: reader=world .* roundtrip=OK .* missing=0" "$LOG3" \
+    || { echo "FAIL: the journal summary did not build after a restart"; STATUS=1; }
 
 echo "--- verifying Steinfeld has an inhabitant and the resident chains exist ---"
 # Ives is a one-per-world find beside a broken angel, so a 64-tile probe around

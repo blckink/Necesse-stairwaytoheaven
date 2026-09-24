@@ -134,6 +134,7 @@ Waren, nicht die Zahlen.
 | Geisterkreide ×3 (+1 pro Tag) @ 1 200 | Nachschub, nachdem er dir das erste Stück geschenkt hat |
 | Wolkengleve ×1 @ 4 500 · Himmelswacht-Banner ×1 @ 800 | erst, wenn irgendwer in der Welt die Anker-Quest abgegeben hat |
 | Katzenkorb ×1 @ 500 · Flackerlicht-Girlande ×2 @ 500 | erst, wenn die Katzen daheim sind |
+| Abenteurer-Tagebuch ×1 @ 100 | Ersatz für ein verlorenes Tagebuch, +1 pro Tag |
 
 Er kauft nichts. Er **schenkt** 1× Geisterkreide (beim ersten Mal, dass *du*
 im Nebel gestanden hast — pro Charakter, nie geteilt). Das Silberglöckchen gibt
@@ -361,6 +362,51 @@ Strahl, der dem Mauszeiger folgt und alles auf seiner Linie trifft, nur golden.
 Neun) war genau für „die erste Waffenstufe nach Sturmstahl" gedacht und hatte
 bis jetzt keinen Abnehmer — Edenbronze auch nicht. Absichtlich **keine**
 Questbelohnung: die Wolkengleve ist schon eine.
+
+### Das Abenteurer-Tagebuch ⭐ NEU — alles an einem Ort
+
+**Wie man es bekommt:** Jeder Spieler bekommt beim ersten Mal, wenn er in der
+Himmelsweite steht (also beim ersten Aufstieg über die Treppe), ein
+Abenteurer-Tagebuch ins Inventar, mit der Chatzeile „In deinem Gepäck liegt
+ein Abenteurer-Tagebuch …". Bestehende Spielstände bekommen es **einmal**
+nachgereicht: wer schon in der Himmelsweite war, eine Mod-Quest hat, den
+Nebel berührt hat oder den Wächter angeworben hat, bekommt es beim nächsten
+Einloggen. Wer schon eins trägt, bekommt kein zweites. Verloren? Der
+**Himmelswächter** verkauft Ersatz für **100 Münzen** (1 auf Lager, +1 pro Tag).
+Nicht herstellbar.
+
+**Wie man es benutzt:** Rechtsklick auf das Buch im Inventar (oder aus der
+Schnellleiste benutzen). Links stehen die sechs Kapitel — Himmelsweite,
+Garten Eden, Steinfeld, Geisterreich, Krummes Jenseits, Hölle — jeweils mit
+„erledigt/gesamt". Rechts das offene Kapitel, scrollbar:
+
+- **Geschichte & Aufträge:** jede Stufe und Quest mit Status —
+  `[Gesperrt]` (mit „Freigeschaltet nach: …"), `[Verfügbar]`, `[Aktiv]` (mit
+  den Zielen, z. B. „10x Sturmsplitter (du hast 4 dabei)"), `[Erledigt]`
+  (mit „Belohnung erhalten: …"). Dazu **von wem** und **wo diese Person
+  wohnt**, und „(gilt für alle in dieser Welt)" bei allem, was welt- statt
+  spielerbezogen ist.
+- **Schlüssel, Rufsteine & Boss:** warst du schon hier; Region-Schlüssel
+  erhalten; Schlüsselstück aufgestellt (Rufsteine wach); Boss besiegt (zählt
+  jeden Sieg über diesen Vanilla-Boss).
+- **Bewohner:** wen du schon getroffen hast (Name, Rolle, wo), die anderen als
+  „???" mit einem Hinweis, wo man suchen muss.
+- **Orte:** Wächterspitze, Zollhaus, Grange-Keller, Testgelände, Baum der
+  Erkenntnis, zerbrochener Engel, Nebelwand, Gräber, Séance-Zirkel, Türhof,
+  Höllensaum — gefunden oder mit Hinweis.
+- **Überlieferung:** 14 kurze Texte, die mit dem Fortschritt aufgehen.
+
+Knopf **Aktualisieren** holt den Stand neu vom Server, **Schließen** oder
+**Esc** schließt das Fenster.
+
+**Mehrspieler:** Quests, Nebelmal, getroffene Leute und besuchte Reiche sind
+pro Spieler; Warden-Kette, Region-Schlüssel, Rufsteine und die „einmal
+bezahlten" Bewohner-Quests sind pro Welt — genau so, wie das Spiel sie
+speichert. Jeder Spieler sieht nur sein eigenes Tagebuch.
+
+**Stand:** Server-Seite im Integrationstest geprüft (`/swhjournal`). Wie das
+Fenster aussieht, ist **noch nicht im Spiel gesehen** — bitte einmal öffnen
+und Rückmeldung geben.
 
 ---
 

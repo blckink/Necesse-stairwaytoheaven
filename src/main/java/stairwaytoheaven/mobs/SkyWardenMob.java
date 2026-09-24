@@ -135,6 +135,8 @@ public class SkyWardenMob extends HumanShop {
         this.shop.addSellingItem("flickerlightgarland", new SellingShopItem(2, 1))
                 .setStaticPrice(500, 500)
                 .addRequirement((random, client, shop, blackboard) -> catsHome(shop));
+        // A replacement Adventurer's Journal, for a player who lost theirs.
+        stairwaytoheaven.journal.AdventurerJournal.stockShop(this.shop);
     }
 
     /** The anchor quest has been turned in on this world (its glaive is paid). */

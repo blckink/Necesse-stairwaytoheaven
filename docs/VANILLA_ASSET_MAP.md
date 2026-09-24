@@ -185,6 +185,18 @@ file nobody ships is reported rather than shipped as an ERR tile.
 | Aetherwright's Casing | `items/clockworkheart` | vanilla | a machined shell that holds a charge |
 | Skywatch Signet | `items/emptypendant` | vanilla | a plain seal on a chain, distinct from the mod's own Aurora Locket |
 
+### 1.7c The Adventurer's Journal — borrowed item icon
+
+Same seam as §1.7: `journal/AdventurersJournalItem.loadItemTextures` reads
+`items/<ICON>` instead of `items/adventurersjournal`. Swapping means dropping
+`src/main/resources/items/adventurersjournal.png` in and deleting that
+override. `tools/locale_audit.py` checks it through
+`ITEM_CLASS_VANILLA_ICON["AdventurersJournalItem"]`.
+
+| ours | icon borrowed | whose | why that one |
+|---|---|---|---|
+| Adventurer's Journal (`adventurersjournal`) | `items/recipebook` | vanilla | a bound book the player already knows opens a window on right-click — the journal opens exactly the same way |
+
 ### 1.7b Point 8n — vanilla art recoloured, not borrowed whole
 
 Unlike §1.7 these do NOT point `loadItemTextures` at a vanilla file: each is a

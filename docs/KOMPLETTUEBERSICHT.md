@@ -568,6 +568,7 @@ Kostüme: `twilightsuit` (Zwielicht-Perücke, Gestreifter Jenseits-Anzug, Abgewe
 | `postledger` | Buch der unzustellbaren Post | „Jedes Paket, das die Straße nie zustellte, von Hand aufgeführt. Magpie zahlt dafür." | K Zollhaus | **keine Wirkung; Magpie kauft es nicht** |
 | `silverbell` | Silberglöckchen | „Sie war Siggis. Er hasst sie" (Duplikat-Schlüssel, zweiter gewinnt vermutlich: „Ein Andenken aus dem Turm des Hüters. Es öffnet nichts mehr.") | **nirgends** (ausgemustert) | keine |
 | Schlüsselstücke `regionkey*` | Wachfeuer der Himmelsweite · Gartenstiege von Eden · Trauerengel von Steinfeld · Rabenkanzel des Nachgartens · Knotts Krumme Tür · Das Höllensiegel | — | Q Region-Schlüssel | in Siedlung setzen → Rufsteine |
+| `adventurersjournal` (nachgetragen 2026-09-24) | Abenteurer-Tagebuch | „Hält deine Reise durch die Reiche fest: …" | beim ersten Moment in der Himmelsweite (einmal pro Charakter, auch rückwirkend für alte Spielstände; `journal/AdventurerJournal.maybeGiveJournal`), S Wächter 100 | Rechtsklick im Inventar / Benutzen → Tagebuch-Fenster (`journal/JournalForm`), liest nur, schreibt nichts |
 
 ### 5.6 Nahrung und Tränke
 
@@ -736,6 +737,7 @@ Mod-Quests aus allen Journalen + Wächter zurück an die Spitze.
 | Speicher | Inhalt |
 |---|---|
 | `SkyfallWorldData` (`swhskyfall`) | nächster Sternenfall |
+| `JournalWorldData` (`swhjournal`, nachgetragen 2026-09-24) | wer sein Tagebuch schon bekommen hat (pro Auth); was jeder Spieler **gesehen** hat (benannte Bewohner/Wächter in 14 Kacheln, besuchte Reiche), alle 2 s gemessen; welche Bewohner als Siedler gesehen wurden (pro Welt). Nur das Tagebuch liest es; `/swhreset` setzt es nicht zurück |
 | `VeteranDefense` (`veterandefense`) | Verteidigungsstufe 0–5 |
 | Mob-Speicher | Dorian `bloodthirst`; Therapeut Patienten-Plätze; Rufstein `bossUniqueID` |
 

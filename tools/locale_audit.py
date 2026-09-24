@@ -708,6 +708,9 @@ ITEM_CLASS_DRAWS_ITSELF = {
 # not committed, so on a machine without it they are reported as unchecked
 # rather than silently passing.
 ITEM_CLASS_VANILLA_ICON = {
+    # The Adventurer's Journal borrows vanilla's recipe book icon (its ICON
+    # constant); row in docs/VANILLA_ASSET_MAP.md.
+    "AdventurersJournalItem": ("fixed", "recipebook"),
     "LivestockFood": ("arg", 0),
     "LivestockProduce": ("arg", 0),
     # Crooked realm materials deliberately point at a literal vanilla icon
@@ -814,6 +817,10 @@ VANILLA_LOCALE_KEYS = {
     # [mob] stylisthuman=Stylist / Stilistin (en:3626, de:3623). SalonWares
     # re-registers vanilla's Stylist under her own ID and keeps her own name.
     ("mob", "stylisthuman"),
+    # [itemtooltip] rclickinvopentip="[input=-99] in inventory to open" /
+    # "... im Inventar zum Öffnen" (1.3.2 locale en:3095, de:3093), the line
+    # vanilla's RecipeBookItem prints; AdventurersJournalItem opens the same way.
+    ("itemtooltip", "rclickinvopentip"),
 }
 
 VANILLA_RECIPE_OUTPUTS = set()
