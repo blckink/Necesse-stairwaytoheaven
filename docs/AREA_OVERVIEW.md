@@ -27,12 +27,21 @@ it is the state as it stands now.
 
 | realm | tiles out | biomes | hostiles | critters | animals | NPCs | live quests | POIs | boss |
 |---|---|---|---|---|---|---|---|---|---|
-| **Skyreach** | 0–1800 | 4 | 8 | 4 | 2 | 7 | 5 | 18 | `cryoqueen` t8 · 74 412 HP |
-| **Eden** | 600–2880 | 3 | 5 | **0** | 0 | 1 | 3 | 2 | `moonlightdancer` t8 · 171 720 HP |
-| **Steinfeld** | 1920–4200 | 3 | 4 | **0** | 0 | 1 | 2 | 1 | `ascendedwizard` t9 · 220 528 HP |
-| **Ghost Realm** | 2880–5280 | 5 | 9 | **0** | 0 | 4 | 4 | 1 | `pestwarden` t9 · 233 595 HP |
-| **Crooked Beyond** | 4200–5640 | 5 | 8 | 1 | 0 | 1 | 3 | 1 | `crystaldragon` t10 · 322 400 HP |
+| **Skyreach** | 0–1800 | 4 | 8 | 4 | 2 | 7 | 5 | 20 | `cryoqueen` t8 · 74 412 HP |
+| **Eden** | 600–2880 | 3 | 5 | **0** | 0 | 1 | 3 | 3 | `moonlightdancer` t8 · 171 720 HP |
+| **Steinfeld** | 1920–4200 | 3 | 4 | **0** | 0 | 1 | 2 | 2 | `ascendedwizard` t9 · 220 528 HP |
+| **Ghost Realm** | 2880–5280 | 5 | 9 | **0** | 0 | 4 | 4 | 2 | `pestwarden` t9 · 233 595 HP |
+| **Crooked Beyond** | 4200–5640 | 5 | 8 | 1 | 0 | 1 | 3 | 2 | `crystaldragon` t10 · 322 400 HP |
 | **Hell** | 4800–6000+ | **0** | 0 | 0 | 0 | 0 | 0 | 4 unreachable | — |
+
+**2026-09-24, chapter 02** (`docs/design/chapter-02-hoards-and-mimics.md`):
+the POI column moved for the first time outside the Skyreach — one
+guarded-treasure place each for Eden, Steinfeld, the Ghost Realm and the Crooked
+Beyond, and two more for the Skyreach. Each is a lattice kind in its own band,
+built around a chest a lifted realm elite guards, with `hoardmimic`s (or the
+realm's own mimic) among the boxes around it. They are the section headed
+"Chapter 02" in each realm below. The census rows (`tools/area_census.py`) read
+them off `RealmPoiPresets` and count them; the Hell count is unchanged.
 
 Read down the "NPCs" and "live quests" columns and the shape of the mod is
 still plain: **the Skyreach is a finished game and the outer four realms are
@@ -153,6 +162,14 @@ unique loot of `chapter-01-skyreach-cast.md` §3. Verified on seed 1486743578:
 `landmarks=3`, each `stamped=1 missing=0 present=1 guards=1`, and
 `landmark stamps: 3/3` still 3/3 after a restart.
 
+**Chapter 02 (2026-09-24): two more, which take the band to twenty.** The
+**Counterfeit Treasury** — the Sky Mint's hall of eight chests, five of them
+`hoardmimic`s, and a vault a lifted Skystone Golem keeps — and the **Fallen
+Observatory**, a broken dome with a doorless nightfell cellar the player has to
+mine into. Both stand on a sparser lattice of their own
+(`RealmPoiWorldPreset.SKY_HOARD_KINDS`) so the sixteen older kinds keep every
+cell they had; on seed 1526752859 that was 9 treasuries and 5 observatories.
+
 **Boss.** Cryo Queen, incursion tier 8, 18 000 base → **74 412 HP**.
 
 ---
@@ -177,7 +194,10 @@ thinnest table in the mod. Eden's tables are also the only ones using plain
 
 **Quests (3 live).** `swh_edenreach` → `swh_edenplants` → `swh_keyeden`.
 
-**POIs (2).** Crown Garden, Ferment House. The older Knowledge Grove, Lagoon
+**POIs (3).** Crown Garden, Ferment House, and since 2026-09-24 the **Hedge
+Labyrinth** (chapter 02 §3): a 10×10-cell forest-hedge maze whose six dead ends
+each end in a box — three are mimics — around a clearing where a lifted
+Forbidden Serpent guards the Garden's chest. The older Knowledge Grove, Lagoon
 Shrine and Orchard Ring are terrain/pressure sites, not buildings.
 
 **Boss.** Moonlight Dancer, tier 8, 40 000 base → **171 720 HP**.
@@ -214,8 +234,11 @@ Spirit Moss, the two Steinfeld materials that nothing else in the mod consumed;
 pays his 11 000 fee waived plus 10 Stormsteel Bar. Then `swh_keysteinfeld`,
 which the Warden only offers once the whole Warden's Call is done.
 
-**POIs (1).** Steinfeld Memorial, plus the (unfurnished) Graveyard and Ruined
-Chapel shells.
+**POIs (2).** Steinfeld Memorial, and since 2026-09-24 the **Pilgrims'
+Ossuary** (chapter 02 §4): a churchyard with two Stone Mourners among the
+graves, a processional corridor with three pressure plates wired to arrow traps
+in its walls, six niches (three mimics) and a reliquary a lifted Hollow Angel
+keeps. Plus the (unfurnished) Graveyard and Ruined Chapel shells.
 
 **Boss.** Ascended Wizard, tier 9, 44 000 base → **220 528 HP**.
 
@@ -260,8 +283,11 @@ fire and the essence quenches it; his 14 000 fee waived + 6 Spiritsteel Bar).
 Caspern's ask is the first thing in the mod that sends a player into the
 Gloomfen and the Ashen Reach on purpose: Veil Essence only drops there.
 
-**POIs (1).** Ghost Archive, plus the Haunted Manor, Mausoleum and Sunken
-Graveyard shells.
+**POIs (2).** Ghost Archive, and since 2026-09-24 the **Wedding Feast**
+(chapter 02 §5): a hall laid for twenty-four where thirteen of the chairs are
+`possessedchair`s — the first place that mob stands outside one Ectomarsh guard
+pack — two of four wedding gifts are mimics, and a lifted Mourning Bride guards
+the dowry. Plus the Haunted Manor, Mausoleum and Sunken Graveyard shells.
 
 **Boss.** Pest Warden, tier 9, 45 000 base → **233 595 HP**.
 
@@ -298,8 +324,11 @@ is the quietest ground outside Eden — deliberately, here.
 **Quests (3 live).** `swh_crookedarrival` → `swh_crookeddoor` →
 `swh_keycrookedbeyond`.
 
-**POIs (1).** Crooked Bazaar, plus the Door Yard, Inverted House, Long Table
-and Crooked House shells.
+**POIs (2).** Crooked Bazaar, and since 2026-09-24 the **Hall of Many Doors**
+(chapter 02 §6): one wall with five ways through it, three of them `doormimic`s
+standing in the gap, and beyond it a lifted Rare Crooked Golem guarding a real
+`mimicchest`. Plus the Door Yard, Inverted House, Long Table and Crooked House
+shells.
 
 **Boss.** Crystal Dragon, tier 10, 52 000 base → **322 400 HP**.
 

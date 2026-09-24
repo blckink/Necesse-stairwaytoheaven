@@ -98,6 +98,11 @@ final class SkyMobs {
         MobRegistry.registerMob("bloodthrall", stairwaytoheaven.mobs.BloodThrallMob.class, true);
         // Striped Megashark: overworld deep water, next to vanilla's shark.
         MobRegistry.registerMob("stripedmegashark", stairwaytoheaven.mobs.StripedMegasharkMob.class, true);
+        // The chest in a treasure room that is not a chest: vanilla's mimic on
+        // the Skyreach elite row, placed only by worldgen/pois/RealmPoiHoards
+        // (docs/design/chapter-02-hoards-and-mimics.md). countKillStat true: it
+        // is killed, so it gets a journal row with the vanilla mimic's face.
+        MobRegistry.registerMob("hoardmimic", stairwaytoheaven.mobs.HoardMimicMob.class, true);
     }
 
     /**

@@ -89,7 +89,23 @@ public final class RealmPoiPresets {
     public static final int SKY_GRANGE_CELLAR = 25;
     /** POI 2.14 of the dossier: a lit box in a dark crater field. */
     public static final int SKY_TEST_RANGE = 26;
-    public static final int COUNT = 27;
+    /**
+     * Chapter 02 ({@code docs/design/chapter-02-hoards-and-mimics.md}): six
+     * guarded-treasure places, APPENDED for the reason {@link #SKY_TOLL_HOUSE}
+     * gives. §1, the Sky Mint's hall of chests, five of them mimics.
+     */
+    public static final int SKY_COUNTERFEIT_TREASURY = 27;
+    /** Chapter 02 §2: the dome that fell, and the cellar with no door. */
+    public static final int SKY_FALLEN_OBSERVATORY = 28;
+    /** Chapter 02 §3: a hedge maze with a serpent at its heart. */
+    public static final int EDEN_HEDGE_LABYRINTH = 29;
+    /** Chapter 02 §4: a trapped processional, niches, and a reliquary. */
+    public static final int STEINFELD_OSSUARY = 30;
+    /** Chapter 02 §5: a wedding feast whose chairs are guests. */
+    public static final int GHOST_WEDDING_FEAST = 31;
+    /** Chapter 02 §6: five ways through one wall, three of them mimics. */
+    public static final int CROOKED_HALL_OF_DOORS = 32;
+    public static final int COUNT = 33;
 
     private static final int UP = 0, RIGHT = 1, DOWN = 2, LEFT = 3;
     /** Wall-decor rotation: where the WALL is, not where the piece faces (§0.2). */
@@ -129,6 +145,12 @@ public final class RealmPoiPresets {
             case SKY_SERPENTS_REEF: return REEF_PLAN[0].length();
             case SKY_GRANGE_CELLAR: return GRANGE_PLAN[0].length();
             case SKY_TEST_RANGE: return RANGE_PLAN[0].length();
+            case SKY_COUNTERFEIT_TREASURY: return TREASURY_PLAN[0].length();
+            case SKY_FALLEN_OBSERVATORY: return OBSERVATORY_PLAN[0].length();
+            case EDEN_HEDGE_LABYRINTH: return LABYRINTH_PLAN[0].length();
+            case STEINFELD_OSSUARY: return OSSUARY_PLAN[0].length();
+            case GHOST_WEDDING_FEAST: return FEAST_PLAN[0].length();
+            case CROOKED_HALL_OF_DOORS: return DOORS_PLAN[0].length();
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -162,6 +184,12 @@ public final class RealmPoiPresets {
             case SKY_SERPENTS_REEF: return REEF_PLAN.length;
             case SKY_GRANGE_CELLAR: return GRANGE_PLAN.length;
             case SKY_TEST_RANGE: return RANGE_PLAN.length;
+            case SKY_COUNTERFEIT_TREASURY: return TREASURY_PLAN.length;
+            case SKY_FALLEN_OBSERVATORY: return OBSERVATORY_PLAN.length;
+            case EDEN_HEDGE_LABYRINTH: return LABYRINTH_PLAN.length;
+            case STEINFELD_OSSUARY: return OSSUARY_PLAN.length;
+            case GHOST_WEDDING_FEAST: return FEAST_PLAN.length;
+            case CROOKED_HALL_OF_DOORS: return DOORS_PLAN.length;
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -204,6 +232,12 @@ public final class RealmPoiPresets {
             case SKY_SERPENTS_REEF: return "serpentsreef";
             case SKY_GRANGE_CELLAR: return "grangecellar";
             case SKY_TEST_RANGE: return "stormveiltestrange";
+            case SKY_COUNTERFEIT_TREASURY: return "counterfeittreasury";
+            case SKY_FALLEN_OBSERVATORY: return "fallenobservatory";
+            case EDEN_HEDGE_LABYRINTH: return "edenhedgelabyrinth";
+            case STEINFELD_OSSUARY: return "steinfeldossuary";
+            case GHOST_WEDDING_FEAST: return "ghostweddingfeast";
+            case CROOKED_HALL_OF_DOORS: return "crookedhallofdoors";
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -245,11 +279,14 @@ public final class RealmPoiPresets {
             case SKY_AETHER_MANUFACTORY: case SKY_SOVEREIGNS_ANVIL:
             case SKY_UNOPENED_GATE: case SKY_PRISM_CHOIR: case SKY_SERPENTS_REEF:
             case SKY_GRANGE_CELLAR: case SKY_TEST_RANGE:
+            case SKY_COUNTERFEIT_TREASURY: case SKY_FALLEN_OBSERVATORY:
                 return 0;
-            case EDEN_CROWN_GARDEN: case EDEN_FERMENT_HOUSE: return 1;
-            case STEINFELD_MEMORIAL: return 2;
-            case GHOST_ARCHIVE: return 3;
-            case CROOKED_BAZAAR: return 4;
+            case EDEN_CROWN_GARDEN: case EDEN_FERMENT_HOUSE:
+            case EDEN_HEDGE_LABYRINTH:
+                return 1;
+            case STEINFELD_MEMORIAL: case STEINFELD_OSSUARY: return 2;
+            case GHOST_ARCHIVE: case GHOST_WEDDING_FEAST: return 3;
+            case CROOKED_BAZAAR: case CROOKED_HALL_OF_DOORS: return 4;
             case HELL_BORDER_OFFICE: case HELL_ADMINISTRATION:
             case HELL_FORGE: case HELL_CARNIVAL:
                 return 5;
@@ -289,6 +326,12 @@ public final class RealmPoiPresets {
             case SKY_SERPENTS_REEF: return serpentsReef(random);
             case SKY_GRANGE_CELLAR: return grangeCellar(random);
             case SKY_TEST_RANGE: return testRange(random);
+            case SKY_COUNTERFEIT_TREASURY: return counterfeitTreasury(random);
+            case SKY_FALLEN_OBSERVATORY: return fallenObservatory(random);
+            case EDEN_HEDGE_LABYRINTH: return hedgeLabyrinth(random);
+            case STEINFELD_OSSUARY: return pilgrimsOssuary(random);
+            case GHOST_WEDDING_FEAST: return weddingFeast(random);
+            case CROOKED_HALL_OF_DOORS: return hallOfDoors(random);
             default: throw new IllegalArgumentException("Unknown realm POI " + kind);
         }
     }
@@ -2807,4 +2850,504 @@ public final class RealmPoiPresets {
         ), random, 17, 7, new Object[0]);
         return p;
     }
+
+    // =======================================================================
+    // Chapter 02: hoards and mimics
+    //
+    // docs/design/chapter-02-hoards-and-mimics.md. Six places across five
+    // realms, every one built around a guarded treasure: a boss-guarded chest,
+    // and around it storage boxes of which some are real and some are
+    // RealmPoiHoards' mimics. The plans below are that dossier's maps verbatim
+    // (tools/plan_transcription_audit.py checks it), and the characters every
+    // one of the six shares mean the same thing in all of them:
+    //
+    //   T  the prize: a vanilla chest, rolled from RealmPoiHoards.prize
+    //   C  a storage box that really is one, rolled from RealmPoiHoards.bait
+    //   M  a storage box that is not: floor here, a mimic mob placed on it
+    //   W  the guardian, a realm elite lifted to mini-boss (floor here)
+    //   S  a sign, whose text is the place's one line of story
+    //
+    // Mobs are not objects, so M, W and every guard letter are floor in the
+    // preset and a mob at generation, placed by RealmPoiHoards.placeInhabitants
+    // off these same rows. A chest and a mimic are turned the same way — toward
+    // the open side nearest the middle of the place — so the two cannot be told
+    // apart by which way they face.
+    // =======================================================================
+
+    /**
+     * The plan of one chapter-02 kind, for {@link RealmPoiHoards} to read its
+     * mob and container letters off. The same array {@link #build} writes, so
+     * the mobs cannot drift from the building they stand in.
+     */
+    static String[] hoardPlan(int kind) {
+        switch (kind) {
+            case SKY_COUNTERFEIT_TREASURY: return TREASURY_PLAN;
+            case SKY_FALLEN_OBSERVATORY: return OBSERVATORY_PLAN;
+            case EDEN_HEDGE_LABYRINTH: return LABYRINTH_PLAN;
+            case STEINFELD_OSSUARY: return OSSUARY_PLAN;
+            case GHOST_WEDDING_FEAST: return FEAST_PLAN;
+            case CROOKED_HALL_OF_DOORS: return DOORS_PLAN;
+            default: return null;
+        }
+    }
+
+    /**
+     * The rotation that turns a chest at {@code (x,y)} toward the open side of
+     * its tile that lies nearest the middle of the plan.
+     *
+     * <p>Shared by the chests ({@link #faceChests}) and the mimics
+     * ({@link RealmPoiHoards}), which is the whole point: vanilla's own
+     * {@code RandomCaveChestRoom} turns its mimic with {@code setDir} of the
+     * rotation the chest it replaced would have had, and a mimic facing a
+     * different way from every real box beside it would give itself away.
+     * "Open" is {@code open}: for both callers {@link RealmPoiHoards#isOpen}.
+     */
+    static int faceInward(String[] rows, int x, int y, java.util.function.IntPredicate open) {
+        int centreX = rows[0].length() / 2;
+        int centreY = rows.length / 2;
+        int[][] sides = {{DOWN, 0, 1}, {UP, 0, -1}, {RIGHT, 1, 0}, {LEFT, -1, 0}};
+        int best = DOWN;
+        long bestDistance = Long.MAX_VALUE;
+        for (int[] side : sides) {
+            int nx = x + side[1];
+            int ny = y + side[2];
+            if (!open.test(at(rows, nx, ny))) {
+                continue;
+            }
+            long dx = nx - centreX;
+            long dy = ny - centreY;
+            long distance = dx * dx + dy * dy;
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                best = side[0];
+            }
+        }
+        return best;
+    }
+
+    /**
+     * Turns every T and C of a chapter-02 plan inward and fills it: T from the
+     * kind's prize table, C (and any extra container letters) from its bait.
+     * Written AFTER {@link #plan}, because {@code addInventory} fills whatever
+     * container object entity stands on the tile when the preset is applied.
+     */
+    private static void faceChests(Preset p, String[] rows, Legend legend, int kind,
+            GameRandom random, String containerChars) {
+        for (int y = 0; y < rows.length; y++) {
+            for (int x = 0; x < rows[y].length(); x++) {
+                char c = rows[y].charAt(x);
+                if (c != 'T' && containerChars.indexOf(c) < 0) {
+                    continue;
+                }
+                int rotation = faceInward(rows, x, y, ch -> RealmPoiHoards.isOpen(kind, (char) ch));
+                p.setObject(x, y, legend.object[c], rotation);
+                p.addInventory(c == 'T' ? RealmPoiHoards.prize(kind) : RealmPoiHoards.bait(kind, c),
+                        random, x, y, new Object[0]);
+            }
+        }
+    }
+
+    /**
+     * The sign's one line, from {@code [misc]} of the locale — the pattern
+     * {@code SkywardShrinePreset} uses: a {@code sign} object and, once the
+     * preset is applied, its {@code SignObjectEntity}'s message.
+     */
+    private static void signText(Preset p, String[] rows, String miscKey) {
+        for (int y = 0; y < rows.length; y++) {
+            int x = rows[y].indexOf('S');
+            if (x < 0) {
+                continue;
+            }
+            p.addCustomApply(x, y, 0, (level, levelX, levelY, dir, blackboard) -> {
+                necesse.entity.objectEntity.ObjectEntity entity =
+                        level.entityManager.getObjectEntity(levelX, levelY);
+                if (entity instanceof necesse.entity.objectEntity.SignObjectEntity) {
+                    ((necesse.entity.objectEntity.SignObjectEntity) entity).setMessage(
+                            new necesse.engine.localization.message.LocalMessage("misc", miscKey));
+                }
+                return null;
+            });
+        }
+    }
+
+    /**
+     * Wires each pressure plate of a plan to the wall trap on its own row.
+     *
+     * <p>{@code RandomCaveChestRoom.placeTrap} (decompiled, lines 150-170) is
+     * vanilla's recipe and this is the same one: the plate and the trap on one
+     * straight line, the trap turned to fire back along it, and wire 0 laid on
+     * every tile from the plate to the trap inclusive. A {@code WallTrapObject}
+     * fires on the rising edge of its wire; a pressure plate drives the wire
+     * while something stands on it. The preset's own wire layer carries it —
+     * {@code Preset.applyToLevel} writes every set wire bit through
+     * {@code level.wireManager.setWire} (Preset.java:432-447).
+     */
+    private static void wirePlates(Preset p, String[] rows, char plate, String traps) {
+        for (int y = 0; y < rows.length; y++) {
+            String row = rows[y];
+            for (int x = 0; x < row.length(); x++) {
+                if (row.charAt(x) != plate) {
+                    continue;
+                }
+                int trapX = -1;
+                for (int d = 1; d < row.length() && trapX < 0; d++) {
+                    if (x - d >= 0 && traps.indexOf(row.charAt(x - d)) >= 0) trapX = x - d;
+                    else if (x + d < row.length() && traps.indexOf(row.charAt(x + d)) >= 0) trapX = x + d;
+                }
+                if (trapX < 0) {
+                    throw new IllegalStateException("Pressure plate at " + x + "," + y
+                            + " has no trap on its row to fire");
+                }
+                for (int wx = Math.min(x, trapX); wx <= Math.max(x, trapX); wx++) {
+                    p.putWire(wx, y, 0, true);
+                }
+            }
+        }
+    }
+
+    /**
+     * Chapter 02, §1: the Counterfeit Treasury. The Sky Mint's public hall —
+     * eight chests down a gold runner, five of them mimics — and behind the
+     * vault door the real one, with a lifted Skystone Golem in front of it.
+     */
+    private static Preset counterfeitTreasury(GameRandom random) {
+        Preset p = new Preset(width(SKY_COUNTERFEIT_TREASURY), height(SKY_COUNTERFEIT_TREASURY));
+        Legend legend = new Legend(tile("skywaytile"))
+                .floor(',')
+                .wall('#', "cloudmarblewall")
+                .window('O', "cloudmarblewindow")
+                .door('D', "cloudmarbledoor")
+                .rug('r', "skywatchcarpet")
+                .floor('+', "marblecheckertile")
+                .prop('c', "skywatchcandelabra")
+                .floor('n').decor('n', "skywatchbanner", WALL_ABOVE)
+                // Four lanterns, one character: two off the hall's south wall,
+                // two inside the vault — its north face is the one exception.
+                .floor('q').decor('q', "mistglasslantern", WALL_BELOW)
+                .turns(19, 5, WALL_ABOVE)
+                .prop('d', "skywatchdisplay")
+                .prop('C', "storagebox")
+                .prop('T', "birchchest")
+                .prop('S', "sign", DOWN)
+                .loose('L', "wardencandelabra")
+                .floor('M').floor('W').floor('a');
+        legend.paves('T', "marblecheckertile").paves('d', "marblecheckertile");
+        plan(p, TREASURY_PLAN, legend);
+        faceChests(p, TREASURY_PLAN, legend, SKY_COUNTERFEIT_TREASURY, random, "C");
+        signText(p, TREASURY_PLAN, "swhsigntreasury");
+        dryRing(p, SkyRegistry.cloudturfID);
+        return p;
+    }
+
+    /**
+     * Chapter 02, §2: the Fallen Observatory. A dome that came down on its
+     * north-west side, a lens nobody looks through, and in the middle of it a
+     * nightfell cube with NO door — the star cellar, sealed when the dome fell.
+     * The way in is a pickaxe.
+     */
+    private static Preset fallenObservatory(GameRandom random) {
+        Preset p = new Preset(width(SKY_FALLEN_OBSERVATORY), height(SKY_FALLEN_OBSERVATORY));
+        Legend legend = new Legend(tile("skystonetile"))
+                .floor(',')
+                .floor('+', "marblecheckertile")
+                .floor('=', "gloomwoodfloortile")
+                .wall('#', "skystonebrickwall")
+                .window('O', "skystonebrickwindow")
+                .door('D', "skystonebrickdoor")
+                .wall('%', "nightfellwall")
+                .prop('Y', "skywatchtelescope")
+                .prop('U', "skywatchastrolabe")
+                .prop('k', "skywatchbookshelf")
+                .prop('b', "skywatchbookshelf")
+                .prop('g', "chargecrystal")
+                .prop('T', "birchchest")
+                .prop('S', "sign", DOWN)
+                .loose('x', "skystonerock")
+                .loose('r', "skywatchrubble")
+                .loose('L', "wardencandelabra")
+                .floor('M').floor('W').floor('w');
+        legend.paves('Y', "marblecheckertile").paves('U', "marblecheckertile")
+                .paves('M', "marblecheckertile").paves('T', "gloomwoodfloortile")
+                .paves('k', "gloomwoodfloortile");
+        plan(p, OBSERVATORY_PLAN, legend);
+        faceChests(p, OBSERVATORY_PLAN, legend, SKY_FALLEN_OBSERVATORY, random, "kb");
+        signText(p, OBSERVATORY_PLAN, "swhsignobservatory");
+        dryRing(p, SkyRegistry.cloudturfID);
+        return p;
+    }
+
+    /**
+     * Chapter 02, §3: the Hedge Labyrinth. A 10x10-cell perfect maze of
+     * vanilla forest hedge, six dead ends that each end in a box, and a hedged
+     * clearing at its heart where a lifted Forbidden Serpent keeps the Garden's
+     * own chest.
+     */
+    private static Preset hedgeLabyrinth(GameRandom random) {
+        Preset p = new Preset(width(EDEN_HEDGE_LABYRINTH), height(EDEN_HEDGE_LABYRINTH));
+        Legend legend = new Legend(tile("edenmosstile"))
+                .floor(',')
+                .fence('h', "foresthedge")
+                .fence('G', "foresthedgegate")
+                .prop('c', "palmcandelabra")
+                .prop('C', "storagebox")
+                .prop('T', "palmchest")
+                .floor('M').floor('W').floor('v').floor('m');
+        plan(p, LABYRINTH_PLAN, legend);
+        faceChests(p, LABYRINTH_PLAN, legend, EDEN_HEDGE_LABYRINTH, random, "C");
+        dryRing(p, tile("edenmosstile"));
+        return p;
+    }
+
+    /**
+     * Chapter 02, §4: the Pilgrims' Ossuary. A churchyard, a crypt door, and a
+     * processional corridor the pilgrims had to walk: three pressure plates
+     * wired to arrow traps in its walls, six niches of which three hold a
+     * mimic, and at the top the reliquary a lifted Hollow Angel still keeps.
+     */
+    private static Preset pilgrimsOssuary(GameRandom random) {
+        Preset p = new Preset(width(STEINFELD_OSSUARY), height(STEINFELD_OSSUARY));
+        Legend legend = new Legend(tile("crackedmarbletile"))
+                .floor(',')
+                .floor(';', "miststonetile")
+                .wall('#', "stonewall")
+                .door('D', "stonedoor")
+                // The trap is the wall: vanilla's WallArrowTrapObject wears the
+                // stone wall's own face and fires the way it is turned.
+                .wall('t', "stonearrowtrap").turns(8, 12, RIGHT).turns(8, 20, RIGHT)
+                .wall('u', "stonearrowtrap").turns(12, 16, LEFT)
+                .prop('p', "stonepressureplate")
+                .prop('i', "chapelcolumn")
+                .prop('e', "brokenangel")
+                .prop('c', "stonecandlepedestal")
+                .prop('C', "storagebox")
+                .prop('T', "deadwoodchest")
+                .prop('S', "sign", DOWN)
+                .loose('g', "cryptgravestone1")
+                .floor('M').floor('W')
+                // The two Stone Mourners stand among the graves, on the
+                // meadow the painter grew: a mob tile, not a floor.
+                .pending('n', false);
+        plan(p, OSSUARY_PLAN, legend);
+        wirePlates(p, OSSUARY_PLAN, 'p', "tu");
+        faceChests(p, OSSUARY_PLAN, legend, STEINFELD_OSSUARY, random, "C");
+        signText(p, OSSUARY_PLAN, "swhsignossuary");
+        dryRing(p, tile("crackedmarbletile"));
+        return p;
+    }
+
+    /**
+     * Chapter 02, §5: the Wedding Feast. A hall laid for a wedding that never
+     * ended — plates, skulls, twenty-four seats of which thirteen are Possessed
+     * Chairs — the gifts piled along the east wall, and in the apse behind the
+     * bride the dowry chest she is still guarding.
+     */
+    private static Preset weddingFeast(GameRandom random) {
+        Preset p = new Preset(width(GHOST_WEDDING_FEAST), height(GHOST_WEDDING_FEAST));
+        Legend legend = new Legend(tile("blackcobbletile"))
+                .floor(',')
+                .floor(';', "spiritstonetile")
+                .wall('#', "nightfellwall")
+                .window('O', "nightfellwindow")
+                .door('D', "nightfelldoor")
+                .table('t', "bonemodulartable", "oldplate", "brokenplate", "skull", "dirtyplate")
+                .chair('h', "bonechair")
+                .prop('c', "deadwoodcandelabra")
+                .prop('C', "storagebox")
+                .prop('T', "bonechest")
+                .prop('S', "sign", DOWN)
+                .loose('L', "ghostlantern")
+                .floor('M').floor('W').floor('P');
+        plan(p, FEAST_PLAN, legend);
+        faceChests(p, FEAST_PLAN, legend, GHOST_WEDDING_FEAST, random, "C");
+        signText(p, FEAST_PLAN, "swhsignfeast");
+        dryRing(p, tile("blackcobbletile"));
+        return p;
+    }
+
+    /**
+     * Chapter 02, §6: the Hall of Many Doors. Five ways through one wall — two
+     * are doors and three are Door Mimics standing in the gap — and in the
+     * gallery beyond, where the windows lie on the floor, the only honest
+     * thing in the building is the chest that looks like a mimic.
+     */
+    private static Preset hallOfDoors(GameRandom random) {
+        Preset p = new Preset(width(CROOKED_HALL_OF_DOORS), height(CROOKED_HALL_OF_DOORS));
+        Legend legend = new Legend(tile("checkerstonetile"))
+                .floor('=')
+                .floor(';', "crookedstripetile")
+                .wall('#', "arcanicwall")
+                .window('O', "arcanicwindow")
+                .door('D', "arcanicdoor")
+                .prop('w', "groundwindow")
+                .prop('l', "bentlantern")
+                .prop('k', "crookedclock")
+                .prop('x', "crookedcrate")
+                .prop('C', "storagebox")
+                // The inversion the place is built on: vanilla's mimicchest is
+                // a real 40-slot StorageBoxInventoryObject that LOOKS like a
+                // mimic (MimicStorageBoxInventoryObject), in a hall where the
+                // things standing in the doorways are mimics that do not.
+                .prop('T', "mimicchest")
+                .prop('S', "sign", DOWN)
+                .floor('M').floor('W').floor('a');
+        legend.paves('C', "crookedstripetile").paves('x', "crookedstripetile")
+                .paves('S', "crookedstripetile");
+        plan(p, DOORS_PLAN, legend);
+        faceChests(p, DOORS_PLAN, legend, CROOKED_HALL_OF_DOORS, random, "C");
+        signText(p, DOORS_PLAN, "swhsigndoors");
+        dryRing(p, tile("checkerstonetile"));
+        return p;
+    }
+
+    private static final String[] TREASURY_PLAN = {
+            "...........................",
+            "...........................",
+            "..####O###O###O####........",
+            "..#c,,,,n,,,n,,,,c#......L.",
+            "..#,,,,,,,,,,,,,,,###O###..",
+            "..#,,M,,C,,M,,M,,,#q++++#..",
+            "..#,,,,,,,,,,,,,a,#++d++#..",
+            ".S#,,,,,,,,,,,,,,,#+++++O..",
+            "..#,rrrrrrrrrrrrr,#+++++#..",
+            "..D,rrrrrrrrrrrrr,D+W++T#..",
+            "..#,rrrrrrrrrrrrr,#+++++#..",
+            ".L#,,,,,,,,,,,,,,,#+++++O..",
+            "..#,,,,,,,,,,,,,a,#++d++#..",
+            "..#,,C,,M,,M,,C,,,#q++++#..",
+            "..#,,,,,,,,,,,,,,,###O###..",
+            "..#c,,,,q,,,q,,,,c#......L.",
+            "..####O###O###O####........",
+            "...........................",
+            "...........................",
+    };
+
+    private static final String[] OBSERVATORY_PLAN = {
+            ".........................",
+            ".........................",
+            "..........x..............",
+            "......rx.r##O##..........",
+            ".....x..,,,,,,,##........",
+            "......,,,,,,,,,,,##......",
+            "......#,r,,,,,,g,,#......",
+            ".....#,,,,,,,,,,,,,#.....",
+            ".....#,,,W,,,,%%%%%#.....",
+            "....#,,+++++,,%==k%,#....",
+            "....#,,++Y++,,%=T=%,#....",
+            "....O,,+++++,,%===%,O....",
+            "....#,,+M+U+,,%%%%%,#....",
+            "....#,b+++++,,,,,,,,#....",
+            ".....#w,,,,,,,,,,,,#.....",
+            ".....#,g,,,,,w,,,,,#.....",
+            "......#,,,,,,,,,r,#......",
+            "......##,,,,,,,,,,,r.....",
+            "........##,,,,,##r.x.....",
+            "..........##D##..........",
+            "..........L.,.L..........",
+            "...........S,............",
+            ".........................",
+    };
+
+    private static final String[] LABYRINTH_PLAN = {
+            ".......................",
+            ".hhhhhhhhhhhhhhhhhhhhh.",
+            ".h,,,,,,,h,,,h,,,hM,,h.",
+            ".hhhhhhh,h,h,h,h,hhh,h.",
+            ".h,,,h,,,h,h,h,h,,,,,h.",
+            ".h,h,h,hhh,h,h,hhhhh,h.",
+            ".h,h,h,h,,,h,h,,,hC,,h.",
+            ".h,h,h,hhhhhhhhh,hhh,h.",
+            ".hvh,,,hc,,,,,ch,,,h,h.",
+            ".h,hhhhh,,,T,,,hhh,h,h.",
+            ".h,h,,,h,,,,,,,h,h,h,h.",
+            ".h,hhh,h,,,W,,,h,h,h,h.",
+            ".h,,,h,h,,,,,,,h,h,h,h.",
+            ".hhh,hhh,m,,,m,hhh,h,h.",
+            ".hMh,,,hc,,,,,ch,h,hCh.",
+            ".h,hhhhhhhhGhhhh,h,hhh.",
+            ".h,h,,,,,,,,,h,v,h,,,h.",
+            ".h,h,hhh,hhh,h,hhhhh,h.",
+            ".h,h,hCh,,,,,h,h,,,,,h.",
+            ".h,h,h,hhhhhhhhh,hhh,h.",
+            ".h,,,,,,,,,,,,,,,hM,,h.",
+            ".hhhhhhhhhhGhhhhhhhhhh.",
+            ".......................",
+    };
+
+    private static final String[] OSSUARY_PLAN = {
+            ".....................",
+            "......#########......",
+            "......#c,,T,,c#......",
+            "......#,i,,,i,#......",
+            "......#,,,W,,,#......",
+            "......#,i,,,i,#......",
+            "......#e,,,,,e#......",
+            "......####D####......",
+            "........#,,,#........",
+            "......###,,,###......",
+            "......#M,,,,,C#......",
+            "......###,,,###......",
+            "........t,p,#........",
+            "......###,,,###......",
+            "......#C,,,,,M#......",
+            "......###,,,###......",
+            "........#,p,u........",
+            "......###,,,###......",
+            "......#M,,,,,C#......",
+            "......###,,,###......",
+            "........t,p,#........",
+            "........#,,,#........",
+            ".....g..#,,,#........",
+            "........##D##..g.....",
+            "........c;;;c........",
+            ".....gn..;;;..g......",
+            ".........;;;...n.....",
+            "....g..g.;;;.S..g....",
+            ".........;;;.........",
+    };
+
+    private static final String[] FEAST_PLAN = {
+            "........#########........",
+            "........#c,,T,,c#........",
+            "........#,,,,,,,#........",
+            "..###O###,,,,,,,###O###..",
+            "..#c,,,,#,,,,,,,#,,,,c#..",
+            "..#,,,,,,,,,W,,,,,,,,,#..",
+            "..#,,,,,,,,,,,,,,,,,,M#..",
+            "..O,,,,,,,,,,,,,,,,,,,O..",
+            "..#,,,,,,,,,,,,,,,,,,C#..",
+            "..#,,,,hPhPPhPhPPh,,,,#..",
+            "..#,,,Pttttttttttth,,,#..",
+            "..#,,,,PhPhhPPhPhP,,,,#..",
+            "..#,,,,,,,,,,,,,,,,,,M#..",
+            "..O,,,,,,,,,,,,,,,,,,,O..",
+            "..#,,,,,,,,,,,,,,,,,,C#..",
+            "..#,,,,,,,,,,,,,,,,,,,#..",
+            "..#c,,,,,,,,,,,,,,,,,c#..",
+            "..###O######D######O###..",
+            "............;............",
+            "...........L;L...........",
+            "..........S.;............",
+    };
+
+    private static final String[] DOORS_PLAN = {
+            ".........................",
+            ".........................",
+            "..####O###########O####..",
+            "..#l======k===k======l#..",
+            "..#==w======T======w==#..",
+            "..#====a==============#..",
+            "..O=========W=========O..",
+            "..#===================#..",
+            "..#==w===w=====w===w==#..",
+            "..#===================#..",
+            "..#===================#..",
+            "..###M##D###M###D##M###..",
+            "..#;;;;;;;;;;;;;;;;;;;#..",
+            "..#;;;;;;;;;;;;;;;;;;;#..",
+            "..O;C;;;;;;;x;;;;;;;C;O..",
+            "..#;;;;;;;;;;;;;;;;;;;#..",
+            "..#l;;;;;;;;;;;;;;;;;l#..",
+            "..####O#####D#####O####..",
+            "...........S;............",
+    };
 }

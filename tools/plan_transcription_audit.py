@@ -42,6 +42,18 @@ PLANS = {
     "RANGE_PLAN": "### 2.14 The Test Range",
 }
 
+# The same audit for the chapter-02 dossier: its six maps live in the same
+# RealmPoiPresets file and are read the same way.
+DOSSIER_02 = REPO / "docs/design/chapter-02-hoards-and-mimics.md"
+PLANS_02 = {
+    "TREASURY_PLAN": "## 1. The Counterfeit Treasury",
+    "OBSERVATORY_PLAN": "## 2. The Fallen Observatory",
+    "LABYRINTH_PLAN": "## 3. The Hedge Labyrinth",
+    "OSSUARY_PLAN": "## 4. The Pilgrims' Ossuary",
+    "FEAST_PLAN": "## 5. The Wedding Feast",
+    "DOORS_PLAN": "## 6. The Hall of Many Doors",
+}
+
 # The dossier draws each row as "  y12  ..#####..", the leading label being a
 # reading aid rather than part of the map.
 ROW = re.compile(r"^\s*y\d+\s+(\S+)\s*$")
@@ -63,10 +75,14 @@ def java_rows(text, name):
 
 
 def main():
-    dossier = DOSSIER.read_text(encoding="utf-8")
+    dossiers = {DOSSIER: DOSSIER.read_text(encoding="utf-8"),
+                DOSSIER_02: DOSSIER_02.read_text(encoding="utf-8")}
     presets = PRESETS.read_text(encoding="utf-8")
     flags = 0
-    for name, heading in sorted(PLANS.items()):
+    work = [(name, heading, DOSSIER) for name, heading in PLANS.items()]
+    work += [(name, heading, DOSSIER_02) for name, heading in PLANS_02.items()]
+    for name, heading, source in sorted(work):
+        dossier = dossiers[source]
         try:
             drawn = dossier_rows(dossier, heading)
             built = java_rows(presets, name)

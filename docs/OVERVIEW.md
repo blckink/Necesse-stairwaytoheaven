@@ -158,6 +158,29 @@ with the lap-the-ring puzzle and Sovereign Shard III still on the art queue.
 pedestal each) and it is deliberately NOT taken: that is three objects on one
 tile, which no plan cell can hold. **`[run]`, not `[game]`.**
 
+**Chapter 02 adds six guarded-treasure places (2026-09-24), kinds 27–32**
+(`docs/design/chapter-02-hoards-and-mimics.md`): the Counterfeit Treasury and
+the Fallen Observatory (Skyreach), the Hedge Labyrinth (Eden), the Pilgrims'
+Ossuary (Steinfeld), the Wedding Feast (Ghost Realm) and the Hall of Many Doors
+(Crooked Beyond). All plan-built; the catalogue is now **thirty lattice
+kinds** plus the three landmarks. The four outer ones sit in their band's row;
+the two Skyreach ones on a sparser second lattice of their own
+(`RealmPoiWorldPreset.SKY_HOARD_KINDS`, 16% of cells), because adding them to
+the Skyreach row diluted its ~36 rank-dealt sites until the Sky Tower stood
+nowhere on seed 1486191071. Each one is
+a prize chest behind a guardian (that realm's elite, lifted by
+`BossScaling.applyTier` to tier 5: ×2.12 HP, ×1.52 damage) and boxes around it
+of which some are mimics: the new `hoardmimic` (vanilla `MimicMob` on the
+Skyreach elite row, lifted onto the Eden/Steinfeld/Ghost rows where it stands),
+or the realm's own `doormimic`/`possessedchair`. Everything is placed once, at
+generation, by `RealmPoiHoards`, read off the same plan rows the preset is
+built from. The Ossuary is the first place in the mod with vanilla pressure
+plates wired to arrow traps; the Observatory the first with a room that has no
+door. `/skyreachstatus pois` stamps each kind's nearest site and prints a
+`realmpoi hoard` line (cast, mimics, mimic loot, guardian lifted, chests
+filled); the integration test fails on any of them short. **`[run]`, not
+`[game]`.**
+
 **And they now stand in the world — counted, not assumed.** From 2026-09-04 to
 2026-09-07 they were registered and largely absent, and no gate looked: the POI
 counts in `scripts/integration_test.sh` were the SURFACE catalogue's, a

@@ -560,10 +560,11 @@ echo "--- verifying the twenty-five inhabited places actually stand ---"
 # (2026-09-09) to 19; the Redoubt, the Manufactory and the Anvil (2026-09-10)
 # to 22; the Gate, the Choir and the Reef (2026-09-10) to 25, which is twelve
 # of the dossier's fourteen sections -- 2.13 and 2.14 are still unbuilt.
-grep -qE "realmpoi census: .* kinds=24/24 " "$LOG1" \
+# Chapter 02's six guarded-treasure places (2026-09-24) take the lattice to 30.
+grep -qE "realmpoi census: .* kinds=30/30 " "$LOG1" \
     || { echo "FAIL: the placer accepts no site at all for one of the twenty-four lattice places"; \
          grep -aE "realmpoi kind .* accepted=0 " "$LOG1"; STATUS=1; }
-grep -qE "realmpoi census: .* queuedkinds=24/24 " "$LOG1" \
+grep -qE "realmpoi census: .* queuedkinds=30/30 " "$LOG1" \
     || { echo "FAIL: one of the twenty-four lattice places is in no preset region in the world"; \
          grep -aE "realmpoi kind .* queued=0 " "$LOG1"; STATUS=1; }
 # ...named one by one, so a regression says WHICH place vanished rather than
@@ -582,7 +583,9 @@ for poi in skytower skytown skytollbridge skyinn edencrowngarden edenfermenthous
     hellforge hellcarnival skywaytollhouse waysideshrine dewkeepershut \
     shepherdsfold fallinginstitute passagewayhouse \
     nightfellredoubt aethermanufactory sovereignsanvil \
-    unopenedgate prismchoir serpentsreef grangecellar stormveiltestrange; do
+    unopenedgate prismchoir serpentsreef grangecellar stormveiltestrange \
+    counterfeittreasury fallenobservatory edenhedgelabyrinth steinfeldossuary \
+    ghostweddingfeast crookedhallofdoors; do
     case "$poi" in
         skywaytollhouse|grangecellar|stormveiltestrange)
             # Once per world: it must be queued NOWHERE, or it is back on the
@@ -706,6 +709,33 @@ EOF
 grep -qE "realmpoi stamp: kind=serpentsreef .* missing=0 " "$LOG1" \
     || { echo "FAIL: the Serpent's Reef was not stamped clean"; \
          grep -aE "realmpoi stamp: kind=serpentsreef" "$LOG1" | tail -1; STATUS=1; }
+
+# ---- chapter 02: the six guarded-treasure places ---------------------------
+# docs/design/chapter-02-hoards-and-mimics.md. Each one's nearest site is
+# stamped by name (like the Reef) and then read back: the building must stand
+# whole, every mob its plan draws must be standing in it -- the guardian, the
+# guards and the mimics -- the guardian must carry the tier buff that makes it
+# the mini-boss, every hoard mimic must really carry a hoard, and every chest
+# must hold something. A place whose cast did not spawn is a room with chests
+# in it, which is exactly the "room with chest" this chapter exists to replace.
+for hoard in counterfeittreasury fallenobservatory edenhedgelabyrinth \
+    steinfeldossuary ghostweddingfeast crookedhallofdoors; do
+    grep -qE "realmpoi stamp: kind=$hoard .* missing=0 " "$LOG1" \
+        || { echo "FAIL: $hoard was not stamped clean"; \
+             grep -aE "realmpoi stamp: kind=$hoard" "$LOG1" | tail -1; STATUS=1; }
+    hoard_line="$(grep -aE "realmpoi hoard $hoard:" "$LOG1" | tail -1)"
+    if [ -z "$hoard_line" ]; then
+        echo "FAIL: the census never read $hoard's cast"; STATUS=1; continue
+    fi
+    for field in cast mimics mimicloot lifted loot; do
+        pair="$(echo "$hoard_line" | grep -oE " $field=[0-9]+/[0-9]+" | cut -d= -f2)"
+        have="${pair%/*}"; want="${pair#*/}"
+        [ -n "$pair" ] && [ "$have" = "$want" ] \
+            || { echo "FAIL: $hoard $field=$pair"; echo "$hoard_line"; STATUS=1; }
+    done
+    echo "$hoard_line" | grep -qE " cast=[1-9][0-9]*/" \
+        || { echo "FAIL: $hoard has no cast at all"; STATUS=1; }
+done
 
 # ---- §0.6's three once-per-world places -------------------------------------
 # The lattice census above cannot see these, so this is the whole of their

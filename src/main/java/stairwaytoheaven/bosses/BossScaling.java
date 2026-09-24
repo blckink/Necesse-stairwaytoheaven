@@ -153,6 +153,29 @@ public final class BossScaling {
     }
 
     /**
+     * The same curve on a mob that is not a ladder boss: a POI guardian or a
+     * hoard mimic, at a tier the caller states.
+     *
+     * <p>{@code RealmPoiHoards} uses it to lift one realm-native elite into the
+     * mini-boss that guards a treasure room, and to lift the Skyreach-row
+     * {@code hoardmimic} onto a deeper realm's row. It is {@link #apply} without
+     * a {@link SkyBossLadder.Boss}: the tier travels in the same GND map, the
+     * uplifts stay at {@link #NO_UPLIFT}, and {@link TierBuff#init} is the one
+     * place the modifiers are set — so it saves and syncs exactly as a boss
+     * does. Call it after {@code entityManager.addMob}, for the reason
+     * {@link #apply} gives.
+     */
+    public static void applyTier(Mob mob, int tier) {
+        if (mob == null || pressure == null || tier <= 0) {
+            return;
+        }
+        ActiveBuff active = new ActiveBuff(pressure, mob, 0, null);
+        active.getGndData().setInt(TIER_KEY, tier);
+        mob.buffManager.addBuff(active, true);
+        mob.setHealth(mob.getMaxHealth());
+    }
+
+    /**
      * The buff itself: invisible, permanent, synced, and carrying nothing but
      * one integer.
      *

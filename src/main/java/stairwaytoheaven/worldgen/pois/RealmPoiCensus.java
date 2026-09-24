@@ -259,6 +259,22 @@ public final class RealmPoiCensus {
         // ---- 4. the three that are stamped once, off ensureWardenSpire ------
         landmarks(level, seed, logs);
 
+        // ---- 5. chapter 02's six guarded-treasure places -------------------
+        // Each one's nearest site is stamped like the Reef, whether or not it
+        // is the nearest of all, because what these places ARE is who stands
+        // in them and what their chests hold -- and no preset count sees a mob.
+        for (int kind : RealmPoiHoards.KINDS) {
+            Site site = nearestQueuedByKind[kind];
+            if (site == null) {
+                logs.add("realmpoi hoard " + RealmPoiPresets.key(kind) + ": NO SITE");
+                continue;
+            }
+            if (nearestOfAll == null || nearestOfAll.kind != kind) {
+                stampNearest(level, site, logs);
+            }
+            hoard(level, site, logs);
+        }
+
         logs.add("realmpoi census: seed=" + seed
                 + " arrival=" + arrival.x + "," + arrival.y
                 + " radius=" + CENSUS_RADIUS_TILES
@@ -637,6 +653,111 @@ public final class RealmPoiCensus {
                     + " rewards=" + rewardsHeld + "/" + rewardsWanted + rewardMisses
                     + " ms=" + (System.currentTimeMillis() - started));
         }
+    }
+
+    /**
+     * The cast and the chests of one chapter-02 place, read off the world.
+     *
+     * <p>{@code cast=a/b} counts, per resident the plan draws, a mob of that
+     * string ID standing inside the footprint grown by {@link #HOARD_MARGIN}
+     * -- they are mobs and some of them wander, but none of them leaves its
+     * place when no player is near. {@code mimics} is the subset that are
+     * the mimics, and {@code mimicloot} how many hoard mimics really carry a
+     * hoard in {@code MimicMob.loot} (the Door Mimic drops its own table and
+     * is not counted there). {@code lifted} is whether the guardian carries
+     * {@code BossScaling}'s tier buff, which is the whole difference between
+     * a realm elite and the thing the room is built around. {@code loot}
+     * counts containers whose inventory is non-empty: the prize and the bait.
+     */
+    private static void hoard(Level level, Site site, CommandLog logs) {
+        int kind = site.kind;
+        int x0 = site.x - HOARD_MARGIN;
+        int y0 = site.y - HOARD_MARGIN;
+        int x1 = site.x + site.width + HOARD_MARGIN;
+        int y1 = site.y + site.height + HOARD_MARGIN;
+        java.util.List<RealmPoiHoards.Resident> residents = RealmPoiHoards.residents(kind);
+        java.util.Map<String, Integer> wanted = new java.util.TreeMap<>();
+        int mimicsWanted = 0;
+        for (RealmPoiHoards.Resident resident : residents) {
+            wanted.merge(resident.mobID, 1, Integer::sum);
+            if (resident.role == 'M') mimicsWanted++;
+        }
+        java.util.Map<String, Integer> found = new java.util.TreeMap<>();
+        int mimicLoot = 0;
+        int lifted = 0;
+        String mimicID = RealmPoiHoards.mimicOf(kind);
+        String guardianID = RealmPoiHoards.guardianOf(kind);
+        for (necesse.entity.mobs.Mob mob : level.entityManager.mobs) {
+            String id = mob.getStringID();
+            if (!wanted.containsKey(id)) continue;
+            int tx = mob.getTileX();
+            int ty = mob.getTileY();
+            if (tx < x0 || tx >= x1 || ty < y0 || ty >= y1) continue;
+            found.merge(id, 1, Integer::sum);
+            if (id.equals(mimicID) && mob instanceof necesse.entity.mobs.hostile.MimicMob
+                    && !((necesse.entity.mobs.hostile.MimicMob) mob).loot.isEmpty()) {
+                mimicLoot++;
+            }
+            if (id.equals(guardianID) && stairwaytoheaven.bosses.BossScaling.buff() != null
+                    && mob.buffManager.hasBuff(stairwaytoheaven.bosses.BossScaling.buff())) {
+                lifted++;
+            }
+        }
+        int castWanted = 0;
+        int castFound = 0;
+        StringBuilder detail = new StringBuilder();
+        for (java.util.Map.Entry<String, Integer> entry : wanted.entrySet()) {
+            int have = Math.min(entry.getValue(), found.getOrDefault(entry.getKey(), 0));
+            castWanted += entry.getValue();
+            castFound += have;
+            detail.append(' ').append(entry.getKey()).append('=').append(have)
+                    .append('/').append(entry.getValue());
+        }
+        int mimicsFound = Math.min(mimicsWanted, found.getOrDefault(mimicID, 0));
+        int mimicLootWanted = "doormimic".equals(mimicID) ? 0 : mimicsWanted;
+        java.util.List<Point> chests = RealmPoiHoards.containers(kind);
+        int filled = 0;
+        StringBuilder empty = new StringBuilder();
+        for (Point chest : chests) {
+            if (holdsAnything(level, site.x + chest.x, site.y + chest.y)) {
+                filled++;
+            } else {
+                empty.append(' ').append(chest.x).append(',').append(chest.y);
+            }
+        }
+        logs.add("realmpoi hoard " + RealmPoiPresets.key(kind)
+                + ": at=" + site.x + "," + site.y
+                + " cast=" + castFound + "/" + castWanted
+                + " mimics=" + mimicsFound + "/" + mimicsWanted
+                + " mimicloot=" + Math.min(mimicLoot, mimicLootWanted) + "/" + mimicLootWanted
+                + " guardian=" + guardianID
+                + " lifted=" + Math.min(lifted, 1) + "/1"
+                + " loot=" + filled + "/" + chests.size()
+                + (empty.length() > 0 ? " empty=" + empty.toString().trim().replace(' ', ';') : "")
+                + " |" + detail);
+    }
+
+    /** Tiles a hoard's mob may stand outside its footprint and still count as home. */
+    private static final int HOARD_MARGIN = 10;
+
+    /** Whether the container on a tile holds any item at all. */
+    private static boolean holdsAnything(Level level, int tileX, int tileY) {
+        necesse.entity.objectEntity.ObjectEntity entity =
+                level.entityManager.getObjectEntity(tileX, tileY);
+        if (entity == null || !entity.implementsOEInventory()) {
+            return false;
+        }
+        necesse.inventory.Inventory inventory =
+                ((necesse.entity.objectEntity.interfaces.OEInventory) entity).getInventory();
+        if (inventory == null) {
+            return false;
+        }
+        for (int slot = 0; slot < inventory.getSize(); slot++) {
+            if (inventory.getItem(slot) != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** Whether the container standing on a tile holds at least one of an item. */

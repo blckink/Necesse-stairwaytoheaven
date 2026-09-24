@@ -4094,3 +4094,64 @@ from `decompileToSources`), not observed in a running client, unless marked.
 - **`BedObject.registerBed(id, …)` registers `id` (obtainable) and `id + "2"`
   (unobtainable)** (`BedObject.java:481-482`); `LargePaintingObject.registerLargePainting`
   the same with `id + "2"` (`:241-242`).
+
+## Mimics, traps and a cobweb: what chapter 02's places proved (2026-09-24)
+
+**Vanilla already ships "a chest that is a mimic" — VERIFIED [jar] + [run].**
+`RandomCaveChestRoom.openingApply` (decompiled, lines 109-120) deletes the
+`storagebox` a deep-cave chest room would have had and spawns `"mimic"` on that
+tile: `canDespawn = false`, `setDir(rotation of the chest)`, the room's loot
+table rolled into the public `MimicMob.loot` list, `onSpawned`, `addMob`.
+`MimicMob.getLootTable` (196-219) drops a `mimicchest` plus a copy of every item
+in that list; `addSaveData`/`applyLoadData` (80-110) persist the list under
+`LOOT`. The disguise is `isDisguised = !isAccelerating && dx == 0 && dy == 0`,
+re-evaluated every tick, and the AI's target filter is `getDistance < 96` —
+three tiles. So a worldgen mimic needs no new object class at all: write floor
+where the chest would be and put the mob there with a filled `loot`.
+`[run]` on seed 1527922515: every `hoardmimic` the census found carried a
+non-empty `loot` after generation (`mimicloot=5/5`, `3/3`, …).
+
+**A subclass that overrides `getLootTable` ignores `loot`.** `DoorMimicMob`
+and `PossessedChairMob` both return their realm table, so filling their `loot`
+does nothing; only a subclass that keeps `MimicMob.getLootTable` drops a hoard.
+
+**`BossScaling`'s tier buff works on any mob, not only ladder bosses —
+`[run]`.** `BossScaling.applyTier(mob, tier)` (added for these places) is
+`apply` without a `SkyBossLadder.Boss`; after `addMob`, the guardian of all six
+places read `lifted=1/1` (`buffManager.hasBuff(BossScaling.buff())`).
+
+**Pressure plate + wall trap = vanilla's recipe, and a Preset can carry the
+wire — VERIFIED [jar].** `RandomCaveChestRoom.placeTrap` (150-170): plate and
+trap on one line, trap rotated to fire back along it, wire 0 on every tile from
+plate to trap inclusive. A `WallTrapObject`'s rotation IS its firing direction
+(`TrapObjectEntity.getPos/getDir`: 0 up, 1 right, 2 down, 3 left).
+`Preset.putWire(x, y, wireID, true)` sets the bit and `Preset.applyToLevel`
+(432-447) writes it through `level.wireManager.setWire`. `ArrowTrapObjectEntity`
+does a fixed `GameDamage(40)` with a 1 s cooldown — flavour at sky tiers, not a
+threat. `DoorObject.onWireUpdate` opens a door on a live wire, but a player
+opens any door by hand, so a lever cannot lock anything: there is no vanilla
+lock to build a lever puzzle out of. HYPOTHESIS, not run: that the traps really
+fire when a player steps on the plates (the census cannot walk).
+
+**`cobweb` is deleted after a preset writes it on `blackcobbletile` — `[run]`.**
+The first stamp of the Wedding Feast read `missing=3` at exactly the three
+`cobweb` tiles (`3,9=0!=1420@t145`), with every other object standing. The
+mechanism was not chased — `CobwebObject`'s own validity test, the same
+post-write `tickValid` sweep `dryRing`'s header describes — and the cobwebs were
+simply removed from the plan. Do not put `cobweb` in a surface preset without
+stamping it first.
+
+**A plan cell can hold a sealed room — `[run]`.** The Fallen Observatory's
+nightfell cube has no door and stamped `placed=78/78 missing=0`: nothing in the
+engine objects to an enclosed, unreachable interior, and the chest inside was
+filled (`loot=3/3`).
+
+**A new Skyreach lattice kind is not free: the band is dealt by rank — `[run]`.**
+The Skyreach band offers only ~35-38 lattice sites (it is bounded by its own
+depth), and `RealmPoiWorldPreset.skyreachRotate` deals them out `rank % kinds`.
+Appending two chapter-02 kinds (16 -> 18) left the 49x55 Sky Tower one or two
+cells on seed 1486191071, both missed land, and the gate read
+`realmpoi kind skytower: ... accepted=0`. The fix was a second, sparser grid for
+the new kinds only (`SKY_HOARD_KINDS`, same CELL, re-seeded with `HOARD_SALT`,
+16% of cells), which leaves lattice 0 bit-for-bit as it was. Any future
+Skyreach kind should go there or onto a lattice of its own, not onto the row.

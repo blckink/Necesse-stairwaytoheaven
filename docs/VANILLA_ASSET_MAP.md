@@ -58,6 +58,7 @@ behaviour, but no vanilla art reaches the screen through them.)
 | `CryoFlakeMob` | Vatling | Skyreach (Grange Cellar only) | the small floating add the Bloom keeps letting out |
 | `AncientSkeletonMageMob` | Prototype Nine | Skyreach (Test Range only) | ranged caster that blinks away when its own bolt comes back — the same base the Cinder Cantor uses, and here with NO sheet of its own |
 | `SharkMob` | Striped Megashark | Overworld surface (deep water, all five biomes) | swim AI, deep-water spawn check and bite behaviour; stats, 3x body and loot are the subclass's own — own 288 px sheet and bestiary icon since 2026-09-13, no vanilla art reaches the screen |
+| `MimicMob` | Hoard Mimic (`hoardmimic`) | Skyreach, Eden, Steinfeld, Ghost Realm (chapter-02 places only) | vanilla's own disguised-chest mechanic, unchanged: sits as a chest, wakes within 3 tiles, drops `mimicchest` plus the hoard in `MimicMob.loot`. Wears `mobs/mimic` and the vanilla mimic's bestiary face (`BorrowedMobIcon`). Stats are the Skyreach elite row; deeper places lift it with `BossScaling.applyTier` |
 
 ### 1.3 Vanilla textures loaded by literal path (recolours)
 
@@ -214,6 +215,21 @@ object of the same role in the preset's own legend; nothing else changes.
 | `largekeg` | Skyreach | `RealmPoiPresets.skyInn` behind the bar — 2026-09-23 | the inn's two kegs. `KegObject extends GameObject`, one tile (VERIFIED [jar], decompiled `KegObject.java`) |
 | `cuttingboard`, `plate`, `stewpot`, `mug`, `teapot`, `stackedbooks`, `quillandparchment` | Skyreach | `RealmPoiPresets.skyTown`, `skyInn`, `tollBridge` table decorations — 2026-09-23 | the kitchen, bar, tea-table and study detail the Skywatch family has no piece for (it ships chalice, candle, tome and potted cloudberry only). All seven are `TableDecorationObject` (VERIFIED [jar]: `javap` of `ObjectRegistry`), and `Legend.table` re-checks the layer at load |
 | `snowstonepathtile` (tile) | Skyreach | `SkyBuildingSet` as `SkyRegistry.skyroadTileID`; by string ID in `RealmPoiPresets.skyTown` and `tollBridge` plans — 2026-09-23 | the Skyway carriageway. It was already the town's and the bridge's road through `skyroadTileID`; the plans now name it directly |
+| `storagebox` | all five chapter-02 places | `RealmPoiPresets` chapter-02 plans (`C`) | the honest box beside the mimics. Vanilla's own `RandomCaveChestRoom` replaces exactly this object with a mimic (ChestRoomSet `inventoryObject` = `storagebox` in all 14 sets), so the two are the pair vanilla itself treats as interchangeable |
+| `birchchest` | Skyreach | chapter-02 §1 Counterfeit Treasury, §2 Fallen Observatory (`T`) | the prize chest; pale wood for the white-and-gold realm |
+| `palmchest` | Eden | chapter-02 §3 Hedge Labyrinth (`T`) | the prize chest, Eden's palm family |
+| `deadwoodchest` | Steinfeld | chapter-02 §4 Pilgrims' Ossuary (`T`) | the prize chest; dead wood for the realm where life stops |
+| `bonechest` | Ghost Realm | chapter-02 §5 Wedding Feast (`T`) | the dowry chest, bone family like the table |
+| `mimicchest` | Crooked Beyond | chapter-02 §6 Hall of Many Doors (`T`) | a real 40-slot chest (`MimicStorageBoxInventoryObject extends StorageBoxInventoryObject`) that looks like a mimic — the realm's inversion joke |
+| `sign` | five places | chapter-02 plans (`S`) | the one line of story, set through `SignObjectEntity.setMessage` as `SkywardShrinePreset` does |
+| `foresthedge`, `foresthedgegate` | Eden | chapter-02 §3 Hedge Labyrinth (`h`, `G`) | the maze walls; a `FenceObject`, so every run is checked against §0.4 by the plan interpreter |
+| `palmcandelabra` | Eden | chapter-02 §3 (`c`) | the clearing's four lights |
+| `stonewall`, `stonedoor` | Steinfeld | chapter-02 §4 (`#`, `D`) | the only vanilla wall family that ships BOTH an arrow trap and a pressure plate in its own face (`stonearrowtrap`, `stonepressureplate`), so the trapped corridor reads as one material |
+| `stonearrowtrap`, `stonepressureplate` | Steinfeld | chapter-02 §4 (`t`/`u`, `p`) | the pilgrims' plates, wired to the trap on their row exactly as `RandomCaveChestRoom.placeTrap` wires them |
+| `stonecandlepedestal`, `cryptgravestone1` | Steinfeld | chapter-02 §4 (`c`, `g`) | reliquary lights, churchyard graves — the Memorial's own pieces |
+| `bonemodulartable`, `bonechair` | Ghost Realm | chapter-02 §5 (`t`, `h`) | the feast table and the real chairs among the possessed ones |
+| `oldplate`, `brokenplate`, `skull`, `dirtyplate` | Ghost Realm | chapter-02 §5 (on `t`) | vanilla `TableDecorationObject`s: the feast that never ended |
+| `deadwoodcandelabra` | Ghost Realm | chapter-02 §5 (`c`) | the hall's light |
 
 *(This subsection covers `RealmPoiPresets` only. The older presets'
 vanilla furniture — `barrel`, `crate`, the `oak*` and `palm*` families — is

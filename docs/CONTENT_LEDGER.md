@@ -352,6 +352,18 @@ Hell has no stone: §B4 reserves its boss and gives it no tier.
 | `bossportalcrookedbeyond` | object | Crooked summoning stone — wakes the Crystal Dragon at incursion tier 10 (208 000 HP) once Mr. Knott's red door stands at home; never minable. |
 | `incursionpressure` | buff | The permanent, invisible buff a portal puts on the boss it wakes: vanilla's own incursion tier curve as `MAX_HEALTH` and `ALL_DAMAGE` on that one mob, so the rest of the sky plane is untouched. |
 
+## Chapter 02 — hoards and mimics
+
+`docs/design/chapter-02-hoards-and-mimics.md`: six guarded-treasure places
+across five realms. The places themselves are POI kinds, not registered IDs;
+the one new registration is the mimic they share. Every guardian is an
+existing realm elite lifted by `BossScaling.applyTier` (the same
+`incursionpressure` buff above, at tier 5).
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `hoardmimic` | mob | A storage box in a treasure room that is really vanilla's Mimic on the Skyreach elite row (1820 HP), carrying the hoard it drops; lifted onto Eden, Steinfeld and Ghost rows where those places stand. Placed only by worldgen, never respawns. |
+
 ## The region key pieces
 
 `docs/FOGKEY_AND_BOSSPORTALS.md` §B1–B2: one buildable object per realm, the

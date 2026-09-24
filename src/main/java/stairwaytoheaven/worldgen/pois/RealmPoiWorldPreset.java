@@ -81,13 +81,45 @@ public class RealmPoiWorldPreset extends WorldPreset {
                     RealmPoiPresets.SKY_UNOPENED_GATE,
                     RealmPoiPresets.SKY_PRISM_CHOIR,
                     RealmPoiPresets.SKY_SERPENTS_REEF},
-            {RealmPoiPresets.EDEN_CROWN_GARDEN, RealmPoiPresets.EDEN_FERMENT_HOUSE},
-            {RealmPoiPresets.STEINFELD_MEMORIAL},
-            {RealmPoiPresets.GHOST_ARCHIVE},
-            {RealmPoiPresets.CROOKED_BAZAAR},
+            // Chapter 02 (docs/design/chapter-02-hoards-and-mimics.md) appends
+            // one guarded-treasure place to each band after the Skyreach. The
+            // Skyreach's two are NOT in the row above: see SKY_HOARD_KINDS.
+            {RealmPoiPresets.EDEN_CROWN_GARDEN, RealmPoiPresets.EDEN_FERMENT_HOUSE,
+                    RealmPoiPresets.EDEN_HEDGE_LABYRINTH},
+            {RealmPoiPresets.STEINFELD_MEMORIAL, RealmPoiPresets.STEINFELD_OSSUARY},
+            {RealmPoiPresets.GHOST_ARCHIVE, RealmPoiPresets.GHOST_WEDDING_FEAST},
+            {RealmPoiPresets.CROOKED_BAZAAR, RealmPoiPresets.CROOKED_HALL_OF_DOORS},
             {RealmPoiPresets.HELL_BORDER_OFFICE, RealmPoiPresets.HELL_ADMINISTRATION,
                     RealmPoiPresets.HELL_FORGE, RealmPoiPresets.HELL_CARNIVAL},
     };
+
+    /**
+     * The Skyreach's two chapter-02 places, on a lattice of their own.
+     *
+     * <p>Appending them to the Skyreach row above was tried first and failed
+     * the gate on the second seed it met (1486191071: {@code skytower
+     * accepted=0}). The band is bounded by its own depth and offers ~35-38
+     * sites; {@link #skyreachRotate} deals them out by rank, so every kind
+     * added to the row takes cells away from the sixteen already there — 18
+     * kinds left the 49x55 Sky Tower one or two cells, and both missed land.
+     * The dilution is the defect, not the tower.
+     *
+     * <p>So the hoards get their OWN sites: the same {@link #CELL} grid,
+     * re-seeded with {@link #HOARD_SALT} and a far lower
+     * {@link #HOARD_SITE_CHANCE}, walked by the same funnel. The sixteen keep
+     * every cell they had — lattice 0 is computed exactly as before — and a
+     * hoard that lands on one of their rectangles loses to the occupancy board
+     * like any other overlap. This is also the rarity §0.6 would give a vault:
+     * "per region", a handful per band, not one every few minutes.
+     */
+    static final int[] SKY_HOARD_KINDS = {
+            RealmPoiPresets.SKY_COUNTERFEIT_TREASURY,
+            RealmPoiPresets.SKY_FALLEN_OBSERVATORY,
+    };
+    /** Re-seeds the grid for {@link #SKY_HOARD_KINDS}; never reuse for lattice 0. */
+    private static final int HOARD_SALT = 0x4A7D;
+    /** Share of cells the hoard lattice offers a site in (lattice 0: {@link #SITE_CHANCE}). */
+    private static final float HOARD_SITE_CHANCE = 0.16F;
 
     /** Resolve every tile/object once when registries close, so a typo fails at load instead of far out in the world. */
     @Override
@@ -192,25 +224,43 @@ public class RealmPoiWorldPreset extends WorldPreset {
         int originX = SkyOrigin.originX(seed);
         int originY = SkyOrigin.originY(seed);
         java.awt.Rectangle[] landmarks = landmarkRects(seed);
+        surveyLattice(seed, false, startX, startY, endX, endY, originX, originY, landmarks, visitor);
+        surveyLattice(seed, true, startX, startY, endX, endY, originX, originY, landmarks, visitor);
+    }
+
+    /**
+     * One lattice of {@link #survey}. {@code hoards == false} is the lattice
+     * every kind before chapter 02 stands on, computed exactly as it always
+     * was; {@code true} is {@link #SKY_HOARD_KINDS}'s sparser one.
+     */
+    private static void surveyLattice(int seed, boolean hoards, int startX, int startY,
+            int endX, int endY, int originX, int originY,
+            java.awt.Rectangle[] landmarks, SiteVisitor visitor) {
+        // The grid's own seed. Terrain, realms and landmarks still read the
+        // world's seed; only where the cells put their sites moves.
+        int gridSeed = hoards ? seed + HOARD_SALT : seed;
         for (int cellX = Math.floorDiv(startX, CELL); cellX <= Math.floorDiv(endX, CELL); cellX++) {
             for (int cellY = Math.floorDiv(startY, CELL); cellY <= Math.floorDiv(endY, CELL); cellY++) {
-                if (!hasSite(seed, cellX, cellY)) continue;
-                int siteX = siteX(seed, cellX, cellY);
-                int siteY = siteY(seed, cellX, cellY);
+                if (hoards
+                        ? SkyNoise.hash(gridSeed + SALT, cellX, cellY) >= HOARD_SITE_CHANCE
+                        : !hasSite(seed, cellX, cellY)) continue;
+                int siteX = siteX(gridSeed, cellX, cellY);
+                int siteY = siteY(gridSeed, cellX, cellY);
                 // Not this region's cell. Silent rather than a stage: the
                 // neighbour that owns it will report it, and counting it here
                 // too would make every census double-count its borders.
                 if (siteX < startX || siteX >= endX || siteY < startY || siteY >= endY) continue;
 
                 int realm = RealmDepth.realmAt(seed, siteX, siteY, originX, originY);
-                int[] choices = REALM_KINDS[realm];
+                if (hoards && realm != RealmDepth.REALM_SKYREACH) continue;
+                int[] choices = hoards ? SKY_HOARD_KINDS : REALM_KINDS[realm];
                 int rotate = -1;
-                if (realm == RealmDepth.REALM_SKYREACH) {
+                if (!hoards && realm == RealmDepth.REALM_SKYREACH) {
                     rotate = skyreachRotate(seed, cellX, cellY, originX, originY, choices.length);
                 }
                 if (rotate < 0) {
                     rotate = Math.min(choices.length - 1,
-                            (int) (SkyNoise.hash(seed + SALT + 3, cellX, cellY) * choices.length));
+                            (int) (SkyNoise.hash(gridSeed + SALT + 3, cellX, cellY) * choices.length));
                 }
 
                 if (nearSpire(siteX - originX, siteY - originY)) {
@@ -263,8 +313,8 @@ public class RealmPoiWorldPreset extends WorldPreset {
                         continue;
                     }
                     for (int attempt = 0; attempt < SITE_ATTEMPTS; attempt++) {
-                        int spotX = siteX + jitter(seed, cellX, cellY, kind, attempt, 0);
-                        int spotY = siteY + jitter(seed, cellX, cellY, kind, attempt, 1);
+                        int spotX = siteX + jitter(gridSeed, cellX, cellY, kind, attempt, 0);
+                        int spotY = siteY + jitter(gridSeed, cellX, cellY, kind, attempt, 1);
                         // A nudge must not walk a site into the spire's ring.
                         if (attempt > 0 && nearSpire(spotX - originX, spotY - originY)) continue;
                         int x = clamp(spotX - width / 2, startX, highX);
@@ -464,6 +514,9 @@ public class RealmPoiWorldPreset extends WorldPreset {
      */
     private static void placeInhabitants(int kind, Level level, int x, int y) {
         if (level.isClient()) return;
+        // Chapter 02's six: guardians, guards and mimics, read off their own
+        // plans. One call, so the cast lives beside its loot tables.
+        RealmPoiHoards.placeInhabitants(kind, level, x, y);
         // The three once-per-world places have no branch here, and must not
         // get one: they are not on this lattice any more, and their people,
         // their guards and their unique rewards are all placed by

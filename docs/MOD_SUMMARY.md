@@ -367,6 +367,61 @@ bewahrt das Siegel des Haushalts. Wird das Tor später gebaut, zieht es um.
 §1.7) — gezeichnet ist noch keines, und ein Item ohne Icon wäre im Inventar eine
 ERR-Kachel.
 
+### Kapitel 02 — sechs Schatzorte mit Mimik-Truhen ⭐ **NEU**
+
+Dein Wunsch war: *„interessante neue Orte und Aufbauten / Mimic-Truhen die
+geheimen Loot haben aber von Bossen beschützt werden"*. Das Ergebnis sind
+**sechs neue Orte in fünf Reichen**, jeder mit einem anderen Grundriss-Gedanken,
+aber alle um dasselbe gebaut: **eine bewachte Schatztruhe, und daneben Kisten,
+von denen manche keine Kisten sind.** Pläne, Geschichten und Karten stehen in
+`docs/design/chapter-02-hoards-and-mimics.md`.
+
+| Ort | Reich | die Idee | Wächter (Mini-Boss) | Mimiks | Hauptbeute (Truhe hinter dem Wächter) |
+|---|---|---|---|---|---|
+| **Die falsche Schatzkammer** | Skyreach | Achsenhalle der Himmelsmünze: 8 Truhen am goldenen Läufer, dahinter der Tresor | Himmelsstein-Golem (gestärkt) + 2 Raureif-Wächter | **5 von 8** Truhen | 4–8 Sturmstahlbarren, 3–6 Aetherium, Sturmglas, 900–2200 Münzen; 30 % Sturmscheibe/Himmelsreißer/Donnerkopf, 15 % Himmelsstein-Herz |
+| **Das eingestürzte Observatorium** | Skyreach | runde Kuppel, halb eingestürzt — und ein Nachtfall-Würfel **ohne Tür**: der versiegelte Instrumentenkeller, nur mit der Spitzhacke zu öffnen | Morgenstecher (gestärkt) + 2 Sturmirrlichter | die Truhe des Astronomen | Prismasplitter, Sturmglas, Sturmsplitter, 500–1400 Münzen; 20 % Aurora-Medaillon |
+| **Das Heckenlabyrinth** | Eden | echtes 10×10-Irrgarten aus Waldhecke; 6 Sackgassen enden in einer Kiste, in der Mitte eine Lichtung | Verbotene Schlange (gestärkt) + 2 Eifersüchtige Ranken + 2 Blütenrachen | **3 von 6** Sackgassen | 4–8 Edenbronze, Schlangenschuppen, Giftzahn, Goldpollen, 1100–2800 Münzen; 15 % Blütenzahn |
+| **Das Pilger-Ossarium** | Steinfeld | Kirchhof, Gruft, und ein Prozessionsgang mit **3 Druckplatten, verdrahtet mit Pfeilfallen** in der Wand; 6 Nischen | Hohler Engel (gestärkt) + 2 Steinerne Trauernde zwischen den Gräbern | **3 von 6** Nischen | Blassstein, Grabsalz, Echosplitter, Geistermoos, 1400–3500 Münzen; 20 % Trauerband |
+| **Das Hochzeitsmahl** | Ghost Realm | Festsaal, gedeckt für 24 — **13 der Stühle sind Besessene Stühle**; die Geschenke stapeln sich an der Ostwand | Trauerbraut (gestärkt) | 13 Stühle + **2 von 4** Geschenken | 4–8 Geisterstahl, Seelenfaden, Spektralerz, Knochenholz, 1700–4200 Münzen; 20 % Seelenhalsband |
+| **Die Halle der vielen Türen** | Crooked Beyond | eine Wand, fünf Durchgänge: zwei sind Türen, **drei sind Türmimiken** | Seltener krummer Golem (gestärkt) + Krummes Gürteltier | **3 von 5** Durchgängen | Realitätssplitter, Warp-Harz, Seltsamer Stoff, Irrholz, 2200–5500 Münzen; 20 % Streifenhorn — und die Truhe selbst ist eine **echte Mimik-Truhe** (Vanilla `mimicchest`), die wie ein Mimik aussieht |
+
+**Wie die Mimiks funktionieren — Vanilla-Mechanik, unverändert.** Das Spiel
+macht es in seinen eigenen Höhlen-Truhenräumen genauso: statt der `storagebox`
+steht dort ein `mimic`-Mob mit der Beute im Bauch (im dekompilierten
+`RandomCaveChestRoom` nachgelesen). Er sieht aus wie eine Truhe, steht still,
+wacht auf, wenn du auf **drei Felder** herankommst, und lässt beim Tod seine
+Beute **plus eine Mimik-Truhe** fallen. Neu ist nur der Mob **Hortmimik**
+(`hoardmimic`): der Vanilla-Mimik mit Skyreach-Elite-Werten (**1820 LP**, 50
+Rüstung) statt der 600 LP aus der Tiefhöhle; in Eden, Steinfeld und dem Ghost
+Realm wird er auf die Werte des jeweiligen Reichs angehoben. Echte Kisten sind
+dieselbe Vanilla-`storagebox`, die das Spiel selbst gegen einen Mimik tauscht,
+und Kiste wie Mimik schauen **in dieselbe Richtung** — man kann sie nicht am
+Aussehen unterscheiden, nur am Näherkommen.
+
+**Wächter:** immer ein Elite-Gegner **aus dem eigenen Reich**, mit dem
+unsichtbaren Stufen-Buff der Boss-Portale auf Stufe 5 (**×2,12 LP, ×1,52
+Schaden**) — ein Mini-Boss, kein Leiter-Boss (die beginnen bei ×3,18).
+
+**Wie oft:** die vier äußeren Orte gibt es in ihrem Reich regelmäßig; die zwei Skyreach-Orte stehen auf einem eigenen, dünneren Raster — auf einem Testseed 9 Schatzkammern und 5 Observatorien im ganzen Band, damit die 16 alten Skyreach-Orte keinen Platz verlieren.
+
+**Einmal, nie wieder:** alle Gegner entstehen genau einmal, wenn der Ort
+generiert wird, verschwinden nicht und spawnen nicht nach. Die Truhen werden bei
+der Generierung gefüllt und nie wieder aufgefüllt. **Alte Spielstände** bekommen
+die Orte nur in Gegenden, die noch nie generiert wurden (`/swhreset world` kann
+POIs nicht nachrüsten).
+
+**Schilder** (Deutsch im Spiel): *„Alle Truhen werden täglich geprüft. Manche
+prüfen zurück."* · *„Im Instrumentenkeller befindet sich nichts von Wert."* ·
+*„Geh … in der Mitte, und nie auf die hellen Steine."* (die Mitte ist genau da,
+wo die Druckplatten liegen) · *„Bitte nehmen Sie Platz. Die Plätze finden Sie."*
+· *„EINE DAVON IST EINE TÜR."* (Es sind zwei.)
+
+**Geprüft:** Auf einem echten Server stehen alle sechs mit `missing=0`, jeder
+Gegner an seinem Platz, jeder Wächter gestärkt, jeder Hortmimik mit Beute, jede
+Truhe gefüllt (`scripts/integration_test.sh`, Zeilen `realmpoi hoard`). **Nicht
+geprüft:** wie sie im Spiel aussehen und sich spielen — das kann nur ein Blick
+im Client beantworten.
+
 ---
 
 ## 6. Die Gebiete, kompakt
@@ -501,7 +556,7 @@ Bestiarium-Icon.** Der Rest teilt sich so auf:
 
 ### Geliehene Vanilla-Texturen — die vollständige Liste
 
-**20 literale Pfade** zeigen auf Vanilla-Dateien statt auf unsere:
+**21 literale Pfade** zeigen auf Vanilla-Dateien statt auf unsere:
 
 | Pfad | wofür |
 |---|---|
@@ -511,7 +566,7 @@ Bestiarium-Icon.** Der Rest teilt sich so auf:
 | `mobs/icons/stylisthuman` | Eleanors Gesicht |
 | `mobs/icons/exoticmerchanthuman` | Mr. Knotts Gesicht |
 | `mobs/icons/elderhuman` ⭐ | **Ives' Gesicht** |
-| `mobs/bee` · `mobs/cow` · `mobs/crocodile` · `mobs/dragonwhelp` · `mobs/dryadsentinel` · `mobs/scorpion` · `mobs/stabbybush` | Kreaturen, die eine Vanilla-Klasse beerben |
+| `mobs/bee` · `mobs/cow` · `mobs/mimic` ⭐ (Hortmimik) · `mobs/crocodile` · `mobs/dragonwhelp` · `mobs/dryadsentinel` · `mobs/scorpion` · `mobs/stabbybush` | Kreaturen, die eine Vanilla-Klasse beerben |
 | `tiles/cryptash_splat` · `ravenfloor_splat` · `stonebrickfloor_splat` · `swampgrass_splat` · `swamprock_splat` | Autotile-Atlanten für Böden ohne eigene Kunst |
 
 Dazu **getragene Kleidung**, die nur Item-IDs sind und keine Pixel kostet:

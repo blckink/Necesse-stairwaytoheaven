@@ -1267,3 +1267,19 @@ vampireturned=Das da ist noch nicht fertig. Zurueck.
 
 [mob]
 bloodthrall=Blutknecht
+
+// Chapter 02: hoards and mimics (docs/design/chapter-02-hoards-and-mimics.md)
+[mob]
+hoardmimic=Hortmimik
+
+[misc]
+// The Counterfeit Treasury's sign, beside its west door.
+swhsigntreasury=HIMMELSMÜNZE - ÖFFENTLICHE SCHATZKAMMER\nFür alle Bürger geöffnet.\nBitte nehmen Sie nur, was Ihnen gehört.\n\n(Alle Truhen werden täglich geprüft. Manche prüfen zurück.)
+// The Fallen Observatory's sign, on the south approach.
+swhsignobservatory=OBSERVATORIUM GESCHLOSSEN\nDie Kuppel ist nicht standsicher.\nDer Instrumentenkeller wurde zu Ihrer Sicherheit versiegelt.\nIm Instrumentenkeller befindet sich nichts von Wert.
+// The Pilgrims' Ossuary's sign, in the churchyard.
+swhsignossuary=Geh den Weg, den die Pilger gingen:\nlangsam, in der Mitte, und nie auf die hellen Steine.\nWas hier gegeben wurde, bleibt hier.
+// The Wedding Feast's sign, on the path to its door.
+swhsignfeast=Sie sind herzlich eingeladen.\nDas Fest dauert schon eine Weile.\nBitte nehmen Sie Platz. Die Plätze finden Sie.
+// The Hall of Many Doors' sign, under its south window.
+swhsigndoors=EINE DAVON IST EINE TÜR.\n- die Direktion

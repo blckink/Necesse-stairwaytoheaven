@@ -1266,3 +1266,19 @@ vampireturned=That one is not finished. Stand back.
 
 [mob]
 bloodthrall=Blood Thrall
+
+// Chapter 02: hoards and mimics (docs/design/chapter-02-hoards-and-mimics.md)
+[mob]
+hoardmimic=Hoard Mimic
+
+[misc]
+// The Counterfeit Treasury's sign, beside its west door.
+swhsigntreasury=SKY MINT - PUBLIC TREASURY\nOpen to all citizens.\nPlease take only what is yours.\n\n(All chests are inspected daily. Some of them inspect back.)
+// The Fallen Observatory's sign, on the south approach.
+swhsignobservatory=OBSERVATORY CLOSED\nThe dome is not structurally sound.\nThe instrument cellar has been sealed for your safety.\nThere is nothing of value in the instrument cellar.
+// The Pilgrims' Ossuary's sign, in the churchyard.
+swhsignossuary=Walk the way the pilgrims walked:\nslowly, in the middle, and never on the pale stones.\nWhat was given here stays here.
+// The Wedding Feast's sign, on the path to its door.
+swhsignfeast=You are cordially invited.\nThe feast has been going on for some time.\nPlease find a seat. The seats will find you.
+// The Hall of Many Doors' sign, under its south window.
+swhsigndoors=ONE OF THESE IS A DOOR.\n- the management
