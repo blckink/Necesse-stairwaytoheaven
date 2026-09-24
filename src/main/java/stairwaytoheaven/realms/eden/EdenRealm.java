@@ -122,6 +122,18 @@ public final class EdenRealm {
                 .setItemCategory("materials", "ore"), 10.0F, true);
         ItemRegistry.registerItem("edenbronzebar", new GhostMatItem("ivybar", 500, Item.Rarity.EPIC)
                 .setItemCategory("materials", "bars"), 10.0F, true);
+
+        // Edenwood is a log, and a log in Necesse is anything carrying the
+        // vanilla `anylog` global ingredient -- the Skyreach's five woods carry
+        // it (SkyItems, `new SkyMatItem(500, "anylog")`), and so does vanilla's
+        // own palmlog, the icon Edenwood borrows. Without it the Eden trees'
+        // main drop had no use at all (KOMPLETTUEBERSICHT §8 item 10): no
+        // recipe, no buyer. Item.addGlobalIngredient(String...) is public and,
+        // once the item's ID is set, registers the ID with the ingredient
+        // itself (Item.java:792-812, GlobalIngredient.registerItemID:38,
+        // VERIFIED [jar]), so this works after registration without touching
+        // the registration call above.
+        ItemRegistry.getItem("edenwood").addGlobalIngredient("anylog");
     }
 
     private static void registerObjects() {

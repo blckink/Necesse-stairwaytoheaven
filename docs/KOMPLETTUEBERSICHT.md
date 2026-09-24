@@ -215,7 +215,7 @@ umgekehrt (erster Wert = glücklich).
 
 ### 3.1 Der Himmelswächter (`skywarden` → `wardensettler`)
 
-- **Name DE:** `mob.skywarden` „Der Himmelswächter"; Siedler `mob.wardensettler` „Hüter", `wardensettlername` „<name>, der Himmelswächter". Siedlungs-Hinweis `misc.wardensettlertip` „Über den Wolken angeworben, für ein Vermögen in Münzen."
+- **Name DE:** `mob.skywarden` „Der Himmelswächter"; Siedler `mob.wardensettler` „Himmelswächter", `wardensettlername` „<name>, der Himmelswächter". Siedlungs-Hinweis `misc.wardensettlertip` „Über den Wolken angeworben, für ein Vermögen in Münzen."
 - **Treffen:** Alte Wächterspitze, beim ersten Aufstieg gestempelt.
 - **Anwerbung:** 30 000 Münzen (`SkyWardenMob.java:72`), nur einmal pro Welt (`isValidRecruitment`), braucht eigene Siedlung.
 - **Berufe:** Handwerk, Ackerbau, Forst, Transport (Vanilla-Standard).
@@ -243,7 +243,7 @@ umgekehrt (erster Wert = glücklich).
 | Die Große Runde | 9 000 | 6 000–9 000 | Himmelsgewebe, Sturmstahl, Edenbronze, Echosplitter, Geisterstahl, Realitätssplitter, Prismensplitter + legendäres Zufriedenheits-Objekt | 75 %, erst ab Krummem Schlüssel |
 
   UI-Texte: `ui.skyvoyageask` „Ich will dich wieder auf die alte Straße schicken", `ui.skyvoyageselect` „Wohin denn?", `ui.skyvoyagecost` „Ich laufe bis <expedition> und zurück, für <cost> Münzen. <chance>% sagen, ich komme an.", `ui.skyvoyagemore` „Zeig mir den Rest der Straße", `ui.skyvoyagecomplete` „Alles, was auf dem Frachtbrief stand. Und etwas, das nicht draufstand.", gesperrt `expedition.skyvoyagelocked` „Diese Straße ist noch nicht offen".
-- **Talk (DE wörtlich):** pitch „Die kurze Fassung: Ich flog Fracht fuer die Skywatch, die Skywatch hoerte auf zu antworten, und seither sitze ich auf verzollter Ladung ohne Landeplatz. Gib mir ein Dach und einen Markt, und ich mache dich reich genug, dass du es bereust gefragt zu haben." · 1 „Alles in diesem Sack hat eine Seriennummer. Frag mich nach keiner davon." · 2 „Ich bestehle nicht die eigene Siedlung. Schreib das auf, das spart uns spaeter Streit." · 3 „Es fiel ohnehin. Ich habe nur arrangiert, wohin." · 4 „Bring mir Bergungsgut. Ich bin die Einzige hier oben, die anstaendig dafuer zahlt."
+- **Talk (DE wörtlich):** pitch „Die kurze Fassung: Ich flog Fracht für die Skywatch, die Skywatch hörte auf zu antworten, und seither sitze ich auf verzollter Ladung ohne Landeplatz. Gib mir ein Dach und einen Markt, und ich mache dich reich genug, dass du es bereust gefragt zu haben." · 1 „Alles in diesem Sack hat eine Seriennummer. Frag mich nach keiner davon." · 2 „Ich bestehle nicht die eigene Siedlung. Schreib das auf, das spart uns später Streit." · 3 „Es fiel ohnehin. Ich habe nur arrangiert, wohin." · 4 „Bring mir Bergungsgut. Ich bin die Einzige hier oben, die anständig dafür zahlt."
 - **Kein eigenes `interact()`**, keine Quest.
 
 ### 3.3 Halda — `haldasettler`
@@ -252,7 +252,7 @@ umgekehrt (erster Wert = glücklich).
 - **Treffen:** Grange-Keller (+ alter Werkstatt-Weg). **Anwerbung:** 9 000 + **Die Mutter**. Beruf: **Angeln**.
 - **Verkauft:** Kellermeisterin-Haube 1 @ 700–1 200 · Himmelsgewebe 20/+2 @ 150–300 · Sturmglas 20/+2 @ 140–280 · **Sturmstahlbarren** 10/+1 @ 420–800 · Wolkenzupf-Leckerli 30/+3 @ 60–130 · Wolkenbeere 60/+6 @ 12–26.
 - **Kauft:** Windweizen 24→15 · Wolkenbeere 20→12 · Nimbusholz 26→16 · Kohlenholz 30→19.
-- **Talk:** pitch „Ich habe die Vorraete gehuetet, nachdem der Letzte gegangen war. Vierzig Jahre Faesser zaehlen fuer niemanden. Ich komme mit - und ich bringe den Keller mit, du wirst wollen, was daraus kommt." · 1 „Ein Keller haelt die Zeit besser als eine Uhr. Beide sind geduldig. Nur eines lohnt das Oeffnen." · 2 „Bring mir das Rohe, ich gebe dir das Fertige zurueck. Das ist der ganze Handel." · 3 „Die Katzen sassen immer auf dem warmen Bottich. Ich brachte es nicht uebers Herz." · 4 „Alles hier oben schmeckt nach Sturm. Man lernt, das Wuerze zu nennen."
+- **Talk:** pitch „Ich habe die Vorräte gehütet, nachdem der Letzte gegangen war. Vierzig Jahre Fässer zählen für niemanden. Ich komme mit - und ich bringe den Keller mit, du wirst wollen, was daraus kommt." · 1 „Ein Keller hält die Zeit besser als eine Uhr. Beide sind geduldig. Nur eines lohnt das Öffnen." · 2 „Bring mir das Rohe, ich gebe dir das Fertige zurück. Das ist der ganze Handel." · 3 „Die Katzen saßen immer auf dem warmen Bottich. Ich brachte es nicht übers Herz." · 4 „Alles hier oben schmeckt nach Sturm. Man lernt, das Würze zu nennen."
 
 ### 3.4 Ossian Vane — `ossiansettler`
 
@@ -260,7 +260,7 @@ umgekehrt (erster Wert = glücklich).
 - **Treffen:** Testgelände (+ alter Werkstatt-Weg). **Anwerbung:** 18 000 + **Sturmlinsenkern**. Verweigert Ackerbau/Forst.
 - **Verkauft, 3 von 8 im Tagesrhythmus** (Fenster rückt mit dem Welttag, `OssianMob.java` `offerOnRotation`): Kristallessenz (6/+1 @ 900–1 800) · Aufgestiegene Scherbe (3/+1 @ 2 600–5 000) · Leerengeschoss (200/+40 @ 26–52) · Arkanahelm (1 @ 5 200–9 000) · Arkanaharnisch (1 @ 6 400–11 000) · Arkanastiefel (1 @ 4 800–8 400) · Leerentasche (1 @ 7 500–13 000) · Auge der Leere (1 @ 12 000–20 000); dauerhaft Werkmeister-Reif 1 @ 1 100–1 900.
 - **Kauft:** Aetheriumbarren 150→95 · Sturmstahlbarren 220→140 · Himmelsgewebe 90→58.
-- **Talk:** pitch „Ich blieb wegen des Archivs, nicht wegen des Ordens. Die Haelfte ist unleserlich, die andere habe ich zu oft gelesen. Ich habe Dinge im Beutel von weiter draussen als diesem Himmel - und einen Preis, der dir nicht gefallen wird." · 1 „Ich habe jede Liste gelesen, die die Skywatch fuehrte. Deiner ist der erste neue Name seit Langem." · 2 „Was ich verkaufe, stammt nicht von hier. Frag nicht, woher." · 3 „Der Turm ist keine Ruine. Eine Ruine hat aufgehoert, etwas zu bedeuten." · 4 „Bring mir Barren, kein Erz. Fuer Schmelzen fehlt mir die Geduld."
+- **Talk:** pitch „Ich blieb wegen des Archivs, nicht wegen des Ordens. Die Hälfte ist unleserlich, die andere habe ich zu oft gelesen. Ich habe Dinge im Beutel von weiter draußen als diesem Himmel - und einen Preis, der dir nicht gefallen wird." · 1 „Ich habe jede Liste gelesen, die die Skywatch führte. Deiner ist der erste neue Name seit Langem." · 2 „Was ich verkaufe, stammt nicht von hier. Frag nicht, woher." · 3 „Der Turm ist keine Ruine. Eine Ruine hat aufgehört, etwas zu bedeuten." · 4 „Bring mir Barren, kein Erz. Für Schmelzen fehlt mir die Geduld."
 
 ### 3.5 Eveleen — `eveleensettler`
 
@@ -318,17 +318,17 @@ umgekehrt (erster Wert = glücklich).
 
 ### 3.11 Dorian, der Nachtgebundene — `vampiresettler`
 
-- **Name DE:** `mob.vampiresettler` „Dorian", „Dorian <name>, der Nachtgebundene". Tip: „Kommt in eine Siedlung, in der ein Sarg steht. Schlaeft tagsueber und arbeitet nachts; jagt Wildtiere ausserhalb der Mauern, niemals euer Vieh."
+- **Name DE:** `mob.vampiresettler` „Dorian", „Dorian <name>, der Nachtgebundene". Tip: „Kommt in eine Siedlung, in der ein Sarg steht. Schläft tagsüber und arbeitet nachts; jagt Wildtiere außerhalb der Mauern, niemals euer Vieh."
 - **Treffen:** **Nirgends in der Welt** — nur per Anreise (Sarg in der Siedlung, **kein Wächter nötig**, 90 Tickets).
 - **Anwerbung:** 11 000. Beruf **Jagd**, verweigert Ackerbau/Forst. **Kein Laden** (keine Sell/Buy-Einträge).
 - **Mechanik** (`mobs/VampireSettlerMob.java`):
   - schläft tagsüber, arbeitet nachts (oder im Abenteuertrupp/auf Befehl); nachts ×1,45 Tempo, außer in Sonnenlicht.
   - isst nicht; statt Hunger **Blutdurst** 0–1, leert sich in 1 200 s Dienst (`tickHunger`, `:184`).
-  - **Jagd** (`VampireHuntAINode`): nachts, nicht-feindliche, nicht-menschliche Mobs **außerhalb** der Siedlungsgrenzen; „leersaugen" `drain()` (`:338`): +0,34 Durst; 5/6: Beute verschwindet, 1× **Blutfläschchen** + 40 % Hammel; **1/6: Beute wird zum „Blutknecht"** (feindliche Krypta-Fledermaus, Drops 1–2 Blutfläschchen, 35 % Leder). Bubble `misc.vampiredrained` „..." bzw. `misc.vampireturned` „Das da ist noch nicht fertig. Zurueck."
+  - **Jagd** (`VampireHuntAINode`): nachts, nicht-feindliche, nicht-menschliche Mobs **außerhalb** der Siedlungsgrenzen; „leersaugen" `drain()` (`:338`): +0,34 Durst; 5/6: Beute verschwindet, 1× **Blutfläschchen** + 40 % Hammel; **1/6: Beute wird zum „Blutknecht"** (feindliche Krypta-Fledermaus, Drops 1–2 Blutfläschchen, 35 % Leder). Bubble `misc.vampiredrained` „..." bzw. `misc.vampireturned` „Das da ist noch nicht fertig. Zurück."
   - **Biss:** bei Durst 0 alle 3 600 Settler-Ticks (≈ 3 min) ein Siedler im Umkreis 320 px ohne Blutfieber → **Blutfieber** (1 Spieltag: −20 % Tempo, −15 % Abbau, −15 % Bauen, −10 % max. LP), +0,5 Durst, Bubble `misc.vampirebite` „Verzeih. Es hat niemand etwas rausgestellt." (`:212-230`)
-  - **Heilung:** Arzt, Option „Die Gebissenen behandeln (<price> Muenzen)" = 100 Münzen.
+  - **Heilung:** Arzt, Option „Die Gebissenen behandeln (<price> Münzen)" = 100 Münzen.
   - **Fläschchen hinstellen/füttern: NICHT implementiert** (§8).
-- **Talk:** pitch „Ihr haltet einen Sarg und niemanden darin. Das ist entweder eine Einladung oder ein Versehen, und ich hoffe auf das Erste." · 1 „Eure Leute arbeiten im Licht und schlafen im Dunkeln. Ich habe das nie verstanden, aber ich uebernehme die andere Haelfte." · 2 „Zwei Felder weiter steht ein Reh, das mich noch nicht bemerkt hat. Gib ihm eine Stunde." · 3 „Ich nehme nichts, was euer Zeichen traegt. Das ist keine Hoeflichkeit. Das ist die Abmachung." · 4 „Stellt ein Flaeschchen raus, wenn ihr lieber nicht habt, dass ich losziehe. Ich bin nicht stolz."
+- **Talk:** pitch „Ihr haltet einen Sarg und niemanden darin. Das ist entweder eine Einladung oder ein Versehen, und ich hoffe auf das Erste." · 1 „Eure Leute arbeiten im Licht und schlafen im Dunkeln. Ich habe das nie verstanden, aber ich übernehme die andere Hälfte." · 2 „Zwei Felder weiter steht ein Reh, das mich noch nicht bemerkt hat. Gib ihm eine Stunde." · 3 „Ich nehme nichts, was euer Zeichen trägt. Das ist keine Höflichkeit. Das ist die Abmachung." · 4 „Stellt ein Fläschchen raus, wenn ihr lieber nicht habt, dass ich losziehe. Ich bin nicht stolz."
 
 ### 3.12 Geisterführer — `ghostguide`
 
@@ -337,7 +337,7 @@ umgekehrt (erster Wert = glücklich).
 - **Nicht anwerbbar** (`misc.ghostguidenohire` „Die Toten ziehen nicht ein. Komm wieder, wenn du etwas brauchst."), unverwundbar.
 - **Laden (Münzpreise im Code!):** Geisterstahl-Schnitter 1 @ 14 000–24 000 · Grabwind-Bogen 1 @ 12 000–20 000 · Geisterstahlbarren 20/+4 @ 400–900 · Schleier-Essenz 30/+6 @ 250–560. **Kauft:** Ektoplasma 60→38 · Schleier-Essenz 170→108 · Geisterstahlbarren 275→175.
 - **Erstes Gespräch:** Nebelmal (s. 1.5 H), öffnet dann keinen Laden.
-- **Fenster:** `misc.ghostguideintro` „Mit Münzen kann ich nichts anfangen. Zeig mir, was du trägst." (widerspricht dem Laden, §8)
+- **Fenster:** `misc.ghostguideintro` „Münzen? Die Toten haben reichlich davon und nichts, wofür sie sie ausgeben. Ich nehme deine trotzdem - und ich kaufe, was der Nebel dir gibt." (seit 2026-09-24 passend zum Münz-Laden)
 - **Talk:** 1 „Alle stellen dieselbe erste Frage, und keinem gefällt die Antwort." · 2 „Vorsicht mit dem Nebel weiter draußen. Der gehört nicht mir." · 3 „Ich war Landvermesser. Ich zähle immer noch Dinge. Das beruhigt." · 4 „Bring mir irgendwann ein gutes Essen. Essen kann ich es nicht. Riechen würde ich es gern."
 
 ### 3.13 Siggi und Peanut — `spirecatblack` / `spirecattabby`
@@ -359,7 +359,7 @@ umgekehrt (erster Wert = glücklich).
 Talk-Texte (wörtlich):
 - Therapeut: 1 „Hier ist niemand kaputt. Manche tragen nur zu viel mit sich herum." · 2 „Ich habe vier Stühle. Das ist keine Bescheidenheit, so viel Aufmerksamkeit habe ich." · 3 „Sesshaft werden heißt zur Hälfte zugeben, dass man sesshaft ist." · 4 „Man kann einen Menschen ändern. Es kostet mehr, als die Leute denken." · 5 „Setz dich, wenn du magst. Ich nehme Geld für die Arbeit, nicht fürs Reden."
 - Arzt: 1 „Das meiste, was die Leute da unten umbringt, hätten sie aussitzen können." · 2 „Ich verkaufe die guten Tränke. Und Abendessen, das besser wirkt – nur glaubt mir das keiner." · 3 „Komm wieder, bevor es interessant wird. Interessant ist teuer." · 4 „Nein, ich sehe mir das nicht an. Ja, ich bringe es in Ordnung." · 5 „Iss was, bevor du steigst. Das ist die ganze Medizin."
-- Veteran: 1 „Ich hab schon schlimmere Postenrunden gedreht als diese hier." · 2 „Barrikaden gewinnen keinen Kampf. Sie kaufen dir Zeit dafuer." · 3 „Jeder Ueberfall, den ich gesehen hab, fing gleich an: Einer hat aufgehoert, die Mauer zu beobachten." · 4 „Kauf den Stacheldraht. Ich hab gesehen, was der mit einem Ansturm macht." · 5 „Halt die Munition voll, dann sorg ich dafuer, dass sie was bringt."
+- Veteran: 1 „Ich hab schon schlimmere Postenrunden gedreht als diese hier." · 2 „Barrikaden gewinnen keinen Kampf. Sie kaufen dir Zeit dafür." · 3 „Jeder Überfall, den ich gesehen hab, fing gleich an: Einer hat aufgehört, die Mauer zu beobachten." · 4 „Kauf den Stacheldraht. Ich hab gesehen, was der mit einem Ansturm macht." · 5 „Halt die Munition voll, dann sorg ich dafür, dass sie was bringt."
 - Zwielichthändler: 1 „Psst. Hier drüben. Nein, der andere Schatten." · 2 „Alles gebraucht. Die Vorbesitzer beschweren sich nicht mehr." · 3 „Sag dreimal meinen Namen und ich geb dir Rabatt. Lieber doch nicht." · 4 „Das Sargbett? Schläft sich wie tot. Garantiert." · 5 „Ich bin nur bis Sonnenuntergang da. Oder -aufgang. Vergess ich immer."
 
 ### 3.15 Vanilla-Stylistin (erweitert)
@@ -455,8 +455,8 @@ Kachel, nur für den Spieler). Talk-Zeilen stehen in §3.
 |---|---|---|---|
 | Therapeut | `misc.swhtherapyoption` „Über die Therapieplätze" | `swhtherapyintro` „Ich habe vier Plätze. Wer auf einem sitzt, fühlt sich <percent>% wohler mit dem Leben hier – solange der Platz ihm gehört." · `swhtherapyslot` „Platz <number>: <name>" / `swhtherapyslotfree` „Platz <number>: frei" · `swhtherapypick` „Wer soll den Platz bekommen?" · `swhtherapyclear` „Platz freigeben" | Platz vergeben → Gedanke `misc.swhtherapythought` „Mir hört jemand zu" |
 | Therapeut | `misc.swhtraitoption` „An jemandes Wesen arbeiten (<price> Münzen)" | `swhtraitintro` „Das Wesen ist kein Schicksal. Für <price> Münzen nehme ich jedem hier eine Eigenschaft ab – aber was stattdessen nachwächst, wählt weder ich noch du." · `swhtraitwhich` „Welcher Teil von <name> soll gehen?" · `swhtraitconfirm` „Ich nehme <name> die Eigenschaft <trait> ab, für <price> Münzen. Was dafür zurückkommt, weiß keiner von uns beiden vorher." · `swhtraitdoit` „Mach es" · `swhtraitdone` „<name> ist nicht mehr <old>. <name> ist jetzt <new>." · `swhtraitnocoins` „Das sind <price> Münzen, und die hast du nicht." · `swhtraitnotrait` „In ihm ist nichts mehr, woraus ich das machen könnte. Behalt dein Geld." | 50 000 Münzen, Wesenszug zufällig ersetzt |
-| Arzt | `misc.swhdoctoroption` „Flick mich zusammen (<price> Münzen)" | `swhdoctorintro` „Setz dich. <price> Münzen, und du gehst hier heil wieder raus – halbe Sachen mache ich nicht, und Raten auch nicht." · `swhdoctordoit` „<price> Münzen zahlen" · `swhdoctordone` „Fertig. Versuch, es eine Stunde lang so zu lassen." · `swhdoctorfine` „Dir fehlt nichts. Heb dir die Münzen für den Tag auf, an dem doch was fehlt." · `swhdoctorcure` „Die Gebissenen behandeln (<price> Muenzen)" · `swhdoctorcured` „Bis morgen frueh sind sie wieder sie selbst. Und fuettert den da." | 100 Münzen: volle LP; bzw. Blutfieber von allen Gebissenen entfernen |
-| Veteran | `misc.swhveteranoption` „Verteidigungsausbau (Stufe <level>/5)" | `swhveteranintro` „Die Verteidigung der Siedlung ist auf Stufe <level> von <max>.\nNaechste Stufe braucht: <req>." · `swhveterandoit` „Munition uebergeben" · `swhveteranmax` „Die Verteidigung ist bereits auf der hoechsten Stufe. Da ist nichts mehr zu uebergeben." | Stufe +1 (Tabelle §3.14) |
+| Arzt | `misc.swhdoctoroption` „Flick mich zusammen (<price> Münzen)" | `swhdoctorintro` „Setz dich. <price> Münzen, und du gehst hier heil wieder raus – halbe Sachen mache ich nicht, und Raten auch nicht." · `swhdoctordoit` „<price> Münzen zahlen" · `swhdoctordone` „Fertig. Versuch, es eine Stunde lang so zu lassen." · `swhdoctorfine` „Dir fehlt nichts. Heb dir die Münzen für den Tag auf, an dem doch was fehlt." · `swhdoctorcure` „Die Gebissenen behandeln (<price> Münzen)" · `swhdoctorcured` „Bis morgen früh sind sie wieder sie selbst. Und füttert den da." | 100 Münzen: volle LP; bzw. Blutfieber von allen Gebissenen entfernen |
+| Veteran | `misc.swhveteranoption` „Verteidigungsausbau (Stufe <level>/5)" | `swhveteranintro` „Die Verteidigung der Siedlung ist auf Stufe <level> von <max>.\nNächste Stufe braucht: <req>." · `swhveterandoit` „Munition übergeben" · `swhveteranmax` „Die Verteidigung ist bereits auf der höchsten Stufe. Da ist nichts mehr zu übergeben." | Stufe +1 (Tabelle §3.14) |
 | Magpie | Himmelsfahrt-Menü | siehe §3.2 | Expedition |
 
 ### 4.6 Schilder an Orten
@@ -554,7 +554,7 @@ Kostüme: `twilightsuit` (Zwielicht-Perücke, Gestreifter Jenseits-Anzug, Abgewe
 | Krumm: `oddwood` Seltsamholz, `warpresin` Krümmungsharz, `strangefabric` Seltsamer Stoff, `eyeseed` Augensamen, `stripedshell` Gestreifter Panzer, `realityshard` Realitätssplitter | „Ein Stück Holz, das in die falsche Richtung gewachsen ist." · „Klebriger Beweis dafür, dass Wirklichkeit auslaufen kann." · „Stoff, dessen Muster nicht stillhalten will." · „Er beobachtet, wo er besser nicht wachsen sollte." · „Ein harter Panzer in unmöglichen Streifen." · „Ein scharfer Splitter einer Regel, der die Welt nicht mehr folgt." | Krumme Objekte/Mobs/Kisten, Höllen-Mobs | Knott-Quest, Krummer + Höllen-Schlüssel, Knott kauft; **kein Rezept; Gestreifter Panzer ohne jede Verwendung** |
 | Trophäen `skystoneheart` Himmelsstein-Herz, `bloomfang` Blütenzahn, `mourningband` Trauerflor, `soulcollar` Seelenhalsband, `stripedhorn` Gestreiftes Horn | „Trophäe - … Magpie zahlt über Wert." | Golem 12 %, Blütenrachen, Steinerner Trauernder 12 %, Trauerbraut 12 %, Türmimik 20 %; Schatzorte | nur Verkauf an Magpie |
 | `aetherwrightcasing` | Ätherwerker-Gehäuse | „Eine gefräste Hülle, die Ladung hält. Vane weiß, was damit anzufangen ist." | Testgelände 2–4, Prototyp Neun 1–2 | Himmelslanze (3×) |
-| `bloodvial` | Blutfaeschchen | „Kreaturenbeute - vor einer Stunde hat das noch gegrast. Noch warm, und darueber redet niemand gern." | Dorians Jagd, Blutknecht | **keine** |
+| `bloodvial` | Blutfläschchen | „Kreaturenbeute - vor einer Stunde hat das noch gegrast. Noch warm, und darüber redet niemand gern." | Dorians Jagd, Blutknecht | **keine** |
 
 ### 5.5 Schlüssel- und Quest-Items
 

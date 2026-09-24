@@ -262,7 +262,7 @@ public class SkyWardenMob extends HumanShop {
     /**
      * He cannot be killed. He is a one-of-a-kind story NPC with no random
      * replacement ({@code WardenSettler.getArriveAsRecruitAfterDeathChance} is
-     * 0), and after a 100,000-coin purchase losing him to a stray mob would be
+     * 0), and after a 30,000-coin (RECRUIT_COST) purchase losing him to a stray mob would be
      * unrecoverable.
      */
     @Override

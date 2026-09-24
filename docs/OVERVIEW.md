@@ -47,9 +47,11 @@ into the Ghost and Crooked bands per §41.5.
 (`SkyTerrainPainter.REALM_WATERLINE`: Skyreach 0.48, Eden 0.40, Steinfeld 0.34,
 rest 0.44) so no band border shows a coastline step.
 
-**Anti-rush.** `veil/SoulExposureBuff` + `VeilRegion` + `VeilGate`. Standing in
-a band you have not earned stacks a named debuff: vision → slow → health drain →
-heavy damage. The check is against the world REGION, not the tile, so a teleport
+**Anti-rush.** `veil/SoulExposureBuff` + `VeilRegion` + `VeilGate`. There is
+exactly **one** wall: the Veil at `VeilRegion.VEIL_DEPTH` (derived, 0.581 at
+today's bands, ~3 486 tiles out) between Steinfeld and the Ghost Realm. Standing
+past it without the Veil Mark stacks a named debuff: vision → slow → health
+drain → heavy damage. Eden and Steinfeld have no barrier of their own. The check is against the world REGION, not the tile, so a teleport
 past the edge does not help (§8's abuse case).
 
 **Travel.** The Séance Circle is fast travel to the Ghost band
@@ -277,14 +279,14 @@ and Orchard Ring cells still remain pressure/terrain sites rather than presets.
 
 ---
 
-## 3. NPCs — 9 named humans + 2 cats
+## 3. NPCs — 10 named residents + Dorian + 2 cats (+ 4 profession/visitor NPCs, see `KOMPLETTUEBERSICHT.md` §3.14)
 
 | who | realm / where found | recruit | shop | quest |
 |---|---|---|---|---|
 | **The Warden** | Skyreach, Old Warden Spire (stamped on first ascent) | 30 000 coins | after settling: Ghost Chalk @1 200; once earned on the world, the chain rewards — Wolkengleve @4 500, Skywatch Banner @800 (anchor done), Cat Basket @500, Flickerlight Garland @500 (both cats home) | the whole Warden's Call chain |
 | **Eveleen**, Eden Botanist | Eden, beside a Knowledge Tree (0.35/region + tree) | 7 000 → **free** after her quest | seeds, saplings, fertiliser, queen bee | `swh_edenplants` |
-| **Mortimer**, Undertaker | Ghost, beside a gravestone | 8 000 | gravestones, sarcophagus, Bonewood furniture | — |
-| **Caspern**, Spirit Smith | Ghost, beside a gravestone | 14 000 | Nightsteel ore/bar, phantom dust, bone arrows | — |
+| **Mortimer**, Undertaker | Ghost, beside a gravestone | 8 000 → **free** after his quest | gravestones, sarcophagus, Bonewood furniture | `swh_mortimerrites` |
+| **Caspern**, Spirit Smith | Ghost, beside a gravestone | 14 000 → **free** after his quest | Nightsteel ore/bar, phantom dust, bone arrows | `swh_caspernforge` |
 | **Eleanor**, Lost Soul | Ghost, beside a gravestone | 5 000 (STAY only) | flowers, lanterns | `swh_eleanor`, two endings |
 | **Mr. Knott**, Doorman | Crooked, at a Door Yard | 22 000 | void cube, runestone, 3 masks | `swh_crookeddoor` |
 | **Magpie** | Skyreach, **Skyway Toll-House** (once per world, guarded by the Tollwright) | 12 000 **+ Bonded Lockbox** | buys sky salvage above broker | — |
@@ -292,6 +294,7 @@ and Orchard Ring cells still remain pressure/terrain sites rather than presets.
 | **Ossian Vane** | Skyreach, **the Stormveil Test Range** (once per world, guarded by Prototype Nine) | 18 000 **+ Storm Lens Core** | rotating incursion-exclusive loot (3 of 8) | — |
 | **Ives**, Verger of the Quiet Reach | **Steinfeld**, beside a broken angel | 11 000 → **free** after his quest | the realm's four materials (buys), gravestones/candles/urn/stone fence + Pale Stone (sells) | `swh_steinfeldvigil` |
 | **Spire Cats** ×2 | Skyreach lairs | not recruitable | — | objective of `swh_cats` |
+| **Dorian**, the Nightbound | nowhere in the world — arrives when a coffin stands in the settlement | 11 000 | none | — |
 
 **Arrivals.** Eveleen, Mortimer and Caspern also travel to the settlement the
 vanilla way once a condition is met (9+ Eden tiles / 3+ gravestones / an Aether
@@ -455,9 +458,9 @@ ours. Each sells their spare. `[run]`, not `[game]`.
 | **Weapons (5 craftable + 2 past Stormsteel)** | Skyreave (glaive) · Thunderhead (greatbow) · Prismcaller (magic staff) · Skywatch Whistle (summon) · Stormdisc (melee). Plus Tempest Edge (sword) and Galehowl (ranged). **Wolkengleve** (glaive, 165, reward of `swh_anchor` only) and **Himmelslanze** (beam lance, 95/tick, crafted from Aetherwright's Casing + Eden Bronze) — both VERIFIED [jar] registered and built; their load-time white-gold recolour of vanilla `cryoglaive`/`dragonlance` is HYPOTHESIS until seen on a client. |
 | **Armour** | Stormsteel helmet / chestplate / boots · Glimmerstrides (boots) · Skywatch Hood, Warden Mantle, Warden Boots (cosmetic) |
 | **Trinkets (3)** | Aurora Locket (Crooked key) · Stormsteel Vambrace (Ghost key) · Zephyr Harness (Knott's quest) — all three also craftable |
-| **Bars & ore** | Aetherium ore → Aetherium bar · **Stormsteel bar** (Aether Forge only) · Nightsteel (Caspern's shop) · Spiritsteel (Eleanor's quest) |
+| **Bars & ore** | Aetherium ore → Aetherium bar · **Stormsteel bar** (Aether Forge only) · Nightsteel (Caspern's shop) · Spiritsteel (Spirit Forge from spectral ore + ectoplasm; also Eleanor's quest and the Ghost Guide's shop) |
 | **Minerals** | Skystone · Storm shard · Stormglass · Fulgurite · Prism shard · Cinder pearl |
-| **Woods (5)** | Cloudwood · Nimbuswood · Prismwood · Seraphwood · Charwood — all register as `anylog`, so vanilla recipes accept them |
+| **Woods (5)** | Cloudwood · Nimbuswood · Prismwood · Seraphwood · Charwood — all register as `anylog`, so vanilla recipes accept them. Eden's **Edenwood** carries `anylog` too since 2026-09-24 (`EdenRealm.registerItems`) |
 | **Cloth** | Windsilk → Skyweave (Windsilk Loom) |
 | **Mob drops** | Aurora fleece (Glimmergoat shear) · Veil essence · Dewsnail |
 | **Livestock** | **Nimbus Yak** — milk, no shear · **Glimmergoat** — shear for aurora fleece, no milk. Both eat cloudberry and wheat, by hand or trough. |
@@ -530,15 +533,15 @@ What DOES still follow: `nimbusmilk`, `aurorafleece`, `skycurd`, `cloudcustard`,
    catalogue is dense, but the older shells listed in §2 are unchanged.
 4. **The Warden's-house travel anchors are unplaced** (§A2.3). Four gate objects
    registered, nothing places them; no route is fast travel yet.
-5. **Magpie, Halda and Ossian are near-unfindable.** Their placement needs a
-   *player-built* workstation to already stand within 3 tiles of a region that
-   is generating for the FIRST time — the opposite of how anyone builds. The
-   other five residents key off naturally-painted landmarks and are fine.
+5. ~~**Magpie, Halda and Ossian are near-unfindable.**~~ Resolved 2026-09-10:
+   each now stands in a landmark the world stamps exactly once (Skyway
+   Toll-House, Grange Cellar, Stormveil Test Range). The old workstation route
+   still exists alongside (`SkyLevel.placeResident`).
 6. **`distortion` is threaded to every band painter and read by none.** §3's
    calm/mad variants do not exist yet.
 7. **3 of 10 named settlers have no `interact()` of their own**: Magpie, Halda
-   and Ossian. Mortimer and Caspern gained one on 2026-09-05 along with
-   `swh_mortimerrites` and `swh_caspernforge`. (All ten do have talk lines --
+   and Ossian. (Mortimer and Caspern have one since 2026-09-05, with
+   `swh_mortimerrites` and `swh_caspernforge`.) (All ten do have talk lines --
    `talkKey()` is on the base class -- so "no dialogue" was always too strong;
    what they lacked was anything to DO.)
 8. **`swh_beacon` is a registered dead quest**, kept only for old-save

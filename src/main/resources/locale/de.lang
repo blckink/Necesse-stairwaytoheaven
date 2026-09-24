@@ -70,7 +70,7 @@ ghostlantern=Geisterlaterne
 windwheat=Windweizen
 cloudberrybush=Wolkenbeeren-Busch
 stairwaytoheaven=Stairway to Heaven
-skywatchgate=Skywatch-Tor
+skywatchgate=Himmelswacht-Tor
 skystonerock=Himmelsstein-Felsen
 aetheriumore=Aetherium
 stormcrystal=Sturmkristall
@@ -176,14 +176,11 @@ fulgursapling=Fulgur-Setzling
 prismasapling=Prismen-Setzling
 veilessence=Schleier-Essenz
 cinderpearl=Glutperle
-seancecircletip=Zeichne den Kreis, läute das Silberglöckchen - und klopfe an.
-ghostlanterntip=Ihre Flamme erinnert sich, wer sie zuerst entzündet hat.
 windwheat=Windweizen
 cloudberrybush=Wolkenbeeren-Busch
 cloudberry=Wolkenbeere
 overgrownedenseed=Eden-Grassamen
 overgrowngrass=Üppiges Eden-Gras
-cloudberrytip=Pralle Himmelsbeeren - süß, kalt und mit einem Hauch Gewitter.
 skystone=Himmelsstein
 aetheriumore=Aetheriumerz
 aetheriumbar=Aetheriumbarren
@@ -203,8 +200,6 @@ dewsnail=Tauschnecke
 skystairwaydowntip=Ermöglicht den Aufstieg in die Himmelsweite
 tempestedgetip=Aus Himmelsmetall geschmiedet, leicht wie der Wind
 galehowltip=Mit Windseide bespannt – ihre Pfeile überholen den Sturm
-cloudpufftreattip=Unwiderstehlich für Himmelskatzen. Riecht schwach nach Gewitter
-silverbelltip=Sie war Siggis. Er hasst sie
 
 [mob]
 magpiesettler=Elster
@@ -217,7 +212,7 @@ galehound=Sturmwindhund
 dawnpiercer=Morgenstecher
 zephyrfinch=Zephyrfink
 dewsnail=Tauschnecke
-wardensettler=Hüter
+wardensettler=Himmelswächter
 wardensettlername=<name>, der Himmelswächter
 gloomshade=Düsterschemen
 glowmoth=Glühfalter
@@ -260,22 +255,22 @@ veil=Der Schleier
 skyreach=Die Himmelsweite
 
 [misc]
-magpietalkpitch=Die kurze Fassung: Ich flog Fracht fuer die Skywatch, die Skywatch hoerte auf zu antworten, und seither sitze ich auf verzollter Ladung ohne Landeplatz. Gib mir ein Dach und einen Markt, und ich mache dich reich genug, dass du es bereust gefragt zu haben.
+magpietalkpitch=Die kurze Fassung: Ich flog Fracht für die Himmelswacht, die Himmelswacht hörte auf zu antworten, und seither sitze ich auf verzollter Ladung ohne Landeplatz. Gib mir ein Dach und einen Markt, und ich mache dich reich genug, dass du es bereust gefragt zu haben.
 magpietalk1=Alles in diesem Sack hat eine Seriennummer. Frag mich nach keiner davon.
-magpietalk2=Ich bestehle nicht die eigene Siedlung. Schreib das auf, das spart uns spaeter Streit.
+magpietalk2=Ich bestehle nicht die eigene Siedlung. Schreib das auf, das spart uns später Streit.
 magpietalk3=Es fiel ohnehin. Ich habe nur arrangiert, wohin.
-magpietalk4=Bring mir Bergungsgut. Ich bin die Einzige hier oben, die anstaendig dafuer zahlt.
-haldatalkpitch=Ich habe die Vorraete gehuetet, nachdem der Letzte gegangen war. Vierzig Jahre Faesser zaehlen fuer niemanden. Ich komme mit - und ich bringe den Keller mit, du wirst wollen, was daraus kommt.
-haldatalk1=Ein Keller haelt die Zeit besser als eine Uhr. Beide sind geduldig. Nur eines lohnt das Oeffnen.
-haldatalk2=Bring mir das Rohe, ich gebe dir das Fertige zurueck. Das ist der ganze Handel.
-haldatalk3=Die Katzen sassen immer auf dem warmen Bottich. Ich brachte es nicht uebers Herz.
-haldatalk4=Alles hier oben schmeckt nach Sturm. Man lernt, das Wuerze zu nennen.
-ossiantalkpitch=Ich blieb wegen des Archivs, nicht wegen des Ordens. Die Haelfte ist unleserlich, die andere habe ich zu oft gelesen. Ich habe Dinge im Beutel von weiter draussen als diesem Himmel - und einen Preis, der dir nicht gefallen wird.
-ossiantalk1=Ich habe jede Liste gelesen, die die Skywatch fuehrte. Deiner ist der erste neue Name seit Langem.
+magpietalk4=Bring mir Bergungsgut. Ich bin die Einzige hier oben, die anständig dafür zahlt.
+haldatalkpitch=Ich habe die Vorräte gehütet, nachdem der Letzte gegangen war. Vierzig Jahre Fässer zählen für niemanden. Ich komme mit - und ich bringe den Keller mit, du wirst wollen, was daraus kommt.
+haldatalk1=Ein Keller hält die Zeit besser als eine Uhr. Beide sind geduldig. Nur eines lohnt das Öffnen.
+haldatalk2=Bring mir das Rohe, ich gebe dir das Fertige zurück. Das ist der ganze Handel.
+haldatalk3=Die Katzen saßen immer auf dem warmen Bottich. Ich brachte es nicht übers Herz.
+haldatalk4=Alles hier oben schmeckt nach Sturm. Man lernt, das Würze zu nennen.
+ossiantalkpitch=Ich blieb wegen des Archivs, nicht wegen des Ordens. Die Hälfte ist unleserlich, die andere habe ich zu oft gelesen. Ich habe Dinge im Beutel von weiter draußen als diesem Himmel - und einen Preis, der dir nicht gefallen wird.
+ossiantalk1=Ich habe jede Liste gelesen, die die Himmelswacht führte. Deiner ist der erste neue Name seit Langem.
 ossiantalk2=Was ich verkaufe, stammt nicht von hier. Frag nicht, woher.
-ossiantalk3=Der Turm ist keine Ruine. Eine Ruine hat aufgehoert, etwas zu bedeuten.
-ossiantalk4=Bring mir Barren, kein Erz. Fuer Schmelzen fehlt mir die Geduld.
-spiremarker=Wardens Turm
+ossiantalk3=Der Turm ist keine Ruine. Eine Ruine hat aufgehört, etwas zu bedeuten.
+ossiantalk4=Bring mir Barren, kein Erz. Für Schmelzen fehlt mir die Geduld.
+spiremarker=Turm des Wächters
 stairsmarker=Deine Treppe
 dirnorth=Norden
 dirnortheast=Nordosten
@@ -289,26 +284,18 @@ wardenintro1=Hm. Die Treppe. Lange hat niemand mehr die Treppe genommen.
 wardenintro2=Ich bin der Wächter. Der letzte, wenn du mitzählst. Ich hüte das Licht. Hütete, besser gesagt. Es erlosch mit dem Sturm.
 wardenintro3=Nimm diese Windseide. Du bist den ganzen Weg geklettert; mit leeren Taschen schicke ich dich nicht fort.
 wardenrecruit1=Hier ist eine seltsame Bitte an einen Fremden: Mein Orden hütete den Himmel vierhundert Jahre, und ich bin der letzte Name auf seiner Liste. Ein Hüter ohne Turm ist nur ein alter Mann im Wind.
-wardenrecruit2=Stell mich ein. Hunderttausend Münzen - die Himmelswacht-Rente war großzügig, und ich gedenke, sie in Arbeit umzusetzen. Bau mir unten einen eigenen Turm, gib mir ein Bett, und ich hüte DEIN Licht.
-wardenrecruitconfirm=Du hast die Münzen also dabei. Sprich mich noch einmal an, dann ist es besiegelt - ungefragt nehme ich sie dir nicht ab.
-wardenrecruitwait=Hunderttausend, mein Freund. Erst die Münzen - dann bekommst du den ältesten Himmelfahrer der Weite als Nachbarn.
-wardenrecruitdone1=Ha! Vollständig bezahlt. Dann ist es besiegelt: Die Himmelswacht dient nun einem neuen Haus. Deinem.
-wardenrecruitdone2=Ich nehme den langen Weg nach unten und warte an deiner Treppe. Geh heim, bau mir etwas mit Aussicht - und wir werden sehen, was sich dort oben noch zu finden lohnt.
-wardenrecruitnohome=Du bist in meinen Himmel geklettert, ohne eine Treppe hinterzulassen? Geh heim, ordne deine Haustür - dann reden wir über meinen Umzug.
 wardensettlertip=Über den Wolken angeworben, für ein Vermögen in Münzen.
-wardenfarewell=Der Turm ist still jetzt. Mein neuer Posten steht mir besser.
 gatenobinding=Das Tor summt schlafend.\nEs hat noch nirgendwohin zu führen - steig erst von deiner eigenen Treppe auf.
-wardenshopclosed=Meine Regale sind dunkel, wie alles hier. Entzünde erst das Leuchtfeuer.
 wardencatfound1=Mrrp?
-wardencattreat=Die Katze schnappt sich das Leckerli und verschwindet in einem Wölkchen -\ndirekt in den Korb im Turm des Wardens, <dist> Felder <dir> von hier.
+wardencattreat=Die Katze schnappt sich das Leckerli und verschwindet in einem Wölkchen -\ndirekt in den Korb im Turm des Wächters, <dist> Felder <dir> von hier.
 wardencatpurr=Prrrrt.
-wardencatathome=Diese Katze ist endgültig eingezogen.\nSie schläft jetzt im Korb im Turm des Wardens.
+wardencatathome=Diese Katze ist endgültig eingezogen.\nSie schläft jetzt im Korb im Turm des Wächters.
 wardencatathomebasket=Diese Katze ist endgültig eingezogen.\nIhr Korb steht bei <x>, <y> - das ist jetzt ihr Zuhause.
 wardencattreatbasket=Die Katze schnappt sich das Leckerli und verschwindet in einem Wölkchen -\ndirekt in den Korb, den du bei <x>, <y> aufgestellt hast (<level>).
-catbasketready=Der Korb steht bereit, und leer.\nSiggi und Peanut sind noch oben in der Himmelsweite - finde sie und gib ihnen ein Wolkenpuff-Leckerli,\ndann ziehen sie hier ein.
+catbasketready=Der Korb steht bereit, und leer.\nSiggi und Peanut sind noch oben in der Himmelsweite - finde sie und gib ihnen ein Wolkenzupf-Leckerli,\ndann ziehen sie hier ein.
 catbasketmovedin=Katzen erkennen einen guten Korb:\n<count> Katze(n) sind gerade bei <x>, <y> eingezogen.
 catbasketmoved=Der neueste Korb gewinnt:\n<count> Katze(n) haben den alten verlassen und sind bei <x>, <y> eingezogen.
-catbasketremoved=Der Korb ist weg, also sind die Katzen zurück in den Korb im Turm des Wardens gegangen.\nStell einen neuen auf, dann kommen sie dorthin.
+catbasketremoved=Der Korb ist weg, also sind die Katzen zurück in den Korb im Turm des Wächters gegangen.\nStell einen neuen auf, dann kommen sie dorthin.
 siggipetted=Siggi drückt sich in deine Hand und brummt wie ein kleines Gewitter.\nSiggis Schnurren: einen ganzen Tag schärfer und zäher.
 peanutpetted=Peanut wirft sich auf den Rücken, alle vier Pfoten in der Luft.\nPeanuts Schnurren: einen ganzen Tag flinker auf den Beinen.
 siggigiftfish=*legt dir einen gebratenen Fisch vor die Füße* Mrrrp.
@@ -333,23 +320,23 @@ catmarkerblack=Siggis Lager
 catmarkertabby=Peanuts Lager
 
 [quests]
-swhfindspiretitle=Der Ruf des Wardens
+swhfindspiretitle=Der Ruf des Wächters
 swhfindspiredesc=Etwas hält über den Wolken noch ein Licht am Brennen.
-swhfindspireobj=Finde Wardens Turm - folge dem Flackern über dem Nebel.
-swhreturnwarden=Sprich mit dem Sky Warden.
+swhfindspireobj=Finde den Turm des Wächters - folge dem Flackern über dem Nebel.
+swhreturnwarden=Sprich mit dem Himmelswächter.
 swhbeacontitle=Entzünde das Leuchtfeuer
-swhbeacondesc=Das Leuchtfeuer der Himmelswacht ist zu lange dunkel gewesen. Bring dem Warden, was es zum Brennen braucht.
-swhbeaconreward=2x Flickerlicht-Girlande
+swhbeacondesc=Das Leuchtfeuer der Himmelswacht ist zu lange dunkel gewesen. Bring dem Wächter, was es zum Brennen braucht.
+swhbeaconreward=2x Flackerlicht-Girlande
 swhcatstitle=Die Turmkatzen
 swhcatsdesc=Zwei Katzen streunen noch durch Sturm und Bänke. Ein Wolkenzupf-Leckerli überzeugt sie vom Heimweg.
 swhcatblack=Lock die schwarze Katze heim (streunt im Sturmschleier)
 swhcattabby=Lock die getigerte Katze heim (streunt in den Aurorabänken)
-swhcatblackhome=Siggi ist daheim - schläft im Korb im Turm des Wardens
-swhcattabbyhome=Peanut ist daheim - schläft im Korb im Turm des Wardens
+swhcatblackhome=Siggi ist daheim - schläft im Katzenkorb
+swhcattabbyhome=Peanut ist daheim - schläft im Katzenkorb
 swhcatsreward=10x Sturmstahlbarren + Katzenkorb + 2x Flackerlicht-Girlande
 swhanchortitle=Verankere die Insel
-swhanchordesc=Die Turminsel driftet. Der Warden kann sie verankern - mit deinem Metall und Stein.
-swhanchorreward=Wolkengleve + Skywatch-Banner + 5x Aurorablatt
+swhanchordesc=Die Turminsel driftet. Der Wächter kann sie verankern - mit deinem Metall und Stein.
+swhanchorreward=Wolkengleve + Himmelswacht-Banner + 5x Aurorablatt
 swhrecruitwardentitle=Der letzte Hüter
 swhrecruitwardendesc=Der Himmelswächter würde die Himmelswacht hinter sich lassen - für einen Preis, den keine kleine Siedlung zahlen kann.
 swhrecruitwardenobj=Heuere den Himmelswächter für deine Siedlung an (<cost> Münzen)
@@ -411,7 +398,7 @@ stormglasskiln=Sturmglas-Ofen
 
 [itemtooltip]
 windsilkloomtip=Spinnt Windweizen und webt Windseide. Weise einen Siedler zu, und der Stoff kommt von selbst
-aetherforgetip=Verbrennt Holz und läutert Ätheriumerz mit doppelter Ausbeute einer gewöhnlichen Schmiede - und nur hier entsteht Sturmstahl
+aetherforgetip=Verbrennt Holz und läutert Aetheriumerz mit doppelter Ausbeute einer gewöhnlichen Schmiede - und nur hier entsteht Sturmstahl
 stormglasskilntip=Brennt Fulgurit und Himmelsstein zu Sturmglas. Braucht keinen Brennstoff - im Fulgurit steckt noch der Blitz
 // ===== content/livestock: die Nutztiere der Himmelsweite =====
 // Ein wiederholter Abschnittskopf öffnet die vorhandene Kategorie erneut,
@@ -476,21 +463,21 @@ skystonetip=Mineral - der helle Stein, aus dem jede Himmelsinsel besteht. Aus Hi
 aetheriumoretip=Erz - türkises Metall in den Adern der Himmelsweite. In der Esse zu Aetheriumbarren schmelzen.
 aetheriumbartip=Metallbarren - geschmolzenes Aetheriumerz. Das Alltagsmetall der Himmelsweite.
 stormshardtip=Mineral - ein Splitter aus einem Sturmkristall im Sturmschleier, der noch immer summt.
-stormsteelbartip=Metallbarren - Aetherium, in der Aetheresse in Sturmsplitter abgeschreckt. Das härteste Metall hier oben.
+stormsteelbartip=Metallbarren - Aetherium, in der Ätherschmiede in Sturmsplitter abgeschreckt. Das härteste Metall hier oben.
 stormglasstip=Mineral - Fulgurit, im Sturmglasofen über Himmelssteinfluss zu einer klaren Bernsteinscheibe neu gebrannt.
 fulguritetip=Mineral - Sand, den ein Blitzschlag im Boden des Sturmschleiers zu Glas verschmolzen hat.
-prismshardtip=Mineral - Kernholz einer Prismenbirke, zu Kristall geworden. Aus den Aurora-Untiefen gebrochen.
-cinderpearltip=Mineral - eine Glut, die vergessen hat zu erlöschen, aufgelesen in der Aschenweite. Brennt grün.
+prismshardtip=Mineral - Kernholz einer Prismenbirke, zu Kristall geworden. Aus den Aurorabänken gebrochen.
+cinderpearltip=Mineral - eine Glut, die vergessen hat zu erlöschen, aufgelesen in der Aschenöde. Brennt grün.
 // -- Fasern, Stoff und Pflanzliches --
 windsilktip=Faser - aus geerntetem Windweizen gesponnen oder einem Wolkenschaf abgeschoren.
 skyweavetip=Stoff - ein Ballen Windseide, von einem Siedler am Windseiden-Webstuhl gewebt.
-aurorapetaltip=Blütenblatt - von den Aurorablüten der Untiefen gepflückt und noch immer schwach leuchtend.
+aurorapetaltip=Blütenblatt - von den Aurorablüten der Aurorabänke gepflückt und noch immer schwach leuchtend.
 // -- Holz --
 cloudwoodtip=Holz - von einem Wolkenbaum in den Driftlanden. Leicht genug zum Schweben, wenn man es lässt.
 seraphwoodtip=Holz - von einem Himmelsseraph an den Himmelspfaden. Hell, gerade und kalt.
 nimbuswoodtip=Holz - von einer Nimbusweide in den Driftlanden. Feucht, grau und schwer entzündlich.
 charwoodtip=Holz - von einer Fulgurkiefer im Sturmschleier, von altem Blitzschlag durchgekohlt.
-prismwoodtip=Holz - von einer Prismenbirke in den Aurora-Untiefen. Die Maserung wirft noch immer Farbe.
+prismwoodtip=Holz - von einer Prismenbirke in den Aurorabänken. Die Maserung wirft noch immer Farbe.
 // -- Kreaturenbeute und Hoferzeugnisse --
 veilessencetip=Kreaturenbeute - das, woraus ein Düsterschemen besteht. Kalt in der Hand, kälter im Verlust.
 dewsnailtip=Kleintier - eine Tauschnecke, lebend mit dem Netz gefangen. Auf ihrem Haus sitzt ein Tropfen Himmelstau.
@@ -506,6 +493,7 @@ silverbelltip=Ein Andenken aus dem Turm des Hüters. Es öffnet nichts mehr.
 stormsteelhelmettip=Kopfrüstung - Sturmstahlplatte mit Sturmglas-Visier. Am Wolframamboss geschmiedet.
 stormsteelchestplatetip=Brustrüstung - ein Sturmstahl-Harnisch mit Sturmlinse auf der Brust. Am Wolframamboss geschmiedet.
 stormsteelbootstip=Fußrüstung - Sturmstahl-Beinschienen über Himmelsgewebe-Futter. Am Wolframamboss geschmiedet.
+glimmerstridestip=Fußrüstung - gefilztes Auroravlies auf einer Aetherium-Sohle. Warm und leichtfüßig.
 stormsteelvambracetip=Accessoire - eine geschiente Sturmstahl-Armschiene, über Himmelsgewebe geschnürt.
 auroralockettip=Accessoire - ein Aurorablatt unter Sturmglas an einer Schnur aus Auroravlies.
 zephyrharnesstip=Accessoire - ein Windseiden-Flugband mit Sturmflaum, in Sturmstahl verschnallt.
@@ -660,13 +648,13 @@ swhspeaktoives=Sprich mit Ives.
 // --- Mortimer, der Nachgarten ---
 swhmortimerritestitle=Die letzte Ehre
 swhmortimerritesdesc=Mortimer kann jedes Grab im Nachgarten benennen und fast keines erreichen. Ein Leichentuch ist Faden, ein Sarg ist Holz, und ihm fehlt beides.
-swhmortimerritesreward=Mortimer zieht kostenlos in deine Siedlung + 6x Geiststahlbarren
+swhmortimerritesreward=Mortimer zieht kostenlos in deine Siedlung + 6x Geisterstahlbarren
 swhspeaktomortimer=Sprich mit Mortimer.
 
 // --- Caspern, der Nachgarten ---
 swhcaspernforgetitle=Die kalte Schmiede
 swhcaspernforgedesc=Das Feuer des Geisterschmieds ist ausgegangen. Spektralerz nährt es, Schleieressenz löscht es - und Letztere fällt nur dort, wo der Nebel am dichtesten steht.
-swhcaspernforgereward=Caspern zieht kostenlos in deine Siedlung + 6x Geiststahlbarren
+swhcaspernforgereward=Caspern zieht kostenlos in deine Siedlung + 6x Geisterstahlbarren
 swhspeaktocaspern=Sprich mit Caspern.
 
 // --- Mr. Knott, die Krümmungs-Kette (Fortsetzung) ---
@@ -952,7 +940,7 @@ seanceneedsettlement=Kreide hält nur dort, wo Menschen wohnen. Zeichne sie in d
 seanceguidehere=Dein Führer ist bereits hier.
 seanceguidearrives=Die Kreide raucht, und <name> tritt heraus.
 ghostguideunlock1=Atme aus. So. Jetzt kennt dich der Nebel - die Seelenblöße rührt dich nicht mehr an.
-ghostguideintro=Mit Münzen kann ich nichts anfangen. Zeig mir, was du trägst.
+ghostguideintro=Münzen? Die Toten haben reichlich davon und nichts, wofür sie sie ausgeben. Ich nehme deine trotzdem - und ich kaufe, was der Nebel dir gibt.
 ghostguidenohire=Die Toten ziehen nicht ein. Komm wieder, wenn du etwas brauchst.
 ghostguidetalk1=Alle stellen dieselbe erste Frage, und keinem gefällt die Antwort.
 ghostguidetalk2=Vorsicht mit dem Nebel weiter draußen. Der gehört nicht mir.
@@ -970,29 +958,29 @@ regionkeyeden=Gartenstiege von Eden
 regionkeysteinfeld=Trauerengel von Steinfeld
 regionkeyghostrealm=Rabenkanzel des Nachgartens
 regionkeycrookedbeyond=Knotts Krumme Tür
-regionkeyhell=Das Höllensiegel
+regionkeyhell=Höllensiegel
 [quests]
 swhkeyskyreachtitle=Das Wachfeuer
-swhkeyskyreachdesc=Der Warden kann ein Wachfeuer bauen, auf das die Rufsteine der Himmelsweite antworten - wenn du ihm den Sturm bringst, mit dem es brennt.
+swhkeyskyreachdesc=Der Wächter kann ein Wachfeuer bauen, auf das die Rufsteine der Himmelsweite antworten - wenn du ihm den Sturm bringst, mit dem es brennt.
 swhkeyskyreachreward=Wachfeuer der Himmelsweite + 4x Sturmscheibe + Himmelswacht-Kapuze + 4x Sturmstahlbarren
 swhkeyedentitle=Die Gartenstiege
-swhkeyedendesc=Eden bewacht seinen Saft und seinen Pollen mit Zähnen und Stacheln. Hol beides aus dem Garten, dann schlägt dir der Warden eine Stiege, die seine Steine wiedererkennen.
+swhkeyedendesc=Eden bewacht seinen Saft und seinen Pollen mit Zähnen und Stacheln. Hol beides aus dem Garten, dann schlägt dir der Wächter eine Stiege, die seine Steine wiedererkennen.
 swhkeyedenreward=Gartenstiege von Eden + Windheuler + Mantel des Hüters + 5x Sturmstahlbarren
 swhkeysteinfeldtitle=Der Trauerengel
-swhkeysteinfelddesc=Steinfeld ist nichts als bleicher Stein und das Echo, das darin gefangen ist. Bring genug von beidem zurück, dann stellt dir der Warden einen seiner Engel in die eigene Siedlung.
+swhkeysteinfelddesc=Steinfeld ist nichts als bleicher Stein und das Echo, das darin gefangen ist. Bring genug von beidem zurück, dann stellt dir der Wächter einen seiner Engel in die eigene Siedlung.
 swhkeysteinfeldreward=Trauerengel von Steinfeld + Sturmklinge + Stiefel des Hüters + 6x Sturmstahlbarren
 swhkeyghostrealmtitle=Die Rabenkanzel
-swhkeyghostrealmdesc=Aus dem Nachgarten kommt nichts, was der Nebel nicht schon berührt hat. Trag sein Knochenholz und sein Spektralerz heraus, dann setzt dir der Warden einen Raben über das Tor.
+swhkeyghostrealmdesc=Aus dem Nachgarten kommt nichts, was der Nebel nicht schon berührt hat. Trag sein Knochenholz und sein Spektralerz heraus, dann setzt dir der Wächter einen Raben über das Tor.
 swhkeyghostrealmreward=Rabenkanzel des Nachgartens + Geisterstahl-Schnitter + Sturmstahl-Armschiene + 6x Geisterstahlbarren
 swhkeycrookedbeyondtitle=Eine eigene Tür
-swhkeycrookedbeyonddesc=Jede Tür in der Krümmung führt irgendwohin, wo sie nicht hinführen sollte. Bring dem Warden ihr Holz und ihre Splitter, dann hängt er dir eine ein, die es mit Absicht tut.
+swhkeycrookedbeyonddesc=Jede Tür in der Krümmung führt irgendwohin, wo sie nicht hinführen sollte. Bring dem Wächter ihr Holz und ihre Splitter, dann hängt er dir eine ein, die es mit Absicht tut.
 swhkeycrookedbeyondreward=Knotts Krumme Tür + Grabwind-Bogen + Auroramedaillon + 8x Geisterstahlbarren
 swhkeyhelltitle=Alles scheint in Ordnung zu sein
-swhkeyhelldesc=Die Hölle macht niemandem ohne Papiere auf. Ein Formular kann der Warden dir nicht besorgen, also nimmt er den Beweis, dass du so weit draußen warst: die Krümmung, doppelt.
-swhkeyhellreward=Das Höllensiegel + 16x Geisterstahlbarren
+swhkeyhelldesc=Die Hölle macht niemandem ohne Papiere auf. Ein Formular kann der Wächter dir nicht besorgen, also nimmt er den Beweis, dass du so weit draußen warst: die Krümmung, doppelt.
+swhkeyhellreward=Höllensiegel + 16x Geisterstahlbarren
 [misc]
 regionkeyneedsettlement=Ein Schlüsselstück hält nur dort, wo Menschen wohnen. Stell es in deiner Siedlung auf.
-regionkeyunlocked=Die <key> setzt sich in den Boden,\nund weit draußen wird ein kalter Stein warm.
+regionkeyunlocked=Das Schlüsselstück setzt sich in den Boden: <key>.\nWeit draußen wird ein kalter Stein warm.
 wardenkeyaskskyreach=Es gibt einen Weg, das zu rufen, was da draußen schläft - aber es antwortet nur seinesgleichen. Bring mir den Sturm, dann baue ich dir ein Wachfeuer.
 wardenkeydoneskyreach=Das brennt. Stell es daheim ab, wo die Mauern dir gehören.
 wardenkeyaskeden=Dann also Eden. Saft und Pollen, und beides wird dir niemand reichen.
@@ -1054,11 +1042,11 @@ skywatchsignet=Siegelring der Himmelswacht
 [itemtooltip]
 bondedlockboxtip=Versiegelt, verzollt, nie abgeholt. Magpie will sie zurück.
 skywaywrittip=Wegerecht auf jeder Straße der Himmelswacht, zweimal gegengezeichnet.
-postledgertip=Jedes Paket, das die Straße nie zustellte, von Hand aufgeführt. Magpie zahlt dafür.
+postledgertip=Jedes Paket, das die Straße nie zustellte, von Hand aufgeführt. Die Pakete liegen noch draußen - Magpie zahlt für jedes, das zurückkommt.
 themothertip=Die lebende Kultur des Kellers. Älter als der Haushalt, der sie fütterte.
 wardensroundtip=Ausgeschenkt für die Wache am Ende einer Schicht. Ein Fass war noch übrig.
 stormlenscoretip=Läuft immer noch an. Was er antreiben sollte, hat niemand abgestellt.
-aetherwrightcasingtip=Eine gefräste Hülle, die Ladung hält. Vane weiß, was damit anzufangen ist.
+aetherwrightcasingtip=Eine gefräste Hülle, die Ladung hält. Drei davon tragen eine Himmelslanze.
 skywatchsignettip=Das Siegel des Haushalts. Wer ihn trägt, dem versteckt der Himmel seine Bauten nicht mehr.
 skywatchsignetmap=Zeigt beim Gehen mehr von der Welt und hebt hervor, was sich zu öffnen lohnt
 
@@ -1217,10 +1205,10 @@ warveterantip=Zieht von selbst in deine Siedlung ein, genau wie ein Schmied
 
 [mobmsg]
 warveterantalk1=Ich hab schon schlimmere Postenrunden gedreht als diese hier.
-warveterantalk2=Barrikaden gewinnen keinen Kampf. Sie kaufen dir Zeit dafuer.
-warveterantalk3=Jeder Ueberfall, den ich gesehen hab, fing gleich an: Einer hat aufgehoert, die Mauer zu beobachten.
+warveterantalk2=Barrikaden gewinnen keinen Kampf. Sie kaufen dir Zeit dafür.
+warveterantalk3=Jeder Überfall, den ich gesehen hab, fing gleich an: Einer hat aufgehört, die Mauer zu beobachten.
 warveterantalk4=Kauf den Stacheldraht. Ich hab gesehen, was der mit einem Ansturm macht.
-warveterantalk5=Halt die Munition voll, dann sorg ich dafuer, dass sie was bringt.
+warveterantalk5=Halt die Munition voll, dann sorg ich dafür, dass sie was bringt.
 
 [object]
 veteranbarricade=Barrikade
@@ -1236,19 +1224,19 @@ veterancatapult=Kanone
 
 [misc]
 swhveteranoption=Verteidigungsausbau (Stufe <level>/5)
-swhveteranintro=Die Verteidigung der Siedlung ist auf Stufe <level> von <max>.\nNaechste Stufe braucht: <req>.
-swhveterandoit=Munition uebergeben
-swhveteranmax=Die Verteidigung ist bereits auf der hoechsten Stufe. Da ist nichts mehr zu uebergeben.
+swhveteranintro=Die Verteidigung der Siedlung ist auf Stufe <level> von <max>.\nNächste Stufe braucht: <req>.
+swhveterandoit=Munition übergeben
+swhveteranmax=Die Verteidigung ist bereits auf der höchsten Stufe. Da ist nichts mehr zu übergeben.
 
 [mob]
 vampiresettler=Dorian
 vampiresettlername=Dorian <name>, der Nachtgebundene
 
 [item]
-bloodvial=Blutfaeschchen
+bloodvial=Blutfläschchen
 
 [itemtooltip]
-bloodvialtip=Kreaturenbeute - vor einer Stunde hat das noch gegrast. Noch warm, und darueber redet niemand gern.
+bloodvialtip=Kreaturenbeute - vor einer Stunde hat das noch gegrast. Noch warm, und darüber redet niemand gern.
 
 [buff]
 bloodfever=Blutfieber
@@ -1257,17 +1245,17 @@ bloodfever=Blutfieber
 bloodfevertip=Nachts gebissen. Blass, langsam und ohne Appetit, bis es vorbei ist.
 
 [misc]
-vampiresettlertip=Kommt in eine Siedlung, in der ein Sarg steht. Schlaeft tagsueber und arbeitet nachts; jagt Wildtiere ausserhalb der Mauern, niemals euer Vieh.
+vampiresettlertip=Kommt in eine Siedlung, in der ein Sarg steht. Schläft tagsüber und arbeitet nachts; jagt Wildtiere außerhalb der Mauern, niemals euer Vieh.
 vampiretalkpitch=Ihr haltet einen Sarg und niemanden darin. Das ist entweder eine Einladung oder ein Versehen, und ich hoffe auf das Erste.
-vampiretalk1=Eure Leute arbeiten im Licht und schlafen im Dunkeln. Ich habe das nie verstanden, aber ich uebernehme die andere Haelfte.
+vampiretalk1=Eure Leute arbeiten im Licht und schlafen im Dunkeln. Ich habe das nie verstanden, aber ich übernehme die andere Hälfte.
 vampiretalk2=Zwei Felder weiter steht ein Reh, das mich noch nicht bemerkt hat. Gib ihm eine Stunde.
-vampiretalk3=Ich nehme nichts, was euer Zeichen traegt. Das ist keine Hoeflichkeit. Das ist die Abmachung.
-vampiretalk4=Stellt ein Flaeschchen raus, wenn ihr lieber nicht habt, dass ich losziehe. Ich bin nicht stolz.
+vampiretalk3=Ich nehme nichts, was euer Zeichen trägt. Das ist keine Höflichkeit. Das ist die Abmachung.
+vampiretalk4=Stellt ein Fläschchen raus, wenn ihr lieber nicht habt, dass ich losziehe. Ich bin nicht stolz.
 vampiredrained=...
 vampirebite=Verzeih. Es hat niemand etwas rausgestellt.
-swhdoctorcure=Die Gebissenen behandeln (<price> Muenzen)
-swhdoctorcured=Bis morgen frueh sind sie wieder sie selbst. Und fuettert den da.
-vampireturned=Das da ist noch nicht fertig. Zurueck.
+swhdoctorcure=Die Gebissenen behandeln (<price> Münzen)
+swhdoctorcured=Bis morgen früh sind sie wieder sie selbst. Und füttert den da.
+vampireturned=Das da ist noch nicht fertig. Zurück.
 
 [mob]
 bloodthrall=Blutknecht

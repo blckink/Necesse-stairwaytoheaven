@@ -4384,3 +4384,29 @@ Full audit and table: `docs/ITEM_CATEGORIES.md`.
   test holds at 0. `ItemRegistry.getItemMod(id).id` is how an item is told to
   be ours; `Recipes.getRecipesFromResult` is populated by ServerStartEvent.
   VERIFIED [run].
+
+## Locale duplicates and late global ingredients (2026-09-24)
+
+- **A duplicate key in a `.lang` file: the LATER line wins.**
+  `TranslationCategory.addTranslation` (jar 1.3.2,
+  `engine/localization/fileLanguage/TranslationCategory.java:28-36`) logs
+  "localisation overwriting by mod" and then does a plain `HashMap.put`, and the
+  file is parsed top to bottom (`Translation.java:167`). So when a key is
+  repeated inside the same `[section]` (repeated section headers continue the
+  section), the text a player sees is the last occurrence. VERIFIED [jar]
+  (source read, not observed in a client). This is how
+  `itemtooltip.cloudpufftreattip` / `silverbelltip` had two texts each; the
+  dead first copies were removed.
+- **Keys in the wrong section are silently dead.** `item.seancecircletip`,
+  `item.ghostlanterntip`, `item.cloudberrytip` were never read: descriptions
+  come from `itemtooltip.<id>tip` via `ItemDescription`, and only for classes
+  that call it; vanilla `FoodConsumableItem` / `GrainItem` add no per-item
+  line. VERIFIED [jar]; the keys are removed.
+- **`Item.addGlobalIngredient(String...)` works after registration.** It is
+  public (jar `Item.java:792`), and once the item's `idData` is set it calls
+  `GlobalIngredient.registerItemID`, which also files the ID as obtainable
+  when `ItemRegistry.isObtainable` (`GlobalIngredient.java:38-43`). So an
+  existing item can be made an `anylog` without touching its registration
+  call: `EdenRealm.registerItems` does it for `edenwood`. VERIFIED [jar] +
+  `buildModJar`; the crafting menu accepting Edenwood as a log is HYPOTHESIS
+  until seen on a client.

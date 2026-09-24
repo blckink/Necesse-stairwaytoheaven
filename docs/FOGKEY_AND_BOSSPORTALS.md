@@ -50,6 +50,14 @@ Using the circle summons a **Ghost Guide** (`ghostguide`).
 3. The same ghost weapons also **drop randomly in the Ghost region**, so a
    player who never trades still finds them.
 
+> **Superseded by the player's ruling on point 2.** Vanilla's shop API can only
+> price in coins (`NetworkSellingShopItem.canAffordCost:82` / `consumeCost:108`),
+> and the hold-and-talk barter built around that was rejected: *"Auf garkeinen
+> fall! dann lieber hohe münzbeträge und normaler shop."* The Ghost Guide is a
+> normal coin shop at endgame prices that buys the realm's drops above broker
+> (`GhostGuideMob` constructor). His greeting `misc.ghostguideintro` was
+> rewritten on 2026-09-24 to stop claiming he has no use for coin.
+
 ---
 
 ## Part B — Elder quests, region keys, and the boss portals

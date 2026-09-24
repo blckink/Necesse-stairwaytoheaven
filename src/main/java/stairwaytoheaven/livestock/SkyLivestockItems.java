@@ -143,5 +143,24 @@ public final class SkyLivestockItems {
                     new ModifierValue<>(necesse.entity.mobs.buffs.BuffModifiers.SPEED, 0.06F),
                     new ModifierValue<>(necesse.entity.mobs.buffs.BuffModifiers.HEALTH_REGEN_FLAT, 0.4F));
         }
+
+        /**
+         * The boots' "what is this" line — the same hook the Stormsteel pieces
+         * use, since {@code ArmorItem.getTooltips} is final (see
+         * {@code StormsteelArmor}). Until this they were the one crafted armour
+         * piece with no description (KOMPLETTUEBERSICHT §8 item 43).
+         */
+        @Override
+        public necesse.gfx.gameTooltips.ListGameTooltips getPreEnchantmentTooltips(
+                InventoryItem item, necesse.entity.mobs.PlayerMob perspective,
+                necesse.engine.util.GameBlackboard blackboard) {
+            necesse.gfx.gameTooltips.ListGameTooltips tooltips =
+                    super.getPreEnchantmentTooltips(item, perspective, blackboard);
+            String line = stairwaytoheaven.items.ItemDescription.of(this.getStringID());
+            if (line != null) {
+                tooltips.addFirst(line);
+            }
+            return tooltips;
+        }
     }
 }

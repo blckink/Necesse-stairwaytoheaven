@@ -75,13 +75,17 @@ Saat). Selbst gebaute Stücke geben sich weiter selbst zurück. Details:
 
 ## 2. Alle NPCs
 
-Zehn benannte Menschen, zwei Katzen, ein beschworener Geist. Jeder existiert
-**genau einmal pro Welt** (`SkywatchWorldData.residentsClaimed`).
+Zehn benannte Bewohner in der Welt, dazu **Dorian** (elf benannte Figuren),
+zwei Katzen, ein beschworener Geist — und vier Berufs- bzw. Besucher-NPCs ohne
+Ort in der Welt (Therapeut, Arzt, Kriegsveteran, Zwielichtiger Händler), die
+von selbst in eine Siedlung kommen. Die benannten Bewohner existieren
+**genau einmal pro Welt** (`SkywatchWorldData.residentsClaimed`). Volle Läden
+und Texte aller Figuren: `docs/KOMPLETTUEBERSICHT.md` §3.
 
 | Wer | Gebiet | Gefunden bei | Anwerbung | Beruf | Quest | Kommt von selbst in die Siedlung? |
 |---|---|---|---|---|---|---|
 | **Sky Warden** | Skyreach | Alte Wächterspitze (beim ersten Aufstieg gestempelt) | 30 000 | — | die ganze Warden's-Call-Kette **+ alle 5 Region-Keys** | nein, wird angeworben |
-| **Magpie** | Skyreach | **Skyway-Zollhaus** ⭐, einmal pro Welt · bewacht vom **Tollwright** | 12 000 **+ Verbundene Schließkassette** ⭐ | Handelsmissionen | — | nein |
+| **Magpie** | Skyreach | **Skyway-Zollhaus** ⭐, einmal pro Welt · bewacht vom **Zollwerk** | 12 000 **+ Verzollte Kassette** ⭐ | Handelsmissionen | — | nein |
 | **Halda** | Skyreach | **Grange-Keller** ⭐, einmal pro Welt · bewacht von der **Sauerbottich-Blüte** | 9 000 **+ Die Mutter** ⭐ | **Angeln** | — | nein |
 | **Ossian Vane** | Skyreach | **Sturmschleier-Testgelände** ⭐, einmal pro Welt · bewacht von **Prototyp Neun** | 18 000 **+ Sturmlinsenkern** ⭐ | — | — | nein |
 | **Eveleen** | Eden | bei einem Baum der Erkenntnis | 7 000 → **frei** | **Düngen** | `swh_edenreach`, `swh_edenplants` | ja, wenn Eden-Gras in der Siedlung wächst |
@@ -92,6 +96,11 @@ Zehn benannte Menschen, zwei Katzen, ein beschworener Geist. Jeder existiert
 | **Mr. Knott** | Crooked Beyond | am Türhof | 22 000 | Handelsmissionen | `swh_crookedarrival`, `swh_crookeddoor` | nein |
 | **Ghost Guide** | Ghost Realm | am Séance-Kreis **beschworen** | nicht anwerbbar | — | — | — |
 | **Siggi + Peanut** | Skyreach | Lairs im Sturmschleier / in den Aurorabänken | nicht anwerbbar | — | Ziel von `swh_cats` | ziehen in den Katzenkorb |
+| **Dorian, der Nachtgebundene** | — | nirgends in der Welt | 11 000 | **Jagd** (nur nachts) | — | ja, wenn ein Sarg in der Siedlung steht |
+| **Therapeut** | — | — | 900–1 400 | Therapieplätze, Wesenszug tauschen | — | ja, wie ein Schmied |
+| **Arzt** | — | — | 900–1 400 | Heilung, Blutfieber heilen | — | ja, wie ein Schmied |
+| **Kriegsveteran** | — | — | 900 | Verteidigungsausbau (5 Stufen) | — | ja, wie ein Schmied |
+| **Zwielichtiger Händler** | — | — | nicht anwerbbar (Besucher) | wechselnde Kostüme + Deko | — | kommt als Besucher |
 
 ⭐ = neu in diesem Durchgang.
 
@@ -122,20 +131,22 @@ Waren, nicht die Zahlen.
 ### Sky Warden — Skyreach
 | verkauft | |
 |---|---|
-| Silberglöckchen ×2 @ 5 000 | erst nachdem er eingezogen ist; der einzige Schlüssel zum Séance-Kreis |
-| Geisterkreide ×3 | Nachschub, nachdem er dir das erste Stück geschenkt hat |
+| Geisterkreide ×3 (+1 pro Tag) @ 1 200 | Nachschub, nachdem er dir das erste Stück geschenkt hat |
+| Wolkengleve ×1 @ 4 500 · Himmelswacht-Banner ×1 @ 800 | erst, wenn irgendwer in der Welt die Anker-Quest abgegeben hat |
+| Katzenkorb ×1 @ 500 · Flackerlicht-Girlande ×2 @ 500 | erst, wenn die Katzen daheim sind |
 
-Er **schenkt** außerdem: 1× Silberglöckchen (bei der Anwerbung) und 1×
-Geisterkreide (beim ersten Mal, dass *du* im Nebel gestanden hast — pro
-Charakter, nie geteilt).
+Er kauft nichts. Er **schenkt** 1× Geisterkreide (beim ersten Mal, dass *du*
+im Nebel gestanden hast — pro Charakter, nie geteilt). Das Silberglöckchen gibt
+es nicht mehr zu kaufen oder zu verdienen; der Séance-Zirkel braucht es nicht.
 
 ### Magpie — Skyreach · der Aufkäufer
 | verkauft | kauft |
 |---|---|
 | Wurmköder, Sandstein, Kokosnuss, Schneeball, Glas | **Himmelsstein, Windseide, Aetheriumerz, Sturmsplitter, Aurorablatt, Fulgurit, Prismensplitter** |
-| Silberglöckchen ×1 (Ersatz) | |
+| **Kurierkappe** ×1 (ihre eigene) | **Himmelspost-Pakete** |
+| | die fünf Trophäen: Himmelsstein-Herz, Blütenzahn, Trauerflor, Seelenhalsband, Gestreiftes Horn |
 
-Er zahlt über Broker-Kurs für Himmelsbergung — dafür ist er da.
+Sie zahlt über Broker-Kurs für Himmelsbergung — dafür ist sie da.
 
 ### Halda — Skyreach · die Kellermeisterin
 | verkauft | kauft |
@@ -206,14 +217,18 @@ halbierter Laden.
 | Leerenwürfel, Runenstein (klein) | Krümmungsharz, Augensamen, Realitätssplitter |
 | Leerenmaske, Alienmaske, Haifischmaske | |
 
-### Ghost Guide — beschworen, handelt nicht mit Münzen
+### Ghost Guide — beschworen, ein normaler Münz-Laden
 | verkauft | kauft |
 |---|---|
 | **Geisterstahl-Schnitter**, **Grabwind-Bogen** — die Geisterwaffen | Ektoplasma, Schleier-Essenz, Geisterstahlbarren |
 | Geisterstahlbarren, Schleier-Essenz | |
 
-Er nimmt **kein Geld**: Wertsachen aus der Geisterregion oder hochwertiges
-selbstgekochtes Essen. Beim **ersten** Gebrauch des Kreises schaltet er dich
+Er handelt **gegen Münzen**, zu Endgame-Preisen (Schnitter 14 000–24 000,
+Bogen 12 000–20 000) — die ursprüngliche Tauschidee („kein Geld, nur
+Geisterwaren oder gutes Essen") hast du verworfen: *„Auf garkeinen fall! dann
+lieber hohe münzbeträge und normaler shop."* Dafür kauft er die Drops des
+Realms deutlich über Broker. Seine Begrüßung sagt das jetzt auch („Münzen? Die
+Toten haben reichlich davon …"). Beim **ersten** Gebrauch des Kreises schaltet er dich
 frei — danach wirkt die Soul-Exposure des Ghost-Bands für diesen Charakter
 nicht mehr. Dieselben Geisterwaffen fallen auch zufällig in der Region, damit
 ein Spieler, der nie handelt, sie trotzdem findet.
@@ -254,7 +269,7 @@ ihre Aufgabe beim ersten Treffen.
 | ID | Geber | Aufgabe | Belohnung |
 |---|---|---|---|
 | `swh_findspire` | erster Aufstieg | finde die Alte Wächterspitze | Karten-Pin |
-| `swh_recruitwarden` | Warden | 30 000 zahlen | der Warden zieht ein + Silberglöckchen |
+| `swh_recruitwarden` | Warden | 30 000 zahlen | der Warden zieht ein |
 | `swh_cats` | Warden | beide Katzen mit Wolkenzupf-Leckerli heimlocken | **Katzenkorb**, 2× Flackerlicht-Girlande, 10× Sturmstahlbarren |
 | `swh_anchor` | Warden | 20× Aetheriumbarren, 80× Himmelsstein, 8× Sturmstahlbarren | ⭐ **Wolkengleve**, Himmelswacht-Banner, 5× Aurorablatt |
 | `swh_beacon` | *niemand* | — | **TOT** — registriert, wird nie vergeben; existiert nur, damit Spielstände vor 0.5 laden |
@@ -285,7 +300,7 @@ Beschwörungssteine dieses Realms auf.
 | `swh_keysteinfeld` | 8× Echosplitter, 20× Blasser Stein | Trauerengel von Steinfeld, 6× Sturmstahlbarren, Sturmklinge, Stiefel des Hüters |
 | `swh_keyghostrealm` | 12× Knochenholz, 8× Spektralerz | Rabenkanzel des Nachgartens, 6× Geisterstahlbarren, **Geisterstahl-Schnitter** (statt Himmelsreißer), Sturmstahl-Armschiene |
 | `swh_keycrookedbeyond` | 16× Seltsamholz, 8× Realitätssplitter | Knotts Krumme Tür, 8× Geisterstahlbarren, **Grabwind-Bogen** (statt Prismenrufer), Auroramedaillon |
-| `swh_keyhell` | 16× Realitätssplitter, 24× Seltsamholz | Das Höllensiegel, **16× Geisterstahlbarren** (statt Donnerhaupt + Zephyr-Gurtzeug + 10×) |
+| `swh_keyhell` | 16× Realitätssplitter, 24× Seltsamholz | Höllensiegel, **16× Geisterstahlbarren** (statt Donnerhaupt + Zephyr-Gurtzeug + 10×) |
 
 Die Waffen steigen jetzt mit: Skyreach-Waffen auf den ersten drei Stufen, die
 Geisterwaffen ab dem Ghost Realm. Hell zahlt vorerst nur Barren, weil es noch
@@ -341,7 +356,7 @@ Strahl, der dem Mauszeiger folgt und alles auf seiner Linie trifft, nur golden.
 10 Mana pro Sekunde, du stehst still, solange sie brennt (Drachenlanze: 80 →
 126). Verzauberungskosten 2000, EPISCH.
 
-**Rezept (Wolfram-Werkbank):** 3× Aetherwright-Gehäuse, 10× Edenbronzebarren,
+**Rezept (Wolfram-Werkbank):** 3× Ätherwerker-Gehäuse, 10× Edenbronzebarren,
 8× Goldener Pollen, 6× Aetheriumbarren. Das Gehäuse (Testgelände, Prototyp
 Neun) war genau für „die erste Waffenstufe nach Sturmstahl" gedacht und hatte
 bis jetzt keinen Abnehmer — Edenbronze auch nicht. Absichtlich **keine**
@@ -349,7 +364,7 @@ Questbelohnung: die Wolkengleve ist schon eine.
 
 ---
 
-## 5. Die Bosse — fünf, plus eine reservierte Sprosse
+## 5. Die Bosse — sechs, einer pro Realm
 
 Beschworen an **Beschwörungssteinen**, die verstreut im eigenen Band stehen
 (~0,97 pro 1000×1000 Kacheln). Nicht abbaubar. **Inert**, bis das
@@ -365,7 +380,7 @@ permanenten Buff — nie über `LevelModifiers`, das würde die ganze Ebene buff
 | Steinfeld | `ascendedwizard` — Aufgestiegener Magier | Settlement Ruins | 44 000 | 9 (×3,58, dazu Aufschlag ×1,40) | **220 528** |
 | Ghost Realm | `pestwarden` — Pestwächter | Swamp Deep Cave | 45 000 | 9 (×3,58, dazu Aufschlag ×1,45) | **233 595** |
 | Crooked Beyond | `crystaldragon` — Kristalldrache | Crystal Hollow | 52 000 | 10 (×4,00, dazu Aufschlag ×1,55) | **322 400** |
-| Hell | `mutanthydra` reserviert | Scrapyard | 80 000 | — | **nicht gebaut** |
+| Hell | `mutanthydra` — Mutantenhydra | Scrapyard | 80 000 | 10 (×4,00, dazu Aufschlag ×1,65) | **528 000** |
 
 Die Leiter ist absichtlich monoton: nach außen laufen heißt nach oben laufen.
 Dein Wunsch war *„grundsätzlich sollen die Bosse auf Incursion Level 8–10
@@ -380,14 +395,14 @@ Sprite-Sheet, kosten also **kein neues Pixel**; die HP kommen aus derselben
 
 | Wächter | steht im | Rolle | lässt fallen |
 |---|---|---|---|
-| **Tollwright** | Skyway-Zollhaus | Elite (Nahkampf, Stampfer) | — der Schlüssel liegt hier in der Tresor-Vitrine |
-| **Sauerbottich-Blüte** ＋ **Vatlinge** | Grange-Keller | Elite, ruft Vatlinge | **Die Mutter** — bei **jedem** Kill |
+| **Zollwerk** (`tollwright`) | Skyway-Zollhaus | Elite (Nahkampf, Stampfer) | 3–6 Himmelsstein, 65 %: 1–3 Sturmstahlbarren, 40 %: 1–2 Aetheriumbarren, 80 %: 400–1 200 Münzen — der Anwerbeschlüssel liegt nicht bei ihm, sondern in der Tresor-Vitrine |
+| **Sauerbottich-Blüte** ＋ **Bottichlinge** | Grange-Keller | Elite, ruft Bottichlinge | **Die Mutter** — bei **jedem** Kill |
 | **Prototyp Neun** | Sturmschleier-Testgelände | Fernkampf | **Sturmlinsenkern** — bei **jedem** Kill |
 
-Zwei Vanilla-Verhalten sind absichtlich aus: der Tollwright kann **keine Objekte
+Zwei Vanilla-Verhalten sind absichtlich aus: das Zollwerk kann **keine Objekte
 zerbrechen** (ein Aschegolem liefe sonst durch die Wände des Hauses, in dem
 Magpie steht), und die Blüte bleibt **eine Frenzy-Stufe unter dem Limit** und
-entlässt Vatlinge, statt zu explodieren — ein Stachelbusch tötet sich am Limit
+entlässt Bottichlinge, statt zu explodieren — ein Stachelbusch tötet sich am Limit
 selbst, und das wäre ein Wächter, der vor dem Kampf stirbt. Beide greifen nur
 **Spieler** an, nie den Siedler im selben Raum.
 
@@ -399,14 +414,14 @@ zwar bei jedem Kill, nicht mit einer Chance, denn beide sind Anwerbeschlüssel.
 
 | # | Belohnung | wo | wofür |
 |---|---|---|---|
-| 1 | **Verbundene Schließkassette** | Zollhaus, Tresor-Vitrine | Magpies Anwerbeschlüssel |
-| 2 | **Skyway-Freibrief** | Zollhaus, Vitrine im Kontor | dauerhafte Aufwertung von Magpies Handelsmissionen |
-| 3 | **Register unzustellbarer Post** | Zollhaus, Schrank | benennt Sky-Pakete in der Welt; Magpie zahlt dafür |
+| 1 | **Verzollte Kassette** | Zollhaus, Tresor-Vitrine | Magpies Anwerbeschlüssel |
+| 2 | **Himmelsweg-Freibrief** | Zollhaus, Vitrine im Kontor | **derzeit ohne Wirkung** — ein Andenken; die geplante Aufwertung von Magpies Handelsmissionen ist nicht gebaut |
+| 3 | **Buch der unzustellbaren Post** | Zollhaus, Schrank | ein Andenken; Magpie kauft das Buch nicht, wohl aber jedes **Himmelspost-Paket**, das in der Welt liegt (140→90 Münzen) |
 | 4 | **Die Mutter** | in der Sauerbottich-Blüte | Haldas Anwerbeschlüssel + nie verbrauchte Zutat |
 | 5 | **Der Wächtertrunk** | Grange-Keller, das eine alte Fass | einmaliger, langer, starker Skywatch-Buff |
 | 6 | **Sturmlinsenkern** | in Prototyp Neun | Vanes Anwerbeschlüssel + Antrieb seines Zeichentischs |
-| 7 | **Aetherwright-Gehäuse** ×2–4 | Testgelände, Vitrine | Tor-Material der ersten Waffenstufe nach Sturmstahl |
-| 8 | **Skywatch-Siegel** | Grange-Keller, Schrank | Schmuck: zeigt unerforschte Skyreach-Bauten auf der Karte |
+| 7 | **Ätherwerker-Gehäuse** ×2–4 | Testgelände, Vitrine | Material der Himmelslanze (3 Stück) |
+| 8 | **Siegelring der Himmelswacht** | Grange-Keller, Schrank | Schmuck: zeigt unerforschte Skyreach-Bauten auf der Karte |
 
 **Zum Siegel, ehrlich:** die Vorlage legt es ins Archiv der Wächterspitze,
 übergeben „wenn der Haushalt vollständig ist". Dieses Story-Tor ist **nicht
@@ -433,7 +448,7 @@ von denen manche keine Kisten sind.** Pläne, Geschichten und Karten stehen in
 | **Die falsche Schatzkammer** | Skyreach | Achsenhalle der Himmelsmünze: 8 Truhen am goldenen Läufer, dahinter der Tresor | Himmelsstein-Golem (gestärkt) + 2 Raureif-Wächter | **5 von 8** Truhen | 4–8 Sturmstahlbarren, 3–6 Aetherium, Sturmglas, 900–2200 Münzen; 30 % Sturmscheibe/Himmelsreißer/Donnerkopf, 15 % Himmelsstein-Herz |
 | **Das eingestürzte Observatorium** | Skyreach | runde Kuppel, halb eingestürzt — und ein Nachtfall-Würfel **ohne Tür**: der versiegelte Instrumentenkeller, nur mit der Spitzhacke zu öffnen | Morgenstecher (gestärkt) + 2 Sturmirrlichter | die Truhe des Astronomen | Prismasplitter, Sturmglas, Sturmsplitter, 500–1400 Münzen; 20 % Aurora-Medaillon |
 | **Das Heckenlabyrinth** | Eden | echtes 10×10-Irrgarten aus Waldhecke; 6 Sackgassen enden in einer Kiste, in der Mitte eine Lichtung | Verbotene Schlange (gestärkt) + 2 Eifersüchtige Ranken + 2 Blütenrachen | **3 von 6** Sackgassen | 4–8 Edenbronze, Schlangenschuppen, Giftzahn, Goldpollen, 1100–2800 Münzen; 15 % Blütenzahn |
-| **Das Pilger-Ossarium** | Steinfeld | Kirchhof, Gruft, und ein Prozessionsgang mit **3 Druckplatten, verdrahtet mit Pfeilfallen** in der Wand; 6 Nischen | Hohler Engel (gestärkt) + 2 Steinerne Trauernde zwischen den Gräbern | **3 von 6** Nischen | Blassstein, Grabsalz, Echosplitter, Geistermoos, 1400–3500 Münzen; 20 % Trauerband |
+| **Das Pilger-Ossarium** | Steinfeld | Kirchhof, Gruft, und ein Prozessionsgang mit **3 Druckplatten, verdrahtet mit Pfeilfallen** in der Wand; 6 Nischen | Hohler Engel (gestärkt) + 2 Steinerne Trauernde zwischen den Gräbern | **3 von 6** Nischen | Blassstein, Grabsalz, Echosplitter, Geistermoos, 1400–3500 Münzen; 20 % Trauerflor |
 | **Das Hochzeitsmahl** | Ghost Realm | Festsaal, gedeckt für 24 — **13 der Stühle sind Besessene Stühle**; die Geschenke stapeln sich an der Ostwand | Trauerbraut (gestärkt) | 13 Stühle + **2 von 4** Geschenken | 4–8 Geisterstahl, Seelenfaden, Spektralerz, Knochenholz, 1700–4200 Münzen; 20 % Seelenhalsband |
 | **Die Halle der vielen Türen** | Crooked Beyond | eine Wand, fünf Durchgänge: zwei sind Türen, **drei sind Türmimiken** | Seltener krummer Golem (gestärkt) + Krummes Gürteltier | **3 von 5** Durchgängen | Realitätssplitter, Warp-Harz, Seltsamer Stoff, Irrholz, 2200–5500 Münzen; 20 % Streifenhorn — und die Truhe selbst ist eine **echte Mimik-Truhe** (Vanilla `mimicchest`), die wie ein Mimik aussieht |
 
@@ -485,7 +500,7 @@ im Client beantworten.
 | **Steinfeld** | 1 920 – 4 200 | 3 | 4 | 0 | 0 | 1 ⭐ | 2 ⭐ | 1 | 20,3 |
 | **Ghost Realm** | 2 880 – 5 280 | 5 | 9 | 0 | 0 | 4 | 4 ⭐ | 1 | 21,8 |
 | **Crooked Beyond** | 4 200 – 5 640 | 5 | 8 | 1 | 0 | 1 | 3 | 1 | 30,9 |
-| **Hell** | 4 800+ | 0 | 0 | 0 | 0 | 0 | 0 | 4 unerreichbar | 0 |
+| **Hell** | 4 800+ | 2 | 4 | 0 | 0 | 0 | 1 (`swh_keyhell`, beim Warden) | 4 | 0 (Wächter-Packs definiert, nie platziert) |
 
 **Sechs neue Orte im Skyreach (Stand 2026-09-09).** Zu Turm, Stadt, Zollbrücke
 und Gasthaus kommen sechs Plätze aus dem POI-Dossier: das **Skyway-Zollhaus**
@@ -818,9 +833,10 @@ und eine dritte Serverphase.
 
 ## 10. Was offen bleibt — ehrlich, nach Kosten für den Spieler
 
-1. **Hell ist ein Loch mit vier Gebäuden drin.** Das Band 0,80–1,00 malt sich
-   als Crooked; die vier Hell-POI-Presets stehen in krummem Boden. Kein Biom,
-   keine Besetzung, kein NPC, keine Quest, keine Boss-Sprosse.
+1. **Hell ist gebaut, aber leer an Menschen.** Zwei Biome (Höllensaum,
+   Ofenweite), vier Gegner, vier POIs und die Mutantenhydra (528 000 LP, über
+   `swh_keyhell`) stehen — es fehlen NPCs, Critter und eigene Quests, und die
+   Wächter-Packs der Biome werden nie platziert (`tools/area_census.py`).
 2. **Nur Skyreach hat Critter oder Tiere.** Vier Realms haben null
    Umgebungsleben. Steinfelds Antwort steht fertig in `WORLD_DESIGN` §A3.4 und
    ist schlicht ungebaut: Geister, die nicht angreifen, die stehen, die ewig
