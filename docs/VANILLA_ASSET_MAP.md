@@ -299,6 +299,56 @@ and the temporary census stamp found every one standing on its tile.
 | `wallcandle`, `walltorch`, `walllantern` | Ghost; Hell; Eden | wall lights on `WALL_DECOR` | `WallCandleObject`/`WallTorchObject`: rotation is where the wall is, exactly `mistglasslantern`'s convention (VERIFIED [jar], `WallTorchObject.canPlace`) |
 | `diningset`, `reddiningset`, `oldchalices`, `goldchalice`, `spilledgoldchalice`, `bloodgoblet`, `bloodgobletspilled`, `oldplate`, `brokenplate`, `dirtyplate`, `dirtydishes`, `oldsoup`, `rottenpigdish`, `rottenfishstew`, `skull`, `tableclock`, `stackofpaper`, `papertowel`, `redbooks`, `blueandyellowbooks`, `greenandpinkbooks`, `largeglobe`, `farseersorb`, `fishonastick`, `experimentalroot`, `observantmask`, `unamusedmask`, `voidcube`, `forgottenblade`, `dinoplush`, `dogplush`, `woodenduck`, `luckyrabbitsfoot`, `pottedflower1`/`2`/`4`/`5`/`6`, `pottedplant1`/`2`/`3`/`4`/`6` | all | table decorations (`FENCE_AND_TABLE_DECOR`), only ever on a `DecorationHolderInterface` — never on a desk | the laid tables, the files on the counters, the carnival prizes, the stolen heaven goods. `Legend.table`/`serves` check the layer and the holder at load |
 
+### 1.8 Chapter 03 — the Spire Village and the quest ladder (2026-09-24)
+
+**The ladder's twelve rewards — borrowed item icons.** The same seam as §1.7:
+`items/LadderTrinketItem` and `items/LadderFoodItem` take the icon as their
+first argument, `MemoryBlade` and `BloodFeverTinctureItem` carry it as a
+constant; `tools/locale_audit.py` checks all four classes through
+`ITEM_CLASS_VANILLA_ICON`. Swapping means dropping
+`items/<the reward's own id>.png` in and deleting the icon argument.
+
+| ours | icon borrowed | whose | why that one |
+|---|---|---|---|
+| Magpie's Satchel (`magpiesatchel`) | `items/explorersatchel` | vanilla | a courier's bag |
+| Stormbrew (`stormbrew`) | `items/unlabeledpotion` | vanilla | Halda's cellar brew has no label |
+| Reader's Lens (`readerslens`) | `items/scryingmirror` | vanilla | a glass you look through to see what is hidden |
+| Paradise Cider (`paradisecider`) | `items/passivepotion` | vanilla | a bottled golden drink |
+| Echo Conch (`echoconch`) | `items/prophecyslab` | vanilla | a carved stone that remembers a voice |
+| Verger's Lantern (`vergerlantern`) | `items/lantern` | vanilla | Ives' lantern, literally |
+| The Remembering Blade (`memoryblade`) | `items/hexedbladegreatsword` (also its attack sprite) | vanilla | a haunted greatsword |
+| Mourning Brooch (`mourningbrooch`) | `items/companionlocket` | vanilla | a keepsake worn for someone gone |
+| Root Crown (`rootcrown`) | `items/dryadcrown` | vanilla | a crown grown, not forged |
+| Knott's Keyring (`knottkeyring`) | `items/ignitionkey` | vanilla | a key |
+| Auditor's Seal (`auditorsseal`) | `items/templependant` | vanilla | an official, gold, LEGENDARY-looking seal |
+| Blood Fever Tincture (`bloodfevertincture`) | `items/greaterhealthregenpotion` | vanilla | a red cure |
+
+**The Blood Bowl (`bloodbowl`)** wears `spiritbasin` as world sheet and icon —
+the **third** borrow of that sheet after the Soul Basin and the Eden
+Threshold. `settlement/BloodBowlObject`.
+
+**Every vanilla piece the village plans name.** Each is written literally in a
+legend in `village/SpireVillagePlans.java`; `SpireVillage.validateAll()`
+builds all twelve plans at postInit, so an unknown ID throws and the server
+does not start. **How verified:** `[run]` — the integration test booted with
+all of them and `/swhvillage` counted every object back
+(`objects=958/958 missing=0`). The mod's own pieces (`skywatch*`,
+`mistglasslantern`, `skyparcel`, `pottedcloudberry`, `skywatchcandle`,
+`cloudmarblefence(gate)`, `wardencandelabra`, `skytulip`, `knowledgetree`,
+`aetherforge`, the tiles `overgrownedentile`, `mistseatile`, `cloudturftile`,
+`skyway`, `skyroad`) are not borrows and are not listed.
+
+| vanilla IDs | house | stands in for |
+|---|---|---|
+| `barrel`, `sack`, `largekeg`, `cookingpot` | Magpie, Halda, Mortimer, Caspern, Eleanor, market | stores and kitchen |
+| `stackofpaper`, `tableclock`, `quillandparchment`, `teapot`, `mug`, `plate`, `stewpot`, `cuttingboard`, `stackedbooks`, `largeglobe`, `farseersorb`, `skull`, `oldchalices`, `forgottenblade`, `voidcube`, `pottedflower1`/`4`/`5`, `pottedplant2`/`3` | all houses (table decorations) | laid tables and desks |
+| `palmwall`, `palmwindow`, `palmdoor`, `palmbed`, `palmbench`, `palmdesk`, `palmmodulartable`, `palmdresser`, `palmbookshelf`, `palmcabinet`, `palmcandelabra`; tile `farmland`; `redflowerpatch`, `blueflowerpatch`, `yellowflowerpatch`, `blackberrybush` | Eveleen, Eden bed, Eleanor (flowers) | Edenwood house and beds (as §1.4c) |
+| `birchchair`, `birchbench`, `stonecandlepedestal`, `vase`, `gravestone1`, `gravestone2`, `stonefence`, `stonefencegate` | Ives | chapel pews and a stonemason's yard |
+| `bonechair`, `bonemodulartable`, `bonebed`, `bonebench`, `bonedresser`, `bonebookshelf`, `boneclock`, `bonecabinet`, `bonecandelabra`, `bonedisplay`, `cryptcoffin`, `cryptgravestone1`; tile `cryptpath` | Mortimer, Knott | undertaker's showroom; Knott's crooked furniture (as §1.4c) |
+| `forge`, `ironanvil`, `tungstenanvil`, `armorstand`, `trainingdummy` | Caspern, sparring ring | the cold forge (§10's Spirit Forge is his, not built as an object here) |
+| `arcanicwall`, `arcanicwindow`, `arcanicdoor` | Knott | warped building material (as §1.4c) |
+| `sign`, `woodfence`, `woodfencegate` | market notice board, Eden bed | — |
+
 ### 1.5 Vanilla sheets a mod asset was DRAWN ON
 
 Not borrowed at runtime — the art is the player's own, but its layout is

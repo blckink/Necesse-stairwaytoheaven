@@ -412,6 +412,8 @@ Two more consequences worth knowing:
 
 | shipped | content | retrofittable? |
 |---|---|---|
+| 2026-09-24 | the Spire Village and its nine residents | **yes, by itself** — stamped the next time the spire is ensured, unless a player settlement lies in its 77×77 footprint (then `/swhvillage` reads `blocked=settlement` and nothing is overwritten). A resident an old save still has somewhere in the sky is walked to his seat (`SpireVillage.bringHome`); a resident already living in a settlement stays there and is not seated twice |
+| 2026-09-24 | the quest ladder (12 new quests) | yes — handed out on conversation. An old save's done resident chains count as done steps |
 | 2026-09-05 | Eden's guard packs (they had never been placed at all) | **yes** — `/swhreset world` |
 | 2026-09-05 | Ives, Steinfeld's first resident | **yes** |
 | 2026-09-05 | Ives's, Mortimer's and Caspern's quest chains | yes — they are handed out on conversation, not by worldgen |

@@ -284,23 +284,29 @@ and Orchard Ring cells still remain pressure/terrain sites rather than presets.
 | who | realm / where found | recruit | shop | quest |
 |---|---|---|---|---|
 | **The Warden** | Skyreach, Old Warden Spire (stamped on first ascent) | 30 000 coins | after settling: Ghost Chalk @1 200; once earned on the world, the chain rewards — Wolkengleve @4 500, Skywatch Banner @800 (anchor done), Cat Basket @500, Flickerlight Garland @500 (both cats home) | the whole Warden's Call chain |
-| **Eveleen**, Eden Botanist | Eden, beside a Knowledge Tree (0.35/region + tree) | 7 000 → **free** after her quest | seeds, saplings, fertiliser, queen bee | `swh_edenplants` |
-| **Mortimer**, Undertaker | Ghost, beside a gravestone | 8 000 → **free** after his quest | gravestones, sarcophagus, Bonewood furniture | `swh_mortimerrites` |
-| **Caspern**, Spirit Smith | Ghost, beside a gravestone | 14 000 → **free** after his quest | Nightsteel ore/bar, phantom dust, bone arrows | `swh_caspernforge` |
-| **Eleanor**, Lost Soul | Ghost, beside a gravestone | 5 000 (STAY only) | flowers, lanterns | `swh_eleanor`, two endings |
-| **Mr. Knott**, Doorman | Crooked, at a Door Yard | 22 000 | void cube, runestone, 3 masks | `swh_crookeddoor` |
-| **Magpie** | Skyreach, **Skyway Toll-House** (once per world, guarded by the Tollwright) | 12 000 **+ Bonded Lockbox** | buys sky salvage above broker | — |
-| **Halda**, Cellarer | Skyreach, **the Grange Cellar** (once per world, guarded by the Sourvat Bloom) | 9 000 **+ The Mother** | the mod's 3 crafted materials | — |
-| **Ossian Vane** | Skyreach, **the Stormveil Test Range** (once per world, guarded by Prototype Nine) | 18 000 **+ Storm Lens Core** | rotating incursion-exclusive loot (3 of 8) | — |
-| **Ives**, Verger of the Quiet Reach | **Steinfeld**, beside a broken angel | 11 000 → **free** after his quest | the realm's four materials (buys), gravestones/candles/urn/stone fence + Pale Stone (sells) | `swh_steinfeldvigil` |
+| **Eveleen**, Eden Botanist | **Spire Village**, the Greenhouse (was: Eden, beside a Knowledge Tree) | 7 000 → **free** after her quest | seeds, saplings, fertiliser, queen bee | `swh_edenplants` |
+| **Mortimer**, Undertaker | **Spire Village**, the Undertaker's House (was: Ghost) | 8 000 → **free** after his quest | gravestones, sarcophagus, Bonewood furniture | `swh_mortimerrites` |
+| **Caspern**, Spirit Smith | **Spire Village**, the Cold Forge (was: Ghost) | 14 000 → **free** after his quest | Nightsteel ore/bar, phantom dust, bone arrows | `swh_caspernforge` |
+| **Eleanor**, Lost Soul | **Spire Village**, the Kitchen House (was: Ghost) | 5 000 (STAY only) | flowers, lanterns | `swh_eleanor`, two endings |
+| **Mr. Knott**, Doorman | **Spire Village**, the House of Many Doors (was: Crooked) | 22 000 | void cube, runestone, 3 masks | `swh_crookeddoor` |
+| **Magpie** | **Spire Village**, Magpie's Counting House (was: the Skyway Toll-House) | 12 000 **+ Bonded Lockbox** | buys sky salvage above broker | — |
+| **Halda**, Cellarer | **Spire Village**, the Cellar Tavern (was: the Grange Cellar) | 9 000 **+ The Mother** | the mod's 3 crafted materials | — |
+| **Ossian Vane** | **Spire Village**, the Little Archive (was: the Stormveil Test Range) | 18 000 **+ Storm Lens Core** | rotating incursion-exclusive loot (3 of 8) | — |
+| **Ives**, Verger of the Quiet Reach | **Spire Village**, the Vestry (was: Steinfeld) | 11 000 → **free** after his quest | the realm's four materials (buys), gravestones/candles/urn/stone fence + Pale Stone (sells) | `swh_steinfeldvigil` |
 | **Spire Cats** ×2 | Skyreach lairs | not recruitable | — | objective of `swh_cats` |
-| **Dorian**, the Nightbound | nowhere in the world — arrives when a coffin stands in the settlement | 11 000 | none | — |
+| **Dorian**, the Nightbound | nowhere in the world — arrives when a coffin stands in the settlement | 11 000 | Blood Bowl (3 200–4 800) | his own dialogue page: thirst, last night, feed a vial |
 
-**Arrivals.** Eveleen, Mortimer and Caspern also travel to the settlement the
-vanilla way once a condition is met (9+ Eden tiles / 3+ gravestones / an Aether
-Forge). Eleanor, Knott, Magpie, Halda, Ossian and Ives never travel — they must
-be found. Ives has no arrival gate because Steinfeld offers no settlement
-condition one could key off, the same call Eleanor and Knott make.
+**The Spire Village (2026-09-24, `docs/design/chapter-03-spire-village.md`).**
+All nine named residents live in houses of their own around the Warden's Spire,
+stamped once per world (`village/SpireVillage`, flag `villagePlaced`), with
+`home` on their seat so they stay there. VERIFIED [run] in
+`scripts/integration_test.sh`: `village stamp: placed=true blocked=none
+houses=12/12 objects=958/958 missing=0` and `village residents: residents=9
+seated=9 inhouse=9 nearhome=9 homed=9 duplicates=0`, and the second boot still
+`nearhome=9 homed=9 duplicates=0`. Because the village claims them, the
+`SkyArrivals` route no longer brings Eveleen, Mortimer or Caspern to a
+settlement on its own; they, Ives and Eleanor move in through their quest
+steps. Dorian is not a village resident and still arrives by coffin.
 
 **No generic settlers.** Every human this mod adds is a unique, named,
 one-per-world individual. There is no "a farmhand arrives" event of its own.
@@ -325,6 +331,17 @@ one-per-world individual. There is no "a farmhand arrives" event of its own.
 | `swh_mortimerrites` | **Mortimer** | 12× soul thread, 10× bonewood | his 8 000 fee waived, 6× spiritsteel bar |
 | `swh_caspernforge` | **Caspern** | 12× spectral ore, 8× veil essence | his 14 000 fee waived, 6× spiritsteel bar |
 | `swh_beacon` | **nobody** | — | — · **DEAD**: registered, never handed out; kept only so pre-0.5 saves deserialize |
+
+**The quest ladder (chapter 03).** Twelve more quests (`swh_ladder_*`,
+`quest/ladder/LadderQuests`) join the resident steps above in one ladder of 20
+steps in six chapters (`quest/ladder/QuestLadder`), each chapter opening when
+the one before is done; the Adventurer's Journal reads it through
+`QuestLadderSource`. `swh_edenreach` and `swh_crookedarrival` are now "enter the
+realm" steps (`RealmVisitQuest`) handed in to Eveleen and Knott — the second was
+dead before. VERIFIED [run]: `village ladder: steps=20 registered=20 builds=20
+offered=19 custom=1`. That the conversations hand out and take back each step
+in play is a HYPOTHESIS: no client has run them. Table in German in the
+chapter-03 dossier §4.
 
 ---
 

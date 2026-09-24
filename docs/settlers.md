@@ -23,6 +23,15 @@ take and seven more proposals in the same class.
 
 ## How to read "found" vs. "travels"
 
+> **Superseded 2026-09-24 (`docs/DESIGN_DECISIONS.md`, "Every named sky
+> resident lives in the Spire Village").** Every resident below now lives in a
+> house of their own around the Warden's Spire (`village/SpireVillage`,
+> `docs/design/chapter-03-spire-village.md`), not beside a realm landmark. The
+> village claims them when it is stamped, so the "travels to a settlement"
+> column below no longer applies to them; they move in through their quest
+> steps instead. Dorian is unchanged. The rest of this section is kept as the
+> record of the professions, fees and arrival gates.
+
 Every one of the five is placed **once per world**, deterministically, by
 worldgen — a persistent (`canDespawn = false`) mob standing beside a specific
 landmark, rolled from the level seed and the region coordinates so the same

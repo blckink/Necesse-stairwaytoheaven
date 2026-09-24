@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Every room plan built in code is still the plan the dossier draws.
 
-`docs/design/chapter-01-skyreach-pois.md` holds fourteen ASCII room plans, one
+`docs/design/chapter-01-skyreach-pois.md` holds fourteen ASCII room plans
+(chapter 02 and chapter 03 add their own; see PLANS_02 / PLANS_03), one
 character per tile. `RealmPoiPresets` carries them as `String[]` arrays and
 reads its own width and height off them, so a plan is not a comment beside the
 code -- it IS the code. That only holds while the two really match, and nothing
@@ -54,6 +55,25 @@ PLANS_02 = {
     "DOORS_PLAN": "## 6. The Hall of Many Doors",
 }
 
+# Chapter 03's twelve Spire Village plots live in their own Java file,
+# SpireVillagePlans, and are drawn in the chapter-03 dossier (German headings).
+DOSSIER_03 = REPO / "docs/design/chapter-03-spire-village.md"
+VILLAGE = REPO / "src/main/java/stairwaytoheaven/village/SpireVillagePlans.java"
+PLANS_03 = {
+    "MAGPIE_PLAN": "### 3.1 Das Kontor der Elster",
+    "HALDA_PLAN": "### 3.2 Die Kellerschänke",
+    "OSSIAN_PLAN": "### 3.3 Das kleine Archiv",
+    "EVELEEN_PLAN": "### 3.4 Das Gewächshaus",
+    "IVES_PLAN": "### 3.5 Die Küsterei",
+    "MORTIMER_PLAN": "### 3.6 Das Bestattungshaus",
+    "CASPERN_PLAN": "### 3.7 Die kalte Schmiede",
+    "KNOTT_PLAN": "### 3.8 Das Haus der vielen Türen",
+    "ELEANOR_PLAN": "### 3.9 Das Küchenhaus",
+    "MARKET_PLAN": "### 3.10 Der Marktplatz",
+    "RING_PLAN": "### 3.11 Der Übungsring",
+    "EDENBED_PLAN": "### 3.12 Das Edenbeet",
+}
+
 # The dossier draws each row as "  y12  ..#####..", the leading label being a
 # reading aid rather than part of the map.
 ROW = re.compile(r"^\s*y\d+\s+(\S+)\s*$")
@@ -76,16 +96,19 @@ def java_rows(text, name):
 
 def main():
     dossiers = {DOSSIER: DOSSIER.read_text(encoding="utf-8"),
-                DOSSIER_02: DOSSIER_02.read_text(encoding="utf-8")}
-    presets = PRESETS.read_text(encoding="utf-8")
+                DOSSIER_02: DOSSIER_02.read_text(encoding="utf-8"),
+                DOSSIER_03: DOSSIER_03.read_text(encoding="utf-8")}
+    sources = {PRESETS: PRESETS.read_text(encoding="utf-8"),
+               VILLAGE: VILLAGE.read_text(encoding="utf-8")}
     flags = 0
-    work = [(name, heading, DOSSIER) for name, heading in PLANS.items()]
-    work += [(name, heading, DOSSIER_02) for name, heading in PLANS_02.items()]
-    for name, heading, source in sorted(work):
+    work = [(name, heading, DOSSIER, PRESETS) for name, heading in PLANS.items()]
+    work += [(name, heading, DOSSIER_02, PRESETS) for name, heading in PLANS_02.items()]
+    work += [(name, heading, DOSSIER_03, VILLAGE) for name, heading in PLANS_03.items()]
+    for name, heading, source, java in sorted(work):
         dossier = dossiers[source]
         try:
             drawn = dossier_rows(dossier, heading)
-            built = java_rows(presets, name)
+            built = java_rows(sources[java], name)
         except LookupError as error:
             print("FLAG %s: %s" % (name, error))
             flags += 1

@@ -4588,3 +4588,41 @@ each fact is known:
   base without the change passed its one run. Read as seed flakes, not
   investigated further — the dewkeepershut one (a whole preset on empty
   ground) is worth a look by whoever owns the POI placement. HYPOTHESIS.
+
+## The Spire Village: keeping a named NPC at home (2026-09-24)
+
+- **`HumanMob.home` is the anchor a non-settler wanders around.** `HumanAI`'s
+  wander node takes `mob.home` as its base tile when the mob is not a settlement
+  settler: roughly ten tiles by day, and back inside by night. `home` is saved
+  and loaded by `HumanMob` itself, so setting it once at spawn is enough.
+  VERIFIED [jar] (decompiled 1.3.2 `HumanAI`/`HumanMob`), and VERIFIED [run] in
+  effect: `/swhvillage` after a full server restart read
+  `village residents: residents=9 seated=9 inhouse=6 nearhome=9 homed=9 duplicates=0`
+  — all nine within ten tiles of their seat after being left to tick. The
+  blackboard "baseOptions" trick other mobs use does NOT apply to a `HumanMob`:
+  `HumanAI` overrides `getBaseOptions`.
+- **`Preset.rotate(PresetRotation)` turns a plan with everything on it.**
+  CLOCKWISE moves a front drawn at the bottom to the LEFT, ANTI_CLOCKWISE to the
+  RIGHT, HALF_180 to the top; furniture rotation, wall-decor side and the far
+  half of a pair come along (`Preset.rotateData`,
+  `MultiTile.getPresetRotation`). VERIFIED [jar] for the mechanism and
+  VERIFIED [run] for the objects: every rotated village house counted back with
+  `missing=0` (`village stamp: ... objects=958/958 missing=0`). That a rotated
+  wall lantern or bed LOOKS right on a client is a HYPOTHESIS — no client ran.
+- **A mod can add its own settlement notification.**
+  `SettlementNotificationRegistry.registerNotification(id, class)` is public;
+  a notification is one `SettlementNotification` subclass, the icon is the
+  severity's, and `SettlementNotificationManager.submitNotification(id,
+  settlerMob, severity)` files it per settler and drops it by itself once
+  `isStillValid(SettlerMob)` returns false. VERIFIED [jar]; registration
+  VERIFIED [run] (the server boots with `swhbloodfever` registered). Seen on a
+  client: HYPOTHESIS.
+- **`RealmPoiPresets.plan` works on any `Preset`**, not only realm POIs, so the
+  village plans reuse its validation (windows mid-run, chairs facing a table,
+  table decorations only on holders, both halves of a pair).
+  `SpireVillage.validateAll()` builds all twelve at postInit: a bad plan stops
+  the server at start rather than stamping a broken house.
+- **The quest ladder's progress is its own `WorldData` (`swhladder`)**, keyed
+  `auth:stepID`, so `/swhreset regenerate`'s `copyProgressFrom` does not have
+  to carry it. `villagePlaced` is on `SkywatchQuestData` and is deliberately
+  NOT copied, so a regenerated hub gets a new village.

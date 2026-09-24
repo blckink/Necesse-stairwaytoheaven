@@ -144,6 +144,50 @@ not live in that level's data. **Only a cat that has been coaxed home with a
 Cloudpuff Treat ever moves**: a basket must never skip the quest step, or
 finding Siggi and Peanut stops being worth anything.
 
+**Every named sky resident lives in the Spire Village, and hands out the
+quest ladder one step at a time** (2026-09-24). The player: *"Ich denke wir
+müssen alle NPCs, die man auf Himmelsebene irgendwo finden kann, zentral um den
+Spire in Häusern wohnen lassen und Stück für Stück Quests von ihnen kriegen,
+für die man immer weiter in tiefe Gebiete ziehen muss, schön übersichtlich
+ergänzt in ein zentrales Abenteurer-Tagebuch."* Magpie, Halda, Ossian,
+Eveleen, Ives, Mortimer, Caspern, Eleanor and Mr. Knott each get a house of
+their own in a ring around the Warden's Spire (`village/SpireVillage`,
+plans in `docs/design/chapter-03-spire-village.md`), with `home` set to their
+seat so the vanilla wanderer keeps them there. Their quests are one ladder of 20
+steps in six chapters, one per realm, and a chapter opens only when the one
+before it is done (`quest/ladder/QuestLadder`); the Adventurer's Journal reads
+it (`QuestLadderSource`). *Why:* residents scattered across the realms were
+found late or never, walked off their landmarks (the recurring
+`ossiansettler is not standing in stormveiltestrange` failure), and their
+quests did not say "go deeper next".
+
+This **supersedes**:
+- the placement rule that each resident is *found in their own realm* —
+  Magpie in the Skyway Toll House, Halda in the Grange Cellar, Ossian on the
+  Test Range (`SkyLandmarkPois` no longer seats them), and Eveleen, Ives,
+  Mortimer, Caspern, Eleanor and Knott beside their realm POIs
+  (`SkyLevel.placeResident` / `placeRealmResidents` now return at once,
+  `RESIDENTS_LIVE_IN_VILLAGE`);
+- the resident rows of `docs/settlers.md` that name a realm location as where
+  they are met;
+- **for these eight**, the `SkyArrivals` route of travelling to a settlement on
+  their own: the village seats and claims them when the spire is first built,
+  and a claimed resident draws no recruit ticket. They still move into the
+  player's settlement through their own quest steps (Ives, Mortimer, Caspern,
+  Eleanor), and a resident who already lives in a settlement is never seated a
+  second time. Dorian is not a village resident and still travels
+  (`SkyArrivals.COFFIN`).
+
+What it does NOT change: the Surface stays the player's main world — the
+village is where the sky's NPCs live, not a base the player is asked to keep;
+and the one-level law holds, the village is a stamp on the existing hub.
+`villagePlaced` is deliberately NOT carried by `/swhreset regenerate`
+(`copyProgressFrom`): the village is terrain and is rebuilt with the hub. The
+ladder's per-player progress lives in its own `WorldData`
+(`LadderWorldData`); its `resetProgress` belongs on the same admin-only
+`/swhreset quests confirm` path as the exception above and is called from
+nowhere in play.
+
 ## Scope
 
 **The Veil exists but is not the current priority.** Do not expand it; do not
