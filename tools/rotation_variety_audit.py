@@ -20,9 +20,10 @@ What this audit checks, per family, is only what the repository has an actual
 engine read for (`docs/research/structures-furniture.md`,
 `docs/research/furniture-formats.md`, `docs/TECHNICAL_LEARNINGS.md`):
 
-  PaintingObject      32x128, four 32x32 ROWS, row = rotation, and the rotation
-                      names where the wall is (0 below, 1 left, 2 above,
-                      3 right). Four walls, four views.
+  PaintingObject      32x128, four 32x32 ROWS; the rotation names where the
+                      wall is (0 below, 1 left, 2 above, 3 right) and reads
+                      row 2, 3, 0, 1 respectively -- NOT row = rotation (see
+                      tools/draw_rect_audit.py). Four walls, four views.
   WallTorchObject     64x128, `sprite(active?0:1, sprite, 32)`: two state
                       columns x four attach orientations. The four orientations
                       must differ, and lit must differ from unlit.

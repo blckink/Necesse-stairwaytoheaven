@@ -516,9 +516,9 @@ def gen_set_icons(dir_path):
     # 379 px against vanilla silk's 492 (0.77), where the derived crop lands
     # near 230.
     gen_flickerlightgarland_icon(f"{dir_path}/flickerlightgarland.png")
-    # The banner's FACE-ON view is row 2 (wall above), not row 0 -- row 0 is
-    # the foreshortened over-the-cap view and reads as a smear in an icon.
-    mini_from(f"{obj}/skywatchbanner.png", (0, 64, 32, 96), "skywatchbanner.png")
+    # The banner's FACE-ON view is row 0 (PaintingObject reads it for a wall
+    # above); row 2 is the foreshortened back and reads as a smear in an icon.
+    mini_from(f"{obj}/skywatchbanner.png", (0, 0, 32, 32), "skywatchbanner.png")
     mini_from(f"{base}/objects/statues/gloomraven.png", (8, 34, 56, 92), "gloomravenstatue.png")
     # walls: crop a front-face piece; doors: rotation-0 closed leaf
     mini_from(f"{obj}/skystonebrickwall.png", (0, 64, 32, 96), "skystonebrickwall.png")
@@ -1113,20 +1113,29 @@ def gen_gloomraven_statue(path):
 def gen_banner_painting(path):
     """32x128 PaintingObject sheet: FOUR DIFFERENT rotation rows of 32x32.
 
-    ``PaintingObject`` reads the row straight off the object's rotation, and
-    for wall decor the rotation names WHERE THE WALL IS, not where the piece
-    faces (``PaintingObject.attachesToObject``; the same convention
-    ``WardenSpirePreset.WALL_BELOW/LEFT/ABOVE/RIGHT`` places banners with):
+    For wall decor the rotation names WHERE THE WALL IS
+    (``PaintingObject.attachesToObject``; the convention
+    ``WardenSpirePreset.WALL_BELOW/LEFT/ABOVE/RIGHT`` places banners with), but
+    the ROW is NOT the rotation. Read off the decompiled
+    ``PaintingObject.addLayerDrawables`` (1.3.2):
 
-        row 0  wall BELOW   drawn at +8px   -> seen from behind, over the cap
-        row 1  wall LEFT    no offset       -> edge-on slab against the left
-        row 2  wall ABOVE   drawn at -32px  -> the face-on view, on the wall
-        row 3  wall RIGHT   no offset       -> edge-on slab against the right
+        rot 0  wall BELOW   sprite(0, 2)  drawY + 8   -> row 2: the back, over the cap
+        rot 1  wall LEFT    sprite(0, 3)  drawY - 16  -> row 3: edge-on, hugs the LEFT
+        rot 2  wall ABOVE   sprite(0, 0)  drawY - 32  -> row 0: the face-on view
+        rot 3  wall RIGHT   sprite(0, 1)  drawY - 16  -> row 1: edge-on, hugs the RIGHT
 
-    The engine supplies the vertical nudge, so the art must NOT bake it in: the
-    +8px on row 0 is why its cell is drawn in rows 0..23 and not at the bottom,
-    and the -32px on row 2 is why the face-on view may use the whole cell -- it
-    lands on the wall tile above.
+    That is the layout every vanilla-format painting in the repo already has
+    (eyepainting, shrunkenheadtrophy, salonmirror: face in row 0, plain back in
+    row 2, side slivers on the right in row 1 and the left in row 3).
+
+    The banner shipped with rows = rotations: its foreshortened over-the-cap
+    view in row 0 and the face-on banner in row 2, side rows swapped. On every
+    ordinary north wall (rot 2) the game therefore showed the squashed stub
+    with its tails clipped, and the full banner only appeared on a wall BELOW,
+    at +8px, with its swallowtail sunk into that wall -- "Banner war immer
+    abgeschnitten". `tools/draw_rect_audit.py` now fails a PaintingObject
+    whose row 0 is lighter than its row 2, or whose side rows hang off the
+    wrong edge.
 
     This shipped with one cell pasted into all four rows, which is exactly
     "laesst sich nicht ausrichten": every wall showed the same picture and
@@ -1255,10 +1264,10 @@ def gen_banner_painting(path):
         return c
 
     sheet = Canvas(32, 128)
-    sheet.paste(over_the_cap(), 0, 0)              # rot 0, wall below
-    sheet.paste(edge_on_left(), 0, 32)             # rot 1, wall left
-    sheet.paste(face_on(), 0, 64)                  # rot 2, wall above
-    sheet.paste(edge_on_left().mirrored(), 0, 96)  # rot 3, wall right
+    sheet.paste(face_on(), 0, 0)                   # row 0 <- rot 2, wall above
+    sheet.paste(edge_on_left().mirrored(), 0, 32)  # row 1 <- rot 3, wall right
+    sheet.paste(over_the_cap(), 0, 64)             # row 2 <- rot 0, wall below (+8)
+    sheet.paste(edge_on_left(), 0, 96)             # row 3 <- rot 1, wall left
     sheet.save(path)
 
 
@@ -1454,3 +1463,52 @@ def gen_marblechecker(path):
         for i in range(rng.range(2, 5)):
             c.put(x + i, y + i // 2, vein)
     c.save(path)
+
+
+def gen_unlit_from_lit(src, dst, is_flame):
+    """Derive a LampObject ``<id>_off.png`` from a supplied lit sheet.
+
+    ``LampObject.loadTextures`` (decompiled 1.3.2) loads BOTH
+    ``objects/<id>`` and ``objects/<id>_off`` with ``GameTexture.fromFile``,
+    whose not-found fallback is ``GameResources.error``. A candelabra shipped
+    without ``_off`` therefore renders the ERR texture the moment a player
+    switches it off. ``skullcandelabra`` (Twilight Merchant, supplied art) was
+    exactly that. The supplied lit sheet stays the source of record; this only
+    snuffs it: flame pixels go, contour pixels left hanging in the air where a
+    flame was go with them, and a one-pixel charred wick stays on each candle.
+    """
+    from PIL import Image
+    im = Image.open(src).convert("RGBA")
+    px = im.load()
+    W, H = im.size
+    flame = {(x, y) for y in range(H) for x in range(W)
+             if px[x, y][3] and is_flame(px[x, y])}
+    for p in flame:
+        px[p] = (0, 0, 0, 0)
+
+    def dark(c):
+        return c[3] and max(c[:3]) < 24
+
+    def body(x, y):
+        return 0 <= x < W and 0 <= y < H and px[x, y][3] and not dark(px[x, y])
+
+    # contour that only framed the flame: dark, and no body pixel beside it
+    stray = [(x, y) for y in range(H) for x in range(W) if dark(px[x, y])
+             and not any(body(x + dx, y + dy) for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+             and any((x + dx, y + dy) in flame for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))]
+    for p in stray:
+        px[p] = (0, 0, 0, 0)
+    # wick: the lowest flame pixel of each flame column sitting on the candle,
+    # centre column of each run only, so it reads as a wick and not a lid
+    bases = sorted((x, y) for (x, y) in flame if body(x, y + 1))
+    runs, cur = [], []
+    for x, y in bases:
+        if cur and (x != cur[-1][0] + 1 or y != cur[-1][1]):
+            runs.append(cur)
+            cur = []
+        cur.append((x, y))
+    if cur:
+        runs.append(cur)
+    for run in runs:
+        px[run[len(run) // 2]] = (46, 38, 34, 255)
+    im.save(dst)

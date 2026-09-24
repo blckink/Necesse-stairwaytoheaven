@@ -179,6 +179,7 @@ python3 tools/size_audit.py           # sprite mass vs vanilla; must print 0 fla
 python3 tools/locale_audit.py         # every registered ID named in both locales
 python3 tools/sheet_format_audit.py   # sheets the engine reads at fixed offsets
 python3 tools/rotation_variety_audit.py # a cell the engine reads apart holds its own art
+python3 tools/draw_rect_audit.py      # every opaque pixel inside a rect the engine draws; no cuts
 python3 tools/template_audit.py       # sprite templates match the cards that spec them
 python3 tools/content_ledger.py --check # nothing registered ships undescribed
 python3 tools/area_census.py          # per-realm density/cast/quest census; reading tool, not a gate

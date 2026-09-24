@@ -372,6 +372,12 @@ def main():
     # stays as the record of the generated one. Its ITEM icon is still
     # derived from the world sheet by mini_from, so it follows the new art.
     gen_furniture.gen_banner_painting(f"{out}/objects/skywatchbanner.png")
+    # The Twilight Merchant's skull candelabra is supplied art with no unlit
+    # sheet; LampObject falls back to the ERR texture without one. Derived
+    # from the supplied lit sheet, which is never written here.
+    gen_furniture.gen_unlit_from_lit(
+        f"{out}/objects/skullcandelabra.png", f"{out}/objects/skullcandelabra_off.png",
+        lambda c: c[1] > c[0] * 1.2 and c[1] > c[2] * 1.3)
     gen_furniture.gen_beacon(f"{out}/objects/wardenbeaconoff.png", False)
     gen_furniture.gen_beacon(f"{out}/objects/wardenbeaconon.png", True)
     gen_furniture.gen_skyanchor(f"{out}/objects/skyanchor.png")

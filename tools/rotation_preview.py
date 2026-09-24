@@ -9,10 +9,17 @@ For every piece whose renderer reads more than one cell, this lays the cells out
 side by side over a 32px tile grid, with the engine's own vertical offset
 applied where the repository has recorded one:
 
-  PaintingObject      rot 0 at drawY+8, rot 2 at drawY-32, rot 1/3 at drawY
-                      (docs/research/structures-furniture.md 3.7). A wall block
-                      is drawn on the side the rotation names, so "is the banner
-                      ON the wall" is visible rather than inferred.
+  PaintingObject      rot 0 (wall below) reads ROW 2 at drawY+8, rot 1 (wall
+                      left) row 3 at drawY-16, rot 2 (wall above) row 0 at
+                      drawY-32, rot 3 (wall right) row 1 at drawY-16 --
+                      decompiled PaintingObject.addLayerDrawables. The row is
+                      NOT the rotation; this tool once assumed it was and so
+                      showed the Skywatch Banner "correct" while the game drew
+                      the wrong view on every wall. A wall block is drawn on
+                      the side the rotation names.
+  LargePaintingObject both halves composited (see tools/draw_rect_audit.py).
+  WallTorchObject     sprite(state, s): s 0 wall above at drawY-32, 1 wall
+                      right at -16, 2 wall below at 0, 3 wall left at -16.
   FenceGateObject     col 2 drawn TWICE at drawY-14 and drawY+14, col 3 at
                       drawY+14 (rotation 3 only), col 4 at drawY-14, col 5 at
                       (drawX-16, drawY+14) (docs/TECHNICAL_LEARNINGS.md).
@@ -90,7 +97,8 @@ def cell_strip(title, cells, note=""):
 
 
 def painting_strip(rel):
-    """PaintingObject: row = rotation = where the wall is; engine offsets +8/-32.
+    """PaintingObject: the rotation names where the wall is; the ROW it reads is
+    not the rotation (rot 0 -> row 2, 1 -> 3, 2 -> 0, 3 -> 1).
 
     The object's own tile is the CENTRE of a 3x3 stage and the wall block goes
     on the neighbour the rotation names, so the two things a reader has to
@@ -102,10 +110,10 @@ def painting_strip(rel):
         return None
     # (row, label, dy, wall rectangle around the 32..63 centre tile)
     plan = [
-        (0, "rot0  wall below  +8", 8, (32, 64, 63, 95)),
-        (1, "rot1  wall left", 0, (0, 32, 31, 63)),
-        (2, "rot2  wall above  -32", -32, (32, 0, 63, 31)),
-        (3, "rot3  wall right", 0, (64, 32, 95, 63)),
+        (2, "rot0  wall below  row2 +8", 8, (32, 64, 63, 95)),
+        (3, "rot1  wall left  row3 -16", -16, (0, 32, 31, 63)),
+        (0, "rot2  wall above  row0 -32", -32, (32, 0, 63, 31)),
+        (1, "rot3  wall right  row1 -16", -16, (64, 32, 95, 63)),
     ]
     cells = []
     for row, label, dy, wall in plan:
@@ -120,15 +128,63 @@ def wall_light_strip(rel):
     im = sheet(rel)
     if im is None or im.size != (64, 128):
         return None
-    names = ("wall above", "wall right", "support below", "wall left")
+    # getSprite index -> (label, dy, wall rectangle around the centre tile)
+    plan = {0: ("wall above -32", -32, (32, 0, 63, 31)),
+            1: ("wall right -16", -16, (64, 32, 95, 63)),
+            2: ("wall below +0", 0, (32, 64, 63, 95)),
+            3: ("wall left -16", -16, (0, 32, 31, 63))}
     cells = []
     for col, state in ((0, "lit"), (1, "unlit")):
         for row in range(4):
+            label, dy, wall = plan[row]
             cell = im.crop((col * 32, row * 32, col * 32 + 32, row * 32 + 32))
-            cells.append(("%s / %s" % (state, names[row]), cell, 32, 32, 3, 3, None))
+            cells.append(("%s / %s" % (state, label), cell, 32, 32 + dy, 3, 3, wall))
     return cell_strip("%s  -- WallTorchObject, sprite(state, orientation)" % rel,
-                      cells, "no draw offset recorded for this class: cells shown "
-                             "at drawY, do not read placement off this strip")
+                      cells, "grey block = the wall that orientation attaches to")
+
+
+def large_painting_strip(rel):
+    """LargePaintingObject + its <id>2 half, composited at the engine's reads.
+
+    The object's own tile is at (32, 64) of a 4x5 stage; the <id>2 half sits
+    on the neighbour its SidedRotationMultiTile names, and the grey block is
+    the wall run both halves attach to.
+    """
+    im = sheet(rel)
+    if im is None or im.size != (64, 256):
+        return None
+    tx, ty = 32, 64
+    # (label, [(sheet box, tile dx, tile dy, engine dy)], wall rectangle)
+    plan = [("rot0 wall below", [((0, 128, 32, 192), 0, 0, -16), ((32, 128, 64, 192), 1, 0, -16)],
+             (32, 96, 95, 127)),
+            ("rot1 wall left", [((0, 192, 32, 224), 0, 0, -16), ((0, 224, 32, 256), 0, 1, -16)],
+             (0, 64, 31, 127)),
+            ("rot2 wall above", [((32, 0, 64, 64), 0, 0, -64), ((0, 0, 32, 64), -1, 0, -64)],
+             (0, 32, 63, 63)),
+            ("rot3 wall right", [((32, 96, 64, 128), 0, 0, -16), ((32, 64, 64, 96), 0, -1, -16)],
+             (64, 32, 95, 95))]
+    cells = []
+    for label, reads, wall in plan:
+        st = stage(4, 5)
+        ImageDraw.Draw(st).rectangle(wall, fill=WALLBLOCK)
+        for box, dtx, dty, dy in reads:
+            st.alpha_composite(im.crop(box), (tx + dtx * 32, ty + dty * 32 + dy))
+        cells.append((label, st, 0, 0, 4, 5, None))
+    return cell_strip("%s  -- LargePaintingObject, both halves" % rel, cells)
+
+
+def lamp_strip(rel):
+    """LampObject/CandelabraObject: lit sheet and its _off sheet, four columns."""
+    lit, off = sheet(rel), sheet(rel[:-4] + "_off.png")
+    if lit is None or off is None:
+        return None
+    h = lit.height
+    cells = []
+    for name, im in (("lit", lit), ("off", off)):
+        for c in range(4):
+            cells.append(("%s %s" % (name, DIRS[c].split()[0] + DIRS[c].split()[1]),
+                          im.crop((c * 32, 0, c * 32 + 32, h)), 32, 96 - h + 32 - 32, 3, 3, None))
+    return cell_strip("%s  -- LampObject lit / _off" % rel, cells)
 
 
 def streetlamp_strip(rel):
@@ -238,7 +294,13 @@ def main():
             # frame, so it answers "does it hang ON the wall"; the shop sign is
             # a WallTorchObject like the lanterns above it.
             ("salonmirror", painting_strip("objects/paintings/salonmirror.png")),
-            ("salonsign", wall_light_strip("objects/salonsign.png"))]
+            ("salonsign", wall_light_strip("objects/salonsign.png")),
+            ("eyepainting", painting_strip("objects/paintings/eyepainting.png")),
+            ("walleye", large_painting_strip("objects/paintings/walleye.png")),
+            ("hauntedwallclock", large_painting_strip("objects/paintings/hauntedwallclock.png")),
+            ("magicmirror", large_painting_strip("objects/paintings/magicmirror.png")),
+            ("skywatchcandelabra", lamp_strip("objects/skywatchcandelabra.png")),
+            ("skullcandelabra", lamp_strip("objects/skullcandelabra.png"))]
     for rel, anchor in sorted(ROTATION_ANCHORS.items()):
         jobs.append((os.path.basename(rel)[:-4], rotation_strip(rel, anchor)))
 

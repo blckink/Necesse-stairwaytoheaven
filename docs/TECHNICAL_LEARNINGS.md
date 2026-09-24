@@ -2312,15 +2312,20 @@ piece faces (`PaintingObject.attachesToObject`; the same convention
 `WardenSpirePreset.WALL_BELOW/LEFT/ABOVE/RIGHT` already places banners with),
 and the engine supplies the vertical nudge itself:
 
-| row | rotation | wall | engine offset | what the camera sees |
+> **CORRECTED 2026-09-24 — the table that stood here was wrong.** It assumed
+> row = rotation and no side offset. The decompiled
+> `PaintingObject.addLayerDrawables` reads a different row per rotation; see
+> "The banner was cut off on every wall" below. Correct table:
+
+| rotation | wall | row read | engine offset | what the camera sees |
 |---|---|---|---|---|
-| 0 | 0 | below | `+8px` | the far side of that wall — rod and cloth foreshortened over its cap |
-| 1 | 1 | left | none | edge-on slab against the tile's left edge |
-| 2 | 2 | above | `-32px` | the face-on view, landing on the wall tile |
-| 3 | 3 | right | none | mirror of row 1, against the right edge |
+| 0 | below | **2** | `+8px` | the far side of that wall — the back, over its cap |
+| 1 | left | **3** | `-16px` | edge-on slab against the tile's LEFT edge |
+| 2 | above | **0** | `-32px` | the face-on view, landing on the wall tile |
+| 3 | right | **1** | `-16px` | edge-on slab against the RIGHT edge |
 
 That `-32px` is why the face-on cell may use its whole 32px height, and the
-`+8px` is why row 0's art has to stay inside cell rows 0..23 — drawing it low
+`+8px` is why the back row's (row 2's) art has to stay inside cell rows 0..23 — drawing it low
 *and* letting the engine push it down puts it a third of a tile into the wall.
 The same trap as the door cells, one class over.
 
@@ -2359,7 +2364,7 @@ decor section above both say `1` = wall **left**, `3` = wall right, and the
 preset cites `PaintingObject.attachesToObject`. The banner's side rows are drawn
 to the preset's convention because it names the method it came from. If a
 screenshot ever shows the edge-on banner hugging the wrong edge, that is this
-line, and swapping the two `paste` calls in `gen_banner_painting` is the fix.
+line, and swapping the two `paste` calls in `gen_banner_painting` is the fix. **Resolved 2026-09-24 [jar]:** the class reads row 1 for the wall on the RIGHT and row 3 for the wall on the LEFT; see the banner section below.
 
 ## The side-wall window is a slot in the roof, and three sets never got the fix (v0.9)
 
@@ -4282,3 +4287,57 @@ seen in two runs today and not reproduced since; settlers may wander out of
 the footprint the census counts. HYPOTHESIS, not fixed. Nor explained: the one
 `tileMismatches=28` painter-oracle failure that pass reported.
 
+
+
+## The banner was cut off on every wall: PaintingObject's row is not its rotation (2026-09-24)
+
+**[game]** Player: *"prüf nochmal alle Möbel auf Ausrichtung, Größe etc..
+Banner war vorhin immer abgeschnitten."*
+
+**[jar]** Decompiled 1.3.2 `PaintingObject.addLayerDrawables` (and
+`drawPreview`, identical):
+
+```java
+rotation 0 (wall below): sprite(0, 2, 32, 32) at drawY + 8
+rotation 1 (wall left):  sprite(0, 3, 32, 32) at drawY - 16
+rotation 2 (wall above): sprite(0, 0, 32, 32) at drawY - 32
+rotation 3 (wall right): sprite(0, 1, 32, 32) at drawY - 16
+```
+
+The v0.9 fix for the duplicated banner cells drew four different views but
+put them at row = rotation, from a table in this file that nobody had checked
+against the class. So on every ordinary north wall (rot 2) the game drew row 0
+-- the foreshortened over-the-cap stub, cloth squashed to 14 rows and tails
+clipped -- and the whole banner only appeared on a wall BELOW, at `+8`, with
+its bottom 8 rows (the swallowtail) sunk into that wall. Both placements read
+as "abgeschnitten". The side rows were swapped as well: the slab hugged the
+edge away from its wall. `rotation_preview.py` shared the wrong assumption, so
+its contact sheet looked right. Every other PaintingObject sheet in the repo
+(eyepainting, shrunkenheadtrophy, salonmirror) already had the vanilla layout
+-- face row 0, back row 2, right-hugging sliver row 1, left row 3 -- which is
+the cheap cross-check that should have caught it.
+
+**[jar]** Reads of the other wall/multi-tile classes, same source:
+`LargePaintingObject` (+`LargePaintingObject2`) rot 0 reads y128..191 (both
+columns) at -16, rot 1 col 0 y192..255 at -16, rot 2 y0..63 at -64 with the
+halves swapped, rot 3 col 1 y64..127 at -16. `WallTorchObject.getSprite` 0 =
+wall above at drawY-32, 1 = wall right at -16, 2 = wall below at 0, 3 = wall
+left at -16. `Bed/DinnerTable(2)Object` rot 0 col 3 y32..127, rot 1 x0..63
+y64..127, rot 2 col 2 y32..127, rot 3 x0..63 y0..63; `Bench(2)Object` swaps
+cols 2 and 3. `LampObject.loadTextures` loads `<id>_off` through
+`GameTexture.fromFile`, whose not-found fallback is `GameResources.error` --
+the furniture brief claimed candelabras load no `_off`; that was wrong, and
+`skullcandelabra` shipped without one (ERR texture when switched off).
+
+**[run]** `tools/draw_rect_audit.py` encodes those reads per class for 45 mod
+sheets and fails on: opaque pixels no read covers, a rotation/state whose reads
+are empty, art continuing across a read edge (a cut; two views that each end
+in their own dark contour and merely touch are exempt), a PaintingObject whose
+row 0 is lighter than row 2, and wall pieces whose left/right views hang off
+the wrong edge. Against the pre-fix tree it reported the banner (views swapped,
+sides swapped), the missing `skullcandelabra_off`, and 12 px of salonmirror's
+pendant tips spilling into the next row (cut from the face-on view and floating
+at the top of the side view). All fixed; the tool is green.
+
+**[unverified]** Not seen in game after the fix. Vanilla sprites are absent on
+this machine, so size/proportion against vanilla wall pieces is unmeasured.
