@@ -778,7 +778,7 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
                 found = this.isTileWithinBounds(tileX, tileY)
                         && !this.isSolidTile(tileX, tileY)
                         && !this.getTile(tileX, tileY).isLiquid
-                        && this.getObjectID(tileX, tileY) == 0;
+                        && standsFree(tileX, tileY);
             }
             if (!found) {
                 continue;
@@ -801,6 +801,25 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
             mob.canDespawn = false;
             this.entityManager.addMob(mob, tileX * 32 + 16, tileY * 32 + 16);
         }
+    }
+
+    /**
+     * Ground a placed guard may stand on: nothing there, or only a grass
+     * carpet. Requiring a bare tile left a wreck in a blooming meadow with no
+     * guards at all -- seed 1486110797, site -174,13: every one of each
+     * member's eight attempts landed on tallcloudgrass or a flower, and the
+     * integration census read {@code atSite=0}. A mob walks through grass
+     * anyway ({@code GameObject.isGrass}, never solid), so standing on it is
+     * what the pack would be doing a second later.
+     */
+    private boolean standsFree(int tileX, int tileY) {
+        int objectID = this.getObjectID(tileX, tileY);
+        if (objectID == 0) {
+            return true;
+        }
+        necesse.level.gameObject.GameObject object =
+                necesse.engine.registries.ObjectRegistry.getObject(objectID);
+        return object != null && object.isGrass && !object.isSolid;
     }
 
     /**
