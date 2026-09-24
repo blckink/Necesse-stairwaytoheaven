@@ -498,6 +498,7 @@ hunts by night, drinks instead of eating.
 | `charredgallows` | object | Charred Gallows — Hell's dead-tree prop, axe to clear. Not obtainable. |
 | `brimstonecrag` | object | Brimstone Crag — Hell's rock prop, pickaxe, 80 HP. Not obtainable. |
 | `skywatchbed` | object | Skywatch Bed — the Skywatch furniture set's bed on vanilla's `BedObject`, so a settler can be assigned to it. Workstation: 6 Skystone + 8 Windsilk. |
+
 ## The two weapons past the Stormsteel band (2026-09-24)
 
 Both are vanilla weapons adapted white-and-gold, both enchant 2000 / EPIC — one

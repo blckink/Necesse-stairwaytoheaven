@@ -4211,6 +4211,7 @@ what proves it.
   `wallcandle`, `walltorch`, `walllantern` and `wallarcaniclamp`, all
   `WallTorchObject`s whose rotation is where the WALL is — the same convention
   as `mistglasslantern` (VERIFIED [jar], `WallTorchObject.canPlace`).
+
 ## Re-inking a vanilla sprite at load time without touching vanilla's copy (2026-09-24)
 
 **VERIFIED [jar]** (read out of the decompiled 1.3.2 classes, not run on a
@@ -4249,3 +4250,32 @@ server install has no sprites; `tools/recolour_preview.py` runs the identical
 ramp over the mod's own Skyreave/Prismcaller as a proxy (cyan blades → cream,
 brown haft → gold, outlines → bronze; looked at in `build/qa/`), and takes
 `--vanilla <dump>` once a client dump exists.
+
+## `scripts/integration_test.sh` goes red when ANY new item becomes craftable (2026-09-24)
+
+**VERIFIED [run], mechanism unknown.** Measured while adding the Himmelslanze
+recipe. Every run is a fresh random world seed; the results split cleanly on
+one variable — whether a mod recipe produces an item that had no recipe before:
+
+| build | runs | result |
+|---|---|---|
+| `bdba2dc` (base) | 4 | 4x `PASS: mod loads, Skyreach generates, world survives a restart, no errors.` |
+| `20c1512` (main) | 1 | PASS |
+| base + both new items, NO recipe | 2 | PASS (skylance registered without recipe; cloudglaive only) |
+| main + a 2nd recipe for the already-craftable `skyreave` | 1 | only the expected `arsenal check: recipes=5` FAIL |
+| base/main + skylance recipe (full or `{{aetheriumbar, 6}}`) | 7 | FAIL every time |
+| main + my commit, recipe retargeted to `cloudglaive` | 1 | FAIL |
+| **untouched main + one recipe for `stormlenscore`** (no mod change otherwise) | 1 | FAIL |
+
+The FAIL lines move around between runs and are all "the world is not what the
+census expected": `haldasettler`/`ossiansettler is not standing in <poi>`,
+`<kind> is missing N objects its preset placed` (windows 1730/1735 on tile 119,
+walls 1653 on tile 108, shrine pieces 1645/1646 on tile 22), `skytower stands
+nowhere in the world`, `the generated world does not match
+SkyTerrainPainter.describeTile (tileMismatches=28)`. None of these touch
+recipes. **HYPOTHESIS:** something that runs per tick scales with the set of
+craftable items (settler crafting/job AI is the obvious suspect — both missing
+settlers have the `crafting` job) and changes timing or behaviour before the
+census runs. Whoever owns the census/settlers should find it: as it stands, the
+next agent to add any recipe will see this gate fail for a reason that is not
+in their diff.
