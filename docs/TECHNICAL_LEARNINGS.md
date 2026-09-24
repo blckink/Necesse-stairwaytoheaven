@@ -4251,31 +4251,34 @@ ramp over the mod's own Skyreave/Prismcaller as a proxy (cyan blades → cream,
 brown haft → gold, outlines → bronze; looked at in `build/qa/`), and takes
 `--vanilla <dump>` once a client dump exists.
 
-## `scripts/integration_test.sh` goes red when ANY new item becomes craftable (2026-09-24)
+## The integration gate's "red on any new recipe" was seed flakes (2026-09-24)
 
-**VERIFIED [run], mechanism unknown.** Measured while adding the Himmelslanze
-recipe. Every run is a fresh random world seed; the results split cleanly on
-one variable — whether a mod recipe produces an item that had no recipe before:
+**Retracted the same day.** The Himmelslanze pass measured 9/9 red runs with a
+new recipe against 4/4 green without and concluded that any newly craftable
+item turns `scripts/integration_test.sh` red. It does not. On the merged branch
+with the recipe in place, three consecutive runs read **PASS, PASS, FAIL**
+(VERIFIED [run]), and the one FAIL was a preset defect with nothing to do with
+recipes.
 
-| build | runs | result |
+Every FAIL line that pass listed turned out to be a seed-dependent world
+defect, each fixed on its own today:
+
+| FAIL line | real cause | fix |
 |---|---|---|
-| `bdba2dc` (base) | 4 | 4x `PASS: mod loads, Skyreach generates, world survives a restart, no errors.` |
-| `20c1512` (main) | 1 | PASS |
-| base + both new items, NO recipe | 2 | PASS (skylance registered without recipe; cloudglaive only) |
-| main + a 2nd recipe for the already-craftable `skyreave` | 1 | only the expected `arsenal check: recipes=5` FAIL |
-| base/main + skylance recipe (full or `{{aetheriumbar, 6}}`) | 7 | FAIL every time |
-| main + my commit, recipe retargeted to `cloudglaive` | 1 | FAIL |
-| **untouched main + one recipe for `stormlenscore`** (no mod change otherwise) | 1 | FAIL |
+| `skytower stands nowhere in the world` | nine-sample site test on a 49x55 box | cross test like the town (`d6e90ff`) |
+| `prototypenine is not standing in stormveiltestrange` | vanilla wanderer AI walked it out | `baseOptions` on the blackboard (`8bbf069`) |
+| `waysideshrine is missing 2 objects` (1645/1646 on tile 22) | flowers on paving delete themselves | turf under them (furnishing pass) |
+| `sovereignsanvil is missing 31 objects` | `skyscree` (GrassObject) in the rim scatter, arena on paving | `stormscreed` instead (`0839445`) |
+| `a guarded site has no guards` | pack members needed a bare tile in a meadow | may stand on grass (`79d4077`) |
 
-The FAIL lines move around between runs and are all "the world is not what the
-census expected": `haldasettler`/`ossiansettler is not standing in <poi>`,
-`<kind> is missing N objects its preset placed` (windows 1730/1735 on tile 119,
-walls 1653 on tile 108, shrine pieces 1645/1646 on tile 22), `skytower stands
-nowhere in the world`, `the generated world does not match
-SkyTerrainPainter.describeTile (tileMismatches=28)`. None of these touch
-recipes. **HYPOTHESIS:** something that runs per tick scales with the set of
-craftable items (settler crafting/job AI is the obvious suspect — both missing
-settlers have the `crafting` job) and changes timing or behaviour before the
-census runs. Whoever owns the census/settlers should find it: as it stands, the
-next agent to add any recipe will see this gate fail for a reason that is not
-in their diff.
+The method error is the lesson: the gate draws a **fresh random seed every
+run**, so a handful of runs per build compares seeds, not builds. A 4/4 green
+base is compatible with a 20% per-seed flake rate. Before concluding a change
+turns the gate red, look at WHAT failed and whether it could depend on the
+seed.
+
+**Still open:** `haldasettler` / `ossiansettler is not standing in <poi>` was
+seen in two runs today and not reproduced since; settlers may wander out of
+the footprint the census counts. HYPOTHESIS, not fixed. Nor explained: the one
+`tileMismatches=28` painter-oracle failure that pass reported.
+
