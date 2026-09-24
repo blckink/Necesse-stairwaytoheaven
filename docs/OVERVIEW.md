@@ -433,6 +433,15 @@ when the WORLD placed them, and into themselves only when a player did.
 `docs/ITEM_CATEGORIES.md`. VERIFIED [run] on the server; FIXED — awaiting
 player confirmation in the client.
 
+### Admin: testing a save again (`/swhreset`, `docs/SAVE_COMPAT.md`)
+
+| mode | state |
+|---|---|
+| `/swhreset` (status) | works — VERIFIED [run] |
+| `/swhreset world` (retrofit mobs + portals into existing ground) | works — VERIFIED [run] |
+| `/swhreset quests confirm` / `all confirm` | works — VERIFIED [run]. Without `confirm` it really is a dry run since 2026-09-24; before that the omitted word arrived as its default "confirm" and the bare form reset the chain (VERIFIED [run] on the old jar) |
+| `/swhreset regenerate confirm` (2026-09-24) | deletes the whole sky level `skyreach2` (backup first) and generates it anew with the current build, spire and landmarks included, quest progress kept — VERIFIED [run] by `scripts/regenerate_check.sh`. The evacuation of a player standing in the sky and a single-player run are HYPOTHESIS (no client in the gate) |
+
 **Silver Bell** is retired (2026-09-24): its door, the Veil Rift, went with
 PLAN_ONE_PLANE. Nothing gives, sells or drops it; it stays registered only so
 bells already in a save still load, with a keepsake tooltip.
@@ -594,6 +603,7 @@ python3 tools/tile_behaviour_audit.py --vanilla vanilla-sprites
                                        42 tiles, 1619 splat cells in the vanilla bands
 python3 tools/asset_generator/generate_assets.py             exit 0, no diff
 scripts/integration_test.sh                                  exit 0, 0 FAIL
+scripts/regenerate_check.sh                                  exit 0 (2026-09-24)
 ```
 
 `--vanilla vanilla-sprites` is mandatory on both audits that take it. Without

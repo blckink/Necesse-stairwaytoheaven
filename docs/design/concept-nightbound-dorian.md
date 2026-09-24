@@ -111,6 +111,11 @@ Ein neues Möbelstück, die „Blutschale“, aus der er selbst trinkt:
 
 # Frage 1: Erkundete Mod-Gebiete bei Updates neu erzeugen
 
+> **Stand 2026-09-24: umgesetzt als Weg A, aber im Spiel statt als Skript** —
+> `/swhreset regenerate confirm` (ohne Neustart; siehe `docs/SAVE_COMPAT.md`,
+> Abschnitt „regenerate“, und `docs/MOD_SUMMARY.md` §8). Weg B (Basen im
+> Himmel schützen) ist nicht gebaut.
+
 **Kurz: Ja, das ist möglich.** Bisher ist es bewusst nicht gebaut: `docs/SAVE_COMPAT.md`
 sagt „zeichnet nie schon existierenden Boden neu“, weil dort deine Basis stehen
 könnte.

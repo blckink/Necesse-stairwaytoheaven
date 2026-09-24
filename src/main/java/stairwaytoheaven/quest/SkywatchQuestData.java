@@ -386,6 +386,58 @@ public class SkywatchQuestData extends LevelData {
         this.catMarkerAuths.clear();
     }
 
+    /**
+     * Copies the PROGRESS half of another record into this one, and nothing
+     * that describes ground. This is what {@code /swhreset regenerate} keeps
+     * when it throws the whole Skyreach away and generates it again.
+     *
+     * <h2>Every field, and which half it is in</h2>
+     * <ul>
+     * <li><b>Kept — progress:</b> {@code stage}, {@code recruited},
+     *     {@code recruitedAuth}, both cat-home flags, {@code catsIntroShown},
+     *     {@code catsRewardGiven}, the anchor's three flags, and the three
+     *     marker ledgers (each is "this player already has that map marker";
+     *     the spire and both lairs are pure functions of the seed and land on
+     *     the same tiles again, so the markers a player holds stay right).</li>
+     * <li><b>Kept — the way home:</b> {@code returnStairs}. They are SURFACE
+     *     tiles, and a player's stairway down there is not touched.</li>
+     * <li><b>Reset — placement:</b> {@code spirePlaced} and every spire
+     *     coordinate, {@code basketPlaced}, {@code catsSpawned} and both lairs,
+     *     {@code landmarksStamped}, {@code landmarkGuards},
+     *     {@code landmarkLoot}. Each of these only says "this is already
+     *     standing in the sky", and after a regenerate nothing is. Left set,
+     *     they would make the new sky skip exactly the things it has to stamp.
+     *     They are simply not copied: this record starts from a fresh level.</li>
+     * </ul>
+     *
+     * <p><b>Adding a field to this class?</b> A "this is stamped in the sky"
+     * flag (the spire village's {@code villagePlaced}, say) needs NOTHING here:
+     * not copying it is what resets it, so the regenerated sky stamps the thing
+     * again. Only a PROGRESS field has to be added to this method, or a
+     * regenerate silently forgets it.
+     *
+     * <p>{@code schemaVersion} is not a field; every save writes the current
+     * one, so {@link #migrateLegacySave} never fires on a carried record.
+     */
+    public void copyProgressFrom(SkywatchQuestData from) {
+        this.stage = from.stage;
+        this.recruited = from.recruited;
+        this.recruitedAuth = from.recruitedAuth;
+        this.blackHome = from.blackHome;
+        this.tabbyHome = from.tabbyHome;
+        this.catsIntroShown = from.catsIntroShown;
+        this.catsRewardGiven = from.catsRewardGiven;
+        this.anchorIntroShown = from.anchorIntroShown;
+        this.anchorDone = from.anchorDone;
+        this.finaleShown = from.finaleShown;
+        this.spireMarkerAuths.addAll(from.spireMarkerAuths);
+        this.stairsMarkerAuths.addAll(from.stairsMarkerAuths);
+        this.catMarkerAuths.addAll(from.catMarkerAuths);
+        for (java.util.Map.Entry<Long, long[]> entry : from.returnStairs.entrySet()) {
+            this.returnStairs.put(entry.getKey(), entry.getValue().clone());
+        }
+    }
+
     /** Remembers which surface stairway tile this player ascended from. */
     public void setReturnStairway(long clientAuth, int tileX, int tileY) {
         this.returnStairs.put(clientAuth, new long[]{tileX, tileY});

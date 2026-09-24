@@ -4497,3 +4497,94 @@ HYPOTHESIS, not observed: the window itself (`JournalForm` — layout, wrapping,
 colours, Escape closing it without opening the pause menu), opening from the
 hotbar (`onAttack`), and the item/packet code on the 1.3.3 client. A dedicated
 server never renders and has no client, so none of this can be seen headless.
+
+## Regenerating a level: deleting it from a running server (2026-09-24)
+
+`/swhreset regenerate confirm` (`level/SkyRegenerator.java`) deletes the whole
+`skyreach2` level and generates it again. What had to be true for that, and how
+each fact is known:
+
+- **A level is three things in a save** — `levels/<id>.dat`,
+  `levels/regions/<id>/<wx>x<wy>.dat`, `levels/presets/<id>/<px>x<py>.dat` —
+  and `WorldFileSystem.deleteAllLevelFiles(id)` deletes exactly those three.
+  It goes through the save's own NIO `FileSystem`, so it is the same call for a
+  folder save and a `.zip` save (zip: `jar:file:` zipfs, committed when the
+  server closes/reloads the file system after a save). VERIFIED [jar] by
+  source; VERIFIED [run] on a zip save: `deleted: 4 region file(s) ...`,
+  then `sky files left on the save before regenerating: 0`.
+- **One region FILE holds many regions.** A freshly generated sky around the
+  spire was 3–4 region files, not hundreds (`WorldRegionData`, one file per
+  world-region block). VERIFIED [run].
+- **Vanilla has the whole operation already**: `LevelManager.deleteLevel` (used
+  by `/deletelevel`, a closing incursion and The Void's death) = move clients to
+  their fallback, `ReturnedObjects` to the fallback level, delete child levels,
+  `unloadLevel`, `deleteAllLevelFiles`, `deleteSettlementsAt`. We run the same
+  steps ourselves because `ReturnedObjects` writes onto the fallback level (the
+  surface) and the fallback is not a player's own stairway. VERIFIED [jar].
+- **`LevelManager.unloadLevel` does NOT save**: `onUnloading` + `dispose` +
+  `WorldLevelUnloadedEntityComponent.onLevelUnloaded`. The only save on that
+  path is `SettlementsWorldData.onLevelUnloaded` writing the level's loaded
+  settlements to their files. `Server.tick`'s own idle unload is
+  `unloadLevel(l); saveLevel(l)` — the save is a separate call. VERIFIED [jar].
+- **`World.getLevel(id)` on an id with no level file generates a new one**
+  through the registered generator (`getGeneratedLevel` →
+  `LevelManager.overwriteLevel` → `World.saveLevel`); the log says
+  `Could not find Level: <world>/levels/skyreach2.dat file for <world>.zip`
+  first, which is expected and not an error. VERIFIED [run].
+- **The world-preset cache outlives the level.** `WorldEntity.worldPresetsCache`
+  (protected) holds a `WorldPresetsRegion` per 1024x1024 block, each holding a
+  `LevelPresetsRegion` per level identifier in `levelRegions` (protected) until
+  ~40 s after its last use (`tickUnloadBuffer`). Deleting a level does not touch
+  it. After `/skyreachstatus pois` it held **169** `skyreach2` entries
+  (`preset caches dropped: 169`, VERIFIED [run]). Left in place they would be
+  reused by the new level — with their per-preset `hasAlreadyGeneratedRegion`
+  flags, which are only ever set, never cleared (`startGenerateRegion`) — and
+  saved back into the folder just deleted (`saveGeneratedPresetsFile`). That
+  those two would actually misplace a preset is HYPOTHESIS; dropping them by
+  reflection under the same monitors the engine uses removes the question.
+- **Presets are recomputed, not read back**: the presets file only stores
+  `generatedPresets` (found-preset records for `findClosestWorldPreset`);
+  placement is `WorldPresetRegistry.initRegion` from the seed every time. So a
+  deleted presets folder regenerates the same buildings. VERIFIED [jar]; the
+  census reading `kinds=30/30` on the new sky is the [run] half.
+- **A save in flight would resurrect the old level.** `ServerSaveHandler`
+  builds one `LevelSaveHandler` per loaded level in its CONSTRUCTOR and writes
+  over several ticks. `Server.saveHandler` is private with no getter; the
+  regenerate reads it by reflection and refuses while it is non-null.
+  VERIFIED [jar]; the refusal itself has not been observed [run].
+- **Which thread a command runs on.** A chat command is processed in
+  `Server.frameTick` (`packetManager.nextPacket` → `processServer`), on the
+  server thread. A dedicated-server console command runs on the console thread
+  (`ServerLoader.handleCommand` → `server.sendCommand`). An empty dedicated
+  server pauses after 200 ticks when `pauseWhenEmpty` (default true) and prints
+  `Suggesting garbage collection due to empty server...` at 300; while paused
+  `World.serverTick` and `World.frameTick` do not run, but `tickSaveHandler` and
+  `tickAutoSave` DO (they are above the pause check in `Server.tick`).
+  VERIFIED [jar]; the paused-console path is what `scripts/regenerate_check.sh`
+  runs.
+- **`WorldData.tick()` is not a safe place for work that can create world
+  data**: `WorldEntity.serverTick` calls it while iterating `this.data.values()`
+  (a HashMap), so a lazy `addWorldData` inside it would throw a
+  `ConcurrentModificationException`. VERIFIED [jar]; this is why the
+  regenerate refuses on a ticking console instead of deferring itself there.
+- **`StringParameterHandler(String defaultValue, String... autoCompletes)`**:
+  the FIRST argument is the default, and an omitted optional parameter is
+  filled with it (`CmdParameter.addDefaults`). `new StringParameterHandler("confirm")`
+  therefore makes an omitted `confirm` arrive as `"confirm"`. VERIFIED [run]:
+  on the old jar a bare `swhreset quests` printed
+  `swhreset quests: the chain is back at the start.` and the progress read
+  `stage=0 recruited=false` afterwards.
+- **`ServerClient.changeLevelCheck` is synchronous**: it loads/generates the
+  target level, runs the check and sets the level identifier before it
+  returns, so "is anyone still on the sky" can be asked right after it.
+  VERIFIED [jar] only — the gate has no connected client.
+- **Gate record for this change (random seed per run).** `regenerate_check.sh`:
+  PASS on 6 seeds. `integration_test.sh` with the change: PASS ×4
+  (2 before, 2 after the final rebase onto `9af5232`), and FAIL ×3 in between
+  on three different seed-dependent world assertions that all run BEFORE any
+  `/swhreset` command: `no Outland ground at Crooked Beyond's peak`
+  (`rpeak=5200:0/3204`), `skytown is missing 1 objects` (`13,39=0!=1639@t105`),
+  `dewkeepershut is missing 64 objects` (all on `@t0`, i.e. no ground). The
+  base without the change passed its one run. Read as seed flakes, not
+  investigated further — the dewkeepershut one (a whole preset on empty
+  ground) is worth a look by whoever owns the POI placement. HYPOTHESIS.

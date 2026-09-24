@@ -17,7 +17,20 @@ nothing, and its destructive forms want the word `confirm`.
 /swhreset world            # retrofit ground an older build generated
 /swhreset quests confirm   # put the whole chain back to before the first ascent
 /swhreset all confirm      # both, plus clear the one-per-world resident claims
+/swhreset regenerate       # report what regenerating the WHOLE sky would do
+/swhreset regenerate confirm  # delete the whole sky level and generate it anew,
+                              # quest progress kept (section "regenerate" below)
 ```
+
+**2026-09-24: `confirm` was not being asked for.** Until this date the
+`confirm` parameter's handler was `StringParameterHandler("confirm")`, whose
+first argument is the *default value* — so an omitted `confirm` arrived as the
+word "confirm", and `/swhreset quests` without it reset the chain while the
+docs said it would only report. VERIFIED [run]: the old jar printed
+`swhreset quests: the chain is back at the start.` for a bare `swhreset quests`
+and the progress read `stage=0 recruited=false` afterwards. Fixed (default
+`null`); `scripts/regenerate_check.sh` now asserts
+`swhreset quests: NOTHING WAS CHANGED` for the bare form.
 
 ---
 
@@ -167,6 +180,117 @@ see each other. Clearing it while the first Magpie is still alive lets worldgen
 stand up a second one. Use `all` on a throwaway test world, or after removing
 the residents, and use `quests` otherwise.
 
+### `/swhreset regenerate confirm` — the whole sky, generated anew (2026-09-24)
+
+The player's request: *"alle Mod-Gebiete auch um den Spire werden neu
+generiert! Quests bisher können so bleiben, aber Gebiete und Rest werden
+zwingend neu erstellt."* Everything above refuses to repaint ground; this mode
+deletes it. It is the answer to "a worldgen fix only reaches the sky I have not
+walked" (§5) when you want the fix everywhere, spire included.
+
+**Bare `/swhreset regenerate` reports and changes nothing**: how many sky
+files the save holds, who is standing in the sky, which sky settlements would
+go, which resident claims are kept or released, and a warning if the Warden is
+recruited but lives in no settlement outside the sky.
+
+#### What it does, in order (`level/SkyRegenerator.java`)
+
+1. Copies the **progress** half of the sky's quest record
+   (`SkywatchQuestData.copyProgressFrom`).
+2. Sends every player on `skyreach2` to **their own return stairway** on the
+   surface (the Skywatch Gate's record), or vanilla's fallback if they have
+   none; a respawn bed in the sky is reset to world spawn. If anybody is still
+   up there afterwards it refuses and deletes nothing.
+3. Writes the sky to disk once more (`World.saveLevel`), so the backup is the
+   sky as it was.
+4. Unloads the level **without saving it** (`LevelManager.unloadLevel` — the
+   same call vanilla's `/deletelevel` makes).
+5. **Backup** to `<game data>/swh-sky-backups/<world>-<yyyyMMdd-HHmmss>/` —
+   `levels/skyreach2.dat`, `levels/regions/skyreach2/`,
+   `levels/presets/skyreach2/` and the file of every settlement on the sky
+   level, in the save's own layout. `<game data>` is `%APPDATA%\Necesse\` in
+   single player on Windows, the server's data folder on a dedicated server
+   (the `-localdir` folder if started with it). Deliberately **outside**
+   `saves/`: the game lists worlds from both `saves/worlds/` and `saves/`.
+6. Deletes the sky's settlements (`SettlementsWorldData.deleteSettlementsAt`)
+   and the sky's three save parts (`WorldFileSystem.deleteAllLevelFiles`), then
+   checks that none is left.
+7. Drops the in-memory world-preset cache for `skyreach2` (see
+   `docs/TECHNICAL_LEARNINGS.md`, "Regenerating a level").
+8. Asks the world for `skyreach2` again: the level file is gone, so the
+   registered generator builds a new one — exactly a first ascent — with the
+   carried progress put back, and stamps the Warden's Spire, its cats and the
+   three landmarks at once. Then writes the new sky and `world.dat`.
+
+**Restoring the backup** (if you want the old sky back): stop the server /
+leave the world, delete `levels/skyreach2.dat`, `levels/regions/skyreach2/`
+and `levels/presets/skyreach2/` from the save (inside the `.zip` for a zip
+save), and copy the backup folder's `levels/` into the save. World progress
+made after the regenerate stays whatever `world.dat` says.
+
+#### Which thread, and where you can type it
+
+It unloads a level, and nothing may be ticking that level meanwhile.
+
+| where you type it | what happens |
+|---|---|
+| game chat, as admin (single player included) | runs at once — chat commands run on the server thread |
+| dedicated-server console, nobody online | runs at once — the empty server is paused, nothing ticks |
+| dedicated-server console, players online | **refused**; type it in chat instead |
+| any, while a world save is running | **refused** until `Completed world save` — a save built before the unload would write the old sky back |
+
+#### Keeps / resets / loses
+
+| | what | why |
+|---|---|---|
+| **kept** | story stage, `recruited`, both cats' coaxed flags, cat intro/reward, anchor + finale, map-marker ledgers | progress; the spire and lairs are seed-derived and land on the same tiles again, so a marker a player holds stays right |
+| **kept** | `returnStairs` | surface tiles — your way home |
+| **kept** | all of `SkywatchWorldData` except the two rows below: Warden recruited, region keys earned, boss portals unlocked, resident chains, Eleanor, Eveleen, Knott | world data, in `world.dat`; progress |
+| **kept** | `VeilWorldData` (Veil Marks, fog, chalk ledger), `SkyfallWorldData`, journal quests, inventories | not the sky |
+| **kept** | the surface and every other level, their settlements, the three surface POIs | never touched; they are placed in *surface* preset regions and stay as they are |
+| **reset** | `spirePlaced` + all spire coordinates, `basketPlaced`, `catsSpawned` + lairs, `landmarksStamped`, `landmarkGuards`, `landmarkLoot` | they only say "this stands in the sky"; the new sky stamps it all again |
+| **reset** | resident claims of people who only **stood in the sky** or lived in a **sky settlement** | they are deleted with the sky; kept claims would make them unreachable for good |
+| **kept** | resident claims of people living in a settlement on **another level** | they still exist; releasing the claim would let worldgen stand up a second one |
+| **reset** | the cats' home, if it was a basket **in the sky** | the basket is gone; they fall back to the spire basket |
+| **LOST** | **everything you built in the sky**: buildings, chests and their contents, farms, a Séance Circle, a key piece standing up there, beds, a settlement on the sky level with its settlers, pets/mounts left standing there, items lying on the ground | it is the ground, and the ground is what is regenerated. The backup holds it, and nothing else does |
+| **again** | the three landmarks' unique rewards (Bonded Lockbox etc.) and guard-key drops, the spire's cat basket | the containers were deleted with the sky, so the new ones are filled once more. A test world gets them twice; that is the price of regenerating |
+
+How the resident claims are decided: every settlement whose level is **not**
+`skyreach2` is read — from memory when loaded, otherwise its own settlement
+file, read-only, no level loaded — and a claimed name found in one of them is
+kept. Everyone else's claim is released.
+
+The cats: a cat coaxed home to a basket on **another level** lives there and is
+not spawned again (no duplicate); a cat coaxed home to the **spire** basket was
+in the deleted sky and is stood straight onto the new spire's basket
+(`SkyLevel.spawnSpireCat`).
+
+**If the Warden lived in a settlement on the sky level**, he is deleted with it
+and `wardenRecruited` stays true — the new spire is stamped awake and empty.
+The dry run warns about exactly that case; move him first.
+
+#### Proven, and not
+
+`scripts/regenerate_check.sh` (dedicated server, fresh random seed, two
+regenerates, a restart). VERIFIED [run] 2026-09-24:
+
+```
+  deleted: 4 region file(s), 0 preset file(s), the level file, 0 sky settlement(s); preset caches dropped: 3
+  new spire=64,-497 (was 64,-497) beacon=1 spireWardens=0 landmarks=3/3 cats=spawned
+  progress kept: stage=2 recruited=true anchor=false catsHome=11 returnStairways=0 keys=1 portalsUnlocked=1 wardenRecruited=true
+after:   regenerate fixture: skymarker=1464,-198 present=0 surfacemarker=-978,-498 present=1
+restart: regenerate fixture: progress stage=2 recruited=true catsHome=11 wardenRecruited=true skyreachKey=true skyreachPortals=true ...
+realmpoi census: ... kinds=30/30 queuedkinds=30/30 landmarks=3 ...
+PASS: /swhreset regenerate generated the sky anew, kept the progress, left the surface alone.
+```
+
+HYPOTHESIS, because the gate has no connected client: the evacuation of a
+player standing in the sky (`players moved home` read 0 in every run), the
+chat path, a single-player run, a folder (non-zip) save, a world with a
+settlement on the sky level, and what an **offline** player who logged out in
+the sky finds on the next login (their player file still names `skyreach2` and
+the same coordinates, which are now fresh ground).
+
 ## 3. Testing the whole mod from an existing save
 
 ```
@@ -246,7 +370,9 @@ generates ground that never existed and leaves existing ground alone, on purpose
 
 **So a worldgen fix reaches the sky you have not walked yet, not the sky around
 your spire.** Nothing is broken by it and nothing you built is at risk; the new
-places are simply further out.
+places are simply further out. **Unless you ask for the whole sky anew:**
+`/swhreset regenerate confirm` (§2) deletes the sky level and generates it with
+the current build, spire included, at the price of everything built up there.
 
 ### The three once-per-world places are the exception, and they reach every save
 

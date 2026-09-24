@@ -822,6 +822,77 @@ Alles ADMIN, alles serverseitig. Vollständig in `docs/SAVE_COMPAT.md`.
 | `/swhreset world` | trägt fehlende Inhalte in **bereits erzeugtes Gelände** nach: Boss-Portale, Wachtrupps, Bewohner, Herden. 1024×1024 um dich herum. Zweimal laufen lassen ist sicher. |
 | `/swhreset quests confirm` | setzt die ganze Kette auf **vor den ersten Aufstieg** zurück |
 | `/swhreset all confirm` | beides + löscht die Ein-pro-Welt-Ansprüche *(Warnung in der Doku lesen)* |
+| `/swhreset regenerate` | **meldet nur**, was ein kompletter Neuaufbau des Himmels tun würde |
+| `/swhreset regenerate confirm` | **löscht den ganzen Himmel** (alle Mod-Gebiete, auch die Warden-Spitze und alles drumherum) und erzeugt ihn mit dem aktuellen Build **neu**. Quest-Fortschritt bleibt. Siehe unten. |
+
+**Behoben am 24.09.2026:** `confirm` wurde bisher gar nicht verlangt — ein
+`/swhreset quests` ohne `confirm` hat die Kette trotzdem zurückgesetzt
+(nachgewiesen mit dem alten Build). Jetzt ändert die Form ohne `confirm`
+wirklich nichts.
+
+### Den ganzen Himmel neu erzeugen: `/swhreset regenerate confirm`
+
+Für den Fall „ich will die Mod neu testen, und **alle** Mod-Gebiete, auch direkt
+um die Spitze, sollen mit dem neuen Build neu entstehen — die Quests dürfen
+bleiben“.
+
+**Schritt für Schritt (Einzelspieler):**
+
+1. **Spielstand sichern** (Welt-Datei kopieren). Der Befehl legt zwar selbst
+   eine Sicherung des Himmels an, aber eine Kopie der ganzen Welt schadet nie.
+2. Den neuen Mod-Build installieren und die Welt laden.
+3. Im Chat: `/swhreset regenerate` — **ändert nichts**, zeigt nur an, was
+   passieren würde: wie viele Himmels-Dateien es gibt, wer gerade oben steht,
+   welche Bewohner-Ansprüche bleiben oder frei werden, und eine Warnung, falls
+   der Warden in einer Siedlung *im Himmel* wohnt (er ginge mit verloren —
+   dann vorher umziehen lassen).
+4. Alles, was du **im Himmel gebaut oder gelagert** hast und behalten willst,
+   vorher herunterholen: Truhen-Inhalte, Tiere, Möbel. **Alles, was im Himmel
+   steht, ist danach weg.**
+5. Im Chat: `/swhreset regenerate confirm`. Stehst du gerade im Himmel, wirst
+   du zuerst zu deiner Treppe auf der Oberwelt zurückgeschickt (Chat-Meldung
+   „Der Himmel wird neu erschaffen …“). Die Meldung endet mit
+   `swhreset regenerate: DONE`.
+6. Die Treppe wieder hinaufsteigen — du kommst an der **frisch gebauten
+   Warden-Spitze** an, am selben Ort wie vorher.
+
+**Dedizierter Server:** dasselbe als Admin im Spiel-Chat. In der Server-Konsole
+geht es nur, wenn **niemand online** ist (dann pausiert der Server) — sonst
+lehnt der Befehl ab. Läuft gerade eine Speicherung, ebenfalls ablehnen und
+nach „Completed world save“ nochmal.
+
+**Was bleibt:** Story-Stufe, angeworbener Warden, Katzen „nach Hause gebracht“,
+Anker, Region-Keys, freigeschaltete Boss-Portale, alle Bewohner-Questketten,
+Eleanor/Eveleen/Knott, Veil-Marken und Kreide, deine Treppen-Heimwege, das
+Tagebuch, Inventare, **die ganze Oberwelt** samt Siedlungen — und die drei
+Oberwelt-Orte (Aeronautenlager, Himmelsschrein, Himmelssplitter-Krater) bleiben
+so, wie sie sind.
+
+**Was neu entsteht:** das gesamte Himmelsgelände aller Realms, alle Gebäude
+und POIs, die Warden-Spitze mit Leuchtfeuer und Katzenkorb, Mautstelle,
+Gutskeller und Testgelände samt Wächtern und Belohnungen, Boss-Portale,
+Wachtrupps, Herden, die Bewohner, die nur im Himmel standen, und die Katzen
+(wohnen sie schon in deiner Stadt, bleiben sie dort und werden nicht doppelt
+erzeugt).
+
+**Was verloren geht:** alles, was du im Himmel gebaut hast, inklusive einer
+Siedlung im Himmel mit ihren Siedlern, Truhen und ihrem Inhalt, Betten dort
+(dein Wiederbelebungspunkt geht dann zurück auf den Weltstart), ein dort
+stehendes Schlüsselstück, ein Séance-Kreis. Die Belohnungen der drei
+Wahrzeichen liegen im neuen Himmel **noch einmal** bereit.
+
+**Sicherung:** `%APPDATA%\Necesse\swh-sky-backups\<Welt>-<Datum-Uhrzeit>\`
+(dedizierter Server: in dessen Datenordner). Darin liegen die Himmels-Dateien
+in derselben Ordnerstruktur wie im Spielstand; zum Zurückholen die drei
+`skyreach2`-Teile im Spielstand löschen und den Ordner `levels/` aus der
+Sicherung hineinkopieren.
+
+**Nachgewiesen** auf einem echten Server (`scripts/regenerate_check.sh`):
+Markierung im fernen Himmel weg, Spitze am selben Ort neu, drei Wahrzeichen
+neu, Zensus `kinds=30/30`, Fortschritt auch nach Neustart da, Markierung auf
+der Oberwelt unberührt. **Noch nicht** nachgewiesen (der Test hat keinen
+echten Spieler): das Zurückschicken eines Spielers, der oben steht, und ein
+Einzelspieler-Durchlauf — das ist der erste echte Test durch dich.
 
 **Warum das nötig ist:** `onRegionGenerated` läuft **genau einmal pro Region,
 für immer**. Eine Welt, die vor dem 03.09.2026 erkundet wurde, hat dort **keine

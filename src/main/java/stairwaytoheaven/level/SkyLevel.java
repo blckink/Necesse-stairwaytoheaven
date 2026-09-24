@@ -977,11 +977,47 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
         quest.tabbyLairX = tabbyLair.x;
         quest.tabbyLairY = tabbyLair.y;
 
-        this.regionManager.ensureTileIsLoaded(blackLair.x, blackLair.y);
-        this.entityManager.addMob(MobRegistry.getMob("spirecatblack", this), blackLair.x * 32 + 16, blackLair.y * 32 + 16);
-        this.regionManager.ensureTileIsLoaded(tabbyLair.x, tabbyLair.y);
-        this.entityManager.addMob(MobRegistry.getMob("spirecattabby", this), tabbyLair.x * 32 + 16, tabbyLair.y * 32 + 16);
+        this.spawnSpireCat("spirecatblack", true, blackLair, quest);
+        this.spawnSpireCat("spirecattabby", false, tabbyLair, quest);
         quest.catsSpawned = true;
+    }
+
+    /**
+     * One spire cat, unless it already lives somewhere else.
+     *
+     * <p>On a fresh world nobody has been coaxed yet and this is simply "stand
+     * the cat in its lair". It matters on a Skyreach that is generated AGAIN
+     * while the world keeps its progress — {@code /swhreset regenerate}, or a
+     * {@code SkyRegistry.WORLD_GENERATION} bump. Then {@code catsSpawned} is
+     * false on the new level, but the world record may say a cat was coaxed:
+     * <ul>
+     * <li>coaxed and living at a player-placed basket on ANOTHER level — the
+     *     cat is standing in that town right now and was never in the sky
+     *     that went away. A second one here would be a duplicate of a named
+     *     cat, so none is spawned;</li>
+     * <li>coaxed and living at the spire basket — that cat was in the sky
+     *     that went away, so a new one is stood straight on the new spire's
+     *     basket rather than in a lair it has already been fetched from.</li>
+     * </ul>
+     */
+    private void spawnSpireCat(String mobID, boolean isBlack, Point lair, SkywatchQuestData quest) {
+        Point at = lair;
+        necesse.engine.network.server.Server server = this.getServer();
+        stairwaytoheaven.quest.SkywatchWorldData world =
+                server == null ? null : stairwaytoheaven.quest.SkywatchWorldData.get(server);
+        if (world != null && world.isCatCoaxed(isBlack)) {
+            stairwaytoheaven.quest.CatHome.Spot placed = stairwaytoheaven.quest.CatHome.placed(server);
+            if (placed != null && !SkyRegistry.SKYREACH_IDENTIFIER.equals(placed.level)) {
+                return;
+            }
+            if (placed == null && quest.spirePlaced) {
+                at = new Point(quest.basketX, quest.basketY);
+            } else if (placed != null) {
+                at = new Point(placed.tileX, placed.tileY);
+            }
+        }
+        this.regionManager.ensureTileIsLoaded(at.x, at.y);
+        this.entityManager.addMob(MobRegistry.getMob(mobID, this), at.x * 32 + 16, at.y * 32 + 16);
     }
 
     /** First land spot in the right sub-biome, sweeping outward from the spire. */
