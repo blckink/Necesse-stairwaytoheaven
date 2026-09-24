@@ -268,6 +268,33 @@ for _ in $(seq 1 180); do
     sleep 2
 done
 
+# The showroom (docs/PREVIEW_TOOLS.md): every preset stamped on flat ground far
+# past Hell, then counted back object by object. Built TWICE (idempotence: the
+# second build must leave the same count, missing=0 both times), then checked
+# again after the level has ticked a few seconds, which is when the engine's
+# own validity checks would delete a piece that cannot stand.
+echo "Running swhshowroom build (first)..."
+echo "swhshowroom build" >&3
+wait_for "SWH_SHOWROOM_DONE" 600
+echo "Running swhshowroom build (second: idempotence)..."
+echo "swhshowroom build" >&3
+for _ in $(seq 1 300); do
+    [ "$(grep -c SWH_SHOWROOM_DONE "$LOG")" -ge 2 ] && break
+    sleep 2
+done
+sleep 5
+echo "Running swhshowroom check (after ticking)..."
+echo "swhshowroom check" >&3
+for _ in $(seq 1 120); do
+    [ "$(grep -c SWH_SHOWROOM_DONE "$LOG")" -ge 3 ] && break
+    sleep 2
+done
+echo "swhshowroom" >&3
+for _ in $(seq 1 60); do
+    [ "$(grep -c SWH_SHOWROOM_DONE "$LOG")" -ge 4 ] && break
+    sleep 1
+done
+
 stop_server
 LOG1="$WORK_DIR/server.log"
 
@@ -1272,6 +1299,17 @@ else
     [ "$HOME_PLACE1" = "$HOME_PLACE2" ] \
         || { echo "FAIL: the cats' home moved across a restart ($HOME_PLACE1 ->$HOME_PLACE2)"; STATUS=1; }
 fi
+
+echo "--- verifying the showroom (every preset stamped and counted back) ---"
+SHOWCHECKS="$(grep -oE "SHOWROOM_CHECK exhibits=.*mobs=[0-9]+" "$LOG1")"
+echo "$SHOWCHECKS"
+[ "$(echo "$SHOWCHECKS" | grep -c .)" -ge 3 ] || { echo "FAIL: expected three showroom checks (two builds + one check)"; STATUS=1; }
+echo "$SHOWCHECKS" | grep -vqE "missing=0 signs=([0-9]+)/\1 mobs=0" \
+    && { echo "FAIL: a showroom check found missing pieces, missing signs or mobs"; STATUS=1; }
+[ "$(echo "$SHOWCHECKS" | sed 's/.*exhibits=\([0-9]*\) expected=\([0-9]*\).*/\1 \2/' | sort -u | grep -c .)" -eq 1 ] \
+    || { echo "FAIL: the showroom builds disagree with each other (not idempotent)"; STATUS=1; }
+grep -qE "SHOWROOM status: exhibits=[0-9]+ built=true" "$LOG1" || { echo "FAIL: showroom status does not report built=true"; STATUS=1; }
+grep -E "SHOWROOM exhibit=.*missing=[1-9]" "$LOG1" | head -5
 
 for L in "$LOG1" "$LOG2"; do
     if grep -nE "Exception|ERROR|ModLoadException" "$L" | grep -vE "libraryPatches|SLF4J" > "$WORK_DIR/errors.txt"; then

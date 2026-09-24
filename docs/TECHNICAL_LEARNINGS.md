@@ -4410,3 +4410,52 @@ Full audit and table: `docs/ITEM_CATEGORIES.md`.
   call: `EdenRealm.registerItems` does it for `edenwood`. VERIFIED [jar] +
   `buildModJar`; the crafting menu accepting Edenwood as a log is HYPOTHESIS
   until seen on a client.
+
+## Preview tooling: what the showroom and the screenshot tour rest on (2026-09-24)
+
+- **A mod can hook the client's frame loop without a patch.** VERIFIED [jar]:
+  `((GameLoop) client.tickManager()).addGameLoopListener(GameLoopListener)` —
+  vanilla's own `PresetPreviewForm.init` does it. `ClientGameLoop.update` calls
+  the listeners' `frameTick` on the game thread right before
+  `State.frameTick`, i.e. where `MainGame` handles the screenshot key, outside
+  any draw pass; `isDisposed()` removes the listener. It is not bound to a
+  level, so it survives the player changing level (a client `LevelEvent`
+  would not).
+- **Vanilla renders any level rectangle off-screen, HUD-free.** VERIFIED
+  [jar]: `Renderer.takeMapshot(Level, Client, GameCamera)`
+  (`Renderer.java:661`) = `window.getNewFrameBuffer(w,h)` → bind →
+  `Settings.hideUI = true` → `level.drawUtils.prepareDraw(camera, player,
+  null, true)` + `draw(...)` → `Renderer.readColorBufferFromFrameBuffer(fb,
+  false)` (public, RGB, rows bottom-up). It is the full-screen map's
+  screenshot button. `showroom/ShotCapture` copies it step for step with a
+  file name of its own; running it on a client is still HYPOTHESIS.
+- **Client region state:** `level.regionManager.isRegionLoaded(rx, ry)` on the
+  client level; the client streams `REGION_LOAD_RANGE = 5` regions around the
+  screen (`ClientLevelLoading.refreshLoading`). A client command reaches the
+  server with `client.network.sendPacket(new PacketChatMessage(slot,
+  "/cmd ..."))`, exactly what `ChatBoxForm` sends for a non-client command.
+- **Every game PNG is enumerable from the client.** VERIFIED [jar]:
+  `ResourceEncoder.getAllFiles()` → `ResourceFile.loadBytes(true)`; a mod's
+  files are merged into the same table under their stripped path
+  (`ResourceFolder.addModResources`), overriding vanilla's.
+- **`TileRegistry.getTileStringIDs()` throws while the registry is open.**
+  VERIFIED [run] (`IllegalStateException: TileRegistry not yet closed` at mod
+  init); `TileRegistry.streamTiles().count()` and
+  `ObjectRegistry.getObjectsCount()` do not. Registry IDs are handed out in
+  registration order, which is how `ShowroomRegistry` knows which IDs are the
+  mod's and which realm registered them.
+- **Spawning is per biome, so a biome can switch it off.** VERIFIED [jar]:
+  the hostile cap is multiplied by `getSpawnCapMod` of the biome under the
+  player, the table comes from the spawn tile's biome. VERIFIED [run]:
+  `SHOWROOM_CHECK ... mobs=0` after building and ticking.
+- **Writing ~170k tiles through `Level.setTile` costs a minute.** VERIFIED
+  [run]: showroom build `totalMs=68871` through `Level.setTile`,
+  `totalMs=6103` through `region.tileLayer.setTileByRegion(..., true)` plus one
+  `updateLiquidManager/updateSplattingManager/updateSubRegions/updateLight` and
+  a `PacketRegionData` resend per region afterwards (the
+  `ClearAreaServerCommand` pattern). `setTile` also asks the settlement data
+  for room stats per tile.
+- **Every preset, stamped on flat ground, keeps every object it writes.**
+  VERIFIED [run]: `SHOWROOM_CHECK exhibits=69 expected=9189 missing=0
+  signs=69/69 mobs=0` — all 33 RealmPoiPresets kinds, 13 standalone presets
+  and the galleries, compared object layer by object layer after build.

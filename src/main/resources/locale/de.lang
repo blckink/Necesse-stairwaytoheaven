@@ -1275,3 +1275,17 @@ swhsignossuary=Geh den Weg, den die Pilger gingen:\nlangsam, in der Mitte, und n
 swhsignfeast=Sie sind herzlich eingeladen.\nDas Fest dauert schon eine Weile.\nBitte nehmen Sie Platz. Die Plätze finden Sie.
 // The Hall of Many Doors' sign, under its south window.
 swhsigndoors=EINE DAVON IST EINE TÜR.\n- die Direktion
+
+// Preview tooling (docs/PREVIEW_TOOLS.md): /swhshowroom signs, /swhshots, /swhdumpsprites.
+[misc]
+swhshowroomsign=Ausstellung: <name>
+swhshotsstart=Screenshot-Tour gestartet: <count> Bild(er) nach <path>. /swhshots stop bricht ab.
+swhshotsdone=Screenshot-Tour fertig: <count> PNG(s) in <path>
+swhshotsaborted=Screenshot-Tour abgebrochen: <count> PNG(s) in <path>
+swhshotsbusy=Läuft schon, bitte warten (oder /swhshots stop).
+swhshotsneedlocal=/swhshots world braucht die Welt auf diesem PC (Einzelspieler oder selbst gehostet). /swhshots here geht überall.
+swhdumpstart=Schreibe Sprites nach <path> ...
+swhdumpdone=Sprite-Dump fertig: <count> Spiel-PNG(s) und <mod> Mod-PNG(s) in <path>
+
+[biome]
+swhshowroom=Ausstellung

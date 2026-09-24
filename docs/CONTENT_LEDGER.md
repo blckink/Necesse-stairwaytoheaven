@@ -512,6 +512,15 @@ is on a loot table. Their art is vanilla's own sprite re-inked at load time by
 | `cloudglaive` | item | Wolkengleve / Cloud Glaive — the Cryo Glaive's shape (range 160, gold-and-white light motes on the swing) at 165 → 208.54, above the craftable Skyreave's 150 and below the Ghost Realm's Spiritsteel Reaver; the Sky Warden's reward for anchoring the spire island (`swh_anchor`), its only source. |
 | `skylance` | item | Himmelslanze / Sky Lance — the Dragon Lance's channelled beam in gold, 95 → 149.63 per 250 ms tick, 10 mana/s, rooted while it burns; crafted at the Tungsten Workstation from 3 Aetherwright's Casing + 10 Eden Bronze Bar + 8 Golden Pollen + 6 Aetherium Bar — the first recipe to consume either the Casing or Eden Bronze. |
 
+## Preview tooling (2026-09-24)
+
+The showroom behind `/swhshowroom` (docs/PREVIEW_TOOLS.md). Not reachable in
+normal play: it exists only inside the showroom rectangle far past Hell.
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `swhshowroom` | biome | Ausstellung / Showroom — the floor of the `/swhshowroom` exhibition hall; empty spawn tables, spawn cap 0, no rain, so nothing spawns among the exhibits. |
+
 ## Baseline — registered before the ledger existed
 
 These predate the ledger and are described in `CHANGELOG.md`,

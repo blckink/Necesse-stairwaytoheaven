@@ -574,6 +574,15 @@ gate's `ObjectEntity` then overrides with `SKYREACH_IDENTIFIER` plus a
 
 ---
 
+## Preview tooling (2026-09-24, `docs/PREVIEW_TOOLS.md`)
+
+| tool | state |
+|---|---|
+| `/swhshowroom build/goto/list/check/clear/export/tp` — 69 exhibits (33 POI kinds, 13 standalone presets, per-realm tile/wall/object galleries and ground samples) at sky tile 20000,20000, spawn-free biome, lit | VERIFIED [run] on the dedicated server: built twice + checked, `missing=0`, `mobs=0` |
+| `/swhshots` — off-screen renders of each exhibit / the spire / nearby POI sites, no HUD | VERIFIED [jar] only — needs a client run |
+| `/swhdumpsprites` — vanilla + mod PNG dump for the offline tools | VERIFIED [jar] only — needs a client run |
+| `scripts/preset_render.sh` / `tools/preset_render.py` — top-down renders from the export | VERIFIED [run]; vanilla pieces are colour blocks until a dump is supplied |
+
 ## Gates
 
 ```

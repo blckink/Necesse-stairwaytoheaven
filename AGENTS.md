@@ -190,7 +190,17 @@ python3 tools/category_table.py <log> # item categories from a server log's swhc
 python3 tools/plan_transcription_audit.py # POI room plans in code still match the dossier's maps
 python3 tools/wall_render_preview.py  # walls: compose scenes, then LOOK at build/qa/
 python3 tools/rotation_preview.py     # rotations: every cell where it lands, then LOOK
+scripts/preset_render.sh              # boots the server, /swhshowroom build + export, renders
+                                      # every building/gallery/realm sample to build/qa/presets/
+python3 tools/preset_render.py --data <export> --sprites <dump>   # re-render an export
 ```
+
+**Previews of what is really built: `docs/PREVIEW_TOOLS.md`.** In game,
+`/swhshowroom build` stamps every preset, material and realm ground on flat,
+lit, spawn-free ground (sky level, tile 20000,20000) and counts it back;
+`/swhshots` (client) photographs each exhibit without HUD; `/swhdumpsprites`
+(client) writes the vanilla sprite dump the offline tools above want. The player
+runs the last two on their PC and hands back the PNGs.
 
 The server integration test **cannot see client rendering bugs**. See
 `docs/TECHNICAL_LEARNINGS.md` for what each gate does and does not cover.
