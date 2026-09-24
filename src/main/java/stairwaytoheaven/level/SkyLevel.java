@@ -73,6 +73,20 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
         }
     }
 
+    /**
+     * A region loaded through {@code ensure...ButDontGenerate} stays EMPTY and
+     * counts as generated forever after: the painter never runs there and every
+     * world preset overlapping it is dropped by {@code LevelPresetsRegion}. The
+     * mod must never cause one; the integration test fails on this line.
+     * See TECHNICAL_LEARNINGS "A region loaded without generation".
+     */
+    @Override
+    public void onGenerateRegionSkipped(Region region) {
+        super.onGenerateRegionSkipped(region);
+        System.out.println("swh region skipped generation: " + this.getIdentifier()
+                + " " + region.regionX + "x" + region.regionY);
+    }
+
     @Override
     public void onRegionGenerated(Region region, boolean skipGenerateForced) {
         super.onRegionGenerated(region, skipGenerateForced);

@@ -307,12 +307,38 @@ public final class CatHome {
      */
     private static final int CAT_SEARCH_RADIUS = 32;
 
-    /** The anchor's region generated if need be, and the ring round it loaded. */
+    /**
+     * The anchor's region generated if need be, and the ring round it loaded --
+     * but only the part of the ring that has ever been generated.
+     *
+     * <p>This used to call {@code ensureTilesAreLoadedButDontGenerate} over the
+     * whole ring, and that engine call is not "load without side effects": for
+     * a region that was never generated it constructs the region, skips
+     * {@code generateRegion} ({@code RegionManager.loadNewRegion} with
+     * {@code forceSkipGenerate}, jar 1.3.2 :230-251) and leaves it in the
+     * region map EMPTY. From then on {@code isRegionGenerated} answers true for
+     * it, so (a) the terrain painter never runs there -- a hole of empty tiles
+     * that is saved as such -- and (b) {@code LevelPresetsRegion.startGenerateRegion}
+     * marks every world preset overlapping it {@code hasAlreadyGeneratedRegion}
+     * and never places it. Seed "VLk1r" (census seed 1510824024): the black
+     * cat's lair at -198,-107 dropped region -15x-9 that way, and the Aether
+     * Manufactory queued over -17..-15 x -10..-9 stood nowhere
+     * ({@code placed=0/127}). A cat can only be standing in a region that
+     * exists, so skipping the rest loses nothing.
+     */
     private static void loadAround(Level level, int tileX, int tileY) {
         level.regionManager.ensureTileIsLoaded(tileX, tileY);
-        level.regionManager.ensureTilesAreLoadedButDontGenerate(
-                tileX - CAT_SEARCH_RADIUS, tileY - CAT_SEARCH_RADIUS,
-                tileX + CAT_SEARCH_RADIUS, tileY + CAT_SEARCH_RADIUS);
+        int startRegionX = level.regionManager.getRegionCoordByTile(tileX - CAT_SEARCH_RADIUS);
+        int startRegionY = level.regionManager.getRegionCoordByTile(tileY - CAT_SEARCH_RADIUS);
+        int endRegionX = level.regionManager.getRegionCoordByTile(tileX + CAT_SEARCH_RADIUS);
+        int endRegionY = level.regionManager.getRegionCoordByTile(tileY + CAT_SEARCH_RADIUS);
+        for (int regionX = startRegionX; regionX <= endRegionX; regionX++) {
+            for (int regionY = startRegionY; regionY <= endRegionY; regionY++) {
+                if (level.regionManager.isRegionGenerated(regionX, regionY)) {
+                    level.regionManager.ensureRegionIsLoaded(regionX, regionY);
+                }
+            }
+        }
     }
 
     private static boolean containsLevel(List<Level> levels, Level level) {

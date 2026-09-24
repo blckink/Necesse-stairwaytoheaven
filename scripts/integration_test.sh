@@ -18,6 +18,27 @@
 #   - the mod jar was built: ./gradlew buildModJar
 #
 # Usage: scripts/integration_test.sh
+#        INTEGRATION_SEED=VLk1r scripts/integration_test.sh   # fixed world seed
+#
+# INTEGRATION_SEED is the world's seed STRING -- what vanilla's world creation
+# asks for ("Please specify spawn seed"), letters/digits/spaces, max 50 chars;
+# vanilla's own random ones are five characters. Without it every run draws a
+# fresh random world, which is the right default (the gate should sample new
+# worlds) and the wrong tool for re-running one defect. The number the census
+# prints (`realmpoi census: seed=<int>`) is NOT this string: it is
+# `worldSeed.hashCode() ^ SkyOrigin.SEED_SALT` (SkyOrigin.worldGenSeed). To
+# re-run a world from an old log, read the string out of that run's
+# `saves/worlds/stairwaytest.zip` -> `stairwaytest/world.dat`, key `worldSeed`.
+#   1510824024 <- "VLk1r"   (the aethermanufactory placed=0/127 run, 2026-09-24)
+#
+# How the seed gets in (jar 1.3.2 ServerLoader.java:66-365): with `-world <name>`
+# the loader builds `new ServerCreationSettings(worldFile)`, whose worldSeed is
+# `getNewRandomSpawnSeed()` -- there is no launch option for a seed at all. The
+# only path that sets one is the interactive creation dialogue, reached by
+# starting WITHOUT `-world`: world name, "Custom server options? (y/n)", then
+# port, slots, password, spawn seed and guide house. Phase 1 answers that
+# dialogue through the same console pipe; the later phases load the saved world
+# with `-world` as always, and the seed lives in world.dat from then on.
 
 set -u
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
@@ -78,11 +99,27 @@ start_server() { # log_file
     # allowAttachSelf: on installs without a bundled jre/ (plain JDK >= 9 on
     # PATH) ByteBuddy's self-attach fallback fails and kills the boot before
     # mods load. The flag makes the game's own patching step work everywhere.
+    # A fixed seed can only be given on CREATION, through the interactive
+    # dialogue (see INTEGRATION_SEED in the header), so the first start of a
+    # seeded run leaves out -world and answers the questions instead.
+    local world_args=(-world "$WORLD")
+    local seeded=""
+    if [ -n "${INTEGRATION_SEED:-}" ] && [ ! -e "$WORK_DIR/saves/worlds/$WORLD.zip" ] \
+            && [ ! -e "$WORK_DIR/saves/worlds/$WORLD" ]; then
+        world_args=()
+        seeded=1
+    fi
     "$JAVA_BIN" -Xms256m -Xmx2G -Djdk.attach.allowAttachSelf=true -jar "$GAME_DIR/Server.jar" -nogui -localdir \
-        -world "$WORLD" -owner tester -port "$PORT" -mod "\"$MOD_DIR\"" \
+        "${world_args[@]}" -owner tester -port "$PORT" -mod "\"$MOD_DIR\"" \
         < "$PIPE" > "$LOG" 2>&1 &
     SERVER_PID=$!
     exec 3> "$PIPE"   # hold the pipe open
+    if [ -n "$seeded" ]; then
+        wait_for "Type a name for the world to create|Select a world" 120
+        echo "Creating world '$WORLD' with fixed seed '$INTEGRATION_SEED'..."
+        # name, custom options, port, slots, password (blank), seed, guide house
+        printf '%s\ny\n%s\n10\n\n%s\ny\n' "$WORLD" "$PORT" "$INTEGRATION_SEED" >&3
+    fi
     echo "Waiting for mod load..."
     wait_for "Loaded mods:.*Stairway to Heaven|Stairway to Heaven" 120
     echo "Waiting for world to be ready..."
@@ -391,6 +428,15 @@ grep -qE "eden registry: bronze=[0-9]+ serpent=[0-9]+ forbidden=[0-9]+" "$LOG1" 
     || { echo "FAIL: Eden items or mobs were not registered"; STATUS=1; }
 grep -qE "biome (driftlands|stormveil|aurorashoals|skyway)" "$LOG1" || { echo "FAIL: sky biomes did not paint"; STATUS=1; }
 grep -qE "spirePlaced=true" "$LOG1" || { echo "FAIL: Warden's Spire was not stamped"; STATUS=1; }
+# A sky region loaded WITHOUT generation stays empty and counts as generated
+# forever: no terrain, and every world preset overlapping it silently dropped.
+# CatHome's cat search did that around the lairs (seed VLk1r: the Aether
+# Manufactory read placed=0/127). SkyLevel.onGenerateRegionSkipped prints it.
+for log in "$WORK_DIR"/server*.log; do
+    grep -aqE "swh region skipped generation: " "$log" \
+        && { echo "FAIL: a region was loaded without being generated ($(basename "$log"))"; \
+             grep -aE "swh region skipped generation: " "$log" | head -5; STATUS=1; }
+done
 grep -qE "beaconObject=wardenbeaconoff" "$LOG1" || { echo "FAIL: spire beacon object missing"; STATUS=1; }
 # The way in. The Spire's doors sit on the axes through its origin, and the
 # forecourt lamp ring once stood a candelabra on the south one, so a player

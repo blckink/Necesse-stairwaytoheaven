@@ -4626,3 +4626,73 @@ each fact is known:
   `auth:stepID`, so `/swhreset regenerate`'s `copyProgressFrom` does not have
   to carry it. `villagePlaced` is on `SkywatchQuestData` and is deliberately
   NOT copied, so a regenerated hub gets a new village.
+
+## A region loaded without generation is empty AND "generated" forever — and it drops every preset over it (2026-09-24)
+
+The `aethermanufactory is missing 127 objects its preset placed` FAIL (the
+"HYPOTHESIS, not investigated" in the showroom gate record, at -257,-153) is
+not a seed flake. It is the cat search. So is the `dewkeepershut is missing 64
+objects` / all-`@t0` one listed just above (see "Same class" below).
+
+**Reproduced deterministically [run].** `scripts/integration_test.sh` now takes
+`INTEGRATION_SEED=<world seed string>` (see its header: the server has no seed
+launch option, so the first start answers the interactive creation dialogue).
+The census int 1510824024 is `"VLk1r".hashCode() ^ SkyOrigin.SEED_SALT`; the
+string was read out of the failing run's `world.dat` (`worldSeed`). Two runs of
+`INTEGRATION_SEED=VLk1r` both printed the identical line
+`realmpoi stamp: kind=aethermanufactory at=-257,-153 objects=31/567 fill=5.5% placed=0/127 missing=127 ...`
+and it was the run's only FAIL.
+
+**Mechanism [jar] + [run].**
+
+- `LevelPresetsRegion.startGenerateRegion` (jar 1.3.2 :348-381) sets
+  `hasAlreadyGeneratedRegion` on any queued preset one of whose OTHER occupied
+  regions `isRegionGenerated`, and `runGenerateRegion` then never places it.
+- `RegionManager.isRegionGenerated` is `regions.isRegionLoaded(..) ||
+  filesManager.isRegionGenerated(..)` — "is in the region map", not "was
+  painted".
+- `RegionManager.ensureTilesAreLoadedButDontGenerate` → `getRegion(x, y, true,
+  forceSkipGenerate=true)` → `loadNewRegion` constructs the region, calls
+  `Level.onGenerateRegionSkipped` (a no-op) instead of `generateRegion`, and
+  puts it in the map. No painter, no presets (and, read from source only, nothing
+  fills its tile layer) — and from then on it
+  is "generated", in memory and in the save.
+- `CatHome.loadAround` (ec7dee2, "cats a region off the spire are found") did
+  exactly that over a 32-tile ring round the basket and both lairs. On VLk1r the
+  black lair is -198,-107, so the ring covers regions -15..-11 x -9..-5. Debug
+  prints (since removed) showed region `-15x-9 loaded=true generated=true`
+  before the census stamp, **no `generateRegion` call for it at any point in
+  the run**, and the engine's own `DEBUG_PLACING_PRESETS` line:
+  `ALREADY GENERATED swh_realmpois:10@... aethermanufactory, REGION: -15x-9, STARTED FROM: -17x-10, RUN: 11`.
+  The Manufactory's rectangle spans -17..-15 x -10..-9, so one skipped corner
+  region cancelled the whole building; the other five regions generated as
+  plain terrain (the 1645/1646 flora the stamp line found).
+
+It was NOT the spire stamp, the forecourt, the occupancy boards or the census
+reading an unstamped rectangle: the spire box (-305..-273, -58..-26) is nowhere
+near, and the queue was real.
+
+**Fix.** `loadAround` now loads a ring region only if
+`isRegionGenerated` already says it exists (`ensureRegionIsLoaded`, which then
+reads it from file); a cat cannot be standing in a region that never existed.
+`SkyLevel.onGenerateRegionSkipped` prints
+`swh region skipped generation: <level> <x>x<y>` and the integration test fails
+on it in any phase, so no future `...ButDontGenerate` call can do this quietly.
+
+**Rule:** `ensure*ButDontGenerate` is for code that overwrites the whole region
+itself (vanilla's `ClearAreaServerCommand`, `OneWorldMigration`). It is never a
+cheap "load if it exists" — that is `isRegionGenerated` + `ensureRegionIsLoaded`.
+
+**Save consequence (HYPOTHESIS, not tested on a real save):** a world played on
+a build containing ec7dee2 whose cat search ran over ungenerated ground has
+those regions saved empty, and the presets over them are gone for good; the
+fix stops new ones but does not repair those. Repairing them would mean
+deleting the regions' save data so they regenerate — not done here.
+
+**Same class, from saved evidence [run] (geometry of a kept failing run, not
+re-run before the fix):** the `dewkeepershut ... objects=0/169 placed=0/64` run
+with every tile `@t0` had world seed `aKiVp`, `tabbyLair=142,-175`; the cat
+ring round it is tiles 110..174 x -207..-143, and the hut's box
+(122..134 x -156..-144) lies wholly inside it — every region under it was
+loaded empty, so no ground and no preset. The `rpeak=5200:0/3204` Outland FAIL
+(seed `yZeXb`) is 5000 tiles from any cat and is NOT this class.
