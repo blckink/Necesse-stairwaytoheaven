@@ -178,6 +178,11 @@ public final class QuestLadder {
             return data != null && data.isDone(auth, this.id);
         }
 
+        /** Recorded for the whole world (the six older chains), not per player. */
+        public boolean isWorldScoped() {
+            return this.worldDone != null;
+        }
+
         /** A fresh copy of this step's quest. */
         public Quest newQuest() {
             return this.factory.get();
