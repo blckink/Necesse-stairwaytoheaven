@@ -1242,17 +1242,17 @@ bloodvialtip=Mob drop - drawn from something that was grazing an hour ago. Still
 bloodfever=Blood Fever
 
 [bufftooltip]
-bloodfevertip=Bitten in the night. Pale, slow, and off their food until it passes.
+bloodfevertip=Bitten by Dorian. Slower, weaker at work, less health. Passes after a day - or the Doctor cures it at once.
 
 [misc]
-vampiresettlertip=Travels to a settlement that keeps a coffin. Sleeps through the day and works the night; hunts wild animals outside the walls, never your livestock.
-vampiretalkpitch=You keep a coffin and no one in it. I find that either an invitation or an oversight, and I am hoping for the first.
+vampiresettlertip=A vampire. Comes to a settlement that keeps a sarcophagus or a coffin bed. Sleeps by day and hunts wild animals outside the settlement at night. If he is thirsty and no Blood Bowl is filled, he bites one of your settlers - the Doctor can cure it.
+vampiretalkpitch=I am what your grandmothers called a vampire. I drink from animals - and from you, if you let me go hungry. You keep a coffin and no one in it; I am hoping that is an invitation.
 vampiretalk1=Your people work in the light and sleep in the dark. I have never understood the arrangement, but I keep the other half of it.
 vampiretalk2=There is a deer two fields over that has not noticed me yet. Give it an hour.
 vampiretalk3=I take nothing that wears your brand. That is not politeness. It is the agreement.
-vampiretalk4=Leave a vial out if you would rather I did not go looking. I am not proud.
+vampiretalk4=Fill a Blood Bowl if you would rather I did not go looking. Or hand me a vial yourself. I am not proud.
 vampiredrained=...
-vampirebite=Forgive me. Nobody left anything out.
+vampirebite=Forgive me. The bowl was empty.
 swhdoctorcure=Treat the bitten (<price> coins)
 swhdoctorcured=They will be themselves by morning. Keep that one fed.
 vampireturned=That one is not finished. Stand back.
@@ -1610,3 +1610,40 @@ auditorssealtip=Hell's own seal, by Form 666-B. Do not read what it says.
 bloodfevertincturetip=From the Doctor. Uncorked, it cures the blood fever of everyone bitten within ten tiles.
 readerslenssight=Shows ore through stone
 vergerlanternsight=Shows nearby enemies
+
+[quests]
+swhladderturnin=Bring it to <name> in the Spire Village.
+
+[misc]
+swhladderhintchapter=Opens with <chapter>
+
+// ---- Dorian made legible (concept-nightbound-dorian.md 3.1-3.5, E1-E5) ----
+[mobmsg]
+doctortalk6=Your night guest... I always keep something against blood fever. Come to me, or buy a tincture and do it yourself.
+doctortalk7=Two marks on the neck and pale as milk? That is not a cold. That is Dorian, and it is curable.
+
+[misc]
+swhdoctorbittenoption=Treat the bitten (<count>, <price> coins)
+swhdoctorbitten=<count> of your people have bite marks on the neck. I have something for that - it is not a cold.
+swhdorianoption=About your thirst
+swhdorianfeed=Give him a Blood Vial
+swhdorianfed=Thank you. That buys your people a night.
+swhdorianthirst0=I am sated. Nobody needs to worry tonight.
+swhdorianthirst1=I am thirsty. Not yet dangerous.
+swhdorianthirst2=I am very thirsty. Fill the bowl, or I go hunting further out.
+swhdorianthirst3=I will have to bite someone tonight. I would rather not.
+swhdorianreportquiet=Last night was quiet.
+swhdorianreport=Last night I drained <drained> animals. <thralls> got up again.
+swhdorianreportbit=<report> And I bit: <names>.
+vampirebowl=From the bowl. Better so.
+bloodbowlstock=The bowl holds <count> of <max> Blood Vials.\nDorian drinks from it at night before he would bite anyone.
+
+[ui]
+swhnotificationbloodfever=Dorian has bitten someone: blood fever
+swhnotificationbloodfeverhelp=Slower and weaker for a day. The Doctor cures it, or a Blood-Fever Tincture; a filled Blood Bowl stops the next bite.
+
+[object]
+bloodbowl=Blood Bowl
+
+[itemtooltip]
+bloodbowltip=Put Blood Vials in. Dorian drinks from it at night instead of biting a settler.

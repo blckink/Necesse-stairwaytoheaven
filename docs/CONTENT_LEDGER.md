@@ -557,6 +557,7 @@ below is paid by exactly one step and exists nowhere else. See
 | `rootcrown` | item | Root Crown: accessory, +60 health and +1 combat regen (one notch over the Aurora Locket, which it excludes); ladder step 18 (Chapter V). Borrowed icon `dryadcrown`. |
 | `knottkeyring` | item | Knott's Key Ring: accessory, -25% dash cooldown and +10% speed; ladder step 19 (A Door with Manners). Borrowed icon `ignitionkey`. |
 | `auditorsseal` | item | The Auditor's Seal: LEGENDARY accessory, +10% all damage and +5% crit; ladder step 20 (Form 666-B, Chapter VI - Hell). Borrowed icon `templependant`. |
+| `bloodbowl` | object | Blood Bowl: Dorian concept E3 - holds up to 12 Blood Vials; Dorian drinks one at night when his thirst runs low, before he would bite a settler; breaking it returns the vials. Sold by Dorian (3 200-4 800). Wears vanilla's `spiritbasin` sheet and icon (third borrow). |
 | `bloodfevertincture` | item | Blood-Fever Tincture: the Doctor's cure in a bottle (Dorian concept E5), cures blood fever on every settler within 10 tiles when uncorked; 250 coins at the Doctor. Borrowed icon `greaterhealthregenpotion`. |
 
 ## Baseline — registered before the ledger existed

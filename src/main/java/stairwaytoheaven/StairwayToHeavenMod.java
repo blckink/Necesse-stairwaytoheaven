@@ -208,6 +208,23 @@ public class StairwayToHeavenMod {
         necesse.engine.registries.QuestRegistry.registerQuest("swh_ladder_seeds", stairwaytoheaven.quest.ladder.LadderQuests.Seeds.class);
         necesse.engine.registries.QuestRegistry.registerQuest("swh_ladder_shells", stairwaytoheaven.quest.ladder.LadderQuests.Shells.class);
         necesse.engine.registries.QuestRegistry.registerQuest("swh_ladder_form", stairwaytoheaven.quest.ladder.LadderQuests.Form.class);
+        // The Adventurer's Journal reads its story steps from the ladder from
+        // now on (journal.JournalStepSource was left as the plug for this).
+        stairwaytoheaven.journal.AdventurerJournal.setStepSource(
+                new stairwaytoheaven.quest.ladder.QuestLadderSource());
+        // Dorian made legible (docs/design/concept-nightbound-dorian.md 3.1-3.5):
+        // the Blood Bowl he drinks from (E3) and where its stock lives, the
+        // settlement notification a bite files (E2 — supported by the engine,
+        // VERIFIED [jar]), and his own dialogue page (3.2).
+        stairwaytoheaven.settlement.BloodBowlObject.id = necesse.engine.registries.ObjectRegistry.registerObject(
+                "bloodbowl", new stairwaytoheaven.settlement.BloodBowlObject(), 40.0F, true);
+        necesse.engine.registries.WorldDataRegistry.registerWorldData(
+                stairwaytoheaven.settlement.NightboundWorldData.KEY,
+                stairwaytoheaven.settlement.NightboundWorldData.class);
+        necesse.level.maps.levelData.settlementData.notifications.SettlementNotificationRegistry
+                .registerNotification("swhbloodfever", new stairwaytoheaven.settlement.BloodFeverNotification());
+        necesse.engine.registries.SettlerDialogueRegistry.registerSettlerDialogue("swh_dorian",
+                stairwaytoheaven.settlement.DorianDialogue.class);
         // Petting a cat that lives in town (SpireCatMob.pet). Literal IDs for
         // the same reason as "bloodfever" below; they must stay equal to
         // CatCuddleBuff.SIGGI_ID / PEANUT_ID.

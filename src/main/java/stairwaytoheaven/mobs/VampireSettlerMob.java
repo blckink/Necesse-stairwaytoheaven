@@ -107,6 +107,13 @@ public class VampireSettlerMob extends SkySettlerMob {
         enableProfession("hunting");
         refuseJob("farming");
         refuseJob("forestry");
+
+        // The Blood Bowl he drinks from (concept E3): his to sell, since he is
+        // the one who wants it filled. 4 000 coins — the price of a sarcophagus
+        // at Mortimer's, the other thing a town buys to keep him.
+        this.shop.addSellingItem("bloodbowl",
+                new necesse.entity.mobs.friendly.human.humanShop.SellingShopItem(2, 1))
+                .setStaticPriceBasedOnHappiness(3200, 4800, 400);
     }
 
     /**
@@ -191,6 +198,14 @@ public class VampireSettlerMob extends SkySettlerMob {
         this.bloodThirst = Math.max(0.0F,
                 this.bloodThirst - (float) (50.0 / (1000.0 * (double) SECONDS_PER_FULL_THIRST)));
 
+        this.rollNight();
+        if (this.bloodThirst < BOWL_THRESHOLD
+                && stairwaytoheaven.settlement.BloodBowlObject.drinkNear(this.getLevel(),
+                        this.getTileX(), this.getTileY(), BOWL_REACH_TILES)) {
+            // Concept E3: the bowl, before anyone's neck.
+            this.feed(0.5F);
+            this.bubble("vampirebowl");
+        }
         if (this.bloodThirst > 0.0F) {
             this.biteCooldown = BITE_INTERVAL;
         } else if (--this.biteCooldown <= 0) {
@@ -228,6 +243,18 @@ public class VampireSettlerMob extends SkySettlerMob {
                 BloodFeverBuff.ID, victim, BloodFeverBuff.durationMs(), this), true);
         this.feed(0.5F);
         this.bubble("vampirebite");
+        // Concept 3.4 / E2: the town is told, in the settlement's own
+        // notification list — never in chat. It clears itself when the fever
+        // does (BloodFeverNotification.isStillValid).
+        this.tonightBitten.add(victim.getSettlerName());
+        if (victim.levelSettler != null && victim.levelSettler.data != null
+                && victim instanceof necesse.level.maps.levelData.settlementData.settler.SettlerMob) {
+            victim.levelSettler.data.networkData.notifications.submitNotification(
+                    stairwaytoheaven.settlement.BloodFeverNotification.ID,
+                    (necesse.level.maps.levelData.settlementData.settler.SettlerMob) victim,
+                    necesse.level.maps.levelData.settlementData.notifications
+                            .SettlementNotificationSeverity.WARNING);
+        }
     }
 
     /**
@@ -341,6 +368,7 @@ public class VampireSettlerMob extends SkySettlerMob {
             return;
         }
         this.feed(0.34F);
+        this.tonightDrained++;
         GameRandom random = GameRandom.globalRandom;
         float preyX = prey.x;
         float preyY = prey.y;
@@ -364,6 +392,7 @@ public class VampireSettlerMob extends SkySettlerMob {
             // loot an ordinary animal never does — see BloodThrallMob.
             Mob thrall = necesse.engine.registries.MobRegistry.getMob("bloodthrall", level);
             if (thrall != null) {
+                this.tonightThralls++;
                 level.entityManager.addMob(thrall, preyX, preyY);
                 this.bubble("vampireturned");
                 return;
@@ -382,12 +411,99 @@ public class VampireSettlerMob extends SkySettlerMob {
     public void addSaveData(SaveData save) {
         super.addSaveData(save);
         save.addFloat("bloodthirst", this.bloodThirst);
+        save.addBoolean("nightrolled", this.wasNight);
+        save.addInt("tonightdrained", this.tonightDrained);
+        save.addInt("tonightthralls", this.tonightThralls);
+        save.addStringArray("tonightbitten", this.tonightBitten.toArray(new String[0]));
+        save.addInt("lastdrained", this.lastDrained);
+        save.addInt("lastthralls", this.lastThralls);
+        save.addSafeString("lastbitten", this.lastBitten);
     }
 
     @Override
     public void applyLoadData(LoadData save) {
         super.applyLoadData(save);
         this.bloodThirst = save.getFloat("bloodthirst", this.bloodThirst, false);
+        this.wasNight = save.getBoolean("nightrolled", false, false);
+        this.tonightDrained = save.getInt("tonightdrained", 0, false);
+        this.tonightThralls = save.getInt("tonightthralls", 0, false);
+        this.tonightBitten.clear();
+        for (String name : save.getStringArray("tonightbitten", new String[0], false)) {
+            if (name != null && !name.isEmpty()) {
+                this.tonightBitten.add(name);
+            }
+        }
+        this.lastDrained = save.getInt("lastdrained", 0, false);
+        this.lastThralls = save.getInt("lastthralls", 0, false);
+        this.lastBitten = save.getSafeString("lastbitten", "", false);
+    }
+
+    // --- what he can tell you (concept 3.2) -------------------------------
+
+    /** Below this he goes to a Blood Bowl rather than wait for empty. */
+    private static final float BOWL_THRESHOLD = 0.25F;
+    /** How far he walks for a bowl: his settlement, give or take. */
+    private static final int BOWL_REACH_TILES = 40;
+
+    private boolean wasNight;
+    private int tonightDrained;
+    private int tonightThralls;
+    private final java.util.ArrayList<String> tonightBitten = new java.util.ArrayList<>();
+    private int lastDrained;
+    private int lastThralls;
+    private String lastBitten = "";
+
+    /**
+     * At every dusk, "tonight" becomes "last night" and starts again from
+     * zero — so the report he gives by day is the night just gone. Called
+     * from the settler tick, which only runs while he is a settler.
+     */
+    private void rollNight() {
+        boolean night = this.isNightTime();
+        if (night && !this.wasNight) {
+            this.lastDrained = this.tonightDrained;
+            this.lastThralls = this.tonightThralls;
+            this.lastBitten = String.join(", ", this.tonightBitten);
+            this.tonightDrained = 0;
+            this.tonightThralls = 0;
+            this.tonightBitten.clear();
+        }
+        this.wasNight = night;
+    }
+
+    /** 0 sated, 1 thirsty, 2 very thirsty, 3 he will bite tonight. */
+    public int thirstStage() {
+        if (this.bloodThirst > 0.66F) return 0;
+        if (this.bloodThirst > 0.33F) return 1;
+        if (this.bloodThirst > 0.0F) return 2;
+        return 3;
+    }
+
+    /** The night being reported: the last finished one, or tonight's so far by night. */
+    public int lastNightDrained() {
+        return this.isNightTime() ? this.tonightDrained : this.lastDrained;
+    }
+
+    public int lastNightThralls() {
+        return this.isNightTime() ? this.tonightThralls : this.lastThralls;
+    }
+
+    public String lastNightBitten() {
+        return this.isNightTime() ? String.join(", ", this.tonightBitten) : this.lastBitten;
+    }
+
+    /** His dialogue page: thirst, a vial, last night (concept 3.2). */
+    @Override
+    public java.util.ArrayList<necesse.level.maps.levelData.settlementData.settler.dialogues.SettlerDialogue>
+            getDialogues(necesse.engine.network.server.ServerClient client,
+                    necesse.level.maps.levelData.settlementData.ServerSettlementData data,
+                    boolean clientHasAccess) {
+        java.util.ArrayList<necesse.level.maps.levelData.settlementData.settler.dialogues.SettlerDialogue> out =
+                super.getDialogues(client, data, clientHasAccess);
+        if (clientHasAccess && this.isSettler()) {
+            out.add(new stairwaytoheaven.settlement.DorianDialogue(this));
+        }
+        return out;
     }
 
     // --- the face ---------------------------------------------------------

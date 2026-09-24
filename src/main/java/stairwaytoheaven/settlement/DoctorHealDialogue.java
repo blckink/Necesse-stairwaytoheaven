@@ -147,6 +147,17 @@ public class DoctorHealDialogue extends SettlerDialogue {
     }
 
     /** Whether anyone on this level is carrying the bite. */
+    /** How many people on this level carry blood fever right now. */
+    protected static int countFeverPatients(necesse.level.maps.Level level) {
+        if (level == null) {
+            return 0;
+        }
+        return (int) level.entityManager.mobs.stream()
+                .filter(m -> m.isHuman && m.buffManager.hasBuff(
+                        stairwaytoheaven.mobs.BloodFeverBuff.ID))
+                .count();
+    }
+
     protected static boolean hasFeverPatients(necesse.level.maps.Level level) {
         return level != null && level.entityManager.mobs.stream()
                 .anyMatch(m -> m.isHuman && m.buffManager.hasBuff(
@@ -228,6 +239,21 @@ public class DoctorHealDialogue extends SettlerDialogue {
             return;
         }
         this.buildHealForm(container, containerForm);
+        // Concept 3.5: the bitten get a line of their own on the first page
+        // while anyone has blood fever — no longer hidden one menu down under
+        // "patch me up".
+        int bitten = countFeverPatients(this.settlerMob.getLevel());
+        if (bitten > 0) {
+            containerForm.dialogueForm.addDialogueOption(
+                    new LocalMessage("misc", "swhdoctorbittenoption",
+                            "count", Integer.toString(bitten), "price", Integer.toString(this.price)),
+                    () -> {
+                        this.healedThisVisit = false;
+                        this.curedThisVisit = false;
+                        this.buildHealForm(container, containerForm);
+                        containerForm.makeCurrent(this.healForm);
+                    });
+        }
         containerForm.dialogueForm.addDialogueOption(
                 new LocalMessage("misc", "swhdoctoroption", "price", Integer.toString(this.price)),
                 () -> {
@@ -244,9 +270,17 @@ public class DoctorHealDialogue extends SettlerDialogue {
         this.healForm.reset(container.humanShop, true, container.romanceLevel,
                 (contentBox, flow) -> {
                     Runnable chatBubble = DialogueForm.startChatBubble(contentBox, flow);
+                    int bitten = countFeverPatients(this.settlerMob.getLevel());
                     if (this.curedThisVisit) {
                         DialogueForm.addText(contentBox, flow,
                                 new LocalMessage("misc", "swhdoctorcured"), true);
+                    } else if (bitten > 0 && !healed) {
+                        // Concept 3.5: the opening line names the bitten, and
+                        // never says "nothing is wrong with you" while the
+                        // cure button sits under it.
+                        DialogueForm.addText(contentBox, flow,
+                                new LocalMessage("misc", "swhdoctorbitten",
+                                        "count", Integer.toString(bitten)), true);
                     } else if (healed) {
                         DialogueForm.addText(contentBox, flow,
                                 new LocalMessage("misc", "swhdoctordone"), true);

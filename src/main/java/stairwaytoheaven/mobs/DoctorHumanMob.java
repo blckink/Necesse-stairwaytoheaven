@@ -106,6 +106,13 @@ public class DoctorHumanMob extends HumanShop {
                 .setPriceBasedOnHappiness(12, 3, 3);
         this.shop.addBuyingItem("iceblossom", new BuyingShopItem())
                 .setPriceBasedOnHappiness(12, 3, 3);
+
+        // --- the cure in a bottle (Dorian concept, E5) -----------------------
+        // 250 against his on-the-spot 100: it saves the walk, so it costs more,
+        // which is what the concept asked for. Always on the shelf — the fever
+        // is not the only reason to want one ready.
+        this.shop.addSellingItem("bloodfevertincture", new SellingShopItem(5, 1))
+                .setStaticPrice(250, 250);
     }
 
     /**
@@ -122,7 +129,9 @@ public class DoctorHumanMob extends HumanShop {
 
     @Override
     protected ArrayList<GameMessage> getMessages(ServerClient client) {
-        return getLocalMessages("mobmsg", "doctortalk", 5);
+        // Six and seven are about the Nightbound (concept 3.5): a player hears
+        // of the cure before the day they need it.
+        return getLocalMessages("mobmsg", "doctortalk", 7);
     }
 
     /**
