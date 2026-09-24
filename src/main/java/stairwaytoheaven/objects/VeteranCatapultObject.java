@@ -105,8 +105,11 @@ public class VeteranCatapultObject extends GameObject {
         this.mapColor = new Color(110, 95, 70);
         this.isLightTransparent = true;
         this.objectHealth = 250;
-        this.setItemCategory("objects", "decorations");
-        this.setCraftingCategory("objects", "decorations");
+        // A settlement DEFENCE, sold by the War Veteran: vanilla files its
+        // own defences under objects.traps. The crafting tree has no traps
+        // node, so that side is objects.misc. docs/ITEM_CATEGORIES.md.
+        this.setItemCategory("objects", "traps");
+        this.setCraftingCategory("objects", "misc");
     }
 
     /** Registers the nine pieces; the master keeps the ID {@code veterancatapult}. */

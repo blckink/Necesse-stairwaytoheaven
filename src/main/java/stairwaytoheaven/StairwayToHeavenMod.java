@@ -52,6 +52,8 @@ import stairwaytoheaven.tiles.MurkwaterTile;
 public class StairwayToHeavenMod {
 
     public void init() {
+        // Per-item category census at server start; docs/ITEM_CATEGORIES.md.
+        CategoryCensus.register();
         registerDimension();
         registerBiomes();
         registerTiles();

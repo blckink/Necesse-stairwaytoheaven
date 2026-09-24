@@ -167,6 +167,8 @@ Before handing off new content, explicitly answer this checklist for each new fa
 - What does it drop / reward / unlock?
 - Does it need an item icon?
 - Does it need an object item?
+- Which inventory and crafting category does it sort into (the vanilla family it belongs to — never the bare `objects`/`misc` default; the server's `swhcat census` line must stay `bad=0`, see `docs/ITEM_CATEGORIES.md`)?
+- If the world places it and it is also buildable: does breaking a NATURAL one give its material (or nothing), and only a player-placed one give itself back (`isPlayerPlaced`, as vanilla does)?
 - Does it need locale keys?
 - Does it need crafting?
 - Does it need bestiary/journal support?

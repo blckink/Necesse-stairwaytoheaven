@@ -32,6 +32,11 @@ public class OvergrownEdenSeedItem extends GrassSeedItem {
 
     public OvergrownEdenSeedItem() {
         super("overgrownedentile");
+        // Vanilla's GrassSeedItem sets no category and falls into the bare
+        // "misc" root (Item.java:180). A seed the player plants belongs with
+        // the other seeds; docs/ITEM_CATEGORIES.md.
+        this.setItemCategory("objects", "seeds");
+        this.setItemCategory(necesse.inventory.item.ItemCategory.craftingManager, "objects");
     }
 
     @Override

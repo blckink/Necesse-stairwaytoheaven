@@ -76,13 +76,18 @@ final class SkyObjects {
             }
         }
 
-        GrassObject skyreeds = new GrassObject("skyreeds", 4);
+        // Wild grass gives vanilla's wild-grass drop, not itself: see
+        // NaturalGrassObject and docs/ITEM_CATEGORIES.md.
+        GrassObject skyreeds = new stairwaytoheaven.objects.NaturalGrassObject("skyreeds", 4, wildGrassLoot(null));
         skyreeds.mapColor = new Color(168, 184, 178);
         SkyRegistry.skyreedsID = ObjectRegistry.registerObject("skyreeds", skyreeds, 1.0F, true);
 
         // Eden's own eight-variant ground cover. OvergrownEdenTile grows this
         // instead of vanilla grass; its ObjectItem uses the matching icon.
-        GrassObject overgrowngrass = new GrassObject("overgrowngrass", 8);
+        // ...and its 1% seed chance is Eden's own seed, the way vanilla's
+        // overgrown grass drops overgrowngrassseed.
+        GrassObject overgrowngrass = new stairwaytoheaven.objects.NaturalGrassObject("overgrowngrass", 8,
+                wildGrassLoot("overgrownedenseed"));
         overgrowngrass.mapColor = new Color(45, 112, 37);
         SkyRegistry.overgrowngrassID = ObjectRegistry.registerObject(
                 "overgrowngrass", overgrowngrass, 1.0F, true);
@@ -91,6 +96,12 @@ final class SkyObjects {
         // berry bush that drops food instead of its own object item.
         GrassObject windwheat = new GrassObject("windwheat", 4);
         windwheat.mapColor = new Color(196, 196, 156);
+        // Windwheat is a HARVEST, not scenery: it is what cutting it gives, it
+        // is what Eveleen and Halda buy and what Driftlands crates carry. So it
+        // keeps dropping itself, but sorts where vanilla's wheat sorts
+        // (GrainItem -> FoodMatItem: consumable.rawfood; crafting: materials).
+        windwheat.setItemCategory("consumable", "rawfood");
+        windwheat.setCraftingCategory("materials");
         SkyRegistry.windwheatID = ObjectRegistry.registerObject("windwheat", windwheat, 1.0F, true);
 
         // The Cloudberry Bush is a REAL BUSH now (v0.9), and that one change
@@ -352,7 +363,7 @@ final class SkyObjects {
         RockObject evilwall = new RockObject("evilwall", new Color(99, 15, 143), "crystalstone", SKY_CATEGORY);
         SkyRegistry.evilwallID = ObjectRegistry.registerObject("evilwall", evilwall, -1.0F, true);
 
-        GrassObject whisperreeds = new GrassObject("whisperreeds", 4);
+        GrassObject whisperreeds = new stairwaytoheaven.objects.NaturalGrassObject("whisperreeds", 4, wildGrassLoot(null));
         whisperreeds.mapColor = new Color(96, 110, 96);
         SkyRegistry.whisperreedsID = ObjectRegistry.registerObject("whisperreeds", whisperreeds, 1.0F, true);
 
@@ -363,6 +374,11 @@ final class SkyObjects {
                 "gloomshroom", 32, new Color(122, 196, 160), null, "objects", "decorations")
                 .setTool(ToolType.ALL).setObjectHealth(1)
                 .setLight(70, 0.40F, 0.40F);
+        // A forage flower that is replanted by placing it: vanilla's
+        // FlowerObject (sunflower, firemone, mushroom) sorts exactly that under
+        // materials.flowers, and so does this.
+        gloomshroom.setItemCategory("materials", "flowers");
+        gloomshroom.setCraftingCategory("materials");
         SkyRegistry.gloomshroomID = ObjectRegistry.registerObject("gloomshroom", gloomshroom, 5.0F, true);
 
         // half-buried ribcage: harvest node for Cinder Pearls (drops no item of
@@ -379,8 +395,13 @@ final class SkyObjects {
 
         // crooked bare tree: woody trunk, so axe like every TreeObject.
         stairwaytoheaven.objects.SkyDecoObject deadtree = new stairwaytoheaven.objects.SkyDecoObject(
-                "deadtree", 48, new Color(60, 52, 58), null, "objects", "decorations")
-                .setTool(ToolType.AXE);
+                "deadtree", 48, new Color(60, 52, 58), null, "objects", "landscaping", "plants")
+                .setTool(ToolType.AXE)
+                // Scattered all over the Veil and the Outlands: chopping one
+                // the world grew gives logs like vanilla's dead trees, not a
+                // "Dead Tree" object for the bag.
+                .setNaturalLoot(new necesse.inventory.lootTable.LootTable(
+                        necesse.inventory.lootTable.lootItem.LootItem.between("deadwoodlog", 2, 4)));
         SkyRegistry.deadtreeID = ObjectRegistry.registerObject("deadtree", deadtree, 4.0F, true);
 
         // Salvage crates: vanilla's entire exploration loop is containers, and
@@ -396,6 +417,16 @@ final class SkyObjects {
         SkyRegistry.skyCrateID = ObjectRegistry.registerObject("skycrate", skycrate, 0.0F, false);
 
         allowShore("veilrock", "whisperreeds", "gloomshroom", "ashbones", "deadtree");
+    }
+
+    /** Vanilla SurfaceGrassObject's natural drop: 1/35 worm bait, 1% seed. */
+    private static necesse.inventory.lootTable.LootTable wildGrassLoot(String seedItem) {
+        necesse.inventory.lootTable.LootTable loot = new necesse.inventory.lootTable.LootTable(
+                new necesse.inventory.lootTable.lootItem.ChanceLootItem(1.0F / 35.0F, "wormbait"));
+        if (seedItem != null) {
+            loot.items.add(new necesse.inventory.lootTable.lootItem.ChanceLootItem(0.01F, seedItem));
+        }
+        return loot;
     }
 
     static final necesse.inventory.lootTable.LootTable ashbonesLoot =

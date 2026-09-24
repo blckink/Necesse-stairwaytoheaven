@@ -57,6 +57,20 @@ und Sturmglas-Ofen sind `SettlementWorkstationObject`; `LevelJobRegistry` legt
 jeden Werkstatt-Job unter die geteilte **Handwerk**-Priorität — derselbe Topf
 wie Vanillas Schmiede. Jeder Siedler mit Handwerk kann jede davon bedienen.
 
+**Geisterschmiede und Seelenwebstuhl** (Geisterreich) lassen sich seit
+2026-09-24 an der Werkbank bauen — vorher gab es sie nirgends:
+Geisterschmiede = 20 Knochenholz + 8 Spektralerz + 6 Ektoplasma,
+Seelenwebstuhl = 12 Knochenholz + 8 Ektoplasma + 4 Seelenfaden. Die Mengen sind
+ein Vorschlag.
+
+**Sortierung und Abbau (2026-09-24).** Alles aus der Mod steht jetzt in echten
+Vanilla-Kategorien (Material, Rohkost, Quest-Items, Fallen, Landschaft …), und
+Welt-Szenerie gibt beim Abbauen Material statt sich selbst: Toter Baum →
+Totholz, Sturmschutt/Wächter-Trümmer → Himmelsstein, Kristalle → ihre
+Scherben, wildes Gras → wie Vanilla-Gras (Wurmköder, beim Eden-Gras selten
+Saat). Selbst gebaute Stücke geben sich weiter selbst zurück. Details:
+`docs/ITEM_CATEGORIES.md`.
+
 ---
 
 ## 2. Alle NPCs

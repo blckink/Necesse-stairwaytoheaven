@@ -91,12 +91,17 @@ public final class EdenRealm {
     }
 
     private static void registerItems() {
+        // Categories (docs/ITEM_CATEGORIES.md, 2026-09-24): nothing sits in a
+        // bare "materials" root any more. The fruit sort where vanilla's raw
+        // crop ingredients do (wheat, sugarbeet, honey: consumable.rawfood);
+        // the sap and the cutting are plant matter, which vanilla files under
+        // materials.flowers (mushroom, thorns).
         ItemRegistry.registerItem("edenwood", new GhostMatItem("palmlog", 500, Item.Rarity.UNCOMMON)
                 .setItemCategory("materials", "logs"), 10.0F, true);
         ItemRegistry.registerItem("edensap", new GhostMatItem("dryadbranch", 500, Item.Rarity.UNCOMMON)
-                .setItemCategory("materials"), 10.0F, true);
+                .setItemCategory("materials", "flowers"), 10.0F, true);
         ItemRegistry.registerItem("paradiseapple", new GhostMatItem("apple", 500, Item.Rarity.UNCOMMON)
-                .setItemCategory("materials"), 10.0F, true);
+                .setItemCategory("consumable", "rawfood"), 10.0F, true);
         ItemRegistry.registerItem("serpentscale", new GhostMatItem("sharkscales", 500, Item.Rarity.RARE)
                 .setItemCategory("materials", "mobdrops"), 10.0F, true);
         ItemRegistry.registerItem("venomfang", new GhostMatItem("fangoftheprotector", 500, Item.Rarity.RARE)
@@ -104,15 +109,15 @@ public final class EdenRealm {
         ItemRegistry.registerItem("goldenpollen", new GhostMatItem("honey", 500, Item.Rarity.RARE)
                 .setItemCategory("materials", "flowers"), 10.0F, true);
         ItemRegistry.registerItem("knowledgecutting", new GhostMatItem("dryadsapling", 500, Item.Rarity.EPIC)
-                .setItemCategory("materials"), 10.0F, true);
+                .setItemCategory("materials", "flowers"), 10.0F, true);
         ItemRegistry.registerItem("paradisecoconut", new GhostMatItem("coconut", 500, Item.Rarity.UNCOMMON)
-                .setItemCategory("materials"), 10.0F, true);
+                .setItemCategory("consumable", "rawfood"), 10.0F, true);
         ItemRegistry.registerItem("edenberry", new GhostMatItem("blueberry", 500, Item.Rarity.UNCOMMON)
-                .setItemCategory("materials"), 10.0F, true);
+                .setItemCategory("consumable", "rawfood"), 10.0F, true);
         ItemRegistry.registerItem("moonmelon", new GhostMatItem("frozenberry", 500, Item.Rarity.UNCOMMON)
-                .setItemCategory("materials"), 10.0F, true);
+                .setItemCategory("consumable", "rawfood"), 10.0F, true);
         ItemRegistry.registerItem("sungrape", new GhostMatItem("raspberry", 500, Item.Rarity.UNCOMMON)
-                .setItemCategory("materials"), 10.0F, true);
+                .setItemCategory("consumable", "rawfood"), 10.0F, true);
         ItemRegistry.registerItem("edencopperore", new GhostMatItem("ivyore", 500, Item.Rarity.RARE)
                 .setItemCategory("materials", "ore"), 10.0F, true);
         ItemRegistry.registerItem("edenbronzebar", new GhostMatItem("ivybar", 500, Item.Rarity.EPIC)

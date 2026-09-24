@@ -205,6 +205,20 @@ public final class GhostRealm {
     }
 
     public static void registerRecipes() {
+        // The two stations had NO source at all until 2026-09-24: registered
+        // obtainable, sold by nobody, in no loot table and in no preset, so
+        // Soul Thread, Spiritsteel and the whole Spiritsteel set behind them
+        // could not be made (docs/ITEM_CATEGORIES.md, "obtainable but no
+        // source"). They now build at the Workstation like the Skyreach's
+        // three (SkyProfessions: windsilkloom, aetherforge, stormglasskiln),
+        // and the gate WORLD_DESIGN's unlock table asks for ("Ghost Realm
+        // entered -> Spirit Forge") is the materials: Bonewood, Ectoplasm and
+        // Spectral Ore only come out of the Ghost Realm. The quantities are a
+        // first proposal -- IMPLEMENTED, awaiting player confirmation.
+        Recipes.registerModRecipe(new Recipe("spiritforge", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{bonewood, 20}, {spectralore, 8}, {ectoplasm, 6}}")));
+        Recipes.registerModRecipe(new Recipe("soulloom", 1, RecipeTechRegistry.WORKSTATION,
+                Recipes.ingredientsFromScript("{{bonewood, 12}, {ectoplasm, 8}, {soulthread, 4}}")));
         Recipes.registerModRecipe(new Recipe("soulbasin", 1, RecipeTechRegistry.TUNGSTEN_WORKSTATION,
                 Recipes.ingredientsFromScript("{{ectoplasm, 12}, {veilessence, 6}, {bone, 8}}")));
         Recipes.registerModRecipe(new Recipe("soulthread", 2, SOUL_LOOM,

@@ -283,18 +283,22 @@ public final class SteinfeldRealm {
         // elsewhere needs the numeric ID -- every reference to these four (the
         // three biomes' crate tables, the four mobs' loot tables, the two
         // landmark presets) is by their string ID, inside a LootTable.
+        //
+        // Categories follow vanilla's own families (docs/ITEM_CATEGORIES.md):
+        // a rock's drop is materials.stone like vanilla stone, salt and shards
+        // are minerals like quartz and amber, the moss is plant matter.
         ItemRegistry.registerItem("palestone",
                 new SteinfeldMatItem("cryptstone", 500, Item.Rarity.UNCOMMON)
-                        .setItemCategory("materials"), 6.0F, true);
+                        .setItemCategory("materials", "stone"), 6.0F, true);
         ItemRegistry.registerItem("gravesalt",
                 new SteinfeldMatItem("alchemyshard", 500, Item.Rarity.UNCOMMON)
-                        .setItemCategory("materials"), 18.0F, true);
+                        .setItemCategory("materials", "minerals"), 18.0F, true);
         ItemRegistry.registerItem("spiritmoss",
                 new SteinfeldMatItem("phantomdust", 500, Item.Rarity.RARE)
-                        .setItemCategory("materials"), 32.0F, true);
+                        .setItemCategory("materials", "flowers"), 32.0F, true);
         ItemRegistry.registerItem("echoshard",
                 new SteinfeldMatItem("pearlescentshard", 500, Item.Rarity.RARE)
-                        .setItemCategory("materials"), 45.0F, true);
+                        .setItemCategory("materials", "minerals"), 45.0F, true);
     }
 
     /**

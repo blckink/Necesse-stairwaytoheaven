@@ -418,7 +418,16 @@ These are the objects with real behaviour, as opposed to deco and furniture.
 | **Skyward Stairway** | surface | The ascent. First use stamps the Warden Spire and gives `swh_findspire`. |
 | **Warden Beacon** | Spire | Lights on recruiting the Warden. |
 | **Aether Forge** · **Windsilk Loom** · **Stormglass Kiln** | settlement | The three settler-operable workstations — see §5. |
+| **Spirit Forge** · **Soul Loom** | settlement | Ghost Realm stations (Spiritsteel bar/armour; Soul Thread). Had **no source at all** until 2026-09-24; now Workstation recipes from Ghost-Realm-only materials (Bonewood, Ectoplasm, Spectral Ore / Soul Thread). IMPLEMENTED — awaiting player confirmation; recipe verified registered (`swhcat item spiritforge … recipe=workstation`, VERIFIED [run]). |
 | **Eden / Ghost / Crooked gates** | band borders | Move you between bands on the plane, destination computed by `RealmLanding`, not by a dimension change. Their **return halves** (`edengateup`, `ghostgateup`, `crookeddoorup`, `veilriftup`) are registered and **placed by nothing**. |
+
+**Categories and natural drops (2026-09-24).** Every mod item now sorts into a
+real vanilla category (server gate `swhcat census: … bad=0`), and ten pieces of
+worldgen scenery — dead tree, scree, rubble, three crystals, withershrub, two
+reeds and Eden grass — break into material (or vanilla's wild-grass drop)
+when the WORLD placed them, and into themselves only when a player did.
+`docs/ITEM_CATEGORIES.md`. VERIFIED [run] on the server; FIXED — awaiting
+player confirmation in the client.
 
 **Silver Bell** is retired (2026-09-24): its door, the Veil Rift, went with
 PLAN_ONE_PLANE. Nothing gives, sells or drops it; it stays registered only so

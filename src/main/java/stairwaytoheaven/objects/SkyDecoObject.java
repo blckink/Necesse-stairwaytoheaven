@@ -12,6 +12,7 @@ import necesse.gfx.drawOptions.texture.TextureDrawOptionsEnd;
 import necesse.gfx.drawables.LevelSortedDrawable;
 import necesse.gfx.drawables.OrderableDrawables;
 import necesse.gfx.gameTexture.GameTexture;
+import necesse.inventory.lootTable.LootTable;
 import necesse.inventory.item.toolItem.ToolType;
 import necesse.level.gameObject.GameObject;
 import necesse.level.maps.Level;
@@ -28,6 +29,11 @@ public class SkyDecoObject extends GameObject {
     private final int variantWidth;
     public GameTexture texture;
     private final GameRandom drawRandom = new GameRandom();
+    /**
+     * What a piece the WORLD placed gives when broken; null = its own item.
+     * See {@link #setNaturalLoot}.
+     */
+    private LootTable naturalLoot;
 
     public SkyDecoObject(String textureName, int variantWidth, Color mapColor, Rectangle collision, String... category) {
         this.textureName = textureName;
@@ -62,6 +68,33 @@ public class SkyDecoObject extends GameObject {
     public SkyDecoObject setObjectHealth(int objectHealth) {
         this.objectHealth = objectHealth;
         return this;
+    }
+
+    /**
+     * Natural pieces break into their MATERIAL, placed ones into themselves.
+     *
+     * <p>Vanilla's own rule for anything that is both scenery and buildable
+     * (CrystalClusterObject, CowSkeletonObject, SurfaceGrassObject,
+     * CobwebObject -- jar 1.3.2, each {@code getLootTable}): if
+     * {@code level.objectLayer.isPlayerPlaced} the object gives itself back,
+     * otherwise it gives what it is made of, or nothing. Without it every
+     * scree pile, crystal and dead tree worldgen scattered went into the
+     * player's bag as a placeable OBJECT -- the "Grossteil als Objekte" of
+     * the 2026-09-24 report (docs/ITEM_CATEGORIES.md). The flag is saved per
+     * tile ({@code objectIsPlayerPlaced}, ArrayObjectLayer.java:90), so a piece
+     * a player already built in an old save still comes back whole.
+     */
+    public SkyDecoObject setNaturalLoot(LootTable naturalLoot) {
+        this.naturalLoot = naturalLoot;
+        return this;
+    }
+
+    @Override
+    public LootTable getLootTable(Level level, int layerID, int tileX, int tileY) {
+        if (this.naturalLoot != null && !level.objectLayer.isPlayerPlaced(tileX, tileY)) {
+            return this.naturalLoot;
+        }
+        return super.getLootTable(level, layerID, tileX, tileY);
     }
 
     @Override

@@ -4341,3 +4341,46 @@ at the top of the side view). All fixed; the tool is green.
 
 **[unverified]** Not seen in game after the fix. Vanilla sprites are absent on
 this machine, so size/proportion against vanilla wall pieces is unmeasured.
+
+## Item categories, and why "most of it is objects" was a DROP problem (2026-09-24)
+
+Full audit and table: `docs/ITEM_CATEGORIES.md`.
+
+- **Three category trees, not one.** `ItemCategory.masterManager` (inventory
+  sort, creative menu), `craftingManager` (crafting tabs), `equipmentManager`.
+  The crafting tree is flatter: its `tiles` has no children, and it has no
+  `misc.questitems` and no `objects.traps`. Asking a manager for a path it does
+  not have throws `IllegalStateException("Must first create item category …")`
+  at registration (ItemCategoryManager.getCategory). `SkyDecoObject`'s
+  constructor applies ONE tree to both managers, so a SkyDecoObject that wants
+  `misc.questitems` or `materials.flowers` must set its crafting side
+  separately afterwards. VERIFIED [jar].
+- **Defaults are bare roots.** `Item` → `misc` in both trees (Item.java:180);
+  `GameObject` → bare `objects` (GameObject.java:113-114). Vanilla base classes
+  override in their constructors (MatItem, GrainItem, FlowerObject,
+  GrassObject, CraftingStationObject …). VERIFIED [jar].
+- **An ObjectItem copies its object's trees in its constructor**
+  (ObjectItem.java:55-56), i.e. inside `registerObject`. Setting the category
+  on the object after that does nothing. VERIFIED [jar].
+- **Natural vs placed is a saved per-tile flag.** `GameObject.placeObject(...,
+  byPlayer)` writes `objectLayer.setIsPlayerPlaced` (GameObject.java:607);
+  `ArrayObjectLayer` saves it as `objectIsPlayerPlaced` (:90) and reloads it.
+  Vanilla scenery that is also buildable branches on it in `getLootTable`
+  (SurfaceGrassObject, CrystalClusterObject, CowSkeletonObject, CobwebObject).
+  VERIFIED [jar]. Ours now do too (`SkyDecoObject.setNaturalLoot`,
+  `objects/NaturalGrassObject`), and the branch was observed on a real server:
+  `swhcat loot deadtree natural=[deadwoodlog] placed=[deadtree]`,
+  `swhcat loot skyreeds natural=[wormbait] placed=[skyreeds]` (VERIFIED [run],
+  `CategoryCensus.probeLoot` on a throwaway 8x8 `Level` that is never added to
+  the world).
+- **A throwaway `Level` is usable server-side for probing.** `new Level(new
+  LevelIdentifier("x"), 8, 8, server.world.worldEntity)` accepts
+  `objectLayer.setObject` / `setIsPlayerPlaced` and answers `getLootTable`
+  without being registered with the world. VERIFIED [run]; nothing about it
+  is saved.
+- **`CategoryCensus`** prints `swhcat item <id> kind= class= cat= craft= obt=
+  creative= listed= broker= rarity= loot= recipe=` for every mod item at
+  server start and a `swhcat census: … bad=N` summary that the integration
+  test holds at 0. `ItemRegistry.getItemMod(id).id` is how an item is told to
+  be ours; `Recipes.getRecipesFromResult` is populated by ServerStartEvent.
+  VERIFIED [run].

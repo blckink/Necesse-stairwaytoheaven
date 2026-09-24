@@ -9,6 +9,8 @@ import necesse.engine.registries.RecipeTechRegistry;
 import necesse.engine.registries.TileRegistry;
 import necesse.inventory.item.Item;
 import necesse.inventory.item.toolItem.ToolType;
+import necesse.inventory.lootTable.LootTable;
+import necesse.inventory.lootTable.lootItem.LootItem;
 import necesse.inventory.recipe.Recipe;
 import necesse.inventory.recipe.Recipes;
 import necesse.level.gameObject.FenceGateObject;
@@ -153,32 +155,48 @@ final class SkyBuildingSet {
         // player pays for it once and loses it the moment they change their
         // mind. All six of these shipped that way, each with a comment saying
         // they exist so builders can place them.
+        //
+        // Categories and natural drops (2026-09-24, docs/ITEM_CATEGORIES.md):
+        // the NATURAL pieces -- scree, rubble, crystals, shrub -- sort under
+        // vanilla's landscaping tree next to its own rocks, crystals and
+        // plants, and one the world placed breaks into its material instead
+        // of into itself (SkyDecoObject.setNaturalLoot). A piece the player
+        // built still gives itself back. The man-made props below (telescope,
+        // astrolabe, balloon, wreck, parcel) keep objects.decorations and
+        // their own item, like vanilla dungeon furniture.
         ObjectRegistry.registerObject("stormscreed",
                 new SkyDecoObject("stormscreed", 32, new Color(66, 60, 95),
-                        null, "objects", "decorations")
-                        .setTool(ToolType.ALL).setObjectHealth(1), 2.0F, true);
+                        null, "objects", "landscaping", "rocksandores")
+                        .setTool(ToolType.ALL).setObjectHealth(1)
+                        .setNaturalLoot(new LootTable(LootItem.between("skystone", 1, 2))), 2.0F, true);
         SkyRegistry.skywatchRubbleID = ObjectRegistry.registerObject("skywatchrubble",
                 // A weathered winged warden monument, 48x80: one tile of
                 // pedestal, wings spilling over both neighbours.
                 new SkyDecoObject("skywatchrubble", 48, new Color(126, 138, 154),
-                        new Rectangle(6, 12, 20, 20), "objects", "decorations"), 2.0F, true);
+                        new Rectangle(6, 12, 20, 20), "objects", "landscaping", "masonry")
+                        .setNaturalLoot(new LootTable(LootItem.between("skystone", 2, 4))), 2.0F, true);
         SkyRegistry.chargeCrystalID = ObjectRegistry.registerObject("chargecrystal",
                 new SkyDecoObject("chargecrystal", 32, new Color(122, 108, 210),
-                        new Rectangle(10, 20, 12, 12), "objects", "decorations")
-                        .setLight(70, 0.72F, 0.45F), 5.0F, true);
+                        new Rectangle(10, 20, 12, 12), "objects", "landscaping", "crystals")
+                        .setLight(70, 0.72F, 0.45F)
+                        .setNaturalLoot(new LootTable(LootItem.between("stormshard", 1, 2))), 5.0F, true);
         ObjectRegistry.registerObject("withershrub",
                 new SkyDecoObject("withershrub", 32, new Color(62, 58, 72),
-                        new Rectangle(12, 24, 8, 8), "objects", "decorations")
-                        .setTool(ToolType.ALL).setObjectHealth(1), 2.0F, true);
+                        new Rectangle(12, 24, 8, 8), "objects", "landscaping", "plants")
+                        .setTool(ToolType.ALL).setObjectHealth(1)
+                        // vanilla wild shrubs and crypt grass give nothing
+                        .setNaturalLoot(new LootTable()), 2.0F, true);
         // Aurora Shoals accents — the same restrained teal/rose language.
         SkyRegistry.auroraShardsID = ObjectRegistry.registerObject("aurorashards",
                 new SkyDecoObject("aurorashards", 32, new Color(214, 130, 172),
-                        new Rectangle(10, 20, 12, 10), "objects", "decorations")
-                        .setLight(70, 0.90F, 0.40F), 5.0F, true);
+                        new Rectangle(10, 20, 12, 10), "objects", "landscaping", "crystals")
+                        .setLight(70, 0.90F, 0.40F)
+                        .setNaturalLoot(new LootTable(LootItem.between("aurorapetal", 1, 2))), 5.0F, true);
         SkyRegistry.starfallID = ObjectRegistry.registerObject("starfall",
                 new SkyDecoObject("starfall", 32, new Color(136, 216, 206),
-                        new Rectangle(10, 16, 12, 12), "objects", "decorations")
-                        .setLight(80, 0.50F, 0.40F), 10.0F, true);
+                        new Rectangle(10, 16, 12, 12), "objects", "landscaping", "crystals")
+                        .setLight(80, 0.50F, 0.40F)
+                        .setNaturalLoot(new LootTable(LootItem.between("prismshard", 1, 1))), 10.0F, true);
         // Sky oddities: rare-encounter SEEDS. Registered + craftable so they
         // exist and map builders can place them, but deliberately absent from
         // normal worldgen (docs/DESIGN.md keeps rare discoveries special).

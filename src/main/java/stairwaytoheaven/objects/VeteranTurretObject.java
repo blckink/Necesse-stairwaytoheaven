@@ -58,8 +58,11 @@ public class VeteranTurretObject extends GameObject {
         this.mapColor = new Color(90, 90, 80);
         this.isLightTransparent = true;
         this.objectHealth = 150;
-        this.setItemCategory("objects", "decorations");
-        this.setCraftingCategory("objects", "decorations");
+        // A settlement DEFENCE, sold by the War Veteran: vanilla files its
+        // own defences under objects.traps. The crafting tree has no traps
+        // node, so that side is objects.misc. docs/ITEM_CATEGORIES.md.
+        this.setItemCategory("objects", "traps");
+        this.setCraftingCategory("objects", "misc");
     }
 
     @Override

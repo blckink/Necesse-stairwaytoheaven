@@ -441,6 +441,31 @@ done
 # The snail must implement NetableMob — the marker the vanilla net checks.
 grep -qF "net dewsnail=NETABLE" "$LOG1" || { echo "FAIL: dewsnail is not netable"; STATUS=1; }
 
+echo "--- verifying every item sorts into a real category ---"
+# CategoryCensus prints one line per mod item at server start and a summary.
+# bad= counts holdable items left in a bare fallback root -- GameObject's
+# "objects", Item's "misc", "tiles" -- and recipe results whose crafting tab is
+# one; that is how most of the mod once sorted as "Objekte" or "Sonstiges"
+# (2026-09-24, docs/ITEM_CATEGORIES.md). A new registration that forgets its
+# category fails here, by name.
+grep -qE "swhcat census: items=[1-9][0-9]* obtainable=[0-9]+ bad=0 " "$LOG1" \
+    || { echo "FAIL: an item sorts into a bare fallback category (docs/ITEM_CATEGORIES.md)"; \
+         grep -aE "swhcat (census|BAD)" "$LOG1" | head -20; STATUS=1; }
+# ...and scenery the WORLD placed breaks into its material, not into a
+# placeable object for the bag, while a piece the player built still gives
+# itself back (SkyDecoObject.setNaturalLoot, NaturalGrassObject). Asked of the
+# real getLootTable on a throwaway level at server start.
+for expected in \
+    "deadtree natural=[deadwoodlog] placed=[deadtree]" \
+    "stormscreed natural=[skystone] placed=[stormscreed]" \
+    "chargecrystal natural=[stormshard] placed=[chargecrystal]" \
+    "skyreeds natural=[wormbait] placed=[skyreeds]" \
+    "overgrowngrass natural=[overgrownedenseed, wormbait] placed=[overgrowngrass]" \
+    "skywatchtelescope natural=[skywatchtelescope] placed=[skywatchtelescope]"; do
+    grep -qF "swhcat loot $expected" "$LOG1" \
+        || { echo "FAIL: loot probe expected: $expected"; grep -aE "swhcat loot" "$LOG1" | head -3; STATUS=1; }
+done
+
 echo "--- verifying the arsenal stream's enemies can actually be placed ---"
 # Two failure modes this catches, and they look identical from a log:
 #  1. the class inherits Mob's `isValidSpawnLocation` (which returns false), so

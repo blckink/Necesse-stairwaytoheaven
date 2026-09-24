@@ -228,6 +228,13 @@ public class RegionKeyObject extends SkyDecoObject {
         super(worldSheet, sheetWidth, mapColor, new Rectangle(2, 10, 28, 18), "objects", "misc");
         this.realm = realm;
         this.iconPath = iconPath;
+        // It is the Elder's quest reward and the key to a realm: in the
+        // inventory it sorts with the other quest items (the Ghost Chalk sets
+        // the same precedent), not in "objects.misc" with the gates and
+        // crates. Still an object -- it is placed, and the ID is in saves.
+        // The crafting tree has no questitems node, so that side stays
+        // objects.misc (it has no recipe either way). docs/ITEM_CATEGORIES.md.
+        this.setItemCategory("misc", "questitems");
         this.displayMapTooltip = true;
         this.isLightTransparent = true;
         // Furniture, not a fixture: minable, and vanilla's 100 health -- the
