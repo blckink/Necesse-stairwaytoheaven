@@ -25,6 +25,23 @@ public class GhostWorldPreset extends WorldPreset {
     private static final int MANOR = 1;
     private static final int GRAVEYARD = 2;
 
+    /**
+     * Builds every preset this places once, when the registries close.
+     *
+     * <p>Its buildings are drawn as plans and read through
+     * {@code RealmPoiPresets.plan}, which throws on a missing object ID, a
+     * window outside its own wall run, a chair with no table or half a bed.
+     * Building them here turns any of those into a failed startup instead of
+     * a region that fails to generate in a player's world -- the same bargain
+     * {@code RealmPoiWorldPreset.onRegistryClosed} makes for its catalogue.
+     */
+    @Override
+    public void onRegistryClosed() {
+        new HauntedManorPreset(new GameRandom(0L));
+        new SunkenGraveyardPreset(new GameRandom(0L));
+        new MausoleumPreset(new GameRandom(0L));
+    }
+
     @Override
     public boolean shouldAddToRegion(LevelPresetsRegion region) {
         return region.identifier.equals(SkyRegistry.SKYREACH_IDENTIFIER);

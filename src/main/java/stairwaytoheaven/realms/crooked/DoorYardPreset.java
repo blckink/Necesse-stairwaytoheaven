@@ -1,12 +1,15 @@
 package stairwaytoheaven.realms.crooked;
 
-import necesse.engine.registries.ObjectRegistry;
+import static stairwaytoheaven.worldgen.pois.RealmPoiPresets.DOWN;
+
 import necesse.engine.util.GameRandom;
 import necesse.inventory.lootTable.LootTable;
 import necesse.inventory.lootTable.lootItem.ChanceLootItem;
 import necesse.inventory.lootTable.lootItem.LootItem;
 import necesse.level.maps.presets.Preset;
 import stairwaytoheaven.SkyRegistry;
+import stairwaytoheaven.worldgen.pois.RealmPoiPresets;
+import stairwaytoheaven.worldgen.pois.RealmPoiPresets.Legend;
 
 /**
  * The Door Yard — {@code WORLD_DESIGN.md} §13's <i>"doors without a house"</i>,
@@ -17,39 +20,30 @@ import stairwaytoheaven.SkyRegistry;
  * through and is exactly where they were. That is the entire joke and it is the
  * cheapest true statement this realm can make about itself.
  *
- * <h2>Why a character map</h2>
- * Same reason {@link stairwaytoheaven.worldgen.CrookedHousePreset} uses one: the
- * layout's whole point is that it is not symmetric, and written as coordinates
- * that is unreadable and one typo away from a door in the wrong row. Written as
- * a map you can see the silhouette in the source.
- *
- * <h2>Legend</h2>
- * <pre>
- *   space  not written at all (the realm's own ground shows through)
- *   .      chequered paving (marble checker, the mod's own floor)
- *   D      a Beetlefreak door, shut, standing free
- *   L      a bent lantern
- *   C      a crooked clock
- *   W      a window lying in the ground
- *   B      the barrel (the reason to come)
- * </pre>
+ * <h2>Whose yard it is (2026-09-24)</h2>
+ * It used to be doors and lanterns and nothing else. Now it is somebody's
+ * workplace -- the Doorman's (§15), who keeps doors the way other people keep
+ * sheep: a red doormat laid in front of every door, as if each were somebody's
+ * front door; a desk under the lantern at the east side with his papers and a
+ * table clock, his chair turned to it, a bench beside it and a crate of spare
+ * hinges; three long chairs lined up in front of the centre door like a
+ * waiting room, which is where the realm's joke meets Hell's
+ * (§18's "then you are in the wrong queue"); and the barrel, which is still the
+ * reason to come.
  *
  * <h2>Two engine facts this plan depends on</h2>
  * <ul>
  * <li><b>A free-standing door is legal.</b> Neither {@code DoorObject} nor
- *     {@code WallDoorObject} overrides {@code isValid} (VERIFIED [jar] — the
- *     method does not appear in either file), so a door with no wall beside it
- *     is not swept away on validation. Its sibling <b>window</b> is not: <b>
- *     {@code WallWindowObject.isValid} rejects itself outright</b> unless its
- *     connected walls are exactly one opposite pair, which is why there is not a
- *     single {@code beetlewindow} in this yard and the "windows in the ground"
- *     image is carried by the {@code groundwindow} prop instead. The Crooked
- *     House shipped with 1 of its 3 windows before somebody measured that.</li>
- * <li><b>No multi-tile objects.</b> {@code Preset.applyToLevel} writes IDs
- *     straight into the object layer and never runs {@code MultiTile.placeObject}
- *     (VERIFIED [jar]), so every multi-tile piece would need its second half
- *     written by hand. Everything here is single-tile, which removes that whole
- *     class of mistake.</li>
+ *     {@code WallDoorObject} overrides {@code isValid} (VERIFIED [jar]), so a
+ *     door with no wall beside it is not swept away on validation. Its sibling
+ *     <b>window</b> is not: {@code WallWindowObject.isValid} rejects itself
+ *     unless its walls are exactly one opposite pair of its own family, which
+ *     is why the "windows in the ground" image is the {@code groundwindow}
+ *     prop instead.</li>
+ * <li><b>Multi-tile pieces are written whole</b> by
+ *     {@link RealmPoiPresets#plan}: the bench's far half is drawn as {@code n}
+ *     and the interpreter throws at load if it is not where the rotation puts
+ *     it.</li>
  * </ul>
  */
 public class DoorYardPreset extends Preset {
@@ -57,67 +51,44 @@ public class DoorYardPreset extends Preset {
     public static final int WIDTH = 17;
     public static final int HEIGHT = 13;
 
-    /** The yard, drawn. Every row is exactly {@link #WIDTH} characters. */
+    /** The yard, drawn one character per tile; ' ' writes nothing. */
     public static final String[] PLAN = {
-            "  ...........    ",
-            " .............   ",
-            " ..D...D...D..   ",
-            "..............   ",
-            "..L.......C.L..  ",
-            "..............W  ",
-            "..D....B....D..  ",
-            "..............   ",
-            "..L...W....L...  ",
-            "..............   ",
-            " ..D...D...D..   ",
-            " ...........     ",
-            "  .........      ",
+            "  ___________    ",
+            " _____________   ",
+            " __D___D___D__   ",
+            "__-___-___-___   ",
+            "__L_______C_L__  ",
+            "______________W  ",
+            "__D_HHHB____D__  ",
+            "__-___________   ",
+            "__L___W____L_cN  ",
+            "__________yhx_n  ",
+            " __D___D___D__   ",
+            " __-___-___-_    ",
+            "  _________      ",
     };
 
     public DoorYardPreset(GameRandom random) {
         super(WIDTH, HEIGHT);
-
-        final int paving = SkyRegistry.marbleCheckerID;
-        final int door = SkyRegistry.beetleDoorClosedID;
-
-        for (int y = 0; y < PLAN.length; y++) {
-            String row = PLAN[y];
-            for (int x = 0; x < row.length(); x++) {
-                char c = row.charAt(x);
-                if (c == ' ') {
-                    continue;
-                }
-                // Everything that is written at all stands on paving: the
-                // chequerboard IS the yard, and a door with no floor under it
-                // reads as a door that fell over rather than one left standing.
-                this.setTile(x, y, paving);
-                switch (c) {
-                    case 'D':
-                        this.setObject(x, y, door);
-                        break;
-                    case 'L':
-                        this.setObject(x, y, CrookedRealm.bentLanternID);
-                        break;
-                    case 'C':
-                        this.setObject(x, y, CrookedRealm.crookedClockID);
-                        break;
-                    case 'W':
-                        this.setObject(x, y, CrookedRealm.groundWindowID);
-                        break;
-                    case 'B':
-                        // A vanilla barrel, because the loot has to live in
-                        // something the engine already knows how to open and
-                        // Preset.addInventory fills whatever container object
-                        // entity stands on the tile.
-                        this.setObject(x, y, ObjectRegistry.getObjectID("barrel"));
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-
-        this.addInventory(LOOT, random, 7, 6, new Object[0]);
+        // Everything that is written at all stands on paving: the chequerboard
+        // IS the yard, and a door with no floor under it reads as a door that
+        // fell over rather than one left standing.
+        Legend legend = new Legend(SkyRegistry.marbleCheckerID)
+                .floor('_')
+                .rug('-', "redyarncarpet")
+                .door('D', "beetledoor")
+                .prop('L', "bentlantern")
+                .prop('C', "crookedclock")
+                .prop('W', "groundwindow")
+                .prop('H', "longchair")
+                .prop('B', "barrel")
+                .prop('c', "crookedcrate")
+                .pair('N', 'n', "bonebench", DOWN)
+                .table('y', "bonemodulartable", "stackofpaper")
+                .chair('h', "bonechair")
+                .table('x', "bonedesk");
+        RealmPoiPresets.plan(this, PLAN, legend);
+        RealmPoiPresets.stock(this, PLAN, 'B', LOOT, random);
     }
 
     /**

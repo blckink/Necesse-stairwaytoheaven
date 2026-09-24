@@ -1,46 +1,37 @@
 package stairwaytoheaven.realms.ghost;
 
-import necesse.engine.registries.ObjectRegistry;
+import static stairwaytoheaven.worldgen.pois.RealmPoiPresets.DOWN;
+import static stairwaytoheaven.worldgen.pois.RealmPoiPresets.WALL_LEFT;
+import static stairwaytoheaven.worldgen.pois.RealmPoiPresets.WALL_RIGHT;
+
 import necesse.engine.util.GameRandom;
 import necesse.inventory.lootTable.LootTable;
 import necesse.inventory.lootTable.lootItem.ChanceLootItem;
 import necesse.inventory.lootTable.lootItem.LootItem;
 import necesse.level.maps.presets.Preset;
+import stairwaytoheaven.worldgen.pois.RealmPoiPresets;
+import stairwaytoheaven.worldgen.pois.RealmPoiPresets.Legend;
 
 /**
  * The Mausoleum — the Aftergarden's common tomb, and the smallest of its three
  * POIs.
  *
- * <h2>Drawn as a character map</h2>
- * Same technique {@code CrookedHousePreset} uses and for the same reason: a
- * building whose walls step in and out is unreadable as a list of coordinates
- * and one typo away from a hole. Written as a map, the silhouette is visible in
- * the source. Legend:
+ * <h2>What it is now (2026-09-24)</h2>
+ * A family tomb read from the door: two candle pedestals inside the threshold,
+ * four crypt columns carrying the cross vault, the family's sarcophagus in the
+ * crossing, a crypt coffin laid in each of the two arms, and at the head of the
+ * nave the family altar -- the bone chest between two urns, lit by a wall
+ * candle either side. Outside, the four who could not afford a place inside.
  *
- * <pre>
- *   space  not written at all (the realm's own ground shows through)
- *   #      crypt wall
- *   D      crypt door
- *   .      interior: black cobble
- *   ,      apron: spirit stone, outside the walls
- * </pre>
+ * <p>The coffins were ONE tile before this: {@code cryptcoffin} is a two-tile
+ * {@code CoffinObject} (vanilla {@code MultiTile(0, 1, 1, 2, ...)}, the bed's
+ * own shape) and a preset writes only what it is told, so the old tomb carried
+ * the head of a coffin with no foot. {@link RealmPoiPresets#plan} writes both
+ * halves, and throws at load if the plan does not draw the far half where the
+ * rotation puts it. The coffins are real containers and hold grave goods.
  *
- * <h2>Every object in it is the game's own</h2>
- * The Aftergarden ships without new art, so the tomb is built from vanilla
- * objects resolved by string ID at construction time —
- * {@code cryptwall}, {@code cryptdoor}, {@code cryptcoffin}, {@code cryptcolumn},
- * {@code cryptgravestone1/2}, {@code candle}, {@code vases}, {@code bonechest}.
- * That is not a compromise: a crypt built out of the game's own crypt is
- * exactly what a graveyard realm should look like, and it costs nothing to
- * replace later. Resolving by ID at construction rather than in a static
- * initialiser matters — a preset is built when a region generates, long after
- * every registry has closed, so the lookups cannot run too early.
- *
- * <h2>No multi-tile objects</h2>
- * Deliberately none. {@code Preset.applyToLevel} writes IDs straight into the
- * object layer and never runs {@code MultiTile.placeObject}, so a multi-tile
- * piece would need its second half written by hand and would break the moment
- * anyone edited the map. Everything here is single-tile.
+ * <p>Everything is the game's own crypt set plus the mod's plan interpreter;
+ * two lights over ~43 floor tiles, the dim end of the dossier's band.
  */
 public class MausoleumPreset extends Preset {
 
@@ -49,96 +40,51 @@ public class MausoleumPreset extends Preset {
 
     /** The tomb, drawn. Every row is exactly {@link #WIDTH} characters. */
     public static final String[] PLAN = {
-            ",,,,,,,,,,,",
+            "G,,,,,,,,,G",
             ",,#######,,",
-            ",,#.....#,,",
-            ",,#.....#,,",
-            "###.....###",
-            "#.........#",
-            "#.........#",
-            "###.....###",
-            ",,#.....#,,",
+            ",,#u=B=u#,,",
+            ",,#<===>#,,",
+            "###I===I###",
+            "#Q===S===Q#",
+            "#q=======q#",
+            "###I===I###",
+            ",,#k===k#,,",
             ",,###D###,,",
-            ",,,,,,,,,,,",
+            "G,,,,,,,,,G",
     };
 
     public MausoleumPreset(GameRandom random) {
         super(WIDTH, HEIGHT);
+        Legend legend = new Legend(GhostRealm.blackCobbleID)
+                .floor('=')
+                .floor(',', "spiritstonetile")
+                .wall('#', "cryptwall")
+                .door('D', "cryptdoor")
+                .floor('<').decor('<', "wallcandle", WALL_LEFT)
+                .floor('>').decor('>', "wallcandle", WALL_RIGHT)
+                // "vase", not "vases": vanilla registers the object as "vase"
+                // and only its TEXTURE is "vases" (ObjectRegistry.java:2063).
+                .prop('u', "vase")
+                .prop('B', "bonechest")
+                .prop('I', "cryptcolumn")
+                .pair('Q', 'q', "cryptcoffin", DOWN)
+                .prop('S', "sarcophagus")
+                .prop('k', "stonecandlepedestal")
+                .prop('G', "cryptgravestone1").paves('G', "spiritstonetile");
+        RealmPoiPresets.plan(this, PLAN, legend);
 
-        final int wall = ObjectRegistry.getObjectID("cryptwall");
-        final int door = ObjectRegistry.getObjectID("cryptdoor");
-        final int floor = GhostRealm.blackCobbleID;
-        final int apron = GhostRealm.spiritStoneID;
-        final int coffin = ObjectRegistry.getObjectID("cryptcoffin");
-        final int column = ObjectRegistry.getObjectID("cryptcolumn");
-        final int candle = ObjectRegistry.getObjectID("candle");
-        // "vase", not "vases": vanilla registers the object as "vase" and only
-        // its TEXTURE is "vases" (ObjectRegistry.java:2063, new
-        // RandomVaseObject("vases")). getObjectID("vases") answered -1, so
-        // both corner urns were silently never placed.
-        final int urn = ObjectRegistry.getObjectID("vase");
-        final int chest = ObjectRegistry.getObjectID("bonechest");
-        final int gravestone = ObjectRegistry.getObjectID("cryptgravestone1");
-
-        for (int y = 0; y < PLAN.length; y++) {
-            String row = PLAN[y];
-            for (int x = 0; x < row.length(); x++) {
-                switch (row.charAt(x)) {
-                    case '#':
-                        this.setTile(x, y, floor);
-                        this.setObject(x, y, wall);
-                        break;
-                    case 'D':
-                        // The threshold gets floor too, or the doorway reads as
-                        // a gap in the ground when you are standing in it.
-                        this.setTile(x, y, floor);
-                        this.setObject(x, y, door);
-                        break;
-                    case '.':
-                        this.setTile(x, y, floor);
-                        break;
-                    case ',':
-                        this.setTile(x, y, apron);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-
-        // ===== Inside: four columns, the sarcophagus, and light =====
-        this.setObject(3, 4, column);
-        this.setObject(7, 4, column);
-        this.setObject(3, 7, column);
-        this.setObject(7, 7, column);
-        // The occupant, dead centre and lying across the room.
-        this.setObject(5, 5, coffin);
-        this.setObject(4, 8, candle);
-        this.setObject(6, 8, candle);
-        this.setObject(1, 5, candle);
-        this.setObject(9, 6, candle);
-        // Two urns in the corners the columns leave.
-        this.setObject(2, 3, urn);
-        this.setObject(8, 3, urn);
-
-        // ===== What the tomb was actually built to hold =====
-        // A vanilla bone chest, because the loot has to live in something the
-        // engine already knows how to open: Preset.addInventory fills whatever
-        // container object entity stands on the tile.
-        this.setObject(5, 2, chest);
-        this.addInventory(new LootTable(
+        // What the tomb was built to hold.
+        RealmPoiPresets.stock(this, PLAN, 'B', new LootTable(
                 LootItem.between("ectoplasm", 6, 14),
                 LootItem.between("bonewood", 5, 12),
                 ChanceLootItem.between(0.60F, "soulthread", 3, 8),
                 ChanceLootItem.between(0.45F, "spectralore", 3, 7),
                 ChanceLootItem.between(0.25F, "spiritsteelbar", 1, 3),
-                ChanceLootItem.between(0.20F, "bone", 5, 12)
-        ), random, 5, 2, new Object[0]);
-
-        // ===== Outside: the family that could not afford a tomb of their own =====
-        this.setObject(1, 1, gravestone);
-        this.setObject(9, 1, gravestone);
-        this.setObject(1, 9, gravestone);
-        this.setObject(9, 9, gravestone);
+                ChanceLootItem.between(0.20F, "bone", 5, 12)), random);
+        // ...and what each of the two family members was buried with.
+        RealmPoiPresets.stock(this, PLAN, 'Q', new LootTable(
+                LootItem.between("bone", 2, 6),
+                ChanceLootItem.between(0.45F, "ectoplasm", 2, 5),
+                ChanceLootItem.between(0.35F, "coin", 15, 60)), random);
     }
 }

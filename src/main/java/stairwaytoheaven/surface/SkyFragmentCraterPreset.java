@@ -129,6 +129,17 @@ public class SkyFragmentCraterPreset extends Preset {
         // at night rather than a grey patch you walk past.
         this.setObject(C + 2, C + 3, starfall);
 
+        // Somebody got here first (2026-09-24): a prospector's oil lantern left
+        // burning on the north-east rim and his sack of samples beside it. A
+        // natural site carries no furniture (dossier §0.5), so this is the one
+        // human trace -- and the lantern is the crater's second light.
+        this.setObject(C + 4, C - 3, SurfaceMaterials.obj("oillantern"));
+        this.setObject(C + 4, C - 2, SurfaceMaterials.obj("sack"));
+        this.addInventory(new LootTable(
+                LootItem.between("skystone", 2, 6),
+                new ChanceLootItem(0.35F, "aetheriumore", r -> r.getIntBetween(1, 2))),
+                random, C + 4, C - 2);
+
         // The strongbox that came down with it, on the debris field rather than
         // in the core so it is reachable without mining first.
         int chestX = C - 3;

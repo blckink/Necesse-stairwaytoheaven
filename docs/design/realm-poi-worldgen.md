@@ -10,22 +10,22 @@ they only enter unexplored regions and cannot overlap another reserved POI.
 
 | Realm | In-game preset | Size | Layout purpose |
 |---|---|---:|---|
-| Skyreach | Skyrealm Arch Tower | 49×55 | stepped arch silhouette, central aisle, furnished wings |
+| Skyreach | Skyrealm Arch Tower | 49×55 | ASCII plan (`TOWER_PLAN`, 2026-09-24): the Skywatch chapter house — assembly hall, refectory, library; dormitory, chart room, warden's study; observatory; the seraph's lantern; every door in a wall, axis clear |
 | Skyreach | Wolkenhain district | 57×41 | ASCII plan (`TOWN_PLAN`, 2026-09-23): road cross into a square round a pond with four benches; bakery, general store, scholar's house, weaver's house and family home, each multi-room and furnished for its trade; two one-gate gardens |
 | Skyreach | Cloudstream toll bridge | 31×23 | ASCII plan (`TOLL_BRIDGE_PLAN`, 2026-09-23): railed 3-wide deck across a 5-wide stream; toll office north, keepers' quarters south |
 | Skyreach | Last Updraft Inn | 17×15 | ASCII plan (`INN_PLAN`, 2026-09-23): two guest rooms and a kitchen behind a common room seating sixteen, bar with kegs and stools |
 | Skyreach | Skyway Toll-House | 23×19 | dossier §2.12, transcribed by hand: weighing hall, ledger room (Magpie), vault |
 | Skyreach | Skywatch Wayside | 11×9 | dossier §2.1, read from its ASCII plan: paved pocket, balustrade, benches, offering cabinet |
 | Skyreach | Dew-Keeper's Hut | 13×13 | dossier §2.11, read from its ASCII plan: one-room dwelling, two windows, snail run with 5 Dew Snails |
-| Eden | Crown Garden hamlet | 45×35 | road cross, two homes, large planted clearing, seed shrine |
-| Eden | Fermentation house | 19×17 | bent workhouse, dining area, barrels, storage, seed basin |
-| Steinfeld | Memorial court | 23×23 | four-way path, monument, graves, columns and lights |
-| Ghost | Lantern archive | 25×21 | irregular three-wing archive, reading tables, shelves and basin |
-| Crooked | False-door bazaar | 27×21 | three separated shops; no meaningless door pile |
-| Hell | Border Office 666-B | 23×19 | through-route, desks, archive, secure storage |
-| Hell | Infernal administration | 61×45 | four furnished wings around a public street cross |
-| Hell | Brim forge block | 29×23 | public approach, anvils, forge station and stores |
-| Hell | Hell carnival | 39×31 | street cross, fenced central attraction and four stalls |
+| Eden | Crown Garden hamlet | 45×35 | ASCII plan (`CROWN_PLAN`, 2026-09-24): lane cross; head gardener's L-house (kitchen, bedroom, potting room); the Crown (seed basin in a flower ring, one gate); fenced orchard on farmland; seed-keeper's house (porch, seed store, room) |
+| Eden | Fermentation house | 19×17 | ASCII plan (`FERMENT_PLAN`, 2026-09-24): fermenting hall (kegs, barrels, pots), tasting room (table for eight), vintner's office, seed basin outside |
+| Steinfeld | Memorial court | 23×23 | ASCII plan (`MEMORIAL_PLAN`, 2026-09-24): four paths to a fallen angel on a dark-gold plinth; flower bed, grave rows, pilgrims' rest, mason's corner |
+| Ghost | Lantern archive | 25×21 | ASCII plan (`ARCHIVE_PLAN`, 2026-09-24): reading hall (stacks, soul basin, reading tables), catalogue, archivist's rooms; windows now nightfell, `badwindows` 6 → 0 |
+| Crooked | False-door bazaar | 27×21 | ASCII plan (`BAZAAR_PLAN`, 2026-09-24): the Doorman's counter, the clockmaker, the grocer with store room, two street stalls |
+| Hell | Border Office 666-B | 23×19 | ASCII plan (`OFFICE_PLAN`, 2026-09-24): the road runs through on a runner past two counters; waiting benches, the 400-year skeleton, ticket machine, records room |
+| Hell | Infernal administration | 61×45 | ASCII plan (`ADMIN_PLAN`, 2026-09-24): Eternal Waiting, Records & Seals, Moxie's canteen, the Director + clerks' dormitory round the street cross |
+| Hell | Brim forge block | 29×23 | ASCII plan (`FORGE_PLAN`, 2026-09-24): public way through the hall; forge floor (forges, anvils, armour stands, dummies), shop counter, Brim's quarters |
+| Hell | Hell carnival | 39×31 | ASCII plan (`CARNIVAL_PLAN`, 2026-09-24): sheep-chair carousel in a gated ring; food stall, prize booth, fortune teller, Vex's contraband |
 
 ## Placement and layout rules
 

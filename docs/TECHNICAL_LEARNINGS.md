@@ -4155,3 +4155,59 @@ cells on seed 1486191071, both missed land, and the gate read
 the new kinds only (`SKY_HOARD_KINDS`, same CELL, re-seeded with `HOARD_SALT`,
 16% of cells), which leaves lattice 0 bit-for-bit as it was. Any future
 Skyreach kind should go there or onto a lattice of its own, not onto the row.
+
+## Furnishing pass: four engine rules a furnished preset has to respect (2026-09-24)
+
+Found while giving every building an interior of its own. Each is stated with
+what proves it.
+
+- **A table decoration needs a `DecorationHolderInterface` under it — a desk is
+  not one.** VERIFIED [jar]: `TableDecorationObject.isValid` on
+  `FENCE_AND_TABLE_DECOR` asks `getDecorationHolder` and returns false without
+  one; `ModularTableObject`, `DinnerTableObject`, `DinnerTable2Object` and
+  `DresserObject` implement `canPlaceDecoration`, while `DeskObject extends
+  TableObject implements TorchHolderInterface` does not. VERIFIED [run]: a
+  temporary census stamp that compared EVERY object layer (the permanent one
+  compares only layer 0) found every quill, tome and paper stack a plan had set
+  on a desk reading 0 in the world after generation — 5 on the Sky Tower's
+  desks, 13 on the Border Office's desk counters, 26 on the Administration's —
+  and every piece on a modular or dinner table still standing. So a desk still
+  counts as a table for a chair (`ChairObject.facesTable` asks
+  `TableObjectInterface`), but not for a decoration. `Legend.table` and
+  `Legend.serves` now ask the holder question, and `plan()` does not write a
+  decoration onto a non-holder (it warns once on stderr instead of throwing,
+  because the Sky Town's and Toll Bridge's plans -- another pass's files --
+  still ask for a tome and a quill on their desks). **Open:** those two
+  plans, and Magpie's desk in the hand-built Toll-House (`setObjectLayer` of
+  `skywatchtome` onto a `skywatchdesk`), have been writing decorations the
+  engine deletes since they were built; the fix is a modular table beside the
+  desk, not left to this pass.
+- **A window connects only to its own wall family.** VERIFIED [jar]:
+  `WallWindowObject.getWindowDir` counts `isConnectedWall`, and
+  `WallObject.connectedWalls` holds that family's wall ID plus its own window
+  (`WallObject.onObjectRegistryClosed`, `WallWindowObject.onObjectRegistryClosed`).
+  The Lantern Archive set `beetlewindow` into `nightfellwall`: none of its six
+  windows had a connected wall on any side, which is the `badwindows=6` the
+  census carried from 2026-09-09. `RealmPoiPresets.plan` now asks
+  `isConnectedWall` of the neighbour's real object instead of "is it masonry".
+- **`Preset.addInventory` on a crate fills nothing.** VERIFIED [jar]:
+  `RandomCrateObject extends RandomBreakObject extends GameObject` has no object
+  entity, and `addInventory`'s apply prints "Could not find an objectEntity ...
+  with inventory" to stderr and returns. The Steinfeld Graveyard and Ruined
+  Chapel had put their whole loot table on a `skycrate` since they were built;
+  it now sits in a `birchchest`. A plan's loot goes through
+  `RealmPoiPresets.stock(p, rows, char, table, random)`, which also throws if
+  the character is not drawn.
+- **Soft flora is swept off inorganic ground.** VERIFIED [jar]: a
+  `GrassObject` with an empty `grassValidTileIDs` (the Steinfeld plants,
+  `paradisefern`) is invalid unless `level.getTile(x, y).isOrganic`;
+  `FlowerPatchObject` asks the same; vanilla `grass` (`SurfaceGrassObject`) only
+  accepts `grasstile`/`overgrowngrasstile`, which is why the old Crown Garden's
+  twenty "serpent grass" tufts on Eden soil never stood. Cracked marble is not
+  organic: a flower in a marble court needs a tile of its own (`paves`).
+- **`ghostlantern` is a standing lamp, not wall decor.** It is a
+  `StreetlampObject`; `Legend.decor` refuses it (its valid layers do not
+  include `WALL_DECOR`). Vanilla's wall lights for the non-Skyreach realms are
+  `wallcandle`, `walltorch`, `walllantern` and `wallarcaniclamp`, all
+  `WallTorchObject`s whose rotation is where the WALL is — the same convention
+  as `mistglasslantern` (VERIFIED [jar], `WallTorchObject.canPlace`).

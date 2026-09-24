@@ -1,88 +1,86 @@
 package stairwaytoheaven.realms.steinfeld;
 
+import static stairwaytoheaven.worldgen.pois.RealmPoiPresets.DOWN;
+import static stairwaytoheaven.worldgen.pois.RealmPoiPresets.LEFT;
+
 import necesse.engine.util.GameRandom;
 import necesse.inventory.lootTable.LootTable;
 import necesse.inventory.lootTable.lootItem.ChanceLootItem;
 import necesse.inventory.lootTable.lootItem.LootItem;
 import necesse.level.maps.presets.Preset;
 import stairwaytoheaven.SkyRegistry;
+import stairwaytoheaven.worldgen.pois.RealmPoiPresets;
+import stairwaytoheaven.worldgen.pois.RealmPoiPresets.Legend;
 
 /**
  * A roofless nave, hand-laid rather than grown from the noise field —
  * {@code docs/WORLD_DESIGN.md} §7's "broken angel statues" made into a PLACE
- * rather than a scatter, on {@link SteinfeldSites}' own rare lattice. See
- * that class's header for why this is a second lattice and not a variation
- * on {@link SteinfeldTerrainPainter}'s organic ruined chapel.
+ * rather than a scatter, on {@link SteinfeldSites}' own rare lattice.
  *
- * <h2>Legend</h2>
- * <pre>
- *   A   the broken angel, where the altar would be (mod's own seraph statue)
- *   M   a mourner flanking the angel (mossymonkstatue)
- *   L   a colonnade pillar (vanilla cryptcolumn) — two lines down the nave
- *   S   a fallen roof slab on the open floor (skywatchrubble)
- *   X   the salvage crate, at the door end
- *   .   cracked heaven marble, bare
- * </pre>
+ * <h2>A chapel, not a colonnade (2026-09-24)</h2>
+ * Until now: an angel, two mourners, eight pillars, two slabs and a crate.
+ * Now the nave is furnished as the chapel it was. At the head, the broken
+ * angel where the altar-piece stood, between two candle pedestals still lit;
+ * before it the altar, a birch table carrying the chalices -- their gold gone
+ * dark, which A3.4 names as the one sign of Skyreach's own material ageing --
+ * with a mourner at either end and the sacristy chest in the corner. The
+ * lectern stands on the gospel side with the book still on it. Down the nave,
+ * pews either side of the aisle, all facing the altar; the roof came down on
+ * one of them, and a slab and its rubble lie where the pew was. Pale grass and
+ * widow flowers break up through the marble at the door end.
  *
  * <p>No walls: a roof and its walls are what a RUIN has lost, and open
- * colonnades read as "roofless" the moment the sky shows between them —
- * exactly what {@link SteinfeldTerrainPainter}'s own procedural chapel does
- * with the same two-line pillar pattern, here fixed in place instead of
- * scattered by noise.
+ * colonnades read as "roofless" the moment the sky shows between them.
+ *
+ * <p>The loot moved from a {@code skycrate} -- a {@code RandomCrateObject},
+ * which has no inventory and so never held any of it -- into the sacristy
+ * {@code birchchest}.
  */
 public class RuinedChapelPreset extends Preset {
 
     public static final int WIDTH = 11;
     public static final int HEIGHT = 15;
 
-    private static final String[] PLAN = {
-            ".....A.....",
-            "..M.....M..",
-            "...........",
-            ".L.......L.",
-            "...........",
-            "....S......",
-            ".L.......L.",
-            "...........",
-            "......S....",
-            ".L.......L.",
-            "...........",
-            "...........",
-            ".L.......L.",
-            ".....X.....",
-            "...........",
+    /** The nave, drawn one character per tile. */
+    public static final String[] PLAN = {
+            ";;;k;A;k;;;",
+            ";XM;TTT;M;;",
+            ";;;;;;;;;;;",
+            ";L;;x;;;;L;",
+            ";;nN;;;nN;;",
+            ";;;;;;;;;;;",
+            ";LnN;;;nNL;",
+            ";;;;;;;;;;;",
+            ";;Sr;;;nN;;",
+            ";L;;;;;;;L;",
+            ";;nN;;;nN;;",
+            ";;;;;;;;;;;",
+            ";L;;;;;;;L;",
+            ";;w;;;;;p;;",
+            ";;;;;;;;;;;",
     };
 
     public RuinedChapelPreset(GameRandom random) {
         super(WIDTH, HEIGHT);
-
-        for (int y = 0; y < PLAN.length; y++) {
-            String row = PLAN[y];
-            for (int x = 0; x < row.length(); x++) {
-                this.setTile(x, y, SkyRegistry.crackedmarbleID);
-                switch (row.charAt(x)) {
-                    case 'A':
-                        this.setObject(x, y, SkyRegistry.brokenangelID);
-                        break;
-                    case 'M':
-                        this.setObject(x, y, SkyRegistry.mournerstatueID);
-                        break;
-                    case 'L':
-                        this.setObject(x, y, SkyRegistry.chapelcolumnID);
-                        break;
-                    case 'S':
-                        this.setObject(x, y, SkyRegistry.heavenslabID);
-                        break;
-                    case 'X':
-                        this.setObject(x, y, SkyRegistry.skyCrateID);
-                        break;
-                    default:
-                        break; // '.' is bare floor
-                }
-            }
-        }
-
-        this.addInventory(LOOT, random, 5, 13, new Object[0]);
+        Legend legend = new Legend(SkyRegistry.crackedmarbleID)
+                .floor(';')
+                .prop('A', "brokenangel")
+                .prop('M', "mournerstatue")
+                .prop('k', "stonecandlepedestal")
+                .prop('X', "birchchest", DOWN)
+                .table('T', "birchmodulartable", "oldchalices", "spilledgoldchalice", "goldchalice")
+                .table('x', "birchmodulartable", "stackedbooks")
+                .prop('L', "chapelcolumn")
+                // Pews: turned to 3, the far half west, facing the altar.
+                .pair('N', 'n', "birchbench", LEFT)
+                .prop('S', "heavenslab")
+                .prop('r', "skywatchrubble")
+                // A GrassObject is deleted off inorganic ground, and marble is
+                // not organic: the weeds bring their own patch of pale grass.
+                .prop('w', "widowflower").paves('w', "palegrasstile")
+                .prop('p', "palereed").paves('p', "palegrasstile");
+        RealmPoiPresets.plan(this, PLAN, legend);
+        RealmPoiPresets.stock(this, PLAN, 'X', LOOT, random);
     }
 
     /**

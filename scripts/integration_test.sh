@@ -623,11 +623,11 @@ for poi in skytower skytown skytollbridge skyinn edencrowngarden edenfermenthous
     # So each kind is held to the count it has NOW: 0 for every kind that is
     # clean, and the known debt named one by one so it can only ever shrink.
     # Delete a line here when its POI is fixed; never raise a number.
+    # PAID OFF 2026-09-24: all eight were rebuilt as plans, whose interpreter
+    # refuses a window outside its own wall family's straight run at load
+    # (ghostarchive's six were beetle windows in nightfell masonry). Every kind
+    # is held to 0 now; the case stays so a future debt has somewhere to go.
     case "$poi" in
-        ghostarchive)     allowed=6 ;;
-        crookedbazaar)    allowed=2 ;;
-        edencrowngarden|edenfermenthouse) allowed=1 ;;
-        hellborderoffice|hellforge)                      allowed=1 ;;
         *)                allowed=0 ;;
     esac
     grep -qE "realmpoi kind $poi: .* badwindows=$allowed " "$LOG1" \
@@ -689,10 +689,6 @@ while IFS= read -r stamp_line; do
     stamp_kind="$(echo "$stamp_line" | grep -oE "kind=[a-z]+" | cut -d= -f2)"
     stamp_missing="$(echo "$stamp_line" | grep -oE "missing=[0-9]+" | cut -d= -f2)"
     case "$stamp_kind" in
-        ghostarchive)     stamp_allowed=6 ;;
-        crookedbazaar)    stamp_allowed=2 ;;
-        edencrowngarden|edenfermenthouse) stamp_allowed=1 ;;
-        hellborderoffice|hellforge)                      stamp_allowed=1 ;;
         *)                stamp_allowed=0 ;;
     esac
     [ "${stamp_missing:-99}" -le "$stamp_allowed" ] \

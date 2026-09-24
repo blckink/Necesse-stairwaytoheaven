@@ -235,6 +235,41 @@ object of the same role in the preset's own legend; nothing else changes.
 vanilla furniture — `barrel`, `crate`, the `oak*` and `palm*` families — is
 recorded per realm in §2.)*
 
+### 1.4c The furnishing pass (2026-09-24) — every vanilla piece, by name
+
+The furnishing pass gave every building the mod stamps an interior of its
+own. It borrows whole vanilla families, one per realm, so the later swap is
+one family at a time. Every ID below is named literally in a plan legend (or,
+for the three surface presets, in a `SurfaceMaterials.obj` call), and every
+one of them is resolved when the registries close: the ten `RealmPoiPresets`
+kinds by `RealmPoiWorldPreset.onRegistryClosed`, the nine realm presets by
+their own world preset's `onRegistryClosed` (added in the same pass), the
+surface three by `SkySurfacePresets`' registry close. A missing ID throws
+there and the server does not start. **How verified:** each ID was read out
+of the 1.3.2 `ObjectRegistry`/`TileRegistry` source (the `registerObject`,
+`registerWallObjects`, `registerBed`/`registerBench`/`registerDinnerTable`/
+`registerBathtub`/`registerCoffinObject` helpers), and `[run]`:
+`scripts/integration_test.sh` booted with all of them in the plans and passed,
+and the temporary census stamp found every one standing on its tile.
+
+| vanilla IDs | realm | placed by | stands in for |
+|---|---|---|---|
+| `deadwoodbed`, `deadwooddinnertable`, `deadwoodchair`, `deadwoodmodulartable`, `deadwooddesk`, `deadwooddresser`, `deadwoodclock`, `deadwoodbookshelf`, `deadwoodcabinet`, `deadwoodcandelabra`, `deadwooddisplay`, `deadwoodbench` | Ghost; Crooked (Beetlefreak Hollow) | `HauntedManorPreset`, `SunkenGraveyardPreset` (bench), `CrookedHousePreset` | §10's "haunted furniture" from the Soul Loom (Bonewood/Ghost Cloth) |
+| `bonebed`, `bonedinnertable`, `bonechair`, `bonemodulartable`, `bonedesk`, `bonedresser`, `bonebookshelf`, `bonecabinet`, `boneclock`, `bonecandelabra`, `bonedisplay`, `bonebench`, `bonebathtub`, `bonetoilet`, `bonechest` | Ghost; Crooked | `RealmPoiPresets.ghostArchive`, `crookedBazaar`; `InvertedHousePreset`, `LongTablePreset`, `DoorYardPreset`; `bonechest` also the Ghost caches | Ghost: bonewood furniture. Crooked: §13's "morphing furniture" (Reality Stitcher, not built) — the bone set matches `longchair`/`crookedclock`, which already borrow its sheets |
+| `birchbench`, `birchchest`, `birchmodulartable`, `birchdinnertable`, `birchchair` | Steinfeld | `GraveyardPreset`, `RuinedChapelPreset`, `RealmPoiPresets.memorial` | pale-wood furniture for the pale realm (§36); no Steinfeld furniture set exists |
+| `palmwall`, `palmdoor`, `palmwindow`, `palmbed`, `palmdinnertable`, `palmchair`, `palmmodulartable`, `palmdesk`, `palmdresser`, `palmclock`, `palmbookshelf`, `palmcabinet`, `palmcandelabra`, `palmdisplay`, `palmbench` | Eden | `RealmPoiPresets.crownGarden`, `fermentHouse` | Edenwood building and furniture set |
+| `dungeondesk`, `dungeonmodulartable`, `dungeonchair`, `dungeonbench`, `dungeonbed`, `dungeoncabinet`, `dungeonclock`, `dungeonbookshelf`, `dungeoncandelabra`, `dungeondisplay` | Hell | `RealmPoiPresets.borderOffice`, `hellAdministration`, `hellForge` | §18's bureaucracy: counters, filing cabinets, the waiting room |
+| `spidercastlemodulartable`, `spidercastlechair`, `spidercastlecandelabra` | Hell | `hellForge`, `hellAdministration` (canteen), `hellCarnival` | red "Infernal Brass" furniture |
+| `forge`, `demonicanvil`, `ironanvil`, `tungstenanvil`, `armorstand`, `trainingdummy`, `fuelskullencasing`, `demonchest`, `bannerofwar`, `vendingmachine`, `roastingstation`, `chieftainsthrone`, `sheepchair`, `jailfence`, `jailfencegate`, `scraplamp`; tiles `scrapfloor`, `junkfloor` | Hell | the four Hell kinds | Brim's forge, the ticket machine, the Director's throne, the carousel's horses; §21's Infernal Forge is not built |
+| `cryptwall`, `cryptdoor`, `cryptcoffin` (+`cryptcoffin2`), `cryptcolumn`, `cryptfence`, `cryptfencegate`, `cryptgravestone1`, `cryptgravestone2`, `gravestone1`, `gravestone2`, `sarcophagus`, `vase`, `stonecandlepedestal`, `candle`, `lantern`; tile `cryptpath` | Ghost; Steinfeld | `MausoleumPreset`, `SunkenGraveyardPreset`, `GraveyardPreset`, `RuinedChapelPreset`, `memorial` | §10's world objects: coffins, sarcophagi, urns, crooked fences, floating candles |
+| `arcanicwall`, `arcanicdoor`, `arcanicwindow`, `wallarcaniclamp` | Crooked | `RealmPoiPresets.crookedBazaar` | §13's "warped building materials" |
+| `woodfence`, `woodfencegate`, `farmland` (tile), `redflowerpatch`, `blueflowerpatch`, `yellowflowerpatch`, `blackberrybush`, `blueberrybush`, `largekeg` | Eden | `crownGarden`, `fermentHouse` | the Crown's flower ring, the orchard (Eden berry / sun grape bushes), the vintner's kegs |
+| `oakbench` (+`oakbench2`), `oakchair`, `oakmodulartable`, `oakchest`, `bigtent`…`bigtent4`, `campfire`, `oillantern`, `ironanvil`, `sign`, `sack`; tiles `graveltile`, `woodpathtile` | Surface | `AeronautCampPreset`, `SkyFragmentCraterPreset` (`oillantern`, `sack`) | a stranded aeronaut's camp kit |
+| `cartographertable` | Skyreach | `RealmPoiPresets.skyTower` (chart room) | the Skywatch's chart table |
+| `purplecarpet`, `velourcarpet`, `steelgreycarpet`, `greencarpet`, `heartcarpet`, `redyarncarpet` | all | rugs in the manor, archive, inverted house, door yard, Crown Garden, the Hell kinds | realm carpets; only Skyreach has its own (`skywatchcarpet`) |
+| `wallcandle`, `walltorch`, `walllantern` | Ghost; Hell; Eden | wall lights on `WALL_DECOR` | `WallCandleObject`/`WallTorchObject`: rotation is where the wall is, exactly `mistglasslantern`'s convention (VERIFIED [jar], `WallTorchObject.canPlace`) |
+| `diningset`, `reddiningset`, `oldchalices`, `goldchalice`, `spilledgoldchalice`, `bloodgoblet`, `bloodgobletspilled`, `oldplate`, `brokenplate`, `dirtyplate`, `dirtydishes`, `oldsoup`, `rottenpigdish`, `rottenfishstew`, `skull`, `tableclock`, `stackofpaper`, `papertowel`, `redbooks`, `blueandyellowbooks`, `greenandpinkbooks`, `largeglobe`, `farseersorb`, `fishonastick`, `experimentalroot`, `observantmask`, `unamusedmask`, `voidcube`, `forgottenblade`, `dinoplush`, `dogplush`, `woodenduck`, `luckyrabbitsfoot`, `pottedflower1`/`2`/`4`/`5`/`6`, `pottedplant1`/`2`/`3`/`4`/`6` | all | table decorations (`FENCE_AND_TABLE_DECOR`), only ever on a `DecorationHolderInterface` — never on a desk | the laid tables, the files on the counters, the carnival prizes, the stolen heaven goods. `Legend.table`/`serves` check the layer and the holder at load |
+
 ### 1.5 Vanilla sheets a mod asset was DRAWN ON
 
 Not borrowed at runtime — the art is the player's own, but its layout is

@@ -129,6 +129,29 @@ public class AeronautCampPreset extends Preset {
         this.setObject(3, 7, parcel);
         this.setObject(8, 5, lantern);
 
+        // ------------------------------------------- how somebody lived here
+        // (2026-09-24; the camp used to be a tent, a fire and a chest.)
+        // A bench by the fire, both halves written: BenchObject is a two-tile
+        // SideMultiTile and a preset never runs MultiTile.placeObject. Turned
+        // to 0, its far half is the tile above.
+        this.setObject(5, 7, SurfaceMaterials.obj("oakbench"), 0);
+        this.setObject(5, 6, SurfaceMaterials.obj("oakbench2"), 0);
+        // The camp table with the aeronaut's log on it, and the one chair,
+        // turned to the table (ChairObject.facesTable looks at exactly the
+        // tile the rotation points at).
+        this.setObject(7, 8, SurfaceMaterials.obj("oakmodulartable"));
+        this.setObjectLayer(ObjectLayerRegistry.FENCE_AND_TABLE_DECOR, 7, 8,
+                SurfaceMaterials.obj("quillandparchment"));
+        this.setObject(7, 9, SurfaceMaterials.obj("oakchair"), 0);
+        // The repair corner beside the wreck: an anvil for the fittings, and a
+        // sack of spare envelope silk that never got stitched in.
+        this.setObject(12, 4, SurfaceMaterials.obj("ironanvil"));
+        final int sack = SurfaceMaterials.obj("sack");
+        this.setObject(12, 6, sack);
+        this.addInventory(new LootTable(
+                LootItem.between("windsilk", 1, 3),
+                new ChanceLootItem(0.5F, "skystone", r -> r.getIntBetween(1, 4))), random, 12, 6);
+
         // A short windbreak on the north side: four posts in a straight run, so
         // the fence's four-orthogonal-neighbour connection actually forms a
         // line instead of a row of lone posts.

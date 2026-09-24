@@ -107,9 +107,9 @@ public final class RealmPoiPresets {
     public static final int CROOKED_HALL_OF_DOORS = 32;
     public static final int COUNT = 33;
 
-    private static final int UP = 0, RIGHT = 1, DOWN = 2, LEFT = 3;
+    public static final int UP = 0, RIGHT = 1, DOWN = 2, LEFT = 3;
     /** Wall-decor rotation: where the WALL is, not where the piece faces (§0.2). */
-    private static final int WALL_BELOW = 0, WALL_LEFT = 1, WALL_ABOVE = 2, WALL_RIGHT = 3;
+    public static final int WALL_BELOW = 0, WALL_LEFT = 1, WALL_ABOVE = 2, WALL_RIGHT = 3;
 
     private RealmPoiPresets() {
     }
@@ -296,19 +296,19 @@ public final class RealmPoiPresets {
 
     public static Preset build(int kind, GameRandom random) {
         switch (kind) {
-            case SKY_TOWER: return skyTower();
+            case SKY_TOWER: return skyTower(random);
             case SKY_TOWN: return skyTown();
             case SKY_TOLL_BRIDGE: return tollBridge();
             case SKY_INN: return skyInn();
-            case EDEN_CROWN_GARDEN: return crownGarden();
-            case EDEN_FERMENT_HOUSE: return fermentHouse();
-            case STEINFELD_MEMORIAL: return memorial();
-            case GHOST_ARCHIVE: return ghostArchive();
-            case CROOKED_BAZAAR: return crookedBazaar();
-            case HELL_BORDER_OFFICE: return borderOffice();
-            case HELL_ADMINISTRATION: return hellAdministration();
-            case HELL_FORGE: return hellForge();
-            case HELL_CARNIVAL: return hellCarnival();
+            case EDEN_CROWN_GARDEN: return crownGarden(random);
+            case EDEN_FERMENT_HOUSE: return fermentHouse(random);
+            case STEINFELD_MEMORIAL: return memorial(random);
+            case GHOST_ARCHIVE: return ghostArchive(random);
+            case CROOKED_BAZAAR: return crookedBazaar(random);
+            case HELL_BORDER_OFFICE: return borderOffice(random);
+            case HELL_ADMINISTRATION: return hellAdministration(random);
+            case HELL_FORGE: return hellForge(random);
+            case HELL_CARNIVAL: return hellCarnival(random);
             case SKY_TOLL_HOUSE: return skywayTollHouse();
             case SKY_WAYSIDE_SHRINE: return waysideShrine();
             case SKY_DEW_KEEPERS_HUT: return dewKeepersHut();
@@ -423,7 +423,7 @@ public final class RealmPoiPresets {
      * <p>Tiles the preset paints itself are left alone: they are the author's
      * decision, dry or not.
      */
-    private static void dryRing(Preset p, int ground) {
+    public static void dryRing(Preset p, int ground) {
         p.addCustomPreApply(0, 0, 0, (level, originX, originY, dir, blackboard) -> {
             for (int x = 0; x < p.width; x++) {
                 for (int y = 0; y < p.height; y++) {
@@ -494,49 +494,145 @@ public final class RealmPoiPresets {
         p.setObject(x + 2, y + 5, object(family + "candelabra"));
     }
 
-    private static Preset skyTower() {
-        Preset p = blank(SKY_TOWER);
-        int path = SkyRegistry.skyroadTileID;
-        int floor = SkyCloudmarbleSet.skywayTileID;
-        int wall = SkyCloudmarbleSet.cloudmarbleWallID;
-        int door = SkyCloudmarbleSet.cloudmarbleDoorID;
-        int window = SkyCloudmarbleSet.cloudmarbleWindowID;
-        road(p, 23, 39, 3, 16, path);
-        road(p, 7, 40, 35, 3, path);
-        // Stepped/arched silhouette: wide transept below a narrowing nave.
-        building(p, floor, wall,
-                new Rectangle(5, 25, 39, 17), new Rectangle(12, 14, 25, 13),
-                new Rectangle(17, 7, 15, 9), new Rectangle(21, 3, 7, 6));
-        door(p, 24, 41, door);
-        door(p, 24, 25, door);
-        door(p, 24, 14, door);
-        door(p, 24, 7, door);
-        // (16,25) and (32,25) used to be in this row and were never in the
-        // world: y=25 is the transept's north wall only OUTSIDE the nave's own
-        // rectangle (x 12..36), so those two sat on interior floor with no wall
-        // beside them, WallWindowObject.getWindowDir returned -1 and the engine
-        // deleted both -- exactly the failure chapter-01-skyreach-pois.md §0.3
-        // is written about. Moved to the transept's south wall, mid-run.
-        // `realmpoi kind ... badwindows=` now counts this for every kind.
-        windows(p, window, new int[][]{{10,25},{38,25},{16,41},{32,41},{12,19},{36,19},{17,11},{31,11},{21,5},{27,5}});
-        // Central processional aisle is x=24 and remains clear.
-        int chair = SkyFurnitureSet.skywatchChairID;
-        int table = SkyFurnitureSet.skywatchTableID;
-        for (int y : new int[]{30, 34, 38}) {
-            p.setObject(18, y, table); p.setObject(17, y, chair, RIGHT); p.setObject(19, y, chair, LEFT);
-            p.setObject(30, y, table); p.setObject(29, y, chair, RIGHT); p.setObject(31, y, chair, LEFT);
-        }
-        p.setObject(9, 29, SkyFurnitureSet.skywatchBookshelfID);
-        p.setObject(9, 33, SkyFurnitureSet.skywatchCabinetID);
-        p.setObject(39, 29, SkyFurnitureSet.skywatchDisplayID);
-        p.setObject(39, 33, SkyFurnitureSet.skywatchClockID);
-        p.setObject(19, 19, SkyFurnitureSet.skywatchDeskID, RIGHT);
-        p.setObject(20, 19, chair, LEFT);
-        bed(p, 29, 18, "skywatchbed", DOWN);
-        for (int[] at : new int[][]{{8,39},{40,39},{14,23},{34,23},{20,9},{28,9},{22,4},{26,4}}) {
-            p.setObject(at[0], at[1], SkyFurnitureSet.skywatchCandelabraID);
-        }
-        p.setObject(24, 4, SkyCloudmarbleSet.seraphStatueID);
+    /**
+     * The Skyrealm Arch Tower: the Skywatch's chapter house, rebuilt as a plan
+     * on 2026-09-24. The stepped silhouette is the one it always had -- a wide
+     * hall tier, the chart tier above it, the observatory, and the seraph's
+     * lantern at the top -- but each tier is now a floor with a use and a wall
+     * and a door of its own, and the processional axis (x=24) runs clear from
+     * the triple portal to the seraph.
+     *
+     * <p><b>Hall tier:</b> the assembly hall in the middle (a carpet runner up
+     * the axis, four rows of pews either side facing north, the order's two
+     * banners on the north wall); the <b>refectory</b> west (the kitchen along
+     * its north wall -- pot, three counters, barrels and a sack -- and two
+     * dinner tables for eight); the <b>library</b> east (shelves on two walls,
+     * two reading tables, two writing desks, two display stands).
+     * <b>Chart tier:</b> the acolytes' dormitory west (five beds and their
+     * dressers), the chart room in the middle (the map table with its chairs,
+     * the cartographer's own table, an astrolabe and a telescope), the warden's
+     * study east (bed, dresser, clock, desk, shelves and a rug).
+     * <b>Observatory:</b> the second telescope and astrolabe, two star-chart
+     * tables and two desks, dim on purpose. <b>Lantern:</b> the seraph on its
+     * carpet between two candelabra and two potted cloudberries.
+     *
+     * <p>49x55 as before. The old code-built tower had three doors standing
+     * free on interior floor (the tiers' rectangles overlapped, so the "walls"
+     * they were set in were floor); every door here sits in a drawn wall.
+     */
+    private static final String[] TOWER_PLAN = {
+            ".................................................",
+            ".................................................",
+            ".....................###O###.....................",
+            ".....................#c:::c#.....................",
+            ".....................#::U::#.....................",
+            ".....................O:::::O.....................",
+            ".....................#q:::q#.....................",
+            ".....................#:::::#.....................",
+            ".................##O####D####O##.................",
+            ".................#S=Y==^=^==X=S#.................",
+            ".................#=============#.................",
+            ".................O=============O.................",
+            ".................#=xh=J===J=hx=#.................",
+            ".................#=============#.................",
+            ".................#=====:::=====#.................",
+            "............###O########D########O###............",
+            "............#E=E=E^#SS^===^SS#E=RK^W#............",
+            "............#e=e=e=#=========#e====W#............",
+            "............#======#=====iii=#======#............",
+            "............O======#=Z===MMMh#==xh==O............",
+            "............#R=R=R=#=====iii=#======#............",
+            "............#======D=========D======#............",
+            "............#======#c=======c#c=====#............",
+            "............OE=E=Kc#=========#===:::O............",
+            "............#e=e===#=A=====G=#===:::#............",
+            "............#======#=========#C==:::#............",
+            ".....###O###############D###############O###.....",
+            ".....#okkk^ls=ll#c==B==:::==B==c#SSS^SS^SSS#.....",
+            ".....#==========#======:::======#==========#.....",
+            ".....#<=========#======:::======#==========#.....",
+            ".....O=hhhh====K#<nNnN=:::=nNnN>#=ii==ii==WO.....",
+            ".....#=TtTt=====#======:::======#=JJ==JJ==W#.....",
+            ".....#=hhhh=====#======:::======#=ii==ii==W#.....",
+            ".....#==========#=nNnN=:::=nNnN=#==========#.....",
+            ".....#<=========D======:::======D=========>#.....",
+            ".....#=hhhh=====#======:::======#==========#.....",
+            ".....#=TtTt=====#=nNnN=:::=nNnN=#=xh==xh==W#.....",
+            ".....#=hhhh=====#<=====:::=====>#==========#.....",
+            ".....O==========#======:::======#=P====P==WO.....",
+            ".....#<=========#=nNnN=:::=nNnN=#==========#.....",
+            ".....#==========#======:::======#=c======c=#.....",
+            ".....#C==c==C===#c=====:::=====c#==========#.....",
+            ".....####O###O#####O###DDD###O#####O###O####.....",
+            ".......,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.......",
+            ".......,L,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,L,.......",
+            ".......................,,,.......................",
+            "......................Q,,,Q......................",
+            ".......................,,,.......................",
+            ".......................,,,.......................",
+            ".......................,,,.......................",
+            ".......................,,,.......................",
+            ".......................,,,.......................",
+            ".......................,,,.......................",
+            ".......................,,,.......................",
+            ".......................,,,.......................",
+    };
+
+    private static Preset skyTower(GameRandom random) {
+        Preset p = new Preset(width(SKY_TOWER), height(SKY_TOWER));
+        Legend legend = new Legend(SkyCloudmarbleSet.skywayTileID)
+                .floor('=')
+                .floor(',', "snowstonepathtile")
+                .rug(':', "skywatchcarpet")
+                .wall('#', "cloudmarblewall")
+                .window('O', "cloudmarblewindow")
+                .door('D', "cloudmarbledoor")
+                .prop('L', "wardencandelabra")
+                .paves('L', "snowstonepathtile")
+                .loose('Q', "wardencandelabra")
+                .floor('^').decor('^', "mistglasslantern", WALL_ABOVE)
+                .floor('v').decor('v', "mistglasslantern", WALL_BELOW)
+                .floor('<').decor('<', "mistglasslantern", WALL_LEFT)
+                .floor('>').decor('>', "mistglasslantern", WALL_RIGHT)
+                .floor('B').decor('B', "skywatchbanner", WALL_ABOVE)
+                .pair('N', 'n', "skywatchbench", LEFT)
+                .prop('c', "skywatchcandelabra")
+                .prop('o', "cookingpot")
+                .table('k', "skywatchmodulartable", "cuttingboard", "stewpot", "plate")
+                .prop('l', "barrel")
+                .prop('s', "sack")
+                .pair('T', 't', "skywatchdinnertable", RIGHT)
+                .chair('h', "skywatchchair")
+                .prop('K', "skywatchclock", DOWN)
+                .prop('C', "skywatchcabinet")
+                .prop('S', "skywatchbookshelf", DOWN)
+                .prop('W', "skywatchbookshelf", LEFT)
+                .table('J', "skywatchmodulartable", "stackedbooks", "skywatchtome", "skywatchcandle", "blueandyellowbooks")
+                .chair('i', "skywatchchair")
+                .table('x', "skywatchdesk")
+                .prop('P', "skywatchdisplay")
+                .pair('E', 'e', "skywatchbed", DOWN)
+                .prop('R', "skywatchdresser", DOWN)
+                .table('M', "skywatchmodulartable", "largeglobe", "stackofpaper", "skywatchchalice", "quillandparchment")
+                .prop('Z', "cartographertable")
+                .prop('A', "skywatchastrolabe")
+                .prop('G', "skywatchtelescope")
+                .prop('Y', "skywatchastrolabe")
+                .prop('X', "skywatchtelescope")
+                .prop('U', "seraphstatue")
+                .carpet('U', "skywatchcarpet")
+                .prop('q', "pottedcloudberry")
+                .carpet('q', "skywatchcarpet")
+                .serves('T', "plate", "mug").serves('t', "stewpot", "plate");
+        plan(p, TOWER_PLAN, legend);
+        stock(p, TOWER_PLAN, 'l', new LootTable(
+                LootItem.between("cloudberry", 3, 8),
+                ChanceLootItem.between(0.55F, "skycurd", 1, 3),
+                ChanceLootItem.between(0.45F, "nimbusmilk", 1, 3),
+                ChanceLootItem.between(0.30F, "cloudcustard", 1, 2)), random);
+        stock(p, TOWER_PLAN, 's', new LootTable(
+                LootItem.between("flour", 3, 8)), random);
+        dryRing(p, SkyRegistry.cloudturfID);
         return p;
     }
 
@@ -927,154 +1023,856 @@ public final class RealmPoiPresets {
         return p;
     }
 
-    private static Preset crownGarden() {
-        Preset p = blank(EDEN_CROWN_GARDEN);
-        int road = EdenRealm.edenRootFloorID;
-        road(p, 0, 16, 45, 3, road); road(p, 21, 0, 3, 35, road);
-        int wall = object("palmwall"), door = object("palmdoor"), window = object("palmwindow");
-        building(p, EdenRealm.edenRootFloorID, wall, new Rectangle(3, 4, 14, 10), new Rectangle(12, 10, 7, 5));
-        building(p, EdenRealm.edenRootFloorID, wall, new Rectangle(28, 22, 14, 10), new Rectangle(26, 27, 5, 6));
-        door(p, 16, 13, door); door(p, 28, 27, door);
-        road(p, 17, 13, 4, 1, road); road(p, 24, 27, 4, 1, road);
-        windows(p, window, new int[][]{{6,4},{13,4},{31,31},{38,31}});
-        furnishHome(p, 5, 6, "palm"); furnishHome(p, 31, 24, "palm");
-        // A substantial field/clearing with a soft meadow edge, not a tiny patch.
-        p.fillTile(3, 21, 15, 11, EdenRealm.edenSoilID);
-        for (int x = 5; x <= 16; x += 3) for (int y = 23; y <= 30; y += 2) p.setObject(x, y, EdenRealm.serpentGrassID);
-        p.setObject(36, 8, EdenRealm.edenSeedBasinID);
+    /**
+     * What an Eden kitchen keeps: the realm's own fruit, the pantry of a
+     * gardener rather than a treasure chest.
+     */
+    private static final LootTable EDEN_PANTRY = new LootTable(
+            LootItem.between("paradiseapple", 2, 5),
+            ChanceLootItem.between(0.60F, "edenberry", 2, 6),
+            ChanceLootItem.between(0.45F, "sungrape", 2, 5),
+            ChanceLootItem.between(0.30F, "moonmelon", 1, 2),
+            ChanceLootItem.between(0.25F, "paradisecoconut", 1, 2));
+
+    /**
+     * What a kitchen in Hell keeps. Moxie's "absurd food" (§19) is art the mod
+     * does not have yet, so the barrels hold the ordinary food it is made
+     * from.
+     */
+    private static final LootTable HELL_PANTRY = new LootTable(
+            LootItem.between("steak", 1, 4),
+            ChanceLootItem.between(0.60F, "bread", 1, 3),
+            ChanceLootItem.between(0.40F, "cheese", 1, 2),
+            ChanceLootItem.between(0.30F, "cinderpearl", 1, 2));
+
+    /**
+     * The Crown Garden hamlet (2026-09-24): the gardeners who tend Eden's first
+     * bed, and the bed itself.
+     *
+     * <p>The lanes cross in the middle as before. <b>North-west</b>, the head
+     * gardener's house, an L: a kitchen with a table for eight, the couple's
+     * bedroom behind it (two beds, a dresser, a clock, a green rug), and the
+     * potting room in the foot of the L, where cuttings are started on a bench
+     * of potted plants beside the sacks and barrels -- its door onto the lane.
+     * <b>North-east</b>, the Crown: the seed basin in the middle of a round bed
+     * of red flowers, a tree of plenty at each corner of the bed, two benches
+     * facing it, flowers along the fence, one gate. <b>South-west</b>, the
+     * orchard field: five rows of fruit bushes on tilled farmland with a
+     * furrow down the middle to walk, fenced, one gate, two palms at its head.
+     * <b>South-east</b>, the seed-keeper's house: a porch with a bench, the
+     * seed store (sacks, barrels, two counters of seedlings, two display
+     * stands), and his room (bed, dresser, shelf, clock, desk, a tea table,
+     * a rug).
+     *
+     * <p>The old kind planted vanilla {@code grass} on Eden soil, which
+     * {@code SurfaceGrassObject} only accepts on grass tiles -- the engine
+     * swept them away. Every plant here is a flower patch, a fruit bush or a
+     * tree, and every flower stands on organic Eden soil.
+     */
+    private static final String[] CROWN_PLAN = {
+            ".....................,,,.....................",
+            ".....................,,,.....................",
+            "..###O#######O##.....,,,.....................",
+            "..#okk^ll=#E^E=#.....,,,...fffffffffffff.....",
+            "..#=======#e=e=#.....,,,...fy;;;;;;;;;yf.....",
+            "..#=hhhh==#::::O....L,,,...f;r;b;;;;;;;f.....",
+            "..OhTtTth=D::::#.....,,,...f;;;Z***Z;;;f.....",
+            "..#=hhhh==#R==c#.....,,,...f;n;*___*;N;f.....",
+            "..#=======#===K#.....,,,...f;N;*_Y_*;n;f.....",
+            "..#C===c=###D######..,,,...f;;;*___*;;;f.....",
+            "..#======D========O..,,,...f;;;Z*_*Z;;;f.....",
+            "..###O####pppp====#..,,,...f;b;y;_;;;;;f.....",
+            ".........#========D,,,,,...fr;;;;_;;;;rf.....",
+            ".........#ssll==<=#..,,,...ffffffgffffff.....",
+            ".........####O#####..,,,........._...........",
+            "........L...........L,,,........._...........",
+            ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+            ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+            ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+            ".........._..........,,,L...........L........",
+            "..ffffffffgffffffff..,,,.....................",
+            "..f~P~~~~~~~~~~~P~f..,,,...####O#####O####...",
+            "..f~V~B~V~~~V~B~V~f..,,,...#ssllsP^Pssll=#...",
+            "..f~~~~~~~~~~~~~~~f..,,,...#=============#...",
+            "..f~B~V~B~~~B~V~B~f..,,,...#=kkk=====kkk=O...",
+            "..f~~~~~~~~~~~~~~~f..,,,.###=============#...",
+            "..f~V~B~V~~~V~B~V~f..,,,.#=l==#####D######...",
+            "..f~~~~~~~~~~~~~~~f..,,,.#====D=ER===WK=c#...",
+            "..f~B~V~B~~~B~V~B~f..,,,,D====#=e====xh==#...",
+            "..f~~~~~~~~~~~~~~~f..,,,L#====#==hmh=::::O...",
+            "..f~V~B~V~~~V~B~V~f..,,,.O=qQ=#======::::#...",
+            "..f~~~~~~~~~~~~~~~f..,,,.#c===####O###O###...",
+            "..fffffffffffffffff..,,,.##O###..............",
+            ".....................,,,.....................",
+            ".....................,,,.....................",
+    };
+
+    private static Preset crownGarden(GameRandom random) {
+        Preset p = new Preset(width(EDEN_CROWN_GARDEN), height(EDEN_CROWN_GARDEN));
+        Legend legend = new Legend(EdenRealm.edenRootFloorID)
+                .floor('=')
+                .floor(',', "paradisesandtile")
+                .floor('_', "edenrootfloortile")
+                .floor(';', "edenmosstile")
+                .floor('~', "farmland")
+                .rug(':', "greencarpet")
+                .wall('#', "palmwall")
+                .window('O', "palmwindow")
+                .door('D', "palmdoor")
+                .fence('f', "woodfence")
+                .fence('g', "woodfencegate")
+                .floor('^').decor('^', "walllantern", WALL_ABOVE)
+                .floor('<').decor('<', "walllantern", WALL_BELOW)
+                .prop('o', "cookingpot")
+                .table('k', "palmmodulartable", "cuttingboard", "plate", "pottedplant2", "pottedflower1", "pottedplant4", "pottedflower4", "pottedplant6", "pottedflower6")
+                .prop('l', "barrel")
+                .prop('s', "sack")
+                .pair('T', 't', "palmdinnertable", RIGHT)
+                .chair('h', "palmchair")
+                .prop('C', "palmcabinet")
+                .prop('c', "palmcandelabra")
+                .pair('E', 'e', "palmbed", DOWN)
+                .prop('R', "palmdresser")
+                .prop('K', "palmclock")
+                .table('p', "palmmodulartable", "pottedplant1", "pottedflower2", "pottedplant3", "pottedflower5")
+                .prop('Y', "edenseedbasin")
+                .paves('Y', "edenrootfloortile")
+                .prop('*', "redflowerpatch")
+                .paves('*', "edensoiltile")
+                .prop('r', "redflowerpatch")
+                .paves('r', "edensoiltile")
+                .prop('b', "blueflowerpatch")
+                .paves('b', "edensoiltile")
+                .prop('y', "yellowflowerpatch")
+                .paves('y', "edensoiltile")
+                .prop('B', "blackberrybush")
+                .paves('B', "farmland")
+                .prop('V', "blueberrybush")
+                .paves('V', "farmland")
+                .pair('N', 'n', "palmbench", UP)
+                // BenchObject stores facing minus one: 0 faces east (the west
+                // bench, toward the basin), 2 faces west (the east one).
+                .turns(37, 7, DOWN)
+                .pair('Q', 'q', "palmbench", LEFT)
+                .prop('Z', "treeofplenty")
+                .paves('Z', "edensoiltile")
+                .prop('P', "paradisepalm")
+                .paves('P', "edensoiltile")
+                .prop('W', "palmbookshelf")
+                .table('m', "palmmodulartable", "teapot")
+                .table('x', "palmdesk")
+                .loose('L', "lantern")
+                .serves('T', "plate", "teapot").serves('t', "plate", "mug");
+        plan(p, CROWN_PLAN, legend);
+        stock(p, CROWN_PLAN, 'l', EDEN_PANTRY, random);
+        stock(p, CROWN_PLAN, 's', new LootTable(
+                LootItem.between("overgrownedenseed", 1, 3),
+                ChanceLootItem.between(0.50F, "edenberry", 2, 5)), random);
+        dryRing(p, EdenRealm.edenSoilID);
         return p;
     }
 
-    private static Preset fermentHouse() {
-        Preset p = blank(EDEN_FERMENT_HOUSE);
-        int wall = object("palmwall"), door = object("palmdoor"), window = object("palmwindow");
-        building(p, EdenRealm.edenRootFloorID, wall, new Rectangle(1, 2, 17, 13), new Rectangle(12, 1, 6, 5));
-        door(p, 9, 14, door); door(p, 12, 7, door);
-        windows(p, window, new int[][]{{4,2},{9,2},{15,2},{1,7},{17,10}});
-        road(p, 9, 15, 1, 2, EdenRealm.edenRootFloorID);
-        int table = object("palmmodulartable"), chair = object("palmchair");
-        tableForFour(p, 5, 7, table, chair);
-        for (int x : new int[]{13,15}) for (int y : new int[]{9,12}) p.setObject(x, y, object("barrel"));
-        p.setObject(4, 12, EdenRealm.edenSeedBasinID);
-        p.setObject(7, 12, object("palmcabinet"));
+
+    /**
+     * Eden's Fermentation House (2026-09-24): where the sun grapes and moon
+     * melons turn.
+     *
+     * <p>The <b>fermenting hall</b> east of the partition: four large kegs
+     * under the north wall, a row of barrels, two pots on the boil and a
+     * counter with a cutting board, sacks of fruit waiting. The <b>tasting
+     * room</b> west: a dinner table for eight on its own, a cabinet and a
+     * clock, two display stands of the year's bottles. The vintner's
+     * <b>office</b> in the north annex: desk and chair, two shelves, a bed.
+     * Outside the south door, the seed basin in a bed of flowers.
+     */
+    private static final String[] FERMENT_PLAN = {
+            "..........###O####.",
+            "..........#xh=SSE#.",
+            "..........#c====e#.",
+            ".####O#######D####.",
+            ".#R=^=K=#GG=^=GG=#.",
+            ".#======#========#.",
+            ".O=hhhh=#=l=l=l=l#.",
+            ".#=TtTt=#========O.",
+            ".#=hhhh=#========#.",
+            ".#======D========#.",
+            ".#======#=oo=kkk=#.",
+            ".#P====P#========#.",
+            ".O======#=ss==s=l#.",
+            ".#c=====#========O.",
+            ".#=====q#p=======#.",
+            ".####O#####O#D####.",
+            "..r;Y;b......,.....",
+    };
+
+    private static Preset fermentHouse(GameRandom random) {
+        Preset p = new Preset(width(EDEN_FERMENT_HOUSE), height(EDEN_FERMENT_HOUSE));
+        Legend legend = new Legend(EdenRealm.edenRootFloorID)
+                .floor('=')
+                .floor(',', "paradisesandtile")
+                .floor(';', "edensoiltile")
+                .wall('#', "palmwall")
+                .window('O', "palmwindow")
+                .door('D', "palmdoor")
+                .floor('^').decor('^', "walllantern", WALL_ABOVE)
+                .floor('q').decor('q', "walllantern", WALL_RIGHT)
+                .floor('p').decor('p', "walllantern", WALL_LEFT)
+                .table('x', "palmdesk")
+                .chair('h', "palmchair")
+                .prop('S', "palmbookshelf", DOWN)
+                .pair('E', 'e', "palmbed", DOWN)
+                .prop('c', "palmcandelabra")
+                .prop('R', "palmcabinet", DOWN)
+                .prop('K', "palmclock", DOWN)
+                .prop('G', "largekeg")
+                .prop('l', "barrel")
+                .prop('s', "sack")
+                .pair('T', 't', "palmdinnertable", RIGHT)
+                .prop('o', "cookingpot")
+                .table('k', "palmmodulartable", "cuttingboard", "mug", "plate")
+                .prop('P', "palmdisplay")
+                .prop('Y', "edenseedbasin")
+                .paves('Y', "edensoiltile")
+                .prop('r', "redflowerpatch")
+                .paves('r', "edensoiltile")
+                .prop('b', "blueflowerpatch")
+                .paves('b', "edensoiltile")
+                .serves('T', "mug", "plate").serves('t', "mug", "teapot");
+        plan(p, FERMENT_PLAN, legend);
+        stock(p, FERMENT_PLAN, 'l', new LootTable(
+                LootItem.between("sungrape", 3, 8),
+                ChanceLootItem.between(0.60F, "moonmelon", 1, 3),
+                ChanceLootItem.between(0.40F, "edenberry", 2, 5)), random);
+        stock(p, FERMENT_PLAN, 's', new LootTable(
+                LootItem.between("edenberry", 2, 6),
+                ChanceLootItem.between(0.40F, "paradiseapple", 1, 3)), random);
+        dryRing(p, EdenRealm.edenSoilID);
         return p;
     }
 
-    private static Preset memorial() {
-        Preset p = blank(STEINFELD_MEMORIAL);
-        int floor = SkyRegistry.crackedmarbleID;
-        road(p, 10, 0, 3, 23, floor); road(p, 0, 10, 23, 3, floor);
-        p.fillTile(5, 5, 13, 13, floor);
-        p.setObject(11, 11, SkyRegistry.mournerstatueID);
-        for (int[] at : new int[][]{{5,5},{17,5},{5,17},{17,17}}) p.setObject(at[0], at[1], SkyRegistry.chapelcolumnID);
-        for (int[] at : new int[][]{{7,7},{15,7},{7,15},{15,15}}) p.setObject(at[0], at[1], object("cryptgravestone1"));
-        p.setObject(8, 11, object("stonecandlepedestal"));
-        p.setObject(14, 11, object("stonecandlepedestal"));
+
+    /**
+     * The Memorial Court (2026-09-24): Steinfeld's monument to what fell out of
+     * the sky -- A3.4's "things land here that no longer belong to the sky".
+     *
+     * <p>The four weathered paths meet at a plinth of marble chequer, its gold
+     * gone dark, with a fallen angel on it and a candle pedestal at each
+     * corner. The court's four quarters each hold one thing: north-west a bed
+     * of dead heaven blooms and widow flowers round a memorial slab; north-east
+     * two rows of the fallen, a flower at each stone's foot; south-west the
+     * pilgrims' rest, a bench and an offering table with its chair; south-east
+     * the mason's corner, two unfinished slabs, his chest and the stone pile.
+     * A lantern where each path enters the court; a chapel column at each of
+     * its corners.
+     *
+     * <p>Every flower stands on its own patch of dead soil: cracked marble is
+     * not organic, and a {@code GrassObject} deletes itself from anything that
+     * is not.
+     */
+    private static final String[] MEMORIAL_PLAN = {
+            "..........,,,..........",
+            "..........,,,..........",
+            "..........,,,..........",
+            "..........,,,..........",
+            ".........L,,,..........",
+            ".....I;;;;,,,;;;;I.....",
+            ".....;b;w;,,,;g;g;.....",
+            ".....;;S;;,,,;f;f;.....",
+            ".....;w;b;,,,;g;g;.....",
+            ".....;;;;k+++k;;;;L....",
+            ",,,,,,,,,+++++,,,,,,,,,",
+            ",,,,,,,,,++A++,,,,,,,,,",
+            ",,,,,,,,,+++++,,,,,,,,,",
+            "....L;;;;k+++k;;;;.....",
+            ".....;nNMm,,,;S;X;.....",
+            ".....;;;h;,,,;;;r;.....",
+            ".....;;;;;,,,;S;;;.....",
+            ".....I;;;;,,,;;;;I.....",
+            "..........,,,L.........",
+            "..........,,,..........",
+            "..........,,,..........",
+            "..........,,,..........",
+            "..........,,,..........",
+    };
+
+    private static Preset memorial(GameRandom random) {
+        Preset p = new Preset(width(STEINFELD_MEMORIAL), height(STEINFELD_MEMORIAL));
+        Legend legend = new Legend(SkyRegistry.crackedmarbleID)
+                .floor(';')
+                .floor(',', "weatheredstonetile")
+                .floor('+', "marblecheckertile")
+                .prop('A', "brokenangel")
+                .paves('A', "marblecheckertile")
+                .prop('k', "stonecandlepedestal")
+                .paves('k', "marblecheckertile")
+                .prop('I', "chapelcolumn")
+                .prop('b', "deadheavenbloom")
+                .prop('w', "widowflower")
+                .prop('f', "widowflower")
+                .prop('S', "heavenslab")
+                .prop('g', "cryptgravestone2")
+                .pair('N', 'n', "birchbench", LEFT)
+                .pair('M', 'm', "birchdinnertable", RIGHT)
+                .chair('h', "birchchair")
+                .prop('X', "birchchest")
+                .prop('r', "palestonerock")
+                .loose('L', "lantern")
+                .paves('b', "deadsoiltile").paves('w', "deadsoiltile").paves('f', "deadsoiltile")
+                .serves('M', "goldchalice").serves('m', "pottedflower4");
+        plan(p, MEMORIAL_PLAN, legend);
+        stock(p, MEMORIAL_PLAN, 'X', new LootTable(
+                LootItem.between("palestone", 6, 14),
+                ChanceLootItem.between(0.50F, "gravesalt", 2, 5),
+                ChanceLootItem.between(0.20F, "echoshard", 1, 2)), random);
+        dryRing(p, tile("palegrasstile"));
         return p;
     }
 
-    private static Preset ghostArchive() {
-        Preset p = blank(GHOST_ARCHIVE);
-        int wall = SkyRegistry.nightfellWallID, door = SkyRegistry.nightfellDoorID, window = SkyRegistry.beetleWindowID;
-        building(p, GhostRealm.blackCobbleID, wall,
-                new Rectangle(1, 3, 23, 16), new Rectangle(8, 1, 9, 4), new Rectangle(18, 8, 6, 10));
-        door(p, 12, 18, door); door(p, 12, 3, door); door(p, 18, 11, door);
-        windows(p, window, new int[][]{{5,3},{19,3},{1,8},{1,14},{23,7},{23,15}});
-        road(p, 12, 19, 1, 2, GhostRealm.spiritStoneID);
-        int shelf = object("bonebookshelf"), table = object("bonemodulartable"), chair = object("bonechair");
-        for (int x : new int[]{4,7,17,20}) for (int y : new int[]{6,15}) p.setObject(x, y, shelf);
-        tableForFour(p, 8, 10, table, chair); tableForFour(p, 16, 10, table, chair);
-        p.setObject(12, 6, GhostRealm.soulBasinID);
-        p.setObject(12, 14, object("bonechest"));
-        for (int[] at : new int[][]{{3,5},{21,5},{3,17},{21,17}}) p.setObject(at[0], at[1], object("deadwoodcandelabra"));
+
+    /**
+     * The Lantern Archive (2026-09-24): where the Aftergarden files its dead.
+     *
+     * <p>The <b>reading hall</b>: stacks along the west wall and a
+     * free-standing double row beside them, broken by a cross aisle; the soul
+     * basin on its rug under the catalogue door, where the dead are consulted;
+     * two long reading tables on a runner, chairs down both sides, books and a
+     * skull and a table clock on them; a returns stand and shelves on the east
+     * side. The <b>catalogue</b> north: card cabinets under the windows, the
+     * clerk's desk and a crystal ball. The <b>archivist's rooms</b> east: bed,
+     * dresser, clock, desk, cabinet, the pantry barrel and a rug.
+     *
+     * <p>The code-built archive set BEETLE windows in NIGHTFELL walls.
+     * {@code WallObject.isConnectedWall} is a set of one wall family's IDs, so
+     * none of the six had a connected wall on any side and the engine deleted
+     * all of them -- the "badwindows=6" the census has carried since
+     * 2026-09-09. {@link #plan} now asks the engine's own question, so a
+     * window of the wrong family throws at load.
+     */
+    private static final String[] ARCHIVE_PLAN = {
+            ".........................",
+            "........##O###O##........",
+            "........#CC^=^CC#........",
+            "........#=======#........",
+            "........#xh===Ky#........",
+            ".###O#######D#####.......",
+            ".#======^=======^#.......",
+            ".#W==SZ===:::::=P#.......",
+            ".OW==SZ===::Y::==###O###.",
+            ".#W==SZ=========S#E=K=R#.",
+            ".#W==SZ==iii=iiiS#e====#.",
+            ".#<======JJJ=JJJ=#=====O.",
+            ".#=======iii=iii=D=====#.",
+            ".#W==SZ==========#==xh=#.",
+            ".#W==SZ==c=====c=#=====O.",
+            ".OW==SZ=========S#C===c#.",
+            ".#W==SZ=========S#l=:::#.",
+            ".#==========v====###O###.",
+            ".####O###D####O###.......",
+            ".........,...............",
+            ".........,...............",
+    };
+
+    private static Preset ghostArchive(GameRandom random) {
+        Preset p = new Preset(width(GHOST_ARCHIVE), height(GHOST_ARCHIVE));
+        Legend legend = new Legend(GhostRealm.blackCobbleID)
+                .floor('=')
+                .floor(',', "spiritstonetile")
+                .rug(':', "purplecarpet")
+                .wall('#', "nightfellwall")
+                .window('O', "nightfellwindow")
+                .door('D', "nightfelldoor")
+                .floor('^').decor('^', "wallcandle", WALL_ABOVE)
+                .floor('<').decor('<', "wallcandle", WALL_LEFT)
+                .floor('v').decor('v', "wallcandle", WALL_BELOW)
+                .prop('C', "bonecabinet", DOWN)
+                .table('x', "bonedesk")
+                .chair('h', "bonechair")
+                .prop('K', "boneclock", DOWN)
+                .table('y', "bonemodulartable", "farseersorb")
+                .prop('W', "bonebookshelf", RIGHT)
+                .prop('S', "bonebookshelf", LEFT)
+                .prop('Z', "bonebookshelf", RIGHT)
+                .prop('Y', "soulbasin")
+                .carpet('Y', "purplecarpet")
+                .table('J', "bonemodulartable", "stackedbooks", "redbooks", "skull", "blueandyellowbooks", "greenandpinkbooks", "tableclock")
+                .carpet('J', "steelgreycarpet")
+                .chair('i', "bonechair")
+                .carpet('i', "steelgreycarpet")
+                .prop('c', "bonecandelabra")
+                .prop('P', "bonedisplay")
+                .pair('E', 'e', "bonebed", DOWN)
+                .prop('R', "bonedresser", DOWN)
+                .prop('l', "barrel");
+        plan(p, ARCHIVE_PLAN, legend);
+        stock(p, ARCHIVE_PLAN, 'l', new LootTable(
+                LootItem.between("book", 1, 3),
+                ChanceLootItem.between(0.60F, "soulthread", 2, 5),
+                ChanceLootItem.between(0.40F, "ectoplasm", 2, 6)), random);
+        dryRing(p, GhostRealm.graveyardSoilID);
         return p;
     }
 
-    private static Preset crookedBazaar() {
-        Preset p = blank(CROOKED_BAZAAR);
-        int road = CrookedRealm.checkerStoneID;
-        road(p, 0, 9, 27, 3, road);
-        // Three actual stalls; their doors are deliberately separated, never a door heap.
-        int wall = object("arcanicwall"), door = object("arcanicdoor"), window = object("arcanicwindow");
-        building(p, CrookedRealm.crookedStripeID, wall, new Rectangle(2, 2, 7, 6));
-        building(p, CrookedRealm.crookedStripeID, wall, new Rectangle(10, 13, 8, 6), new Rectangle(15, 16, 5, 4));
-        building(p, CrookedRealm.crookedStripeID, wall, new Rectangle(19, 2, 6, 6));
-        door(p, 5, 7, door); door(p, 13, 13, door); door(p, 22, 7, door);
-        road(p, 5, 8, 1, 1, road); road(p, 13, 12, 1, 1, road); road(p, 22, 8, 1, 1, road);
-        windows(p, window, new int[][]{{3,2},{7,2},{11,18},{18,18},{20,2},{24,2}});
-        for (int[] at : new int[][]{{4,4},{6,4},{12,16},{16,16},{21,4},{23,4}}) p.setObject(at[0], at[1], CrookedRealm.crookedCrateID);
-        p.setObject(9, 6, CrookedRealm.bentLanternID); p.setObject(18, 14, CrookedRealm.bentLanternID);
+
+    /**
+     * The False-Door Bazaar (2026-09-24): three shops on the chequer street,
+     * each selling one of the realm's jokes.
+     *
+     * <p><b>The Doorman's counter</b> (north-west): doors for sale standing
+     * free along the back wall, the doorman behind a five-table counter open
+     * at one end, a window lying in the floor. <b>The clockmaker</b>
+     * (north-east): four crooked clocks along the north wall, a bone clock,
+     * his desk with a potato clock on it, two display stands, a rug.
+     * <b>The grocer</b> (south, an L): a shop floor with a counter of odd
+     * produce and the grocer at it, a store room behind a partition full of
+     * sacks, barrels and crates. Two market stalls on the street sell masks
+     * and a void cube; bent lanterns light the street and the crooked clock
+     * stands by the lamp in the middle.
+     *
+     * <p>The code-built bazaar had two windows the engine deleted; every
+     * window here is mid-run in an arcanic wall.
+     */
+    private static final String[] BAZAAR_PLAN = {
+            "...........................",
+            ".##O###O##.......##O###O##.",
+            ".#=d=d=d=#.......#C=C^C=C#.",
+            ".#=h=====#.......#=======#.",
+            ".Okkkkk==#.......#P=xh==PO.",
+            ".#=======#.......#=====cK#.",
+            ".#<=W===>#.......#::::===#.",
+            ".####D####.......####D####.",
+            ".L...,...L...C...L...,...L.",
+            ",,,,,,,,,,,,,,,,,,,,,,,,,,,",
+            ",,,,,,,,,,,,,,,,,,,,,,,,,,,",
+            ",,,,,,,,,,,,,,,,,,,,,,,,,,,",
+            "..mmm..L.....,......L.mmm..",
+            "..sbs....####D######O#blb..",
+            ".........#yy===#llss=ll#...",
+            ".........#=====D=======O...",
+            ".........Ogggh=#rr=rr=r#...",
+            ".........#=====#########...",
+            ".........#lsl==rrrc#.......",
+            ".........##O#####O##.......",
+            "...........................",
+    };
+
+    private static Preset crookedBazaar(GameRandom random) {
+        Preset p = new Preset(width(CROOKED_BAZAAR), height(CROOKED_BAZAAR));
+        Legend legend = new Legend(CrookedRealm.crookedStripeID)
+                .floor('=')
+                .floor(',', "checkerstonetile")
+                .rug(':', "purplecarpet")
+                .wall('#', "arcanicwall")
+                .window('O', "arcanicwindow")
+                .door('D', "arcanicdoor")
+                .floor('<').decor('<', "wallarcaniclamp", WALL_LEFT)
+                .floor('>').decor('>', "wallarcaniclamp", WALL_RIGHT)
+                .floor('^').decor('^', "wallarcaniclamp", WALL_ABOVE)
+                .door('d', "beetledoor")
+                .table('k', "bonemodulartable", "stackofpaper", "tableclock", "quillandparchment", "mug", "stackofpaper")
+                .chair('h', "bonechair")
+                .prop('W', "groundwindow")
+                .prop('C', "crookedclock")
+                .prop('K', "boneclock", LEFT)
+                .prop('P', "bonedisplay")
+                .table('x', "bonedesk")
+                .prop('c', "bonecandelabra")
+                .table('y', "bonemodulartable", "cuttingboard", "plate")
+                .table('g', "bonemodulartable", "fishonastick", "pottedflower2", "experimentalroot")
+                .prop('l', "barrel")
+                .prop('s', "sack")
+                .prop('r', "crookedcrate")
+                .table('m', "bonemodulartable", "observantmask", "unamusedmask", "voidcube")
+                .prop('b', "barrel")
+                .prop('L', "bentlantern");
+        plan(p, BAZAAR_PLAN, legend);
+        stock(p, BAZAAR_PLAN, 'l', new LootTable(
+                LootItem.between("eyeseed", 3, 7),
+                ChanceLootItem.between(0.50F, "oddwood", 5, 12)), random);
+        stock(p, BAZAAR_PLAN, 's', new LootTable(
+                LootItem.between("strangefabric", 3, 8)), random);
+        dryRing(p, CrookedRealm.checkerStoneID);
         return p;
     }
 
-    private static Preset borderOffice() {
-        Preset p = blank(HELL_BORDER_OFFICE);
-        int floor = tile("hellbrickfloortile"), wall = object("hellbrickwall"), door = object("hellbrickdoor"), window = object("hellbrickwindow");
-        road(p, 10, 0, 3, 19, tile("scrapfloor"));
-        building(p, floor, wall, new Rectangle(2, 3, 19, 13), new Rectangle(16, 2, 5, 7));
-        door(p, 11, 15, door); door(p, 11, 3, door); door(p, 16, 8, door);
-        windows(p, window, new int[][]{{5,3},{17,3},{2,8},{20,12},{6,15},{17,15}});
-        int table = object("oakmodulartable"), chair = object("oakchair");
-        for (int y : new int[]{6,10,13}) { p.setObject(8, y, table); p.setObject(7, y, chair, RIGHT); p.setObject(9, y, chair, LEFT); }
-        p.setObject(17, 11, object("demonchest"));
-        p.setObject(4, 6, object("scraplamp")); p.setObject(18, 6, object("scraplamp"));
+
+    /**
+     * Border Office 666-B (2026-09-24): §18's Department of Eternal Processing,
+     * and A3.7's waiting room.
+     *
+     * <p>The road runs THROUGH the office, north door to south door, on a red
+     * runner -- nobody enters Hell without passing processing. Two counters of
+     * desks face the runner, four clerks' chairs behind them, filing cabinets
+     * and a clock that does not move along the north wall. The public side is
+     * benches, all facing the counters; beside the last one lie the bones of
+     * the applicant who has been waiting four hundred years. A ticket machine
+     * stands by the south door. The records room behind its own door holds the
+     * shelves, the archivist's desk and the secure chest.
+     */
+    private static final String[] OFFICE_PLAN = {
+            "..........,,,..........",
+            "..........,,,..........",
+            ".........L,,,L.........",
+            ".####O#####D#####O####.",
+            ".#C=C=K^C=:::=C^K=C=C#.",
+            ".#========:::========#.",
+            ".#==h==h==:::==h==h==#.",
+            ".#=kkkkkk=:::=kkkkkk=#.",
+            ".#========:::========#.",
+            ".#========:::=nN=nN==#.",
+            ".####D###=:::========#.",
+            ".#SS===X#=:::=nN=nN=>#.",
+            ".#======#=:::========#.",
+            ".#=xh===#V:::bnN=nN==#.",
+            ".#SS==Cc#=:::===v====#.",
+            ".####O#####D#####O####.",
+            "..........,,,..........",
+            ".........L,,,L.........",
+            "..........,,,..........",
+    };
+
+    private static Preset borderOffice(GameRandom random) {
+        Preset p = new Preset(width(HELL_BORDER_OFFICE), height(HELL_BORDER_OFFICE));
+        Legend legend = new Legend(tile("hellbrickfloortile"))
+                .floor('=')
+                .floor(',', "scrapfloor")
+                .floor(';', "junkfloor")
+                .rug(':', "velourcarpet")
+                .wall('#', "hellbrickwall")
+                .window('O', "hellbrickwindow")
+                .door('D', "hellbrickdoor")
+                .floor('^').decor('^', "walltorch", WALL_ABOVE)
+                .floor('v').decor('v', "walltorch", WALL_BELOW)
+                .floor('<').decor('<', "walltorch", WALL_LEFT)
+                .floor('>').decor('>', "walltorch", WALL_RIGHT)
+                .loose('L', "scraplamp")
+                .prop('C', "dungeoncabinet", DOWN)
+                .prop('K', "dungeonclock", DOWN)
+                .chair('h', "dungeonchair")
+                .table('k', "dungeonmodulartable", "stackofpaper", "quillandparchment", "stackofpaper", "papertowel", "stackofpaper", "tableclock")
+                .pair('N', 'n', "dungeonbench", LEFT)
+                .prop('S', "dungeonbookshelf", DOWN)
+                .prop('X', "demonchest", LEFT)
+                .table('x', "dungeondesk")
+                .prop('c', "dungeoncandelabra")
+                .prop('V', "vendingmachine")
+                .prop('b', "hellbones");
+        plan(p, OFFICE_PLAN, legend);
+        stock(p, OFFICE_PLAN, 'X', new LootTable(
+                LootItem.between("coin", 80, 260),
+                LootItem.between("book", 1, 3),
+                ChanceLootItem.between(0.40F, "cinderpearl", 1, 3)), random);
+        dryRing(p, tile("cinderashtile"));
         return p;
     }
 
-    private static Preset hellAdministration() {
-        Preset p = blank(HELL_ADMINISTRATION);
-        int road = tile("scrapfloor"), floor = tile("hellbrickfloortile");
-        int wall = object("hellbrickwall"), door = object("hellbrickdoor"), window = object("hellbrickwindow");
-        road(p, 29, 0, 3, 45, road); road(p, 0, 21, 61, 3, road);
-        // Four dense wings around a public cross; none occupies the road.
-        building(p, floor, wall, new Rectangle(4, 4, 21, 14), new Rectangle(18, 14, 8, 5));
-        building(p, floor, wall, new Rectangle(35, 4, 22, 14), new Rectangle(34, 13, 8, 6));
-        building(p, floor, wall, new Rectangle(4, 27, 22, 14), new Rectangle(18, 25, 8, 5));
-        building(p, floor, wall, new Rectangle(35, 27, 22, 14), new Rectangle(34, 25, 8, 5));
-        for (int[] at : new int[][]{{24,17},{36,17},{24,27},{36,27}}) door(p, at[0], at[1], door);
-        for (int[] at : new int[][]{{24,18},{36,18},{24,24},{36,24}}) road(p, at[0], at[1], 1, 3, road);
-        windows(p, window, new int[][]{{8,4},{14,4},{20,4},{40,4},{47,4},{53,4},{8,40},{14,40},{20,40},{40,40},{47,40},{53,40}});
-        int table = object("oakmodulartable"), chair = object("oakchair"), shelf = object("oakbookshelf");
-        for (int[] at : new int[][]{{10,9},{20,9},{41,9},{51,9},{10,34},{20,34},{41,34},{51,34}}) tableForFour(p, at[0], at[1], table, chair);
-        for (int[] at : new int[][]{{6,6},{23,6},{37,6},{55,6},{6,38},{23,38},{37,38},{55,38}}) p.setObject(at[0], at[1], shelf);
-        for (int[] at : new int[][]{{27,20},{33,20},{27,24},{33,24}}) p.setObject(at[0], at[1], object("scraplamp"));
+
+    /**
+     * The Infernal Administration (2026-09-24): four departments round a
+     * public street cross, no two furnished alike.
+     *
+     * <p><b>North-west, the Department of Eternal Waiting:</b> four counters of
+     * desks with their clerks, cabinets and clocks behind them, and six rows of
+     * benches facing the counters -- two skeletons among the applicants, a
+     * ticket machine by the door. <b>North-east, Records and Seals:</b> five
+     * double stacks of shelves, three reading desks, the seal table on its rug
+     * with its chairs, and the two secure chests. <b>South-west, Moxie's
+     * canteen:</b> the kitchen (four pots, a roasting station, counters,
+     * barrels, a sack), a serving counter of seven tables laden with what
+     * Moxie calls food, and four dining tables of six. <b>South-east, the
+     * Director:</b> a dormitory of eight bunks for the clerks, and behind a
+     * partition his office -- the throne behind the desk on a velvet rug, two
+     * candelabra, two chairs for the damned, banners of war and shelves, the
+     * confiscated goods in barrels. A streetlamp at each corner of the cross.
+     */
+    private static final String[] ADMIN_PLAN = {
+            ".............................,,,.............................",
+            ".............................,,,.............................",
+            ".............................,,,.............................",
+            "...####O######O######O####...,,,...####O######O######O####...",
+            "...#C=C=K=C=^=C=C=^=C=K=C#...,,,...#^==========^=========#...",
+            "...#=====================#...,,,...#==SZ==SZ==SZ==SZ==SZ=#...",
+            "...#===h====h====h====h==#...,,,...#==SZ==SZ==SZ==SZ==SZ=#...",
+            "...#=kkkk=kkkk=kkkk=kkkk=#...,,,...#==SZ==SZ==SZ==SZ==SZ=#...",
+            "...O=====================#...,,,...#<=SZ==SZ==SZ==SZ==SZ=O...",
+            "...#=====================#...,,,...#==SZ==SZ==SZ==SZ==SZ=#...",
+            "...#=nN=nN=nN===nN=nN=nN=D,,,,,,,,,D=====================#...",
+            "...#=====================#...,,,...#=====================#...",
+            "...#bnN=nN=nN===nN=nN=nN=#...,,,...#=xh==xh==:::::==xh==>#...",
+            "...#<===================>#...,,,...#=========:MMM:=======#...",
+            "...O=nN=nN=nN===nN=nN=nN=#...,,,...#=========:iii:=======O...",
+            "...#=====================#...,,,...#C=C=c====:::::===X=X=#...",
+            "...#=V=====c=======c=b===#...,,,...#=====================#...",
+            "...#=====================#...,,,...#==========v==========#...",
+            "...#####O######O######D###...,,,...###D######O######O#####...",
+            "......................,......,,,......,......................",
+            "......................,.....L,,,L.....,......................",
+            ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+            ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+            ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+            "......................,.....L,,,L.....,......................",
+            "......................,......,,,......,......................",
+            "...#####O######O######D###...,,,...###D####O#######O######...",
+            "...#ooRoo^kkkk=l=l=s======...,,,...#^E=E=E=E==#WWW=Q=Q=WW#...",
+            "...#=====================#...,,,...#=e=e=e=e==#==========#...",
+            "...#UUUUUUU==============#...,,,...#==========#===:::::==#...",
+            "...O=====================#...,,,...#R=R=R=R=K=#===:TYT:==O...",
+            "...#=hhhhhh===hhhhhh=====#...,,,...#==========#===:jjj:==#...",
+            "...#=mmmmmm===mmmmmm=====#...,,,...#==========#===:i:i:==#...",
+            "...#=hhhhhh===hhhhhh====>#...,,,...#==========D===:::::==#...",
+            "...#=====================D,,,,,,,,,D==E=E=E=E=#=====P===>#...",
+            "...#=hhhhhh===hhhhhh=====#...,,,...#==e=e=e=e=#==========#...",
+            "...#=mmmmmm===mmmmmm=====#...,,,...#==========#c====P===c#...",
+            "...O=hhhhhh===hhhhhh=====#...,,,...#R=R=R=c===#==========O...",
+            "...#=====================#...,,,...#==========#===lll====#...",
+            "...#<=c======c=======c===#...,,,...#==========#==========#...",
+            "...#=====================#...,,,...#==========#==========#...",
+            "...####O######O######O####...,,,...######O#########O######...",
+            ".............................,,,.............................",
+            ".............................,,,.............................",
+            ".............................,,,.............................",
+    };
+
+    private static Preset hellAdministration(GameRandom random) {
+        Preset p = new Preset(width(HELL_ADMINISTRATION), height(HELL_ADMINISTRATION));
+        Legend legend = new Legend(tile("hellbrickfloortile"))
+                .floor('=')
+                .floor(',', "scrapfloor")
+                .floor(';', "junkfloor")
+                .rug(':', "velourcarpet")
+                .wall('#', "hellbrickwall")
+                .window('O', "hellbrickwindow")
+                .door('D', "hellbrickdoor")
+                .floor('^').decor('^', "walltorch", WALL_ABOVE)
+                .floor('v').decor('v', "walltorch", WALL_BELOW)
+                .floor('<').decor('<', "walltorch", WALL_LEFT)
+                .floor('>').decor('>', "walltorch", WALL_RIGHT)
+                .loose('L', "scraplamp")
+                .prop('C', "dungeoncabinet", DOWN)
+                .prop('K', "dungeonclock", DOWN)
+                .chair('h', "dungeonchair")
+                .table('k', "dungeonmodulartable", "stackofpaper", "quillandparchment", "papertowel", "stackofpaper", "tableclock", "stackofpaper")
+                .pair('N', 'n', "dungeonbench", LEFT)
+                .prop('b', "hellbones")
+                .prop('V', "vendingmachine")
+                .prop('c', "dungeoncandelabra")
+                .prop('S', "dungeonbookshelf", LEFT)
+                .prop('Z', "dungeonbookshelf", RIGHT)
+                .table('x', "dungeondesk")
+                .table('M', "dungeonmodulartable", "stackedbooks", "redbooks", "stackofpaper")
+                .carpet('M', "velourcarpet")
+                .chair('i', "dungeonchair")
+                .carpet('i', "velourcarpet")
+                .prop('X', "demonchest")
+                .prop('o', "cookingpot")
+                .prop('R', "roastingstation")
+                .table('U', "spidercastlemodulartable", "cuttingboard", "stewpot", "plate", "dirtydishes", "oldsoup", "rottenpigdish", "plate")
+                .prop('l', "barrel")
+                .prop('s', "sack")
+                .table('m', "spidercastlemodulartable", "plate", "mug", "bloodgoblet", "plate", "mug", "dirtyplate")
+                .pair('E', 'e', "dungeonbed", DOWN)
+                .prop('Q', "bannerofwar")
+                .prop('T', "dungeoncandelabra")
+                .carpet('T', "velourcarpet")
+                .prop('Y', "chieftainsthrone", DOWN)
+                .carpet('Y', "velourcarpet")
+                .table('j', "dungeonmodulartable", "quillandparchment", "skull", "stackofpaper")
+                .carpet('j', "velourcarpet")
+                .prop('W', "dungeonbookshelf", DOWN)
+                .prop('P', "dungeondisplay");
+        plan(p, ADMIN_PLAN, legend);
+        stock(p, ADMIN_PLAN, 'X', new LootTable(
+                LootItem.between("coin", 120, 400),
+                LootItem.between("book", 1, 4),
+                ChanceLootItem.between(0.45F, "cinderpearl", 1, 3)), random);
+        stock(p, ADMIN_PLAN, 'l', HELL_PANTRY, random);
+        dryRing(p, tile("cinderashtile"));
         return p;
     }
 
-    private static Preset hellForge() {
-        Preset p = blank(HELL_FORGE);
-        int road = tile("scrapfloor"), floor = tile("hellbrickfloortile");
-        int wall = object("hellbrickwall"), door = object("hellbrickdoor"), window = object("hellbrickwindow");
-        road(p, 13, 0, 3, 23, road);
-        building(p, floor, wall, new Rectangle(2, 4, 25, 15), new Rectangle(20, 2, 7, 7));
-        door(p, 14, 18, door); door(p, 14, 4, door); door(p, 20, 8, door);
-        windows(p, window, new int[][]{{6,4},{22,4},{2,9},{26,13},{7,18},{22,18}});
-        for (int[] at : new int[][]{{5,8},{9,8},{5,13},{9,13}}) p.setObject(at[0], at[1], object("demonicanvil"));
-        p.setObject(19, 12, object("demonicworkstation"));
-        p.setObject(23, 13, object("fuelskullencasing"));
-        p.setObject(18, 16, object("demonchest"));
-        p.setObject(4, 16, object("scraplamp")); p.setObject(24, 16, object("scraplamp"));
+
+    /**
+     * Brim's forge block (2026-09-24): §19's Infernal Blacksmith at work.
+     *
+     * <p>The public way runs through the middle of the hall on junk plate.
+     * <b>West, the forge floor:</b> five forges under the north wall, three
+     * demonic anvils before them and three iron anvils behind those, the fuel
+     * barrels, two fuel-skull encasings, six armour stands of the smith's work
+     * and a row of training dummies to try a blade on. <b>East, the shop:</b>
+     * the counter to the public way with Brim's chair behind it, a banner of
+     * war, four display stands of finished weapons, the tungsten anvil for
+     * finishing, two stock chests, and the long table where the forge hands
+     * eat. <b>North-east, Brim's quarters</b> behind their own door: bed,
+     * dresser, clock, shelves, desk.
+     */
+    private static final String[] FORGE_PLAN = {
+            ".............,,,..###O##O###.",
+            ".............,,,..#E=R=K=SS#.",
+            ".............,,,..#e=======#.",
+            ".............,,,..#==xh===c#.",
+            ".#####O###O###D##########D##.",
+            ".#F=F=F=F=F=^;;;=^==hhhh===#.",
+            ".#===========;;;===hmmmmh==#.",
+            ".#=A==A==A===;;;====hhhh===#.",
+            ".#===========;;;===========#.",
+            ".Ol==========;;;k=====R====#.",
+            ".#l==H==H==H=;;;kh=========#.",
+            ".#===========;;;k=======P=PO.",
+            ".#===========;;;k==========#.",
+            ".#<==s==s====;;;k=======P=P#.",
+            ".O=QQQ=QQQ===;;;===========#.",
+            ".#===========;;;====T=====>#.",
+            ".#=f=f=f=f===;;;===========O.",
+            ".#===========;;;X=X========#.",
+            ".#==c====c===;;;c=====l=l=c#.",
+            ".#####O###O###D####O###O####.",
+            ".............,,,.............",
+            ".............,,,.............",
+            ".............,,,.............",
+    };
+
+    private static Preset hellForge(GameRandom random) {
+        Preset p = new Preset(width(HELL_FORGE), height(HELL_FORGE));
+        Legend legend = new Legend(tile("hellbrickfloortile"))
+                .floor('=')
+                .floor(',', "scrapfloor")
+                .floor(';', "junkfloor")
+                .rug(':', "velourcarpet")
+                .wall('#', "hellbrickwall")
+                .window('O', "hellbrickwindow")
+                .door('D', "hellbrickdoor")
+                .floor('^').decor('^', "walltorch", WALL_ABOVE)
+                .floor('v').decor('v', "walltorch", WALL_BELOW)
+                .floor('<').decor('<', "walltorch", WALL_LEFT)
+                .floor('>').decor('>', "walltorch", WALL_RIGHT)
+                .loose('L', "scraplamp")
+                .prop('F', "forge")
+                .prop('A', "demonicanvil")
+                .prop('H', "ironanvil")
+                .prop('l', "barrel")
+                .prop('s', "fuelskullencasing")
+                .prop('Q', "armorstand")
+                .prop('f', "trainingdummy")
+                .prop('c', "spidercastlecandelabra")
+                .table('k', "spidercastlemodulartable", "forgottenblade", "stackofpaper", "mug", "forgottenblade", "tableclock")
+                .chair('h', "spidercastlechair")
+                .prop('R', "bannerofwar")
+                .prop('P', "dungeondisplay")
+                .prop('X', "demonchest")
+                .prop('T', "tungstenanvil")
+                .pair('E', 'e', "dungeonbed", DOWN)
+                .prop('K', "dungeonclock", DOWN)
+                .prop('S', "dungeonbookshelf", DOWN)
+                .table('x', "dungeondesk")
+                .table('m', "spidercastlemodulartable", "plate", "mug", "bloodgoblet", "stewpot");
+        plan(p, FORGE_PLAN, legend);
+        stock(p, FORGE_PLAN, 'X', new LootTable(
+                LootItem.between("ironbar", 4, 10),
+                ChanceLootItem.between(0.50F, "goldbar", 1, 3),
+                ChanceLootItem.between(0.30F, "demonicbar", 1, 3),
+                ChanceLootItem.between(0.50F, "coin", 60, 200)), random);
+        dryRing(p, tile("cinderashtile"));
         return p;
     }
 
-    private static Preset hellCarnival() {
-        Preset p = blank(HELL_CARNIVAL);
-        int path = tile("junkfloor");
-        road(p, 18, 0, 3, 31, path); road(p, 0, 14, 39, 3, path);
-        // Central carousel ring and four side stalls leave the road cross open.
-        int fence = object("jailfence");
-        for (int x = 14; x <= 24; x++) { p.setObject(x, 9, fence); p.setObject(x, 21, fence); }
-        for (int y = 10; y <= 20; y++) { p.setObject(14, y, fence); p.setObject(24, y, fence); }
-        p.setObject(19, 9, 0); p.setObject(19, 21, 0); p.setObject(14, 15, 0); p.setObject(24, 15, 0);
-        p.setObject(19, 15, object("chieftainsthrone"));
-        int wall = object("hellbrickwall"), door = object("hellbrickdoor");
-        building(p, tile("hellbrickfloortile"), wall, new Rectangle(3, 3, 9, 7));
-        building(p, tile("hellbrickfloortile"), wall, new Rectangle(27, 3, 9, 7));
-        building(p, tile("hellbrickfloortile"), wall, new Rectangle(3, 21, 9, 7));
-        building(p, tile("hellbrickfloortile"), wall, new Rectangle(27, 21, 9, 7));
-        door(p, 7, 9, door); door(p, 31, 9, door); door(p, 7, 21, door); door(p, 31, 21, door);
-        for (int[] at : new int[][]{{6,6},{9,6},{30,6},{33,6},{6,24},{9,24},{30,24},{33,24}}) p.setObject(at[0], at[1], object("crate"));
-        for (int[] at : new int[][]{{12,12},{26,12},{12,18},{26,18}}) p.setObject(at[0], at[1], object("scraplamp"));
+
+    /**
+     * The Hell Carnival (2026-09-24): A3.8's broken fairground.
+     *
+     * <p>In the middle, the <b>carousel</b>: a jail-fence ring with a gate on
+     * each road, eight sheep-chairs for horses on a heart-patterned floor,
+     * turned to ride round the lamp-post at its hub. <b>North-west, Moxie's
+     * food stall:</b> pots and a roasting station, a counter of absurd dishes,
+     * barrels, and three picnic tables outside. <b>North-east, the strength
+     * and shooting booth:</b> four dummies behind a counter of plush prizes.
+     * <b>South-west, the fortune teller:</b> a crystal ball on a table between
+     * two chairs on a violet rug, candelabra, urns. <b>South-east, Vex's
+     * contraband:</b> stolen heaven goods -- Skywatch chalices, tomes, candles
+     * and a potted cloudberry on the counter, a Sky Seraph in the corner, the
+     * strongbox. Streetlamps at every road end.
+     */
+    private static final String[] CARNIVAL_PLAN = {
+            "..................,,,..................",
+            ".................L,,,L.................",
+            "..................,,,..................",
+            "...##O###O##......,,,......##O###O##...",
+            "...#oRo^ll=#......,,,......#T=T^T=T#...",
+            "...#=======#......,,,......#=======#...",
+            "...OUUU=UUU#......,,,......#kkk=kkkO...",
+            "...#=======#......,,,......#=======#...",
+            "...#s=c=l=s#......,,,......#P=c=c=P#...",
+            "...####D####.ffffffgffffff.####D####...",
+            ".......,.....f;;;;,,,;;;;f.....,.......",
+            "..hmh..,.hmh.f;;;;,,,;;;;f.....,.......",
+            "..hmh..,.....f;;:::H:::;;f.....,.......",
+            ".L.....,.....f;;:H:::H:;;f.....,.....L.",
+            ",,,,,,,,,,,,,f,,:::::::,,f,,,,,,,,,,,,,",
+            ",,,,,,,,,,,,,g,,H::L::H,,g,,,,,,,,,,,,,",
+            ",,,,,,,,,,,,,f,,:::::::,,f,,,,,,,,,,,,,",
+            ".L.....,.....f;;:H:::H:;;f.....,.....L.",
+            ".......,.....f;;:::H:::;;f.....,.......",
+            ".......,.....f;;;;,,,;;;;f.....,.......",
+            ".......,.....f;;;;,,,;;;;f.....,.......",
+            "...####D####.ffffffgffffff.####D####...",
+            "...#=======#......,,,......#=======#...",
+            "...#=:::::=#......,,,......#yyy=yyy#...",
+            "...O=:iZi:=#......,,,......#=======O...",
+            "...#c:::::c#......,,,......#P=X=c=A#...",
+            "...#V=v=v=V#......,,,......#l=v=v=l#...",
+            "...##O###O##......,,,......##O###O##...",
+            "..................,,,..................",
+            ".................L,,,L.................",
+            "..................,,,..................",
+    };
+
+    private static Preset hellCarnival(GameRandom random) {
+        Preset p = new Preset(width(HELL_CARNIVAL), height(HELL_CARNIVAL));
+        Legend legend = new Legend(tile("hellbrickfloortile"))
+                .floor('=')
+                .floor(',', "scrapfloor")
+                .floor(';', "junkfloor")
+                .rug(':', "velourcarpet")
+                .wall('#', "hellbrickwall")
+                .window('O', "hellbrickwindow")
+                .door('D', "hellbrickdoor")
+                .floor('^').decor('^', "walltorch", WALL_ABOVE)
+                .floor('v').decor('v', "walltorch", WALL_BELOW)
+                .floor('<').decor('<', "walltorch", WALL_LEFT)
+                .floor('>').decor('>', "walltorch", WALL_RIGHT)
+                .loose('L', "scraplamp")
+                .fence('f', "jailfence")
+                .fence('g', "jailfencegate")
+                .prop('H', "sheepchair")
+                .carpet('H', "heartcarpet")
+                .prop('o', "cookingpot")
+                .prop('R', "roastingstation")
+                .prop('l', "barrel")
+                .prop('s', "sack")
+                .table('U', "spidercastlemodulartable", "plate", "fishonastick", "rottenpigdish", "stewpot", "oldsoup", "rottenfishstew")
+                .prop('c', "spidercastlecandelabra")
+                .chair('h', "spidercastlechair")
+                .table('m', "spidercastlemodulartable", "mug", "bloodgoblet", "plate")
+                .table('k', "spidercastlemodulartable", "dinoplush", "dogplush", "woodenduck", "dinoplush", "luckyrabbitsfoot", "dogplush")
+                .prop('P', "dungeondisplay")
+                .chair('i', "spidercastlechair")
+                .carpet('i', "purplecarpet")
+                .table('Z', "spidercastlemodulartable", "farseersorb")
+                .carpet('Z', "purplecarpet")
+                .prop('V', "vase")
+                .table('y', "dungeonmodulartable", "skywatchchalice", "skywatchtome", "pottedcloudberry", "skywatchcandle", "skywatchchalice", "goldchalice")
+                .prop('X', "demonchest")
+                .prop('A', "seraphstatue")
+                .prop('T', "trainingdummy")
+                .turns(19, 12, RIGHT).turns(21, 13, DOWN).turns(22, 15, DOWN).turns(21, 17, LEFT)
+                .turns(19, 18, LEFT).turns(17, 17, UP).turns(16, 15, UP).turns(17, 13, RIGHT);
+        plan(p, CARNIVAL_PLAN, legend);
+        stock(p, CARNIVAL_PLAN, 'X', new LootTable(
+                LootItem.between("skystone", 4, 10),
+                LootItem.between("windsilk", 2, 5),
+                ChanceLootItem.between(0.60F, "cloudberry", 2, 6),
+                ChanceLootItem.between(0.25F, "aurorapetal", 1, 2),
+                ChanceLootItem.between(0.50F, "coin", 80, 240)), random);
+        stock(p, CARNIVAL_PLAN, 'l', HELL_PANTRY, random);
+        dryRing(p, tile("cinderashtile"));
         return p;
     }
 
@@ -1118,13 +1916,21 @@ public final class RealmPoiPresets {
      * {@link #loose} keep that painter ground on purpose -- a streetlamp beside
      * a hut, a fence across a meadow.
      */
-    private static final class Legend {
+    public static final class Legend {
         private final int ground;
         private final int[] tile = new int[LEGEND_SIZE];
         private final int[] object = new int[LEGEND_SIZE];
         private final byte[] rotation = new byte[LEGEND_SIZE];
         /** Far half of a multi-tile piece, and the plan character that must mark it. */
         private final int[] counter = new int[LEGEND_SIZE];
+        /**
+         * The object that stands on a character's tile, for the pieces a
+         * decoration may stand on -- including the far half of a pair, whose
+         * own {@link #object} entry is deliberately empty.
+         */
+        private final int[] holder = new int[LEGEND_SIZE];
+        /** Characters whose decorations the engine would delete: see {@link #decorations}. */
+        private final boolean[] unheld = new boolean[LEGEND_SIZE];
         private final char[] counterChar = new char[LEGEND_SIZE];
         /** Decorations for a table character, handed out in plan reading order. */
         private final int[][] tableDecor = new int[LEGEND_SIZE][];
@@ -1150,7 +1956,7 @@ public final class RealmPoiPresets {
         private final java.util.HashMap<Integer, Byte> turn =
                 new java.util.HashMap<>();
 
-        Legend(int ground) {
+        public Legend(int ground) {
             this.ground = ground;
             java.util.Arrays.fill(this.tile, -1);
             java.util.Arrays.fill(this.object, -1);
@@ -1171,7 +1977,7 @@ public final class RealmPoiPresets {
         }
 
         /** The plan's own paving: writes the ground and clears what stood on it. */
-        Legend floor(char c) {
+        public Legend floor(char c) {
             mark(c);
             this.tile[c] = this.ground;
             this.object[c] = 0;
@@ -1179,18 +1985,18 @@ public final class RealmPoiPresets {
         }
 
         /** Paving of its own kind -- an inlay, a weighbridge, a terrace. */
-        Legend floor(char c, String tileID) {
+        public Legend floor(char c, String tileID) {
             floor(c);
             this.tile[c] = tile(tileID);
             return this;
         }
 
-        Legend prop(char c, String objectID) {
+        public Legend prop(char c, String objectID) {
             return prop(c, objectID, UP);
         }
 
         /** A piece standing on the plan's own ground. */
-        Legend prop(char c, String objectID, int rotation) {
+        public Legend prop(char c, String objectID, int rotation) {
             mark(c);
             this.tile[c] = this.ground;
             this.object[c] = object(objectID);
@@ -1199,7 +2005,7 @@ public final class RealmPoiPresets {
         }
 
         /** A piece that keeps the terrain painter's own ground under it. */
-        Legend loose(char c, String objectID) {
+        public Legend loose(char c, String objectID) {
             mark(c);
             this.object[c] = object(objectID);
             return this;
@@ -1215,11 +2021,13 @@ public final class RealmPoiPresets {
          * must be the character the plan draws there: that is what makes the
          * ASCII map and the object agree instead of merely coexist.
          */
-        Legend pair(char c, char counterChar, String objectID, int rotation) {
+        public Legend pair(char c, char counterChar, String objectID, int rotation) {
             prop(c, objectID, rotation);
             mark(counterChar);
             this.counter[c] = object(objectID + "2");
             this.counterChar[c] = counterChar;
+            this.holder[c] = this.object[c];
+            this.holder[counterChar] = this.counter[c];
             // The far half is written by its master. Its own character carries
             // the ground so the floor under it stays the room's floor.
             this.tile[counterChar] = this.ground;
@@ -1237,7 +2045,7 @@ public final class RealmPoiPresets {
         }
 
         /** Masonry: wall, and the two things that count as connected wall. */
-        Legend wall(char c, String objectID) {
+        public Legend wall(char c, String objectID) {
             prop(c, objectID);
             this.masonry[c] = true;
             return this;
@@ -1249,19 +2057,19 @@ public final class RealmPoiPresets {
          * {@code WallObject.connectedWalls}, so a window beside a door is a
          * window with an open side.
          */
-        Legend door(char c, String objectID) {
+        public Legend door(char c, String objectID) {
             return prop(c, objectID);
         }
 
         /** A window, checked against §0.3 wherever the plan places it. */
-        Legend window(char c, String objectID) {
+        public Legend window(char c, String objectID) {
             wall(c, objectID);
             this.isWindow[c] = true;
             return this;
         }
 
         /** A fence or gate, checked against §0.4 for lone posts. */
-        Legend fence(char c, String objectID) {
+        public Legend fence(char c, String objectID) {
             loose(c, objectID);
             this.isFence[c] = true;
             return this;
@@ -1277,7 +2085,7 @@ public final class RealmPoiPresets {
          * (§2.11 draws {@code mm} for a tome and a potted cloudberry), the list
          * is handed out in plan reading order, left to right and top to bottom.
          */
-        Legend table(char c, String tableID, String... decorIDs) {
+        public Legend table(char c, String tableID, String... decorIDs) {
             prop(c, tableID);
             // "Tischdeko nur auf Tischen" is only worth anything if the thing
             // called a table really is one. ChairObject.facesTable and
@@ -1290,13 +2098,45 @@ public final class RealmPoiPresets {
                         + " a decoration cannot stand on it");
             }
             this.isTable[c] = true;
+            this.holder[c] = this.object[c];
+            this.tableDecor[c] = decorations(c, tableID, decorIDs);
+            return this;
+        }
+
+        /**
+         * The decorations for a character, after asking the question the
+         * engine asks before it keeps one.
+         *
+         * <p>That question is NOT "is it a table". VERIFIED [jar]:
+         * {@code TableDecorationObject.isValid} on {@code FENCE_AND_TABLE_DECOR}
+         * asks for a {@code DecorationHolderInterface} under it and deletes
+         * itself when there is none -- and {@code DeskObject} is a
+         * {@code TableObject} (a chair faces it) that implements
+         * {@code TorchHolderInterface}, not the holder interface. VERIFIED
+         * [run] 2026-09-24: every tome, quill and paper stack a plan set on a
+         * desk read {@code 0} in the world a tick after it was written, while
+         * the same pieces on modular tables, dinner tables and their far
+         * halves all stood. Modular tables, dinner tables and dressers hold
+         * decorations; desks do not.
+         *
+         * <p>Not a throw, although every other rule here is one: the Sky Town
+         * and the Toll Bridge (2026-09-23) set a tome and a quill on their
+         * desks, and those two plans are another pass's to change. So a
+         * decoration on a non-holder is never WRITTEN ({@link #plan} skips it,
+         * and says so once on stderr) -- which leaves the world exactly as the
+         * engine left it before, minus a write it deleted anyway.
+         */
+        private int[] decorations(char c, String what, String... decorIDs) {
+            if (decorIDs.length > 0 && !(ObjectRegistry.getObject(this.holder[c]) instanceof
+                    necesse.level.gameObject.DecorationHolderInterface)) {
+                this.unheld[c] = true;
+            }
             int[] decor = new int[decorIDs.length];
             for (int i = 0; i < decorIDs.length; i++) {
                 decor[i] = layered(decorIDs[i], ObjectLayerRegistry.FENCE_AND_TABLE_DECOR,
                         "a table decoration");
             }
-            this.tableDecor[c] = decor;
-            return this;
+            return decor;
         }
 
         /**
@@ -1310,7 +2150,7 @@ public final class RealmPoiPresets {
          * in a room whatever side of the table it sits on, which is how the
          * dossier draws them.
          */
-        Legend chair(char c, String objectID) {
+        public Legend chair(char c, String objectID) {
             prop(c, objectID);
             this.isChair[c] = true;
             return this;
@@ -1328,7 +2168,7 @@ public final class RealmPoiPresets {
          * the dossier calls out by name. {@link #plan} then checks that the wall
          * it says it hangs from is really drawn there.
          */
-        Legend decor(char c, String objectID, int wallDir) {
+        public Legend decor(char c, String objectID, int wallDir) {
             if (c >= LEGEND_SIZE || !this.known[c]) {
                 throw new IllegalStateException("Wall decor '" + c
                         + "' must first be declared as the floor tile it hangs from");
@@ -1351,7 +2191,7 @@ public final class RealmPoiPresets {
          * and shipping an error texture is a release blocker
          * ({@code docs/IMPLEMENTATION_RULES.md} §5).
          */
-        Legend pending(char c, boolean keepGround) {
+        public Legend pending(char c, boolean keepGround) {
             mark(c);
             if (keepGround) {
                 this.tile[c] = this.ground;
@@ -1372,7 +2212,7 @@ public final class RealmPoiPresets {
          * rewritten to match a build), so the second meaning is named here, by
          * coordinate. {@link #plan} checks the tile is really drawn.
          */
-        Legend reads(int x, int y, char meaning) {
+        public Legend reads(int x, int y, char meaning) {
             if (meaning >= LEGEND_SIZE || !this.known[meaning]) {
                 throw new IllegalStateException("Plan tile " + x + "," + y
                         + " is read as '" + meaning + "', which has no legend entry");
@@ -1398,7 +2238,7 @@ public final class RealmPoiPresets {
          * {@link #chair} was turned and the side a {@link #pair}'s far half
          * lands on; {@link #plan} checks the tile is really drawn.
          */
-        Legend turns(int x, int y, int rotation) {
+        public Legend turns(int x, int y, int rotation) {
             this.turn.put((x << 16) | y, (byte) rotation);
             return this;
         }
@@ -1412,7 +2252,7 @@ public final class RealmPoiPresets {
          * Writing one with {@code setObject} would put it on the base layer,
          * where it takes the tile the furniture standing on the rug needs.
          */
-        Legend rug(char c, String objectID) {
+        public Legend rug(char c, String objectID) {
             floor(c);
             this.rug[c] = layered(objectID, ObjectLayerRegistry.TILE_LAYER, "a carpet");
             return this;
@@ -1430,7 +2270,7 @@ public final class RealmPoiPresets {
          * autotiles a hole around every chair, which is what a rug with a
          * dining set on it must not look like.
          */
-        Legend carpet(char c, String objectID) {
+        public Legend carpet(char c, String objectID) {
             if (c >= LEGEND_SIZE || !this.known[c]) {
                 throw new IllegalStateException("Carpet under '" + c
                         + "' must first be declared as the piece standing on it");
@@ -1463,7 +2303,7 @@ public final class RealmPoiPresets {
          * RealmPoiWorldPreset#onRegistryClosed}, in the census, and at every
          * placement in the world.
          */
-        Legend scatter(char c, float coverage, String... objectIDs) {
+        public Legend scatter(char c, float coverage, String... objectIDs) {
             mark(c);
             int[] pieces = new int[objectIDs.length];
             for (int i = 0; i < objectIDs.length; i++) {
@@ -1493,13 +2333,61 @@ public final class RealmPoiPresets {
          * {@link #prop} — so this is a note about the shape of the problem, not
          * a live caller.
          */
-        Legend paves(char c, String tileID) {
+        public Legend paves(char c, String tileID) {
             if (c >= LEGEND_SIZE || !this.known[c]) {
                 throw new IllegalStateException("Paving '" + c
                         + "' must first be declared as the character it goes under");
             }
             this.tile[c] = tile(tileID);
             return this;
+        }
+
+        /**
+         * What stands ON a table character that was not declared with
+         * {@link #table} -- the two halves of a dinner table, whose
+         * {@link #pair} has no decoration list of its own. LAYERS onto an
+         * already declared character, like {@link #decor}, and refuses one that
+         * is not a table: "Tischdeko nur auf Tischen" (§0.2) asks the same
+         * {@code TableObjectInterface} question {@link #table} does.
+         */
+        public Legend serves(char c, String... decorIDs) {
+            if (c >= LEGEND_SIZE || !this.known[c]) {
+                throw new IllegalStateException("Table decoration on '" + c
+                        + "' must first be declared as the table it stands on");
+            }
+            if (!this.isTable[c]) {
+                throw new IllegalStateException("Table decoration on '" + c
+                        + "', which is not a TableObjectInterface; a decoration cannot stand on it");
+            }
+            this.tableDecor[c] = decorations(c, "a pair's half", decorIDs);
+            return this;
+        }
+    }
+
+    /** Each non-holder warned about once per run, not once per placement. */
+    private static final java.util.Set<Integer> UNHELD_WARNED =
+            java.util.Collections.synchronizedSet(new java.util.HashSet<>());
+
+    /**
+     * Fills every container a plan draws with {@code c} from one loot table.
+     *
+     * <p>{@code Preset.addInventory} fills whatever inventory object entity
+     * stands on the tile when the preset is applied, so the character has to
+     * be a real container (a barrel, a sack, a chest, a coffin). A character
+     * the plan never draws is a transcription slip, and throws.
+     */
+    public static void stock(Preset p, String[] rows, char c, LootTable loot, GameRandom random) {
+        int found = 0;
+        for (int y = 0; y < rows.length; y++) {
+            for (int x = 0; x < rows[y].length(); x++) {
+                if (rows[y].charAt(x) == c) {
+                    p.addInventory(loot, random, x, y, new Object[0]);
+                    found++;
+                }
+            }
+        }
+        if (found == 0) {
+            throw new IllegalStateException("Loot for '" + c + "', which the plan never draws");
         }
     }
 
@@ -1544,6 +2432,19 @@ public final class RealmPoiPresets {
     }
 
     /**
+     * Whether the tile holds masonry the window drawn as {@code window} really
+     * connects to -- the engine's own {@code WallObject.isConnectedWall}.
+     */
+    private static boolean sameWallAt(String[] rows, Legend legend, char window, int x, int y) {
+        char c = at(rows, x, y);
+        if (c >= LEGEND_SIZE || !legend.masonry[c] || legend.object[c] <= 0) return false;
+        necesse.level.gameObject.GameObject pane = ObjectRegistry.getObject(legend.object[window]);
+        return pane instanceof necesse.level.gameObject.WallObject
+                && ((necesse.level.gameObject.WallObject) pane)
+                        .isConnectedWall(ObjectRegistry.getObject(legend.object[c]));
+    }
+
+    /**
      * The rotation that turns a chair at {@code (x,y)} toward its table, in
      * {@code ChairObject.facesTable}'s own terms, or -1 if no side has one.
      */
@@ -1571,7 +2472,7 @@ public final class RealmPoiPresets {
      * @throws IllegalStateException on any transcription slip or any breach of
      *         §0.2-§0.4 -- see this section's header for the list
      */
-    private static void plan(Preset p, String[] rows, Legend legend) {
+    public static void plan(Preset p, String[] rows, Legend legend) {
         // Every named tile has to be a tile the plan really draws on. An
         // override on empty margin would move a piece nobody can see it move.
         for (java.util.Map.Entry<Integer, Character> entry : legend.override.entrySet()) {
@@ -1617,10 +2518,15 @@ public final class RealmPoiPresets {
                 // 0.3: a window in a corner -- or beside a door -- is silently
                 // deleted by the engine. Refuse it here instead.
                 if (legend.isWindow[c]) {
-                    boolean up = masonryAt(rows, legend, x, y - 1);
-                    boolean down = masonryAt(rows, legend, x, y + 1);
-                    boolean left = masonryAt(rows, legend, x - 1, y);
-                    boolean right = masonryAt(rows, legend, x + 1, y);
+                    // Connected means the window's OWN wall family:
+                    // WallObject.isConnectedWall is a set of that family's IDs,
+                    // so a beetle window set into nightfell masonry has no
+                    // connected wall on any side and is deleted just the same.
+                    // That is the Lantern Archive's six missing windows.
+                    boolean up = sameWallAt(rows, legend, c, x, y - 1);
+                    boolean down = sameWallAt(rows, legend, c, x, y + 1);
+                    boolean left = sameWallAt(rows, legend, c, x - 1, y);
+                    boolean right = sameWallAt(rows, legend, c, x + 1, y);
                     boolean vertical = up && down && !left && !right;
                     boolean horizontal = left && right && !up && !down;
                     if (!vertical && !horizontal) {
@@ -1690,8 +2596,18 @@ public final class RealmPoiPresets {
                     p.setObject(x + dx, y + dy, legend.counter[c], rotation);
                 }
 
-                // 0.2: table decoration, on a table, on its own layer.
+                // 0.2: table decoration, on a table, on its own layer -- and
+                // only on a piece that holds one (Legend#decorations).
                 int[] decor = legend.tableDecor[c];
+                if (decor != null && decor.length > 0 && legend.unheld[c]) {
+                    if (UNHELD_WARNED.add(legend.holder[c])) {
+                        System.err.println("RealmPoiPresets: a plan sets table decorations on "
+                                + ObjectRegistry.getObject(legend.holder[c]).getStringID()
+                                + ", which is no DecorationHolderInterface; not written"
+                                + " (TableDecorationObject.isValid would delete them)");
+                    }
+                    decor = null;
+                }
                 if (decor != null && decor.length > 0) {
                     p.setObjectLayer(ObjectLayerRegistry.FENCE_AND_TABLE_DECOR, x, y,
                             decor[legend.tableDecorNext[c]++ % decor.length]);
@@ -1770,9 +2686,13 @@ public final class RealmPoiPresets {
                 .prop('k', "skywatchcabinet", RIGHT)
                 .prop('c', "skywatchcandelabra")
                 .loose('L', "wardencandelabra")
-                // Planting, not scatter: the pocket's own three plants.
-                .prop('v', "skytulip")
-                .prop('w', "cloudbell")
+                // Planting, not scatter: the pocket's own three plants. The two
+                // flowers stand in a tile of turf each: they are grass-type
+                // objects, which delete themselves off inorganic ground, and on
+                // the paving they were gone a tick after the stamp
+                // (2026-09-24, seed of that run: `missing=2 2,3 8,3`).
+                .prop('v', "skytulip").paves('v', "cloudturftile")
+                .prop('w', "cloudbell").paves('w', "cloudturftile")
                 .prop('r', "cloudberrybush")
                 .pending('S', true);
         plan(p, WAYSIDE_PLAN, legend);

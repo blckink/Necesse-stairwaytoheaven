@@ -466,6 +466,70 @@ zwei Fässern; die **Zollbrücke** hat ein Geländer, und ihre zwei Häuser sind
 jetzt ein Zollkontor und eine Wächterstube statt zweimal dasselbe Zimmer. Gilt
 für Gegenden, die neu erzeugt werden.
 
+**Alle übrigen Häuser und Orte eingerichtet (Stand 2026-09-24).** Jedes Gebäude
+im Mod ist jetzt ein bestimmter Ort mit einem Zweck, keine zwei gleich:
+
+- **Skyreach — der Bogenturm** ist das Ordenshaus der Skywatch: unten eine
+  Versammlungshalle mit Bänken und Bannern, links das Refektorium (Küche, zwei
+  Esstische für acht), rechts die Bibliothek; darüber der Schlafsaal der
+  Novizen (fünf Betten), der Kartensaal (Kartentisch, Kartografentisch,
+  Astrolabium, Fernrohr) und die Stube des Wächters; ganz oben die
+  Sternwarte und die Laterne mit dem Seraphen. Jede Tür sitzt jetzt in einer
+  Wand (drei standen vorher frei auf dem Boden).
+- **Eden — der Kronengarten**: das L-Haus des Obergärtners (Küche für acht,
+  Schlafzimmer, Pflanzraum mit Setzlingen), die „Krone" selbst (das
+  Samenbecken in einem Blumenring, vier Bäume der Fülle, zwei Bänke, ein Tor),
+  ein eingezäunter Obstgarten mit Beerensträuchern auf Ackerboden und das Haus
+  des Samenhüters (Vorraum, Samenlager, Stube). **Das Gärhaus**: Gärhalle mit
+  vier Fässern, Kochtöpfen und Obstsäcken, Probierstube mit Tafel für acht,
+  Büro des Winzers mit Bett.
+- **Steinfeld — der Gedenkhof**: ein gefallener Engel auf dunkel gewordenem
+  Goldsockel, Blumenbeet, zwei Gräberreihen, eine Pilgerrast mit
+  Opfertisch, die Ecke des Steinmetzen. **Der Friedhof**: Weg zum Trauernden,
+  acht Gräber mit Blumen, eine Besucherbank, die Truhe des Totengräbers. **Die
+  Kapellenruine**: Altar mit angelaufenen Kelchen, Lesepult, Kirchenbänke zum
+  Altar hin — eine davon unter einer eingestürzten Deckenplatte — und die
+  Sakristeitruhe.
+- **Ghost Realm — das Laternenarchiv**: Lesesaal mit Regalreihen, dem
+  Seelenbecken und zwei Lesetischen für zwölf, Katalograum, Zimmer des
+  Archivars. **Das Spukhaus** des kopflosen Butlers: die lange Tafel ist für
+  Gäste gedeckt, die nie kamen, dazu Teeecke, Schlafzimmer und Studierzimmer
+  mit der Knochentruhe. **Das Mausoleum**: Familienaltar, Sarkophag und zwei
+  Särge (jetzt ganz — vorher lag nur die halbe Sargkiste da). **Der
+  versunkene Friedhof**: Weg zur erhöhten Mitte, ein offener Sarg vor der
+  Truhe, Trauerbank, Laternen am Tor.
+- **Crooked Beyond — der Basar**: der Türverkäufer (Türen zum Verkauf, frei
+  stehend), der Uhrmacher, der Krämer mit Lager, zwei Marktstände. **Die lange
+  Tafel** hat jetzt **einen echten Tisch**: siebzehn Tische in einer Reihe,
+  gedeckt mit einem längst verdorbenen Festmahl, die langen Stühle zu beiden
+  Seiten, am Kopfende der einzige normale Stuhl des Reichs. **Das umgestülpte
+  Haus**: Schlafzimmer, Küche, Wohnzimmer — und Badewanne samt Klo mitten im
+  Freien. **Der Türenhof** gehört jetzt dem Türsteher: Fußmatte vor jeder Tür,
+  sein Schreibtisch, eine Warteschlange aus langen Stühlen. **Das krumme Haus**
+  im Beetlefreak-Hollow ist das Haus eines Wächters: Esstisch für sechs, Bett,
+  Küche, der Rabe am Ostfenster.
+- **Hell — Grenzamt 666-B**: die Straße läuft durchs Amt über einen roten
+  Läufer, an zwei Schaltern mit vier Beamten vorbei; Wartebänke, der seit 400
+  Jahren wartende Skelett-Antragsteller, ein Ticketautomat, das Aktenzimmer.
+  **Die Verwaltung**: Abteilung für ewiges Warten, Akten und Siegel, Moxies
+  Kantine, das Büro des Direktors (Thron hinter dem Schreibtisch) mit dem
+  Schlafsaal der Beamten. **Brims Schmiede**: fünf Essen, sechs Ambosse,
+  Rüstungsständer, Übungspuppen, Ladentheke, Waffenständer. **Der
+  Höllenjahrmarkt**: ein Karussell aus Schafstühlen, Moxies Essensstand,
+  Kraft- und Schießbude mit Plüschpreisen, die Wahrsagerin und Vex' Hehlerei
+  mit gestohlenen Himmelswaren.
+- **Oberfläche**: das Aeronautenlager hat jetzt eine Bank am Feuer, einen
+  Lagertisch mit dem Logbuch und eine Reparaturecke; der Himmelsschrein einen
+  Opfertisch mit Kerze und zwei Pilgerbänke; am Kraterrand stehen die
+  Laterne und der Probensack eines Schürfers, der schneller war.
+
+Zwei Fehler sind dabei aufgefallen: Deko auf **Schreibtischen** verschwindet in
+Necesse sofort (ein Schreibtisch ist kein Deko-Träger) — in den neuen Orten
+steht darum nichts mehr auf Schreibtischen; in Stadt, Zollbrücke und Zollhaus
+(auch das Buch auf Magpies Tisch) ist das noch **offen**. Und die Beute von
+Friedhof und Kapelle lag in einer **Kiste, die gar kein Inventar hat** — sie
+liegt jetzt in einer echten Truhe. Gilt für Gegenden, die neu erzeugt werden.
+
 **Drei weitere, und die ersten feindlichen (Stand 2026-09-10).** Die
 **Nightfell-Schanze** ist ein umwehrtes Lager mit Türen auf allen vier Achsen,
 zwei Blockhäusern und einem absichtlich leeren Hof, den du überquerst statt ihn

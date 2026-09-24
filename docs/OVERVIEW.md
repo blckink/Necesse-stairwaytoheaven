@@ -65,24 +65,52 @@ None is orphaned: every `Preset` subclass has a live call site.
 
 | preset | realm | contains | furnished? |
 |---|---|---|---|
-| `WardenSpirePreset` | Skyreach hub | 3 tables (2 + 1 dining), 11 chairs + 4 benches, 1 bed, 2 desks, 2 dressers, **15 lights**, 10 banners, 5 railings, statues, carpet, chalice, tome, beacon | **richest POI in the mod** |
-| `HauntedManorPreset` | Ghost | 2 tables, 4 chairs, 2 candelabra, bone chest | table + chair + light |
-| `InvertedHousePreset` | Crooked | 4 long chairs, 2 lanterns, clock, window, barrel | chair + light |
-| `LongTablePreset` | Crooked | **34 chairs**, 4 lanterns, 2 clocks — and **zero actual tables** | chair + light |
-| `DoorYardPreset` | Crooked | 8 free-standing doors, 4 bent lanterns, clock, 2 ground windows | light only |
-| `MausoleumPreset` | Ghost | 4 columns, coffin, 4 candles, 2 urns (vanilla `vase`; asked for the nonexistent `vases` and placed none until 2026-09-23), 4 gravestones | light only |
-| `CrookedHousePreset` | Beetlefreak Hollow | 3 ghost lanterns, 2 raven statues, rubble | light only |
-| `AeronautCampPreset` | **Surface** | wreck, balloon, 4 tents, campfire, chest, lantern | light only |
-| `SkywardShrinePreset` | **Surface** | seraph statue, 2 lamps, railings, crystals | light only |
-| `GraveyardPreset` | Steinfeld | grave fence, mourner statue, 2 gravestones, crate | **empty shell** |
-| `RuinedChapelPreset` | Steinfeld | broken angel, chapel column, heaven slab, crate | **empty shell** |
-| `SunkenGraveyardPreset` | Ghost | crypt fence, 2 gravestones, bone chest | **empty shell** |
-| `SkyFragmentCraterPreset` | **Surface** | ore, rocks, crystals, starfall, chest | **empty shell** |
+| `WardenSpirePreset` | Skyreach hub | 3 tables (2 + 1 dining), 11 chairs + 4 benches, 1 bed, 2 desks, 2 dressers, **15 lights**, 10 banners, 5 railings, statues, carpet, chalice, tome, beacon | **furnished** — the hub, untouched by the 2026-09-24 pass |
+| `HauntedManorPreset` | Ghost | the Headless Butler's manor: dining hall with the long table laid for guests on a velvet rug (dinner table ×2 pairs, 5 chairs), tea corner, sideboard; master bedroom (bed, dresser, clock, rug); study (desk + chair, shelves, display, the bone chest). 4 lights | **furnished** — plan, 2026-09-24 |
+| `InvertedHousePreset` | Crooked | sealed masonry core; the rooms laid out around it on rugs: bedroom (bed, dresser), kitchen (pot, counter, pantry barrel, sack), parlour (dinner table + 6 chairs, 2 long chairs as sofas, ground window), bathtub + toilet in the open, clock, 2 lanterns | **furnished** — plan |
+| `LongTablePreset` | Crooked | **a real table**: 17 bone tables in one line laid with a rotten feast (17 decorations), 34 long chairs down both sides, the one ordinary chair at the head, the barrel behind it, 4 lanterns, 2 clocks, 2 ground windows | **furnished** — plan |
+| `DoorYardPreset` | Crooked | 11 free-standing doors, each with a red doormat; the Doorman's desk + chair, side table, bench, hinge crate; 3 long chairs queueing at the centre door; barrel, 4 lanterns, clock | **furnished** — plan |
+| `MausoleumPreset` | Ghost | family altar (bone chest between 2 urns, 2 wall candles), 4 crypt columns, the sarcophagus, **2 two-tile crypt coffins** (were one-tile halves until 2026-09-24), 2 candle pedestals, 4 graves outside | **furnished** — plan |
+| `CrookedHousePreset` | Beetlefreak Hollow | the watcher's house: dinner table for six, bed, dresser, shelves, clock between 2 ghost lanterns, kitchen (pot, candelabra, cabinet, barrel, sack), 2 ravens (one at the east window on a rug) | **furnished** — plan |
+| `AeronautCampPreset` | **Surface** | wreck, balloon, tent, campfire with a bench, camp table with the log + chair, repair anvil, silk sack, chest, barrel, parcels, windbreak, sign | **furnished** (code-built, 2026-09-24 additions) |
+| `SkywardShrinePreset` | **Surface** | seraph on its plinth, offering table with a candle, 2 pilgrim benches facing it, 2 lamps, railings, crystals, broken ring | **furnished** (code-built) |
+| `GraveyardPreset` | Steinfeld | walk to the mourner on a plinth between 2 candle pedestals, 8 graves each with a flower, visitors' bench, gravedigger's chest + stone pile, 2 lanterns; **loot now in a chest** (it was on a `skycrate`, which has no inventory) | **furnished** — plan |
+| `RuinedChapelPreset` | Steinfeld | angel between 2 candle pedestals, altar table with dark-gold chalices, 2 mourners, lectern, 7 pews + 1 crushed under a slab, 8 columns, weeds on pale grass, sacristy chest (loot moved off the `skycrate`) | **furnished** — plan |
+| `SunkenGraveyardPreset` | Ghost | cryptpath walk to the raised centre: chest between 2 grave candles, an open coffin (grave goods), 3 grave rows, the old north row with its mourner, mourners' bench, withered shrubs, 2 lanterns at the gate | **furnished** — plan |
+| `SkyFragmentCraterPreset` | **Surface** | ore, rocks, crystals, starfall, strongbox; a prospector's oil lantern and sample sack on the rim | natural site — **one human trace** (deliberately no furniture, §0.5) |
 
-**Furniture reality:** 9 of 13 stamp at least one table/chair/bed/light — but a
-table appears in only **2**, a bed in only **1** (the Spire), and 5 of the 9 are
-"furnished" by a light and nothing else. `SkyFurnitureSet`'s 17 pieces are still
-almost unused outside the Spire.
+**Furniture reality (2026-09-24):** all 13 carry furniture that says what the
+place is for; 9 of them are now `RealmPoiPresets.plan` maps, so their windows,
+both halves of every bed/bench/dinner table/coffin, every chair's facing and
+every table decoration are checked when the registries close
+(`onRegistryClosed` of each realm's world preset builds them once). `[run]`:
+a temporary all-layer census stamp (every object layer, not only layer 0)
+applied each of the twelve to dry Skyreach ground and read back
+`missing=0` for all of them (`hauntedmanor placed=108/108` … `skyfragmentcrater
+placed=19/19`). `[game]`: nobody has looked at one in a client yet.
+
+**The ten old code-built catalogue kinds are plans too (2026-09-24)** — no two
+furnished alike, each a named place with a use. Same footprints, same
+ordinals.
+
+| kind | what it is now | furnished? |
+|---|---|---|
+| `skytower` | the Skywatch chapter house: assembly hall with pews and banners, refectory (kitchen + 2 dinner tables), library, acolytes' dormitory (5 beds), chart room (map table, cartographer's table, astrolabe, telescope), warden's study, observatory, the seraph's lantern; every door in a wall | **furnished** — plan |
+| `edencrowngarden` | head gardener's L-house (kitchen for 8, bedroom, potting room), the Crown (seed basin in a flower ring, 4 trees of plenty, 2 benches, one gate), fenced orchard of fruit bushes on farmland, seed-keeper's house (porch, seed store, room) | **furnished** — plan |
+| `edenfermenthouse` | fermenting hall (4 kegs, barrels, 2 pots, counter, sacks), tasting room (table for 8, cabinet, clock, 2 displays), vintner's office (desk, shelves, bed), seed basin in a flower bed outside | **furnished** — plan |
+| `steinfeldmemorial` | fallen angel on a dark-gold plinth with 4 candle pedestals; memorial flower bed, two grave rows with flowers, pilgrims' rest (bench, offering table + chair), mason's corner (slabs, chest, stone pile); 4 columns, 4 lanterns | **furnished** — plan |
+| `ghostarchive` | reading hall (stacks, soul basin on a rug, 2 reading tables for 12), catalogue (card cabinets, clerk's desk, crystal ball), archivist's rooms (bed, dresser, clock, desk, cabinet, barrel); **`badwindows` 6 → 0** (they were beetle windows in nightfell walls) | **furnished** — plan |
+| `crookedbazaar` | the Doorman's counter (free-standing doors for sale), the clockmaker, the grocer (shop floor + store room), 2 market stalls on the street; `badwindows` 2 → 0 | **furnished** — plan |
+| `hellborderoffice` | Border Office 666-B: the road runs through it on a red runner past 2 counters with 4 clerks, cabinets, a stopped clock; waiting benches, the 400-year skeleton, a ticket machine; records room with the secure chest | **furnished** — plan |
+| `helladministration` | four departments round the cross: Eternal Waiting (4 counters, 6 bench rows, skeletons, ticket machine), Records & Seals (5 double stacks, seal table), Moxie's canteen (kitchen, serving counter, 4 tables of 6), the Director (throne behind his desk on velvet, banners) + clerks' dormitory (8 bunks) | **furnished** — plan |
+| `hellforge` | Brim's forge: 5 forges, 6 anvils, fuel barrels and skull encasings, 6 armour stands, 4 dummies; shop counter to the public way, 4 weapon stands, tungsten anvil, stock chests, the hands' table for 12; Brim's quarters | **furnished** — plan |
+| `hellcarnival` | carousel (jail-fence ring, 4 gates, 8 sheep-chairs round the lamp), Moxie's food stall + picnic tables, strength/shooting booth with plush prizes, fortune teller, Vex's contraband (stolen Skywatch goods, a Seraph) | **furnished** — plan |
+
+`[run]`, 2026-09-24: forced stamps of the nearest queued place of each of the
+ten read `missing=0` on the census's layer-0 comparison and on the temporary
+all-layer one (e.g. `kind=helladministration ... placed=591/591 missing=0`,
+all layers `707/707`). The census's window ratchet is paid off: every kind is
+now held to `badwindows=0`.
 
 **The inhabited catalogue adds 27 presets, and they are no longer all the same
 rarity.** `RealmPoiWorldPreset` places **twenty-four** of them on the lattice —

@@ -42,6 +42,22 @@ public class SteinfeldWorldPreset extends WorldPreset {
     /** Vanilla's shared "do not overlap" board for structures. */
     private static final String OCCUPIED_BOARD = "villages";
 
+    /**
+     * Builds every preset this places once, when the registries close.
+     *
+     * <p>Its buildings are drawn as plans and read through
+     * {@code RealmPoiPresets.plan}, which throws on a missing object ID, a
+     * window outside its own wall run, a chair with no table or half a bed.
+     * Building them here turns any of those into a failed startup instead of
+     * a region that fails to generate in a player's world -- the same bargain
+     * {@code RealmPoiWorldPreset.onRegistryClosed} makes for its catalogue.
+     */
+    @Override
+    public void onRegistryClosed() {
+        new GraveyardPreset(new GameRandom(0L));
+        new RuinedChapelPreset(new GameRandom(0L));
+    }
+
     @Override
     public boolean shouldAddToRegion(LevelPresetsRegion presetsRegion) {
         // The SKY's identifier: Steinfeld is a band of the one plane

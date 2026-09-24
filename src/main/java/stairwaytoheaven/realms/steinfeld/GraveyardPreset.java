@@ -1,12 +1,15 @@
 package stairwaytoheaven.realms.steinfeld;
 
-import necesse.engine.registries.ObjectRegistry;
+import static stairwaytoheaven.worldgen.pois.RealmPoiPresets.LEFT;
+
 import necesse.engine.util.GameRandom;
 import necesse.inventory.lootTable.LootTable;
 import necesse.inventory.lootTable.lootItem.ChanceLootItem;
 import necesse.inventory.lootTable.lootItem.LootItem;
 import necesse.level.maps.presets.Preset;
 import stairwaytoheaven.SkyRegistry;
+import stairwaytoheaven.worldgen.pois.RealmPoiPresets;
+import stairwaytoheaven.worldgen.pois.RealmPoiPresets.Legend;
 
 /**
  * A walled plot, hand-laid rather than grown from the noise field —
@@ -15,77 +18,66 @@ import stairwaytoheaven.SkyRegistry;
  * class's header for why this is a second lattice and not a variation on
  * {@link SteinfeldTerrainPainter}'s organic grave field.
  *
- * <h2>Legend</h2>
- * <pre>
- *   #   the wall (vanilla cryptfence, same sheet Ghost's own graveyard uses)
- *   G   the gate — the only break in the wall
- *   M   the mourner at the head of the plot (mossymonkstatue)
- *   g   a gravestone, alternating vanilla cryptgravestone1 / cryptgravestone2
- *   C   the salvage crate
- *   .   grave soil, bare
- * </pre>
+ * <h2>The pilgrims' plot (2026-09-24)</h2>
+ * It used to be a fence, a mourner, eight stones and a salvage crate on bare
+ * soil. Now it is a plot somebody tends: a weathered-stone walk from the gate
+ * to the mourner, who stands on a mist-stone plinth between two candle
+ * pedestals; two rows of graves either side of the walk, each with a widow
+ * flower or a dead heaven bloom planted at its foot; a bench for visitors
+ * facing the mourner; and in the corner the gravedigger's things -- his chest
+ * and the pile of pale stone the next headstone will be cut from. A lantern
+ * stands either side of the walk inside the gate.
  *
- * <p>Every object here is vanilla's own, read by literal path — nothing new
- * was drawn (see {@code docs/realms/steinfeld.md}'s borrowed-art table).
+ * <p>The loot was never in the game before this: it was added to a
+ * {@code skycrate}, which is a {@code RandomCrateObject} -- a breakable with no
+ * inventory, so {@code Preset.addInventory} had nothing to fill. It is in the
+ * gravedigger's {@code birchchest} now, a real container.
+ *
+ * <p>Every flower stands on grave soil, which is organic: a
+ * {@code GrassObject} on anything else is deleted by its own {@code isValid}.
  */
 public class GraveyardPreset extends Preset {
 
     public static final int WIDTH = 13;
     public static final int HEIGHT = 13;
 
-    private static final String[] PLAN = {
+    /** The plot, drawn one character per tile; '.' writes nothing. */
+    public static final String[] PLAN = {
             "#############",
-            "#...........#",
-            "#.....M.....#",
-            "#...........#",
-            "#.g...g...g.#",
-            "#...........#",
-            "#.g...C...g.#",
-            "#...........#",
-            "#.g...g...g.#",
-            "#...........#",
-            "#...........#",
-            "#...........#",
+            "#;;;;;;;;;;;#",
+            "#;;;;kMk;;;;#",
+            "#;;;;_,_;;;;#",
+            "#;g;g;,;g;g;#",
+            "#;w;b;,;b;w;#",
+            "#;;;;;,;;;;;#",
+            "#;g;g;,;g;g;#",
+            "#;b;w;,;w;b;#",
+            "#;;;;;,;;;r;#",
+            "#;;nN;,;;X;;#",
+            "#;;;;L,L;;;;#",
             "######G######",
     };
 
     public GraveyardPreset(GameRandom random) {
         super(WIDTH, HEIGHT);
-
-        int gravestone2 = ObjectRegistry.getObjectID("cryptgravestone2");
-        int gate = ObjectRegistry.getObjectID("cryptfencegate");
-
-        for (int y = 0; y < PLAN.length; y++) {
-            String row = PLAN[y];
-            for (int x = 0; x < row.length(); x++) {
-                this.setTile(x, y, SkyRegistry.gravesoilID);
-                switch (row.charAt(x)) {
-                    case '#':
-                        this.setObject(x, y, SkyRegistry.gravefenceID);
-                        break;
-                    case 'G':
-                        this.setObject(x, y, gate);
-                        break;
-                    case 'M':
-                        this.setObject(x, y, SkyRegistry.mournerstatueID);
-                        break;
-                    case 'g':
-                        // Alternating stones, the same variety SunkenGraveyardPreset
-                        // uses one dimension over: a field of identical stones reads
-                        // as tiled floor rather than as graves.
-                        this.setObject(x, y, ((x + y) & 1) == 0
-                                ? SkyRegistry.steinfeldgravestoneID : gravestone2);
-                        break;
-                    case 'C':
-                        this.setObject(x, y, SkyRegistry.skyCrateID);
-                        break;
-                    default:
-                        break; // '.' is bare floor
-                }
-            }
-        }
-
-        this.addInventory(LOOT, random, 6, 6, new Object[0]);
+        Legend legend = new Legend(SkyRegistry.gravesoilID)
+                .floor(';')
+                .floor(',', "weatheredstonetile")
+                .floor('_', "miststonetile")
+                .fence('#', "cryptfence")
+                .fence('G', "cryptfencegate")
+                .prop('M', "mournerstatue").paves('M', "miststonetile")
+                .prop('k', "stonecandlepedestal").paves('k', "miststonetile")
+                .prop('g', "cryptgravestone1")
+                .prop('w', "widowflower")
+                .prop('b', "deadheavenbloom")
+                .prop('r', "palestonerock")
+                // Faces the mourner: a bench turned to 3 faces north.
+                .pair('N', 'n', "birchbench", LEFT)
+                .prop('X', "birchchest")
+                .prop('L', "lantern");
+        RealmPoiPresets.plan(this, PLAN, legend);
+        RealmPoiPresets.stock(this, PLAN, 'X', LOOT, random);
     }
 
     /**

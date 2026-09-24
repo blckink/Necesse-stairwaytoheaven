@@ -4,7 +4,8 @@
 A wall map is easy to read and easy to get wrong -- one missing '#' at a step
 in the silhouette and the building has a hole nothing in the build catches,
 because a preset compiles and stamps happily either way. This floods the map
-from outside the bounding box and asserts that no interior cell ('.') is
+from outside the bounding box and asserts that no interior cell (anything
+that is neither masonry, a door, nor drawn outside) is
 reachable without passing through a wall, window or door.
 
 Run: python3 tools/preset_seal_check.py
@@ -16,13 +17,20 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
-# file -> name of the String[] field holding the map
+# file -> (name of the String[] field holding the map, the characters that are
+# OUTSIDE the building). Since 2026-09-24 these presets are drawn in
+# RealmPoiPresets.plan's convention: ' ' and '.' write nothing, and every
+# other character that is not masonry or a door is something standing INSIDE
+# -- floor, rug, furniture. So interior is "neither solid nor outside", and
+# each plan names what it draws out of doors (its path, its apron, the graves
+# round a tomb).
 PRESETS = {
-    "src/main/java/stairwaytoheaven/worldgen/CrookedHousePreset.java": "PLAN",
+    "src/main/java/stairwaytoheaven/worldgen/CrookedHousePreset.java": ("PLAN", " .,"),
+    "src/main/java/stairwaytoheaven/realms/ghost/HauntedManorPreset.java": ("PLAN", " .,"),
+    "src/main/java/stairwaytoheaven/realms/ghost/MausoleumPreset.java": ("PLAN", " .,G"),
 }
 
 SOLID = set("#OD")
-INTERIOR = set(".")
 
 
 def extract_map(path: Path, field: str):
@@ -33,7 +41,7 @@ def extract_map(path: Path, field: str):
     return re.findall(r'"((?:[^"\\]|\\.)*)"', m.group(1))
 
 
-def check(path_str: str, field: str) -> bool:
+def check(path_str: str, field: str, outside: str) -> bool:
     path = ROOT / path_str
     rows = extract_map(path, field)
     if not rows:
@@ -68,9 +76,12 @@ def check(path_str: str, field: str) -> bool:
                 seen[ny][nx] = True
                 q.append((nx, ny))
 
+    def inside(c):
+        return c not in SOLID and c not in outside
+
     leaks = [(x, y) for y in range(h) for x in range(w)
-             if rows[y][x] in INTERIOR and seen[y][x]]
-    interior = sum(row.count(".") for row in rows)
+             if inside(rows[y][x]) and seen[y][x]]
+    interior = sum(1 for row in rows for c in row if inside(c))
     doors = sum(row.count("D") for row in rows)
 
     if leaks:
@@ -89,8 +100,8 @@ def check(path_str: str, field: str) -> bool:
 
 def main() -> int:
     ok = True
-    for path_str, field in PRESETS.items():
-        ok &= check(path_str, field)
+    for path_str, (field, outside) in PRESETS.items():
+        ok &= check(path_str, field, outside)
     return 0 if ok else 1
 
 

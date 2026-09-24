@@ -120,8 +120,24 @@ public class SkywardShrinePreset extends Preset {
         this.setObject(C - 3, C - 1, crystal);
         this.setObject(C - 2, C - 1, crystalR);
         // Dead planting where the shrine's garden used to be.
-        this.setObject(C - 1, C + 2, shrub);
         this.setObject(C + 2, C + 1, shrub);
+        // Where the pilgrims still come (2026-09-24): an offering table before
+        // the Seraph with a candle burning on it, and a bench either side of
+        // it, both turned to face the statue. Rotation 3 faces north, the Sky
+        // Town's pond benches being the reference; a bench is a two-tile
+        // SideMultiTile whose far half lies in the direction of its rotation,
+        // and a preset writes that half or nobody does. Written after the
+        // ring, so a fallen ring stone under a bench is replaced by it.
+        final int bench = SurfaceMaterials.obj("skywatchbench");
+        final int bench2 = SurfaceMaterials.obj("skywatchbench2");
+        final int offering = SurfaceMaterials.obj("skywatchmodulartable");
+        this.setObject(C, C + 2, offering);
+        this.setObjectLayer(ObjectLayerRegistry.FENCE_AND_TABLE_DECOR, C, C + 2,
+                SurfaceMaterials.obj("skywatchcandle"));
+        this.setObject(C - 2, C + 2, bench, 3);
+        this.setObject(C - 3, C + 2, bench2, 3);
+        this.setObject(C + 3, C + 2, bench, 3);
+        this.setObject(C + 2, C + 2, bench2, 3);
         this.setObject(C + 3, C - 2, rubble);
 
         // ------------------------------------------------------- the sign ---
