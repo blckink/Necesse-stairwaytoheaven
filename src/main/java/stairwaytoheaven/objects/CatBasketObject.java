@@ -1,10 +1,18 @@
 package stairwaytoheaven.objects;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import necesse.engine.gameLoop.tickManager.TickManager;
 import necesse.engine.network.server.ServerClient;
 import necesse.entity.mobs.Attacker;
+import necesse.entity.mobs.PlayerMob;
 import necesse.entity.pickup.ItemPickupEntity;
+import necesse.gfx.camera.GameCamera;
+import necesse.gfx.drawOptions.texture.TextureDrawOptionsEnd;
+import necesse.gfx.drawables.LevelSortedDrawable;
+import necesse.gfx.drawables.OrderableDrawables;
+import necesse.gfx.gameTexture.GameTexture;
 import necesse.level.gameObject.furniture.FurnitureObject;
 import necesse.level.maps.Level;
 import stairwaytoheaven.quest.CatHome;
@@ -44,9 +52,61 @@ import stairwaytoheaven.quest.CatHome;
  */
 public class CatBasketObject extends FurnitureObject {
 
+    /** objects/catbasket.png, one 32x32 cell. */
+    public GameTexture texture;
+
     public CatBasketObject() {
         super();
         this.furnitureType = "petbed";
+    }
+
+    /**
+     * {@code FurnitureObject} loads and draws nothing of its own (javap on the
+     * 1.3.3 jar: only {@code furnitureType}, {@code construct},
+     * {@code getFurnitureType}, {@code shouldPlayInteractSound}), so without
+     * these three overrides a placed basket was an invisible tile -- the
+     * player's report of 2026-09-24, "Katzenkorb nicht sichtbar nach
+     * platzieren". Drawn the way {@code SkyDecoObject} draws its props.
+     */
+    @Override
+    public void loadTextures() {
+        super.loadTextures();
+        this.texture = GameTexture.fromFile("objects/catbasket");
+    }
+
+    @Override
+    public void addDrawables(List<LevelSortedDrawable> list, OrderableDrawables tileList, Level level,
+            int tileX, int tileY, TickManager tickManager, GameCamera camera, PlayerMob perspective) {
+        if (this.texture == null) {
+            return;
+        }
+        int drawX = camera.getTileDrawX(tileX) - this.texture.getWidth() / 2 + 16;
+        int drawY = camera.getTileDrawY(tileY) - this.texture.getHeight() + 32;
+        final TextureDrawOptionsEnd options = this.texture.initDraw()
+                .light(level.getLightLevel(tileX, tileY))
+                .pos(drawX, drawY);
+        list.add(new LevelSortedDrawable(this, tileX, tileY) {
+            @Override
+            public int getSortY() {
+                return 16;
+            }
+
+            @Override
+            public void draw(TickManager tickManager) {
+                options.draw();
+            }
+        });
+    }
+
+    @Override
+    public void drawPreview(Level level, int tileX, int tileY, int rotation, float alpha,
+            PlayerMob player, GameCamera camera) {
+        if (this.texture == null) {
+            return;
+        }
+        int drawX = camera.getTileDrawX(tileX) - this.texture.getWidth() / 2 + 16;
+        int drawY = camera.getTileDrawY(tileY) - this.texture.getHeight() + 32;
+        this.texture.initDraw().alpha(alpha).draw(drawX, drawY);
     }
 
     /**
