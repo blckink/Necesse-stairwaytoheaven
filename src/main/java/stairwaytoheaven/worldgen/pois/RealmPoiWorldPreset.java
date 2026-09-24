@@ -654,7 +654,14 @@ public class RealmPoiWorldPreset extends WorldPreset {
                     && skyLand(seed, x + width / 2, y + height - 1)
                     && (!skyLand(seed, x, middleY) || !skyLand(seed, x + width - 1, middleY));
         }
-        if (kind == RealmPoiPresets.SKY_TOWN) {
+        // The Sky Tower (49x55) joins the town's rule on 2026-09-24. It is the
+        // one footprint larger than the town's, and its plan is a stepped
+        // silhouette whose two upper corners are unbuilt margin anyway, so
+        // the corner samples guarded nothing but still cost it every cell:
+        // seed 1574516053 drew `realmpoi kind skytower: accepted=0` with
+        // `badground=0` for the band, the town's 2026-09-10 failure exactly.
+        // Its preset carries dryRing like the town's.
+        if (kind == RealmPoiPresets.SKY_TOWN || kind == RealmPoiPresets.SKY_TOWER) {
             // The catalogue's widest footprint, 57x41, and the only kind that
             // stood NOWHERE on 2026-09-10's run: `realmpoi kind skytown:
             // accepted=0 queued=0 nearest=NONE`. The nine-sample test below
