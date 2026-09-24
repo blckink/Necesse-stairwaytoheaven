@@ -763,7 +763,10 @@ public final class RealmPoiPresets {
                 .carpet('J', "skywatchcarpet")
                 .table('y', "skywatchmodulartable", "skywatchchalice", "skywatchcandle")
                 // Writing desks against the study's south wall, facing the room.
-                .table('x', "skywatchdesk", "skywatchtome", "quillandparchment")
+                // Bare: a desk is no DecorationHolderInterface, so the tome and
+                // quill this line used to name were deleted a tick after the
+                // stamp. The study's books are on the 'J' table beside it.
+                .table('x', "skywatchdesk")
                 .prop('S', "skywatchbookshelf", DOWN)
                 .prop('C', "skywatchcabinet", DOWN)
                 // The family kitchen's two cabinets back onto the hall partition.
@@ -845,7 +848,8 @@ public final class RealmPoiPresets {
                 .floor('<').decor('<', "mistglasslantern", WALL_LEFT)
                 .floor('>').decor('>', "mistglasslantern", WALL_RIGHT)
                 // The collector faces the door: desk turned east, chair behind it.
-                .table('x', "skywatchdesk", "skywatchtome")
+                // Bare, for the reason the town's study desk gives.
+                .table('x', "skywatchdesk")
                 .turns(6, 4, RIGHT)
                 .chair('h', "skywatchchair")
                 .table('m', "skywatchmodulartable", "mug")
@@ -932,9 +936,12 @@ public final class RealmPoiPresets {
         p.setObject(10, 4, candelabra);
         p.setObject(10, 12, candelabra);
 
-        // Ledger room: Magpie's desk carries the Ledger of Undelivered Post,
-        // the display stand the Skyway Writ.
-        p.setObject(14, 4, desk, RIGHT);
+        // Ledger room: Magpie's writing table carries the Ledger of
+        // Undelivered Post, the display stand the Skyway Writ. A modular
+        // table, not the desk it was until 2026-09-24: TableDecorationObject
+        // deletes itself off anything that is no DecorationHolderInterface,
+        // and DeskObject is not one, so the Ledger never stood in the world.
+        p.setObject(14, 4, SkyFurnitureSet.skywatchTableID);
         p.setObjectLayer(ObjectLayerRegistry.FENCE_AND_TABLE_DECOR, 14, 4, object("skywatchtome"));
         p.setObject(15, 4, chair, LEFT);
         p.setObject(17, 3, SkyFurnitureSet.skywatchBookshelfID, DOWN);
