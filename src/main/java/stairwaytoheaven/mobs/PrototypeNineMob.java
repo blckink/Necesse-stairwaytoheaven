@@ -12,8 +12,10 @@ import necesse.entity.mobs.Mob;
 import necesse.entity.mobs.ai.behaviourTree.BehaviourTreeAI;
 import necesse.entity.mobs.ai.behaviourTree.decorators.FailerAINode;
 import necesse.entity.mobs.ai.behaviourTree.leaves.TeleportOnProjectileHitAINode;
+import necesse.entity.mobs.ai.behaviourTree.leaves.WandererAINode;
 import necesse.entity.mobs.ai.behaviourTree.trees.ConfusedPlayerChaserWandererAI;
 import necesse.entity.mobs.ai.behaviourTree.util.TargetFinderDistance;
+import necesse.entity.mobs.ai.behaviourTree.util.WandererBaseOptions;
 import necesse.entity.mobs.hostile.AncientSkeletonMageMob;
 import necesse.entity.projectile.AncientSkeletonMageProjectile;
 import necesse.gfx.gameTexture.GameTexture;
@@ -145,7 +147,38 @@ public class PrototypeNineMob extends AncientSkeletonMageMob {
             }
         }));
         this.ai = new BehaviourTreeAI<>(this, chaserAI);
+        // Keep the demonstrator in its range. Vanilla's mage wanders the open
+        // world, and nothing in the chaser tree reads spawnTilePosition, so the
+        // Test Range's one enemy strolled out of its own building: the
+        // integration census found it outside the footprint (guards=0) on
+        // seeds where nobody had touched it. WandererAINode asks the
+        // blackboard for "baseOptions" (its default baseOptionsKey, VERIFIED
+        // [jar] by javap) and wanders around that tile instead; the Blackboard
+        // is a HashMap, so this is the whole hook.
+        this.ai.blackboard.put("baseOptions", new WandererBaseOptions<PrototypeNineMob>() {
+            @Override
+            public Point getBaseTile(PrototypeNineMob mob) {
+                // A demonstrator that was not seated by the landmark (spawned
+                // by a command, or one day by a spawn table) has no seat, and
+                // wanders around wherever it stands, as vanilla's does.
+                return mob.spawnTilePosition != null ? mob.spawnTilePosition
+                        : new Point(mob.getTileX(), mob.getTileY());
+            }
+
+            @Override
+            public int getBaseRadius(PrototypeNineMob mob, WandererAINode<PrototypeNineMob> node) {
+                return HOME_RADIUS;
+            }
+
+            @Override
+            public boolean forceFindAroundBase(PrototypeNineMob mob) {
+                return true;
+            }
+        });
     }
+
+    /** How far from its seat the demonstrator strolls between fights, in tiles. */
+    private static final int HOME_RADIUS = 5;
 
     @Override
     public LootTable getLootTable() {
