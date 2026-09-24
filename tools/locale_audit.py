@@ -749,6 +749,14 @@ ITEM_CLASS_VANILLA_ICON = {
     # Rows in docs/VANILLA_ASSET_MAP.md §1.3.
     "CloudGlaiveToolItem": ("fixed", "cryoglaive"),
     "SkyLanceToolItem": ("fixed", "dragonlance"),
+    # The Spire Village's quest-ladder rewards (chapter-03-spire-village.md
+    # §5). Nobody has drawn them; each accessory and drink names its vanilla
+    # icon as constructor argument 0, the greatsword and the Doctor's tincture
+    # in a constant. Rows in docs/VANILLA_ASSET_MAP.md §1.8.
+    "LadderTrinketItem": ("arg", 0),
+    "LadderFoodItem": ("arg", 0),
+    "MemoryBlade": ("fixed", "hexedbladegreatsword"),
+    "BloodFeverTinctureItem": ("fixed", "greaterhealthregenpotion"),
 }
 
 # Marker prefix on a wanted-icon path that lives in the vanilla resource file

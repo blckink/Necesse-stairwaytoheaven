@@ -336,6 +336,53 @@ public abstract class SkySettlerMob extends HumanShop {
                 : new LocalMessage("misc", this.talkKey() + "pitch");
     }
 
+    /**
+     * One conversation's worth of the Spire Village's quest ladder
+     * ({@code quest.ladder.QuestLadder}): turn a step in, hand the next one
+     * out, or say "not yet" — and say it in this resident's own bubble.
+     *
+     * <p>Call it from {@code interact} BEFORE {@code super.interact}, the way
+     * every resident chain here always has; server side only, idempotent in
+     * every branch, and deliberately not gated on {@link #isSettler()}: a
+     * resident who was recruited early can still take and pay every step.
+     *
+     * @return true if the ladder said something (so the caller says nothing)
+     */
+    protected boolean talkLadder(necesse.entity.mobs.PlayerMob player) {
+        if (!this.isServer() || player == null || !player.isServerClient()) {
+            return false;
+        }
+        stairwaytoheaven.quest.ladder.QuestLadder.Reply reply =
+                stairwaytoheaven.quest.ladder.QuestLadder.converse(this.getStringID(),
+                        player.getServerClient());
+        if (reply == null || reply.bubble == null) {
+            return false;
+        }
+        this.bubble(reply.bubble);
+        return true;
+    }
+
+    private int homeCheckTicks;
+
+    /**
+     * Home-bound. A resident an older build stood somewhere in the sky — a
+     * workshop, a landmark, a gravestone in the Aftergarden — walks into their
+     * house in the Spire Village the first time their region is loaded, and
+     * from then on strolls around their own door by day and sleeps inside by
+     * night ({@code village.SpireVillage#bringHome}). Every half second is
+     * plenty: it is one null check until the day it is not.
+     */
+    @Override
+    public void serverTick() {
+        super.serverTick();
+        if (++this.homeCheckTicks >= 10) {
+            this.homeCheckTicks = 0;
+            if (this.home == null) {
+                stairwaytoheaven.village.SpireVillage.bringHome(this);
+            }
+        }
+    }
+
     /** Unique story residents: no stray mob may kill one. */
     @Override
     public boolean canTakeDamage() {

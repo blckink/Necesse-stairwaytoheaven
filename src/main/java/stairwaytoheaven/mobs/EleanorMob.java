@@ -154,6 +154,23 @@ public class EleanorMob extends SkySettlerMob {
         // time she is found and neither ending has happened yet. Both endings
         // below remove it; see EleanorQuest's own doc.
         Server server = level == null ? null : level.getServer();
+        // She lives in the Spire Village now, from the very first ascent, and
+        // her choice belongs to the Ghost Realm's chapter of the quest ladder:
+        // until that chapter is open she says so and nothing else happens —
+        // no journal entry, no release. A player already holding her quest
+        // (an older save) keeps both endings open, whatever the chapter.
+        if (server != null && SkyQuests.findHeld(client, EleanorQuest.class) == null) {
+            if (!stairwaytoheaven.quest.ladder.QuestLadder.chapterOpen(server,
+                    client.authentication, stairwaytoheaven.quest.ladder.QuestLadder.CHAPTER_GHOST)) {
+                this.bubble(new necesse.engine.localization.message.LocalMessage("misc",
+                        "swhladderwaiteleanor", "chapter",
+                        new necesse.engine.localization.message.LocalMessage("misc",
+                                stairwaytoheaven.quest.ladder.QuestLadder.chapterKey(
+                                        stairwaytoheaven.quest.ladder.QuestLadder.CHAPTER_GHOST))));
+                super.interact(player);
+                return;
+            }
+        }
         if (server != null) {
             SkyQuests.giveOnce(server, client, new EleanorQuest());
         }

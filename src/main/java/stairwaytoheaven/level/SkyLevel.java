@@ -148,7 +148,10 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
      * spawn table.
      */
     private void placeResident(Region region) {
-        if (this.isClient()) {
+        // Retired 2026-09-24: the three Skyreach residents live in the Spire
+        // Village now (village.SpireVillage, DESIGN_DECISIONS.md). A resident
+        // found beside a workshop would be a second path to the same person.
+        if (this.isClient() || RESIDENTS_LIVE_IN_VILLAGE) {
             return;
         }
         long seed = (this.getWorldGenSeed() * 0x9E3779B97F4A7C15L)
@@ -221,6 +224,14 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
         }
         return false;
     }
+
+    /**
+     * The player's decision of 2026-09-24: every named resident lives in the
+     * Spire Village. The two scattered placement paths are kept (and not
+     * deleted) so the rule is one switch, not a rewrite, if it is ever asked
+     * back; while it is true neither path places anybody.
+     */
+    private static final boolean RESIDENTS_LIVE_IN_VILLAGE = true;
 
     private static final String[] RESIDENTS = {
             "magpiesettler", "haldasettler", "ossiansettler",
@@ -560,7 +571,11 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
      * are the ones their retired levels shipped with.
      */
     private void placeRealmResidents(Region region) {
-        if (this.isClient()) {
+        // Retired 2026-09-24 with placeResident, for the same reason: Eveleen,
+        // Ives, Mortimer, Caspern, Eleanor and Mr. Knott live in the Spire
+        // Village and send the player OUT into their realms (the quest ladder,
+        // quest.ladder.QuestLadder) instead of waiting in them.
+        if (this.isClient() || RESIDENTS_LIVE_IN_VILLAGE) {
             return;
         }
         int seed = this.getWorldGenSeed();
@@ -964,6 +979,10 @@ public class SkyLevel extends BiomeGeneratorStackLevel {
         // re-stamped. They ride this method rather than the POI lattice because
         // a lattice kind is §0.6's "common" row by definition, and a world with
         // four toll-houses has four Magpies. See SkyLandmarkPois.
+        // The Spire Village: every named resident in a house of their own around
+        // the spire (the player's decision of 2026-09-24, DESIGN_DECISIONS.md).
+        // BEFORE the landmarks, so the village is where they are claimed.
+        stairwaytoheaven.village.SpireVillage.ensure(this);
         stairwaytoheaven.worldgen.pois.SkyLandmarkPois.ensureAll(this);
     }
 

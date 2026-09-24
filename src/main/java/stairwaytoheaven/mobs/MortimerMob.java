@@ -115,26 +115,12 @@ public class MortimerMob extends SkySettlerMob {
             necesse.level.maps.Level level = this.getLevel();
             necesse.engine.network.server.Server server =
                     level == null ? null : level.getServer();
-            advanceRites(server, player.getServerClient());
+            // Rung 11 and 15 of the quest ladder (QuestLadder).
+            this.talkLadder(player);
         }
         super.interact(player);
     }
 
-    private void advanceRites(necesse.engine.network.server.Server server,
-            necesse.engine.network.server.ServerClient client) {
-        stairwaytoheaven.quest.SkyQuests.Step step =
-                stairwaytoheaven.quest.SkyQuests.advanceResidentChain(server, client,
-                        stairwaytoheaven.quest.SkywatchWorldData.CHAIN_MORTIMER_RITES,
-                        new stairwaytoheaven.quest.MortimerRitesQuest());
-        if (step == stairwaytoheaven.quest.SkyQuests.Step.ASKED) {
-            this.bubble("mortimerasksrites");
-        } else if (step == stairwaytoheaven.quest.SkyQuests.Step.PAID) {
-            // The Ghost band's own bar. Six, benchmarked in the quest's own doc
-            // against GhostKeyQuest's ten.
-            giveReward(client, "spiritsteelbar", 6, "mortimer");
-            this.bubble("mortimerritesdone");
-        }
-    }
 
     /**
      * The price, waived once the dead are seen to. Vanilla's recruit page is

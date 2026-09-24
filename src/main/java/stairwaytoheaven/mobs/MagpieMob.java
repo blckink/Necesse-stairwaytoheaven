@@ -101,6 +101,7 @@ public class MagpieMob extends SkySettlerMob {
         // hers, not a line of merchandise.
         this.shop.addSellingItem("magpiecap", new SellingShopItem(1, 1))
                 .setStaticPriceBasedOnHappiness(900, 1500, 120);
+        this.stockCopies();
     }
 
     // --- her SECOND profession: sky voyages ----------------------------
@@ -160,6 +161,33 @@ public class MagpieMob extends SkySettlerMob {
         return this.completedMission
                 ? new LocalMessage("ui", "skyvoyagecomplete")
                 : super.getWorkInvNotificationMessage();
+    }
+
+    /**
+     * The two one-of-a-kind papers her ladder steps ask for, as copies —
+     * only on the shelf for a player who HOLDS that step and has lost the
+     * original. The Ledger and the Writ each lie in the Toll-House exactly
+     * once per world ({@code SkyLandmarkPois}); a step that one sold book can
+     * lock forever would be the swh_beacon dead end again. Priced so the
+     * Toll-House stays the way to go: 2 500 and 3 000 coins, 10x their broker
+     * value like the Warden's catch-up shelf.
+     */
+    private void stockCopies() {
+        this.shop.addSellingItem("postledger", new SellingShopItem(1, 1))
+                .setStaticPrice(2500, 2500)
+                .addRequirement((random, client, shop, blackboard) ->
+                        stairwaytoheaven.quest.ladder.QuestLadder.holds(client, "swh_ladder_post"));
+        this.shop.addSellingItem("skywaywrit", new SellingShopItem(1, 1))
+                .setStaticPrice(3000, 3000)
+                .addRequirement((random, client, shop, blackboard) ->
+                        stairwaytoheaven.quest.ladder.QuestLadder.holds(client, "swh_ladder_contraband"));
+    }
+
+    /** The Spire Village's quest ladder, then the shop (QuestLadder). */
+    @Override
+    public void interact(necesse.entity.mobs.PlayerMob player) {
+        this.talkLadder(player);
+        super.interact(player);
     }
 
     @Override protected int lookSeed() { return 0x4A6913; }

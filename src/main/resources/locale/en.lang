@@ -549,15 +549,15 @@ ivessettlername=Ives <name>, Verger of the Quiet Reach
 
 [misc]
 // --- where each settler comes from (settlement screen "acquire" tip) ---
-magpiesettlertip=Found in the Skyreach, at a derelict Skywatch workshop.
-haldasettlertip=Found in the Skyreach, at a derelict Skywatch workshop.
-ossiansettlertip=Found in the Skyreach, at a derelict Skywatch workshop.
-eveleensettlertip=Found in the Garden of Eden, beside a Knowledge Tree. She also travels to a settlement once Eden grass grows in it. Works Farming, Forestry and Fertilising.
-mortimersettlertip=Found in the Aftergarden, beside a gravestone. He also travels to a settlement that has built a graveyard. Works Hauling, Crafting and Hunting.
-caspernsettlertip=Found in the Aftergarden, beside a gravestone. He also travels to a settlement that has built an Aether Forge. Works Crafting and Hauling, and nothing outdoors.
-eleanorsettlertip=Found in the Aftergarden, beside a gravestone. She never comes to you - you decide whether she stays. Works Husbandry.
-knottsettlertip=Found in Crooked Beyond, at the Door Yard. He does not travel to a settlement on his own. Works Trading, and nothing outdoors.
-ivessettlertip=Found in Steinfeld, beside a broken angel. He does not travel to a settlement on his own. Works Crafting and Hauling, and buys everything the Quiet Reach gives up.
+magpiesettlertip=Lives in the Spire Village around the Old Warden Spire. Recruit price: coins and the Bonded Lockbox from the Skyway Toll-House. Works Trading missions and runs sky voyages.
+haldasettlertip=Lives in the Spire Village around the Old Warden Spire. Recruit price: coins and the Mother from the Grange Cellar. Works Fishing.
+ossiansettlertip=Lives in the Spire Village around the Old Warden Spire. Recruit price: coins and the Storm Lens Core from the Stormveil Test Range. Works Crafting and Hauling.
+eveleensettlertip=Lives in the Spire Village around the Old Warden Spire, beside her Eden bed. Her fee is waived once she has her three Eden fruit. Works Farming, Forestry and Fertilising.
+mortimersettlertip=Lives in the Spire Village around the Old Warden Spire. His fee is waived once his rites are done. Works Hauling, Crafting and Hunting.
+caspernsettlertip=Lives in the Spire Village around the Old Warden Spire. His fee is waived once his forge burns again. Works Crafting and Hauling, and nothing outdoors.
+eleanorsettlertip=Lives in the Spire Village around the Old Warden Spire. She never comes to you - you decide whether she stays. Works Husbandry.
+knottsettlertip=Lives in the Spire Village around the Old Warden Spire, in the house with the red door. Works Trading, and nothing outdoors.
+ivessettlertip=Lives in the Spire Village around the Old Warden Spire. His fee is waived once the vigil is kept. Works Crafting and Hauling, and buys everything the Quiet Reach gives up.
 
 // --- Ives, the Verger ---
 ivestalkpitch=Things end up out here. People too, in the end. Somebody has to write down what they were, and I appear to be somebody.
@@ -621,8 +621,8 @@ knottdoordone=Ha! So it does lead somewhere. Take this - you argued it out of me
 [quests]
 // --- Eveleen, the Eden chain ---
 swhedenreachtitle=Into the Garden
-swhedenreachdesc=Green still grows somewhere above the clouds, richer than anything in the Skyreach. Someone still tends it.
-swhedenreachobj=Find whoever still tends the Garden of Eden - look for a Knowledge Tree.
+swhedenreachdesc=Eveleen talks about a garden further out, greener than anything in the Skyreach. She wants to know whether it still grows.
+swhedenreachobj=Set foot in the Garden of Eden (600-2,880 tiles from the spire), then tell Eveleen in the Spire Village.
 swhspeaktoeveleen=Speak with Eveleen.
 swhedenplantstitle=A Taste of Eden
 swhedenplantsdesc=Eveleen wants proof the garden is real: an Eden Berry, a Moon Melon, and a Sun Grape.
@@ -637,8 +637,8 @@ swhspeaktoeleanor=Speak with Eleanor.
 
 // --- Mr. Knott, the Crooked chain ---
 swhcrookedarrivaltitle=A Door That Goes Somewhere
-swhcrookedarrivaldesc=Doors stand in rows here, closed on nothing. Someone still believes one of them works.
-swhcrookedarrivalobj=Find whoever keeps the Door Yard - look for a red door that stands alone.
+swhcrookedarrivaldesc=Mr. Knott swears that past the bend there is a yard full of doors, and that one of them leads somewhere. He wants you to see it.
+swhcrookedarrivalobj=Set foot in the Crooked Beyond (from about 4,200 tiles out), then tell Mr. Knott in the Spire Village.
 swhspeaktoknott=Speak with Mr. Knott.
 swhsteinfeldvigiltitle=The Vigil
 swhsteinfeldvigildesc=Ives keeps the Quiet Reach, and the Quiet Reach does not stay kept. The ones who walk out here are not haunting anybody - they were simply never laid down. He knows what it takes and has run out of both.
@@ -1467,3 +1467,146 @@ lore5ahint=Unlocked by: reaching Hell.
 lore5btitle=The Infernal Seal
 lore5b=No form could be found, so the Warden took proof instead: the Crooked Beyond, twice over. Heaven, death and hell keep their books in the same ledger - the seal is only the stamp that says so.
 lore5bhint=Unlocked by: earning the Infernal Seal.
+// ---- Spire Village and quest ladder (chapter-03-spire-village.md) ----
+[quests]
+swhladderposttitle=Undelivered Post
+swhladderpostdesc=Magpie flew freight for the Skywatch until the road went quiet. Her Ledger of Undelivered Post is still in the office of the Skyway Toll-House - behind the Tollwright who guards the till.
+swhladderpostreward=Magpie's Satchel (accessory: wider pickup range, more stamina)
+swhladderroundtitle=The Cellar Yeast
+swhladderrounddesc=Halda wants to start her cellar again. The Mother still lives in the Grange Cellar, but without feed she is nothing: cloudberries and wind wheat from the Driftlands, aurora petals from the Aurora Shoals.
+swhladderroundreward=3x Storm Brew, then on sale in her shop
+swhladderprototypetitle=What Prototype Nine Was Built From
+swhladderprototypedesc=Ossian wants to understand what is still running on the Stormveil Test Range. For that he needs what it was built from: storm glass, storm shards and fulgurite from the Stormveil.
+swhladderprototypereward=Reader's Lens (accessory: shows ore, faster mining)
+swhladdercidertitle=Paradise Cider
+swhladderciderdesc=Halda has heard about the Garden and wants to start a cider nobody up here knows: paradise apples, paradise coconuts and Eden sap - the Hedge Labyrinth keeps the apples, the Bloom Maws the sap.
+swhladderciderreward=3x Paradise Cider, then on sale in her shop
+swhladdercontrabandtitle=Contraband from the Garden
+swhladdercontrabanddesc=Magpie has buyers for serpent scales and venom fangs - and needs the Skyway Writ from the Toll-House so the cargo gets through on every road.
+swhladdercontrabandreward=Magpie's sky voyages: every open route +15% success
+swhladderechotitle=The Echo in the Archive
+swhladderechodesc=In Steinfeld voices have turned to stone. Ossian wants to archive them: ten echo shards, and a mourning band from a Stone Mourner.
+swhladderechoreward=Echo Conch (accessory: +25% crit damage, +3% crit)
+swhladderstepstitle=The Eleven Steps
+swhladderstepsdesc=One of the dead in Steinfeld walks the same eleven steps every evening. Ives wants to lay the path for him: eleven each of grave salt, spirit moss and pale stone.
+swhladderstepsreward=Verger's Lantern (accessory: shows enemies, +30 health)
+swhladdermemorytitle=Metal That Remembers
+swhladdermemorydesc=Caspern wants to forge a blade that remembers something. He needs a soul collar from a Mourning Bride, and bonewood and ectoplasm from the Aftergarden.
+swhladdermemoryreward=The Remembering Blade (greatsword, 186 damage)
+swhladdershroudstitle=Shrouds for the Feast
+swhladdershroudsdesc=The Wedding Feast in the Ghost Realm never ended. Mortimer wants to cover the guests at last: ten soul thread and six veil essence.
+swhladdershroudsreward=Mourning Brooch (accessory: +8 armour, +25 health)
+swhladderseedstitle=Seeds I Never Planted
+swhladderseedsdesc=Eveleen has three seeds she never planted. In the Crooked Beyond eye seeds grow that can see what a seed wants to become. She wants six - and three knowledge cuttings.
+swhladderseedsreward=Root Crown (accessory: +60 health, +1 combat regeneration)
+swhladdershellstitle=A Door with Manners
+swhladdershellsdesc=Mr. Knott is building a door that behaves. For it he needs eight striped shells and the horn of a Door Mimic.
+swhladdershellsreward=Knott's Key Ring (accessory: faster dash, +10% speed)
+swhladderformtitle=Form 666-B
+swhladderformdesc=Hell keeps books, and Ossian wants to know what is in them. The form for that asks for proof in Hell-sized amounts: sixteen reality shards, twenty-four oddwood, thirty charwood.
+swhladderformreward=The Auditor's Seal (accessory: +10% damage, +5% crit)
+swhladderreached=(done)
+swhspeaktomagpie=Speak with Magpie.
+swhspeaktohalda=Speak with Halda.
+swhspeaktoossian=Speak with Ossian Vane.
+swhedenreachreward=6x Eden Grass Seed
+swhcrookedarrivalreward=4x Reality Shard
+
+[misc]
+swhladderpostask=The toll-house on the sky road. My book is in the cabinet - every parcel that never arrived. Get it before the Tollwright eats it.
+swhladderpostdone=There it is. Every page a promise I mean to keep. Take the satchel - it has seen more than you have.
+swhladderposttarget=Skyway Toll-House (Magpie's ledger)
+swhladderroundask=Sixteen cloudberries, eight wind wheat, four aurora petals. Then I set what this sky has not drunk in forty years.
+swhladderrounddone=Smell that. That is storm, in bottles. Three for you, the rest is on my shelf from now on.
+swhladderroundtarget=Driftlands and Aurora Shoals (Grange Cellar)
+swhladderprototypeask=The test range in the Stormveil. Bring me storm glass, shards and fulgurite - I want to read what Prototype Nine is before it shows me.
+swhladderprototypedone=Aha. That is not a machine, it is a sentence nobody finished. Take the lens - it reads stone.
+swhladderprototypetarget=Stormveil Test Range
+swhedenreachask=Further out, past the Driftlands, the Garden begins. Go there. Stand in it. Then tell me how it smells.
+swhedenreachdone=Of honey and quarrels? Then it is the one. Here - seed from it. Sow it where you live.
+swhedenreachtarget=Garden of Eden (from about 600 tiles out)
+swhedenplantstarget=Garden of Eden (Eden chests, Hedge Labyrinth)
+swhladderciderask=Paradise apples, four. Two coconuts. Four Eden sap - from the flowers that bite back. I want to know whether paradise ferments.
+swhladderciderdone=It ferments. Of course it ferments. Take three - and tell nobody how strong it is.
+swhladdercidertarget=Garden of Eden (Hedge Labyrinth, Bloom Maws)
+swhladdercontrabandask=Six scales, four venom fangs, and the Writ from the display case in the toll-house. With that paper no road asks me what I carry.
+swhladdercontrabanddone=Countersigned twice. From today my voyages arrive more often - for everyone here.
+swhladdercontrabandtarget=Garden of Eden (serpents) and the Skyway Toll-House
+swhsteinfeldvigiltarget=Steinfeld (Grave Heath)
+swhladderechoask=Echo shards, ten. And a mourning band - the Stone Mourners wear them, and they do not give them up gladly.
+swhladderechodone=Listen... someone is counting. I have written it down. Take the conch, it listens for you.
+swhladderechotarget=Steinfeld (Stone Mourners)
+swhladderstepsask=Eleven grave salt, eleven spirit moss, eleven pale stone. One for every step. Then he may stand still.
+swhladderstepsdone=He stood still. For the first time. Take my lantern - it shows you who is still walking.
+swhladderstepstarget=Steinfeld (Slab Fields, Grave Heath)
+swhmortimerritestarget=Ghost Realm (soul thread, bonewood)
+swhcaspernforgetarget=Ghost Realm (spectral ore, the Gloomfen)
+swheleanortarget=Eleanor in the Spire Village
+swhladdermemoryask=A soul collar. The brides in the Aftergarden still wear them. And ten bonewood, eight ectoplasm. Then I show you what memory weighs.
+swhladdermemorydone=Hear how it rings? That is somebody's wedding. Carry it well.
+swhladdermemorytarget=Ghost Realm (Mourning Brides, Wedding Feast)
+swhladdershroudsask=That feast out there has gone on too long. Ten soul thread, six veil essence - then I cover them.
+swhladdershroudsdone=Covered properly, all of them. Take the brooch. You wear it for the ones you will not forget.
+swhladdershroudstarget=Ghost Realm (Wedding Feast, Gloom Shades)
+swhcrookedarrivalask=Far out, where the world starts to bend: a yard full of doors. Go there. Come back. Tell me whether they looked at you.
+swhcrookedarrivaldone=They looked at you? Good. Then they know you now. Here - shards from there.
+swhcrookedarrivaltarget=Crooked Beyond (the Door Yard)
+swhcrookeddoortarget=Crooked Beyond (warp resin, strange fabric)
+swhladderseedsask=Eye seeds, six, from the bend. And three knowledge cuttings. I want to know at last what my three seeds are.
+swhladderseedsdone=They are... crowns. Of roots. One of them is yours.
+swhladderseedstarget=Crooked Beyond (Tongue Plants)
+swhladdershellsask=Eight striped shells, off the beetles. And a horn from a door that wanted to eat you. A door has to be taught manners.
+swhladdershellsdone=It knocks now before it opens. Here - the keys. To everything that still closes.
+swhladdershellstarget=Crooked Beyond (Stripe Beetles, Door Mimics)
+swhladderformask=Form 666-B. Application to inspect Hell's books. Enclosed: sixteen shards, twenty-four oddwood, thirty charwood. In triplicate.
+swhladderformdone=Approved. Approved! They sent me a copy - and you their seal. Do not read what it says.
+swhladderformtarget=Hell (Hell's Hem, the Furnace Reach)
+swhladderwaitmagpie=No freight for you until <chapter> is open. Help the others in the village first.
+swhladderwaithalda=The cellar is still working. Come back when <chapter> is open for you.
+swhladderwaitossian=I am still reading. When <chapter> is open for you, I have questions only you can answer.
+swhladderwaiteveleen=Not yet. When <chapter> is open for you, I will send you into my garden.
+swhladderwaitives=The Quiet Reach is waiting. Come when <chapter> is open for you.
+swhladderwaitmortimer=Too early for my kind of work. Come back when <chapter> is open.
+swhladderwaitcaspern=My fire can wait. Come when <chapter> is open for you.
+swhladderwaiteleanor=I do not know yet what I want. Ask me again when <chapter> is open for you.
+swhladderwaitknott=No door leads you to me yet. Come when <chapter> is open for you.
+swhladderchapter1=Chapter I - the Skyreach
+swhladderchapter2=Chapter II - the Garden of Eden
+swhladderchapter3=Chapter III - Steinfeld
+swhladderchapter4=Chapter IV - the Ghost Realm
+swhladderchapter5=Chapter V - the Crooked Beyond
+swhladderchapter6=Chapter VI - Hell
+swhsignvillage=NOTICE BOARD - SPIRE VILLAGE
+The people here need help, one thing at a time.
+Start with Magpie, Halda and Ossian.
+Whoever wants to go further out, asks again when back.
+
+[item]
+magpiesatchel=Magpie's Satchel
+stormbrew=Storm Brew
+readerslens=Reader's Lens
+paradisecider=Paradise Cider
+echoconch=Echo Conch
+vergerlantern=Verger's Lantern
+memoryblade=The Remembering Blade
+mourningbrooch=Mourning Brooch
+rootcrown=Root Crown
+knottkeyring=Knott's Key Ring
+auditorsseal=The Auditor's Seal
+bloodfevertincture=Blood-Fever Tincture
+
+[itemtooltip]
+magpiesatcheltip=Magpie's old courier bag. Whatever lies close by finds its own way in.
+stormbrewtip=Halda's cellar ale, set with cloudberries and storm. Makes you quick.
+readerslenstip=Ossian's second lens. It reads stone like a page.
+paradisecidertip=Cider from the garden that bites back. Stronger than it tastes.
+echoconchtip=Holds a voice from Steinfeld. It counts along when you hit.
+vergerlanterntip=Ives's lantern. It shows who is still walking.
+memorybladetip=Caspern forged a wedding into it. It rings when it hits.
+mourningbroochtip=Mortimer's brooch. You wear it for the ones you will not forget.
+rootcrowntip=Grown from one of the three seeds Eveleen never planted.
+knottkeyringtip=Keys to everything that still closes. None of them is labelled.
+auditorssealtip=Hell's own seal, by Form 666-B. Do not read what it says.
+bloodfevertincturetip=From the Doctor. Uncorked, it cures the blood fever of everyone bitten within ten tiles.
+readerslenssight=Shows ore through stone
+vergerlanternsight=Shows nearby enemies

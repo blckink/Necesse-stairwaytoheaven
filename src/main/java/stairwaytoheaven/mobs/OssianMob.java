@@ -74,6 +74,13 @@ public class OssianMob extends SkySettlerMob {
                 .setPriceBasedOnHappiness(90, 58, 15);
     }
 
+    /** The Spire Village's quest ladder, then the shop (QuestLadder). */
+    @Override
+    public void interact(necesse.entity.mobs.PlayerMob player) {
+        this.talkLadder(player);
+        super.interact(player);
+    }
+
     @Override protected int lookSeed() { return 0x0551A0; }
     @Override protected HumanGender gender() { return HumanGender.MALE; }
     @Override protected Color shirtColor() { return new Color(70, 62, 104); }

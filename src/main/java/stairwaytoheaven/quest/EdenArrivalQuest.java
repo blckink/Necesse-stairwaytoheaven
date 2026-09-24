@@ -1,83 +1,39 @@
 package stairwaytoheaven.quest;
 
-import java.awt.Color;
-import java.awt.Rectangle;
-
-import necesse.engine.localization.Localization;
-import necesse.engine.localization.message.GameMessage;
-import necesse.engine.localization.message.LocalMessage;
-import necesse.engine.network.NetworkClient;
-import necesse.engine.network.server.ServerClient;
-import necesse.engine.quest.Quest;
-import necesse.gfx.drawOptions.DrawOptionsBox;
-import necesse.gfx.drawOptions.DrawOptionsList;
-import necesse.gfx.drawOptions.StringDrawOptions;
-import necesse.gfx.fairType.FairType;
-import necesse.gfx.gameFont.FontOptions;
+import stairwaytoheaven.worldgen.RealmDepth;
 
 /**
- * HUD quest for the first step of the Eden chain: find the Knowledge Tree.
+ * {@code swh_edenreach} — "Into the Garden": the first step of the Garden of
+ * Eden chapter of the quest ladder.
  *
- * Pure signpost, exactly like {@link FindSpireQuest} — no tracked state.
- * Handed out on a player's first step through the Eden Gate
- * ({@code EdenGateObjectEntity.use}); completed by Eveleen's first dialogue,
- * who stands beside a Knowledge Tree ({@code EdenLevel.placeResident}), so
- * finding her IS finding the tree.
+ * <p>Eveleen hands it out in the Spire Village once the Skyreach chapter is
+ * done; it completes when the player has stood in the Eden band
+ * ({@link RealmVisitQuest}) and is turned in to her. The Eden Gate still hands
+ * it out on first use, as it always did — a player standing in Eden has then
+ * already reached it, and takes it back to her.
+ *
+ * <p>Was a pure signpost ("find the Knowledge Tree, Eveleen is beside it")
+ * until 2026-09-24; with Eveleen living in the village that signpost pointed
+ * at nobody. Its ID and class are unchanged, so a copy an older save holds in
+ * its journal loads and simply starts tracking the visit.
  */
-public class EdenArrivalQuest extends Quest {
+public class EdenArrivalQuest extends RealmVisitQuest {
 
     public EdenArrivalQuest() {
     }
 
     @Override
-    public void tick(ServerClient client) {
+    protected int realm() {
+        return RealmDepth.REALM_EDEN;
     }
 
     @Override
-    public boolean canComplete(NetworkClient client) {
-        return true;
+    protected String keyPrefix() {
+        return "swhedenreach";
     }
 
     @Override
-    public GameMessage getTitle() {
-        return new LocalMessage("quests", "swhedenreachtitle");
-    }
-
-    @Override
-    public GameMessage getDescription() {
-        return new LocalMessage("quests", "swhedenreachdesc");
-    }
-
-    @Override
-    public DrawOptionsBox getProgressDrawBox(NetworkClient client, final int x, final int y, final int width,
-            Color textColor, boolean outlined) {
-        final DrawOptionsList drawOptions = new DrawOptionsList();
-        FontOptions fo = new FontOptions(16).outline(outlined);
-        if (textColor != null) {
-            fo.color(textColor);
-        }
-        drawOptions.add(new StringDrawOptions(fo, Localization.translate("quests", "swhedenreachobj")).pos(x, y));
-        return new DrawOptionsBox() {
-            @Override
-            public Rectangle getBoundingBox() {
-                return new Rectangle(x, y, width, 16);
-            }
-
-            @Override
-            public void draw() {
-                drawOptions.draw();
-            }
-        };
-    }
-
-    @Override
-    public FairType getRewardType(NetworkClient client, boolean outlined) {
-        return null;
-    }
-
-    @Override
-    public FairType getHandInType(NetworkClient client, boolean outlined) {
-        return new FairType().append(new FontOptions(12).outline(outlined),
-                Localization.translate("quests", "swhspeaktoeveleen"));
+    protected String handInKey() {
+        return "swhspeaktoeveleen";
     }
 }

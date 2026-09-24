@@ -295,15 +295,22 @@ public final class SkyVoyages {
             if (deepest < 0) {
                 return 0.0F;
             }
+            // The Skyway Writ, honoured (quest ladder step swh_ladder_contraband,
+            // chapter-03-spire-village.md §5): every OPEN road +15%, capped at a
+            // sure thing. It never opens a road — a closed route stays at 0.
+            // This is the effect MOD_SUMMARY had promised the Writ since it
+            // shipped, and that the code never had (KOMPLETTUEBERSICHT §8.1 no. 5).
+            float writ = stairwaytoheaven.quest.ladder.LadderWorldData.flag(serverOf(settlement),
+                    stairwaytoheaven.quest.ladder.LadderWorldData.FLAG_WRIT_HONOURED) ? 0.15F : 0.0F;
             if (this.realm == REALM_ALL) {
                 // The capstone wants the whole road, and stays a gamble even
                 // then: there is nothing deeper to grow safe against.
-                return deepest >= RealmDepth.REALM_CROOKED ? 0.75F : 0.0F;
+                return deepest >= RealmDepth.REALM_CROOKED ? Math.min(1.0F, 0.75F + writ) : 0.0F;
             }
             if (this.realm > deepest) {
                 return 0.0F;
             }
-            return CHANCES[Math.min(deepest - this.realm, CHANCES.length - 1)];
+            return Math.min(1.0F, CHANCES[Math.min(deepest - this.realm, CHANCES.length - 1)] + writ);
         }
 
         /** Shown on the talk page in place of a price. */

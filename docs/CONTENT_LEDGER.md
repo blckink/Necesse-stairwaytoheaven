@@ -535,6 +535,30 @@ recipe book (`docs/VANILLA_ASSET_MAP.md` §1.7c).
 |---|---|---|
 | `adventurersjournal` | item | Abenteurer-Tagebuch / Adventurer's Journal — handed to every player the first time they stand in the Skyreach (and once, retroactively, to anyone in an existing save who has started the mod's story); right-click in the inventory or use from the hotbar to open the journal window; not craftable, the Sky Warden sells a replacement for 100 coins. |
 
+## Chapter 03 — the Spire Village and its quest ladder
+
+Every named sky-plane resident lives in a house of their own around the Old
+Warden Spire (player decision 2026-09-24), and hands out the twenty-step quest
+ladder that sends the player out through all six realms. Each ladder reward
+below is paid by exactly one step and exists nowhere else. See
+`docs/design/chapter-03-spire-village.md`, `village/SpireVillage`,
+`quest/ladder/QuestLadder`, `quest/ladder/LadderItems`.
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `magpiesatchel` | item | Magpie's Satchel: accessory, +5 pickup range and +25% stamina; ladder step 1 (Undelivered Post, Chapter I). Borrowed icon `explorersatchel`. |
+| `stormbrew` | item | Storm Brew: fine drink, +10% speed and +5% attack speed for 720 s; three from ladder step 2, then sold by Halda to whoever finished it. Borrowed icon `unlabeledpotion`. |
+| `readerslens` | item | Reader's Lens: accessory, spelunker sight and +20% tool damage; ladder step 3 (What Prototype Nine Was Built From). Borrowed icon `scryingmirror`. |
+| `paradisecider` | item | Paradise Cider: gourmet drink, +40 health, +0.5 combat regen, +3% crit for 900 s; three from ladder step 6 (Chapter II), then sold by Halda. Borrowed icon `passivepotion`. |
+| `echoconch` | item | Echo Conch: accessory, +25% crit damage and +3% crit; ladder step 9 (The Echo in the Archive, Chapter III). Borrowed icon `prophecyslab`. |
+| `vergerlantern` | item | Verger's Lantern: accessory, enemy-tracker sight and +30 health; ladder step 10 (The Eleven Steps). Borrowed icon `lantern`. |
+| `memoryblade` | item | The Remembering Blade: greatsword 186 -> 232, enchant 2600, EPIC; ladder step 14 (Metal That Remembers, Chapter IV). Borrowed icon and swing `hexedbladegreatsword`. |
+| `mourningbrooch` | item | Mourning Brooch: accessory, +8 armour and +25 health; ladder step 15 (Shrouds for the Feast). Borrowed icon `companionlocket`. |
+| `rootcrown` | item | Root Crown: accessory, +60 health and +1 combat regen (one notch over the Aurora Locket, which it excludes); ladder step 18 (Chapter V). Borrowed icon `dryadcrown`. |
+| `knottkeyring` | item | Knott's Key Ring: accessory, -25% dash cooldown and +10% speed; ladder step 19 (A Door with Manners). Borrowed icon `ignitionkey`. |
+| `auditorsseal` | item | The Auditor's Seal: LEGENDARY accessory, +10% all damage and +5% crit; ladder step 20 (Form 666-B, Chapter VI - Hell). Borrowed icon `templependant`. |
+| `bloodfevertincture` | item | Blood-Fever Tincture: the Doctor's cure in a bottle (Dorian concept E5), cures blood fever on every settler within 10 tiles when uncorked; 250 coins at the Doctor. Borrowed icon `greaterhealthregenpotion`. |
+
 ## Baseline — registered before the ledger existed
 
 These predate the ledger and are described in `CHANGELOG.md`,

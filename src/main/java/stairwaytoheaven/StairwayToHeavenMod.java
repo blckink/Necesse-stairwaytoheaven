@@ -188,6 +188,26 @@ public class StairwayToHeavenMod {
         // the Crooked key, and it was the one quest class never registered —
         // appended last so every earlier quest keeps its numeric ID.
         necesse.engine.registries.QuestRegistry.registerQuest("swh_keyhell", stairwaytoheaven.quest.HellKeyQuest.class);
+        // The Spire Village's quest ladder (docs/design/chapter-03-spire-village.md,
+        // quest.ladder.QuestLadder). Its unique rewards first, then the world
+        // record of who turned what in, then the twelve steps it added —
+        // APPENDED after every older quest, so each keeps its numeric ID.
+        stairwaytoheaven.quest.ladder.LadderItems.register();
+        necesse.engine.registries.WorldDataRegistry.registerWorldData(
+                stairwaytoheaven.quest.ladder.LadderWorldData.KEY,
+                stairwaytoheaven.quest.ladder.LadderWorldData.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_ladder_post", stairwaytoheaven.quest.ladder.LadderQuests.Post.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_ladder_round", stairwaytoheaven.quest.ladder.LadderQuests.Round.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_ladder_prototype", stairwaytoheaven.quest.ladder.LadderQuests.Prototype.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_ladder_cider", stairwaytoheaven.quest.ladder.LadderQuests.Cider.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_ladder_contraband", stairwaytoheaven.quest.ladder.LadderQuests.Contraband.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_ladder_echo", stairwaytoheaven.quest.ladder.LadderQuests.Echo.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_ladder_steps", stairwaytoheaven.quest.ladder.LadderQuests.Steps.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_ladder_memory", stairwaytoheaven.quest.ladder.LadderQuests.Memory.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_ladder_shrouds", stairwaytoheaven.quest.ladder.LadderQuests.Shrouds.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_ladder_seeds", stairwaytoheaven.quest.ladder.LadderQuests.Seeds.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_ladder_shells", stairwaytoheaven.quest.ladder.LadderQuests.Shells.class);
+        necesse.engine.registries.QuestRegistry.registerQuest("swh_ladder_form", stairwaytoheaven.quest.ladder.LadderQuests.Form.class);
         // Petting a cat that lives in town (SpireCatMob.pet). Literal IDs for
         // the same reason as "bloodfever" below; they must stay equal to
         // CatCuddleBuff.SIGGI_ID / PEANUT_ID.
@@ -386,6 +406,12 @@ public class StairwayToHeavenMod {
         CommandsManager.registerServerCommand(new stairwaytoheaven.showroom.ShowroomCommand());
         CommandsManager.registerClientCommand(new stairwaytoheaven.showroom.ShotsClientCommand());
         CommandsManager.registerClientCommand(new stairwaytoheaven.showroom.DumpSpritesClientCommand());
+        // The Spire Village: every house built in the rotation it is stamped
+        // in, now that every object its legends name is registered — a slip in
+        // a plan stops the boot here, not in a player's village. And the census
+        // the integration test reads (village stamp, residents at home, ladder).
+        stairwaytoheaven.village.SpireVillage.validateAll();
+        CommandsManager.registerServerCommand(new stairwaytoheaven.commands.SwhVillageCommand());
     }
 
     private void registerWorldGenerator() {

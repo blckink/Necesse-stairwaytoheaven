@@ -330,6 +330,9 @@ public final class SkySettlers {
             Server server = level == null ? null : level.getServer();
             if (server != null) {
                 SkywatchWorldData.claimResident(server, this.mobStringID);
+                // They have left the Spire Village for a town: a regeneration
+                // of the hub must never seat a second one of them there.
+                SkywatchWorldData.unmarkVillageResident(server, this.mobStringID);
             }
         }
 

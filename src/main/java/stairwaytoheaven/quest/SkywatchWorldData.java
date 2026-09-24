@@ -139,6 +139,21 @@ public class SkywatchWorldData extends WorldData {
     public final java.util.HashSet<String> residentsClaimed = new java.util.HashSet<>();
 
     /**
+     * The named residents that live in the Spire Village RIGHT NOW, by mob ID.
+     *
+     * <p>A strict subset of {@link #residentsClaimed}: a resident the village
+     * seated (or pulled home from an older save's scattered spot) is added
+     * here, and leaves it again the moment they move into a settlement
+     * ({@code SkySettlers.SkyResident.onMoveIn}). It exists for one question a
+     * claim cannot answer: <i>if the hub's regions are regenerated, which
+     * claimed people went with them?</i> Those — and only those — may be
+     * seated again, because a recruited Magpie asleep in a surface town is
+     * claimed too and must never get a twin. See
+     * {@code village.SpireVillage.prepareRegeneration}.
+     */
+    public final java.util.HashSet<String> villageResidents = new java.util.HashSet<>();
+
+    /**
      * Which realms' boss portals a key piece has already unlocked.
      *
      * <p>{@code docs/FOGKEY_AND_BOSSPORTALS.md} §B2: <i>"Stand the key piece in
@@ -247,6 +262,8 @@ public class SkywatchWorldData extends WorldData {
         save.addBoolean("crookedDoorwayOpened", this.crookedDoorwayOpened);
         save.addStringArray("residentsClaimed",
                 this.residentsClaimed.toArray(new String[0]));
+        save.addStringArray("villageResidents",
+                this.villageResidents.toArray(new String[0]));
         save.addStringArray("bossPortalsUnlocked",
                 this.bossPortalsUnlocked.toArray(new String[0]));
         save.addStringArray("regionKeysEarned",
@@ -273,6 +290,12 @@ public class SkywatchWorldData extends WorldData {
         for (String claimed : save.getStringArray("residentsClaimed", new String[0], false)) {
             if (claimed != null && !claimed.isEmpty()) {
                 this.residentsClaimed.add(claimed);
+            }
+        }
+        this.villageResidents.clear();
+        for (String living : save.getStringArray("villageResidents", new String[0], false)) {
+            if (living != null && !living.isEmpty()) {
+                this.villageResidents.add(living);
             }
         }
         this.bossPortalsUnlocked.clear();
@@ -574,6 +597,22 @@ public class SkywatchWorldData extends WorldData {
         }
     }
 
+    /** Records that the village holds this resident now. Idempotent. */
+    public static void markVillageResident(Server server, String mobStringID) {
+        SkywatchWorldData data = get(server);
+        if (data != null) {
+            data.villageResidents.add(mobStringID);
+        }
+    }
+
+    /** The resident left the village for a settlement (or for good). */
+    public static void unmarkVillageResident(Server server, String mobStringID) {
+        SkywatchWorldData data = get(server);
+        if (data != null) {
+            data.villageResidents.remove(mobStringID);
+        }
+    }
+
     // ------------------------------------------------------------------
     // Resetting, for a world that wants to play the chain again
     // ------------------------------------------------------------------
@@ -622,6 +661,7 @@ public class SkywatchWorldData extends WorldData {
         this.catHomeLevel = "";
         if (clearResidentClaims) {
             this.residentsClaimed.clear();
+            this.villageResidents.clear();
         }
     }
 }

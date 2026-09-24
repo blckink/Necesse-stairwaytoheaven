@@ -117,52 +117,15 @@ public class KnottMob extends SkySettlerMob {
             Level level = this.getLevel();
             Server server = level == null ? null : level.getServer();
             if (server != null) {
-                advanceDoorChain(server, player.getServerClient());
+                // Rungs 16, 17 and 19 of the quest ladder (QuestLadder): the
+                // arrival (dead until now), the door, the shells.
+                this.talkLadder(player);
             }
         }
         super.interact(player);
     }
 
-    private void advanceDoorChain(Server server, ServerClient client) {
-        if (SkywatchWorldData.crookedDoorwayOpened(server)) {
-            return;
-        }
-        CrookedDoorQuest quest = SkyQuests.findHeld(client, CrookedDoorQuest.class);
-        if (quest == null) {
-            SkyQuests.removeAllOfType(server, stairwaytoheaven.quest.CrookedArrivalQuest.class);
-            SkyQuests.giveOnce(server, client, new CrookedDoorQuest());
-            this.bubble("knottasksdoor");
-            return;
-        }
-        if (!quest.canComplete(client)) {
-            return;
-        }
-        quest.complete(client);
-        SkyQuests.removeAllOfType(server, CrookedDoorQuest.class);
-        SkywatchWorldData.markCrookedDoorwayOpened(server);
-        give(client, "zephyrharness", 1);
-        // Spiritsteel, not Stormsteel: the Crooked Beyond comes after the Ghost
-        // Realm, whose residents already pay Spiritsteel.
-        give(client, "spiritsteelbar", 12);
-        give(client, "realityshard", 6);
-        // His own voice over his own head, not a chat line. The bubble is the
-        // LAST thing said in this method for a reason: ChatBubbleText.init
-        // (ChatBubbleText.java:67-76, VERIFIED [jar]) removes any bubble the
-        // same mob already has, so two in a row would show only the second.
-        this.bubble("knottdoordone");
-    }
 
-    /** Reward hand-off; anything that does not fit drops at the player's feet. */
-    private void give(ServerClient client, String itemStringID, int amount) {
-        PlayerMob player = client.playerMob;
-        Level level = player.getLevel();
-        necesse.inventory.InventoryItem item = new necesse.inventory.InventoryItem(itemStringID, amount);
-        boolean added = player.getInv().main.addItem(level, player, item, "knott", null);
-        if (!added && item.getAmount() > 0) {
-            level.entityManager.pickups.add(
-                    new necesse.entity.pickup.ItemPickupEntity(level, item, player.x, player.y, 0.0F, 0.0F));
-        }
-    }
 
     @Override protected int lookSeed() { return 0x6707701; }
     @Override protected HumanGender gender() { return HumanGender.MALE; }

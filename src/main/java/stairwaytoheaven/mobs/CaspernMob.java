@@ -95,26 +95,12 @@ public class CaspernMob extends SkySettlerMob {
             necesse.level.maps.Level level = this.getLevel();
             necesse.engine.network.server.Server server =
                     level == null ? null : level.getServer();
-            advanceForge(server, player.getServerClient());
+            // Rungs 12 and 14 of the quest ladder (QuestLadder).
+            this.talkLadder(player);
         }
         super.interact(player);
     }
 
-    private void advanceForge(necesse.engine.network.server.Server server,
-            necesse.engine.network.server.ServerClient client) {
-        stairwaytoheaven.quest.SkyQuests.Step step =
-                stairwaytoheaven.quest.SkyQuests.advanceResidentChain(server, client,
-                        stairwaytoheaven.quest.SkywatchWorldData.CHAIN_CASPERN_FORGE,
-                        new stairwaytoheaven.quest.CaspernForgeQuest());
-        if (step == stairwaytoheaven.quest.SkyQuests.Step.ASKED) {
-            this.bubble("caspernasksforge");
-        } else if (step == stairwaytoheaven.quest.SkyQuests.Step.PAID) {
-            // Six bars, matching Mortimer's exactly: the two are the same rung
-            // of the same realm and neither should be the obviously better one.
-            giveReward(client, "spiritsteelbar", 6, "caspern");
-            this.bubble("caspernforgedone");
-        }
-    }
 
     /** The price, waived once the forge burns again. See {@code MortimerMob}. */
     @Override

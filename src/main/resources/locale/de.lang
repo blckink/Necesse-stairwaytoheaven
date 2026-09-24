@@ -550,15 +550,15 @@ ivessettlername=Ives <name>, Küster der Stillen Weite
 
 [misc]
 // --- Herkunft jedes Siedlers (Hinweis im Siedlungsfenster) ---
-magpiesettlertip=In der Himmelsweite zu finden, an einer verlassenen Skywatch-Werkstatt.
-haldasettlertip=In der Himmelsweite zu finden, an einer verlassenen Skywatch-Werkstatt.
-ossiansettlertip=In der Himmelsweite zu finden, an einer verlassenen Skywatch-Werkstatt.
-eveleensettlertip=Im Garten Eden zu finden, bei einem Baum der Erkenntnis. Sie kommt außerdem in eine Siedlung, in der Eden-Gras wächst. Arbeitet in Ackerbau, Forstwirtschaft und Düngen.
-mortimersettlertip=Im Nachgarten zu finden, bei einem Grabstein. Er kommt außerdem in eine Siedlung, die einen Friedhof gebaut hat. Arbeitet in Transport, Handwerk und Jagd.
-caspernsettlertip=Im Nachgarten zu finden, bei einem Grabstein. Er kommt außerdem in eine Siedlung, die eine Ätherschmiede gebaut hat. Arbeitet in Handwerk und Transport - und nichts im Freien.
-eleanorsettlertip=Im Nachgarten zu finden, bei einem Grabstein. Sie kommt nie zu dir - du entscheidest, ob sie bleibt. Arbeitet in der Tierhaltung.
-knottsettlertip=Im Jenseits der Krümmung zu finden, auf dem Türhof. Er kommt nicht von selbst in eine Siedlung. Arbeitet im Handel, und nichts im Freien.
-ivessettlertip=In Steinfeld zu finden, bei einem zerbrochenen Engel. Er kommt nicht von selbst in eine Siedlung. Arbeitet in Handwerk und Transport - und kauft alles, was die Stille Weite hergibt.
+magpiesettlertip=Lebt im Himmelsdorf rund um die Alte Wächterspitze. Anwerbung: Münzen und die Verzollte Kassette aus dem Skyway-Zollhaus. Arbeitet in Handelsmissionen und Himmelsfahrten.
+haldasettlertip=Lebt im Himmelsdorf rund um die Alte Wächterspitze. Anwerbung: Münzen und Die Mutter aus dem Grange-Keller. Arbeitet im Angeln.
+ossiansettlertip=Lebt im Himmelsdorf rund um die Alte Wächterspitze. Anwerbung: Münzen und der Sturmlinsenkern vom Sturmschleier-Testgelände. Arbeitet in Handwerk und Transport.
+eveleensettlertip=Lebt im Himmelsdorf rund um die Alte Wächterspitze, neben ihrem Edenbeet. Ihre Gebühr entfällt, sobald sie ihre drei Eden-Früchte hat. Arbeitet in Ackerbau, Forstwirtschaft und Düngen.
+mortimersettlertip=Lebt im Himmelsdorf rund um die Alte Wächterspitze. Seine Gebühr entfällt nach der letzten Ehre. Arbeitet in Transport, Handwerk und Jagd.
+caspernsettlertip=Lebt im Himmelsdorf rund um die Alte Wächterspitze. Seine Gebühr entfällt, sobald seine Schmiede wieder brennt. Arbeitet in Handwerk und Transport - und nichts im Freien.
+eleanorsettlertip=Lebt im Himmelsdorf rund um die Alte Wächterspitze. Sie kommt nie zu dir - du entscheidest, ob sie bleibt. Arbeitet in der Tierhaltung.
+knottsettlertip=Lebt im Himmelsdorf rund um die Alte Wächterspitze, im Haus mit der roten Tür. Arbeitet im Handel, und nichts im Freien.
+ivessettlertip=Lebt im Himmelsdorf rund um die Alte Wächterspitze. Seine Gebühr entfällt nach der Totenwache. Arbeitet in Handwerk und Transport - und kauft alles, was die Stille Weite hergibt.
 
 // --- Ives, der Küster ---
 ivestalkpitch=Hier draußen landen die Dinge. Am Ende auch die Leute. Irgendwer muss aufschreiben, was sie einmal waren, und offenbar bin das ich.
@@ -622,8 +622,8 @@ knottdoordone=Ha! Sie führt also doch irgendwohin. Hier - das hast du dir erstr
 [quests]
 // --- Eveleen, die Eden-Kette ---
 swhedenreachtitle=Hinein in den Garten
-swhedenreachdesc=Irgendwo über den Wolken wächst noch Grün, üppiger als alles in der Himmelsweite. Jemand pflegt es noch.
-swhedenreachobj=Finde, wer den Garten Eden noch pflegt - halte Ausschau nach einem Baum der Erkenntnis.
+swhedenreachdesc=Eveleen erzählt von einem Garten weiter draußen, grüner als alles in der Himmelsweite. Sie will wissen, ob er noch wächst.
+swhedenreachobj=Betritt den Garten Eden (600-2 880 Felder vom Turm) und berichte dann Eveleen im Himmelsdorf.
 swhspeaktoeveleen=Sprich mit Eveleen.
 swhedenplantstitle=Ein Geschmack von Eden
 swhedenplantsdesc=Eveleen will einen Beweis, dass der Garten echt ist: eine Edenbeere, eine Mondmelone und eine Sonnentraube.
@@ -638,8 +638,8 @@ swhspeaktoeleanor=Sprich mit Eleanor.
 
 // --- Mr. Knott, die Krumme Kette ---
 swhcrookedarrivaltitle=Eine Tür, die irgendwohin führt
-swhcrookedarrivaldesc=Türen stehen hier reihenweise, verschlossen vor dem Nichts. Jemand glaubt noch, dass eine von ihnen funktioniert.
-swhcrookedarrivalobj=Finde, wer den Türhof noch hütet - halte Ausschau nach einer roten Tür, die für sich allein steht.
+swhcrookedarrivaldesc=Mr. Knott schwört, dass hinter der Krümmung ein Hof voller Türen steht, und eine davon führt irgendwohin. Er will, dass du sie siehst.
+swhcrookedarrivalobj=Betritt das Krumme Jenseits (ab etwa 4 200 Felder vom Turm) und berichte dann Mr. Knott im Himmelsdorf.
 swhspeaktoknott=Sprich mit Mr. Knott.
 swhsteinfeldvigiltitle=Die Totenwache
 swhsteinfeldvigildesc=Ives hält die Stille Weite in Ordnung, und die Stille Weite bleibt nicht in Ordnung. Die, die hier draußen umhergehen, spuken niemandem - sie wurden nur nie niedergelegt. Er weiß, was dafür nötig ist, und hat von beidem nichts mehr.
@@ -1468,3 +1468,146 @@ lore5ahint=Freigeschaltet durch: die Hölle erreichen.
 lore5btitle=Das Höllensiegel
 lore5b=Ein Formular war nicht aufzutreiben, also nahm der Wächter stattdessen einen Beweis: das Krumme Jenseits, doppelt. Himmel, Tod und Hölle führen ihre Bücher im selben Hauptbuch - das Siegel ist nur der Stempel, der es bestätigt.
 lore5bhint=Freigeschaltet durch: das Höllensiegel verdienen.
+// ---- Spire Village and quest ladder (chapter-03-spire-village.md) ----
+[quests]
+swhladderposttitle=Unzustellbare Post
+swhladderpostdesc=Magpie flog Fracht für die Himmelswacht, bis die Straße verstummte. Ihr Buch der unzustellbaren Post liegt noch im Kontor des Skyway-Zollhauses - hinter dem Zollwerk, das die Kasse bewacht.
+swhladderpostreward=Elsterbeutel (Accessoire: größerer Aufsammelradius, mehr Ausdauer)
+swhladderroundtitle=Die Kellerhefe
+swhladderrounddesc=Halda will ihren Keller wieder ansetzen. Die Mutter lebt noch im Grange-Keller, aber ohne Futter ist sie nichts: Wolkenbeeren und Windweizen aus den Driftlanden, Aurorablätter aus den Aurorabänken.
+swhladderroundreward=3x Sturmbräu, danach in Haldas Laden
+swhladderprototypetitle=Woraus Prototyp Neun gebaut ist
+swhladderprototypedesc=Ossian will verstehen, was auf dem Sturmschleier-Testgelände noch läuft. Dafür braucht er, woraus es gebaut wurde: Sturmglas, Sturmsplitter und Fulgurit aus dem Sturmschleier.
+swhladderprototypereward=Leserlupe (Accessoire: zeigt Erze, schnellerer Abbau)
+swhladdercidertitle=Paradiesmost
+swhladderciderdesc=Halda hat vom Garten gehört und will einen Most ansetzen, den hier oben niemand kennt: Paradiesäpfel, Paradieskokosnüsse und Edensaft - das Heckenlabyrinth hütet die Äpfel, die Blütenrachen den Saft.
+swhladderciderreward=3x Paradiesmost, danach in Haldas Laden
+swhladdercontrabandtitle=Schmuggelware aus dem Garten
+swhladdercontrabanddesc=Magpie hat Käufer für Schlangenschuppen und Giftzähne - und braucht den Himmelsweg-Freibrief aus dem Zollhaus, damit die Ladung über jede Straße kommt.
+swhladdercontrabandreward=Magpies Himmelsfahrten: jede offene Route +15 % Erfolg
+swhladderechotitle=Das Echo im Archiv
+swhladderechodesc=In Steinfeld sind Stimmen zu Stein geworden. Ossian will sie archivieren: zehn Echosplitter und einen Trauerflor von einem Steinernen Trauernden.
+swhladderechoreward=Echomuschel (Accessoire: +25 % Kritschaden, +3 % Krit)
+swhladderstepstitle=Die elf Schritte
+swhladderstepsdesc=Einer der Toten in Steinfeld geht jeden Abend dieselben elf Schritte. Ives will ihm den Weg legen: je elf Grabsalz, Geistermoos und Blasser Stein.
+swhladderstepsreward=Küsterlaterne (Accessoire: zeigt Gegner, +30 Leben)
+swhladdermemorytitle=Metall, das sich erinnert
+swhladdermemorydesc=Caspern will eine Klinge schmieden, die sich an etwas erinnert. Dazu braucht er ein Seelenhalsband von einer Trauerbraut, Knochenholz und Ektoplasma aus dem Nachgarten.
+swhladdermemoryreward=Die Erinnernde Klinge (Großschwert, 186 Schaden)
+swhladdershroudstitle=Leichentücher für das Fest
+swhladdershroudsdesc=Das Hochzeitsmahl im Geisterreich hat nie aufgehört. Mortimer will die Gäste endlich zudecken: zehn Seelenfaden und sechs Schleier-Essenz.
+swhladdershroudsreward=Trauerbrosche (Accessoire: +8 Rüstung, +25 Leben)
+swhladderseedstitle=Samen, die ich nie gepflanzt habe
+swhladderseedsdesc=Eveleen hat drei Samen, die sie nie gepflanzt hat. Im Krummen Jenseits wachsen Augensamen, die sehen, was ein Samen werden will. Sie will sechs davon - und drei Wissensstecklinge.
+swhladderseedsreward=Wurzelkranz (Accessoire: +60 Leben, +1 Kampfregeneration)
+swhladdershellstitle=Eine Tür mit Manieren
+swhladdershellsdesc=Mr. Knott baut an einer Tür, die sich benimmt. Dafür braucht er acht Gestreifte Panzer und das Horn einer Türmimik.
+swhladdershellsreward=Knotts Schlüsselbund (Accessoire: schnelleres Ausweichen, +10 % Tempo)
+swhladderformtitle=Formular 666-B
+swhladderformdesc=Die Hölle führt Buch, und Ossian will wissen, was darin steht. Das Formular dafür verlangt Beweise in Höllenmengen: sechzehn Realitätssplitter, vierundzwanzig Seltsamholz, dreißig Kohlenholz.
+swhladderformreward=Siegel des Prüfers (Accessoire: +10 % Schaden, +5 % Krit)
+swhladderreached=(erledigt)
+swhspeaktomagpie=Sprich mit Magpie.
+swhspeaktohalda=Sprich mit Halda.
+swhspeaktoossian=Sprich mit Ossian Vane.
+swhedenreachreward=6x Eden-Grassamen
+swhcrookedarrivalreward=4x Realitätssplitter
+
+[misc]
+swhladderpostask=Das Zollhaus an der Himmelsstraße. Im Schrank liegt mein Buch - jedes Paket, das nie ankam. Hol es, bevor das Zollwerk es frisst.
+swhladderpostdone=Da ist es ja. Jede Seite ein Versprechen, das ich halten werde. Nimm den Beutel - der hat mehr gesehen als du.
+swhladderposttarget=Skyway-Zollhaus (Magpies Buch)
+swhladderroundask=Sechzehn Wolkenbeeren, acht Windweizen, vier Aurorablätter. Dann setze ich an, was dieser Himmel seit vierzig Jahren nicht getrunken hat.
+swhladderrounddone=Riech das. Das ist Sturm, in Flaschen. Drei für dich, der Rest steht ab jetzt in meinem Regal.
+swhladderroundtarget=Driftlande und Aurorabänke (Grange-Keller)
+swhladderprototypeask=Das Testgelände im Sturmschleier. Bring mir Sturmglas, Splitter und Fulgurit - ich will lesen, was Prototyp Neun ist, bevor er es mir zeigt.
+swhladderprototypedone=Aha. Das ist keine Maschine, das ist ein Satz, den niemand zu Ende gesprochen hat. Nimm die Lupe - sie liest Stein.
+swhladderprototypetarget=Sturmschleier-Testgelände
+swhedenreachask=Weiter draußen, hinter den Driftlanden, fängt der Garten an. Geh hin. Steh darin. Und dann erzähl mir, wie er riecht.
+swhedenreachdone=Nach Honig und Streit? Dann ist er es. Hier - Samen davon. Säe sie, wo du wohnst.
+swhedenreachtarget=Garten Eden (ab etwa 600 Felder)
+swhedenplantstarget=Garten Eden (Eden-Kisten, Heckenlabyrinth)
+swhladderciderask=Paradiesäpfel, vier. Zwei Kokosnüsse. Vier Edensaft - von den Blumen, die zurückbeißen. Ich will wissen, ob Paradies gärt.
+swhladderciderdone=Es gärt. Natürlich gärt es. Nimm drei - und sag keinem, wie stark er ist.
+swhladdercidertarget=Garten Eden (Heckenlabyrinth, Blütenrachen)
+swhladdercontrabandask=Sechs Schuppen, vier Giftzähne und der Freibrief aus der Vitrine im Zollhaus. Mit dem Papier fragt mich keine Straße mehr, was ich trage.
+swhladdercontrabanddone=Zweimal gegengezeichnet. Ab heute kommen meine Fahrten öfter an - für alle hier.
+swhladdercontrabandtarget=Garten Eden (Schlangen) und Skyway-Zollhaus
+swhsteinfeldvigiltarget=Steinfeld (Grabheide)
+swhladderechoask=Echosplitter, zehn. Und einen Trauerflor - die Steinernen Trauernden tragen ihn, und sie geben ihn nicht gern her.
+swhladderechodone=Hör hin... jemand zählt. Ich habe es aufgeschrieben. Nimm die Muschel, sie hört für dich mit.
+swhladderechotarget=Steinfeld (Steinerne Trauernde)
+swhladderstepsask=Elf Grabsalz, elf Geistermoos, elf Blasser Stein. Für jeden Schritt einen. Dann darf er stehen bleiben.
+swhladderstepsdone=Er ist stehen geblieben. Zum ersten Mal. Nimm meine Laterne - sie zeigt dir, wer noch geht.
+swhladderstepstarget=Steinfeld (Plattenfelder, Grabheide)
+swhmortimerritestarget=Geisterreich (Seelenfaden, Knochenholz)
+swhcaspernforgetarget=Geisterreich (Spektralerz, Düsterfenn)
+swheleanortarget=Eleanor im Himmelsdorf
+swhladdermemoryask=Ein Seelenhalsband. Die Bräute im Nachgarten tragen sie noch. Dazu zehn Knochenholz und acht Ektoplasma. Dann zeige ich dir, was Erinnerung wiegt.
+swhladdermemorydone=Hörst du, wie sie klingt? Das ist jemandes Hochzeit. Trag sie gut.
+swhladdermemorytarget=Geisterreich (Trauerbräute, Hochzeitsmahl)
+swhladdershroudsask=Das Fest da draußen dauert schon zu lange. Zehn Seelenfaden, sechs Schleier-Essenz - dann decke ich sie zu.
+swhladdershroudsdone=Ordentlich zugedeckt, alle. Nimm die Brosche. Man trägt sie für die, die man nicht vergessen will.
+swhladdershroudstarget=Geisterreich (Hochzeitsmahl, Düsterschemen)
+swhcrookedarrivalask=Weit draußen, wo die Welt anfängt, sich zu verbiegen: ein Hof voller Türen. Geh hin. Komm wieder. Sag mir, ob sie dich angesehen haben.
+swhcrookedarrivaldone=Sie haben dich angesehen? Gut. Dann kennen sie dich jetzt. Hier - Splitter von dort.
+swhcrookedarrivaltarget=Krummes Jenseits (Türhof)
+swhcrookeddoortarget=Krummes Jenseits (Krümmungsharz, Seltsamer Stoff)
+swhladderseedsask=Augensamen, sechs, aus der Krümmung. Und drei Wissensstecklinge. Ich will endlich wissen, was meine drei Samen sind.
+swhladderseedsdone=Es sind... Kronen. Aus Wurzeln. Eine davon gehört dir.
+swhladderseedstarget=Krummes Jenseits (Zungenpflanzen)
+swhladdershellsask=Acht Gestreifte Panzer, von den Käfern. Und ein Horn von einer Tür, die dich fressen wollte. Manieren muss man einer Tür beibringen.
+swhladdershellsdone=Sie klopft jetzt, bevor sie aufgeht. Hier - die Schlüssel. Zu allem, was noch zugeht.
+swhladdershellstarget=Krummes Jenseits (Streifenkäfer, Türmimiken)
+swhladderformask=Formular 666-B. Antrag auf Einsicht in die Bücher der Hölle. Anlage: sechzehn Splitter, vierundzwanzig Seltsamholz, dreißig Kohlenholz. In dreifacher Ausführung.
+swhladderformdone=Genehmigt. Genehmigt! Sie haben mir eine Kopie geschickt - und dir ihr Siegel. Lies nicht, was darauf steht.
+swhladderformtarget=Hölle (Höllensaum, Ofenweite)
+swhladderwaitmagpie=Für dich hab ich erst Fracht, wenn <chapter> offen ist. Hilf erst den anderen im Dorf.
+swhladderwaithalda=Der Keller arbeitet noch. Komm wieder, wenn <chapter> für dich offen ist.
+swhladderwaitossian=Ich lese noch. Wenn <chapter> für dich offen ist, habe ich Fragen, die nur du beantworten kannst.
+swhladderwaiteveleen=Noch nicht. Wenn <chapter> für dich offen ist, schicke ich dich in meinen Garten.
+swhladderwaitives=Die Stille Weite wartet. Komm, wenn <chapter> für dich offen ist.
+swhladderwaitmortimer=Für meine Art Arbeit ist es zu früh. Komm wieder, wenn <chapter> offen ist.
+swhladderwaitcaspern=Mein Feuer kann warten. Komm, wenn <chapter> für dich offen ist.
+swhladderwaiteleanor=Ich weiß noch nicht, was ich will. Frag mich wieder, wenn <chapter> für dich offen ist.
+swhladderwaitknott=Noch führt keine Tür dich zu mir. Komm, wenn <chapter> für dich offen ist.
+swhladderchapter1=Kapitel I - Himmelsweite
+swhladderchapter2=Kapitel II - Garten Eden
+swhladderchapter3=Kapitel III - Steinfeld
+swhladderchapter4=Kapitel IV - Geisterreich
+swhladderchapter5=Kapitel V - Krummes Jenseits
+swhladderchapter6=Kapitel VI - Hölle
+swhsignvillage=ANSCHLAGTAFEL - HIMMELSDORF
+Die Leute hier brauchen Hilfe, eine Sache nach der anderen.
+Fang bei Magpie, Halda und Ossian an.
+Wer weiter hinauswill, fragt wieder, wenn er zurück ist.
+
+[item]
+magpiesatchel=Elsterbeutel
+stormbrew=Sturmbräu
+readerslens=Leserlupe
+paradisecider=Paradiesmost
+echoconch=Echomuschel
+vergerlantern=Küsterlaterne
+memoryblade=Die Erinnernde Klinge
+mourningbrooch=Trauerbrosche
+rootcrown=Wurzelkranz
+knottkeyring=Knotts Schlüsselbund
+auditorsseal=Siegel des Prüfers
+bloodfevertincture=Blutfieber-Tinktur
+
+[itemtooltip]
+magpiesatcheltip=Magpies alter Kurierbeutel. Was in der Nähe liegt, findet von selbst hinein.
+stormbrewtip=Haldas Kellerbier, mit Wolkenbeeren und Sturm angesetzt. Macht flink.
+readerslenstip=Ossians zweite Lupe. Sie liest Stein wie eine Seite.
+paradisecidertip=Most aus dem Garten, der zurückbeißt. Stärker, als er schmeckt.
+echoconchtip=Hält eine Stimme aus Steinfeld. Sie zählt mit, wenn du triffst.
+vergerlanterntip=Ives' Laterne. Sie zeigt, wer noch geht.
+memorybladetip=Caspern hat eine Hochzeit hineingeschmiedet. Sie klingt, wenn sie trifft.
+mourningbroochtip=Mortimers Brosche. Man trägt sie für die, die man nicht vergessen will.
+rootcrowntip=Aus einem der drei Samen, die Eveleen nie gepflanzt hat.
+knottkeyringtip=Schlüssel zu allem, was noch zugeht. Keiner davon ist beschriftet.
+auditorssealtip=Das Siegel der Hölle, per Formular 666-B. Lies nicht, was darauf steht.
+bloodfevertincturetip=Vom Arzt. Entkorkt heilt sie das Blutfieber aller Gebissenen im Umkreis von zehn Feldern.
+readerslenssight=Zeigt Erze durch den Stein
+vergerlanternsight=Zeigt Gegner in der Nähe

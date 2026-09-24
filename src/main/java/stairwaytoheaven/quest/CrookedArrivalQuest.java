@@ -1,84 +1,35 @@
 package stairwaytoheaven.quest;
 
-import java.awt.Color;
-import java.awt.Rectangle;
-
-import necesse.engine.localization.Localization;
-import necesse.engine.localization.message.GameMessage;
-import necesse.engine.localization.message.LocalMessage;
-import necesse.engine.network.NetworkClient;
-import necesse.engine.network.server.ServerClient;
-import necesse.engine.quest.Quest;
-import necesse.gfx.drawOptions.DrawOptionsBox;
-import necesse.gfx.drawOptions.DrawOptionsList;
-import necesse.gfx.drawOptions.StringDrawOptions;
-import necesse.gfx.fairType.FairType;
-import necesse.gfx.gameFont.FontOptions;
+import stairwaytoheaven.worldgen.RealmDepth;
 
 /**
- * HUD quest for the first step of the Crooked chain: find whoever still
- * believes one of these doors leads somewhere.
+ * {@code swh_crookedarrival} — "A Door That Leads Somewhere": the first step of
+ * the Crooked Beyond chapter of the quest ladder.
  *
- * Pure signpost, exactly like {@link FindSpireQuest} — no tracked state.
- * Handed out on a player's first step through a Crooked Door
- * ({@code CrookedDoorObjectEntity.use}); completed by Mr. Knott's first
- * dialogue, who stands at the Door Yard ({@code settlement.CrookedResidents}).
+ * <p>Until 2026-09-24 this quest was DEAD: the only thing that handed it out
+ * was {@code CrookedDoorObjectEntity.use}, and nothing in the world places a
+ * Crooked Door ({@code KOMPLETTUEBERSICHT.md} §8.1 no. 1). Mr. Knott now hands
+ * it out himself in the Spire Village, and it completes when the player has
+ * stood in the Crooked band ({@link RealmVisitQuest}) — the Door Yard he keeps
+ * talking about is out there.
  */
-public class CrookedArrivalQuest extends Quest {
+public class CrookedArrivalQuest extends RealmVisitQuest {
 
     public CrookedArrivalQuest() {
     }
 
     @Override
-    public void tick(ServerClient client) {
+    protected int realm() {
+        return RealmDepth.REALM_CROOKED;
     }
 
     @Override
-    public boolean canComplete(NetworkClient client) {
-        return true;
+    protected String keyPrefix() {
+        return "swhcrookedarrival";
     }
 
     @Override
-    public GameMessage getTitle() {
-        return new LocalMessage("quests", "swhcrookedarrivaltitle");
-    }
-
-    @Override
-    public GameMessage getDescription() {
-        return new LocalMessage("quests", "swhcrookedarrivaldesc");
-    }
-
-    @Override
-    public DrawOptionsBox getProgressDrawBox(NetworkClient client, final int x, final int y, final int width,
-            Color textColor, boolean outlined) {
-        final DrawOptionsList drawOptions = new DrawOptionsList();
-        FontOptions fo = new FontOptions(16).outline(outlined);
-        if (textColor != null) {
-            fo.color(textColor);
-        }
-        drawOptions.add(new StringDrawOptions(fo,
-                Localization.translate("quests", "swhcrookedarrivalobj")).pos(x, y));
-        return new DrawOptionsBox() {
-            @Override
-            public Rectangle getBoundingBox() {
-                return new Rectangle(x, y, width, 16);
-            }
-
-            @Override
-            public void draw() {
-                drawOptions.draw();
-            }
-        };
-    }
-
-    @Override
-    public FairType getRewardType(NetworkClient client, boolean outlined) {
-        return null;
-    }
-
-    @Override
-    public FairType getHandInType(NetworkClient client, boolean outlined) {
-        return new FairType().append(new FontOptions(12).outline(outlined),
-                Localization.translate("quests", "swhspeaktoknott"));
+    protected String handInKey() {
+        return "swhspeaktoknott";
     }
 }

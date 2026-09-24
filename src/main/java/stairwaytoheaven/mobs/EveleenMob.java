@@ -148,58 +148,15 @@ public class EveleenMob extends SkySettlerMob {
             Level level = this.getLevel();
             Server server = level == null ? null : level.getServer();
             if (server != null) {
-                advanceEdenChain(server, player.getServerClient());
+                // Rungs 4, 5 and 18 of the quest ladder (QuestLadder): the
+                // visit to Eden, the three fruit, the three seeds.
+                this.talkLadder(player);
             }
         }
         super.interact(player);
     }
 
-    private void advanceEdenChain(Server server, ServerClient client) {
-        if (SkywatchWorldData.edenPlantsGiven(server)) {
-            return;
-        }
-        EdenPlantsQuest quest = SkyQuests.findHeld(client, EdenPlantsQuest.class);
-        if (quest == null) {
-            // First meeting: the signpost that led here is done, the ask begins.
-            SkyQuests.removeAllOfType(server, EdenArrivalQuest.class);
-            SkyQuests.giveOnce(server, client, new EdenPlantsQuest());
-            this.bubble("eveleenasksplants");
-            return;
-        }
-        if (!quest.canComplete(client)) {
-            return;
-        }
-        quest.complete(client); // DeliverItemsQuest.complete removes the delivered items itself.
-        SkyQuests.removeAllOfType(server, EdenPlantsQuest.class);
-        SkywatchWorldData.markEdenPlantsGiven(server);
-        // The Knowledge Cutting closes the loop the chain opened with "find
-        // the Knowledge Tree"; the bar stack is the endgame payout benchmarked
-        // against the Skyreach finale (docs/BALANCE.md), same as every other
-        // chain this pass adds.
-        give(client, "knowledgecutting", 3);
-        give(client, "stormsteelbar", 10);
-        // Her own voice, and nothing else. The narration that used to follow
-        // it in chat ("misc.edenplantsdone", describing the cutting coming
-        // away from the Knowledge Tree) is gone with the chat log; the two
-        // gifts above land in the player's inventory, which is where a reward
-        // announces itself. A second bubble was never an option:
-        // ChatBubbleText.init (ChatBubbleText.java:67-76, VERIFIED [jar])
-        // deletes the bubble a mob already has, so it would have eaten this
-        // one.
-        this.bubble("eveleenplantsdone");
-    }
 
-    /** Reward hand-off; anything that does not fit drops at the player's feet. */
-    private void give(ServerClient client, String itemStringID, int amount) {
-        PlayerMob player = client.playerMob;
-        Level level = player.getLevel();
-        InventoryItem item = new InventoryItem(itemStringID, amount);
-        boolean added = player.getInv().main.addItem(level, player, item, "eveleen", null);
-        if (!added && item.getAmount() > 0) {
-            level.entityManager.pickups.add(
-                    new necesse.entity.pickup.ItemPickupEntity(level, item, player.x, player.y, 0.0F, 0.0F));
-        }
-    }
 
     /**
      * The price, stated by vanilla's own recruit page — waived once she has

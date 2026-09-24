@@ -64,6 +64,28 @@ public class HaldaMob extends SkySettlerMob {
                 .setPriceBasedOnHappiness(26, 16, 5);
         this.shop.addBuyingItem("charwood", new BuyingShopItem())
                 .setPriceBasedOnHappiness(30, 19, 5);
+
+        // --- what her quest ladder teaches her to brew -----------------------
+        // On the shelf for a player once THAT player has turned the step in
+        // (the requirement is asked per client, SellingShopItem.java:177): the
+        // three paid out are the reward, the shelf is what makes it last.
+        // Priced at 6x and 9x broker value — dearer than cooking, because
+        // nobody else sells either.
+        this.shop.addSellingItem("stormbrew", new SellingShopItem(10, 2))
+                .setStaticPriceBasedOnHappiness(150, 220, 20)
+                .addRequirement((random, client, shop, blackboard) ->
+                        stairwaytoheaven.quest.ladder.QuestLadder.isDone(client, "swh_ladder_round"));
+        this.shop.addSellingItem("paradisecider", new SellingShopItem(6, 1))
+                .setStaticPriceBasedOnHappiness(380, 520, 40)
+                .addRequirement((random, client, shop, blackboard) ->
+                        stairwaytoheaven.quest.ladder.QuestLadder.isDone(client, "swh_ladder_cider"));
+    }
+
+    /** The Spire Village's quest ladder, then the shop (QuestLadder). */
+    @Override
+    public void interact(necesse.entity.mobs.PlayerMob player) {
+        this.talkLadder(player);
+        super.interact(player);
     }
 
     @Override protected int lookSeed() { return 0xAA1DA0; }

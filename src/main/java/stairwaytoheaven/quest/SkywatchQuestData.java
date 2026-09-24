@@ -160,6 +160,20 @@ public class SkywatchQuestData extends LevelData {
      */
     public final java.util.HashSet<String> landmarkLoot = new java.util.HashSet<>();
 
+    /**
+     * Whether the Spire Village (Himmelsdorf) is stamped around the spire.
+     *
+     * <p>The player's decision of 2026-09-24 (DESIGN_DECISIONS.md) moved every
+     * named sky-plane resident into one house each around the Warden's Spire;
+     * {@code village.SpireVillage} stamps the ring once and records it here,
+     * beside {@link #spirePlaced}, for the same reason the landmarks live here:
+     * it describes THIS level's ground, and a fresh Skyreach (a regenerate, or
+     * a {@code WORLD_GENERATION} bump) must be able to stamp it again. A
+     * regeneration that deletes the hub regions clears it through
+     * {@code SpireVillage.prepareRegeneration}; nothing in play ever clears it.
+     */
+    public boolean villagePlaced = false;
+
     @Override
     public void addSaveData(SaveData save) {
         super.addSaveData(save);
@@ -196,6 +210,7 @@ public class SkywatchQuestData extends LevelData {
                 this.landmarkGuards.toArray(new String[0]));
         save.addStringArray("landmarkLoot",
                 this.landmarkLoot.toArray(new String[0]));
+        save.addBoolean("villagePlaced", this.villagePlaced);
         // v0.5 return-stairway bindings: auths, Xs and Ys as parallel arrays
         long[] auths = new long[this.returnStairs.size()];
         long[] xs = new long[this.returnStairs.size()];
@@ -275,6 +290,7 @@ public class SkywatchQuestData extends LevelData {
                 this.landmarkGuards.add(seated);
             }
         }
+        this.villagePlaced = save.getBoolean("villagePlaced", false, false);
         this.landmarkLoot.clear();
         for (String filled : save.getStringArray("landmarkLoot", new String[0], false)) {
             if (filled != null && !filled.isEmpty()) {

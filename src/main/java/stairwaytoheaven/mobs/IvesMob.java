@@ -151,21 +151,14 @@ public class IvesMob extends SkySettlerMob {
         if (this.isServer() && player.isServerClient()) {
             Level level = this.getLevel();
             Server server = level == null ? null : level.getServer();
-            advanceVigil(server, player.getServerClient());
+            // The vigil is rung 8 of the quest ladder now (QuestLadder):
+            // same quest, same reward, same world record, but only once the
+            // Steinfeld chapter is open.
+            this.talkLadder(player);
         }
         super.interact(player);
     }
 
-    private void advanceVigil(Server server, ServerClient client) {
-        SkyQuests.Step step = SkyQuests.advanceResidentChain(server, client,
-                SkywatchWorldData.CHAIN_STEINFELD_VIGIL, new SteinfeldVigilQuest());
-        if (step == SkyQuests.Step.ASKED) {
-            this.bubble("ivesasksvigil");
-        } else if (step == SkyQuests.Step.PAID) {
-            giveReward(client, "stormsteelbar", VIGIL_BARS, "ives");
-            this.bubble("ivesvigildone");
-        }
-    }
 
     /** The price, waived once the graves are laid. See {@code EveleenMob}. */
     @Override

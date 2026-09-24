@@ -442,7 +442,9 @@ public final class SkyLandmarkPois {
             // to be able to receive both afterwards.
             seatGuard(level, quest, index, site, width, height);
             placeRewards(level, quest, index, site, width, height, seed);
-            seatSettler(level, server, index, site, width, height);
+            // The settler is NOT seated here any more: since 2026-09-24 the
+            // three live in the Spire Village (village.SpireVillage) and send
+            // the player here for their recruit key and their first quest.
         }
     }
 
