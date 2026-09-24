@@ -740,6 +740,12 @@ ITEM_CLASS_VANILLA_ICON = {
     # points its loadItemTextures at vanilla's red potion; the class names the
     # file in its own BORROWED_ICON constant. Row in docs/VANILLA_ASSET_MAP.md.
     "BloodVialItem": ("fixed", "healthpotion"),
+    # The two weapons past the Stormsteel band. Each reads the vanilla icon
+    # named in its ART constant and re-inks it white and gold at load time
+    # (arsenal/RecolouredVanillaTexture) unless items/<own id>.png ships.
+    # Rows in docs/VANILLA_ASSET_MAP.md §1.3.
+    "CloudGlaiveToolItem": ("fixed", "cryoglaive"),
+    "SkyLanceToolItem": ("fixed", "dragonlance"),
 }
 
 # Marker prefix on a wanted-icon path that lives in the vanilla resource file

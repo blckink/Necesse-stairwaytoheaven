@@ -27,9 +27,9 @@ import necesse.gfx.gameFont.FontOptions;
  * Eden biomes, this one asks the player to actually fight the garden.
  *
  * <h2>Reward</h2>
- * The key piece plus 8 Stormsteel Bar — one step up the 6 - 8 - 10 - 10 - 12
- * ladder these five quests walk, which is §B4's own monotone boss ladder read
- * back as a payout curve. Eden's stone wakes a tier-8 Moonlight Dancer.
+ * The key piece, 5 Stormsteel Bar, the Galehowl and the Warden's Mantle — one
+ * step up the six-key ladder (table in {@code SkyWardenMob.RegionKey}). Eden's
+ * stone wakes a tier-8 Moonlight Dancer.
  */
 public class EdenKeyQuest extends DeliverItemsQuest {
 

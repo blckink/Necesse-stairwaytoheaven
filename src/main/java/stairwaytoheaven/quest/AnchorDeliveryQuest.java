@@ -19,6 +19,15 @@ import necesse.gfx.gameFont.FontOptions;
  * the player's own verdict on the finale as shipped was "das sind keine
  * endgame belohnungen tbh", and he was right. See each field for what its
  * number is benchmarked against.
+ *
+ * <h2>Reward</h2>
+ * Paid by {@code SkyWardenMob.advanceChain}: the <b>Wolkengleve</b>
+ * ({@code arsenal/CloudGlaiveToolItem}), the Skywatch Banner and 5 Aurora
+ * Petal. The glaive has no recipe and no loot table, so this is its one
+ * source. Until 2026-09-24 the headline was the Stormsteel Vambrace — a
+ * craftable trinket the Ghost region key hands out again — and a world that
+ * anchored before then is paid the glaive once, on its next word with the
+ * Warden ({@code SkywatchWorldData.REWARD_CLOUD_GLAIVE}).
  */
 public class AnchorDeliveryQuest extends DeliverItemsQuest {
 

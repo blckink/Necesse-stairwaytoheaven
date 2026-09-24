@@ -447,7 +447,7 @@ public class SkyWardenMob extends HumanShop {
                 stairwaytoheaven.quest.SkyreachKeyQuest.class,
                 "regionkeyskyreach", "stormsteelbar", 4,
                 "wardenkeyaskskyreach", "wardenkeydoneskyreach",
-                "stormdisc", "skywatchhood") {
+                "stormdisc:4", "skywatchhood") {
             @Override
             stairwaytoheaven.quest.SkyreachKeyQuest newQuest() {
                 return new stairwaytoheaven.quest.SkyreachKeyQuest();
@@ -477,7 +477,7 @@ public class SkyWardenMob extends HumanShop {
                 stairwaytoheaven.quest.GhostKeyQuest.class,
                 "regionkeyghostrealm", "spiritsteelbar", 6,
                 "wardenkeyaskghostrealm", "wardenkeydoneghostrealm",
-                "skyreave", "stormsteelvambrace") {
+                "spiritsteelreaver", "stormsteelvambrace") {
             @Override
             stairwaytoheaven.quest.GhostKeyQuest newQuest() {
                 return new stairwaytoheaven.quest.GhostKeyQuest();
@@ -487,7 +487,7 @@ public class SkyWardenMob extends HumanShop {
                 stairwaytoheaven.quest.CrookedKeyQuest.class,
                 "regionkeycrookedbeyond", "spiritsteelbar", 8,
                 "wardenkeyaskcrookedbeyond", "wardenkeydonecrookedbeyond",
-                "prismcaller", "auroralocket") {
+                "gravewindbow", "auroralocket") {
             @Override
             stairwaytoheaven.quest.CrookedKeyQuest newQuest() {
                 return new stairwaytoheaven.quest.CrookedKeyQuest();
@@ -495,9 +495,8 @@ public class SkyWardenMob extends HumanShop {
         },
         HELL(stairwaytoheaven.worldgen.RealmDepth.REALM_HELL,
                 stairwaytoheaven.quest.HellKeyQuest.class,
-                "regionkeyhell", "spiritsteelbar", 10,
-                "wardenkeyaskhell", "wardenkeydonehell",
-                "thunderhead", "zephyrharness") {
+                "regionkeyhell", "spiritsteelbar", 16,
+                "wardenkeyaskhell", "wardenkeydonehell") {
             @Override
             stairwaytoheaven.quest.HellKeyQuest newQuest() {
                 return new stairwaytoheaven.quest.HellKeyQuest();
@@ -514,9 +513,24 @@ public class SkyWardenMob extends HumanShop {
         final int bars;
         final String askKey;
         final String doneKey;
-        /** One of each, on top of the key and the bars: a weapon and a piece
-         *  to wear, so the six rungs do not all pay out the same steel. Every
-         *  ID is a registered SkyItems/SkyArsenal item with its own sprite. */
+        /** On top of the key and the bars: a weapon and a piece to wear, so
+         *  the rungs do not all pay out the same steel. {@code "id"} is one of
+         *  it, {@code "id:n"} is n of it — the Stormdisc is a set of four
+         *  (StormdiscToolItem's stackSize), and one disc is a partial stack the
+         *  forge refuses (BoomerangToolItem.isEnchantable needs a full set).
+         *
+         *  <p>Retuned 2026-09-24 so the weapons ESCALATE with the rung instead
+         *  of handing Skyreach craftables to the last three bosses: the Ghost
+         *  key pays the Ghost Realm's own Spiritsteel Reaver (176, enchant
+         *  2400) instead of the Skyreave (150), which the Wolkengleve from the
+         *  anchor already outclasses; the Crooked key pays the Gravewind Bow
+         *  (Ghost tier, 2400) instead of the Prismcaller (the Skyreach's
+         *  lowest-hitting craftable). Hell pays NO weapon and no trinket: the
+         *  mod has no weapon above the Ghost tier yet, its old Thunderhead was
+         *  a Skyreach craftable on the final rung, and its Zephyr Harness
+         *  duplicated Mr. Knott's chain reward. It pays the 16 Spiritsteel its
+         *  own quest class always promised instead; give it a weapon the day
+         *  a Hell-tier one exists. */
         final String[] specialItemIDs;
 
         RegionKey(int realm, Class<? extends necesse.engine.quest.DeliverItemsQuest> questClass,
@@ -614,10 +628,13 @@ public class SkyWardenMob extends HumanShop {
             give(client, step.keyItemID, 1);
             give(client, step.barItemID, step.bars);
             for (String special : step.specialItemIDs) {
+                int colon = special.indexOf(':');
+                String id = colon < 0 ? special : special.substring(0, colon);
+                int amount = colon < 0 ? 1 : Integer.parseInt(special.substring(colon + 1));
                 // The Skywatch set only registers when its armor sheets ship
                 // (WardenIdentity.armorSheetsExist); skip a piece that did not.
-                if (necesse.engine.registries.ItemRegistry.getItemID(special) >= 0) {
-                    give(client, special, 1);
+                if (necesse.engine.registries.ItemRegistry.getItemID(id) >= 0) {
+                    give(client, id, amount);
                 }
             }
             // His doneKey line already tells the player where the piece goes
@@ -746,18 +763,40 @@ public class SkyWardenMob extends HumanShop {
                 // belohnungen tbh", and this is the fix.
                 give(client, "skywatchbanner", 1);
                 give(client, "aurorapetal", 5);
-                // The actual endgame payout for finishing the whole chain:
-                // one of the mod's three EPIC trinkets (SkyItems.registerGear),
-                // handed over outright rather than through its own recipe
-                // (stormsteelbar 6 + skyweave 4 + aetheriumbar 2). Stormsteel
-                // is the name on both the ask this quest just took and the
-                // set the mod's endgame gear is built around, so the vambrace
-                // is the one of the three that closes the loop the chain
-                // opened.
-                give(client, "stormsteelvambrace", 1);
+                // The actual payout for finishing the whole chain: the
+                // Wolkengleve, the Skywatch's own glaive (arsenal/
+                // CloudGlaiveToolItem). It replaced the Stormsteel Vambrace
+                // here on 2026-09-24: the vambrace is a CRAFTABLE trinket
+                // (stormsteelbar 6 + skyweave 4 + aetheriumbar 2) and the
+                // Ghost key hands it out again, so as the finale of the mod's
+                // first chain it was a recipe the player already owned. The
+                // glaive has no recipe and no loot table -- this is its only
+                // source, which is what a finale reward should be.
+                giveCloudGlaive(server, client);
                 say(client, "wardenanchordone");
             }
         }
+
+        // A world that anchored the island before the Wolkengleve existed was
+        // paid the vambrace and nothing else. It is owed the glaive exactly
+        // once, on the next conversation; the vambrace stays where it is.
+        if (chapterFor(quest, this.isSettler()) == Chapter.DONE
+                && !SkywatchWorldData.residentChainDone(server, SkywatchWorldData.REWARD_CLOUD_GLAIVE)) {
+            giveCloudGlaive(server, client);
+            say(client, "wardenglaivecatchup");
+        }
+    }
+
+    /**
+     * Hands over the Wolkengleve and writes the world record that it has been
+     * handed over. One per world, like the anchor itself: the record is the
+     * same {@code residentChainsDone} set the resident chains use, keyed
+     * {@link SkywatchWorldData#REWARD_CLOUD_GLAIVE}, so {@code /swhreset
+     * quests} clears it together with the anchor it belongs to.
+     */
+    private void giveCloudGlaive(Server server, ServerClient client) {
+        give(client, "cloudglaive", 1);
+        SkywatchWorldData.markResidentChainDone(server, SkywatchWorldData.REWARD_CLOUD_GLAIVE);
     }
 
     /**

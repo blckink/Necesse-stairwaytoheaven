@@ -4211,3 +4211,41 @@ what proves it.
   `wallcandle`, `walltorch`, `walllantern` and `wallarcaniclamp`, all
   `WallTorchObject`s whose rotation is where the WALL is — the same convention
   as `mistglasslantern` (VERIFIED [jar], `WallTorchObject.canPlace`).
+## Re-inking a vanilla sprite at load time without touching vanilla's copy (2026-09-24)
+
+**VERIFIED [jar]** (read out of the decompiled 1.3.2 classes, not run on a
+client). `GameTexture.fromFile(path)` caches by path in `loadedTextures` and
+returns the SAME object vanilla draws (`GameTexture.java:150-160`), and reading
+pixels off a finalised texture un-finalises it (`ensureNotFinal` →
+`restoreFinal` → `glGetTexImage`, `:1070-1091`) — i.e. `livestock/SkyPelt`'s
+route leaves vanilla's texture in the un-final state. One level lower is
+cleaner: `ResourceEncoder.getResourceBytes("items/cryoglaive.png")` is exactly
+what `fromFile` calls on a cache miss (`:298`; `ResourceEncoder.java:82-87`,
+throws `FileNotFoundException` for an unknown key, `IllegalStateException` if
+resources are not loaded — i.e. on a dedicated server), and
+`new GameTexture(debugName, byte[])` (`:274-278`) decodes it into a new,
+un-final texture nobody else holds. `getRed/getGreen/getBlue/getAlpha`,
+`setPixel` and `makeFinal()` then work on it. Implemented in
+`arsenal/RecolouredVanillaTexture` (luminance gradient map, percentile
+stretch); used by `CloudGlaiveToolItem` and `SkyLanceToolItem` from their
+`loadItemTextures`/`loadAttackTexture` overrides, which only run client-side.
+
+**VERIFIED [jar].** `ToolItem`'s constructor keeps every loot table it is handed
+(`ToolItem.addToLootTable`, deferred to `onItemRegistryClosed` when the ID is
+not set yet; `null` is skipped). So subclassing a vanilla weapon to reuse its
+behaviour — `CryoGlaiveToolItem`, `DragonLanceProjectileToolItem` — would also
+put the mod's item into `GlaiveWeaponsLootTable`/`MagicWeaponsLootTable`. Both
+new weapons therefore extend the vanilla BASE class (`GlaiveToolItem`,
+`MagicProjectileToolItem`) with a `null` table and copy the behaviour.
+
+**VERIFIED [jar].** The Dragon Lance is a beam, not a projectile:
+`onAttack` starts a `MouseBeamLevelEvent` (hit cooldown 250 ms, the colour is a
+constructor argument) plus a `MouseBeamAttackHandler` that charges mana per
+second, and `MouseBeamLevelEvent.constructBeam` draws `GameResources.chains`
+tinted by that colour — so a re-coloured beam needs no texture at all.
+
+**HYPOTHESIS.** What the re-inked cryo glaive and dragon lance look like. The
+server install has no sprites; `tools/recolour_preview.py` runs the identical
+ramp over the mod's own Skyreave/Prismcaller as a proxy (cyan blades → cream,
+brown haft → gold, outlines → bronze; looked at in `build/qa/`), and takes
+`--vanilla <dump>` once a client dump exists.

@@ -64,6 +64,8 @@ public final class SkyArsenal {
     public static int prismcallerID;
     public static int skywatchwhistleID;
     public static int stormdiscID;
+    public static int cloudglaiveID;
+    public static int skylanceID;
 
     public static int prismboltProjectileID;
     public static int stormdiscProjectileID;
@@ -117,7 +119,9 @@ public final class SkyArsenal {
     }
 
     /**
-     * The five weapons. Runs from {@code init()}, after {@link #register()}.
+     * The seven weapons. Runs from {@code init()}, after {@link #register()}.
+     * The first five are the incursion-tier craftables; the Wolkengleve and the
+     * Himmelslanze are the rung past them (see their classes).
      *
      * <p>Broker values are hand-set rather than left to {@code -1.0F}: the
      * auto-computation walks the cheapest recipe, and these recipes are made of
@@ -151,6 +155,19 @@ public final class SkyArsenal {
         skywatchwhistleID = ItemRegistry.registerItem("skywatchwhistle", new SkywatchWhistleSummonToolItem(), 310.0F, true);
         // 406 in materials for a set of four, so 100 a disc
         stormdiscID = ItemRegistry.registerItem("stormdisc", new StormdiscToolItem(), 100.0F, true);
+
+        // The two weapons past the Stormsteel band (enchant 2000). Neither is
+        // on a loot table; see each class for the calibration.
+        //
+        // Wolkengleve: the Warden's reward for anchoring the spire island
+        // (AnchorDeliveryQuest), and nowhere else. No recipe, so no coin-press
+        // bound; 450 sits over the Skyreave's 280 and vanilla slimeglaive's
+        // 400, as the weapon does.
+        cloudglaiveID = ItemRegistry.registerItem("cloudglaive", new CloudGlaiveToolItem(), 450.0F, true);
+        // Himmelslanze: 600 in materials (3x90 aetherwrightcasing + 10x10
+        // edenbronzebar + 8x10 goldenpollen + 6x25 aetheriumbar), so 580 by
+        // the rule above. Vanilla's dragonlance registers at 700.
+        skylanceID = ItemRegistry.registerItem("skylance", new SkyLanceToolItem(), 580.0F, true);
     }
 
     /**
@@ -208,5 +225,15 @@ public final class SkyArsenal {
         Recipes.registerModRecipe(new Recipe(
                 "stormdisc", 4, RecipeTechRegistry.TUNGSTEN_WORKSTATION,
                 Recipes.ingredientsFromScript("{{aetheriumbar, 8}, {stormshard, 8}, {cinderpearl, 4}, {veilessence, 3}}")));
+
+        // Beam lance: the first recipe that consumes Aetherwright's Casing,
+        // the material chapter-01-skyreach-cast.md §3 names as "the gate
+        // material of the first weapon tier past Stormsteel". The Eden half
+        // (bronze and pollen) means it is made after the Eden Gate, not
+        // before; Eden Bronze had no recipe consumer at all until now.
+        // Vanilla's dragonlance: FALLEN_ANVIL, 20 primordialessence.
+        Recipes.registerModRecipe(new Recipe(
+                "skylance", 1, RecipeTechRegistry.TUNGSTEN_WORKSTATION,
+                Recipes.ingredientsFromScript("{{aetherwrightcasing, 3}, {edenbronzebar, 10}, {goldenpollen, 8}, {aetheriumbar, 6}}")));
     }
 }

@@ -37,10 +37,12 @@ import necesse.gfx.gameFont.FontOptions;
  * realm's ground a reason to be dug.
  *
  * <h2>Reward, and where it sits on the ladder</h2>
- * Ives's recruit fee waived plus 10 Stormsteel Bar — deliberately the same
- * shape and the same bar count as {@link EdenPlantsQuest}, the mod's other
- * "found in a realm, waives the finder's fee" chain, because the two are the
- * same beat one band apart. It stays BELOW {@link SteinfeldKeyQuest}'s own
+ * Ives's recruit fee waived plus 12 Stormsteel Bar — the same shape as
+ * {@link EdenPlantsQuest}, the mod's other "found in a realm, waives the
+ * finder's fee" chain, because the two are the same beat one band apart; and
+ * two bars more than it since 2026-09-24, because it IS one band further out
+ * and asks for 24 drops where Eveleen asks for three fruit
+ * ({@code IvesMob.VIGIL_BARS}). It stays BELOW {@link SteinfeldKeyQuest}'s own
  * payout in what it unlocks rather than in what it pays: that one opens a
  * tier-9 boss, this one opens a shopkeeper.
  */

@@ -213,6 +213,15 @@ inventories are not part of that object and are never touched.
 `SkywatchQuestData.resetProgress` is the deliberate half of the same operation,
 and `/swhreset quests` is what calls it.
 
+**A reward catch-up (2026-09-24), not a migration.** `swh_anchor` now pays the
+Wolkengleve instead of the Stormsteel Vambrace. A world that anchored the
+island earlier has `anchorDone` set and no `anchorcloudglaive` entry in
+`SkywatchWorldData.residentChainsDone`; on the next conversation with the Warden
+(`SkyWardenMob.advanceChain`) he hands over the glaive once and records it. It
+adds an item and a world flag, takes nothing away, and runs only through the
+Warden — no save is rewritten on load. HYPOTHESIS until turned in on a real
+save; read out of the code, not run.
+
 ## 5. The rule everything here obeys
 
 `docs/DESIGN_DECISIONS.md`:

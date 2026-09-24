@@ -34,7 +34,10 @@ import necesse.gfx.gameFont.FontOptions;
  *
  * <h2>Reward</h2>
  * The key piece plus 16 Spiritsteel Bar, the top of the six-key ladder — over
- * the Crooked key's 12. Its stone wakes the Mutant Hydra at 528 000 HP, the
+ * the Crooked key's 8 (table in {@code SkyWardenMob.RegionKey}). No weapon and
+ * no trinket: the mod has none above the Ghost tier yet, and the Thunderhead
+ * and Zephyr Harness this rung paid until 2026-09-24 were a Skyreach craftable
+ * and a duplicate of Mr. Knott's reward. Its stone wakes the Mutant Hydra at 528 000 HP, the
  * heaviest fight the mod has a portal for.
  */
 public class HellKeyQuest extends DeliverItemsQuest {

@@ -219,6 +219,16 @@ public class SkywatchWorldData extends WorldData {
     public static final String CHAIN_MORTIMER_RITES = "mortimerrites";
     /** {@link #residentChainsDone} key — Caspern's cold forge. */
     public static final String CHAIN_CASPERN_FORGE = "caspernforge";
+    /**
+     * {@link #residentChainsDone} key — the Wolkengleve has been handed over
+     * for anchoring the spire island. Not a resident chain, but the same kind
+     * of record: one world-scoped "paid once" flag, persisted by the same
+     * string array and cleared by the same {@link #resetProgress}. Its own key
+     * rather than {@code SkywatchQuestData.anchorDone} because worlds that
+     * anchored the island BEFORE the glaive existed have {@code anchorDone}
+     * set and were never paid it — the Warden reads the pair to owe them one.
+     */
+    public static final String REWARD_CLOUD_GLAIVE = "anchorcloudglaive";
 
     public boolean catHomeSet = false;
     public int catHomeX = 0;

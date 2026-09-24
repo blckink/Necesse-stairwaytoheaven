@@ -28,13 +28,15 @@ import necesse.gfx.gameFont.FontOptions;
  * drops either.
  *
  * <h2>Reward, and why it looks like this</h2>
- * The key piece plus 6 Stormsteel Bar. Deliberately BELOW the Skyreach finale's
- * own 10 ({@link AnchorDeliveryQuest}, {@code docs/BALANCE.md}): this quest sits
- * immediately after that finale and its real payout is the boss it unlocks —
- * a tier-8 Cryo Queen at 57 240 HP (§B4) whose loot is the point. Paying the
- * finale's own number twice would make the bars, not the boss, the reason to do
- * it. The five keys then climb 6 - 8 - 10 Stormsteel, 10 - 12 Spiritsteel,
- * matching §B4's own monotone boss ladder rather than inventing a second one.
+ * The key piece, 4 Stormsteel Bar, a full set of four Stormdiscs and the
+ * Skywatch Hood. The table lives in ONE place, {@code SkyWardenMob.RegionKey};
+ * this paragraph only explains it. Deliberately BELOW the Skyreach finale that
+ * comes immediately before it ({@link AnchorDeliveryQuest}, which pays the
+ * Wolkengleve): the key's real payout is the boss it unlocks, a tier-8 Cryo
+ * Queen (§B4), and paying the finale's number twice would make the bars, not
+ * the boss, the reason to do it. The six keys then climb 4 - 5 - 6 Stormsteel,
+ * 6 - 8 - 16 Spiritsteel, with the weapon rising alongside (see
+ * {@code RegionKey.specialItemIDs}).
  */
 public class SkyreachKeyQuest extends DeliverItemsQuest {
 

@@ -498,6 +498,18 @@ hunts by night, drinks instead of eating.
 | `charredgallows` | object | Charred Gallows — Hell's dead-tree prop, axe to clear. Not obtainable. |
 | `brimstonecrag` | object | Brimstone Crag — Hell's rock prop, pickaxe, 80 HP. Not obtainable. |
 | `skywatchbed` | object | Skywatch Bed — the Skywatch furniture set's bed on vanilla's `BedObject`, so a settler can be assigned to it. Workstation: 6 Skystone + 8 Windsilk. |
+## The two weapons past the Stormsteel band (2026-09-24)
+
+Both are vanilla weapons adapted white-and-gold, both enchant 2000 / EPIC — one
+step past the incursion floor's 1900, short of Spiritsteel's 2400 — and neither
+is on a loot table. Their art is vanilla's own sprite re-inked at load time by
+`arsenal/RecolouredVanillaTexture` (client only); rows in
+`docs/VANILLA_ASSET_MAP.md` §1.3. Calibration in each class.
+
+| id | kind | what it is, in one line |
+|---|---|---|
+| `cloudglaive` | item | Wolkengleve / Cloud Glaive — the Cryo Glaive's shape (range 160, gold-and-white light motes on the swing) at 165 → 208.54, above the craftable Skyreave's 150 and below the Ghost Realm's Spiritsteel Reaver; the Sky Warden's reward for anchoring the spire island (`swh_anchor`), its only source. |
+| `skylance` | item | Himmelslanze / Sky Lance — the Dragon Lance's channelled beam in gold, 95 → 149.63 per 250 ms tick, 10 mana/s, rooted while it burns; crafted at the Tungsten Workstation from 3 Aetherwright's Casing + 10 Eden Bronze Bar + 8 Golden Pollen + 6 Aetherium Bar — the first recipe to consume either the Casing or Eden Bronze. |
 
 ## Baseline — registered before the ledger existed
 

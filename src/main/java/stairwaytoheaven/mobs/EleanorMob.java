@@ -92,13 +92,20 @@ public class EleanorMob extends SkySettlerMob {
     /**
      * Spiritsteel bars handed over on EITHER ending (see {@link #interact}'s
      * PASS ON branch and {@link #onRecruited}) — the endgame material payout
-     * §11 itself does not name a number for. 14 rather than the Anchor's 10:
-     * Spiritsteel is one tier above Stormsteel on {@code docs/BALANCE.md}'s own
-     * gear ladder (34 chest armour / 2400 enchant vs. 29 / 1900), so "at or
-     * above" the Anchor's reward means more of the mod's own harder bar, not
-     * merely matching the count of an easier one.
+     * §11 itself does not name a number for.
+     *
+     * <p>Ten since 2026-09-24 (was 14). Fourteen was benchmarked against the
+     * Skyreach cats' 10 Stormsteel and never re-read against its own
+     * neighbours, and against those it was the outlier of the whole quest
+     * table: more Spiritsteel than Mr. Knott's chain one realm further out
+     * (12), more than twice what Mortimer and Caspern pay in the same realm
+     * (6 each, for bigger asks — Caspern's is 12 Spectral Ore + 8 Veil
+     * Essence against her 12 Veil Essence), and more than the Ghost region key
+     * itself (6). Ten keeps her the best-paid resident of the Ghost Realm —
+     * she is the one with a permanent choice attached, and the PASS ON ending
+     * adds the lantern on top — while leaving the Crooked chain above her.
      */
-    public static final int PASS_ON_BAR_BONUS = 14;
+    public static final int PASS_ON_BAR_BONUS = 10;
 
     public EleanorMob() {
         super("eleanorsettler");

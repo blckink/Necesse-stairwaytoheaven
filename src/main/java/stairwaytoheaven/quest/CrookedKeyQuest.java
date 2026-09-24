@@ -30,10 +30,10 @@ import necesse.gfx.gameFont.FontOptions;
  * would mean inventing an item.
  *
  * <h2>Reward</h2>
- * The key piece plus 12 Spiritsteel Bar, the top of the five-key ladder.
- * {@code docs/BALANCE.md} puts the Crooked Beyond at incursion tier 10, and
- * §B4's own table agrees: its stone wakes the Crystal Dragon at 208 000 HP,
- * the heaviest fight the mod currently has a portal for.
+ * The key piece, 8 Spiritsteel Bar, the Gravewind Bow and the Aurora Locket
+ * (table in {@code SkyWardenMob.RegionKey}). {@code docs/BALANCE.md} puts the
+ * Crooked Beyond at incursion tier 10, and §B4's own table agrees: its stone
+ * wakes the Crystal Dragon.
  */
 public class CrookedKeyQuest extends DeliverItemsQuest {
 

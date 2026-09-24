@@ -328,7 +328,8 @@ wardentalk4=Die Katzen kamen mit dem Turm. Oder der Turm mit den Katzen. Schwer 
 wardentalk5=Unten habt ihr Wetter. Hier oben haben wir Launen.
 wardentalk6=Ich habe vieles fallen sehen. Nur wenig davon kam wieder herauf.
 wardencatsdone=Beide. Unter einem Dach. Damit ist der Turm ordentlich geschlossen - nimm den Korb, sie kennen ihn.
-wardenanchordone=Metall und Stein, und die alte Insel hört auf zu wandern. Sie wird da sein, wo du sie verlassen hast. Das zählt, später.
+wardenanchordone=Metall und Stein, und die alte Insel hört auf zu wandern. Sie wird da sein, wo du sie verlassen hast. Das zählt, später. Nimm die Gleve - die Himmelswacht hatte nie jemanden, dem sie sie geben konnte.
+wardenglaivecatchup=Ich schulde dir noch etwas für den Anker. Die Gleve der Himmelswacht - sie hat Wolken geschnitten, bevor sie je etwas anderes schnitt. Sie gehört dir.
 catmarkerblack=Siggis Lager
 catmarkertabby=Peanuts Lager
 
@@ -349,7 +350,7 @@ swhcattabbyhome=Peanut ist daheim - schläft im Korb im Turm des Wardens
 swhcatsreward=10x Sturmstahlbarren + Katzenkorb + 2x Flackerlicht-Girlande
 swhanchortitle=Verankere die Insel
 swhanchordesc=Die Turminsel driftet. Der Warden kann sie verankern - mit deinem Metall und Stein.
-swhanchorreward=Sturmstahl-Armschiene + Skywatch-Banner + 5x Aurorablatt
+swhanchorreward=Wolkengleve + Skywatch-Banner + 5x Aurorablatt
 swhrecruitwardentitle=Der letzte Hüter
 swhrecruitwardendesc=Der Himmelswächter würde die Himmelswacht hinter sich lassen - für einen Preis, den keine kleine Siedlung zahlen kann.
 swhrecruitwardenobj=Heuere den Himmelswächter für deine Siedlung an (<cost> Münzen)
@@ -365,6 +366,8 @@ thunderhead=Donnerhaupt
 prismcaller=Prismenrufer
 skywatchwhistle=Himmelswacht-Pfeife
 stormdisc=Sturmscheibe
+cloudglaive=Wolkengleve
+skylance=Himmelslanze
 
 [itemtooltip]
 skyreavetip=Fegt einen ganzen Kreis. Damit schnitt die Himmelswacht den Hagel.
@@ -372,6 +375,8 @@ thunderheadtip=Ganz durchgezogen - oder gar nicht erst gespannt.
 prismcallertip=Der Splitter erinnert sich an jede Dämmerung, die er durchstand.
 skywatchwhistletip=Ein Ton, und ein Stück der alten Maschinerie antwortet.
 stormdisctip=Sie kommt zurück. Sie kam immer zurück.
+cloudglaivetip=Die Gleve der Himmelswacht selbst. Wo die Klinge der Kryokönigin Frost hinterlässt, hinterlässt diese Tageslicht. Geschenkt, nie geschmiedet.
+skylancetip=Halte sie, und der Himmel hält dir eine Linie aus Licht. Solange sie brennt, stehst du still.
 
 [mob]
 rimesentry=Raureif-Wächter
@@ -640,7 +645,7 @@ swhedenplantsreward=3x Wissenssteckling + 10x Sturmstahlbarren
 swheleanortitle=Warum sie blieb
 swheleanordesc=Etwas hält Eleanor hier, nachdem alle anderen weitergezogen sind. Sie weiß nicht, warum. Vielleicht kannst du ihr helfen, sich zu entscheiden.
 swheleanorobj=Sprich mit Eleanor. Halte Schleieressenz in der Hand, um ihr beim Loslassen zu helfen, oder komm mit leeren Händen und bitte sie zu bleiben.
-swheleanorreward=Loslassen: Irrlichtlaterne + 14x Geisterstahlbarren. Bleiben: sie zieht in deine Siedlung ein + 14x Geisterstahlbarren.
+swheleanorreward=Loslassen: Irrlichtlaterne + 10x Geisterstahlbarren. Bleiben: sie zieht in deine Siedlung ein + 10x Geisterstahlbarren.
 swhspeaktoeleanor=Sprich mit Eleanor.
 
 // --- Mr. Knott, die Krumme Kette ---
@@ -650,7 +655,7 @@ swhcrookedarrivalobj=Finde, wer den Türhof noch hütet - halte Ausschau nach ei
 swhspeaktoknott=Sprich mit Mr. Knott.
 swhsteinfeldvigiltitle=Die Totenwache
 swhsteinfeldvigildesc=Ives hält die Stille Weite in Ordnung, und die Stille Weite bleibt nicht in Ordnung. Die, die hier draußen umhergehen, spuken niemandem - sie wurden nur nie niedergelegt. Er weiß, was dafür nötig ist, und hat von beidem nichts mehr.
-swhsteinfeldvigilreward=Ives zieht kostenlos in deine Siedlung + 10x Sturmstahlbarren
+swhsteinfeldvigilreward=Ives zieht kostenlos in deine Siedlung + 12x Sturmstahlbarren
 swhspeaktoives=Sprich mit Ives.
 
 // --- Mortimer, der Nachgarten ---
@@ -970,7 +975,7 @@ regionkeyhell=Das Höllensiegel
 [quests]
 swhkeyskyreachtitle=Das Wachfeuer
 swhkeyskyreachdesc=Der Warden kann ein Wachfeuer bauen, auf das die Rufsteine der Himmelsweite antworten - wenn du ihm den Sturm bringst, mit dem es brennt.
-swhkeyskyreachreward=Wachfeuer der Himmelsweite + Sturmscheibe + Himmelswacht-Kapuze + 4x Sturmstahlbarren
+swhkeyskyreachreward=Wachfeuer der Himmelsweite + 4x Sturmscheibe + Himmelswacht-Kapuze + 4x Sturmstahlbarren
 swhkeyedentitle=Die Gartenstiege
 swhkeyedendesc=Eden bewacht seinen Saft und seinen Pollen mit Zähnen und Stacheln. Hol beides aus dem Garten, dann schlägt dir der Warden eine Stiege, die seine Steine wiedererkennen.
 swhkeyedenreward=Gartenstiege von Eden + Windheuler + Mantel des Hüters + 5x Sturmstahlbarren
@@ -979,13 +984,13 @@ swhkeysteinfelddesc=Steinfeld ist nichts als bleicher Stein und das Echo, das da
 swhkeysteinfeldreward=Trauerengel von Steinfeld + Sturmklinge + Stiefel des Hüters + 6x Sturmstahlbarren
 swhkeyghostrealmtitle=Die Rabenkanzel
 swhkeyghostrealmdesc=Aus dem Nachgarten kommt nichts, was der Nebel nicht schon berührt hat. Trag sein Knochenholz und sein Spektralerz heraus, dann setzt dir der Warden einen Raben über das Tor.
-swhkeyghostrealmreward=Rabenkanzel des Nachgartens + Himmelsreißer + Sturmstahl-Armschiene + 6x Geisterstahlbarren
+swhkeyghostrealmreward=Rabenkanzel des Nachgartens + Geisterstahl-Schnitter + Sturmstahl-Armschiene + 6x Geisterstahlbarren
 swhkeycrookedbeyondtitle=Eine eigene Tür
 swhkeycrookedbeyonddesc=Jede Tür in der Krümmung führt irgendwohin, wo sie nicht hinführen sollte. Bring dem Warden ihr Holz und ihre Splitter, dann hängt er dir eine ein, die es mit Absicht tut.
-swhkeycrookedbeyondreward=Knotts Krumme Tür + Prismenrufer + Auroramedaillon + 8x Geisterstahlbarren
+swhkeycrookedbeyondreward=Knotts Krumme Tür + Grabwind-Bogen + Auroramedaillon + 8x Geisterstahlbarren
 swhkeyhelltitle=Alles scheint in Ordnung zu sein
 swhkeyhelldesc=Die Hölle macht niemandem ohne Papiere auf. Ein Formular kann der Warden dir nicht besorgen, also nimmt er den Beweis, dass du so weit draußen warst: die Krümmung, doppelt.
-swhkeyhellreward=Das Höllensiegel + Donnerhaupt + Zephyr-Gurtzeug + 10x Geisterstahlbarren
+swhkeyhellreward=Das Höllensiegel + 16x Geisterstahlbarren
 [misc]
 regionkeyneedsettlement=Ein Schlüsselstück hält nur dort, wo Menschen wohnen. Stell es in deiner Siedlung auf.
 regionkeyunlocked=Die <key> setzt sich in den Boden,\nund weit draußen wird ein kalter Stein warm.

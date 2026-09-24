@@ -304,21 +304,21 @@ one-per-world individual. There is no "a farmhand arrives" event of its own.
 
 ---
 
-## 4. Quests — 18 registered, 17 live
+## 4. Quests — 20 registered, 19 live (rewards retuned 2026-09-24, full table in `docs/quests.md`)
 
 | id | giver | do | reward |
 |---|---|---|---|
 | `swh_findspire` | first ascent | find the Spire | signpost only |
 | `swh_recruitwarden` | Warden | pay 30 000 | the Warden |
 | `swh_cats` | Warden | coax both cats home with Cloudpuff Treats | cat basket, 2× flickerlight garland, 10× stormsteel bar |
-| `swh_anchor` | Warden | 20× aetherium bar, 80× skystone, 8× stormsteel bar | Skywatch banner, 5× aurora petal, Stormsteel Vambrace |
+| `swh_anchor` | Warden | 20× aetherium bar, 80× skystone, 8× stormsteel bar | **Wolkengleve** (its only source), Skywatch banner, 5× aurora petal. Worlds that anchored earlier get the glaive once on their next word with the Warden |
 | `swh_edenreach` | Eden Gate | find Eveleen | signpost only |
 | `swh_edenplants` | Eveleen | 1× Eden berry, moon melon, sun grape | 3× knowledge cutting, 10× stormsteel bar, **her fee waived** |
-| `swh_eleanor` | Eleanor | PASS ON with 12× veil essence, or recruit | PASS ON: will-o'-wisp lantern + 14× spiritsteel bar (she is deleted **permanently**) · STAY: 14× spiritsteel bar |
+| `swh_eleanor` | Eleanor | PASS ON with 12× veil essence, or recruit | PASS ON: will-o'-wisp lantern + 10× spiritsteel bar (she is deleted **permanently**) · STAY: 10× spiritsteel bar |
 | `swh_crookedarrival` | Crooked Door | find Knott | signpost only |
-| `swh_crookeddoor` | Knott | 5× reality shard, 8× warp resin, 8× strange fabric | Zephyr Harness, 12× stormsteel bar, 6× reality shard |
-| `swh_keyskyreach` … `swh_keycrookedbeyond` | Warden, after the Call is DONE | two materials only that realm drops, one realm at a time in boss-ladder order | that realm's key piece + 6 / 8 / 10 Stormsteel, then 10 / 12 Spiritsteel. Standing the piece in a settlement wakes that realm's boss portals |
-| `swh_steinfeldvigil` | **Ives** | 14× grave salt, 10× spirit moss | his 11 000 fee waived, 10× stormsteel bar |
+| `swh_crookeddoor` | Knott | 5× reality shard, 8× warp resin, 8× strange fabric | Zephyr Harness, 12× spiritsteel bar, 6× reality shard |
+| `swh_keyskyreach` … `swh_keyhell` | Warden, after the Call is DONE | two materials of that realm, one realm at a time in boss-ladder order | key piece + 4 / 5 / 6 Stormsteel, 6 / 8 / 16 Spiritsteel, plus a weapon and a wearable on the first five (4× Stormdisc, Galehowl, Tempest Edge, Spiritsteel Reaver, Gravewind Bow). Standing the piece in a settlement wakes that realm's boss portals |
+| `swh_steinfeldvigil` | **Ives** | 14× grave salt, 10× spirit moss | his 11 000 fee waived, 12× stormsteel bar |
 | `swh_mortimerrites` | **Mortimer** | 12× soul thread, 10× bonewood | his 8 000 fee waived, 6× spiritsteel bar |
 | `swh_caspernforge` | **Caspern** | 12× spectral ore, 8× veil essence | his 14 000 fee waived, 6× spiritsteel bar |
 | `swh_beacon` | **nobody** | — | — · **DEAD**: registered, never handed out; kept only so pre-0.5 saves deserialize |
@@ -442,9 +442,9 @@ ours. Each sells their spare. `[run]`, not `[game]`.
 
 | kind | what ships |
 |---|---|
-| **Weapons (5, all craftable)** | Skyreave (glaive) · Thunderhead (greatbow) · Prismcaller (magic staff) · Skywatch Whistle (summon) · Stormdisc (melee). Plus Tempest Edge (sword) and Galehowl (ranged). |
+| **Weapons (5 craftable + 2 past Stormsteel)** | Skyreave (glaive) · Thunderhead (greatbow) · Prismcaller (magic staff) · Skywatch Whistle (summon) · Stormdisc (melee). Plus Tempest Edge (sword) and Galehowl (ranged). **Wolkengleve** (glaive, 165, reward of `swh_anchor` only) and **Himmelslanze** (beam lance, 95/tick, crafted from Aetherwright's Casing + Eden Bronze) — both VERIFIED [jar] registered and built; their load-time white-gold recolour of vanilla `cryoglaive`/`dragonlance` is HYPOTHESIS until seen on a client. |
 | **Armour** | Stormsteel helmet / chestplate / boots · Glimmerstrides (boots) · Skywatch Hood, Warden Mantle, Warden Boots (cosmetic) |
-| **Trinkets (3)** | Aurora Locket · Stormsteel Vambrace (Anchor quest) · Zephyr Harness (Knott's quest) |
+| **Trinkets (3)** | Aurora Locket (Crooked key) · Stormsteel Vambrace (Ghost key) · Zephyr Harness (Knott's quest) — all three also craftable |
 | **Bars & ore** | Aetherium ore → Aetherium bar · **Stormsteel bar** (Aether Forge only) · Nightsteel (Caspern's shop) · Spiritsteel (Eleanor's quest) |
 | **Minerals** | Skystone · Storm shard · Stormglass · Fulgurite · Prism shard · Cinder pearl |
 | **Woods (5)** | Cloudwood · Nimbuswood · Prismwood · Seraphwood · Charwood — all register as `anylog`, so vanilla recipes accept them |

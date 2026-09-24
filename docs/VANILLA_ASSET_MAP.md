@@ -69,6 +69,23 @@ stand-in and swaps out by shipping a real sheet under the mod's own name.
 | vanilla texture | realm | used for |
 |---|---|---|
 
+`arsenal/RecolouredVanillaTexture.whiteGold` does the same for the two weapons
+past the Stormsteel band, with a white-and-gold gradient map instead of a hue
+tint. It reads the vanilla file's BYTES (`ResourceEncoder.getResourceBytes`)
+into a new texture, so vanilla's own cached texture is never touched. Each
+item prefers a mod PNG under its own id when one ships, so these swap out by
+adding the file — no code change. Sizes from `tools/vanilla_sizes.json`.
+
+| vanilla asset | realm | used for | read by / swaps out by |
+|---|---|---|---|
+| `items/cryoglaive` (32x32) | Skyreach | the Wolkengleve's inventory icon, re-inked white and gold | `arsenal/CloudGlaiveToolItem.ART`; add `items/cloudglaive.png` |
+| `player/weapons/cryoglaive` (120x108) | Skyreach | the Wolkengleve mid-swing; range 160 and pivot 58 are this sheet's | `CloudGlaiveToolItem.loadAttackTexture`; add `player/weapons/cloudglaive.png` (keep pivot 58 or change `attackXOffset`) |
+| sound `GameResources.cryoGlaive` | Skyreach | the Wolkengleve's swing, unchanged | `CloudGlaiveToolItem.getAttackSound` |
+| `items/dragonlance` (32x32) | Skyreach / Eden | the Himmelslanze's inventory icon, re-inked | `arsenal/SkyLanceToolItem.ART`; add `items/skylance.png` |
+| `player/weapons/dragonlance` (48x34) | Skyreach / Eden | the Himmelslanze held while the beam burns | `SkyLanceToolItem.loadAttackTexture`; add `player/weapons/skylance.png` |
+| `GameResources.chains` (beam sprite of `MouseBeamLevelEvent`) | Skyreach / Eden | the Himmelslanze's beam, tinted gold by the event's colour argument (255, 214, 120) | vanilla `MouseBeamLevelEvent.constructBeam`; would need an own `LevelEvent` subclass to swap |
+| sounds `GameResources.dragonLance`, `magicbolt1` | Skyreach / Eden | the Himmelslanze's hum (pitch 1.1 instead of 0.9) and cast | `SkyLanceToolItem.getAttackSound/getSwingSound` |
+
 ### 1.3b Vanilla textures used as-is by literal path
 
 Loaded straight from the game's own resources, no copy in

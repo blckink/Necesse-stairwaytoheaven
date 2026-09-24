@@ -227,7 +227,13 @@ Kleidung).
 Schafsstuhl und Holzente). Spiegel und Schild zählen zusätzlich als Licht für
 die Raumwertung.
 
-## 4. Alle Quests — 18 registriert, 17 aktiv
+## 4. Alle Quests — 20 registriert, 19 aktiv
+
+Stand **2026-09-24** (Feinschliff der Belohnungen, siehe unten). Reihenfolge =
+die Reihenfolge, in der du sie im Spiel triffst. Die Warden-Kette ist streng
+linear; die Region-Keys beginnen erst, wenn sie fertig ist, und kommen einzeln
+in Boss-Reihenfolge. Die Ketten der Bewohner laufen nebenher: jede Person gibt
+ihre Aufgabe beim ersten Treffen.
 
 ### Skyreach — „The Warden's Call"
 
@@ -236,26 +242,42 @@ die Raumwertung.
 | `swh_findspire` | erster Aufstieg | finde die Alte Wächterspitze | Karten-Pin |
 | `swh_recruitwarden` | Warden | 30 000 zahlen | der Warden zieht ein + Silberglöckchen |
 | `swh_cats` | Warden | beide Katzen mit Wolkenzupf-Leckerli heimlocken | **Katzenkorb**, 2× Flackerlicht-Girlande, 10× Sturmstahlbarren |
-| `swh_anchor` | Warden | 20× Aetheriumbarren, 80× Himmelsstein, 8× Sturmstahlbarren | **Himmelswacht-Banner**, 5× Aurorablatt, **Sturmstahl-Armschiene** |
+| `swh_anchor` | Warden | 20× Aetheriumbarren, 80× Himmelsstein, 8× Sturmstahlbarren | ⭐ **Wolkengleve**, Himmelswacht-Banner, 5× Aurorablatt |
 | `swh_beacon` | *niemand* | — | **TOT** — registriert, wird nie vergeben; existiert nur, damit Spielstände vor 0.5 laden |
 
-### Die fünf Region-Keys — Warden, erst wenn die Kette DONE ist
+**Die Wolkengleve ⭐ NEU** — die Gleve der Himmelswacht: die Kryogleve der
+Cryo-Königin, weiß-golden statt eisblau, und statt Frostfunken hinterlässt der
+Schwung goldene und wolkenweiße Lichtfunken. **165 Schaden → 208,5** voll
+geschmiedet (Kryogleve: 60 → 75,8; dein herstellbarer Himmelsreißer: 150 →
+189,6; der Geisterstahl-Schnitter eine Welt weiter: 176). Reichweite 160 wie
+die Kryogleve, Rückstoß 150, Verzauberungskosten 2000, EPISCH. **Nur hier zu
+bekommen** — kein Rezept, keine Truhe. Sie trägt dich durch Eden und Steinfeld.
 
-Einer nach dem anderen, in Boss-Reihenfolge. Jeder verlangt **zwei Materialien,
-die es nur in diesem Realm gibt**, und zahlt das Schlüsselstück plus Barren.
-Stell das Schlüsselstück **in eine Siedlung** — dann wachen die
+*Alter Spielstand, Anker schon gesetzt?* Beim nächsten Gespräch mit dem
+Warden bekommst du die Wolkengleve einmal nachgereicht (die Armschiene von
+damals behältst du).
+
+### Die sechs Region-Keys — Warden, erst wenn die Kette DONE ist
+
+Einer nach dem anderen, in Boss-Reihenfolge. Jeder verlangt Materialien aus
+seinem Realm und zahlt das Schlüsselstück, Barren, **eine Waffe und ein Stück
+zum Anziehen**. Stell das Schlüsselstück **in eine Siedlung** — dann wachen die
 Beschwörungssteine dieses Realms auf.
 
 | ID | Aufgabe | Belohnung |
 |---|---|---|
-| `swh_keyskyreach` | 10× Sturmsplitter, 5× Fulgurit | Skyreach-Wachfeuer + **6×** Sturmstahlbarren |
-| `swh_keyeden` | 8× Edensaft, 6× Goldener Pollen | Eden-Schlüsselstück + **8×** Sturmstahlbarren |
-| `swh_keysteinfeld` | 8× Echosplitter, 20× Blasser Stein | Steinfeld-Schlüsselstück + **10×** Sturmstahlbarren |
-| `swh_keyghostrealm` | 12× Knochenholz, 8× Spektralerz | Ghost-Schlüsselstück + **10×** Geisterstahlbarren |
-| `swh_keycrookedbeyond` | 16× Seltsamholz, 8× Realitätssplitter | Crooked-Schlüsselstück + **12×** Geisterstahlbarren |
+| `swh_keyskyreach` | 10× Sturmsplitter, 5× Fulgurit | Skyreach-Wachfeuer, 4× Sturmstahlbarren, **4× Sturmscheibe** (ein ganzer Satz — eine einzelne ließ sich nicht schmieden), Himmelswacht-Kapuze |
+| `swh_keyeden` | 8× Edensaft, 6× Goldener Pollen | Gartenstiege von Eden, 5× Sturmstahlbarren, Windheuler, Mantel des Hüters |
+| `swh_keysteinfeld` | 8× Echosplitter, 20× Blasser Stein | Trauerengel von Steinfeld, 6× Sturmstahlbarren, Sturmklinge, Stiefel des Hüters |
+| `swh_keyghostrealm` | 12× Knochenholz, 8× Spektralerz | Rabenkanzel des Nachgartens, 6× Geisterstahlbarren, **Geisterstahl-Schnitter** (statt Himmelsreißer), Sturmstahl-Armschiene |
+| `swh_keycrookedbeyond` | 16× Seltsamholz, 8× Realitätssplitter | Knotts Krumme Tür, 8× Geisterstahlbarren, **Grabwind-Bogen** (statt Prismenrufer), Auroramedaillon |
+| `swh_keyhell` | 16× Realitätssplitter, 24× Seltsamholz | Das Höllensiegel, **16× Geisterstahlbarren** (statt Donnerhaupt + Zephyr-Gurtzeug + 10×) |
 
-Die Kurve 6 – 8 – 10 Sturmstahl, dann 10 – 12 Geisterstahl liegt genau auf der
-monotonen Boss-Leiter darunter.
+Die Waffen steigen jetzt mit: Skyreach-Waffen auf den ersten drei Stufen, die
+Geisterwaffen ab dem Ghost Realm. Hell zahlt vorerst nur Barren, weil es noch
+keine Waffe über der Geister-Stufe gibt — ein Donnerhaupt (herstellbarer
+Skyreach-Bogen) auf der letzten Stufe war ein Rückschritt, und das
+Zephyr-Gurtzeug gab es bei Mr. Knott schon.
 
 ### Eden
 
@@ -268,7 +290,7 @@ monotonen Boss-Leiter darunter.
 
 | ID | Geber | Aufgabe | Belohnung |
 |---|---|---|---|
-| `swh_steinfeldvigil` | **Ives** | 14× Grabsalz, 10× Geistermoos | **seine 11 000 entfallen** + 10× Sturmstahlbarren |
+| `swh_steinfeldvigil` | **Ives** | 14× Grabsalz, 10× Geistermoos | **seine 11 000 entfallen** + **12×** Sturmstahlbarren (vorher 10 — gleich viel wie Edens drei Früchte, obwohl eine Welt weiter und 24 Drops) |
 
 *Die Totenwache.* Beide Materialien gibt es nur in Steinfeld — und beide hatte
 vorher **überhaupt keinen Abnehmer**: kein Rezept im Mod nennt sie, und der
@@ -278,7 +300,7 @@ Region-Key nimmt die anderen zwei (Echosplitter, Blasser Stein).
 
 | ID | Geber | Aufgabe | Belohnung |
 |---|---|---|---|
-| `swh_eleanor` | Eleanor | **PASS ON:** 12× Schleier-Essenz in der Hand halten · **STAY:** ohne Essenz reden und anwerben | PASS ON: **Irrlichtlaterne** + 14× Geisterstahlbarren, *sie ist dauerhaft weg* · STAY: 14× Geisterstahlbarren, sie zieht ein |
+| `swh_eleanor` | Eleanor | **PASS ON:** 12× Schleier-Essenz in der Hand halten · **STAY:** ohne Essenz reden und anwerben | PASS ON: **Irrlichtlaterne** + **10×** Geisterstahlbarren, *sie ist dauerhaft weg* · STAY: **10×** Geisterstahlbarren, sie zieht ein (vorher 14 — mehr als Knott eine Welt weiter) |
 | `swh_mortimerrites` ⭐ | **Mortimer** | 12× Seelenfaden, 10× Knochenholz | **seine 8 000 entfallen** + 6× Geisterstahlbarren |
 | `swh_caspernforge` ⭐ | **Caspern** | 12× Spektralerz, 8× Schleier-Essenz | **seine 14 000 entfallen** + 6× Geisterstahlbarren |
 
@@ -293,7 +315,23 @@ gab es bis jetzt keinen Grund, sie zu betreten.
 | ID | Geber | Aufgabe | Belohnung |
 |---|---|---|---|
 | `swh_crookedarrival` | Krumme Tür | finde Mr. Knott (rote Tür, die allein steht) | Wegweiser |
-| `swh_crookeddoor` | Mr. Knott | 5× Realitätssplitter, 8× Krümmungsharz, 8× Seltsamer Stoff | **Zephyr-Gurtzeug**, 12× Sturmstahlbarren, 6× Realitätssplitter |
+| `swh_crookeddoor` | Mr. Knott | 5× Realitätssplitter, 8× Krümmungsharz, 8× Seltsamer Stoff | **Zephyr-Gurtzeug**, 12× Geisterstahlbarren, 6× Realitätssplitter |
+
+---
+
+### Die Himmelslanze ⭐ NEU — keine Quest, ein Rezept
+
+Die Drachenlanze, als Lanze aus gehaltenem Tageslicht: derselbe gelenkte
+Strahl, der dem Mauszeiger folgt und alles auf seiner Linie trifft, nur golden.
+**95 Schaden pro Treffer → 149,6** voll geschmiedet, 4 Treffer pro Sekunde,
+10 Mana pro Sekunde, du stehst still, solange sie brennt (Drachenlanze: 80 →
+126). Verzauberungskosten 2000, EPISCH.
+
+**Rezept (Wolfram-Werkbank):** 3× Aetherwright-Gehäuse, 10× Edenbronzebarren,
+8× Goldener Pollen, 6× Aetheriumbarren. Das Gehäuse (Testgelände, Prototyp
+Neun) war genau für „die erste Waffenstufe nach Sturmstahl" gedacht und hatte
+bis jetzt keinen Abnehmer — Edenbronze auch nicht. Absichtlich **keine**
+Questbelohnung: die Wolkengleve ist schon eine.
 
 ---
 
@@ -632,6 +670,12 @@ Bestiarium-Icon.** Der Rest teilt sich so auf:
 | `mobs/icons/elderhuman` ⭐ | **Ives' Gesicht** |
 | `mobs/bee` · `mobs/cow` · `mobs/mimic` ⭐ (Hortmimik) · `mobs/crocodile` · `mobs/dragonwhelp` · `mobs/dryadsentinel` · `mobs/scorpion` · `mobs/stabbybush` | Kreaturen, die eine Vanilla-Klasse beerben |
 | `tiles/cryptash_splat` · `ravenfloor_splat` · `stonebrickfloor_splat` · `swampgrass_splat` · `swamprock_splat` | Autotile-Atlanten für Böden ohne eigene Kunst |
+| `items/cryoglaive` · `player/weapons/cryoglaive` ⭐ | **Wolkengleve** — beim Laden weiß-golden umgefärbt (`RecolouredVanillaTexture`); legst du `items/cloudglaive.png` / `player/weapons/cloudglaive.png` ab, gewinnt deine Datei |
+| `items/dragonlance` · `player/weapons/dragonlance` ⭐ | **Himmelslanze** — genauso umgefärbt; eigene Datei: `items/skylance.png` / `player/weapons/skylance.png` |
+
+**Wie die Umfärbung aussieht, ist ungeprüft:** der Server hat keine Sprites.
+`python3 tools/recolour_preview.py --vanilla <Sprite-Dump>` zeigt es vorab,
+sonst erst im Spiel.
 
 Dazu **getragene Kleidung**, die nur Item-IDs sind und keine Pixel kostet:
 Eveleen (`dryadhat`/`dryadchestplate`/`dryadboots`) · Mortimer (`tophat` /

@@ -327,7 +327,8 @@ wardentalk4=The cats came with the tower. Or the tower came with the cats. Hard 
 wardentalk5=Down there you have weather. Up here we have moods.
 wardentalk6=I have watched a great many things fall. Very few of them came back up.
 wardencatsdone=Both of them. Under one roof. That is the tower closed properly - take the basket, they know it.
-wardenanchordone=Metal and stone, and the old island stops wandering. It will be where you left it. That matters, later.
+wardenanchordone=Metal and stone, and the old island stops wandering. It will be where you left it. That matters, later. Take the glaive - the Skywatch never had anyone to hand it to.
+wardenglaivecatchup=I still owe you for the anchor. The Skywatch's own glaive - it cut cloud before it ever cut anything else. It is yours.
 catmarkerblack=Siggi's lair
 catmarkertabby=Peanut's lair
 
@@ -348,7 +349,7 @@ swhcattabbyhome=Peanut is home - asleep in the basket at the Warden's Spire
 swhcatsreward=10x Stormsteel Bar + Cat Basket + 2x Flickerlight Garland
 swhanchortitle=Anchor the Island
 swhanchordesc=The spire island drifts. The Warden can anchor it - with your metal and stone.
-swhanchorreward=Stormsteel Vambrace + Skywatch Banner + 5x Aurora Petal
+swhanchorreward=Cloud Glaive + Skywatch Banner + 5x Aurora Petal
 swhrecruitwardentitle=The Last Keeper
 swhrecruitwardendesc=The Sky Warden would leave the Skywatch behind, for a price no small settlement could pay.
 swhrecruitwardenobj=Hire the Sky Warden into your settlement (<cost> coins)
@@ -364,6 +365,8 @@ thunderhead=Thunderhead
 prismcaller=Prismcaller
 skywatchwhistle=Skywatch Whistle
 stormdisc=Stormdisc
+cloudglaive=Cloud Glaive
+skylance=Sky Lance
 
 [itemtooltip]
 skyreavetip=Sweeps a full circle. The Skywatch cut hail with these.
@@ -371,6 +374,8 @@ thunderheadtip=Drawn all the way, or not worth drawing at all.
 prismcallertip=The shard still remembers every dawn it stood through.
 skywatchwhistletip=One note, and a piece of the old machinery answers.
 stormdisctip=It comes back. It always came back.
+cloudglaivetip=The Skywatch's own glaive. Where the Cryo Queen's blade leaves frost, this one leaves daylight. Given, never forged.
+skylancetip=Hold it, and the sky holds a line of light for you. You cannot walk while it burns.
 
 [mob]
 rimesentry=Rime Sentry
@@ -639,7 +644,7 @@ swhedenplantsreward=3x Knowledge Cutting + 10x Stormsteel Bar
 swheleanortitle=Why She Stayed
 swheleanordesc=Something keeps Eleanor here after everyone else has gone on. She does not know why. Maybe you can help her decide what to do about it.
 swheleanorobj=Speak with Eleanor. Hold Veil Essence to help her pass on, or come empty-handed to ask her to stay.
-swheleanorreward=Pass on: Will-o'-Wisp Lantern + 14x Spiritsteel Bar. Stay: she joins your settlement + 14x Spiritsteel Bar.
+swheleanorreward=Pass on: Will-o'-Wisp Lantern + 10x Spiritsteel Bar. Stay: she joins your settlement + 10x Spiritsteel Bar.
 swhspeaktoeleanor=Speak with Eleanor.
 
 // --- Mr. Knott, the Crooked chain ---
@@ -649,7 +654,7 @@ swhcrookedarrivalobj=Find whoever keeps the Door Yard - look for a red door that
 swhspeaktoknott=Speak with Mr. Knott.
 swhsteinfeldvigiltitle=The Vigil
 swhsteinfeldvigildesc=Ives keeps the Quiet Reach, and the Quiet Reach does not stay kept. The ones who walk out here are not haunting anybody - they were simply never laid down. He knows what it takes and has run out of both.
-swhsteinfeldvigilreward=Ives joins your settlement for free + 10x Stormsteel Bar
+swhsteinfeldvigilreward=Ives joins your settlement for free + 12x Stormsteel Bar
 swhspeaktoives=Speak with Ives.
 
 // --- Mortimer, the Aftergarden ---
@@ -969,7 +974,7 @@ regionkeyhell=The Infernal Seal
 [quests]
 swhkeyskyreachtitle=The Watchfire
 swhkeyskyreachdesc=The Warden can build a watchfire that the Skyreach's own summoning stones will answer to - if you bring him the storm to light it with.
-swhkeyskyreachreward=Skyreach Watchfire + Stormdisc + Skywatch Hood + 4x Stormsteel Bar
+swhkeyskyreachreward=Skyreach Watchfire + 4x Stormdisc + Skywatch Hood + 4x Stormsteel Bar
 swhkeyedentitle=The Garden Stair
 swhkeyedendesc=Eden guards its sap and its pollen with teeth and stings. Take both from the garden and the Warden will cut you a stair that its stones recognise.
 swhkeyedenreward=Eden Garden Stair + Galehowl + Warden's Mantle + 5x Stormsteel Bar
@@ -978,13 +983,13 @@ swhkeysteinfelddesc=Steinfeld is nothing but pale stone and the echoes trapped i
 swhkeysteinfeldreward=Steinfeld Mourning Angel + Tempest Edge + Warden's Boots + 6x Stormsteel Bar
 swhkeyghostrealmtitle=The Raven Perch
 swhkeyghostrealmdesc=Nothing comes out of the Aftergarden that the fog has not already touched. Carry back its bonewood and its spectral ore, and the Warden will set a raven over your gate.
-swhkeyghostrealmreward=Aftergarden Raven Perch + Skyreave + Stormsteel Vambrace + 6x Spiritsteel Bar
+swhkeyghostrealmreward=Aftergarden Raven Perch + Spiritsteel Reaver + Stormsteel Vambrace + 6x Spiritsteel Bar
 swhkeycrookedbeyondtitle=A Door of Your Own
 swhkeycrookedbeyonddesc=Every door in the Crooked Beyond leads somewhere it should not. Bring the Warden its wood and its shards and he will hang you one that does it on purpose.
-swhkeycrookedbeyondreward=Knott's Crooked Door + Prismcaller + Aurora Locket + 8x Spiritsteel Bar
+swhkeycrookedbeyondreward=Knott's Crooked Door + Gravewind Bow + Aurora Locket + 8x Spiritsteel Bar
 swhkeyhelltitle=Everything Appears to Be in Order
 swhkeyhelldesc=Hell does not open for anybody without the paperwork. The Warden cannot get you a form, so he will settle for proof you have been out that far: the Crooked Beyond, twice over.
-swhkeyhellreward=The Infernal Seal + Thunderhead + Zephyr Harness + 10x Spiritsteel Bar
+swhkeyhellreward=The Infernal Seal + 16x Spiritsteel Bar
 [misc]
 regionkeyneedsettlement=A key piece only holds where people live. Stand it up inside your settlement.
 regionkeyunlocked=The <key> settles into the ground,\nand somewhere far out a cold stone warms.

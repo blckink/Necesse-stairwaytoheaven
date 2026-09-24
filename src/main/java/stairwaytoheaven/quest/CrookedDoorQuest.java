@@ -26,11 +26,11 @@ import necesse.gfx.gameFont.FontOptions;
  * Crooked Beyond sits at incursion tier 10 on {@code docs/BALANCE.md}'s own
  * realm ladder — the same ceiling the Skyreach itself topped out at before this
  * mod's endgame rescale — so its chain is the largest of the three this pass
- * adds: Zephyr Harness (one of the mod's three EPIC trinkets, the same shape as
- * the Anchor's own Stormsteel Vambrace, but not the same one — Caspern's and
- * Eveleen's chains do not repeat each other's payout either), 12 Stormsteel
- * bars (above the Anchor's 10), and Reality Shards back, a small seed fund for
- * whichever future pass builds the Stitcher.
+ * adds: Zephyr Harness (one of the mod's three EPIC trinkets; since 2026-09-24
+ * the Hell region key no longer pays a second one, so this chain is its one
+ * quest source), 12 Spiritsteel bars ({@code KnottMob}; the top resident-chain
+ * payout, above Eleanor's 10 one realm back), and Reality Shards back, a small
+ * seed fund for whichever future pass builds the Stitcher.
  */
 public class CrookedDoorQuest extends DeliverItemsQuest {
 

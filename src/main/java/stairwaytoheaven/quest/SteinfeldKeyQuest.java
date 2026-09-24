@@ -27,10 +27,10 @@ import necesse.gfx.gameFont.FontOptions;
  * rather than a stand at one rock.
  *
  * <h2>Reward</h2>
- * The key piece plus 10 Stormsteel Bar — level with the Skyreach finale's own
- * payout ({@link AnchorDeliveryQuest}, {@code docs/BALANCE.md}), and the top of
- * the Stormsteel half of the five-key ladder. Steinfeld's stone wakes a tier-9
- * Ascended Wizard.
+ * The key piece, 6 Stormsteel Bar, the Tempest Edge and the Warden's Boots —
+ * the top of the Stormsteel half of the six-key ladder (table in
+ * {@code SkyWardenMob.RegionKey}). Steinfeld's stone wakes a tier-9 Ascended
+ * Wizard.
  */
 public class SteinfeldKeyQuest extends DeliverItemsQuest {
 

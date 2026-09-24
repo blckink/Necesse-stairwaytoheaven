@@ -85,8 +85,16 @@ public class IvesMob extends SkySettlerMob {
      */
     private static final int RECRUIT_COST = 11000;
 
-    /** Bars for the vigil. Ten, matching Eveleen's — see the quest's own doc. */
-    public static final int VIGIL_BARS = 10;
+    /**
+     * Bars for the vigil. Twelve since 2026-09-24 (was ten, matching Eveleen's):
+     * Steinfeld is one realm further out than Eden, and its ask — 14 Grave Salt
+     * + 10 Spirit Moss, 24 drops from two Steinfeld-only sources — is a real
+     * farming trip where Eveleen's is one of each Eden fruit. Paying the same
+     * ten for both made the further realm the worse deal. Twelve keeps it on
+     * Stormsteel, the band's own bar, and under the Crooked chain's 12
+     * Spiritsteel, which is the harder bar.
+     */
+    public static final int VIGIL_BARS = 12;
 
     public IvesMob() {
         super("ivessettler");

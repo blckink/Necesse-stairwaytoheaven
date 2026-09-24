@@ -6,6 +6,29 @@ All notable changes to this project are documented here. Format loosely follows
 ## [Unreleased]
 
 ### Added
+- **Wolkengleve / Cloud Glaive** (`cloudglaive`) — the Cryo Glaive re-made in
+  white and gold, gold-and-white light motes on the swing instead of frost.
+  165 → 208.54, range 160, enchant 2000, EPIC: above the craftable Skyreave
+  (150), below the Ghost Realm's Spiritsteel Reaver (176). Only source: the
+  Warden's anchor quest (`swh_anchor`), which it replaces the Stormsteel
+  Vambrace in; worlds that anchored earlier are handed it once on their next
+  word with the Warden.
+- **Himmelslanze / Sky Lance** (`skylance`) — the Dragon Lance's channelled
+  beam in gold. 95 → 149.63 per 250 ms tick, 10 mana/s, rooted while it burns.
+  Crafted at the Tungsten Workstation from 3 Aetherwright's Casing + 10 Eden
+  Bronze Bar + 8 Golden Pollen + 6 Aetherium Bar — the first consumer of both.
+- `arsenal/RecolouredVanillaTexture`: both weapons draw vanilla's own
+  `cryoglaive` / `dragonlance` sprites re-inked white-gold at client load time
+  (nothing copied or shipped); a mod PNG under the item's own id wins.
+  `tools/recolour_preview.py` previews the ramp.
+
+### Changed
+- **Quest rewards retuned** (table in `docs/quests.md`): Skyreach key pays a
+  full set of 4 Stormdiscs (one disc could not be forged); Ghost key Skyreave →
+  Spiritsteel Reaver; Crooked key Prismcaller → Gravewind Bow; Hell key drops
+  the Thunderhead and the duplicate Zephyr Harness for 16 Spiritsteel; Ives
+  10 → 12 Stormsteel; Eleanor 14 → 10 Spiritsteel.
+
 - **Dorian, the Nightbound — a settler who sleeps by day and works by night.**
   `vampiresettler`, the first inverted schedule in the mod. Necesse has no
   "nocturnal" flag, so all four of vanilla's day/night decisions are turned

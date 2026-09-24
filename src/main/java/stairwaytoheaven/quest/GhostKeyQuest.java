@@ -33,11 +33,13 @@ import necesse.gfx.gameFont.FontOptions;
  * new one invented here.
  *
  * <h2>Reward</h2>
- * The key piece plus 10 Spiritsteel Bar. Spiritsteel sits one tier above
- * Stormsteel on {@code docs/BALANCE.md}'s gear ladder (34 chest armour / 2400
- * enchant vs. 29 / 1900), so the payout steps up in KIND here rather than only
- * in count — the same reasoning {@link EleanorQuest}'s own reward is built on.
- * The Aftergarden's stone wakes a tier-9 Pest Warden.
+ * The key piece, 6 Spiritsteel Bar, the Spiritsteel Reaver and the Stormsteel
+ * Vambrace (table in {@code SkyWardenMob.RegionKey}). Spiritsteel sits one
+ * tier above Stormsteel on {@code docs/BALANCE.md}'s gear ladder (34 chest
+ * armour / 2400 enchant vs. 29 / 1900), so the payout steps up in KIND here
+ * rather than only in count, and the weapon is the realm's own greatsword —
+ * the first key weapon above the Wolkengleve the Skyreach finale paid. The
+ * Aftergarden's stone wakes a tier-9 Pest Warden.
  */
 public class GhostKeyQuest extends DeliverItemsQuest {
 
