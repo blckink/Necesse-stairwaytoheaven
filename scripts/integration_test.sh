@@ -462,9 +462,12 @@ grep -qE "journal book: reader=world chapters=6 steps=[1-9][0-9]* bytes=[1-9][0-
 grep -qF "journal check: FAIL" "$LOG1" "$LOG3" \
     && { echo "FAIL: /swhjournal threw"; STATUS=1; }
 # After /swhreset quests the book must read as the start of the story: the
-# first ascent available, everything after it locked, the resident asks that
-# no one gates available, and nothing beyond the fog open without the Mark.
-grep -qE "journal state: reader=world skyreach=ALLLL eden=AAL steinfeld=AL ghostrealm=ALLAAAL crookedbeyond=LL hell=L" "$LOG3" \
+# first ascent available, everything after it locked, and nothing beyond the
+# fog open without the Mark. Since the quest ladder (chapter 03) the resident
+# asks are ladder steps: chapter I's three are open (the trailing AAA of
+# skyreach), every later chapter is locked until the one before is done, and
+# the one ghost-realm A is the fog wall, which only needs the walk there.
+grep -qE "journal state: reader=world skyreach=ALLLLAAA eden=LLLLL steinfeld=LLLL ghostrealm=ALLLLLLLL crookedbeyond=LLLLL hell=LL" "$LOG3" \
     || { echo "FAIL: the journal does not read a reset world as the start of the story"; \
          grep -E "journal state:" "$LOG3"; STATUS=1; }
 grep -qE "journal book: reader=world .* roundtrip=OK .* missing=0" "$LOG3" \
