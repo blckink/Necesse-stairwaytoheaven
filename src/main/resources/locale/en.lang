@@ -1314,7 +1314,6 @@ statusdone=[Done]
 statusactive=[Active]
 statusavailable=[Available]
 statuslocked=[Locked]
-received=You have an Adventurer's Journal in your pack. Right-click it in your inventory to see where your journey stands.
 realm0=Skyreach
 realm1=Garden of Eden
 realm2=Steinfeld

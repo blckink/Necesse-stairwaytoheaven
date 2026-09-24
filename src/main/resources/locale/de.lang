@@ -1315,7 +1315,6 @@ statusdone=[Erledigt]
 statusactive=[Aktiv]
 statusavailable=[Verfügbar]
 statuslocked=[Gesperrt]
-received=In deinem Gepäck liegt ein Abenteurer-Tagebuch. Ein Rechtsklick darauf im Inventar zeigt dir, wo deine Reise steht.
 realm0=Himmelsweite
 realm1=Garten Eden
 realm2=Steinfeld

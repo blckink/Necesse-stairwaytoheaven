@@ -7,7 +7,6 @@ import necesse.engine.GameEventListener;
 import necesse.engine.GameEvents;
 import necesse.engine.commands.CommandsManager;
 import necesse.engine.events.ServerStartEvent;
-import necesse.engine.localization.message.LocalMessage;
 import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
 import necesse.engine.quest.Quest;
@@ -153,7 +152,8 @@ public final class AdventurerJournal {
         if (!added && book.getAmount() > 0) {
             level.entityManager.pickups.add(new ItemPickupEntity(level, book, player.x, player.y, 0.0F, 0.0F));
         }
-        client.sendChatMessage(new LocalMessage("journal", "received"));
+        // No chat line: the player's standing rule is "keine Chat-Nachrichten!
+        // generell" (see SkySettlerMob). The book simply appears in the bag.
     }
 
     /** Has this player started the mod's story (now, or in an earlier session of this save)? */
