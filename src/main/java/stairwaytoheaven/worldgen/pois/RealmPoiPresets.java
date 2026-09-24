@@ -3309,7 +3309,14 @@ public final class RealmPoiPresets {
                 .floor('+', "marblecheckertile")
                 // The altar is unbuilt art; the plinth under it is not.
                 .floor('V', "marblecheckertile")
-                .scatter('x', 0.55F, "skystonerock", "skyscree")
+                // stormscreed, not the dossier's skyscree: skyscree is a
+                // GrassObject and deletes itself off anything that is not
+                // soil. The rim keeps the painter's ground, and on seeds that
+                // put the arena on paving (census, 2026-09-24: 'sovereignsanvil
+                // ... missing=31', every one of them the scree) the rim lost
+                // half its stones. stormscreed is a SkyDecoObject and stands
+                // anywhere; the Test Range already scatters the same pair.
+                .scatter('x', 0.55F, "skystonerock", "stormscreed")
                 .fence('|', "cloudmarblefence")
                 .fence('G', "cloudmarblefencegate")
                 .prop('A', "seraphstatue")
