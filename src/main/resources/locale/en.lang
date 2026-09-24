@@ -294,7 +294,6 @@ wardenrecruitwait=A hundred thousand, friend. Coin first - then you get the olde
 wardenrecruitdone1=Ha! Paid in full. Then it is settled: the Skywatch serves a new house now. Yours.
 wardenrecruitdone2=I will take the long way down and wait by your stairway. Go on home, build me something with a view - and we will see what else is still worth finding up here.
 wardenrecruitnohome=You climbed into my sky without leaving a stairway behind you? Go home, set your front door in order - then we will talk about me moving.
-wardengivesbell=One more thing. Take the old bell - it opens doors that are not doors. You will know when.
 wardensettlertip=Recruited above the clouds, for a fortune in coin.
 wardenfarewell=The tower is quiet now. My new post suits me better.
 gatenobinding=The gate hums, dormant.\nIt has nowhere to take you yet - ascend from your own stairway first.
@@ -501,7 +500,7 @@ cloudcustardtip=Food - Nimbus Milk and cloudberries cooked in a pot. Quick on th
 nimbusdraughttip=Potion - Nimbus Milk brewed with an Aurora Petal. Thickens the skin against a long fall.
 // -- odds and ends --
 cloudpufftreattip=Pet treat - rolled from windsilk and petals. Siggi and Peanut will follow you for one.
-silverbelltip=Quest key - the Warden's own bell. Ring it at a Seance Circle to open the way down into the Veil.
+silverbelltip=A keepsake from the Warden's spire. It opens nothing any more.
 // -- the Stormsteel set and the three accessories --
 stormsteelhelmettip=Head armour - Stormsteel plate with a stormglass visor. Beaten out at a Tungsten Anvil.
 stormsteelchestplatetip=Chest armour - a Stormsteel cuirass with a storm-lens boss. Beaten out at a Tungsten Anvil.

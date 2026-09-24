@@ -266,10 +266,23 @@ on the level for the same fee.
 
 **Found.** Nowhere. He is the first resident with no worldgen seat at all: he
 travels, and only to a settlement that keeps a **coffin** (`SkyArrivals.COFFIN`
-— one sarcophagus inside the bounds, which is also the thing he will sleep in),
-on top of the precondition every arrival here shares: the world has recruited
-its Sky Warden. He beds down in an ordinary assigned bed like anyone else; the
-coffin is the invitation, not the bedroom.
+— vanilla's `sarcophagus` or either of the Twilight Merchant's two,
+`twilightsarcophagus` and the `coffinbed`; vanilla's own is in no vanilla shop,
+so listing only it would have meant "build the one coffin the game never sells
+you").
+
+**He is the one arrival that does NOT wait for the Sky Warden.** Every other
+settler here also needs `SkyArrivals.wardenSettled` — the shared precondition
+that says the player has a Skywatch house for word from the sky to reach. That
+reasoning does not cover somebody who was never in the Skyreach, and in play it
+meant a coffin standing in a town for nothing (decision of the player,
+2026-09-19). His registration passes `requiresWarden = false` to
+`SkyResident`; the five-argument constructor everybody else uses still defaults
+to true.
+
+He beds down in an ordinary assigned bed like anyone else — though a settlement
+that owns the Twilight Merchant's `coffinbed` may well end up assigning him
+that one, which is the joke working as intended.
 
 ---
 

@@ -255,6 +255,15 @@ public final class RealmPoiCensus {
                 && nearestOfAll.kind != RealmPoiPresets.SKY_SERPENTS_REEF) {
             stampNearest(level, nearestQueuedByKind[RealmPoiPresets.SKY_SERPENTS_REEF], logs);
         }
+        // ...and the Sky Town by name too. It paints its own pond between its
+        // own walls, the same wall-to-water question the Reef asks, and before
+        // this it was only ever stamped when it happened to be the nearest --
+        // so a green run said nothing about it most of the time.
+        if (nearestQueuedByKind[RealmPoiPresets.SKY_TOWN] != null
+                && nearestOfAll != null
+                && nearestOfAll.kind != RealmPoiPresets.SKY_TOWN) {
+            stampNearest(level, nearestQueuedByKind[RealmPoiPresets.SKY_TOWN], logs);
+        }
 
         // ---- 4. the three that are stamped once, off ensureWardenSpire ------
         landmarks(level, seed, logs);

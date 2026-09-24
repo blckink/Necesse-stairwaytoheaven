@@ -176,9 +176,17 @@ public final class SkySettlers {
         // towards and can see, which is the same test every other arrival here
         // has to pass. The icon is vanilla's own vampire face by literal path,
         // the way Eveleen wears the Farmer's; row in docs/VANILLA_ASSET_MAP.md.
+        // ...and he is the one resident who does NOT wait for the Sky Warden
+        // (decision of the player, 2026-09-19: "Streich die Warden Bedingung
+        // bei ihm"). The shared precondition is there so a stranger from the
+        // SKY has a reason to know the town exists; Dorian was never in the
+        // Skyreach, and the coffin standing in the settlement is the whole of
+        // what tells him he would be welcome. The flag is his alone — every
+        // other registration above uses the five-argument constructor and
+        // keeps the precondition.
         SettlerRegistry.registerSettler("vampiresettler",
                 new SkyResident("vampiresettler", () -> GameTexture.fromFile("mobs/icons/vampire"),
-                        "vampiresettlertip", SkyArrivals.COFFIN, 90));
+                        "vampiresettlertip", SkyArrivals.COFFIN, 90, false));
 
         assertWired();
     }
@@ -217,14 +225,31 @@ public final class SkySettlers {
         /** null = never travels to a settlement on its own. */
         private final SkyArrivals.Gate arrivalGate;
         private final int arrivalTickets;
+        /**
+         * Whether this resident also waits for the world's Sky Warden.
+         *
+         * <p>True for everyone the Skyreach sent: the shared precondition says
+         * the player has a Skywatch house for word to reach, which is the story
+         * reason a stranger from the sky knows their town exists at all. It is
+         * false for a resident who has nothing to do with the Skyreach — see
+         * Dorian's registration below (decision of the player, 2026-09-19).
+         */
+        private final boolean requiresWarden;
 
         public SkyResident(String mobStringID, Supplier<GameTexture> icon, String acquireTipKey,
                            SkyArrivals.Gate arrivalGate, int arrivalTickets) {
+            this(mobStringID, icon, acquireTipKey, arrivalGate, arrivalTickets, true);
+        }
+
+        public SkyResident(String mobStringID, Supplier<GameTexture> icon, String acquireTipKey,
+                           SkyArrivals.Gate arrivalGate, int arrivalTickets,
+                           boolean requiresWarden) {
             super(mobStringID);
             this.icon = icon;
             this.acquireTipKey = acquireTipKey;
             this.arrivalGate = arrivalGate;
             this.arrivalTickets = arrivalTickets;
+            this.requiresWarden = requiresWarden;
             // Vanilla's COMPLETE_HOST achievement wants one of every settler
             // type in a settlement. A modded settler must stay out of that set
             // or installing this mod makes the achievement unreachable.
@@ -283,7 +308,10 @@ public final class SkySettlers {
             if (server == null || SkywatchWorldData.residentClaimed(server, this.mobStringID)) {
                 return;
             }
-            if (!SkyArrivals.wardenSettled(data) || !this.arrivalGate.isOpen(data)) {
+            if (this.requiresWarden && !SkyArrivals.wardenSettled(data)) {
+                return;
+            }
+            if (!this.arrivalGate.isOpen(data)) {
                 return;
             }
             ticketSystem.addObject(this.arrivalTickets, this.getNewRecruitMob(data));

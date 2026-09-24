@@ -705,6 +705,12 @@ EOF
 grep -qE "realmpoi stamp: kind=serpentsreef .* missing=0 " "$LOG1" \
     || { echo "FAIL: the Serpent's Reef was not stamped clean"; \
          grep -aE "realmpoi stamp: kind=serpentsreef" "$LOG1" | tail -1; STATUS=1; }
+# ...and the Sky Town by name as well: it paints its own pond between its own
+# walls, and before the census stamped it by name it was only ever checked on
+# the runs where it happened to be the nearest place.
+grep -qE "realmpoi stamp: kind=skytown .* missing=0 " "$LOG1" \
+    || { echo "FAIL: the Sky Town was not stamped clean"; \
+         grep -aE "realmpoi stamp: kind=skytown" "$LOG1" | tail -1; STATUS=1; }
 
 # ---- chapter 02: the six guarded-treasure places ---------------------------
 # docs/design/chapter-02-hoards-and-mimics.md. Each one's nearest site is

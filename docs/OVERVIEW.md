@@ -281,7 +281,7 @@ and Orchard Ring cells still remain pressure/terrain sites rather than presets.
 
 | who | realm / where found | recruit | shop | quest |
 |---|---|---|---|---|
-| **The Warden** | Skyreach, Old Warden Spire (stamped on first ascent) | 30 000 coins | 2× Silver Bell @5 000, after settling | the whole Warden's Call chain |
+| **The Warden** | Skyreach, Old Warden Spire (stamped on first ascent) | 30 000 coins | after settling: Ghost Chalk @1 200; once earned on the world, the chain rewards — Wolkengleve @4 500, Skywatch Banner @800 (anchor done), Cat Basket @500, Flickerlight Garland @500 (both cats home) | the whole Warden's Call chain |
 | **Eveleen**, Eden Botanist | Eden, beside a Knowledge Tree (0.35/region + tree) | 7 000 → **free** after her quest | seeds, saplings, fertiliser, queen bee | `swh_edenplants` |
 | **Mortimer**, Undertaker | Ghost, beside a gravestone | 8 000 | gravestones, sarcophagus, Bonewood furniture | — |
 | **Caspern**, Spirit Smith | Ghost, beside a gravestone | 14 000 | Nightsteel ore/bar, phantom dust, bone arrows | — |
@@ -411,8 +411,8 @@ These are the objects with real behaviour, as opposed to deco and furniture.
 
 | object | where it works | what it does |
 |---|---|---|
-| **Séance Circle** | craft + place anywhere | **On the surface, holding the Silver Bell** (checked, never consumed — it is a key you keep): the ring tears open into a Veil Rift and lands you in the **Ghost band** via `RealmLanding.find`. **In the Beetle Outlands**: it becomes a Crooked Door instead — the boss-portal site. **Already at Ghost depth or beyond**: it tells you there is nowhere left to send you. **Anywhere else in the sky**: silent. |
-| **Soul Basin** | craft + place anywhere | The Ghost Realm's counterpart. Wants **12× ectoplasm and CONSUMES it** — that is the deliberate difference from the Circle: the bell is a key, ectoplasm is a price. Opens the way to the Aftergarden. |
+| **Séance Circle** | drawn from Ghost Chalk, only inside a settlement | Summons the Ghost Guide: the first use lifts the Ghost band's Soul Exposure for that player, every use after he trades ghost weapons (FOGKEY A2/A3). Not a teleporter any more. |
+| **Soul Basin** | craft + place anywhere | The Ghost Realm's counterpart. Wants **12× ectoplasm and CONSUMES it** — that is the price of the door. Opens the way to the Aftergarden. |
 | **Eden Seed Basin** | craft + place anywhere | The Eden Threshold. **6 seeds** grow a way into the Garden. Built because Eden had a settler and a quest chain and no door. |
 | **Skywatch Gate** | fixed at the Spire | The only way home. Routes each player back to the **surface stairway they personally ascended from** (per-player server-side binding). Unbreakable — mining your way home must not be possible. |
 | **Skyward Stairway** | surface | The ascent. First use stamps the Warden Spire and gives `swh_findspire`. |
@@ -420,8 +420,9 @@ These are the objects with real behaviour, as opposed to deco and furniture.
 | **Aether Forge** · **Windsilk Loom** · **Stormglass Kiln** | settlement | The three settler-operable workstations — see §5. |
 | **Eden / Ghost / Crooked gates** | band borders | Move you between bands on the plane, destination computed by `RealmLanding`, not by a dimension change. Their **return halves** (`edengateup`, `ghostgateup`, `crookeddoorup`, `veilriftup`) are registered and **placed by nothing**. |
 
-**Silver Bell** is the Warden's gift and the Séance Circle's key. It is
-`misc.questitems` and is the only mod item whose whole job is to be carried.
+**Silver Bell** is retired (2026-09-24): its door, the Veil Rift, went with
+PLAN_ONE_PLANE. Nothing gives, sells or drops it; it stays registered only so
+bells already in a save still load, with a keepsake tooltip.
 
 ### Equipment and materials, in one glance
 
@@ -452,7 +453,7 @@ ours. Each sells their spare. `[run]`, not `[game]`.
 | **Mob drops** | Aurora fleece (Glimmergoat shear) · Veil essence · Dewsnail |
 | **Livestock** | **Nimbus Yak** — milk, no shear · **Glimmergoat** — shear for aurora fleece, no milk. Both eat cloudberry and wheat, by hand or trough. |
 | **Food** | Nimbus milk → cheese press · Cloud custard · Sky curd · Nimbus draught · Cloudberry · Cloudpuff Treat (the cats' bait) |
-| **Quest item** | Silver Bell |
+| **Quest item** | — (Silver Bell retired 2026-09-24) |
 | **Unique rewards (8)** | One per place, none of them a bigger number on an existing item. Toll-House: **Bonded Lockbox** (Magpie's key) · **Skyway Writ** · **Ledger of Undelivered Post**. Grange Cellar: **The Mother** (Halda's key, Sourvat Bloom loot) · **The Warden's Round** · **Skywatch Signet** (trinket, reveals sky structures). Test Range: **Storm Lens Core** (Vane's key, Prototype Nine loot) · **Aetherwright's Casing** ×2–4. Six sit in containers, two drop off the guard on **every** kill. All eight borrow a vanilla icon — see `VANILLA_ASSET_MAP.md` §1.7. |
 
 ---

@@ -230,9 +230,12 @@ public final class CatHome {
      *
      * <p>KNOWN LIMIT: a coaxed cat sitting in some OTHER unloaded region would
      * be missed, and would keep its old tether until something moves it again.
-     * That is not reachable today -- a coaxed cat is teleported onto its home
-     * tile and {@code HomesickCritterAI} pulls it back past three tiles, so it
-     * never leaves that tile's region -- and the fix for it would be a
+     * This used to say the case was unreachable because {@code HomesickCritterAI}
+     * keeps a cat within three tiles of home; the player's save of 2026-09-24
+     * had both cats 11 and 23 tiles from the spire basket, in the next region.
+     * {@link #loadAround} now loads a {@value #CAT_SEARCH_RADIUS}-tile ring
+     * round every anchor, which covers that; a cat further out still would be
+     * missed. The full fix would be a
      * per-tick self-heal in {@code SpireCatMob.serverTick}, which would call
      * {@code changeMobLevel} while the old level's entity lock is held and take
      * the new level's on top of it. Not worth a lock-order deadlock for a case
@@ -273,24 +276,43 @@ public final class CatHome {
         if (sky != null) {
             SkywatchQuestData quest = SkywatchQuestData.get(sky);
             if (quest.spirePlaced) {
-                sky.regionManager.ensureTileIsLoaded(quest.basketX, quest.basketY);
+                loadAround(sky, quest.basketX, quest.basketY);
             }
             if (quest.catsSpawned) {
-                sky.regionManager.ensureTileIsLoaded(quest.blackLairX, quest.blackLairY);
-                sky.regionManager.ensureTileIsLoaded(quest.tabbyLairX, quest.tabbyLairY);
+                loadAround(sky, quest.blackLairX, quest.blackLairY);
+                loadAround(sky, quest.tabbyLairX, quest.tabbyLairY);
             }
             levels.add(sky);
         }
         if (leaving != null) {
             Level old = server.world.getLevel(leaving.level);
             if (old != null) {
-                old.regionManager.ensureTileIsLoaded(leaving.tileX, leaving.tileY);
+                loadAround(old, leaving.tileX, leaving.tileY);
                 if (!containsLevel(levels, old)) {
                     levels.add(old);
                 }
             }
         }
         return levels;
+    }
+
+    /**
+     * How far round an anchor a coaxed cat is looked for, in tiles.
+     *
+     * <p>Loading only the anchor's own region was not enough: on the player's
+     * world of 2026-09-24 the spire basket stood at -329,94 and the two coaxed
+     * cats at -318,84 and -306,89 -- eleven and twenty-three tiles off, in the
+     * next region, which nothing loaded while everyone was on the Surface. The
+     * basket then reported "0 Katze(n) sind eingezogen" and moved nobody.
+     */
+    private static final int CAT_SEARCH_RADIUS = 32;
+
+    /** The anchor's region generated if need be, and the ring round it loaded. */
+    private static void loadAround(Level level, int tileX, int tileY) {
+        level.regionManager.ensureTileIsLoaded(tileX, tileY);
+        level.regionManager.ensureTilesAreLoadedButDontGenerate(
+                tileX - CAT_SEARCH_RADIUS, tileY - CAT_SEARCH_RADIUS,
+                tileX + CAT_SEARCH_RADIUS, tileY + CAT_SEARCH_RADIUS);
     }
 
     private static boolean containsLevel(List<Level> levels, Level level) {

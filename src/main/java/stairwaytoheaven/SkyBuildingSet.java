@@ -287,11 +287,9 @@ final class SkyBuildingSet {
         // from the item's own string ID; passing it as well printed it twice.
         ItemRegistry.registerItem("cloudpufftreat",
                 new SkyMatItem(50, Item.Rarity.UNCOMMON).setItemCategory("materials"), 5.0F, true);
-        // A QUEST KEY, not a mineral: the Warden hands it over, the Seance
-        // Circle checks for it, and it is never smelted or built with. Vanilla
-        // keeps that kind of thing in misc/questitems — the category is created
-        // by the engine (ItemCategory.java:286, sort key Z-E-A) and
-        // QuestItem.java:29 files all 32 vanilla quest items into it.
+        // RETIRED 2026-09-24: once the Seance Circle's key to the Veil, a door
+        // PLAN_ONE_PLANE removed. Nothing gives, sells or drops it any more;
+        // it stays registered only so bells already in a save still load.
         ItemRegistry.registerItem("silverbell",
                 new SkyMatItem(10, Item.Rarity.EPIC).setItemCategory("misc", "questitems"), 250.0F, true);
     }

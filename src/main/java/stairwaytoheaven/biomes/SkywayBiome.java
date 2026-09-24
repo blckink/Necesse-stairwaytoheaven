@@ -89,8 +89,6 @@ public class SkywayBiome extends SkyBiome {
                 ChanceLootItem.between(0.45F, "stormglass", 1, 4),
                 // Unchanged: 1-2 -> 1-3 is +33%, past the band the rule allows.
                 ChanceLootItem.between(0.30F, "skyweave", 1, 2),
-                // Unchanged: the bell is a single unique piece, not a stack.
-                ChanceLootItem.between(0.10F, "silverbell", 1, 1),
                 super.getCrateLootTable(level, tileX, tileY)
         );
     }
