@@ -54,10 +54,6 @@ public class MagpieMob extends SkySettlerMob {
                 .setStaticPriceBasedOnHappiness(10, 24, 5);
         this.shop.addSellingItem("glass", new SellingShopItem(40, 4))
                 .setStaticPriceBasedOnHappiness(20, 44, 8);
-        // the rotating rare line: a spare bell is the Veil's only key, and she
-        // is the only person besides the Warden who has one to sell.
-        this.shop.addSellingItem("silverbell", new SellingShopItem(1, 1))
-                .setStaticPriceBasedOnHappiness(9000, 16000, 1200);
 
         // --- what she buys: the salvage loop. This is her real function. ---
         this.shop.addBuyingItem("skystone", new BuyingShopItem())

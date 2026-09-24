@@ -83,9 +83,6 @@ public class SkyWardenMob extends HumanShop {
      */
     private final java.util.ArrayList<GameMessage> pendingSay = new java.util.ArrayList<>();
 
-    /** What a replacement Silver Bell costs at the Warden, in coins. */
-    public static final int SPARE_BELL_PRICE = 5000;
-
     /**
      * What a replacement Ghost Chalk costs at the Warden, in coins.
      *
@@ -96,10 +93,9 @@ public class SkyWardenMob extends HumanShop {
      * {@code setStaticBrokerPriceBasedOnHappiness(3.0F, 6.0F, 2.0F)} and her
      * cauldron with {@code (10.0F, 20.0F, 2.0F)}
      * (FriendlyWitchHumanMob.java:94, :113 — <b>VERIFIED [jar]</b>), i.e. a
-     * vanilla shop sells between 3x and 20x broker value. The Silver Bell's own
-     * line above sits at the top of that range (5000 on a 250.0F bell = 20x)
-     * because it is a permanent key; the chalk is spent on use and A1 insists a
-     * lost piece must never be a dead end, so it sits at the bottom.
+     * vanilla shop sells between 3x and 20x broker value. The chalk is spent on
+     * use and A1 insists a lost piece must never be a dead end, so it sits at
+     * the bottom.
      */
     public static final int SPARE_CHALK_PRICE = 1200;
 
@@ -109,19 +105,7 @@ public class SkyWardenMob extends HumanShop {
         // other string makes getSettler() null and breaks recruitment entirely.
         super(500, 500, "wardensettler");
         this.canDespawn = false;
-        // The Silver Bell is the Veil's only key, and onRecruited hands exactly
-        // one of them to whoever paid the recruitment. In multiplayer that left
-        // every other player locked out of a whole dimension with no way in,
-        // because the bell is deliberately not craftable. So the keeper keeps
-        // spares: a real vanilla shop line, reachable only once he is a settler
-        // (before that his container opens on the recruit page instead).
-        //
-        // Stocked and restocking rather than unlimited, so it reads as a keeper
-        // handing out the spares he has rather than a vending machine.
-        this.shop.addSellingItem("silverbell", new SellingShopItem(2, 1))
-                .setStaticPrice(SPARE_BELL_PRICE, SPARE_BELL_PRICE);
-        // ...and the Ghost Chalk, on exactly the same line shape and for
-        // exactly the same reason (docs/FOGKEY_AND_BOSSPORTALS.md A1): "The
+        // The Ghost Chalk, stocked and restocking for the reason (docs/FOGKEY_AND_BOSSPORTALS.md A1): "The
         // Warden hands it over the first time that player has stood in Soul
         // Exposure fog, and sells replacements from then on... A lost piece is
         // never a dead end because he restocks it."
@@ -131,6 +115,42 @@ public class SkyWardenMob extends HumanShop {
         // twice in a week needs him to have more than one on the shelf.
         this.shop.addSellingItem("ghostchalk", new SellingShopItem(3, 1))
                 .setStaticPrice(SPARE_CHALK_PRICE, SPARE_CHALK_PRICE);
+
+        // The chain's one-off rewards, on his shelf once ANYONE in the world
+        // has earned them. The player, 2026-09-24, two players on one world:
+        // "man soll nicht alles doppelt machen zwingend" -- the quests are
+        // world progression and pay whoever turns them in, so the second
+        // player needs another way to the Wolkengleve than doing the chain
+        // again. Priced at 10x broker value, the middle of vanilla's 3x-20x
+        // shop range (see SPARE_CHALK_PRICE); one in stock, one back a day.
+        this.shop.addSellingItem("cloudglaive", new SellingShopItem(1, 1))
+                .setStaticPrice(4500, 4500)
+                .addRequirement((random, client, shop, blackboard) -> anchorPaid(shop));
+        this.shop.addSellingItem("skywatchbanner", new SellingShopItem(1, 1))
+                .setStaticPrice(800, 800)
+                .addRequirement((random, client, shop, blackboard) -> anchorPaid(shop));
+        this.shop.addSellingItem("catbasket", new SellingShopItem(1, 1))
+                .setStaticPrice(500, 500)
+                .addRequirement((random, client, shop, blackboard) -> catsHome(shop));
+        this.shop.addSellingItem("flickerlightgarland", new SellingShopItem(2, 1))
+                .setStaticPrice(500, 500)
+                .addRequirement((random, client, shop, blackboard) -> catsHome(shop));
+    }
+
+    /** The anchor quest has been turned in on this world (its glaive is paid). */
+    private static boolean anchorPaid(necesse.entity.mobs.friendly.human.humanShop.HumanShop shop) {
+        Level level = shop == null ? null : shop.getLevel();
+        Server server = level == null ? null : level.getServer();
+        return server != null
+                && SkywatchWorldData.residentChainDone(server, SkywatchWorldData.REWARD_CLOUD_GLAIVE);
+    }
+
+    /** Both cats have been coaxed home on this world, i.e. the cat chapter paid out. */
+    private static boolean catsHome(necesse.entity.mobs.friendly.human.humanShop.HumanShop shop) {
+        Level level = shop == null ? null : shop.getLevel();
+        Server server = level == null ? null : level.getServer();
+        SkywatchWorldData world = server == null ? null : SkywatchWorldData.get(server);
+        return world != null && world.blackHome && world.tabbyHome;
     }
 
     /**
@@ -848,11 +868,11 @@ public class SkyWardenMob extends HumanShop {
             stairwaytoheaven.quest.SkyMapMarkers.sendCatLairs(client, SkywatchQuestData.get(sky));
         }
 
-        // The keeper's Silver Bell changes hands here. It is the key the Seance
-        // Circle checks for, and since the old cat quest that used to award it
-        // is gone this is its only source — without it the Veil is unreachable.
-        give(client, "silverbell", 1);
-        say(client, "wardengivesbell");
+        // The Silver Bell used to change hands here, as the Seance Circle's
+        // key to the Veil. PLAN_ONE_PLANE removed that door and nothing read
+        // the bell any more; the player, 2026-09-24: "Glocke ausbauen". It is
+        // no longer given, sold or dropped -- only still registered, so bells
+        // already in a save stay loadable.
         this.flushSay();
         // The old "misc.wardenmovedin" chat line named the settlement he had
         // just joined. It is gone, and its own comment said why it could go:

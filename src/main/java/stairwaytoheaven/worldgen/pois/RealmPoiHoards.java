@@ -275,8 +275,7 @@ public final class RealmPoiHoards {
             case RealmPoiPresets.SKY_COUNTERFEIT_TREASURY:
                 return new LootTable(
                         LootItem.between(id("coin"), 150, 450),
-                        ChanceLootItem.between(0.40F, id("aetheriumbar"), 1, 2),
-                        ChanceLootItem.between(0.08F, id("silverbell"), 1, 1));
+                        ChanceLootItem.between(0.40F, id("aetheriumbar"), 1, 2));
             case RealmPoiPresets.SKY_FALLEN_OBSERVATORY:
                 return new LootTable(
                         LootItem.between(id("coin"), 120, 380),

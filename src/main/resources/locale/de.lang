@@ -295,7 +295,6 @@ wardenrecruitwait=Hunderttausend, mein Freund. Erst die Münzen - dann bekommst 
 wardenrecruitdone1=Ha! Vollständig bezahlt. Dann ist es besiegelt: Die Himmelswacht dient nun einem neuen Haus. Deinem.
 wardenrecruitdone2=Ich nehme den langen Weg nach unten und warte an deiner Treppe. Geh heim, bau mir etwas mit Aussicht - und wir werden sehen, was sich dort oben noch zu finden lohnt.
 wardenrecruitnohome=Du bist in meinen Himmel geklettert, ohne eine Treppe hinterzulassen? Geh heim, ordne deine Haustür - dann reden wir über meinen Umzug.
-wardengivesbell=Noch etwas. Nimm die alte Glocke - sie öffnet Türen, die keine Türen sind. Du wirst es merken.
 wardensettlertip=Über den Wolken angeworben, für ein Vermögen in Münzen.
 wardenfarewell=Der Turm ist still jetzt. Mein neuer Posten steht mir besser.
 gatenobinding=Das Tor summt schlafend.\nEs hat noch nirgendwohin zu führen - steig erst von deiner eigenen Treppe auf.
@@ -502,7 +501,7 @@ cloudcustardtip=Nahrung - Nimbusmilch und Wolkenbeeren im Kochtopf. Macht danach
 nimbusdraughttip=Trank - Nimbusmilch mit einem Aurorablatt gebraut. Macht die Haut fest gegen einen tiefen Sturz.
 // -- Verschiedenes --
 cloudpufftreattip=Tierleckerli - aus Windseide und Blütenblättern gerollt. Siggi und Peanut folgen dir dafür überallhin.
-silverbelltip=Questschlüssel - das Glöckchen des Hüters. Läute es am Seancekreis, um den Weg hinab in den Schleier zu öffnen.
+silverbelltip=Ein Andenken aus dem Turm des Hüters. Es öffnet nichts mehr.
 // -- Das Sturmstahl-Set und die drei Accessoires --
 stormsteelhelmettip=Kopfrüstung - Sturmstahlplatte mit Sturmglas-Visier. Am Wolframamboss geschmiedet.
 stormsteelchestplatetip=Brustrüstung - ein Sturmstahl-Harnisch mit Sturmlinse auf der Brust. Am Wolframamboss geschmiedet.
