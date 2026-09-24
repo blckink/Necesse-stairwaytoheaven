@@ -47,6 +47,10 @@ public class AdventurersJournalItem extends Item {
         super(1);
         this.rarity = Item.Rarity.UNCOMMON;
         this.worldDrawSize = 32;
+        // Item's default is the bare "misc" root, which CategoryCensus counts
+        // as unsorted; the journal is filed beside the Ghost Chalk and the
+        // region keys, the mod's other story items.
+        this.setItemCategory("misc", "questitems");
     }
 
     @Override

@@ -294,6 +294,7 @@ in keiner Liste. Rezept-Station ist die Tech-ID (`workstation` = Werkbank,
 | `edencopperore` | Item | GhostMatItem |  | materials.ore | materials | ja / ja | 10.0 | RARE |  |
 | `spectralore` | Item | GhostMatItem |  | materials.ore | materials | ja / ja | 35.0 | RARE |  |
 | `palestone` | Item | SteinfeldMatItem | materials | **materials.stone** | materials | ja / ja | 6.0 | UNCOMMON |  |
+| `adventurersjournal` | Item | AdventurersJournalItem |  | misc.questitems | misc | ja / ja | 10.0 | UNCOMMON |  |
 | `bondedlockbox` | Item | SkyRewardItem |  | misc.questitems | materials | ja / ja | 300.0 | RARE |  |
 | `postledger` | Item | SkyRewardItem |  | misc.questitems | materials | ja / ja | 220.0 | RARE |  |
 | `silverbell` | Item | SkyMatItem |  | misc.questitems | materials | ja / ja | 250.0 | EPIC |  |
