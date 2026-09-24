@@ -149,6 +149,16 @@ echo "Running skyreachstatus..."
 echo "skyreachstatus" >&3
 wait_for "SKYREACH_STATUS_DONE" 180
 
+# The Spire Village (docs/design/chapter-03-spire-village.md). The first
+# skyreachstatus above ran ensureWardenSpire, which stamps the village and
+# seats its nine residents; the census right after it is the one moment every
+# resident must still be standing INSIDE their house. It also reads the quest
+# ladder: every step registered, buildable from its ID, and handed out by its
+# giver once the steps before it are done.
+echo "Running swhvillage (the Spire Village, straight after it stamped)..."
+echo "swhvillage" >&3
+wait_for "VILLAGE_STATUS_DONE" 240
+
 # Second pass: the first call loads the Skyreach; its serverTick then stamps
 # the Warden's Spire and spawns the cats. Give it a few ticks and re-check.
 sleep 6
@@ -311,6 +321,10 @@ echo "Restarting server on the same world (persistence pass)..."
 start_server "$WORK_DIR/server2.log"
 echo "skyreachstatus" >&3
 wait_for "SKYREACH_STATUS_DONE" 180
+# The village after a save/load round trip: still stamped, not stamped twice,
+# and the nine still home (by day they stroll, so "near home", not "inside").
+echo "swhvillage" >&3
+wait_for "VILLAGE_STATUS_DONE" 240
 # Wander pass. Give the cats time to actually run their AI before the second
 # probe: the homesick tether is what is supposed to keep them at the basket
 # (HomesickCritterAI only pulls a critter back past 96px), and a tether rebuilt
@@ -477,6 +491,33 @@ grep -qE "recruit check: vampiresettler settler=SkyResident price=coinx11000" "$
 # the only proof from a running server that the night hunter can hunt at all.
 grep -qE "profession check: vampiresettler .*hunting" "$LOG1" \
     || { echo "FAIL: the vampire lost his hunting profession"; STATUS=1; }
+
+echo "--- verifying the Spire Village and its quest ladder ---"
+# chapter-03-spire-village.md. Every house stands object for object as its
+# preset placed it; all nine residents were seated, each exactly once, inside
+# their own house, with their HumanMob.home on their seat (the anchor HumanAI
+# wanders around); and every one of the twenty ladder steps is registered,
+# builds from its registry ID, and is handed out by its giver once the steps
+# before it are done (Eleanor's choice is her own code: custom=1).
+grep -qE "village stamp: placed=true blocked=none houses=12/12 objects=[1-9][0-9]*/[1-9][0-9]* missing=0 " "$LOG1" \
+    || { echo "FAIL: the Spire Village did not stamp whole"; \
+         grep -aE "village stamp:|village house .* missing=[1-9]" "$LOG1" | tail -4; STATUS=1; }
+grep -qE "village residents: residents=9 seated=9 inhouse=9 nearhome=9 homed=9 duplicates=0" "$LOG1" \
+    || { echo "FAIL: not every resident stands in their own house after the village stamped"; \
+         grep -aE "village resident" "$LOG1" | tail -10; STATUS=1; }
+grep -qE "village ladder: steps=20 registered=20 builds=20 offered=19 custom=1" "$LOG1" \
+    || { echo "FAIL: a quest ladder step is unregistered, unbuildable or never handed out"; \
+         grep -aE "ladder step .*(registered=0|builds=0|offered=0)|village ladder:" "$LOG1" | tail -6; STATUS=1; }
+# The painter oracle is only honest if it leaves the village ring out, and says so.
+grep -qE "painter oracle: tileMismatches=0 .*Spire Village ring excluded" "$LOG1" \
+    || { echo "FAIL: the painter oracle did not exclude the Spire Village ring"; STATUS=1; }
+# After the restart: stamped once, nobody lost, nobody doubled, everybody home.
+grep -qE "village stamp: placed=true blocked=none houses=12/12 .* missing=0 " "$LOG2" \
+    || { echo "FAIL: the Spire Village did not survive the save/load round trip"; \
+         grep -aE "village stamp:" "$LOG2" | tail -1; STATUS=1; }
+grep -qE "village residents: residents=9 seated=9 inhouse=[0-9] nearhome=9 homed=9 duplicates=0" "$LOG2" \
+    || { echo "FAIL: after a restart a resident is missing, doubled, or has wandered off"; \
+         grep -aE "village resident" "$LOG2" | tail -10; STATUS=1; }
 
 echo "--- verifying the harvest-tool audit ---"
 # Every custom deco/prop object must report the tool type and HP decided in
@@ -850,7 +891,7 @@ for landmark in skywaytollhouse:magpiesettler:tollwright:3:n/a \
     grep -qE "realmpoi landmark $lm_key: .* missing=0 " "$LOG1" \
         || { echo "FAIL: $lm_key is missing objects its preset placed"; \
              grep -aE "realmpoi landmark $lm_key:" "$LOG1" | tail -1; STATUS=1; }
-    grep -qE "realmpoi landmark $lm_key: .* settler=$lm_who .* present=1 " "$LOG1" \
+    grep -qE "realmpoi landmark $lm_key: .* settler=$lm_who .* home=village " "$LOG1" \
         || { echo "FAIL: $lm_who is not standing in $lm_key (nobody to talk to)"; \
              grep -aE "realmpoi landmark $lm_key:" "$LOG1" | tail -1; STATUS=1; }
     grep -qE "realmpoi landmark $lm_key: .* guard=$lm_guard .* guards=1 " "$LOG1" \

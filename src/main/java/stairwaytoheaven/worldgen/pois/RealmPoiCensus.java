@@ -655,6 +655,10 @@ public final class RealmPoiCensus {
                     + " settler=" + who
                     + " seat=" + at.x + "," + at.y
                     + " present=" + present
+                    // Since 2026-09-24 the settler lives in the Spire Village
+                    // (village.SpireVillage); the landmark keeps their recruit
+                    // key and their first ladder quest's target, not them.
+                    + " home=village"
                     + " guard=" + guardID
                     + " guardseat=" + guardAt.x + "," + guardAt.y
                     + " guards=" + guards

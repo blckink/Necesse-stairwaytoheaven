@@ -1654,6 +1654,7 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         Map<Integer, Integer> expected = new HashMap<>();
         Map<Integer, Integer> actualObjects = new HashMap<>();
         int tileMismatches = 0;
+        boolean villagePlaced = stairwaytoheaven.quest.SkywatchQuestData.get(level).villagePlaced;
         int paved = 0;
         int chequer = 0;
         int skywayGround = 0;
@@ -1682,6 +1683,18 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                 if (Math.abs(x - origin.x) <= spireBox && Math.abs(y - origin.y) <= spireBox) {
                     continue;
                 }
+                // The Spire Village is stamped over the painter's ring outside
+                // the forecourt (village.SpireVillage), the same way the spire
+                // preset is stamped over its plot: everything it writes is
+                // expected to differ, and the forecourt disc it leaves alone
+                // is still checked.
+                if (villagePlaced
+                        && Math.max(Math.abs(x - origin.x), Math.abs(y - origin.y))
+                                <= stairwaytoheaven.village.SpireVillage.RADIUS
+                        && Math.hypot(x - origin.x, y - origin.y)
+                                > stairwaytoheaven.village.SpireVillage.FORECOURT) {
+                    continue;
+                }
                 if (level.getTileID(x, y) != wantTile) {
                     tileMismatches++;
                 }
@@ -1693,7 +1706,8 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         }
         logs.add("painter expectation (seed=" + seed + " origin=" + origin.x + "," + origin.y + "):");
         expected.forEach((id, n) -> logs.add("  expected " + necesse.engine.registries.ObjectRegistry.getObject(id).getStringID() + " x" + n));
-        logs.add("painter oracle: tileMismatches=" + tileMismatches + " (scan radius " + r + ", spire footprint excluded)");
+        logs.add("painter oracle: tileMismatches=" + tileMismatches + " (scan radius " + r
+                + ", spire footprint excluded" + (villagePlaced ? ", Spire Village ring excluded" : "") + ")");
 
         // The built landscape, counted in the world rather than predicted:
         // this is the assertion that roads, lamps and gates really landed.
