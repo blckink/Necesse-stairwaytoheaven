@@ -2748,6 +2748,9 @@ public final class RealmPoiPresets {
                 .prop('r', "cloudberrybush")
                 .pending('S', true);
         plan(p, WAYSIDE_PLAN, legend);
+        // The shoreline rule deletes any wall, door or furniture with open
+        // cloud among its eight neighbours; see dryRing and the institute.
+        dryRing(p, SkyRegistry.cloudturfID);
         return p;
     }
 
@@ -2802,6 +2805,9 @@ public final class RealmPoiPresets {
                 .pending('s', false)
                 .pending('w', false);
         plan(p, HUT_PLAN, legend);
+        // The shoreline rule deletes any wall, door or furniture with open
+        // cloud among its eight neighbours; see dryRing and the institute.
+        dryRing(p, SkyRegistry.cloudturfID);
         return p;
     }
 
@@ -2889,6 +2895,9 @@ public final class RealmPoiPresets {
                 .pending('w', false)
                 .pending('u', false);
         plan(p, FOLD_PLAN, legend);
+        // The shoreline rule deletes any wall, door or furniture with open
+        // cloud among its eight neighbours; see dryRing and the institute.
+        dryRing(p, SkyRegistry.cloudturfID);
         return p;
     }
 
@@ -3031,6 +3040,9 @@ public final class RealmPoiPresets {
                 // stele, which is not built, so the apron simply runs through.
                 .reads(8, 11, ',');
         plan(p, WAYHOUSE_PLAN, legend);
+        // The shoreline rule deletes any wall, door or furniture with open
+        // cloud among its eight neighbours; see dryRing and the institute.
+        dryRing(p, SkyRegistry.cloudturfID);
         return p;
     }
 
@@ -3155,6 +3167,9 @@ public final class RealmPoiPresets {
         p.addInventory(new LootTable(
                 ChanceLootItem.between(0.60F, "coin", 400, 1200)
         ), random, 10, 10, new Object[0]);
+        // The shoreline rule deletes any wall, door or furniture with open
+        // cloud among its eight neighbours; see dryRing and the institute.
+        dryRing(p, SkyRegistry.cloudturfID);
         return p;
     }
 
@@ -3280,6 +3295,9 @@ public final class RealmPoiPresets {
         p.addInventory(new LootTable(
                 ChanceLootItem.between(0.70F, "coin", 800, 2400)
         ), random, 23, 6, new Object[0]);
+        // The shoreline rule deletes any wall, door or furniture with open
+        // cloud among its eight neighbours; see dryRing and the institute.
+        dryRing(p, SkyRegistry.cloudturfID);
         return p;
     }
 
@@ -3374,6 +3392,9 @@ public final class RealmPoiPresets {
                 .prop('g', "chargecrystal")
                 .loose('L', "wardencandelabra");
         plan(p, ANVIL_PLAN, legend);
+        // The shoreline rule deletes any wall, door or furniture with open
+        // cloud among its eight neighbours; see dryRing and the institute.
+        dryRing(p, SkyRegistry.cloudturfID);
         return p;
     }
 
