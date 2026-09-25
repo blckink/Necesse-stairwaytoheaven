@@ -515,7 +515,10 @@ public abstract class SkySettlerMob extends HumanShop {
      * server-side container gets no {@code ShopManager}, so neither buying nor
      * selling works. Keyed on {@code QuestLadder.chapterOpen}, which only ever
      * opens — never on the wait bubble, which comes back in later chapters.
-     * Residents who already live in a settlement keep trading as before.
+     * Recruiting early does not open it: the ladder still tells a recruited
+     * resident's player "come back when chapter X opens" ({@link #talkLadder}),
+     * and a Trade button beside that line is the contradiction reported
+     * (Kevin, 2026-09-26: "wie man es als Spieler logisch findet").
      */
     @Override
     public ShopContainerData getShopContainerData(ServerClient client) {
@@ -533,7 +536,7 @@ public abstract class SkySettlerMob extends HumanShop {
     }
 
     private boolean tradeLocked(ServerClient client) {
-        if (client == null || this.isSettler() || client.getServer() == null) {
+        if (client == null || client.getServer() == null) {
             return false;
         }
         return chapterLocksTrade(client.getServer(), client.authentication, this.getStringID());
