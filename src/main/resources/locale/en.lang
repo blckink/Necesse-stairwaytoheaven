@@ -1236,7 +1236,7 @@ vampiresettlername=Dorian <name>, the Nightbound
 bloodvial=Blood Vial
 
 [itemtooltip]
-bloodvialtip=Mob drop - drawn from something that was grazing an hour ago. Still warm, which is the part nobody mentions.
+bloodvialtip=Mob drop, or alchemy (raw meat + glass bottle) - drawn from something that was grazing an hour ago. Still warm, which is the part nobody mentions.
 
 [buff]
 bloodfever=Blood Fever

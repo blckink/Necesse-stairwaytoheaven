@@ -1237,7 +1237,7 @@ vampiresettlername=Dorian <name>, der Nachtgebundene
 bloodvial=Blutfläschchen
 
 [itemtooltip]
-bloodvialtip=Kreaturenbeute - vor einer Stunde hat das noch gegrast. Noch warm, und darüber redet niemand gern.
+bloodvialtip=Kreaturenbeute oder Alchemie (rohes Fleisch + Glasflasche) - vor einer Stunde hat das noch gegrast. Noch warm, und darüber redet niemand gern.
 
 [buff]
 bloodfever=Blutfieber

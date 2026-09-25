@@ -600,13 +600,15 @@ grep -qE "swhcat census: items=[1-9][0-9]* obtainable=[0-9]+ bad=0 " "$LOG1" \
     || { echo "FAIL: an item sorts into a bare fallback category (docs/ITEM_CATEGORIES.md)"; \
          grep -aE "swhcat (census|BAD)" "$LOG1" | head -20; STATUS=1; }
 # ...and scenery the WORLD placed breaks into its material, not into a
-# placeable object for the bag, while a piece the player built still gives
-# itself back (SkyDecoObject.setNaturalLoot, NaturalGrassObject). Asked of the
-# real getLootTable on a throwaway level at server start.
+# placeable object for the bag. Grass the player planted still gives itself
+# back (NaturalGrassObject); the SkyDecoObject scenery pieces have had no
+# recipe since 2026-09-25 and break into material either way, so leftovers
+# from older saves can be put down and broken up (setNaturalLoot). Asked of
+# the real getLootTable on a throwaway level at server start.
 for expected in \
-    "deadtree natural=[deadwoodlog] placed=[deadtree]" \
-    "stormscreed natural=[skystone] placed=[stormscreed]" \
-    "chargecrystal natural=[stormshard] placed=[chargecrystal]" \
+    "deadtree natural=[deadwoodlog] placed=[deadwoodlog]" \
+    "stormscreed natural=[skystone] placed=[skystone]" \
+    "chargecrystal natural=[stormshard] placed=[stormshard]" \
     "skyreeds natural=[wormbait] placed=[skyreeds]" \
     "overgrowngrass natural=[overgrownedenseed, wormbait] placed=[overgrowngrass]" \
     "skywatchtelescope natural=[skywatchtelescope] placed=[skywatchtelescope]"; do

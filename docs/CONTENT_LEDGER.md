@@ -476,7 +476,7 @@ hunts by night, drinks instead of eating.
 | id | kind | what it is, in one line |
 |---|---|---|
 | `vampiresettler` | mob | Dorian — the first settler with an inverted day. Recruit price 11 000 coins; hunting profession; brings Blood Vials home from night hunts. |
-| `bloodvial` | item | Blood Vial — what Dorian carries home from a hunt; hand him one instead of letting him go thirsty. Ordinary material (broker 22), icon borrowed from vanilla's health potion. |
+| `bloodvial` | item | Blood Vial — what Dorian carries home from a hunt, or brewed at the Alchemy Table from raw meat + a glass bottle; hand him one instead of letting him go thirsty. Ordinary material (broker 22), icon borrowed from vanilla's health potion. |
 | `bloodthrall` | mob | Blood Thrall — one animal in six that Dorian drains gets up again as this hostile. Crypt bat body; drops 1-2 Blood Vial and sometimes leather. |
 | `bloodfever` | buff | Blood Fever — what a bitten resident carries for a day: 20% slow, -15% mining and building speed, -10% max health. Runs out on its own; the Doctor can end it early. |
 

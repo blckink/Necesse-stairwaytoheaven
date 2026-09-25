@@ -272,7 +272,7 @@ in keiner Liste. Rezept-Station ist die Tech-ID (`workstation` = Werkbank,
 | `stormshard` | Item | SkyMatItem |  | materials.minerals | materials | ja / ja | 25.0 | UNCOMMON |  |
 | `aetherwrightcasing` | Item | SkyRewardItem |  | materials.mobdrops | materials | ja / ja | 90.0 | RARE |  |
 | `aurorafleece` | Item | LivestockProduce |  | materials.mobdrops | materials | ja / ja | 16.0 | UNCOMMON |  |
-| `bloodvial` | Item | BloodVialItem |  | materials.mobdrops | materials | ja / ja | 22.0 | UNCOMMON |  |
+| `bloodvial` | Item | BloodVialItem |  | materials.mobdrops | materials | ja / ja | 22.0 | UNCOMMON | alchemy |
 | `bloomfang` | Item | SkyMatItem |  | materials.mobdrops | materials | ja / ja | 45.0 | UNCOMMON |  |
 | `dewsnail` | Item | SkyMatItem |  | materials.mobdrops | materials | ja / ja | 20.0 | UNCOMMON |  |
 | `eyeseed` | Item | CrookedMatItem |  | materials.mobdrops | materials | ja / ja | 45.0 | RARE |  |
@@ -322,7 +322,7 @@ in keiner Liste. Rezept-Station ist die Tech-ID (`workstation` = Werkbank,
 | `spiritforge` | Objekt | GhostStationObject |  | objects.craftingstations | craftingstations | ja / ja | 35.0 | COMMON | workstation |
 | `stormglasskiln` | Objekt | StormglassKilnObject |  | objects.craftingstations | craftingstations | ja / ja | 20.0 | COMMON | workstation |
 | `windsilkloom` | Objekt | WindsilkLoomObject |  | objects.craftingstations | craftingstations | ja / ja | 20.0 | COMMON | workstation |
-| `aeronautwreck` | Objekt | SkyDecoObject |  | objects.decorations | objects.decorations | ja / ja | 8.0 | NORMAL | workstation |
+| `aeronautwreck` | Objekt | SkyDecoObject |  | objects.decorations | objects.decorations | ja / ja | 8.0 | NORMAL | carpenter |
 | `ashbones` | Objekt | SkyDecoObject |  | objects.decorations | objects.decorations | nein / nein | 0.0 | NORMAL |  |
 | `bentgrass` | Objekt | SkyDecoObject |  | objects.decorations | objects.decorations | nein / nein | 0.0 | NORMAL |  |
 | `bentlantern` | Objekt | SkyDecoObject |  | objects.decorations | objects.decorations | nein / nein | 0.0 | NORMAL |  |
@@ -341,11 +341,11 @@ in keiner Liste. Rezept-Station ist die Tech-ID (`workstation` = Werkbank,
 | `longchair` | Objekt | SkyDecoObject |  | objects.decorations | objects.decorations | nein / nein | 0.0 | NORMAL |  |
 | `screamingflower` | Objekt | SkyDecoObject |  | objects.decorations | objects.decorations | nein / nein | 0.0 | NORMAL |  |
 | `skyanchor` | Objekt | SkyDecoObject |  | objects.decorations | objects.decorations | nein / nein | 0.0 | NORMAL |  |
-| `skyballoon` | Objekt | SkyDecoObject |  | objects.decorations | objects.decorations | ja / ja | 2.0 | NORMAL | workstation |
+| `skyballoon` | Objekt | SkyDecoObject |  | objects.decorations | objects.decorations | ja / ja | 2.0 | NORMAL | carpenter |
 | `skyfallshard` | Objekt | SkyfallShardObject |  | objects.decorations | objects.decorations | nein / nein | 0.0 | NORMAL |  |
-| `skyparcel` | Objekt | SkyDecoObject |  | objects.decorations | objects.decorations | ja / ja | 2.0 | NORMAL | workstation |
-| `skywatchastrolabe` | Objekt | SkyDecoObject |  | objects.decorations | objects.decorations | ja / ja | 25.0 | NORMAL | workstation |
-| `skywatchtelescope` | Objekt | SkyDecoObject |  | objects.decorations | objects.decorations | ja / ja | 25.0 | NORMAL | workstation |
+| `skyparcel` | Objekt | SkyDecoObject |  | objects.decorations | objects.decorations | ja / ja | 2.0 | NORMAL | carpenter |
+| `skywatchastrolabe` | Objekt | SkyDecoObject |  | objects.decorations | objects.decorations | ja / ja | 25.0 | NORMAL | carpenter |
+| `skywatchtelescope` | Objekt | SkyDecoObject |  | objects.decorations | objects.decorations | ja / ja | 25.0 | NORMAL | carpenter |
 | `spectralorerock` | Objekt | GhostDecoObject |  | objects.decorations | objects.decorations | nein / nein | 0.0 | NORMAL |  |
 | `spiraltree` | Objekt | SkyDecoObject |  | objects.decorations | objects.decorations | nein / nein | 0.0 | NORMAL |  |
 | `spiritwillow` | Objekt | GhostDecoObject |  | objects.decorations | objects.decorations | nein / nein | 0.0 | NORMAL |  |
@@ -361,7 +361,7 @@ in keiner Liste. Rezept-Station ist die Tech-ID (`workstation` = Werkbank,
 | `shrunkenheadtrophy` | Objekt | PaintingObject |  | objects.decorations.paintings | objects.decorations.paintings | ja / ja | 20.0 | RARE |  |
 | `skywatchbanner` | Objekt | PaintingObject |  | objects.decorations.paintings | objects.decorations.paintings | ja / ja | 80.0 | RARE |  |
 | `walleye` | Objekt | LargePaintingObject |  | objects.decorations.paintings | objects.decorations.paintings | ja / ja | 20.0 | EPIC |  |
-| `pottedcloudberry` | Objekt | PotTableDecorationObject |  | objects.decorations.pots | objects.decorations.pots | ja / ja | 20.0 | NORMAL | workstation |
+| `pottedcloudberry` | Objekt | PotTableDecorationObject |  | objects.decorations.pots | objects.decorations.pots | ja / ja | 20.0 | NORMAL | carpenter |
 | `barbedwirefence` | Objekt | BarbedWireFenceObject |  | objects.fencesandgates | objects.fencesandgates | ja / ja | 35.0 | NORMAL |  |
 | `cloudmarblefence` | Objekt | FenceObject |  | objects.fencesandgates | objects.fencesandgates | ja / ja | 2.0 | NORMAL | workstation |
 | `cloudmarblefencegate` | Objekt | FenceGateObject |  | objects.fencesandgates | objects.fencesandgates | ja / ja | 4.0 | NORMAL | workstation |
@@ -373,21 +373,21 @@ in keiner Liste. Rezept-Station ist die Tech-ID (`workstation` = Werkbank,
 | `salonbarberpole` | Objekt | SalonPoleObject |  | objects.furniture.salon | objects.furniture.salon | ja / ja | 25.0 | RARE |  |
 | `salonchair` | Objekt | SalonChairObject |  | objects.furniture.salon | objects.furniture.salon | ja / ja | 30.0 | RARE |  |
 | `salonsign` | Objekt | SalonSignObject |  | objects.furniture.salon | objects.furniture.salon | ja / ja | 30.0 | RARE |  |
-| `skywatchbed` | Objekt | BedObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 100.0 | NORMAL | workstation |
+| `skywatchbed` | Objekt | BedObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 100.0 | NORMAL | carpenter |
 | `skywatchbed2` | Objekt | Bed2Object |  | objects.furniture.skywatch | objects.furniture.skywatch | nein / nein (Teilstück) | 0.0 | NORMAL |  |
-| `skywatchbench` | Objekt | BenchObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 10.0 | NORMAL | workstation |
+| `skywatchbench` | Objekt | BenchObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 10.0 | NORMAL | carpenter |
 | `skywatchbench2` | Objekt | Bench2Object |  | objects.furniture.skywatch | objects.furniture.skywatch | nein / nein (Teilstück) | 0.0 | NORMAL |  |
-| `skywatchbookshelf` | Objekt | BookshelfObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 10.0 | NORMAL | workstation |
-| `skywatchcabinet` | Objekt | CabinetObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 10.0 | NORMAL | workstation |
-| `skywatchcandelabra` | Objekt | CandelabraObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 10.0 | NORMAL | workstation |
-| `skywatchchair` | Objekt | ChairObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 5.0 | NORMAL | workstation |
-| `skywatchclock` | Objekt | ClockObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 10.0 | NORMAL | workstation |
-| `skywatchdesk` | Objekt | DeskObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 10.0 | NORMAL | workstation |
-| `skywatchdinnertable` | Objekt | DinnerTableObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 20.0 | NORMAL | workstation |
+| `skywatchbookshelf` | Objekt | BookshelfObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 10.0 | NORMAL | carpenter |
+| `skywatchcabinet` | Objekt | CabinetObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 10.0 | NORMAL | carpenter |
+| `skywatchcandelabra` | Objekt | CandelabraObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 10.0 | NORMAL | carpenter |
+| `skywatchchair` | Objekt | ChairObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 5.0 | NORMAL | carpenter |
+| `skywatchclock` | Objekt | ClockObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 10.0 | NORMAL | carpenter |
+| `skywatchdesk` | Objekt | DeskObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 10.0 | NORMAL | carpenter |
+| `skywatchdinnertable` | Objekt | DinnerTableObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 20.0 | NORMAL | carpenter |
 | `skywatchdinnertable2` | Objekt | DinnerTable2Object |  | objects.furniture.skywatch | objects.furniture.skywatch | nein / nein (Teilstück) | 0.0 | NORMAL |  |
-| `skywatchdisplay` | Objekt | DisplayStandObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 20.0 | NORMAL | workstation |
-| `skywatchdresser` | Objekt | DresserObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 10.0 | NORMAL | workstation |
-| `skywatchmodulartable` | Objekt | ModularTableObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 10.0 | NORMAL | workstation |
+| `skywatchdisplay` | Objekt | DisplayStandObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 20.0 | NORMAL | carpenter |
+| `skywatchdresser` | Objekt | DresserObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 10.0 | NORMAL | carpenter |
+| `skywatchmodulartable` | Objekt | ModularTableObject |  | objects.furniture.skywatch | objects.furniture.skywatch | ja / ja | 10.0 | NORMAL | carpenter |
 | `coffinbed` | Objekt | BedObject |  | objects.furniture.twilight | objects.furniture.twilight | ja / ja | 100.0 | NORMAL |  |
 | `coffinbed2` | Objekt | Bed2Object |  | objects.furniture.twilight | objects.furniture.twilight | nein / nein (Teilstück) | 0.0 | NORMAL |  |
 | `electricchair` | Objekt | ChairObject |  | objects.furniture.twilight | objects.furniture.twilight | ja / ja | 5.0 | NORMAL |  |
@@ -397,14 +397,14 @@ in keiner Liste. Rezept-Station ist die Tech-ID (`workstation` = Werkbank,
 | `skullcandelabra` | Objekt | CandelabraObject |  | objects.furniture.twilight | objects.furniture.twilight | ja / ja | 10.0 | NORMAL |  |
 | `twilightcauldron` | Objekt | SkyDecoObject |  | objects.furniture.twilight | objects.furniture.twilight | ja / ja | 20.0 | NORMAL |  |
 | `twilightsarcophagus` | Objekt | SarcophagusObject |  | objects.furniture.twilight | objects | ja / ja | 50.0 | EPIC |  |
-| `aurorashards` | Objekt | SkyDecoObject | objects.decorations | **objects.landscaping.crystals** | objects.landscaping.crystals | ja / ja | 5.0 | NORMAL | workstation |
-| `chargecrystal` | Objekt | SkyDecoObject | objects.decorations | **objects.landscaping.crystals** | objects.landscaping.crystals | ja / ja | 5.0 | NORMAL | workstation |
-| `starfall` | Objekt | SkyDecoObject | objects.decorations | **objects.landscaping.crystals** | objects.landscaping.crystals | ja / ja | 10.0 | NORMAL | workstation |
+| `aurorashards` | Objekt | SkyDecoObject | objects.decorations | **objects.landscaping.crystals** | objects.landscaping.crystals | ja / ja | 5.0 | NORMAL |  |
+| `chargecrystal` | Objekt | SkyDecoObject | objects.decorations | **objects.landscaping.crystals** | objects.landscaping.crystals | ja / ja | 5.0 | NORMAL |  |
+| `starfall` | Objekt | SkyDecoObject | objects.decorations | **objects.landscaping.crystals** | objects.landscaping.crystals | ja / ja | 10.0 | NORMAL |  |
 | `brokenangel` | Objekt | StatueObject |  | objects.landscaping.masonry | objects.landscaping.masonry | nein / nein | 0.0 | NORMAL |  |
-| `gloomravenstatue` | Objekt | StatueObject |  | objects.landscaping.masonry | objects.landscaping.masonry | ja / ja | 20.0 | NORMAL | workstation |
+| `gloomravenstatue` | Objekt | StatueObject |  | objects.landscaping.masonry | objects.landscaping.masonry | ja / ja | 20.0 | NORMAL | carpenter |
 | `mournerstatue` | Objekt | StatueObject |  | objects.landscaping.masonry | objects.landscaping.masonry | nein / nein | 0.0 | NORMAL |  |
-| `seraphstatue` | Objekt | StatueObject |  | objects.landscaping.masonry | objects.landscaping.masonry | ja / ja | 40.0 | NORMAL | workstation |
-| `skywatchrubble` | Objekt | SkyDecoObject | objects.decorations | **objects.landscaping.masonry** | objects.landscaping.masonry | ja / ja | 2.0 | NORMAL | workstation |
+| `seraphstatue` | Objekt | StatueObject |  | objects.landscaping.masonry | objects.landscaping.masonry | ja / ja | 40.0 | NORMAL | carpenter |
+| `skywatchrubble` | Objekt | SkyDecoObject | objects.decorations | **objects.landscaping.masonry** | objects.landscaping.masonry | ja / ja | 2.0 | NORMAL |  |
 | `auroralily` | Objekt | GrassObject |  | objects.landscaping.plants | objects.landscaping.plants | ja / ja | 1.0 | NORMAL |  |
 | `cloudbell` | Objekt | GrassObject |  | objects.landscaping.plants | objects.landscaping.plants | ja / ja | 1.0 | NORMAL |  |
 | `cloudberrybush` | Objekt | FruitBushObject |  | objects.landscaping.plants | objects | nein / ja | 0.0 | NORMAL |  |
@@ -420,7 +420,7 @@ in keiner Liste. Rezept-Station ist die Tech-ID (`workstation` = Werkbank,
 | `ghostlily` | Objekt | GhostPlantObject |  | objects.landscaping.plants | objects.landscaping.plants | nein / nein | 0.0 | NORMAL |  |
 | `ghostmushroom` | Objekt | SteinfeldPlantObject |  | objects.landscaping.plants | objects.landscaping.plants | nein / nein | 0.0 | NORMAL |  |
 | `giantfigtree` | Objekt | FruitTreeObject |  | objects.landscaping.plants | objects | ja / ja | 100.0 | NORMAL |  |
-| `gloomwillow` | Objekt | SkyDecoObject |  | objects.landscaping.plants | objects.landscaping.plants | ja / ja | 15.0 | NORMAL | workstation |
+| `gloomwillow` | Objekt | SkyDecoObject |  | objects.landscaping.plants | objects.landscaping.plants | ja / ja | 15.0 | NORMAL | carpenter |
 | `glowfern` | Objekt | GrassObject |  | objects.landscaping.plants | objects.landscaping.plants | ja / ja | 1.0 | NORMAL |  |
 | `knowledgetree` | Objekt | DryadTreeObject |  | objects.landscaping.plants | objects | ja / ja | 100.0 | NORMAL |  |
 | `mourningrose` | Objekt | GhostPlantObject |  | objects.landscaping.plants | objects.landscaping.plants | nein / nein | 0.0 | NORMAL |  |
@@ -450,7 +450,7 @@ in keiner Liste. Rezept-Station ist die Tech-ID (`workstation` = Werkbank,
 | `widowflower` | Objekt | SteinfeldPlantObject |  | objects.landscaping.plants | objects.landscaping.plants | nein / nein | 0.0 | NORMAL |  |
 | `widowvine` | Objekt | GhostPlantObject |  | objects.landscaping.plants | objects.landscaping.plants | nein / nein | 0.0 | NORMAL |  |
 | `witheredtuft` | Objekt | SteinfeldPlantObject |  | objects.landscaping.plants | objects.landscaping.plants | nein / nein | 0.0 | NORMAL |  |
-| `withershrub` | Objekt | SkyDecoObject | objects.decorations | **objects.landscaping.plants** | objects.landscaping.plants | ja / ja | 2.0 | NORMAL | workstation |
+| `withershrub` | Objekt | SkyDecoObject | objects.decorations | **objects.landscaping.plants** | objects.landscaping.plants | ja / ja | 2.0 | NORMAL |  |
 | `aetheriumrock` | Objekt | RockOreObject |  | objects.landscaping.rocksandores | objects.landscaping.rocksandores | ja / ja | 0.0 | NORMAL |  |
 | `aurorabloom` | Objekt | CrystalClusterObject |  | objects.landscaping.rocksandores | objects.landscaping.rocksandores | ja / ja | 30.0 | NORMAL |  |
 | `evilwall` | Objekt | RockObject |  | objects.landscaping.rocksandores | objects.landscaping.rocksandores | ja / ja | 0.0 | NORMAL |  |
@@ -460,18 +460,18 @@ in keiner Liste. Rezept-Station ist die Tech-ID (`workstation` = Werkbank,
 | `prismshardrock` | Objekt | RockOreObject |  | objects.landscaping.rocksandores | objects.landscaping.rocksandores | ja / ja | 0.0 | NORMAL |  |
 | `skystonerock` | Objekt | RockObject |  | objects.landscaping.rocksandores | objects.landscaping.rocksandores | ja / ja | 0.0 | NORMAL |  |
 | `stormcrystal` | Objekt | CrystalClusterObject |  | objects.landscaping.rocksandores | objects.landscaping.rocksandores | ja / ja | 0.0 | NORMAL |  |
-| `stormscreed` | Objekt | SkyDecoObject | objects.decorations | **objects.landscaping.rocksandores** | objects.landscaping.rocksandores | ja / ja | 2.0 | NORMAL | workstation |
+| `stormscreed` | Objekt | SkyDecoObject | objects.decorations | **objects.landscaping.rocksandores** | objects.landscaping.rocksandores | ja / ja | 2.0 | NORMAL |  |
 | `veilrock` | Objekt | RockObject |  | objects.landscaping.rocksandores | objects.landscaping.rocksandores | ja / ja | 0.0 | NORMAL |  |
 | `saloncashregister` | Objekt | SalonTableObject |  | objects.landscaping.tabledecorations | objects.landscaping.tabledecorations | ja / ja | 30.0 | RARE |  |
 | `salonproducts` | Objekt | SalonTableObject |  | objects.landscaping.tabledecorations | objects.landscaping.tabledecorations | ja / ja | 20.0 | RARE |  |
-| `skywatchcandle` | Objekt | TableDecorationObject |  | objects.landscaping.tabledecorations | objects.landscaping.tabledecorations | ja / ja | 20.0 | NORMAL | workstation |
-| `skywatchchalice` | Objekt | TableDecorationObject |  | objects.landscaping.tabledecorations | objects.landscaping.tabledecorations | ja / ja | 20.0 | NORMAL | workstation |
-| `skywatchtome` | Objekt | TableDecorationObject |  | objects.landscaping.tabledecorations | objects.landscaping.tabledecorations | ja / ja | 20.0 | NORMAL | workstation |
+| `skywatchcandle` | Objekt | TableDecorationObject |  | objects.landscaping.tabledecorations | objects.landscaping.tabledecorations | ja / ja | 20.0 | NORMAL | carpenter |
+| `skywatchchalice` | Objekt | TableDecorationObject |  | objects.landscaping.tabledecorations | objects.landscaping.tabledecorations | ja / ja | 20.0 | NORMAL | carpenter |
+| `skywatchtome` | Objekt | TableDecorationObject |  | objects.landscaping.tabledecorations | objects.landscaping.tabledecorations | ja / ja | 20.0 | NORMAL | carpenter |
 | `thingbox` | Objekt | TableDecorationObject |  | objects.landscaping.tabledecorations | objects.landscaping.tabledecorations | ja / ja | 20.0 | NORMAL |  |
 | `flickerlightgarland` | Objekt | SkyWallLightObject |  | objects.lighting | objects.lighting | ja / ja | 50.0 | NORMAL |  |
-| `ghostlantern` | Objekt | StreetlampObject |  | objects.lighting | objects.lighting | ja / ja | 30.0 | NORMAL | workstation |
-| `mistglasslantern` | Objekt | SkyWallLightObject |  | objects.lighting | objects.lighting | ja / ja | 10.0 | NORMAL | workstation |
-| `wardencandelabra` | Objekt | StreetlampObject |  | objects.lighting | objects.lighting | ja / ja | 30.0 | NORMAL | workstation |
+| `ghostlantern` | Objekt | StreetlampObject |  | objects.lighting | objects.lighting | ja / ja | 30.0 | NORMAL | carpenter |
+| `mistglasslantern` | Objekt | SkyWallLightObject |  | objects.lighting | objects.lighting | ja / ja | 10.0 | NORMAL | carpenter |
+| `wardencandelabra` | Objekt | StreetlampObject |  | objects.lighting | objects.lighting | ja / ja | 30.0 | NORMAL | carpenter |
 | `bossportalcrookedbeyond` | Objekt | BossPortalObject |  | objects.misc | objects.misc | nein / nein | 0.0 | NORMAL |  |
 | `bossportaleden` | Objekt | BossPortalObject |  | objects.misc | objects.misc | nein / nein | 0.0 | NORMAL |  |
 | `bossportalghostrealm` | Objekt | BossPortalObject |  | objects.misc | objects.misc | nein / nein | 0.0 | NORMAL |  |

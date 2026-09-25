@@ -554,7 +554,7 @@ Kostüme: `twilightsuit` (Zwielicht-Perücke, Gestreifter Jenseits-Anzug, Abgewe
 | Krumm: `oddwood` Seltsamholz, `warpresin` Krümmungsharz, `strangefabric` Seltsamer Stoff, `eyeseed` Augensamen, `stripedshell` Gestreifter Panzer, `realityshard` Realitätssplitter | „Ein Stück Holz, das in die falsche Richtung gewachsen ist." · „Klebriger Beweis dafür, dass Wirklichkeit auslaufen kann." · „Stoff, dessen Muster nicht stillhalten will." · „Er beobachtet, wo er besser nicht wachsen sollte." · „Ein harter Panzer in unmöglichen Streifen." · „Ein scharfer Splitter einer Regel, der die Welt nicht mehr folgt." | Krumme Objekte/Mobs/Kisten, Höllen-Mobs | Knott-Quest, Krummer + Höllen-Schlüssel, Knott kauft; **kein Rezept; Gestreifter Panzer ohne jede Verwendung** |
 | Trophäen `skystoneheart` Himmelsstein-Herz, `bloomfang` Blütenzahn, `mourningband` Trauerflor, `soulcollar` Seelenhalsband, `stripedhorn` Gestreiftes Horn | „Trophäe - … Magpie zahlt über Wert." | Golem 12 %, Blütenrachen, Steinerner Trauernder 12 %, Trauerbraut 12 %, Türmimik 20 %; Schatzorte | nur Verkauf an Magpie |
 | `aetherwrightcasing` | Ätherwerker-Gehäuse | „Eine gefräste Hülle, die Ladung hält. Vane weiß, was damit anzufangen ist." | Testgelände 2–4, Prototyp Neun 1–2 | Himmelslanze (3×) |
-| `bloodvial` | Blutfläschchen | „Kreaturenbeute - vor einer Stunde hat das noch gegrast. Noch warm, und darüber redet niemand gern." | Dorians Jagd, Blutknecht | **keine** |
+| `bloodvial` | Blutfläschchen | „Kreaturenbeute - vor einer Stunde hat das noch gegrast. Noch warm, und darüber redet niemand gern." | Dorians Jagd, Blutknecht, Alchemietisch (rohes Fleisch + Glasflasche) | Alchemietisch |
 
 ### 5.5 Schlüssel- und Quest-Items
 
