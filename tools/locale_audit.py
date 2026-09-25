@@ -822,8 +822,10 @@ VANILLA_LOCALE_KEYS = {
     # 2026-09-23: [ui] searchtip=Search / Suchen (en:6244, de:5918), the tip
     # vanilla's own search boxes show; PickupFilterForm reuses it.
     ("ui", "searchtip"),
-    # [mob] stylisthuman=Stylist / Stilistin (en:3626, de:3623). SalonWares
-    # re-registers vanilla's Stylist under her own ID and keeps her own name.
+    # [mob] stylisthuman=Stylist / Stilistin (en:3626, de:3623; 1.3.3 client
+    # en:3626, de:3627, rechecked 2026-09-25). SalonWares re-registers
+    # vanilla's Stylist under her own ID and keeps her own name - our .lang
+    # files must NOT add the key, or they would override the game's name.
     ("mob", "stylisthuman"),
     # [itemtooltip] rclickinvopentip="[input=-99] in inventory to open" /
     # "... im Inventar zum Öffnen" (1.3.2 locale en:3095, de:3093), the line
