@@ -136,15 +136,34 @@ public class JournalCommand extends ModularChatCommand {
 
         // The Warden's steps must each say what, why and for what, in both
         // languages -- the English-only check above cannot see a German gap.
-        int warden = 0;
+        int[] warden = explained(back, LegacyQuestSource.WARDEN_STEPS);
+        // The probe proves the German check can fail at all: a key de.lang
+        // has must read present, one nobody wrote must read absent.
+        boolean probe = !germanMissing(new necesse.engine.localization.message.LocalMessage("journal", "whylabel"))
+                && germanMissing(new necesse.engine.localization.message.LocalMessage("journal", "no10nprobe"));
+        logs.add("journal warden: reader=" + who + " steps=" + warden[0] + "/" + LegacyQuestSource.WARDEN_STEPS.size()
+                + " complete=" + warden[1] + " missingde=" + warden[2] + " probe=" + (probe ? "OK" : "FAIL"));
+        // The same for the village residents' ladder steps.
+        java.util.Set<String> ladderIDs = stairwaytoheaven.quest.ladder.QuestLadderSource.EXPLAINED_STEPS;
+        int[] ladder = explained(back, ladderIDs);
+        logs.add("journal ladder: reader=" + who + " steps=" + ladder[0] + "/" + ladderIDs.size()
+                + " complete=" + ladder[1] + " missingde=" + ladder[2]);
+    }
+
+    /**
+     * Counts the steps in {@code ids} and how many say title, description, why,
+     * opens and reward in English and German: {steps, complete, missingDe}.
+     */
+    private static int[] explained(JournalBook book, java.util.Set<String> ids) {
+        int steps = 0;
         int complete = 0;
         int missingDe = 0;
-        for (JournalChapter chapter : back.chapters) {
+        for (JournalChapter chapter : book.chapters) {
             for (JournalStep step : chapter.steps) {
-                if (!LegacyQuestSource.WARDEN_STEPS.contains(step.id)) {
+                if (!ids.contains(step.id)) {
                     continue;
                 }
-                warden++;
+                steps++;
                 boolean whole = true;
                 for (GameMessage part : new GameMessage[] {step.title, step.description, step.why, step.opens, step.reward}) {
                     if (part == null || part.isMissingKey(Localization.English)) {
@@ -160,12 +179,7 @@ public class JournalCommand extends ModularChatCommand {
                 }
             }
         }
-        // The probe proves the German check can fail at all: a key de.lang
-        // has must read present, one nobody wrote must read absent.
-        boolean probe = !germanMissing(new necesse.engine.localization.message.LocalMessage("journal", "whylabel"))
-                && germanMissing(new necesse.engine.localization.message.LocalMessage("journal", "no10nprobe"));
-        logs.add("journal warden: reader=" + who + " steps=" + warden + "/" + LegacyQuestSource.WARDEN_STEPS.size()
-                + " complete=" + complete + " missingde=" + missingDe + " probe=" + (probe ? "OK" : "FAIL"));
+        return new int[] {steps, complete, missingDe};
     }
 
     /**

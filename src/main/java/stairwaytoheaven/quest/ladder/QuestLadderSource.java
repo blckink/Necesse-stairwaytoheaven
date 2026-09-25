@@ -57,6 +57,18 @@ public final class QuestLadderSource implements JournalStepSource {
         REPLACED.add("crookeddoor");
     }
 
+    /**
+     * Ladder steps of the village's quest residents (Eveleen, Ives, Mortimer,
+     * Caspern, Eleanor, Mr. Knott), by step ID. Each carries a
+     * {@code journal.why<stem>} and a {@code journal.opens<stem>} line, and
+     * {@code /swhjournal} counts that they do, in both languages.
+     */
+    public static final Set<String> EXPLAINED_STEPS = new java.util.LinkedHashSet<>(java.util.Arrays.asList(
+            "swh_edenreach", "swh_edenplants", "swh_steinfeldvigil", "swh_ladder_steps",
+            "swh_mortimerrites", "swh_caspernforge", "swh_eleanor", "swh_ladder_memory",
+            "swh_ladder_shrouds", "swh_crookedarrival", "swh_crookeddoor", "swh_ladder_seeds",
+            "swh_ladder_shells"));
+
     private final LegacyQuestSource legacy = new LegacyQuestSource();
 
     @Override
@@ -103,6 +115,16 @@ public final class QuestLadderSource implements JournalStepSource {
         js.where = new LocalMessage("misc", step.targetKey());
         js.reward = new LocalMessage("quests", step.rewardKey());
         js.worldScoped = step.isWorldScoped();
+        if (EXPLAINED_STEPS.contains(step.id)) {
+            // Built keys, like LegacyQuestSource.explain for the Warden's steps;
+            // tools/locale_audit.py notes them as runtime-built, and
+            // /swhjournal checks each in en and de.
+            String stem = step.id.replace("_", "");
+            String whyKey = "why" + stem;
+            String opensKey = "opens" + stem;
+            js.why = new LocalMessage("journal", whyKey);
+            js.opens = new LocalMessage("journal", opensKey);
+        }
 
         QuestLadder.Status status = ctx.client != null
                 ? QuestLadder.status(ctx.client, step)

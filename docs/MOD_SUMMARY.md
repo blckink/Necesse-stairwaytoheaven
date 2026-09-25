@@ -386,7 +386,9 @@ Garten Eden, Steinfeld, Geisterreich, Krummes Jenseits, Hölle — jeweils mit
   (mit „Belohnung erhalten: …"). Dazu **von wem** und **wo diese Person
   wohnt**, und „(gilt für alle in dieser Welt)" bei allem, was welt- statt
   spielerbezogen ist. **Jede Quest des Wächters** (Turm finden, Anheuern,
-  Katzen, Anker, Geisterkreide, die sechs Region-Schlüssel) sagt außerdem
+  Katzen, Anker, Geisterkreide, die sechs Region-Schlüssel) und jede
+  Leiter-Stufe der Dorfbewohner Eveleen, Ives, Mortimer, Caspern, Eleanor und
+  Mr. Knott sagt außerdem
   **„Warum:"** (wozu du das bauen/holen sollst) und **„Schaltet frei:"** (was
   danach aufgeht) — Spielerbefund 2026-09-24: „man checkt null warum man was
   jetzt bauen muss und was es macht".

@@ -510,6 +510,11 @@ grep -qE "journal book: reader=world chapters=6 steps=[1-9][0-9]* bytes=[1-9][0-
 grep -qE "journal warden: reader=world steps=11/11 complete=11 missingde=0 probe=OK" "$LOG1" \
     || { echo "FAIL: a Warden step lacks its why/opens/reward text, or a German line is missing"; \
          grep -E "journal warden:|journal missing German" "$LOG1"; STATUS=1; }
+# The same for the village residents' ladder steps (Eveleen, Ives, Mortimer,
+# Caspern, Eleanor, Mr. Knott). Task Die-2c97e6, 2026-09-25.
+grep -qE "journal ladder: reader=world steps=13/13 complete=13 missingde=0" "$LOG1" \
+    || { echo "FAIL: a village ladder step lacks its why/opens/reward text, or a German line is missing"; \
+         grep -E "journal ladder:|journal missing German" "$LOG1"; STATUS=1; }
 grep -qF "journal check: FAIL" "$LOG1" "$LOG3" \
     && { echo "FAIL: /swhjournal threw"; STATUS=1; }
 # After /swhreset quests the book must read as the start of the story: the

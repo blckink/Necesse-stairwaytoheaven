@@ -21,6 +21,15 @@ All notable changes to this project are documented here. Format loosely follows
   was neither registered nor sold.
 
 ### Changed
+- **Why / Opens for the village's quest residents / Warum und Schaltet frei
+  für die Dorfbewohner**: the journal's 13 ladder steps given by Eveleen,
+  Ives, Mortimer, Caspern, Eleanor and Mr. Knott now say why they ask and what
+  finishing opens (free recruitment, their next step, which chapter waits for
+  it; Eleanor's does not gate), en + de, like the Warden's steps.
+  `/swhjournal` prints `journal ladder: ... steps=13/13 complete=13
+  missingde=0` and the integration test requires it. Magpie, Halda and
+  Ossian's seven steps have no such lines yet.
+
 - **Twilight outfit icons measured / Outfit-Icons vermessen**: all 33 item
   icons of the Twilight Merchant's outfits now have a row in
   `tools/size_audit.py` against a vanilla icon (pumpkinmask, shirt,
