@@ -28,8 +28,11 @@ All notable changes to this project are documented here. Format loosely follows
   were moved down, pixel for pixel, so chests end at y 28 and shoes at y 24
   like vanilla's: skeleton, screamrobe and widowgown chest; twilightsuit,
   skeleton, dreamstalker, screamrobe, pumpkinscarecrow and hauntedpuppet boots.
-  Nine icons stay too small for the vanilla band and need a redraw; they are
-  flagged by the audit (see `docs/art/briefs/wearables.md`).
+  The nine that were too small for the vanilla band are redrawn as full
+  flat-lays (28 px wide, 0.80–1.07 of vanilla mass): dreamstalker sweater
+  and trousers, hockeyslasher jacket and trousers, twilightsuit jacket and
+  shoes, skeleton ribcage shirt, grinclown ruffled trousers, hauntedpuppet
+  rainbow shirt under denim overalls. The audit flags none of the 33 now.
 - **NPC prices cut / NPC-Preise gesenkt**: the Therapist's trait swap costs
   5 000 coins instead of 50 000. Recruit fees: Warden 30 000 → 8 000, Knott
   22 000 → 5 000, Caspern 14 000 → 4 000, Ives and Dorian 11 000 → 3 000,

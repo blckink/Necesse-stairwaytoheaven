@@ -48,6 +48,14 @@ dark, gothic, Beetlejuice/Addams — but still readable on a dark floor.
 
 ## Lessons (newest first — append, do not rewrite)
 
+- 2026-09-25 · **Name costume colours from the worn sheet, not from memory.**
+  Nine outfit item icons came back right in size on the first pass with hard
+  numbers per kind, but the puppet shirt was red/white/blue because the brief
+  said so — the worn sheet is rainbow. Hand the worn front cell as a ref AND
+  read its colours before writing them into the brief. Black items (striped
+  shoes) need a dark grey-purple body and a light rim, or they vanish on a dark
+  inventory slot.
+
 - 2026-09-25 · **Large wall pieces: give the box, not only the mass.** The
   2026-09-17 shrunken heads were drawn 60 px tall from one nail; on the 28 px
   wall face that left 10 px blobs, so the piece never shipped. Stating
