@@ -4888,7 +4888,10 @@ ist ... Sichtfeld wenn ich stehen bleibe ... wie auf Oberwelt von Vanilla"*.
 - **Fix:** `SkySpawnRules.outOfSight` — with a live `client`, no player within
   `SIGHT_RANGE = 1100` px (half a 1080p diagonal, above every uplifted aggro but
   the Mistserpent's 2560). Used by `daylightSpawn` and `EdenSpawnRules.gardenSpawn`.
-  A rejected draw is a failed attempt (engine retries at half cost), so pressure
-  drops rather than relocating. `client == null` callers (generation,
+  A rejected draw is a failed attempt (engine retries at half cost), so by day
+  pressure drops (roughly to two thirds) rather than relocating. By night the
+  engine's `withoutRandomMob` loop hands a rejected inner-ring draw to the
+  entries without this rule (Galehound, vanilla `HostileMob` rule, aggro 640 <
+  700), so night composition near the player may skew toward Galehounds. `client == null` callers (generation,
   `/skyreachstatus` probes) are unchanged. HYPOTHESIS until played: the
   integration test runs without a connected player, so it cannot exercise it.
