@@ -272,6 +272,12 @@ the settlement bounds, so vanilla's hunting job would kill the player's own
 livestock. The node walks him to a non-hostile, non-human mob **outside** the
 settlement rectangle, within 640px, and drains it: always a Blood Vial, 40% of
 the time some raw meat — an animal he has emptied is worth less at the table.
+The loot goes **straight into the settlement's storage** (2026-09-25, player
+decision; IMPLEMENTED — awaiting player confirmation): highest priority chest
+first, each chest's filter respected, the add copied from vanilla's
+`StorageDropOff.addItem`. What no chest takes lands at the settlement flag;
+only without a settlement does it stay at the kill. Before, it lay where the
+animal stood, out past the walls, and read as "the hunt brings nothing".
 Hard limit worth knowing: only mobs in loaded regions exist, so "around the
 base" means the loaded ring, not the map.
 

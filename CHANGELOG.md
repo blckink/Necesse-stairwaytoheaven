@@ -21,6 +21,12 @@ All notable changes to this project are documented here. Format loosely follows
   was neither registered nor sold.
 
 ### Changed
+- **Dorian's hunt loot goes to storage / Dorians Jagdbeute kommt ins Lager**:
+  the Blood Vial (and the occasional raw mutton) from a night drain is put
+  straight into the settlement's storage — highest priority first, chest
+  filters respected — instead of on the grass where the animal stood, out
+  past the walls. What no chest takes is dropped at the settlement flag.
+
 - **Why / Opens for the village's quest residents / Warum und Schaltet frei
   für die Dorfbewohner**: the journal's 13 ladder steps given by Eveleen,
   Ives, Mortimer, Caspern, Eleanor and Mr. Knott now say why they ask and what

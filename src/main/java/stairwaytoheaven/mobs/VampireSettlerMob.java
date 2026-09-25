@@ -389,7 +389,8 @@ public class VampireSettlerMob extends SkySettlerMob {
      * no weapon of his own, and a drained animal is meant to leave a different
      * body than a butchered one. The animal is removed and the loot is written
      * here — a blood vial always, and only sometimes the meat, because an
-     * animal he has emptied is worth less at the table.
+     * animal he has emptied is worth less at the table. Both go into the
+     * settlement's storage ({@link #dropAt}).
      */
     public void drain(Mob prey) {
         Level level = this.getLevel();
@@ -430,8 +431,53 @@ public class VampireSettlerMob extends SkySettlerMob {
         this.bubble("vampiredrained");
     }
 
-    private static void dropAt(Level level, Mob at, InventoryItem item) {
-        level.entityManager.pickups.add(new ItemPickupEntity(level, item, at.x, at.y, 0.0F, 0.0F));
+    /**
+     * The loot goes home, not onto the grass where the animal stood.
+     *
+     * <p>Player decision 2026-09-25: a vial left at the kill site, out in the
+     * dark past the walls, read in game as "the hunt never brings anything".
+     * So the loot is put straight into the settlement's storage, the way a
+     * hauler would (the add below is {@code StorageDropOff.addItem}'s, VERIFIED
+     * [jar]): highest priority first, and only what each chest's filter lets
+     * in. What no chest takes — no storage, all full, vials filtered out — is
+     * dropped at the settlement flag, where it is seen and hauled like any
+     * pickup. Only a settler without a settlement drops it at the kill.
+     */
+    private void dropAt(Level level, Mob at, InventoryItem item) {
+        necesse.level.maps.levelData.settlementData.ServerSettlementData data =
+                this.levelSettler != null ? this.levelSettler.data : null;
+        float x = at.x;
+        float y = at.y;
+        if (data != null) {
+            java.util.List<necesse.level.maps.levelData.settlementData.SettlementInventory> storage =
+                    new java.util.ArrayList<>(data.storageManager.getStorage());
+            storage.sort((a, b) -> Integer.compare(b.priority, a.priority));
+            for (necesse.level.maps.levelData.settlementData.SettlementInventory inv : storage) {
+                if (item.getAmount() <= 0) {
+                    return;
+                }
+                necesse.inventory.InventoryRange range = inv.getInventoryRange();
+                if (range == null) {
+                    continue;
+                }
+                int addAmount = inv.getFilter() == null ? item.getAmount()
+                        : Math.min(inv.getFilter().getAddAmount(level, item, range, true), item.getAmount());
+                if (addAmount <= 0) {
+                    continue;
+                }
+                InventoryItem add = item.copy(addAmount);
+                range.inventory.addItem(level, null, add, range.startSlot, range.endSlot, "hauljob", null);
+                item.setAmount(item.getAmount() - (addAmount - add.getAmount()));
+            }
+            if (item.getAmount() <= 0) {
+                return;
+            }
+            if (data.networkData.hasFlag()) {
+                x = data.networkData.getTileX() * 32 + 16;
+                y = data.networkData.getTileY() * 32 + 16;
+            }
+        }
+        level.entityManager.pickups.add(new ItemPickupEntity(level, item, x, y, 0.0F, 0.0F));
     }
 
     // --- persistence ------------------------------------------------------
