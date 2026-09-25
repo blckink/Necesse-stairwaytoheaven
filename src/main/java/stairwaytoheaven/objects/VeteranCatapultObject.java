@@ -52,6 +52,8 @@ public class VeteranCatapultObject extends GameObject {
     private final int multiX;
     private final int multiY;
     private final int[] multiIDs;
+    /** This piece's share of {@link #FULL_COLLISION_NS}; the east/west share is {@code collision}. */
+    private final Rectangle collisionNS;
 
     /**
      * The machine as drawn, in footprint pixels (0,0 = top-left tile of the
@@ -60,29 +62,41 @@ public class VeteranCatapultObject extends GameObject {
      *
      * <p>Idle extents, footprint coordinates (cell y minus the 32 px overhang):
      * north x 4..91 y -9..94, east x 5..91 y 37..94, south x 2..94 y -8..94,
-     * west x 5..91 y 37..94. The box has to serve all four at once: the
-     * footprint is square, {@link StaticMultiTile} keeps it unrotated, and
-     * {@code GameObject} reads the rectangle once in the constructor, so it
-     * cannot differ per rotation.
+     * west x 5..91 y 37..94. North and south are a different machine seen
+     * end-on: wheels and carriage start at y=16, only the barrel (x 38..57)
+     * rises above that.
      *
-     * <p>Hence x 5..91 — the width the cannon actually has in every rotation,
-     * 14 px wider than the catapult's box. The top tile row stays open even
-     * though north and south now draw into it: east and west have nothing
-     * above y=37, and an invisible wall in front of visible floor reads worse
-     * than a barrel the player can walk under. Vanilla insets the same way
-     * ({@code BlacksmithStatueObject} blocks 80x54 of its 96x64).
+     * <p>So the box follows the placement rotation: {@link #getCollision}
+     * gets it, and {@code placeObject} hands the master's rotation to all
+     * nine pieces. Both boxes keep x 5..91, the width the cannon has in every
+     * rotation. East/west ({@link #FULL_COLLISION}) leave the top tile row
+     * open — nothing is drawn above y=37, and an invisible wall in front of
+     * visible floor reads worse than a barrel the player can walk under.
+     * North/south ({@link #FULL_COLLISION_NS}) start at y=16, where the
+     * wheels do; the barrel tip above stays walk-under. Until 2026-09-25 both
+     * used the east/west box, and the player walked into the north/south
+     * wheels. Vanilla insets the same way ({@code BlacksmithStatueObject}
+     * blocks 80x54 of its 96x64).
+     *
+     * <p>The collision follows the placement rotation, not the aim row the
+     * sprite swings to after a shot: a box that turned with the barrel would
+     * close around a player standing next to it. {@code isSolid} and the
+     * region type are read once in the constructor and stay as the east/west
+     * box sets them, so the top row counts as open ground for regions.
      */
     private static final Rectangle FULL_COLLISION = new Rectangle(5, 32, 86, 64);
+    private static final Rectangle FULL_COLLISION_NS = new Rectangle(5, 16, 86, 80);
 
     /**
-     * This piece's share of {@link #FULL_COLLISION}, in its own tile's
-     * coordinates — the split {@code StaticMultiObject} does. The three
-     * top-row pieces intersect the box at zero height, so they keep a
-     * degenerate rectangle, {@code GameObject} leaves their {@code isSolid}
-     * false and the bare top row stays walkable; the six pieces below block.
+     * This piece's share of a full box, in its own tile's
+     * coordinates — the split {@code StaticMultiObject} does. Against the
+     * east/west box the three top-row pieces intersect at zero height, so
+     * they keep a degenerate rectangle, {@code GameObject} leaves their
+     * {@code isSolid} false and the bare top row stays walkable; the six
+     * pieces below block. Against the north/south box they block y 16..32.
      */
-    private static Rectangle pieceCollision(int multiX, int multiY) {
-        Rectangle piece = FULL_COLLISION.intersection(new Rectangle(multiX * 32, multiY * 32, 32, 32));
+    private static Rectangle pieceCollision(Rectangle full, int multiX, int multiY) {
+        Rectangle piece = full.intersection(new Rectangle(multiX * 32, multiY * 32, 32, 32));
         if (piece.width < 0) {
             piece.width = 0;
         }
@@ -98,9 +112,10 @@ public class VeteranCatapultObject extends GameObject {
         // Through the constructor, not after it: GameObject reads the
         // rectangle to set isSolid and regionType and never looks again, so
         // assigning isSolid later left every piece walk-through.
-        super(pieceCollision(multiX, multiY));
+        super(pieceCollision(FULL_COLLISION, multiX, multiY));
         this.multiX = multiX;
         this.multiY = multiY;
+        this.collisionNS = pieceCollision(FULL_COLLISION_NS, multiX, multiY);
         this.multiIDs = multiIDs;
         this.mapColor = new Color(110, 95, 70);
         this.isLightTransparent = true;
@@ -144,6 +159,12 @@ public class VeteranCatapultObject extends GameObject {
     @Override
     public ObjectEntity getNewObjectEntity(Level level, int x, int y) {
         return this.isMaster() ? new VeteranCatapultObjectEntity(level, this.getStringID(), x, y) : null;
+    }
+
+    @Override
+    protected Rectangle getCollision(Level level, int x, int y, int rotation) {
+        Rectangle piece = (rotation & 1) == 0 ? this.collisionNS : this.collision;
+        return new Rectangle(x * 32 + piece.x, y * 32 + piece.y, piece.width, piece.height);
     }
 
     /**
