@@ -17,6 +17,8 @@ import necesse.entity.mobs.ai.behaviourTree.trees.HumanAI;
 import necesse.entity.mobs.ai.behaviourTree.util.AIMover;
 import necesse.entity.mobs.friendly.human.HumanMob;
 import necesse.entity.mobs.friendly.human.humanShop.HumanShop;
+import necesse.entity.mobs.friendly.human.humanShop.ShopContainerData;
+import necesse.entity.mobs.friendly.human.humanShop.ShopManager;
 import necesse.entity.mobs.job.FoundJob;
 import necesse.entity.mobs.job.JobFinder;
 import necesse.entity.mobs.job.JobSequence;
@@ -496,6 +498,48 @@ public abstract class SkySettlerMob extends HumanShop {
     @Override
     public boolean startInRecruitForm(ServerClient client) {
         return !this.isSettler();
+    }
+
+    /** True only while {@link #getShopContainerData} builds a locked window. */
+    private boolean shopClosedForThisWindow;
+
+    /**
+     * No trade before this resident's chapter is open for this player
+     * (Kevin, 2026-09-25: "Handel erst freischalten, wenn das Kapitel ihres
+     * ersten Auftrags offen ist"). The recruit page's Back — Circle on a
+     * controller — leads to the plain dialogue, and that is where vanilla puts
+     * Trade ({@code ShopContainerForm}:153); a wait bubble alone never closed it.
+     *
+     * <p>Vanilla's own "no shop" path does the closing: with {@link #getShop}
+     * null, {@code HumanShop.getShopContainerData} sends no wares and the
+     * server-side container gets no {@code ShopManager}, so neither buying nor
+     * selling works. Keyed on {@code QuestLadder.chapterOpen}, which only ever
+     * opens — never on the wait bubble, which comes back in later chapters.
+     * Residents who already live in a settlement keep trading as before.
+     */
+    @Override
+    public ShopContainerData getShopContainerData(ServerClient client) {
+        this.shopClosedForThisWindow = this.tradeLocked(client);
+        try {
+            return super.getShopContainerData(client);
+        } finally {
+            this.shopClosedForThisWindow = false;
+        }
+    }
+
+    @Override
+    public ShopManager getShop() {
+        return this.shopClosedForThisWindow ? null : super.getShop();
+    }
+
+    private boolean tradeLocked(ServerClient client) {
+        if (client == null || this.isSettler() || client.getServer() == null) {
+            return false;
+        }
+        List<stairwaytoheaven.quest.ladder.QuestLadder.Step> steps =
+                stairwaytoheaven.quest.ladder.QuestLadder.stepsOf(this.getStringID());
+        return !steps.isEmpty() && !stairwaytoheaven.quest.ladder.QuestLadder.chapterOpen(
+                client.getServer(), client.authentication, steps.get(0).chapter);
     }
 
     /**
