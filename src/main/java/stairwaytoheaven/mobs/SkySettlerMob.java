@@ -536,10 +536,15 @@ public abstract class SkySettlerMob extends HumanShop {
         if (client == null || this.isSettler() || client.getServer() == null) {
             return false;
         }
+        return chapterLocksTrade(client.getServer(), client.authentication, this.getStringID());
+    }
+
+    /** The chapter half of {@link #tradeLocked}; {@code skyreachstatus} probes it headless. */
+    public static boolean chapterLocksTrade(necesse.engine.network.server.Server server, long auth, String residentID) {
         List<stairwaytoheaven.quest.ladder.QuestLadder.Step> steps =
-                stairwaytoheaven.quest.ladder.QuestLadder.stepsOf(this.getStringID());
+                stairwaytoheaven.quest.ladder.QuestLadder.stepsOf(residentID);
         return !steps.isEmpty() && !stairwaytoheaven.quest.ladder.QuestLadder.chapterOpen(
-                client.getServer(), client.authentication, steps.get(0).chapter);
+                server, auth, steps.get(0).chapter);
     }
 
     /**

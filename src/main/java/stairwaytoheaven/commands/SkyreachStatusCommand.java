@@ -121,6 +121,7 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         diagnoseQuest((SkyLevel) level, logs);
         diagnoseCats((SkyLevel) level, logs);
         diagnoseQuestChain(logs);
+        diagnoseTradeLock(server, logs);
         diagnoseHusbandry((SkyLevel) level, logs);
         diagnoseToolAudit(logs);
         diagnoseNetAudit(logs);
@@ -261,6 +262,24 @@ public class SkyreachStatusCommand extends ModularChatCommand {
      * mod could actually produce, and the three marked (old build) are the ones
      * that used to hand out nothing at all.
      */
+    /**
+     * Which residents keep their shop closed for a player who has done no
+     * ladder step yet ({@code SkySettlerMob.chapterLocksTrade}). An auth no
+     * real player has, so the line reads the fresh-player case on any world.
+     */
+    private void diagnoseTradeLock(Server server, CommandLog logs) {
+        java.util.Set<String> residents = new java.util.LinkedHashSet<>();
+        for (stairwaytoheaven.quest.ladder.QuestLadder.Step s : stairwaytoheaven.quest.ladder.QuestLadder.steps()) {
+            residents.add(s.giver);
+        }
+        StringBuilder line = new StringBuilder("tradelock fresh:");
+        for (String id : residents) {
+            line.append(' ').append(id).append('=').append(
+                    stairwaytoheaven.mobs.SkySettlerMob.chapterLocksTrade(server, Long.MIN_VALUE, id) ? "locked" : "open");
+        }
+        logs.add(line.toString());
+    }
+
     private void diagnoseQuestChain(CommandLog logs) {
         String[][] states = {
                 // label                            recruited settler black tabby reward anchor

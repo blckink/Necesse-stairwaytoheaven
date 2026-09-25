@@ -515,6 +515,11 @@ grep -qE "journal warden: reader=world steps=11/11 complete=11 missingde=0 probe
 grep -qE "journal ladder: reader=world steps=13/13 complete=13 missingde=0" "$LOG1" \
     || { echo "FAIL: a village ladder step lacks its why/opens/reward text, or a German line is missing"; \
          grep -E "journal ladder:|journal missing German" "$LOG1"; STATUS=1; }
+# A resident's shop stays shut until their first step's chapter is open for
+# the player (SkySettlerMob.chapterLocksTrade). Einwurf-c574b0, 2026-09-25.
+grep -qE "tradelock fresh: magpiesettler=open haldasettler=open ossiansettler=open eveleensettler=locked ivessettler=locked mortimersettler=locked caspernsettler=locked eleanorsettler=locked knottsettler=locked$" "$LOG1" \
+    || { echo "FAIL: a fresh player can trade with a resident whose chapter is still shut (or not with one of chapter I)"; \
+         grep -E "tradelock" "$LOG1"; STATUS=1; }
 grep -qF "journal check: FAIL" "$LOG1" "$LOG3" \
     && { echo "FAIL: /swhjournal threw"; STATUS=1; }
 # After /swhreset quests the book must read as the start of the story: the
