@@ -34,3 +34,4 @@ One row per job. Minutes come from `build/codex_runs.tsv` (written by
 - First-pass rate on 2026-09-16 was 4/7 in the round and 7/7 after one fix.
   The failures were layout (a broken side view, a centred side row) and
   context (dark on dark), not style.
+| 2026-09-25 | stormcrystal cluster (player: "sieht aus wie Federn oder Blätter") | 256x64 sheet + 32x32 icon | 5.4 | 1/1 | old brief-less needles replaced by faceted prisms with lightning veins on a stone base; brief said "no thin tapered spikes / leaf / feather" and named the in-game blue ground — first pass shipped; variants 1 and 4 a little alike | shipped |
