@@ -1647,3 +1647,36 @@ bloodbowl=Blood Bowl
 
 [itemtooltip]
 bloodbowltip=Put Blood Vials in. Dorian drinks from it at night instead of biting a settler.
+
+[journal]
+whylabel=Why:
+wherelabel=Where:
+openslabel=Opens:
+whyfindspire=The Warden is the one who knows this sky. Every later quest up here - the cats, the anchor, the keys to the bosses - comes from him.
+opensfindspire=The Last Keeper: hiring the Warden
+whyrecruitwarden=Only a Warden who lives in your settlement keeps handing you quests wherever you meet him, and his hire lights the spire's beacon again.
+opensrecruitwarden=The Spire Cats, with both cat lairs marked on your map
+whycats=The cats belong to the tower. Once both sleep in the basket, the Warden trusts you with the island itself - and the Cat Basket exists nowhere else.
+openscats=Anchor the Island; the Warden sells the Cat Basket and garlands from then on
+whyanchor=The spire island drifts. Anchored, it stays where you left it, and the Warden's own chain is finished - only then does he start on the keys to the realms' bosses.
+opensanchor=The first region key (The Watchfire); the Warden sells the Cloud Glaive and banner from then on
+whyghostchalk=The fog past Steinfeld kills the living (Soul Exposure). The chalk draws the séance circle whose Ghost Guide makes the fog let you through.
+opensghostchalk=The Veil Mark
+whykeyskyreach=A key piece stood up in your settlement wakes that realm's Summoning Stones. Without it they stay inert and the realm's boss cannot be called.
+openskeyskyreach=The Skyreach's Summoning Stones (its boss), and the next key: The Garden Stair
+whykeyeden=Eden's Summoning Stones only answer a stair cut from Eden's own sap and pollen. Stand it up at home to wake them.
+openskeyeden=Eden's Summoning Stones (its boss), and the next key: The Mourning Angel
+whykeysteinfeld=Steinfeld's Summoning Stones sleep until one of its angels stands in your settlement.
+openskeysteinfeld=Steinfeld's Summoning Stones (its boss), and the next key: The Raven Perch
+whykeyghostrealm=The Aftergarden's Summoning Stones only wake for a raven perch made from its bonewood and spectral ore.
+openskeyghostrealm=The Aftergarden's Summoning Stones (its boss), and the next key: A Door of Your Own
+whykeycrookedbeyond=The Crooked Beyond's Summoning Stones answer to a door - one of its own, standing in your settlement.
+openskeycrookedbeyond=The Crooked Beyond's Summoning Stones (its boss), and the last key: Everything Appears to Be in Order
+whykeyhell=Hell's Infernal Summoning Forge wants the paperwork: the Infernal Seal, stood up in your settlement.
+openskeyhell=The Infernal Summoning Forge and Hell's boss - the last rung of the ladder
+
+[misc]
+wardendialogtask=Your task: <title>
+wardendialogjournal=All of this is also in your Adventurer's Journal.
+wardendialogcats=Two cats came with this tower, and two cats are out in the weather. They will not come for me any more. They might come for you, with something to eat.
+wardendialoganchor=The cats are home; the island is not. It drifts. Bring me metal and stone and I will set it where it belongs.

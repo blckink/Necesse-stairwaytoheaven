@@ -218,8 +218,15 @@ public class JournalForm extends Form {
                 if (step.description != null) {
                     y = this.line(text(step.description), 12, null, x, y, w);
                 }
+                if (step.why != null) {
+                    y = this.line(text(new LocalMessage("journal", "whylabel")) + " " + text(step.why), 12, null, x, y, w);
+                }
                 for (GameMessage objective : step.objectives) {
                     y = this.line(text(objective), 12, null, x + 6, y, w - 6);
+                }
+                if (step.opens != null) {
+                    y = this.line(text(new LocalMessage("journal", "openslabel")) + " " + text(step.opens),
+                            12, style.highlightTextColor, x, y, w);
                 }
                 if (step.reward != null) {
                     y = this.line(text(new LocalMessage("journal", "rewardlabel")) + " " + text(step.reward),

@@ -43,6 +43,14 @@ public final class JournalStep {
     public final List<GameMessage> objectives = new ArrayList<>();
     /** What it pays. May be null. */
     public GameMessage reward;
+    /**
+     * Why the player is asked for this at all, in one or two sentences. The
+     * playtest of 2026-09-24: "man checkt null warum man was jetzt bauen muss
+     * und was es macht". May be null.
+     */
+    public GameMessage why;
+    /** What finishing it opens up, beyond the items in {@link #reward}. May be null. */
+    public GameMessage opens;
 
     public JournalStep(String id, int realm) {
         this.id = id;
@@ -69,6 +77,8 @@ public final class JournalStep {
             JournalBook.writeMessage(writer, this.objectives.get(i));
         }
         JournalBook.writeMessage(writer, this.reward);
+        JournalBook.writeMessage(writer, this.why);
+        JournalBook.writeMessage(writer, this.opens);
     }
 
     static JournalStep read(PacketReader reader) {
@@ -90,6 +100,8 @@ public final class JournalStep {
             }
         }
         step.reward = JournalBook.readMessage(reader);
+        step.why = JournalBook.readMessage(reader);
+        step.opens = JournalBook.readMessage(reader);
         return step;
     }
 }

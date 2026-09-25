@@ -90,6 +90,7 @@ public final class LegacyQuestSource implements JournalStepSource {
             find.objectives.add(new LocalMessage("quests", "swhfindspireobj"));
         }
         find.reward = new LocalMessage("journal", "rewardfindspire");
+        explain(find);
         out.add(find);
 
         JournalStep recruit = new JournalStep("recruitwarden", realm);
@@ -109,6 +110,7 @@ public final class LegacyQuestSource implements JournalStepSource {
             recruit.objectives.add(new LocalMessage("journal", "objneedsettlement"));
         }
         recruit.reward = new LocalMessage("journal", "rewardrecruitwarden");
+        explain(recruit);
         out.add(recruit);
 
         JournalStep cats = new JournalStep("cats", realm);
@@ -137,6 +139,7 @@ public final class LegacyQuestSource implements JournalStepSource {
             }
         }
         cats.reward = new LocalMessage("quests", "swhcatsreward");
+        explain(cats);
         out.add(cats);
 
         JournalStep anchor = new JournalStep("anchor", realm);
@@ -154,6 +157,7 @@ public final class LegacyQuestSource implements JournalStepSource {
             deliver(ctx, anchor, AnchorDeliveryQuest.class, new LocalMessage("quests", "swhreturnwarden"));
         }
         anchor.reward = new LocalMessage("quests", "swhanchorreward");
+        explain(anchor);
         out.add(anchor);
 
         out.add(regionKey(ctx, realm, SkyreachKeyQuest.class,
@@ -251,6 +255,7 @@ public final class LegacyQuestSource implements JournalStepSource {
             chalkStep.objectives.add(new LocalMessage("quests", "swhreturnwarden"));
         }
         chalkStep.reward = new LocalMessage("journal", "rewardchalk");
+        explain(chalkStep);
         out.add(chalkStep);
 
         JournalStep markStep = new JournalStep("veilmark", realm);
@@ -377,6 +382,7 @@ public final class LegacyQuestSource implements JournalStepSource {
             step.hint = new LocalMessage("journal", "hintplacekey");
         }
         step.reward = reward;
+        explain(step);
         return step;
     }
 
@@ -421,6 +427,22 @@ public final class LegacyQuestSource implements JournalStepSource {
         if (turnIn != null) {
             step.objectives.add(turnIn);
         }
+    }
+
+    /**
+     * Every step the Warden gives, by journal ID: his own chain, the chalk
+     * and the six region keys. Each carries a {@code journal.why<id>} and a
+     * {@code journal.opens<id>} line, and {@code /swhjournal} counts that they
+     * do, in both languages.
+     */
+    public static final java.util.Set<String> WARDEN_STEPS = new java.util.LinkedHashSet<>(java.util.Arrays.asList(
+            "findspire", "recruitwarden", "cats", "anchor", "ghostchalk",
+            "keyskyreach", "keyeden", "keysteinfeld", "keyghostrealm", "keycrookedbeyond", "keyhell"));
+
+    /** Why the Warden asks for it and what it opens, from the step's own ID. */
+    private static void explain(JournalStep step) {
+        step.why = new LocalMessage("journal", "why" + step.id);
+        step.opens = new LocalMessage("journal", "opens" + step.id);
     }
 
     private static GameMessage after(GameMessage title) {

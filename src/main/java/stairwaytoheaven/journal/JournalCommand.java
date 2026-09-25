@@ -112,6 +112,8 @@ public class JournalCommand extends ModularChatCommand {
                 count(step.where, counts);
                 count(step.hint, counts);
                 count(step.reward, counts);
+                count(step.why, counts);
+                count(step.opens, counts);
                 for (GameMessage objective : step.objectives) {
                     count(objective, counts);
                 }
@@ -131,6 +133,35 @@ public class JournalCommand extends ModularChatCommand {
                 + " bytes=" + bytes + " roundtrip=" + (roundTrip ? "OK" : "FAIL")
                 + " messages=" + counts[0] + " missing=" + counts[1]);
         logs.add("journal state: reader=" + who + codes);
+
+        // The Warden's steps must each say what, why and for what, in both
+        // languages -- the English-only check above cannot see a German gap.
+        int warden = 0;
+        int complete = 0;
+        int missingDe = 0;
+        for (JournalChapter chapter : back.chapters) {
+            for (JournalStep step : chapter.steps) {
+                if (!LegacyQuestSource.WARDEN_STEPS.contains(step.id)) {
+                    continue;
+                }
+                warden++;
+                boolean whole = true;
+                for (GameMessage part : new GameMessage[] {step.title, step.description, step.why, step.opens, step.reward}) {
+                    if (part == null || part.isMissingKey(Localization.English)) {
+                        whole = false;
+                    } else if (part.isMissingKey(Localization.German)) {
+                        whole = false;
+                        missingDe++;
+                        System.out.println("journal missing German key in step " + step.id + ": " + part.translate());
+                    }
+                }
+                if (whole) {
+                    complete++;
+                }
+            }
+        }
+        logs.add("journal warden: reader=" + who + " steps=" + warden + "/" + LegacyQuestSource.WARDEN_STEPS.size()
+                + " complete=" + complete + " missingde=" + missingDe);
     }
 
     private static void count(GameMessage message, int[] counts) {

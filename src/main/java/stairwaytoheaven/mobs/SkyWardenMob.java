@@ -250,13 +250,20 @@ public class SkyWardenMob extends HumanShop {
     }
 
     /**
-     * The line printed at the top of the dialogue window. While he is still a
-     * keeper it is his recruitment pitch, so the offer sits directly above the
-     * price and the recruit button instead of in a speech bubble that scrolls
-     * away. Once he has moved in he makes small talk like any settler.
+     * The text at the top of the dialogue window: whatever he has asked this
+     * player for, in full — his own words, then the task, what it needs, why,
+     * where, what it opens and what it pays ({@link stairwaytoheaven.journal.WardenBrief}). While
+     * he is still a keeper that is his recruitment pitch, so the offer sits
+     * directly above the price and the recruit button instead of in a speech
+     * bubble that scrolls away. With nothing open he makes small talk like any
+     * settler.
      */
     @Override
     public GameMessage getDialogueIntroMessage(ServerClient client) {
+        GameMessage brief = stairwaytoheaven.journal.WardenBrief.dialogue(client);
+        if (brief != null) {
+            return brief;
+        }
         return this.isSettler() ? super.getDialogueIntroMessage(client)
                                 : new LocalMessage("misc", "wardenrecruit1");
     }
@@ -305,8 +312,10 @@ public class SkyWardenMob extends HumanShop {
                 // in ONE bubble, because a bubble replaces the last one
                 // (ChatBubbleText.java:67-76, VERIFIED [jar]) and only the
                 // third would otherwise survive.
+                // wardenintro2, his introduction proper, opens the dialogue
+                // window instead (WardenBrief), above the recruitment pitch:
+                // the bubble keeps only the greeting and the windsilk.
                 say(client, "wardenintro1");
-                say(client, "wardenintro2");
                 say(client, "wardenintro3");
                 give(client, "windsilk", 6);
             }
@@ -677,8 +686,11 @@ public class SkyWardenMob extends HumanShop {
             if (stairwaytoheaven.quest.SkyQuests.findHeld(client, step.questClass) != null) {
                 return; // already asked, and still owed.
             }
+            // No bubble: his ask (step.askKey, read by WardenBrief as
+            // "wardenkeyask" + realm) opens
+            // the dialogue window this same conversation, with the task under
+            // it (WardenBrief). A bubble would say it once and fade.
             stairwaytoheaven.quest.SkyQuests.giveOnce(server, client, step.newQuest());
-            say(client, step.askKey);
             return;
         }
     }

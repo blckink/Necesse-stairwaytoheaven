@@ -23,6 +23,15 @@ All notable changes to this project are documented here. Format loosely follows
   `tools/recolour_preview.py` previews the ramp.
 
 ### Changed
+- **The Warden's quests are readable** (task 10n, playtest 2026-09-24: "Durch
+  die Textblasen ist null lesbar was man machen soll"). His dialogue window
+  now opens on the task he just gave you — his words, the goal with your own
+  counts, why, where, what it opens and the reward (`journal/WardenBrief`).
+  Every Warden step in the Adventurer's Journal gains a "Why:" and an "Opens:"
+  line, en + de (`JournalStep.why/opens`). His region-key asks and his
+  introduction left the speech bubble for the dialogue; the bubble keeps the
+  short reactions. `/swhjournal` prints `journal warden: … complete=11
+  missingde=0`, and the integration test requires it.
 - **Quest rewards retuned** (table in `docs/quests.md`): Skyreach key pays a
   full set of 4 Stormdiscs (one disc could not be forged); Ghost key Skyreave →
   Spiritsteel Reaver; Crooked key Prismcaller → Gravewind Bow; Hell key drops

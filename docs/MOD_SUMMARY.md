@@ -385,7 +385,11 @@ Garten Eden, Steinfeld, Geisterreich, Krummes Jenseits, Hölle — jeweils mit
   den Zielen, z. B. „10x Sturmsplitter (du hast 4 dabei)"), `[Erledigt]`
   (mit „Belohnung erhalten: …"). Dazu **von wem** und **wo diese Person
   wohnt**, und „(gilt für alle in dieser Welt)" bei allem, was welt- statt
-  spielerbezogen ist.
+  spielerbezogen ist. **Jede Quest des Wächters** (Turm finden, Anheuern,
+  Katzen, Anker, Geisterkreide, die sechs Region-Schlüssel) sagt außerdem
+  **„Warum:"** (wozu du das bauen/holen sollst) und **„Schaltet frei:"** (was
+  danach aufgeht) — Spielerbefund 2026-09-24: „man checkt null warum man was
+  jetzt bauen muss und was es macht".
 - **Schlüssel, Rufsteine & Boss:** warst du schon hier; Region-Schlüssel
   erhalten; Schlüsselstück aufgestellt (Rufsteine wach); Boss besiegt (zählt
   jeden Sieg über diesen Vanilla-Boss).
@@ -403,6 +407,15 @@ Knopf **Aktualisieren** holt den Stand neu vom Server, **Schließen** oder
 pro Spieler; Warden-Kette, Region-Schlüssel, Rufsteine und die „einmal
 bezahlten" Bewohner-Quests sind pro Welt — genau so, wie das Spiel sie
 speichert. Jeder Spieler sieht nur sein eigenes Tagebuch.
+
+**Der Wächter im Dialog:** Sprichst du ihn an, steht oben im Dialogfenster
+nicht mehr Smalltalk, sondern **die Aufgabe, die er dir gerade gegeben hat** —
+seine eigenen Worte, dann „Deine Aufgabe: …", die Ziele mit deinen
+Stückzahlen, Warum, Wo, Schaltet frei und Belohnung. Das Fenster bleibt offen,
+bis du es schließt, und ist scrollbar. Die Sprechblase über seinem Kopf trägt
+nur noch kurze Reaktionen (Begrüßung, „erledigt", Kreide); seine Bitten um die
+Region-Schlüssel stehen nicht mehr in der Blase, sondern im Dialog. Ist nichts
+offen, macht er Smalltalk wie jeder Siedler.
 
 **Stand:** Server-Seite im Integrationstest geprüft (`/swhjournal`). Wie das
 Fenster aussieht, ist **noch nicht im Spiel gesehen** — bitte einmal öffnen

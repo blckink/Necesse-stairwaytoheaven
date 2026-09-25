@@ -4822,3 +4822,35 @@ placement list, 1 seed's one place moved within its own cell
 `seeds=300 withMissing=0`, `seeds=500 withMissing=0`. Save impact: only
 footprints within 64 tiles of the spire are refused, ground every save has
 generated already, where the engine drops a queued preset anyway.
+
+## Quest text in the dialogue window, not the speech bubble (2026-09-25, task 10n)
+
+The playtest of 2026-09-24: "Durch die Textblasen ist null lesbar was man
+machen soll". What vanilla offers for "an NPC explains a task", read from the
+1.3.3 jar with CFR 0.152:
+
+- **`HumanShop.getDialogueIntroMessage(ServerClient)` is read inside
+  `HumanShop.interact`, when the container opens** (HumanShop.java:247,
+  VERIFIED [jar]) — so an override sees whatever the mob's own `interact`
+  handed out or turned in just before `super.interact`. `ShopContainer` ships
+  it as a `GameMessage` (ShopContainer.java:585), and `DialogueForm.addText`
+  draws it as a `FormFairTypeLabel` in a scrollable `FormContentBox`
+  (DialogueForm.java:347-368, VERIFIED [jar]): `\n` breaks lines, the text stays
+  until the window closes. A speech bubble is replaced by the mob's next one
+  (`ChatBubbleText.init`, see the Warden's `say`). `journal/WardenBrief` builds
+  the intro from the same `JournalStep` the book shows.
+- **`HumanShop.getQuests(ServerClient)` → `ContainerQuest(introMessage, quest,
+  canSkip, skipError)`** is vanilla's quests tab, with a per-quest intro line
+  (ContainerQuest.java, VERIFIED [jar]). Not used: its accept/complete/skip
+  buttons go through `HumanShop.completeQuest/skipQuest`, which would have to
+  re-implement the Warden's co-op-safe `giveOnce`/`removeAllOfType` hand-out.
+- **Every registered language is loaded on a dedicated server**
+  (`Localization.reload` loops all `languages`, Localization.java:87-88), and
+  `Translation.isMissing` answers true for an absent category or key
+  (Translation.java:200-206), VERIFIED [jar]. So `isMissingKey(Localization.German)`
+  is a real German gate headless: `/swhjournal` prints
+  `journal warden: reader=world steps=11/11 complete=11 missingde=0`,
+  VERIFIED [run] 2026-09-25.
+
+HYPOTHESIS, not observed: how the longer intro text reads in the 1.3.3 client's
+dialogue window (width, scroll) — no client in the gate.

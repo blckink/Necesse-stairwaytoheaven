@@ -1648,3 +1648,36 @@ bloodbowl=Blutschale
 
 [itemtooltip]
 bloodbowltip=Blutfläschchen hineinlegen. Dorian trinkt nachts daraus, statt einen Siedler zu beißen.
+
+[journal]
+whylabel=Warum:
+wherelabel=Wo:
+openslabel=Schaltet frei:
+whyfindspire=Der Wächter kennt diesen Himmel. Jede spätere Quest hier oben - die Katzen, der Anker, die Schlüssel zu den Bossen - kommt von ihm.
+opensfindspire=Der letzte Hüter: den Wächter anheuern
+whyrecruitwarden=Nur ein Wächter, der in deiner Siedlung wohnt, gibt dir überall, wo du ihn triffst, weitere Quests - und sein Anheuern entzündet das Leuchtfeuer der Spitze wieder.
+opensrecruitwarden=Die Turmkatzen, beide Katzenlager auf deiner Karte markiert
+whycats=Die Katzen gehören zum Turm. Schlafen beide im Korb, vertraut dir der Wächter die Insel selbst an - und den Katzenkorb gibt es nirgends sonst.
+openscats=Verankere die Insel; ab dann verkauft der Wächter Katzenkorb und Girlanden
+whyanchor=Die Turminsel driftet. Verankert bleibt sie, wo du sie gelassen hast, und die eigene Kette des Wächters ist abgeschlossen - erst dann fängt er mit den Schlüsseln zu den Bossen der Reiche an.
+opensanchor=Das erste Regionsschlüssel-Stück (Das Wachfeuer); ab dann verkauft der Wächter Wolkengleve und Banner
+whyghostchalk=Der Nebel hinter Steinfeld tötet Lebende (Seelenblöße). Mit der Kreide zeichnest du den Séance-Kreis, dessen Geisterführer dich durch den Nebel lässt.
+opensghostchalk=Das Nebelmal
+whykeyskyreach=Ein Schlüsselstück, in deiner Siedlung aufgestellt, weckt die Rufsteine seines Reichs. Ohne es bleiben sie stumm und der Boss des Reichs lässt sich nicht rufen.
+openskeyskyreach=Die Rufsteine der Himmelsweite (ihr Boss) und der nächste Schlüssel: Die Gartenstiege
+whykeyeden=Die Rufsteine Edens antworten nur auf eine Stiege aus Edens eigenem Saft und Pollen. Stell sie zu Hause auf, um sie zu wecken.
+openskeyeden=Die Rufsteine Edens (sein Boss) und der nächste Schlüssel: Der Trauerengel
+whykeysteinfeld=Die Rufsteine Steinfelds schlafen, bis einer seiner Engel in deiner Siedlung steht.
+openskeysteinfeld=Die Rufsteine Steinfelds (sein Boss) und der nächste Schlüssel: Die Rabenkanzel
+whykeyghostrealm=Die Rufsteine des Nachgartens wachen nur für eine Rabenkanzel aus seinem Knochenholz und Spektralerz auf.
+openskeyghostrealm=Die Rufsteine des Nachgartens (sein Boss) und der nächste Schlüssel: Eine eigene Tür
+whykeycrookedbeyond=Die Rufsteine der Krümmung hören auf eine Tür - eine von ihren eigenen, in deiner Siedlung.
+openskeycrookedbeyond=Die Rufsteine der Krümmung (ihr Boss) und der letzte Schlüssel: Alles scheint in Ordnung zu sein
+whykeyhell=Die Höllische Rufesse will Papiere sehen: das Höllensiegel, in deiner Siedlung aufgestellt.
+openskeyhell=Die Höllische Rufesse und der Boss der Hölle - die letzte Sprosse der Leiter
+
+[misc]
+wardendialogtask=Deine Aufgabe: <title>
+wardendialogjournal=Das alles steht auch in deinem Abenteuerbuch.
+wardendialogcats=Mit diesem Turm kamen zwei Katzen, und zwei Katzen sind draußen im Wetter. Für mich kommen sie nicht mehr. Für dich vielleicht, mit etwas zu fressen.
+wardendialoganchor=Die Katzen sind daheim, die Insel nicht. Sie treibt. Bring mir Metall und Stein, dann setze ich sie fest, wo sie hingehört.
