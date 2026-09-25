@@ -164,31 +164,31 @@ public final class SkyFurnitureSet {
         // Skywatch furniture is skystone + sky-iron work; the soft pieces add
         // windsilk. Costs mirror the vanilla wood families (chair 4 units,
         // table 6-8, bed the expensive one).
-        Recipes.registerModRecipe(new Recipe("skywatchchair", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("skywatchchair", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{skystone, 4}, {ironbar, 1}}")));
-        Recipes.registerModRecipe(new Recipe("skywatchbench", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("skywatchbench", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{skystone, 6}, {ironbar, 2}}")));
-        Recipes.registerModRecipe(new Recipe("skywatchmodulartable", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("skywatchmodulartable", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{skystone, 6}, {ironbar, 1}}")));
-        Recipes.registerModRecipe(new Recipe("skywatchdinnertable", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("skywatchdinnertable", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{skystone, 10}, {ironbar, 2}}")));
-        Recipes.registerModRecipe(new Recipe("skywatchdesk", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("skywatchdesk", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{skystone, 8}, {ironbar, 2}}")));
-        Recipes.registerModRecipe(new Recipe("skywatchdresser", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("skywatchdresser", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{skystone, 8}, {windsilk, 2}}")));
-        Recipes.registerModRecipe(new Recipe("skywatchbed", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("skywatchbed", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{skystone, 6}, {windsilk, 8}}")));
-        Recipes.registerModRecipe(new Recipe("skywatchcandelabra", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("skywatchcandelabra", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{ironbar, 2}, {skystone, 4}, {aurorapetal, 1}}")));
-        Recipes.registerModRecipe(new Recipe("skywatchcarpet", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("skywatchcarpet", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{windsilk, 6}}")));
-        Recipes.registerModRecipe(new Recipe("skywatchchalice", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("skywatchchalice", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{ironbar, 1}, {stormshard, 1}}")));
-        Recipes.registerModRecipe(new Recipe("skywatchcandle", 2, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("skywatchcandle", 2, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{windsilk, 1}, {aurorapetal, 1}}")));
-        Recipes.registerModRecipe(new Recipe("skywatchtome", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("skywatchtome", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{windsilk, 2}, {skystone, 2}}")));
-        Recipes.registerModRecipe(new Recipe("pottedcloudberry", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("pottedcloudberry", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{skystone, 3}, {cloudberry, 2}}")));
 
         // The four spire pieces. These are the first Skywatch furniture that
@@ -197,13 +197,13 @@ public final class SkyFurnitureSet {
         // Stormglass out of the Stormglass Kiln. Both are still WORKSTATION
         // recipes, so the player builds the station, runs it (or lets a
         // settler run it), and then builds the furniture.
-        Recipes.registerModRecipe(new Recipe("skywatchbookshelf", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("skywatchbookshelf", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{skystone, 8}, {cloudwood, 6}, {skyweave, 2}}")));
-        Recipes.registerModRecipe(new Recipe("skywatchcabinet", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("skywatchcabinet", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{skystone, 8}, {cloudwood, 6}, {skyweave, 2}}")));
-        Recipes.registerModRecipe(new Recipe("skywatchclock", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("skywatchclock", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{skystone, 6}, {ironbar, 2}, {stormglass, 2}}")));
-        Recipes.registerModRecipe(new Recipe("skywatchdisplay", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("skywatchdisplay", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{skystone, 6}, {stormglass, 3}}")));
     }
 }

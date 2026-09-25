@@ -365,39 +365,32 @@ final class SkyBuildingSet {
                 Recipes.ingredientsFromScript("{{ironbar, 1}, {skystone, 1}}")));
         Recipes.registerModRecipe(new Recipe("skyironfencegate", 1, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{ironbar, 2}, {skystone, 1}}")));
-        Recipes.registerModRecipe(new Recipe("ghostlantern", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("ghostlantern", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{aurorapetal, 2}, {skystone, 8}}")));
-        Recipes.registerModRecipe(new Recipe("wardencandelabra", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("wardencandelabra", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{ironbar, 2}, {stormshard, 2}, {skystone, 2}}")));
-        Recipes.registerModRecipe(new Recipe("mistglasslantern", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("mistglasslantern", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{ironbar, 1}, {stormshard, 1}}")));
-        Recipes.registerModRecipe(new Recipe("gloomravenstatue", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("gloomravenstatue", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{skystone, 12}, {stormshard, 2}}")));
-        Recipes.registerModRecipe(new Recipe("gloomwillow", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("gloomwillow", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{anylog, 6}, {stormshard, 1}}")));
         // v0.6 prop families (craftable so builders can compose with them;
-        // the oddities stay out of worldgen — see the registration note above)
-        Recipes.registerModRecipe(new Recipe("skywatchtelescope", 1, RecipeTechRegistry.WORKSTATION,
+        // the oddities stay out of worldgen — see the registration note above).
+        // Furniture and props sit at the carpenter's bench like vanilla's; the
+        // workstation list was full of them (player, 2026-09-25). The natural
+        // pieces -- scree, rubble, charged crystal, withered shrub, aurora
+        // shards, starfall -- lost their recipes the same day: they are world
+        // scenery that breaks into its material, not something to build.
+        Recipes.registerModRecipe(new Recipe("skywatchtelescope", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{ironbar, 4}, {aetheriumore, 2}, {skystone, 6}}")));
-        Recipes.registerModRecipe(new Recipe("skywatchastrolabe", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("skywatchastrolabe", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{ironbar, 2}, {stormshard, 2}, {skystone, 4}}")));
-        Recipes.registerModRecipe(new Recipe("stormscreed", 1, RecipeTechRegistry.WORKSTATION,
-                Recipes.ingredientsFromScript("{{skystone, 1}, {stormshard, 1}}")));
-        Recipes.registerModRecipe(new Recipe("skywatchrubble", 2, RecipeTechRegistry.WORKSTATION,
-                Recipes.ingredientsFromScript("{{skystone, 3}}")));
-        Recipes.registerModRecipe(new Recipe("chargecrystal", 1, RecipeTechRegistry.WORKSTATION,
-                Recipes.ingredientsFromScript("{{stormshard, 2}, {skystone, 2}}")));
-        Recipes.registerModRecipe(new Recipe("withershrub", 1, RecipeTechRegistry.WORKSTATION,
-                Recipes.ingredientsFromScript("{{charwood, 2}}")));
-        Recipes.registerModRecipe(new Recipe("aurorashards", 1, RecipeTechRegistry.WORKSTATION,
-                Recipes.ingredientsFromScript("{{aurorapetal, 2}, {skystone, 2}}")));
-        Recipes.registerModRecipe(new Recipe("starfall", 1, RecipeTechRegistry.WORKSTATION,
-                Recipes.ingredientsFromScript("{{prismshard, 2}, {skystone, 1}}")));
-        Recipes.registerModRecipe(new Recipe("skyballoon", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("skyballoon", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{windsilk, 3}, {ironbar, 1}, {anylog, 1}}")));
-        Recipes.registerModRecipe(new Recipe("aeronautwreck", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("aeronautwreck", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{anylog, 4}, {ironbar, 2}}")));
-        Recipes.registerModRecipe(new Recipe("skyparcel", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("skyparcel", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{anylog, 2}, {ironbar, 1}}")));
         // The Warden teaches this one in the story, but it is craftable from
         // the start — the gate is finding him and learning what it's for.

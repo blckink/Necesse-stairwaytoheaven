@@ -83,6 +83,11 @@ public class SkyDecoObject extends GameObject {
      * the 2026-09-24 report (docs/ITEM_CATEGORIES.md). The flag is saved per
      * tile ({@code objectIsPlayerPlaced}, ArrayObjectLayer.java:90), so a piece
      * a player already built in an old save still comes back whole.
+     *
+     * <p>Since 2026-09-25 none of these pieces has a recipe any more, so the
+     * placed-by-player exception is gone too: a leftover from an older save
+     * can be set down and broken into its material, instead of sitting in the
+     * bag for good (player: "liegen nur im Inventar rum").
      */
     public SkyDecoObject setNaturalLoot(LootTable naturalLoot) {
         this.naturalLoot = naturalLoot;
@@ -91,7 +96,7 @@ public class SkyDecoObject extends GameObject {
 
     @Override
     public LootTable getLootTable(Level level, int layerID, int tileX, int tileY) {
-        if (this.naturalLoot != null && !level.objectLayer.isPlayerPlaced(tileX, tileY)) {
+        if (this.naturalLoot != null) {
             return this.naturalLoot;
         }
         return super.getLootTable(level, layerID, tileX, tileY);

@@ -96,7 +96,7 @@ public final class SkyCloudmarbleSet {
                 Recipes.ingredientsFromScript("{{skystone, 2}, {goldbar, 1}}")));
         Recipes.registerModRecipe(new Recipe("cloudmarblefencegate", 1, RecipeTechRegistry.WORKSTATION,
                 Recipes.ingredientsFromScript("{{skystone, 4}, {goldbar, 1}}")));
-        Recipes.registerModRecipe(new Recipe("seraphstatue", 1, RecipeTechRegistry.WORKSTATION,
+        Recipes.registerModRecipe(new Recipe("seraphstatue", 1, RecipeTechRegistry.CARPENTER,
                 Recipes.ingredientsFromScript("{{skystone, 20}, {goldbar, 4}, {aetheriumbar, 2}}")));
     }
 }

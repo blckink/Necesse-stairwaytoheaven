@@ -5,6 +5,25 @@ All notable changes to this project are documented here. Format loosely follows
 
 ## [Unreleased]
 
+### Changed
+- **Blood Vial / Blutfläschchen** is brewed at the Alchemy Table from 1 raw
+  meat (`anyrawmeat`) + 1 vanilla Glass Bottle. Dorian's hunt and the thralls
+  still drop them too.
+- **Sky flowers brew vanilla potions** at the Alchemy Table (2 flowers + 1 Glass
+  Bottle): Cloudbell → Speed, Sky Tulip → Health Regen, Thunderbloom → Attack
+  Speed, Glowfern → Spelunker, Aurora Lily → Mana Regen, Static Moss →
+  Resistance, Cragbloom → Health, Sky Lichen → Fishing.
+- **All Skywatch furniture and the decorative props** (lanterns, candelabra,
+  raven statue, gloom willow, telescope, astrolabe, balloon, wreck, parcel,
+  seraph statue) are crafted at the Carpenter's Bench, not the Workstation.
+  The furniture keeps its own `skywatch` tab there, next to oak, spruce and the
+  rest. Walls, doors, floors and fences stay at the Workstation.
+- **Natural scenery pieces are no longer craftable**: Storm-Scorched Ground,
+  Broken Skywatch Stone, Charged Crystal, Withered Shrub, Aurora Shard Cluster,
+  Starfall Fragment. They now always break into their material, even when a
+  player placed them, so leftovers from older saves can be put down and broken
+  up (stone 2–4 / storm shard 1–2 / aurora petal 1–2 / prism shard 1).
+
 ### Added
 - **Wolkengleve / Cloud Glaive** (`cloudglaive`) — the Cryo Glaive re-made in
   white and gold, gold-and-white light motes on the swing instead of frost.

@@ -523,6 +523,35 @@ public final class SkyItems {
                 "aetheriumbar", 1, RecipeTechRegistry.FORGE,
                 Recipes.ingredientsFromScript("{{aetheriumore, 3}}")));
 
+        // Blood Vials used to come only from Dorian's hunt and the thralls it
+        // raises, and his drops land out in the grass where the prey stood
+        // (player, 2026-09-25: "herstellen am Alchemietisch, rohes Fleisch und
+        // Glasflasche"). Both ingredients are vanilla: glassbottle is used by
+        // 32 vanilla recipes, anyrawmeat is the raw-meat global ingredient.
+        Recipes.registerModRecipe(new Recipe(
+                "bloodvial", 1, RecipeTechRegistry.ALCHEMY,
+                Recipes.ingredientsFromScript("{{anyrawmeat, 1}, {glassbottle, 1}}")));
+
+        // The sky flowers were forage with no use at all -- every meadow filled
+        // the bag with them (player, 2026-09-25). Vanilla brews its potions
+        // from a bottle and a flower, so ours do the same, each at the potion
+        // its look suggests. Vanilla potions only; no new effects to balance.
+        String[][] flowerPotions = {
+                {"cloudbell", "speedpotion"},
+                {"skytulip", "healthregenpotion"},
+                {"thunderbloom", "attackspeedpotion"},
+                {"glowfern", "spelunkerpotion"},
+                {"auroralily", "manaregenpotion"},
+                {"staticmoss", "resistancepotion"},
+                {"cragbloom", "healthpotion"},
+                {"skylichen", "fishingpotion"},
+        };
+        for (String[] fp : flowerPotions) {
+            Recipes.registerModRecipe(new Recipe(
+                    fp[1], 1, RecipeTechRegistry.ALCHEMY,
+                    Recipes.ingredientsFromScript("{{" + fp[0] + ", 2}, {glassbottle, 1}}")));
+        }
+
         Recipes.registerModRecipe(new Recipe(
                 "tempestedge", 1, RecipeTechRegistry.TUNGSTEN_WORKSTATION,
                 Recipes.ingredientsFromScript("{{aetheriumbar, 8}, {stormshard, 5}}")));
