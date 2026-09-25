@@ -61,21 +61,21 @@ public class VeteranCatapultObject extends GameObject {
      * old catapult numbers (x 15..79) belonged to a narrower machine.
      *
      * <p>Idle extents, footprint coordinates (cell y minus the 32 px overhang):
-     * north x 4..91 y -9..94, east x 5..91 y 37..94, south x 2..94 y -8..94,
-     * west x 5..91 y 37..94. North and south are a different machine seen
-     * end-on: wheels and carriage start at y=16, only the barrel (x 38..57)
-     * rises above that.
+     * east/west x 5..91 y 37..94, north x 22..74 y 18..94, south x 25..73
+     * y 24..94. All four rows share one scale — 28 px wheels, 12-14 px barrel.
+     * Until 2026-09-25 the north/south rows were drawn about 2.2x larger
+     * (62 px wheels filling x 4..91), which looked like a different machine;
+     * they were redrawn at the side view's scale, so end-on the cannon is
+     * narrow and long, as a cannon is.
      *
      * <p>So the box follows the placement rotation: {@link #getCollision}
      * gets it, and {@code placeObject} hands the master's rotation to all
-     * nine pieces. Both boxes keep x 5..91, the width the cannon has in every
-     * rotation. East/west ({@link #FULL_COLLISION}) leave the top tile row
+     * nine pieces. East/west ({@link #FULL_COLLISION}) leave the top tile row
      * open — nothing is drawn above y=37, and an invisible wall in front of
      * visible floor reads worse than a barrel the player can walk under.
-     * North/south ({@link #FULL_COLLISION_NS}) start at y=16, where the
-     * wheels do; the barrel tip above stays walk-under. Until 2026-09-25 both
-     * used the east/west box, and the player walked into the north/south
-     * wheels. Vanilla insets the same way ({@code BlacksmithStatueObject}
+     * North/south ({@link #FULL_COLLISION_NS}) cover the narrow machine,
+     * barrel included, x 22..74 from y=24; the free strips either side are
+     * walkable. Vanilla insets the same way ({@code BlacksmithStatueObject}
      * blocks 80x54 of its 96x64).
      *
      * <p>The collision follows the placement rotation, not the aim row the
@@ -85,7 +85,7 @@ public class VeteranCatapultObject extends GameObject {
      * box sets them, so the top row counts as open ground for regions.
      */
     private static final Rectangle FULL_COLLISION = new Rectangle(5, 32, 86, 64);
-    private static final Rectangle FULL_COLLISION_NS = new Rectangle(5, 16, 86, 80);
+    private static final Rectangle FULL_COLLISION_NS = new Rectangle(22, 24, 52, 72);
 
     /**
      * This piece's share of a full box, in its own tile's
@@ -93,7 +93,8 @@ public class VeteranCatapultObject extends GameObject {
      * east/west box the three top-row pieces intersect at zero height, so
      * they keep a degenerate rectangle, {@code GameObject} leaves their
      * {@code isSolid} false and the bare top row stays walkable; the six
-     * pieces below block. Against the north/south box they block y 16..32.
+     * pieces below block. Against the north/south box the middle top piece
+     * blocks y 24..32 and the corner columns only a sliver.
      */
     private static Rectangle pieceCollision(Rectangle full, int multiX, int multiY) {
         Rectangle piece = full.intersection(new Rectangle(multiX * 32, multiY * 32, 32, 32));
