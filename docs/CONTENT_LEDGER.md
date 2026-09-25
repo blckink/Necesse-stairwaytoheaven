@@ -18,7 +18,7 @@ sections at the bottom.
 | `salonproducts` | object | Pflegemittel-Tablett — flaches Tablett mit Flaschen, Schere, Kamm und Buerste; Tischdekoration, vier Blickrichtungen. `HappinessObject` (RARE). Nur bei der Stylistin. |
 | `salonbarberpole` | object | Barbier-Saeule — rot-weiss-blaue Wendel unter Glas mit Messingkappen, steht auf dem Boden, leuchtet leicht, keine Kollision. `HappinessObject` (RARE). Nur bei der Stylistin. |
 | `doctorhuman` | mob | The Doctor — the mod's second settler PROFESSION, on the same terms as the Therapist (75 recruit tickets, no story gate). Patches the player back to full health on the spot for 100 coins, and sells eleven vanilla buff consumables the player could already craft — six Greater-tier potions and five gourmet dishes — priced off each item's own registered broker value by vanilla's Alchemist rule (min 2x, max 6x). `docs/settlers.md`. |
-| `therapisthuman` | mob | The Therapist — the mod's one settler PROFESSION rather than a named person, as common in the recruit draw as the Blacksmith or the Miner (75 tickets, no story gate). Sells calm (flowers, books, a music player, regen potions) and, once settled, offers two services no vanilla settler has: four therapy places that lift a settlement-mate's mood by 50%, and a permanent trait swap for 50 000 coins whose outcome nobody gets to choose. `docs/settlers.md`. |
+| `therapisthuman` | mob | The Therapist — the mod's one settler PROFESSION rather than a named person, as common in the recruit draw as the Blacksmith or the Miner (75 tickets, no story gate). Sells calm (flowers, books, a music player, regen potions) and, once settled, offers two services no vanilla settler has: four therapy places that lift a settlement-mate's mood by 50%, and a permanent trait swap for 5 000 coins whose outcome nobody gets to choose. `docs/settlers.md`. |
 | `cinderashtile` | tile | Zunderasche — the pale half of Hell's floor: burnt grit and cinder dust. Painted by `HellTerrainPainter` across both bands, heaviest where the Infernal Fringe has left Crooked Beyond behind. Not obtainable; there is no hell floor to craft yet. |
 | `furnaceslagtile` | tile | Ofenschlacke — the dark half: cooled slag crust with embers still showing through. The Furnace Reach's own ground at the far edge of the plane, and the darker of Hell's two so the heat reads as specks rather than as glare. Not obtainable. |
 | `ashspirit` | mob | Hell elite. What the Furnace leaves behind, standing up again — vanilla's Ash Golem body at 10 278 HP / 387.6 damage / 81 armour. Drops Reality Shard, Oddwood, Charwood. |
@@ -111,7 +111,7 @@ unlike the four above, no `SkyArrivals` gate makes him walk to a settlement:
 
 | id | kind | what it is, in one line |
 |---|---|---|
-| `ivessettler` | mob | Ives the Verger of the Quiet Reach: Steinfeld's only inhabitant, a **crafting and hauling** settler who refuses farming and forestry. The realm's only vendor - he buys all four of its materials (Pale Stone, Grave Salt, Spirit Moss, Echo Shard) above broker, and sells the churchyard that goes around a grave. His quest, The Vigil, waives his 11 000 fee. Found once per world beside a broken angel; does not travel to a settlement on its own. |
+| `ivessettler` | mob | Ives the Verger of the Quiet Reach: Steinfeld's only inhabitant, a **crafting and hauling** settler who refuses farming and forestry. The realm's only vendor - he buys all four of its materials (Pale Stone, Grave Salt, Spirit Moss, Echo Shard) above broker, and sells the churchyard that goes around a grave. His quest, The Vigil, waives his 3 000 fee. Found once per world beside a broken angel; does not travel to a settlement on its own. |
 | `knottsettler` | mob | Mr. Knott the Doorman: a **trading** settler who refuses farming and forestry, and the only vendor of Crooked Beyond's weird furniture and cosmetic masks, buying Warp Resin, Eye Seed and Reality Shard in turn. Found once per world at the Door Yard; does not travel to a settlement on its own. |
 
 ## The Beetle Outlands — the sky's wrong ground
@@ -475,7 +475,7 @@ hunts by night, drinks instead of eating.
 
 | id | kind | what it is, in one line |
 |---|---|---|
-| `vampiresettler` | mob | Dorian — the first settler with an inverted day. Recruit price 11 000 coins; hunting profession; brings Blood Vials home from night hunts. |
+| `vampiresettler` | mob | Dorian — the first settler with an inverted day. Recruit price 3 000 coins; hunting profession; brings Blood Vials home from night hunts. |
 | `bloodvial` | item | Blood Vial — what Dorian carries home from a hunt, or brewed at the Alchemy Table from raw meat + a glass bottle; hand him one instead of letting him go thirsty. Ordinary material (broker 22), icon borrowed from vanilla's health potion. |
 | `bloodthrall` | mob | Blood Thrall — one animal in six that Dorian drains gets up again as this hostile. Crypt bat body; drops 1-2 Blood Vial and sometimes leather. |
 | `bloodfever` | buff | Blood Fever — what a bitten resident carries for a day: 20% slow, -15% mining and building speed, -10% max health. Runs out on its own; the Doctor can end it early. |

@@ -6,6 +6,15 @@ All notable changes to this project are documented here. Format loosely follows
 ## [Unreleased]
 
 ### Changed
+- **NPC prices cut / NPC-Preise gesenkt**: the Therapist's trait swap costs
+  5 000 coins instead of 50 000. Recruit fees: Warden 30 000 → 8 000, Knott
+  22 000 → 5 000, Caspern 14 000 → 4 000, Ives and Dorian 11 000 → 3 000,
+  Mortimer 8 000 → 2 500, Eveleen 7 000 → 2 500, Eleanor 5 000 → 2 000.
+  The three residents who also ask for a key item (Ossian, Magpie, Halda) take
+  mostly that item now: 3 000 / 2 000 / 1 500 coins instead of
+  18 000 / 12 000 / 9 000. Therapist and Doctor 900–1 400 → 400–700, War
+  Veteran 900 → 400. Ghost Guide's Spiritsteel Reaver 6 000–10 000 (was
+  14 000–24 000), Gravewind Bow 5 000–8 500 (was 12 000–20 000).
 - **Skystone / Himmelsstein looks like the new sky**: the ground is pale
   pearl-blue flagstone with a few gold flecks (Codex, 20 seamless plain
   cells, blend shapes kept) instead of dark grey noise strewn with crystals

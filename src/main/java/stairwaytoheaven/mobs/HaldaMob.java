@@ -96,7 +96,7 @@ public class HaldaMob extends SkySettlerMob {
         // 8n: the kerchief is ours; shirt and boots stay vanilla.
         return new String[]{"haldakerchief", "farmershirt", "clothboots"};
     }
-    @Override protected int recruitCost() { return 9000; }
+    @Override protected int recruitCost() { return 1500; }
     /**
      * §1: "Kill the Sourvat Bloom, recover the Mother from inside it. Coins +
      * the Mother. She does not haggle; she hands over the first barrel."

@@ -535,6 +535,6 @@ public class VampireSettlerMob extends SkySettlerMob {
         return new String[]{null, "thiefscloak", "dressshoes"};
     }
 
-    @Override protected int recruitCost() { return 11000; }
+    @Override protected int recruitCost() { return 3000; }
     @Override protected String talkKey() { return "vampiretalk"; }
 }

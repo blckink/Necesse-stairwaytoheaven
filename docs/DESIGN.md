@@ -244,7 +244,7 @@ dialogue lines, item descriptions and the spire itself changing as you help him.
 > **Stage 2 as shipped differs from the design below (checked against the code
 > 2026-09-02).** The built chain does not ask for a Storm Shard/Windsilk
 > delivery to light the beacon — the beacon lights when the player **recruits
-> the Warden for 30,000 coins** (`SkyWardenMob.onRecruited`). A
+> the Warden for 8,000 coins** (`SkyWardenMob.onRecruited`). A
 > `swh_beacon` quest matching this section's delivery does exist in the
 > registry but no code path ever hands it out — it is a dead registration, not
 > the live stage 2. See `docs/OVERVIEW.md` §5 for the chain as built and §9 for

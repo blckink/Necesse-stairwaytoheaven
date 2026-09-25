@@ -125,6 +125,6 @@ public class CaspernMob extends SkySettlerMob {
         // smith rather than the village one.
         return new String[]{"nightsteelveil", "smithingapron", "smithingshoes"};
     }
-    @Override protected int recruitCost() { return 14000; }
+    @Override protected int recruitCost() { return 4000; }
     @Override protected String talkKey() { return "casperntalk"; }
 }

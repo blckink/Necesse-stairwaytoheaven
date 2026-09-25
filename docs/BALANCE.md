@@ -548,7 +548,7 @@ instead of replacing it with a reason to go somewhere.
 Hell has no band and no trophy of its own; its ask was always "the Crooked
 Beyond, twice over" (`wardenkeyaskhell`), so it takes twice the Crooked horn.
 
-**Not changed, and why.** `swh_recruitwarden` asks for coins (30 000,
+**Not changed, and why.** `swh_recruitwarden` asks for coins (8 000 since 2026-09-25, was 30 000;
 `SkyWardenMob.RECRUIT_COST`), not items — the price is a recorded decision
 (the Warden is the *entry* to the layer, not an endgame purchase) and the
 integration test reads it. `swh_cats` is not a `DeliverItemsQuest` at all.

@@ -451,8 +451,8 @@ grep -qE "settler check: wardensettler=WardenSettler" "$LOG1" || { echo "FAIL: t
 # special loot': at three of them, the loot is a person"). The key is what makes
 # the boss fight and the recruit page one loop, so a price that has quietly
 # fallen back to coins alone is a broken chapter, not a cheaper settler.
-for price in magpiesettler:12000:bondedlockbox haldasettler:9000:themother \
-    ossiansettler:18000:stormlenscore; do
+for price in magpiesettler:2000:bondedlockbox haldasettler:1500:themother \
+    ossiansettler:3000:stormlenscore; do
     pr_who="$(echo "$price" | cut -d: -f1)"
     pr_coins="$(echo "$price" | cut -d: -f2)"
     pr_key="$(echo "$price" | cut -d: -f3)"
@@ -538,7 +538,7 @@ grep -qE "Loaded mods:.*Stairway to Heaven|Stairway to Heaven" "$LOG1" \
 # one resident with no worldgen seat at all, so arriving as a visitor and being
 # recruited is his only way into a game. Assert the live wiring the same way the
 # Warden's is asserted: settler type resolved from the mob, price present.
-grep -qE "recruit check: vampiresettler settler=SkyResident price=coinx11000" "$LOG1" \
+grep -qE "recruit check: vampiresettler settler=SkyResident price=coinx3000" "$LOG1" \
     || { echo "FAIL: the vampire settler is not wired for recruitment"; STATUS=1; }
 # ...and that he is the settlement's hunter. A profession is not a field: it is
 # which JobTypeHandler priorities have disabledBySettler false, so this line is

@@ -126,12 +126,12 @@ public class GhostGuideMob extends HumanShop {
         // whose ceiling is nightsteelveil at 2600-4800 behind a Reaper kill.
         // These two are the realm's signature weapons at Spiritsteel tier
         // (chest 34 / enchant 2400, docs/BALANCE.md), so they sit far above it
-        // and near the Warden's own 30 000 recruit -- the most expensive thing
-        // in the mod. Stock 1, restock 1: one a day, not a rack.
+        // (lowered 2026-09-25 with every NPC price, see docs/BALANCE.md) --
+        // still the dearest things he sells. Stock 1, restock 1: one a day.
         this.shop.addSellingItem("spiritsteelreaver", new SellingShopItem(1, 1))
-                .setStaticPriceBasedOnHappiness(14000, 24000, 1600);
+                .setStaticPriceBasedOnHappiness(6000, 10000, 700);
         this.shop.addSellingItem("gravewindbow", new SellingShopItem(1, 1))
-                .setStaticPriceBasedOnHappiness(12000, 20000, 1400);
+                .setStaticPriceBasedOnHappiness(5000, 8500, 600);
         // The materials, so neither weapon is locked behind a drop the player
         // never happened to find. Broker values: spiritsteelbar 55.0F,
         // veilessence 34.0F (GhostRealm.registerItems, SkyItems.register); the

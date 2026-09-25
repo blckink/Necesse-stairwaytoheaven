@@ -183,6 +183,6 @@ public class EveleenMob extends SkySettlerMob {
         // his hat and shirt. No new art: these are three ItemRegistry IDs.
         return new String[]{"dryadhat", "dryadchestplate", "dryadboots"};
     }
-    @Override protected int recruitCost() { return 7000; }
+    @Override protected int recruitCost() { return 2500; }
     @Override protected String talkKey() { return "eveleentalk"; }
 }

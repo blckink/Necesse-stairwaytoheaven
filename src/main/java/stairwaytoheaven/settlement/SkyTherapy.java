@@ -47,7 +47,7 @@ import necesse.level.maps.levelData.settlementData.settler.personalities.Settler
  *     the therapist's own settlement. While assigned, that settler carries the
  *     {@link TherapyThought} below.</li>
  * <li>{@link TraitTherapyDialogue} — pick any settler of the settlement and
- *     one trait they have; for 50 000 coins it is permanently traded for a
+ *     one trait they have; for 5 000 coins it is permanently traded for a
  *     random other one. The player does not get to choose what comes back.</li>
  * </ul>
  *
@@ -90,7 +90,7 @@ public final class SkyTherapy {
     public static final int SLOTS = 4;
 
     /** Coins per trait swap. */
-    public static final int TRAIT_SWAP_PRICE = 50000;
+    public static final int TRAIT_SWAP_PRICE = 5000;
 
     /**
      * By how much therapy lifts a patient's mood, in percent of what they feel

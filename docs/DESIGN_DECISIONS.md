@@ -73,7 +73,7 @@ absolute everywhere else.
 
 ## The Warden
 
-**Recruitment costs 30,000 coins.** *Why:* it is still the single largest NPC
+**Recruitment costs 8,000 coins** (30,000 until 2026-09-25, lowered with every NPC price on the player's request). *Why:* it is still the single largest NPC
 purchase in the mod, but reachable well before the top vanilla
 settlement-expansion tier — the Warden is the ENTRY to the Skyreach's content,
 so a price that gates him behind endgame wealth gates the whole layer behind it.

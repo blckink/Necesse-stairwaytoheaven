@@ -92,7 +92,7 @@ public class OssianMob extends SkySettlerMob {
         // 8n: the cowl is ours now; the incursion robe and boots stay.
         return new String[]{"vanecowl", "voidrobe", "arcanicboots"};
     }
-    @Override protected int recruitCost() { return 18000; }
+    @Override protected int recruitCost() { return 3000; }
     /**
      * §1: "Kill Prototype Nine, take the Storm Lens Core out of it. Coins +
      * the Core. He is the most expensive of the three and says so is fair."

@@ -268,6 +268,6 @@ public class EleanorMob extends SkySettlerMob {
         // Pale and cold, out of vanilla's own wardrobe. No new art.
         return new String[]{"snowhood", "snowcloak", "clothboots"};
     }
-    @Override protected int recruitCost() { return 5000; }
+    @Override protected int recruitCost() { return 2000; }
     @Override protected String talkKey() { return "eleanortalk"; }
 }

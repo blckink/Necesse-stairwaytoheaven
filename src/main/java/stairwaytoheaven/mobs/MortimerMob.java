@@ -148,6 +148,6 @@ public class MortimerMob extends SkySettlerMob {
         // Top hat, black cloak, dress shoes — three vanilla item IDs, no new art.
         return new String[]{"tophat", "thiefscloak", "dressshoes"};
     }
-    @Override protected int recruitCost() { return 8000; }
+    @Override protected int recruitCost() { return 2500; }
     @Override protected String talkKey() { return "mortimertalk"; }
 }

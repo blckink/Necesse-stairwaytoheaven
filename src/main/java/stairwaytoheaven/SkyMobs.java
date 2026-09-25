@@ -28,7 +28,7 @@ final class SkyMobs {
         MobRegistry.registerMob("spirecatblack", SpireCatMob.Black.class, false);
         MobRegistry.registerMob("spirecattabby", SpireCatMob.Tabby.class, false);
         // v0.5: the recruited Warden as a real surface settler (HumanShop).
-        // NOT registered with createSpawnItem — the 30,000-coin (SkyWardenMob.RECRUIT_COST) recruitment
+        // NOT registered with createSpawnItem — the 8,000-coin (SkyWardenMob.RECRUIT_COST) recruitment
         // transaction transfers him directly (see SkyWardenMob.tryRecruit);
         // there is no spawn-item purchase.
         MobRegistry.registerMob("wardensettler", WardenSettlerMob.class, false);

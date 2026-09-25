@@ -200,7 +200,7 @@ public class MagpieMob extends SkySettlerMob {
         // dressed out of whatever the road offered.
         return new String[]{"magpiecap", "sharpshootercoat", "leatherboots"};
     }
-    @Override protected int recruitCost() { return 12000; }
+    @Override protected int recruitCost() { return 2000; }
     /**
      * §1: "kill the Tollwright, the vault opens, the Bonded Lockbox is hers —
      * and she then buys it off the player as part of her own recruitment fee."

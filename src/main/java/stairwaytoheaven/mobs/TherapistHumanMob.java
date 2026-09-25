@@ -101,7 +101,7 @@ public class TherapistHumanMob extends HumanShop {
     public List<InventoryItem> getRecruitItems(ServerClient client) {
         GameRandom random = new GameRandom((long) this.getSettlerSeed() * 271L);
         return Collections.singletonList(
-                new InventoryItem("coin", random.getIntBetween(900, 1400)));
+                new InventoryItem("coin", random.getIntBetween(400, 700)));
     }
 
     @Override

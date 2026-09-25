@@ -58,8 +58,9 @@ import stairwaytoheaven.quest.SkywatchWorldData;
 public class SkyWardenMob extends HumanShop {
 
     /**
-     * The recruitment price. Still the single largest NPC purchase in the mod
-     * — the Elder's priciest stock item is around 6,000 — but deliberately
+     * The recruitment price. Lowered from 30,000 on 2026-09-25 at the player's
+     * request ("everywhere you need money, and not in proportion"). Still
+     * the priciest recruit in the mod, but deliberately
      * reachable well before the top vanilla settlement-expansion tier, because
      * the Warden is the ENTRY to the Skyreach's content and pricing him at
      * endgame wealth gates the whole layer behind it.
@@ -69,7 +70,7 @@ public class SkyWardenMob extends HumanShop {
      * `DESIGN_DECISIONS.md` nor `CURRENT_STATE.md`. All three now agree with
      * the constant, which is the value the integration test observes.
      */
-    public static final int RECRUIT_COST = 30_000;
+    public static final int RECRUIT_COST = 8_000;
 
     /**
      * One-shot guard for {@link #serverTick()}: the world record is stamped the
@@ -271,7 +272,7 @@ public class SkyWardenMob extends HumanShop {
     /**
      * He cannot be killed. He is a one-of-a-kind story NPC with no random
      * replacement ({@code WardenSettler.getArriveAsRecruitAfterDeathChance} is
-     * 0), and after a 30,000-coin (RECRUIT_COST) purchase losing him to a stray mob would be
+     * 0), and after a 8,000-coin (RECRUIT_COST) purchase losing him to a stray mob would be
      * unrecoverable.
      */
     @Override

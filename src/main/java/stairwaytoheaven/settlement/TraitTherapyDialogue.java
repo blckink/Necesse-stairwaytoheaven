@@ -34,7 +34,7 @@ import stairwaytoheaven.mobs.TherapistHumanMob;
  * "Work on someone's character" — the paid trait swap.
  *
  * <p>Any settler of the therapist's settlement, whether or not they hold a
- * therapy place; one trait they actually have; 50 000 coins; and a replacement
+ * therapy place; one trait they actually have; 5 000 coins; and a replacement
  * the player does not get to choose and cannot see beforehand. The roll and the
  * charge both happen on the server — see {@code SkyTherapy.rollReplacement} for
  * why picking "any other personality" would be wrong — and the outcome comes
@@ -230,7 +230,7 @@ public class TraitTherapyDialogue extends SettlerDialogue {
     /** Set by {@code initForm}; draws the answer into the menu's own forms. */
     private java.util.function.Consumer<PacketTraitSwapResult> resultHandler;
 
-    /** 50 000 coins, as a recipe ingredient so vanilla can count and take them. */
+    /** 5 000 coins, as a recipe ingredient so vanilla can count and take them. */
     protected static Ingredient[] cost() {
         return new Ingredient[]{new Ingredient("coin", SkyTherapy.TRAIT_SWAP_PRICE)};
     }

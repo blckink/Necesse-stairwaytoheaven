@@ -137,6 +137,6 @@ public class KnottMob extends SkySettlerMob {
         // actually leads anywhere.
         return new String[]{"jesterhat", "labcoat", "jesterboots"};
     }
-    @Override protected int recruitCost() { return 22000; }
+    @Override protected int recruitCost() { return 5000; }
     @Override protected String talkKey() { return "knotttalk"; }
 }

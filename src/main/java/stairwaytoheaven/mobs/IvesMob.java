@@ -83,7 +83,7 @@ public class IvesMob extends SkySettlerMob {
      * between Eden and the Ghost band on the climb and a settler's price is
      * the mod's plainest statement of how far out you had to go to find them.
      */
-    private static final int RECRUIT_COST = 11000;
+    private static final int RECRUIT_COST = 3000;
 
     /**
      * Bars for the vigil. Twelve since 2026-09-24 (was ten, matching Eveleen's):

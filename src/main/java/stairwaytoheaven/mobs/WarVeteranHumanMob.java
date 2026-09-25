@@ -73,7 +73,7 @@ public class WarVeteranHumanMob extends HumanShop {
 
     @Override
     public List<InventoryItem> getRecruitItems(ServerClient client) {
-        return Collections.singletonList(new InventoryItem("coin", 900));
+        return Collections.singletonList(new InventoryItem("coin", 400));
     }
 
     /**

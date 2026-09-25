@@ -348,11 +348,11 @@ every two seconds with a 60-second life, so it ends by itself if the Therapist
 dies, is banished or leaves — "only while assigned" is true without a teardown
 path that could be missed. The places themselves are saved on the Therapist mob.
 
-### Service 2 — swapping a trait, for 50 000 coins
+### Service 2 — swapping a trait, for 5 000 coins
 
 The second menu entry, **"Work on someone's character"**, is open for *every*
 settler of the settlement, whether or not they hold a therapy place. Pick the
-settler, pick one trait they actually have, confirm: 50 000 coins are taken and
+settler, pick one trait they actually have, confirm: 5 000 coins are taken and
 that trait is permanently replaced by a random other one. **The player is not
 told what is coming and does not choose it** — that is the design, not a
 shortcut. The replacement is never a trait the settler already has.
