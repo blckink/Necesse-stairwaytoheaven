@@ -284,6 +284,27 @@ realmpoi census: ... kinds=30/30 queuedkinds=30/30 landmarks=3 ...
 PASS: /swhreset regenerate generated the sky anew, kept the progress, left the surface alone.
 ```
 
+**On a real, played save** (the player's world `weirdachstan`, last played
+2026-09-24 23:44 with the jar of that evening, all five of the player's mods
+loaded, dedicated server 1.3.3 paused). VERIFIED [run] 2026-09-25:
+
+```
+before:  painter oracle: tileMismatches=624 (scan radius 64, spire footprint excluded, Spire Village ring excluded)
+dry run: resident claims kept (they live in a settlement elsewhere): vampiresettler      -- no Warden WARNING, no cat line
+  deleted: 6 region file(s), 3 preset file(s), the level file, 0 sky settlement(s); preset caches dropped: 0
+  progress kept: stage=2 recruited=true anchor=true catsHome=11 returnStairways=2 keys=1 portalsUnlocked=1 wardenRecruited=true
+after:   painter oracle: tileMismatches=0 (...)
+after:   village stamp: placed=true blocked=none houses=12/12 objects=958/958 missing=0
+after:   cat home check: ... home=surface:1475,1617 ... spirecatblack on=surface ... AT_BASKET | spirecattabby on=surface ... AT_BASKET
+```
+
+So an old save's sky — ground that no longer matched the painter (624 tiles
+in the scan radius) and no Spire Village — comes back whole. Cats that live
+at a surface basket stay there, a Warden recruited into a surface settlement
+is not touched. Every surface file that differs afterwards differs the same
+way after a load/save **without** the regenerate (it is the ordinary
+re-save), and both player files still name `level = surface`.
+
 HYPOTHESIS, because the gate has no connected client: the evacuation of a
 player standing in the sky (`players moved home` read 0 in every run), the
 chat path, a single-player run, a folder (non-zip) save, a world with a

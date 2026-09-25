@@ -27,7 +27,7 @@ In einer Welt mit der Mod (Einzelspieler reicht; du bist dort Admin), im Chat:
 /swhshowroom clear      die Ausstellungsfläche wieder leer machen
 ```
 
-**Was drin steht** (69 Exponate, je Reich eine Reihe — Skyreach, Eden,
+**Was drin steht** (70 Exponate, darunter seit 2026-09-25 `spirevillage`, das ganze Spire-Dorf, je Reich eine Reihe — Skyreach, Eden,
 Steinfeld, Geisterreich, Crooked Beyond, Hölle, Oberfläche):
 
 * `realm-<reich>` — ein Bildschirm (48×28) echter Boden und echte Natur des
