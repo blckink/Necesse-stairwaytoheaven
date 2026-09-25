@@ -4859,3 +4859,36 @@ machen soll". What vanilla offers for "an NPC explains a task", read from the
 
 HYPOTHESIS, not observed: how the longer intro text reads in the 1.3.3 client's
 dialogue window (width, scroll) — no client in the gate.
+
+## Ambient spawns: vanilla's distance rule, and why the sky broke it (2026-09-25, task 12n)
+
+Player, 2026-09-24: *"Gegner sollen nicht immer in Bereich fliegen der gecleart
+ist ... Sichtfeld wenn ich stehen bleibe ... wie auf Oberwelt von Vanilla"*.
+
+- **VERIFIED [jar 1.3.3]** The mod has no waves of its own. Every ambient
+  hostile comes through `ServerClient` tick -> `EntityManager.tickMobSpawning`
+  -> `getMobSpawnTile(level, x, y, Mob.MOB_SPAWN_AREA, tickets)`.
+  `Mob.MOB_SPAWN_AREA = new MobSpawnArea(700, 1400)` (px); `getMobSpawnTile`
+  returns null for any tile with a player closer than 700. Nothing in the mod
+  changes `MOB_SPAWN_AREA` or `EntityManager.spawnRateMod/spawnCapMod`.
+  The two mod-side `addMob` spawners near players are combat reactions, not
+  ambient: `SourvatBloomMob.burst` (on frenzy hit, capped) and the vampire
+  settler's thrall (night drain).
+- **Cap:** `getMobSpawnCap = getSpawnCap(players, 25, 5)` (= 30 for one player)
+  x difficulty x biome `getSpawnCapMod`; counted are `isHostile && canDespawn`
+  within 1400+320 px. Every mod biome's cap mod is <= 1 (sky 0.75), so the
+  headcount is already under the vanilla surface. Rate: `0.6/s` x biome mod.
+- **The real difference is aggro vs. the 700 px floor.** No vanilla chaser
+  looks further than 640 px (Ninja/Magechanic/AncientSkeletonMage 640, Skeleton
+  512, Zombie 384) — a vanilla hostile is born idle. The band uplifts put Fen
+  Wraith at 1075, Tongue Plant 960, Cinder Cantor 896, Forbidden Serpent 832
+  and every Veil 512 at 716, so those were born already chasing and flew
+  straight in. Plus the sky spawns by day (`SkySpawnRules.daylightSpawn`), where
+  the vanilla surface is empty.
+- **Fix:** `SkySpawnRules.outOfSight` — with a live `client`, no player within
+  `SIGHT_RANGE = 1100` px (half a 1080p diagonal, above every uplifted aggro but
+  the Mistserpent's 2560). Used by `daylightSpawn` and `EdenSpawnRules.gardenSpawn`.
+  A rejected draw is a failed attempt (engine retries at half cost), so pressure
+  drops rather than relocating. `client == null` callers (generation,
+  `/skyreachstatus` probes) are unchanged. HYPOTHESIS until played: the
+  integration test runs without a connected player, so it cannot exercise it.

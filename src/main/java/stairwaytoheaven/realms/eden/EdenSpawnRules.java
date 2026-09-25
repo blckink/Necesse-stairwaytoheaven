@@ -35,11 +35,14 @@ public final class EdenSpawnRules {
 
     /**
      * Vanilla's {@code HostileMob} chain with the ambient-light check swapped
-     * for the static one, and the local hostile cap one lower than vanilla's.
+     * for the static one, the spawn kept out of every player's sight (the
+     * sky's {@code SkySpawnRules.outOfSight}, 12n), and the local hostile cap
+     * one lower than vanilla's.
      */
     public static boolean gardenSpawn(Mob mob, Server server, ServerClient client, int targetX, int targetY) {
         return new MobSpawnLocation(mob, targetX, targetY)
                 .checkStaticLightThreshold(client)
+                .checkLocation((x, y) -> stairwaytoheaven.mobs.SkySpawnRules.outOfSight(mob, client, x, y))
                 .checkMobSpawnLocation()
                 .checkMaxHostilesAround(3, 8, client)
                 .validAndApply();

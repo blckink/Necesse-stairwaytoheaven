@@ -44,7 +44,10 @@ import necesse.level.maps.Level;
  * <ol>
  * <li><b>A guarded site</b> — the ground around an aeronaut wreck or a Skywatch
  *     workshop, i.e. around the loot. {@link #GUARD_TICKETS}. This is where the
- *     fight is, and it is where reinforcements arrive during it.</li>
+ *     fight is. It does NOT send reinforcements into it: the radius is 7
+ *     tiles and vanilla never draws a tile within 700 px (~22 tiles) of a
+ *     player, so a site only feeds the ring while you are out of its sight
+ *     ({@code SkySpawnRules.SIGHT_RANGE}, 12n).</li>
  * <li><b>Its approach</b> — the ring you cross on the way in, at roughly
  *     vanilla's ordinary weight, so a site announces itself before you are
  *     standing in it.</li>

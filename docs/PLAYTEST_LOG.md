@@ -917,3 +917,10 @@ bridge `92/92`, `badwindows=0` for all three.
 **Still open:** nobody has looked at them in a client. Whether the rooms READ
 well — the bakery counter, the square's pond, the carpeted dining set — is the
 player's call, and only applies to regions generated after this change.
+
+## 2026-09-24 — "Gegner sollen nicht immer in Bereich fliegen der gecleart ist" (12n)
+
+Player: enemies keep flying into the area they just cleared; standing still to
+work with NPCs, new ones keep arriving; "wie auf Oberwelt von Vanilla".
+Answered 2026-09-25 by `SkySpawnRules.outOfSight` (spawns >= 1100 px from every
+player); see `TECHNICAL_LEARNINGS.md`. Awaiting the player's check.
