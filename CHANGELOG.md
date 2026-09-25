@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format loosely follows
 ## [Unreleased]
 
 ### Changed
+- **Skystone / Himmelsstein looks like the new sky**: the ground is pale
+  pearl-blue flagstone with a few gold flecks (Codex, 20 seamless plain
+  cells, blend shapes kept) instead of dark grey noise strewn with crystals
+  and sticks. The Skystone Rock and both Skystone icons are re-inked on the
+  same pale ramp (`tools/skystone_pale_remap.py`).
 - **Blood Vial / Blutfläschchen** is brewed at the Alchemy Table from 1 raw
   meat (`anyrawmeat`) + 1 vanilla Glass Bottle. Dorian's hunt and the thralls
   still drop them too.
