@@ -128,6 +128,14 @@ Preise bewegen sich mit der Zufriedenheit des Siedlers
 (`setStaticPriceBasedOnHappiness(min, max, Schritt)`), deshalb stehen hier die
 Waren, nicht die Zahlen.
 
+**Laden erst ab dem Kapitel des Bewohners** (seit 25./26.09.): Die Dorfbewohner
+handeln mit einem Spieler erst, wenn das Kapitel ihres ersten Leiter-Auftrags
+für ihn offen ist. Vorher fehlt „Handeln“ im Gespräch, Kaufen und Verkaufen
+sind zu. Das gilt auch, wenn man sie früh angeworben hat. Magpie, Halda und
+Ossian gleich (Kapitel I), Eveleen ab Eden, Ives ab Steinfeld, Mortimer,
+Caspern und Eleanor ab Geisterreich, Knott ab Krummland. Ist das Kapitel einmal
+offen, bleibt der Laden offen. Die Sperre gilt je Spieler.
+
 ### Sky Warden — Skyreach
 | verkauft | |
 |---|---|

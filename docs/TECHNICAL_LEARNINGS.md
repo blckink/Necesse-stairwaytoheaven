@@ -4953,3 +4953,16 @@ range.endSlot, "hauljob", null)`; what is left in the copy did not fit. A
 settler reaches its `ServerSettlementData` through `levelSettler.data`.
 `VampireSettlerMob.dropAt` uses this for Dorian's hunt loot, and drops the
 remainder at `networkData.getTileX()/getTileY()` when `hasFlag()`.
+
+## Closing a HumanShop for one player (2026-09-26, Einwurf-c574b0)
+
+Read in 1.3.3 (CFR), VERIFIED [jar] for the build: vanilla's recruit page
+(`startInRecruitForm`) is not a gate — its Back (Circle on a controller) leads
+to the plain dialogue, where Trade sits (`ShopContainerForm`:153). To close a
+shop per player, return `null` from `getShop()` only while
+`getShopContainerData(client)` runs (`SkySettlerMob.shopClosedForThisWindow`):
+`HumanShop.getShopContainerData` then sends no wares, the server container takes
+its `ShopManager` from that data (`ShopContainer`:193) and gets none, and the
+form shows no Trade option without wares (`ShopContainerForm`:373–379). The
+chapter half is `SkySettlerMob.chapterLocksTrade`, asserted headless by the
+integration test's `tradelock fresh:` line. VERIFIED [game] still missing.
