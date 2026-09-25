@@ -1636,6 +1636,16 @@ swhdorianthirst3=Ich muss heute Nacht jemanden beißen. Ich würde es lieber nic
 swhdorianreportquiet=Letzte Nacht war ruhig.
 swhdorianreport=Letzte Nacht habe ich <drained> Tiere ausgesaugt. <thralls> sind wieder aufgestanden.
 swhdorianreportbit=<report> Und gebissen habe ich: <names>.
+swhdorianquest1=Lehre mich, am Tag zu gehen (<vials> Blutfläschchen, <essence> Schleier-Essenz)
+swhdorianquest2=Lehre mich, die Nacht nicht mehr zu brauchen (<vials> Blutfläschchen)
+swhdorianquestdone1=Die Sonne bremst mich nicht mehr. Am Tag bin ich so schnell wie in der Nacht.
+swhdorianquestdone2=Ich brauche die Nacht nicht mehr. Ab jetzt schlafe ich nur, wenn ich müde bin, und nie lange.
+swhdorianstage1=Ich gehe jetzt am Tag. Die Sonne bremst mich nicht mehr.
+swhdorianstage2=Ich gehe bei Tag und bei Nacht. Ich schlafe nur, wenn ich müde bin.
+swhdorianturn=<name> zum Nachtsiedler machen (<vials> Blutfläschchen)
+swhdorianunturn=<name> das Tageslicht zurückgeben
+swhdorianturned=Es ist geschehen. <name> schläft ab jetzt am Tag und arbeitet in der Nacht.
+swhdorianunturned=<name> gehört wieder dem Tag. Die Nacht lässt los.
 vampirebowl=Aus der Schale. Besser so.
 bloodbowlstock=Die Schale hält <count> von <max> Blutfläschchen.\nDorian trinkt nachts daraus, bevor er jemanden beißt.
 

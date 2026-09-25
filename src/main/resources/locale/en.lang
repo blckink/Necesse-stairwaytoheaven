@@ -1635,6 +1635,16 @@ swhdorianthirst3=I will have to bite someone tonight. I would rather not.
 swhdorianreportquiet=Last night was quiet.
 swhdorianreport=Last night I drained <drained> animals. <thralls> got up again.
 swhdorianreportbit=<report> And I bit: <names>.
+swhdorianquest1=Teach me to walk by day (<vials> Blood Vials, <essence> Veil Essence)
+swhdorianquest2=Teach me to need no night (<vials> Blood Vials)
+swhdorianquestdone1=The sun no longer slows me. I am as fast by day as I am by night.
+swhdorianquestdone2=I no longer need the night. From now on I sleep only when I am tired, and never for long.
+swhdorianstage1=I walk by day now. The sun no longer slows me.
+swhdorianstage2=I walk by day and by night. I sleep only when I am tired.
+swhdorianturn=Turn <name> into a night settler (<vials> Blood Vials)
+swhdorianunturn=Give <name> the daylight back
+swhdorianturned=It is done. <name> will sleep by day and work by night from now on.
+swhdorianunturned=<name> belongs to the day again. The night lets go.
 vampirebowl=From the bowl. Better so.
 bloodbowlstock=The bowl holds <count> of <max> Blood Vials.\nDorian drinks from it at night before he would bite anyone.
 

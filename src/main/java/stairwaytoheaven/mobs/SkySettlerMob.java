@@ -4,22 +4,29 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 import necesse.engine.localization.message.GameMessage;
 import necesse.engine.localization.message.LocalMessage;
 import necesse.engine.network.server.ServerClient;
+import necesse.engine.save.LoadData;
+import necesse.engine.save.SaveData;
 import necesse.engine.util.GameRandom;
 import necesse.entity.mobs.ai.behaviourTree.BehaviourTreeAI;
 import necesse.entity.mobs.ai.behaviourTree.trees.HumanAI;
 import necesse.entity.mobs.ai.behaviourTree.util.AIMover;
 import necesse.entity.mobs.friendly.human.HumanMob;
 import necesse.entity.mobs.friendly.human.humanShop.HumanShop;
+import necesse.entity.mobs.job.FoundJob;
+import necesse.entity.mobs.job.JobFinder;
+import necesse.entity.mobs.job.JobSequence;
 import necesse.entity.mobs.job.JobTypeHandler;
 import necesse.gfx.HumanGender;
 import necesse.gfx.HumanLook;
 import necesse.gfx.GameHair;
 import necesse.gfx.drawOptions.human.HumanDrawOptions;
 import necesse.inventory.InventoryItem;
+import necesse.level.maps.levelData.settlementData.NetworkSettlementData;
 
 /**
  * Shared base for the Skyreach's hireable residents.
@@ -60,8 +67,174 @@ public abstract class SkySettlerMob extends HumanShop {
     @Override
     public void init() {
         super.init();
-        this.ai = new BehaviourTreeAI<>(this, new HumanAI<>(320, this.attacksHostiles(), false, 25000),
-                new AIMover(HumanMob.humanPathIterations));
+        this.installBrain();
+    }
+
+    /**
+     * Builds the behaviour tree. A resident Dorian has turned
+     * ({@link #nightbound}) gets {@link NightboundAI} — the same brain with
+     * the night turned around — and everybody else vanilla's {@code HumanAI}.
+     * Called again when the flag changes at runtime.
+     */
+    protected void installBrain() {
+        if (this.keepsNightShift()) {
+            this.ai = new BehaviourTreeAI<>(this,
+                    new NightboundAI<>(320, this.attacksHostiles(), false, 25000),
+                    new AIMover(HumanMob.humanPathIterations));
+        } else {
+            this.ai = new BehaviourTreeAI<>(this, new HumanAI<>(320, this.attacksHostiles(), false, 25000),
+                    new AIMover(HumanMob.humanPathIterations));
+        }
+    }
+
+    // --- the night shift (Dorian, and whoever he has turned) --------------
+    //
+    // The second night settler of decision "Zuschnitt C" is NOT a mob swap:
+    // decisions.json ("Vampir-Siedler: Umfang ...") ruled replacing a settled
+    // resident's mob save-risky. A turned resident keeps its class, its
+    // uniqueID, its room and its shop; what changes is one saved boolean that
+    // flips the three "is it night" decisions vampiresettler already inverts
+    // (sleep, work, idling). No speed change: the flag is server-side only and
+    // speed is also read on the client.
+
+    /** Turned by Dorian ({@code DorianDialogue}). Saved with the mob. */
+    protected boolean nightbound;
+
+    public boolean isNightbound() {
+        return this.nightbound;
+    }
+
+    /** Whether this settler keeps Dorian's hours. */
+    public boolean keepsNightShift() {
+        return this.nightbound;
+    }
+
+    /** Turn (or give back the daylight to) this resident. Server only. */
+    public void setNightbound(boolean value) {
+        if (this.nightbound == value) {
+            return;
+        }
+        this.nightbound = value;
+        if (this.getLevel() != null) {
+            this.installBrain();
+        }
+    }
+
+    /** Night, as the world sees it. False on a client with no world entity. */
+    public boolean isNightTime() {
+        return this.getWorldEntity() != null && this.getWorldEntity().isNight();
+    }
+
+    /**
+     * Whether a night-shift settler is on its feet: after dark, or because the
+     * player is keeping it up (party member / standing orders).
+     */
+    public boolean isOnDuty() {
+        return this.isNightTime()
+                || this.adventureParty.isInAdventureParty()
+                || this.hasCommandOrders();
+    }
+
+    /**
+     * The night lock, turned around — for night-shift settlers only; everyone
+     * else gets vanilla's untouched.
+     *
+     * <p>Off duty: no jobs. On duty by day: {@code super} is safe, vanilla's
+     * own lock is inactive during the day. On duty at night: {@code super}
+     * would refuse before doing anything else, so it is rebuilt in
+     * {@link #findJobIgnoringNight}.
+     */
+    @Override
+    public JobSequence findJob(boolean ignoreRecreationJobs, Consumer<JobFinder> finderMod) {
+        if (!this.keepsNightShift()) {
+            return super.findJob(ignoreRecreationJobs, finderMod);
+        }
+        if (!this.isOnDuty()) {
+            return null;
+        }
+        if (!this.isNightTime()) {
+            return super.findJob(ignoreRecreationJobs, finderMod);
+        }
+        return this.findJobIgnoringNight(ignoreRecreationJobs, finderMod);
+    }
+
+    /**
+     * {@link #findJob}'s night branch: vanilla's method without its clock.
+     * Everything below the time check is vanilla's, in vanilla's order
+     * (HumanMob.java:3353-3388 and {@code EntityJobWorker.findJob}), so a
+     * night settler on strike, in a raid, in a disbanding settlement or hiding
+     * behaves exactly like anybody else.
+     */
+    private JobSequence findJobIgnoringNight(boolean ignoreRecreationJobs,
+            Consumer<JobFinder> finderMod) {
+        if (this.objectUser != null) {
+            return null;
+        }
+        NetworkSettlementData settlement = this.getSettlerSettlementNetworkData();
+        if (settlement != null
+                && (settlement.isRaidActive() || settlement.isDisbanding() || !settlement.hasOwner())) {
+            return null;
+        }
+        if (this.isHiding || this.isVisitor()) {
+            return null;
+        }
+        if (!this.adventureParty.isInAdventureParty() && !this.hasCommandOrders()
+                && this.attemptStartStrike(true)) {
+            return null;
+        }
+
+        // EntityJobWorker.findJob's own body, which `super` can no longer be
+        // asked for: `EntityJobWorker.super` is illegal once HumanMob has
+        // overridden the default (JLS 15.12.3).
+        JobTypeHandler handler = this.getJobTypeHandler();
+        long currentTime = this.getMobWorker().getTime();
+        if (handler.isOnGlobalCooldown(currentTime)) {
+            return null;
+        }
+        JobFinder jobFinder = new JobFinder(this);
+        if (finderMod != null) {
+            finderMod.accept(jobFinder);
+        }
+        FoundJob<?> first = jobFinder.findJob(ignoreRecreationJobs);
+        if (handler.resetPrioritizeNextJobIfFound) {
+            handler.prioritizeNextJobID = -1;
+        }
+        JobSequence foundJob = null;
+        if (first != null) {
+            first.startCooldown(currentTime);
+            handler.lastPerformedJobID = first.job.prioritizeForSameJobAgain() ? first.job.getID() : -1;
+            foundJob = first.getSequence();
+        } else {
+            handler.lastPerformedJobID = -1;
+            handler.prioritizeNextJobID = -1;
+        }
+
+        if (foundJob == null && this.getWorkInventory().isFull()) {
+            this.submitFullInventoryNotification();
+        } else {
+            this.removeFullInventoryNotification();
+        }
+        return foundJob;
+    }
+
+    @Override
+    public void addSaveData(SaveData save) {
+        super.addSaveData(save);
+        if (this.nightbound) {
+            save.addBoolean("swhnightbound", true);
+        }
+    }
+
+    @Override
+    public void applyLoadData(LoadData save) {
+        super.applyLoadData(save);
+        boolean turned = save.getBoolean("swhnightbound", false, false);
+        if (turned != this.nightbound) {
+            this.nightbound = turned;
+            if (this.getLevel() != null) {
+                this.installBrain();
+            }
+        }
     }
 
     /**

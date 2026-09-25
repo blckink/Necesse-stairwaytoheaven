@@ -37,7 +37,7 @@ import necesse.level.maps.levelData.settlementData.NetworkSettlementData;
  *     {@link VampireAI} swaps it into the behaviour tree in place of vanilla's
  *     node.</li>
  * <li><b>Working</b> — {@code HumanMob.findJob} (HumanMob.java:3353) returns
- *     {@code null} at night for every settler. {@link #findJob} turns that
+ *     {@code null} at night for every settler. {@code SkySettlerMob.findJob} turns that
  *     around: nothing during the day, normal settler work after dark. The
  *     night branch cannot call {@code super} (super IS the night lock), so it
  *     re-walks vanilla's own guards and then the body of
@@ -67,7 +67,7 @@ import necesse.level.maps.levelData.settlementData.NetworkSettlementData;
  * no stray mob can kill a named character), which rules out a sunburn that
  * ticks damage. What daylight takes instead is the thing that makes him worth
  * having: out in the sun he moves like anybody else, at night he is half again
- * as fast. The planned Daywalk quest removes exactly that penalty.
+ * as fast. The Daywalk quest (step 1, {@link #isSunlit}) removes exactly that penalty.
  */
 public class VampireSettlerMob extends SkySettlerMob {
 
@@ -123,36 +123,139 @@ public class VampireSettlerMob extends SkySettlerMob {
      * {@link VampireAI} does its swapping in its own constructor.
      */
     @Override
-    public void init() {
-        super.init();
+    protected void installBrain() {
         this.ai = new BehaviourTreeAI<>(this,
                 new VampireAI<>(320, this.attacksHostiles(), false, 25000),
                 new AIMover(HumanMob.humanPathIterations));
     }
 
-    // --- the clock -------------------------------------------------------
-
-    /** Night, as the world sees it. False on a client with no world entity. */
-    public boolean isNightTime() {
-        return this.getWorldEntity() != null && this.getWorldEntity().isNight();
+    /** He always keeps the night shift; that is what he is. */
+    @Override
+    public boolean keepsNightShift() {
+        return true;
     }
+
+    // --- the clock -------------------------------------------------------
 
     /**
      * Whether he is on his feet: after dark, or because the player is keeping
-     * him up (party member / standing orders).
+     * him up (party member / standing orders). Once Restless (quest step 2)
+     * the clock no longer decides: he is up day and night and only a nap
+     * takes him off his feet — never in the party or under orders, so an
+     * expedition does not lose him to a bed.
      */
+    @Override
     public boolean isOnDuty() {
-        return this.isNightTime()
-                || this.adventureParty.isInAdventureParty()
-                || this.hasCommandOrders();
+        if (this.adventureParty.isInAdventureParty() || this.hasCommandOrders()) {
+            return true;
+        }
+        return this.isRestless() ? !this.napping : this.isNightTime();
     }
 
-    /** Out in daylight — the state that costs him his speed. */
+    /** Whether an idle hour sends him hunting: the night, or any waking hour once Restless. */
+    public boolean huntsNow() {
+        return this.isRestless() ? !this.napping : this.isNightTime();
+    }
+
+    /**
+     * Out in daylight — the state that costs him his speed. Never true for a
+     * Daywalker (quest step 1): that is the whole of the reward.
+     */
     public boolean isSunlit() {
         Level level = this.getLevel();
-        return level != null && !level.isCave && !this.isNightTime()
+        return this.daywalkStage < 1 && level != null && !level.isCave && !this.isNightTime()
                 && level.isOutside(this.getTileX(), this.getTileY());
     }
+
+    // --- the Daywalk quest (decision "Zuschnitt C") ------------------------
+    //
+    // Two steps, handed in on his dialogue page (DorianDialogue):
+    //   1 Daywalker: 5 Blood Vials + 1 Veil Essence -> the sun no longer slows him.
+    //   2 Restless:  8 Blood Vials                  -> up by day and night; he
+    //     sleeps only when tired, in short naps.
+    // The quest makes him STRONGER rather than tamer (decisions.json,
+    // "Vampir-Siedler: Umfang NPC + Biss freigegeben").
+
+    public static final int QUEST1_VIALS = 5;
+    public static final int QUEST1_ESSENCE = 1;
+    public static final int QUEST2_VIALS = 8;
+    /** Blood Vials it costs him to turn a resident into a night settler. */
+    public static final int TURN_VIALS = 3;
+
+    /** Settler ticks (20 a second) he stays awake before a nap: 14 minutes. */
+    private static final float AWAKE_TICKS = 20.0F * 60.0F * 14.0F;
+    /** Settler ticks one nap lasts from fully tired: two and a half minutes. */
+    private static final float NAP_TICKS = 20.0F * 60.0F * 2.5F;
+
+    /** 0 none, 1 Daywalker, 2 Restless. Saved. */
+    private int daywalkStage;
+    /** 0 rested .. 1 must sleep. Only moves once Restless. Saved. */
+    private float fatigue;
+    /** In a nap until fatigue is back at 0. Saved. */
+    private boolean napping;
+
+    public int getDaywalkStage() {
+        return this.daywalkStage;
+    }
+
+    public boolean isRestless() {
+        return this.daywalkStage >= 2;
+    }
+
+    public float getFatigue() {
+        return this.fatigue;
+    }
+
+    /** One quest step further; the dialogue has already taken the items. */
+    public void advanceDaywalk() {
+        if (this.daywalkStage < 2) {
+            this.daywalkStage++;
+        }
+    }
+
+    /**
+     * Tired while up, rested while not. Off duty rather than "in bed" rests
+     * him, so a Dorian without a reachable bed is not wedged awake forever.
+     */
+    private void tickFatigue() {
+        if (!this.isRestless()) {
+            return;
+        }
+        if (this.isOnDuty()) {
+            this.fatigue = Math.min(1.0F, this.fatigue + 1.0F / AWAKE_TICKS);
+            if (this.fatigue >= 1.0F && !this.adventureParty.isInAdventureParty()
+                    && !this.hasCommandOrders()) {
+                this.napping = true;
+            }
+        } else {
+            this.fatigue = Math.max(0.0F, this.fatigue - 1.0F / NAP_TICKS);
+            if (this.fatigue <= 0.0F) {
+                this.napping = false;
+            }
+        }
+    }
+
+    /**
+     * The nearest resident of this mod he could turn — or give the daylight
+     * back to. Never himself, never the Warden (not a SkySettlerMob), never a
+     * vanilla settler: the flag lives on {@link SkySettlerMob}.
+     */
+    public SkySettlerMob turnCandidate() {
+        Level level = this.getLevel();
+        if (level == null) {
+            return null;
+        }
+        return level.entityManager.mobs.streamInRegionsInRange(this.x, this.y, TURN_RANGE)
+                .filter(m -> m != this && !m.removed() && m instanceof SkySettlerMob
+                        && !(m instanceof VampireSettlerMob))
+                .map(m -> (SkySettlerMob) m)
+                .filter(HumanMob::isSettler)
+                .min(java.util.Comparator.comparingDouble(m -> m.getDistance(this)))
+                .orElse(null);
+    }
+
+    /** How close a resident has to stand to be turned, in pixels: a room. */
+    private static final int TURN_RANGE = 256;
 
     /** Fast in the dark, ordinary in the sun. */
     @Override
@@ -192,6 +295,7 @@ public class VampireSettlerMob extends SkySettlerMob {
         if (!this.isServer() || !this.isSettler()) {
             return;
         }
+        this.tickFatigue();
         if (!this.isOnDuty()) {
             return;
         }
@@ -233,6 +337,8 @@ public class VampireSettlerMob extends SkySettlerMob {
                 .filter(m -> m != this && m.isHuman && !m.removed())
                 .map(m -> (HumanMob) m)
                 .filter(HumanMob::isSettler)
+                // one of his own does not feed him
+                .filter(m -> !(m instanceof SkySettlerMob && ((SkySettlerMob) m).isNightbound()))
                 .filter(m -> m.buffManager.getBuff(BloodFeverBuff.ID) == null)
                 .findFirst()
                 .orElse(null);
@@ -269,85 +375,6 @@ public class VampireSettlerMob extends SkySettlerMob {
     @Override
     public boolean doesEatFood() {
         return false;
-    }
-
-    // --- work, but after dark --------------------------------------------
-
-    /**
-     * The night lock, turned around.
-     *
-     * <p>Day branch: he has no jobs at all unless the player is keeping him up,
-     * in which case {@code super} is safe — vanilla's own lock is inactive
-     * during the day and every other guard it applies still should.
-     *
-     * <p>Night branch: {@code super} would refuse before doing anything else,
-     * so it is rebuilt here. Everything below the time check is vanilla's,
-     * in vanilla's order (HumanMob.java:3353-3388 and
-     * {@code EntityJobWorker.findJob}), so a vampire on strike, in a raid, in a
-     * disbanding settlement or hiding behaves exactly like anybody else.
-     */
-    @Override
-    public JobSequence findJob(boolean ignoreRecreationJobs, Consumer<JobFinder> finderMod) {
-        if (!this.isNightTime()) {
-            if (!this.adventureParty.isInAdventureParty() && !this.hasCommandOrders()) {
-                return null;
-            }
-            return super.findJob(ignoreRecreationJobs, finderMod);
-        }
-        return this.findJobIgnoringNight(ignoreRecreationJobs, finderMod);
-    }
-
-    /** {@link #findJob}'s night branch: vanilla's method without its clock. */
-    private JobSequence findJobIgnoringNight(boolean ignoreRecreationJobs,
-            Consumer<JobFinder> finderMod) {
-        if (this.objectUser != null) {
-            return null;
-        }
-        NetworkSettlementData settlement = this.getSettlerSettlementNetworkData();
-        if (settlement != null
-                && (settlement.isRaidActive() || settlement.isDisbanding() || !settlement.hasOwner())) {
-            return null;
-        }
-        if (this.isHiding || this.isVisitor()) {
-            return null;
-        }
-        if (!this.adventureParty.isInAdventureParty() && !this.hasCommandOrders()
-                && this.attemptStartStrike(true)) {
-            return null;
-        }
-
-        // EntityJobWorker.findJob's own body, which `super` can no longer be
-        // asked for: `EntityJobWorker.super` is illegal once HumanMob has
-        // overridden the default (JLS 15.12.3).
-        JobTypeHandler handler = this.getJobTypeHandler();
-        long currentTime = this.getMobWorker().getTime();
-        if (handler.isOnGlobalCooldown(currentTime)) {
-            return null;
-        }
-        JobFinder jobFinder = new JobFinder(this);
-        if (finderMod != null) {
-            finderMod.accept(jobFinder);
-        }
-        FoundJob<?> first = jobFinder.findJob(ignoreRecreationJobs);
-        if (handler.resetPrioritizeNextJobIfFound) {
-            handler.prioritizeNextJobID = -1;
-        }
-        JobSequence foundJob = null;
-        if (first != null) {
-            first.startCooldown(currentTime);
-            handler.lastPerformedJobID = first.job.prioritizeForSameJobAgain() ? first.job.getID() : -1;
-            foundJob = first.getSequence();
-        } else {
-            handler.lastPerformedJobID = -1;
-            handler.prioritizeNextJobID = -1;
-        }
-
-        if (foundJob == null && this.getWorkInventory().isFull()) {
-            this.submitFullInventoryNotification();
-        } else {
-            this.removeFullInventoryNotification();
-        }
-        return foundJob;
     }
 
     // --- the drain --------------------------------------------------------
@@ -418,6 +445,9 @@ public class VampireSettlerMob extends SkySettlerMob {
         save.addInt("lastdrained", this.lastDrained);
         save.addInt("lastthralls", this.lastThralls);
         save.addSafeString("lastbitten", this.lastBitten);
+        save.addInt("daywalkstage", this.daywalkStage);
+        save.addFloat("fatigue", this.fatigue);
+        save.addBoolean("napping", this.napping);
     }
 
     @Override
@@ -436,6 +466,9 @@ public class VampireSettlerMob extends SkySettlerMob {
         this.lastDrained = save.getInt("lastdrained", 0, false);
         this.lastThralls = save.getInt("lastthralls", 0, false);
         this.lastBitten = save.getSafeString("lastbitten", "", false);
+        this.daywalkStage = Math.max(0, Math.min(2, save.getInt("daywalkstage", 0, false)));
+        this.fatigue = save.getFloat("fatigue", 0.0F, false);
+        this.napping = save.getBoolean("napping", false, false);
     }
 
     // --- what he can tell you (concept 3.2) -------------------------------

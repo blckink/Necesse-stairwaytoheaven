@@ -20,7 +20,7 @@ import necesse.entity.mobs.ai.behaviourTree.leaves.HumanSleepAINode;
  * this the player would walk an expedition into a dungeon and lose their
  * vampire to the nearest bed at sunrise.
  */
-public class VampireSleepAINode<T extends VampireSettlerMob> extends HumanSleepAINode<T> {
+public class VampireSleepAINode<T extends SkySettlerMob> extends HumanSleepAINode<T> {
 
     @Override
     public boolean shouldSleep(T mob) {

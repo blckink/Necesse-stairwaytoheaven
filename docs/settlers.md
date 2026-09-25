@@ -244,8 +244,27 @@ middle of an expedition.
 **Sunlight** costs him speed, not health: every settler here is immortal
 (`SkySettlerMob.canTakeDamage` is false), so a ticking sunburn was never
 available. In the dark he is 1.45x a normal settler; out in the sun he is
-ordinary. The planned Daywalk quest (see the plan in the job folder, not yet
-built) removes exactly that penalty and puts his sleep on a tiredness meter.
+ordinary.
+
+**The Daywalk quest** (2026-09-25, IMPLEMENTED — awaiting player
+confirmation) is handed in on his own dialogue page (`DorianDialogue`), two
+steps, each an item hand-in the server re-checks:
+
+| step | ask | reward (`VampireSettlerMob`) |
+|---|---|---|
+| 1 Daywalker | 5 Blood Vials + 1 Veil Essence | `isSunlit()` is never true: 1.45x speed by day too |
+| 2 Restless | 8 Blood Vials | `isOnDuty()` ignores the clock: up day and night, a `fatigue` meter (14 min awake → nap until rested, 2.5 min) sends him to bed; never while in the party or under orders |
+| then | 3 Blood Vials per turning | he turns the nearest resident of this mod (within 256px) into a **second night settler**, and gives one back the daylight for free |
+
+The turning is **not** a mob swap (ruled save-risky, decisions.json). It is a
+saved boolean `swhnightbound` on `SkySettlerMob`: `installBrain()` then builds
+`NightboundAI` (the vampire tree without the hunt) and `SkySettlerMob.findJob`
+runs the inverted night lock that used to live in `VampireSettlerMob`. A turned
+resident keeps class, room, shop and name, eats as before (vanilla drains
+hunger by day, it eats on its night shift), gets no speed change (the flag is
+server-only) and is never bitten. Vanilla settlers and the Warden cannot be
+turned. `HumanSleepAINode.tickNode` re-polls `shouldSleep` every tick
+(VERIFIED [jar], 1.3.3), which is what ends a nap.
 
 **The night hunt** is `VampireHuntAINode`, and deliberately NOT the vanilla
 `hunting` profession: settler jobs are fenced in by `getJobRestrictZone()` to

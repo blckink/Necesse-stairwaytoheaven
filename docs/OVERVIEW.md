@@ -294,7 +294,7 @@ and Orchard Ring cells still remain pressure/terrain sites rather than presets.
 | **Ossian Vane** | **Spire Village**, the Little Archive (was: the Stormveil Test Range) | 18 000 **+ Storm Lens Core** | rotating incursion-exclusive loot (3 of 8) | — |
 | **Ives**, Verger of the Quiet Reach | **Spire Village**, the Vestry (was: Steinfeld) | 11 000 → **free** after his quest | the realm's four materials (buys), gravestones/candles/urn/stone fence + Pale Stone (sells) | `swh_steinfeldvigil` |
 | **Spire Cats** ×2 | Skyreach lairs | not recruitable | — | objective of `swh_cats` |
-| **Dorian**, the Nightbound | nowhere in the world — arrives when a coffin stands in the settlement | 11 000 | Blood Bowl (3 200–4 800) | his own dialogue page: thirst, last night, feed a vial |
+| **Dorian**, the Nightbound | nowhere in the world — arrives when a coffin stands in the settlement | 3 000 | Blood Bowl (3 200–4 800) | his own dialogue page: thirst, last night, feed a vial; Daywalk quest (5 vials + 1 Veil Essence → no sun penalty; 8 vials → awake day and night, naps when tired); then turns a nearby resident into a second night settler for 3 vials (IMPLEMENTED — awaiting player confirmation) |
 
 **The Spire Village (2026-09-24, `docs/design/chapter-03-spire-village.md`).**
 All nine named residents live in houses of their own around the Warden's Spire,

@@ -5,6 +5,15 @@ All notable changes to this project are documented here. Format loosely follows
 
 ## [Unreleased]
 
+### Added
+- **Dorian's Daywalk quest / Dorians Tagesgang-Quest** on his dialogue page:
+  step 1 *Daywalker* (5 Blood Vials + 1 Veil Essence) — the sun no longer
+  slows him; step 2 *Restless* (8 Blood Vials) — up by day and by night, he
+  sleeps only when tired (14 min awake, 2.5 min nap). After that he can turn
+  the nearest resident of this mod into a **second night settler** for 3 Blood
+  Vials (sleeps by day, works by night, never bitten) and give the daylight
+  back for free. Save-compatible: a saved flag, no mob swap.
+
 ### Changed
 - **NPC prices cut / NPC-Preise gesenkt**: the Therapist's trait swap costs
   5 000 coins instead of 50 000. Recruit fees: Warden 30 000 → 8 000, Knott

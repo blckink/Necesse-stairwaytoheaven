@@ -82,6 +82,11 @@ Ein neues Möbelstück, die „Blutschale“, aus der er selbst trinkt:
 - Optional (E5): Der Arzt **verkauft ein Heilmittel** als Gegenstand, „Blutfieber-Tinktur“, das man einem Siedler selbst gibt. Dann muss man nicht jedes Mal zum Arzt.
 
 ### 3.6 Eine kleine Questreihe mit Dorian (optional, E6)
+> **Stand 2026-09-25: anders gebaut als hier vorgeschlagen** — nach der Entscheidung
+> „Umfang NPC + Biss freigegeben“ macht die Reihe ihn stärker statt zahmer:
+> Tageswandler (5 Blutfläschchen + 1 Schleier-Essenz, kein Sonnen-Malus), Rastlos
+> (8 Blutfläschchen, Schlaf nur bei Müdigkeit), danach Verwandlung eines Bewohners
+> zum Nachtsiedler (3 Blutfläschchen). Siehe `docs/settlers.md`, „The Daywalk quest“.
 „Tageswandler“ war schon geplant (`settlers.md:238`) und wurde nie gebaut. Vorschlag in drei Schritten:
 1. **Dorian stellt sich vor:** der Vampir-Hinweis und seine Regeln.
 2. **„Halte mich satt“:** 5 Blutfläschchen bringen.

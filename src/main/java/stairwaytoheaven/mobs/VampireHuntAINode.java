@@ -59,7 +59,7 @@ public class VampireHuntAINode<T extends VampireSettlerMob> extends MoveTaskAINo
 
     @Override
     public AINodeResult tickNode(T mob, Blackboard<T> blackboard) {
-        if (!mob.isServer() || !mob.isNightTime() || mob.isHiding || !mob.isSettler()
+        if (!mob.isServer() || !mob.huntsNow() || mob.isHiding || !mob.isSettler()
                 || mob.getBloodThirst() >= THIRSTY_BELOW) {
             this.prey = null;
             return AINodeResult.FAILURE;
