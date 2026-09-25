@@ -14,8 +14,9 @@ All notable changes to this project are documented here. Format loosely follows
   health and spawn invincibility come back as with the potion. While a fight
   is on he heals the most hurt ally within 10 tiles (settlers of his
   settlement and its players) every 3 s for 10 % of their max health (min 20).
-  Applies to Doctors already living in a settlement. Headless:
-  `skyreachstatus doctor` / `doctorcheck`.
+  Applies to Doctors already living in a settlement. Debug only:
+  `skyreachstatus doctor` knocks a real settler to 0 health to test this —
+  run it on world copies, never on a save someone plays.
 
 - **Dorian's Daywalk quest / Dorians Tagesgang-Quest** on his dialogue page:
   step 1 *Daywalker* (5 Blood Vials + 1 Veil Essence) — the sun no longer

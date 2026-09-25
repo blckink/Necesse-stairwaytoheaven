@@ -4966,3 +4966,40 @@ its `ShopManager` from that data (`ShopContainer`:193) and gets none, and the
 form shows no Trade option without wares (`ShopContainerForm`:373–379). The
 chapter half is `SkySettlerMob.chapterLocksTrade`, asserted headless by the
 integration test's `tradelock fresh:` line. VERIFIED [game] still missing.
+
+## Downed settlers, and settlers the world has no mob for (2026-09-26)
+
+Read in 1.3.3 (CFR), VERIFIED [run] headless where marked:
+- With `canSettlersDie=false`, `HumanMob.setHealthHidden` downs a settler at
+  0 health instead of killing it and **removes it from the settlement's
+  settler list at once**. That is why a downed settler is missing from the
+  settlement menu, while it still lies on the spot and shows on the map as
+  long as its region is loaded. A player revives it by talking to it with a
+  Revival Potion (`HumanShop.getShopContainerData` puts `revivalpotion` into
+  the recruit items). The revive itself is the ordinary recruit path
+  (`PacketShopContainerUpdate.recruitSettler` → `moveIn` → `makeSettler`
+  clears the downed state → `onRecruited` restores `savedSettlerSettings`,
+  sets max(25 %, current) health, 5 s spawn invincibility).
+- Vanilla bug: `setHealthHidden` sets `settlementUniqueID = 0` and only then
+  calls `setDowned(getSettlementUniqueID(), …)`, so the recruit reservation
+  is always 0. The one reliable "whose settler was this" key is
+  `savedSettlerSettings.settlementUniqueID`, written from the `LevelSettler`
+  just before the removal. `SkyDoctor.belongsTo` uses it.
+- A settlement that lists a settler with no mob anywhere in the world logs
+  `Could not find settler <id> in settlement. Removing soon...` every 10 s
+  and then `Removed not found settler <id>` after about 50 s. VERIFIED [run]
+  on a world copy with only the SETTLER entries restored. This is how four
+  settlers vanished after the 2026-09-25 23:24 crash (PLAYTEST_LOG).
+- Headless without a player, the surface gets loaded by `skyreachstatus
+  cats` (it reads the cats' home level), which is enough for the settlement
+  check above. But the server unloads the surface again about 10 s later
+  (`Suggesting garbage collection due to empty server and unloaded levels`),
+  and mob AI does not tick from then on: a Doctor 18 tiles from a downed
+  settler had not moved after 60 s. Anything that needs time (walking,
+  healing) is not observable there. Test what a command can call directly:
+  `skyreachstatus doctor` runs the revive node's search and `SkyDoctor.revive`
+  in one call.
+- Settlers without a player team all share vanilla's team -10, together with
+  other settlements' settlers and village residents
+  (`HumanMob.updateTeam`), so `isSameTeam` does not mean "ours". Compare
+  `getSettlementUniqueID()` instead.

@@ -924,3 +924,24 @@ Player: enemies keep flying into the area they just cleared; standing still to
 work with NPCs, new ones keep arriving; "wie auf Oberwelt von Vanilla".
 Answered 2026-09-25 by `SkySpawnRules.outOfSight` (spawns >= 1100 px from every
 player); see `TECHNICAL_LEARNINGS.md`. Awaiting the player's check.
+
+## 2026-09-26 — "Händler bei RAID gestorben … sehe Siedler nicht auf Karte"
+
+Player: the trader died in a raid, settler death is off, and the settler is
+not on the map. Also: the Doctor should always run to fallen settlers,
+revive them, and heal others in a fight.
+
+Finding (read from the saves and logs): not the raid (22:20). At 23:16
+(`LATEST_BACKUP1`) Tamara (trader), the alchemist, the explorer and the
+pirate were alive at full health in volterra. The game stopped mid-run at
+23:24:34 with no error in either log. The 23:35 load listed all four in the
+settlement but had no mob for them, and Necesse removed them at 23:37:19
+(`Removed not found settler …`). Why the last autosave lost the mobs cannot
+be told any more: that file is overwritten (HYPOTHESIS: a torn autosave in
+the crash). A restore script (the four MOB blocks and SETTLER entries from
+23:16 into the current save) is in the job folder
+`~/aethergate/jobs/20260926-000354-22761/files/` and was VERIFIED [run]
+headless on a copy. It has not been applied yet: it needs the game closed.
+
+The Doctor part landed in 7466873. The revive was VERIFIED [run] headless;
+the walk and the heal pulse are HYPOTHESIS until the next raid is played.

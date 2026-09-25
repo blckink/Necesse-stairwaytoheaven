@@ -45,6 +45,8 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                 // "doctor" downs the settled settler nearest to a settled
                 // Doctor on the surface; "doctorcheck" reports on it later,
                 // which is how a headless run sees the Doctor revive someone.
+                // It hurts a real settler: world copies only, never a save
+                // someone plays.
                 new necesse.engine.commands.CmdParameter("mode",
                         new necesse.engine.commands.parameterHandlers.StringParameterHandler("", "cats", "dump", "pois",
                                 "doctor", "doctorcheck"), true));
