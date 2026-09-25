@@ -57,9 +57,11 @@ public final class WardenBrief {
                     .append(new LocalMessage("misc", "wardenrecruit1"));
         } else if (step.id.startsWith("key")) {
             // SkyWardenMob.RegionKey's askKey: "wardenkeyask" + RealmDepth.keyOf.
-            out.append(new LocalMessage("misc", "wardenkeyask" + step.id.substring(3)));
+            String askKey = "wardenkeyask" + step.id.substring(3);
+            out.append(new LocalMessage("misc", askKey));
         } else {
-            out.append(new LocalMessage("misc", "wardendialog" + step.id));
+            String dialogKey = "wardendialog" + step.id; // wardendialogcats, wardendialoganchor
+            out.append(new LocalMessage("misc", dialogKey));
         }
         out.append("\n\n").append(new LocalMessage("misc", "wardendialogtask", "title", step.title));
         for (GameMessage objective : step.objectives) {

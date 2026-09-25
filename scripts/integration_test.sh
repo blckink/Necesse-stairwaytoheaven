@@ -507,7 +507,7 @@ grep -qE "journal book: reader=world chapters=6 steps=[1-9][0-9]* bytes=[1-9][0-
     || { echo "FAIL: the journal summary did not build, round-trip or translate cleanly"; STATUS=1; }
 # Every Warden step says what, why, what it opens and what it pays, in English
 # AND German (the "missing=0" above only reads English). Task 10n, 2026-09-25.
-grep -qE "journal warden: reader=world steps=11/11 complete=11 missingde=0" "$LOG1" \
+grep -qE "journal warden: reader=world steps=11/11 complete=11 missingde=0 probe=OK" "$LOG1" \
     || { echo "FAIL: a Warden step lacks its why/opens/reward text, or a German line is missing"; \
          grep -E "journal warden:|journal missing German" "$LOG1"; STATUS=1; }
 grep -qF "journal check: FAIL" "$LOG1" "$LOG3" \

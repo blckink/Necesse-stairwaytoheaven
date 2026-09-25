@@ -441,8 +441,12 @@ public final class LegacyQuestSource implements JournalStepSource {
 
     /** Why the Warden asks for it and what it opens, from the step's own ID. */
     private static void explain(JournalStep step) {
-        step.why = new LocalMessage("journal", "why" + step.id);
-        step.opens = new LocalMessage("journal", "opens" + step.id);
+        // Built keys, one per WARDEN_STEPS entry; tools/locale_audit.py notes
+        // them as runtime-built, and /swhjournal checks each in en and de.
+        String whyKey = "why" + step.id;
+        String opensKey = "opens" + step.id;
+        step.why = new LocalMessage("journal", whyKey);
+        step.opens = new LocalMessage("journal", opensKey);
     }
 
     private static GameMessage after(GameMessage title) {

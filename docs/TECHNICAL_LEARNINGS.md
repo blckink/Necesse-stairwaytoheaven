@@ -4844,13 +4844,18 @@ machen soll". What vanilla offers for "an NPC explains a task", read from the
   (ContainerQuest.java, VERIFIED [jar]). Not used: its accept/complete/skip
   buttons go through `HumanShop.completeQuest/skipQuest`, which would have to
   re-implement the Warden's co-op-safe `giveOnce`/`removeAllOfType` hand-out.
-- **Every registered language is loaded on a dedicated server**
-  (`Localization.reload` loops all `languages`, Localization.java:87-88), and
-  `Translation.isMissing` answers true for an absent category or key
-  (Translation.java:200-206), VERIFIED [jar]. So `isMissingKey(Localization.German)`
-  is a real German gate headless: `/swhjournal` prints
-  `journal warden: reader=world steps=11/11 complete=11 missingde=0`,
-  VERIFIED [run] 2026-09-25.
+- **`isMissingKey(Localization.German)` does NOT catch a key de.lang lacks.**
+  `Translation.isMissing` only answers true for an absent CATEGORY
+  (Translation.java:200-206); for a known category it asks
+  `TranslationCategory.isMissing`, which is `missingTranslations.getOrDefault(key,
+  false)` — true only for keys a language file explicitly FLAGS as missing
+  (TranslationCategory.java:29-55, VERIFIED [jar] 1.3.3). An absent key reads as
+  present. The first cut of the 10n gate used it and would have passed with
+  German lines missing; caught in review before it shipped. The gate uses
+  `Localization.German.translationExists(category, key)` instead (the loaded
+  table, which the mod's de.lang is merged into) and self-tests on a key that
+  exists and one that does not (`probe=OK`). The journal's older
+  `missing=0` is English-only for the same reason.
 
 HYPOTHESIS, not observed: how the longer intro text reads in the 1.3.3 client's
 dialogue window (width, scroll) — no client in the gate.

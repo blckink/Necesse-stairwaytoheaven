@@ -149,7 +149,7 @@ public class JournalCommand extends ModularChatCommand {
                 for (GameMessage part : new GameMessage[] {step.title, step.description, step.why, step.opens, step.reward}) {
                     if (part == null || part.isMissingKey(Localization.English)) {
                         whole = false;
-                    } else if (part.isMissingKey(Localization.German)) {
+                    } else if (germanMissing(part)) {
                         whole = false;
                         missingDe++;
                         System.out.println("journal missing German key in step " + step.id + ": " + part.translate());
@@ -160,8 +160,30 @@ public class JournalCommand extends ModularChatCommand {
                 }
             }
         }
+        // The probe proves the German check can fail at all: a key de.lang
+        // has must read present, one nobody wrote must read absent.
+        boolean probe = !germanMissing(new necesse.engine.localization.message.LocalMessage("journal", "whylabel"))
+                && germanMissing(new necesse.engine.localization.message.LocalMessage("journal", "no10nprobe"));
         logs.add("journal warden: reader=" + who + " steps=" + warden + "/" + LegacyQuestSource.WARDEN_STEPS.size()
-                + " complete=" + complete + " missingde=" + missingDe);
+                + " complete=" + complete + " missingde=" + missingDe + " probe=" + (probe ? "OK" : "FAIL"));
+    }
+
+    /**
+     * Whether de.lang lacks this message's own key. NOT
+     * {@code isMissingKey(Localization.German)}: that only reports keys a
+     * language file explicitly flags as missing
+     * ({@code TranslationCategory.isMissing} is {@code getOrDefault(key, false)},
+     * VERIFIED [jar] 1.3.3) and reads an absent key as present.
+     * {@code translationExists} looks the key up in the loaded German table,
+     * which the mod's own de.lang is merged into.
+     */
+    private static boolean germanMissing(GameMessage message) {
+        if (message instanceof necesse.engine.localization.message.LocalMessage) {
+            necesse.engine.localization.message.LocalMessage local =
+                    (necesse.engine.localization.message.LocalMessage) message;
+            return !Localization.German.translationExists(local.category, local.key);
+        }
+        return false;
     }
 
     private static void count(GameMessage message, int[] counts) {
