@@ -48,6 +48,13 @@ dark, gothic, Beetlejuice/Addams — but still readable on a dark floor.
 
 ## Lessons (newest first — append, do not rewrite)
 
+- 2026-09-25 · **Multi-view objects: one view is the scale, the others follow.**
+  The cannon's end-on rows (north/south) were drawn 2.2x the side view's scale
+  because each job was told to fill the cell; the player saw two machines.
+  Name the canonical view, hand its idle frame as a ref, give wheel/barrel
+  sizes in px and say "equal SCALE, not equal size — end-on it is narrow".
+  Measure a shared part (wheel height) across all rows before shipping.
+
 - 2026-09-25 · **Name costume colours from the worn sheet, not from memory.**
   Nine outfit item icons came back right in size on the first pass with hard
   numbers per kind, but the puppet shirt was red/white/blue because the brief
