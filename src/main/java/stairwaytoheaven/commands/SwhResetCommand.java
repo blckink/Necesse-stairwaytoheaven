@@ -96,7 +96,7 @@ public class SwhResetCommand extends ModularChatCommand {
     private static final String[] NAMED_RESIDENTS = {
             "skywarden", "wardensettler", "magpiesettler", "haldasettler", "ossiansettler",
             "eveleensettler", "mortimersettler", "caspernsettler", "eleanorsettler",
-            "knottsettler",
+            "knottsettler", "ivessettler", "vampiresettler",
     };
 
     public SwhResetCommand() {
@@ -291,6 +291,12 @@ public class SwhResetCommand extends ModularChatCommand {
             world.resetProgress(false);
         }
         int fogRecords = veil == null ? 0 : veil.resetProgress();
+        // The Spire Village's quest ladder keeps its own per-player progress.
+        stairwaytoheaven.quest.ladder.LadderWorldData ladder =
+                stairwaytoheaven.quest.ladder.LadderWorldData.get(server);
+        if (ladder != null) {
+            ladder.resetProgress();
+        }
         int removed = removeModQuests(server);
         boolean warden = sky.restoreSpireWarden();
 

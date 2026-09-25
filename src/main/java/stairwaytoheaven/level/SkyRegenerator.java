@@ -395,6 +395,9 @@ public final class SkyRegenerator {
         SkywatchWorldData world = SkywatchWorldData.get(server);
         if (world != null) {
             world.residentsClaimed.removeAll(plan.claimsReleased);
+            // The Spire Village's "who lives at home" record described the
+            // deleted houses; the new village re-seats and re-records them.
+            world.villageResidents.removeAll(plan.claimsReleased);
             if (plan.catHomeInSky) {
                 world.catHomeSet = false;
                 world.catHomeLevel = "";
