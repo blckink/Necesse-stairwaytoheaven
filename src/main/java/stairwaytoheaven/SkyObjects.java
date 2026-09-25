@@ -44,7 +44,8 @@ final class SkyObjects {
         SkyRegistry.stormCrystalID = ObjectRegistry.getObjectID("stormcrystal");
         SkyRegistry.stormCrystalRID = ObjectRegistry.getObjectID("stormcrystalr");
 
-        CrystalClusterObject.registerCrystalCluster("aurorabloom", new Color(214, 130, 172), 0.90F, "aurorapetal", 30.0F, true, SKY_CATEGORY);
+        CrystalClusterObject.registerCrystalCluster("aurorabloom", new Color(214, 130, 172), 0.90F, "aurorapetal",
+                1, 2, 1, 30.0F, true, SKY_CATEGORY);    // vanilla default 2-3: see auroraColonyObject
         SkyRegistry.auroraBloomID = ObjectRegistry.getObjectID("aurorabloom");
         SkyRegistry.auroraBloomRID = ObjectRegistry.getObjectID("aurorabloomr");
 

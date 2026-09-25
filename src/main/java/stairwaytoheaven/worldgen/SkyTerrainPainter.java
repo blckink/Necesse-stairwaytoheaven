@@ -150,15 +150,12 @@ public final class SkyTerrainPainter {
     public static final float AURORA_COLONY_CHANCE = 0.72F;
     /** Fraction of a colony's footprint that actually grows a plant. */
     public static final float AURORA_COLONY_FILL = 0.62F;
-    /** Share of a colony's plants that are blooms rather than lilies. */
-    public static final float AURORA_BLOOM_SHARE = 0.70F;
     public static final float AURORA_EDGE_AMOUNT = 0.70F;
     public static final float AURORA_EDGE_SCALE = 4.0F;
 
     public static final long SALT_AURORA_COLONY = 0xA0C01L;
     public static final long SALT_AURORA_EDGE = 0xA0C2FL;
     public static final int SALT_AURORA_FILL = 41;
-    public static final int SALT_AURORA_PICK = 43;
 
     private static final float TAU = 6.2831855F;
 
@@ -829,6 +826,7 @@ public final class SkyTerrainPainter {
         int cellX = Math.floorDiv(tileX, AURORA_COLONY_CELL);
         int cellY = Math.floorDiv(tileY, AURORA_COLONY_CELL);
         float best = Float.MAX_VALUE;
+        boolean heart = false;
         for (int ox = -1; ox <= 1; ox++) {
             for (int oy = -1; oy <= 1; oy++) {
                 int cx = cellX + ox;
@@ -844,10 +842,19 @@ public final class SkyTerrainPainter {
                 float dx = tileX - siteX;
                 float dy = tileY - siteY;
                 best = Math.min(best, (float) Math.sqrt(dx * dx + dy * dy) / radius);
+                heart |= (int) Math.floor(siteX) == tileX && (int) Math.floor(siteY) == tileY;
             }
         }
         if (best == Float.MAX_VALUE) {
             return 0;
+        }
+        // The bloom is the colony's heart: one per bed, on the tile holding
+        // the site, with lilies round it. Before 2026-09-25 70% of every
+        // filled tile was a bloom at 2-3 petals each -- a bed of ~15 tiles
+        // paid ~16 petals and "ein Feld abgeerntet und schon hat man
+        // hunderte". Now a bed pays 1-2.
+        if (heart) {
+            return SkyRegistry.auroraBloomID;
         }
         float wobble = SkyNoise.fbm(seed + SALT_AURORA_EDGE, tileX, tileY, AURORA_EDGE_SCALE, 2) - 0.5F;
         if (best - wobble * AURORA_EDGE_AMOUNT > 1.0F) {
@@ -856,9 +863,7 @@ public final class SkyTerrainPainter {
         if (SkyNoise.tileRoll(seed, tileX, tileY, SALT_AURORA_FILL) >= AURORA_COLONY_FILL) {
             return 0;
         }
-        return SkyNoise.tileRoll(seed, tileX, tileY, SALT_AURORA_PICK) < AURORA_BLOOM_SHARE
-                ? SkyRegistry.auroraBloomID
-                : SkyRegistry.auroralilyID;
+        return SkyRegistry.auroralilyID;
     }
 
     /**
