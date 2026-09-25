@@ -18,6 +18,12 @@ All notable changes to this project are documented here. Format loosely follows
   seraph statue) are crafted at the Carpenter's Bench, not the Workstation.
   The furniture keeps its own `skywatch` tab there, next to oak, spruce and the
   rest. Walls, doors, floors and fences stay at the Workstation.
+- **Starfall Fragments no longer lie about loose.** Worldgen puts a Prism
+  Shard Vein (`prismshardrock`, the Aurora ore rock) where it used to drop a
+  lone Starfall: in the stone-barren beds, on bare bedrock in the Skyway
+  passages (never on the paving), and at the core of the Sky Fragment crater.
+  The pickaxe breaks it into prism shards. Already generated Starfalls stay and
+  break into a shard; the Serpent's Reef keeps its three as lights.
 - **Natural scenery pieces are no longer craftable**: Storm-Scorched Ground,
   Broken Skywatch Stone, Charged Crystal, Withered Shrub, Aurora Shard Cluster,
   Starfall Fragment. They now always break into their material, even when a

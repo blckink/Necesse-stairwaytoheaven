@@ -926,8 +926,12 @@ public final class SkyTerrainPainter {
         if (biomeClass == BIOME_AURORA) {
             return SkyRegistry.auroraShardsID;
         }
-        // Skyway and Driftlands both take the Starfall: gold on pale ground.
-        return SkyRegistry.starfallID;
+        // Skyway and Driftlands used to take the Starfall, a lone star lying
+        // on the ground that broke into one prism shard. The player found it
+        // ugly and pointless (2026-09-25: "lieber was zum zerschlagen wie ein
+        // Prisma-Fels"), so the bed carries a prism-shard vein instead: a rock
+        // the pickaxe breaks into shards, like every other ore here.
+        return SkyRegistry.prismshardRockID;
     }
 
     private SkyTerrainPainter() {
@@ -1388,7 +1392,9 @@ public final class SkyTerrainPainter {
             if (roll < 0.130F) return isRockPatch ? 0 : SkyRegistry.cloudbellID;
             if (roll < 0.165F) return isRockPatch ? 0 : SkyRegistry.skytulipID;
             if (roll < 0.198F) return SkyRegistry.skyscreeID;       // broken paving
-            if (roll < 0.215F) return SkyRegistry.starfallID;
+            // Was a Starfall on the paving; now a prism-shard vein, and only
+            // on bare bedrock so a rock never stands in a passage.
+            if (roll < 0.215F) return isRockPatch ? SkyRegistry.prismshardRockID : 0;
             return 0;
         }
         if (biomeClass == BIOME_STORMVEIL) {

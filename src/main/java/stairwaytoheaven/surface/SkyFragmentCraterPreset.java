@@ -13,8 +13,8 @@ import stairwaytoheaven.SkyRegistry;
  *
  * <p>A ragged crater: a scorched Stormslate core inside a Skystone debris
  * field, Aetherium nodes cracked open by the impact, Skystone boulders thrown
- * onto the rim, and a charred strongbox that came down with it. One lit
- * {@code starfall} accent, so the crater reads at night.
+ * onto the rim, and a charred strongbox that came down with it. At the core
+ * a {@code prismshardrock} vein to break open.
  *
  * <h2>What it writes, and what it deliberately does not</h2>
  * A fresh {@link Preset} is filled with −1 ("leave alone") in every layer
@@ -65,7 +65,7 @@ public class SkyFragmentCraterPreset extends Preset {
         final int rock = SurfaceMaterials.known("object:skystonerock", SkyRegistry.skystoneRockID);
         final int ore = SurfaceMaterials.known("object:aetheriumrock", SkyRegistry.aetheriumRockID);
         final int rubble = SurfaceMaterials.known("object:skywatchrubble", SkyRegistry.skywatchRubbleID);
-        final int starfall = SurfaceMaterials.known("object:starfall", SkyRegistry.starfallID);
+        final int prismVein = SurfaceMaterials.known("object:prismshardrock", SkyRegistry.prismshardRockID);
         final int screed = SurfaceMaterials.obj("stormscreed");
         final int chest = SurfaceMaterials.obj("deadwoodchest");
         final int crystal = SurfaceMaterials.known("object:stormcrystal", SkyRegistry.stormCrystalID);
@@ -125,9 +125,9 @@ public class SkyFragmentCraterPreset extends Preset {
         this.setObject(C - 2, C + 4, rubble);
         this.setObject(C + 3, C - 3, rubble);
         this.setObject(C - 4, C - 1, rubble);
-        // One lit accent, so a crater is something you notice from a distance
-        // at night rather than a grey patch you walk past.
-        this.setObject(C + 2, C + 3, starfall);
+        // The fragment's core: a prism-shard vein to break open (was a lone
+        // Starfall on the ground until 2026-09-25).
+        this.setObject(C + 2, C + 3, prismVein);
 
         // Somebody got here first (2026-09-24): a prospector's oil lantern left
         // burning on the north-east rim and his sack of samples beside it. A
