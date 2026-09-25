@@ -296,13 +296,15 @@ public class VampireSettlerMob extends SkySettlerMob {
             return;
         }
         this.tickFatigue();
+        // Before the duty check: asleep by day he still has to notice the
+        // dawn, or wasNight stays true and "last night" never rolls again.
+        this.rollNight();
         if (!this.isOnDuty()) {
             return;
         }
         this.bloodThirst = Math.max(0.0F,
                 this.bloodThirst - (float) (50.0 / (1000.0 * (double) SECONDS_PER_FULL_THIRST)));
 
-        this.rollNight();
         if (this.bloodThirst < BOWL_THRESHOLD
                 && stairwaytoheaven.settlement.BloodBowlObject.drinkNear(this.getLevel(),
                         this.getTileX(), this.getTileY(), BOWL_REACH_TILES)) {
@@ -433,6 +435,24 @@ public class VampireSettlerMob extends SkySettlerMob {
     }
 
     // --- persistence ------------------------------------------------------
+
+    /**
+     * The Daywalk stage goes to the client with the mob: {@link #getSpeed}
+     * reads {@link #isSunlit}, and the client predicts movement with it. A
+     * stage only the server knew would rubber-band a Daywalker every step by
+     * day. (Right after the hand-in the client learns it at the next load.)
+     */
+    @Override
+    public void setupSpawnPacket(necesse.engine.network.PacketWriter writer) {
+        super.setupSpawnPacket(writer);
+        writer.putNextByteUnsigned(this.daywalkStage);
+    }
+
+    @Override
+    public void applySpawnPacket(necesse.engine.network.PacketReader reader) {
+        super.applySpawnPacket(reader);
+        this.daywalkStage = reader.getNextByteUnsigned();
+    }
 
     @Override
     public void addSaveData(SaveData save) {

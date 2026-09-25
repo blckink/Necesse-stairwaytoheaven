@@ -4895,3 +4895,16 @@ ist ... Sichtfeld wenn ich stehen bleibe ... wie auf Oberwelt von Vanilla"*.
   700), so night composition near the player may skew toward Galehounds. `client == null` callers (generation,
   `/skyreachstatus` probes) are unchanged. HYPOTHESIS until played: the
   integration test runs without a connected player, so it cannot exercise it.
+
+## Settler sleep node and bed release (2026-09-25, Dorian's Daywalk quest)
+
+- VERIFIED [jar] (1.3.3 client, javap -c): `HumanSleepAINode.tickNode` calls
+  `canSleep` and `shouldSleep` again on every tick, also while the settler is
+  already lying in bed — flipping `shouldSleep` to false ends a sleep by
+  itself. Dorian's naps (`VampireSettlerMob.tickFatigue`) rely on this.
+- VERIFIED [jar] (1.3.2 server and 1.3.3 client): `ObjectUserActive.stopUsing()`
+  exists; `HumanMob.objectUser` is a public field.
+- HYPOTHESIS: swapping a settler's behaviour tree at runtime while it is in
+  bed would leave `objectUser` held by the discarded sleep node and block
+  `findJob` for good; `SkySettlerMob.setNightbound` therefore calls
+  `objectUser.stopUsing()` before `installBrain()`. Not observed either way.

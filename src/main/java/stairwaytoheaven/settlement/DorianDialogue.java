@@ -120,6 +120,11 @@ public class DorianDialogue extends SettlerDialogue {
                     DorianDialogue.this.runQuest(container);
                 } else if (canAffordQuest(DorianDialogue.this.daywalkStage, container.client.playerMob)) {
                     DorianDialogue.this.daywalkStage++;
+                    // This client's copy of him learns it now, so his day speed
+                    // does not rubber-band until the next load.
+                    if (DorianDialogue.this.settlerMob instanceof VampireSettlerMob) {
+                        ((VampireSettlerMob) DorianDialogue.this.settlerMob).advanceDaywalk();
+                    }
                 }
                 DorianDialogue.this.doneKey = DorianDialogue.this.daywalkStage >= 2
                         ? "swhdorianquestdone2" : "swhdorianquestdone1";
