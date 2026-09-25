@@ -58,9 +58,19 @@ public class AnchorDeliveryQuest extends DeliverItemsQuest {
      */
     public static final int STORMSTEEL = 8;
 
+    /**
+     * 11n (2026-09-25): the three above are all surface work -- ore, rock and
+     * a forge -- and a player had them together "nach paar min". The
+     * Skyreach's band trophy ({@code SkyItems}, 8n) drops only from the
+     * Skystone Golem (12 %, the band's elite and every guard pack's anchor)
+     * and from the chapter-02 hoard chests (15 %), so two of them mean
+     * clearing guarded sites rather than mining. docs/BALANCE.md §11.
+     */
+    public static final int HEARTS = 2;
+
     public AnchorDeliveryQuest() {
         super(new ItemObjective("aetheriumbar", BARS), new ItemObjective("skystone", STONE),
-                new ItemObjective("stormsteelbar", STORMSTEEL));
+                new ItemObjective("stormsteelbar", STORMSTEEL), new ItemObjective("skystoneheart", HEARTS));
     }
 
     @Override

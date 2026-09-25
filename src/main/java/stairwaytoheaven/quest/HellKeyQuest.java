@@ -43,7 +43,10 @@ import necesse.gfx.gameFont.FontOptions;
 public class HellKeyQuest extends DeliverItemsQuest {
 
     public HellKeyQuest() {
-        super(new ItemObjective("realityshard", 16), new ItemObjective("oddwood", 24));
+        // 11n: Hell has no band trophy of its own, so twice the Crooked one
+        // (docs/BALANCE.md §11), in keeping with "twice what the Crooked cost you".
+        super(new ItemObjective("realityshard", 16), new ItemObjective("oddwood", 24),
+                new ItemObjective("stripedhorn", 4));
     }
 
     @Override

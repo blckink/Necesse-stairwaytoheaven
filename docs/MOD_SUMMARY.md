@@ -272,7 +272,7 @@ ihre Aufgabe beim ersten Treffen.
 | `swh_findspire` | erster Aufstieg | finde die Alte Wächterspitze | Karten-Pin |
 | `swh_recruitwarden` | Warden | 30 000 zahlen | der Warden zieht ein |
 | `swh_cats` | Warden | beide Katzen mit Wolkenzupf-Leckerli heimlocken | **Katzenkorb**, 2× Flackerlicht-Girlande, 10× Sturmstahlbarren |
-| `swh_anchor` | Warden | 20× Aetheriumbarren, 80× Himmelsstein, 8× Sturmstahlbarren | ⭐ **Wolkengleve**, Himmelswacht-Banner, 5× Aurorablatt |
+| `swh_anchor` | Warden | 20× Aetheriumbarren, 80× Himmelsstein, 8× Sturmstahlbarren, **2× Himmelsstein-Herz** | ⭐ **Wolkengleve**, Himmelswacht-Banner, 5× Aurorablatt |
 | `swh_beacon` | *niemand* | — | **TOT** — registriert, wird nie vergeben; existiert nur, damit Spielstände vor 0.5 laden |
 
 **Die Wolkengleve ⭐ NEU** — die Gleve der Himmelswacht: die Kryogleve der
@@ -296,12 +296,12 @@ Beschwörungssteine dieses Realms auf.
 
 | ID | Aufgabe | Belohnung |
 |---|---|---|
-| `swh_keyskyreach` | 10× Sturmsplitter, 5× Fulgurit | Skyreach-Wachfeuer, 4× Sturmstahlbarren, **4× Sturmscheibe** (ein ganzer Satz — eine einzelne ließ sich nicht schmieden), Himmelswacht-Kapuze |
-| `swh_keyeden` | 8× Edensaft, 6× Goldener Pollen | Gartenstiege von Eden, 5× Sturmstahlbarren, Windheuler, Mantel des Hüters |
-| `swh_keysteinfeld` | 8× Echosplitter, 20× Blasser Stein | Trauerengel von Steinfeld, 6× Sturmstahlbarren, Sturmklinge, Stiefel des Hüters |
-| `swh_keyghostrealm` | 12× Knochenholz, 8× Spektralerz | Rabenkanzel des Nachgartens, 6× Geisterstahlbarren, **Geisterstahl-Schnitter** (statt Himmelsreißer), Sturmstahl-Armschiene |
-| `swh_keycrookedbeyond` | 16× Seltsamholz, 8× Realitätssplitter | Knotts Krumme Tür, 8× Geisterstahlbarren, **Grabwind-Bogen** (statt Prismenrufer), Auroramedaillon |
-| `swh_keyhell` | 16× Realitätssplitter, 24× Seltsamholz | Höllensiegel, **16× Geisterstahlbarren** (statt Donnerhaupt + Zephyr-Gurtzeug + 10×) |
+| `swh_keyskyreach` | 10× Sturmsplitter, 5× Fulgurit, **2× Himmelsstein-Herz** | Skyreach-Wachfeuer, 4× Sturmstahlbarren, **4× Sturmscheibe** (ein ganzer Satz — eine einzelne ließ sich nicht schmieden), Himmelswacht-Kapuze |
+| `swh_keyeden` | 8× Edensaft, 6× Goldener Pollen, **2× Blütenzahn** | Gartenstiege von Eden, 5× Sturmstahlbarren, Windheuler, Mantel des Hüters |
+| `swh_keysteinfeld` | 8× Echosplitter, 20× Blasser Stein, **2× Trauerflor** | Trauerengel von Steinfeld, 6× Sturmstahlbarren, Sturmklinge, Stiefel des Hüters |
+| `swh_keyghostrealm` | 12× Knochenholz, 8× Spektralerz, **2× Seelenhalsband** | Rabenkanzel des Nachgartens, 6× Geisterstahlbarren, **Geisterstahl-Schnitter** (statt Himmelsreißer), Sturmstahl-Armschiene |
+| `swh_keycrookedbeyond` | 16× Seltsamholz, 8× Realitätssplitter, **2× Gestreiftes Horn** | Knotts Krumme Tür, 8× Geisterstahlbarren, **Grabwind-Bogen** (statt Prismenrufer), Auroramedaillon |
+| `swh_keyhell` | 16× Realitätssplitter, 24× Seltsamholz, **4× Gestreiftes Horn** | Höllensiegel, **16× Geisterstahlbarren** (statt Donnerhaupt + Zephyr-Gurtzeug + 10×) |
 
 Die Waffen steigen jetzt mit: Skyreach-Waffen auf den ersten drei Stufen, die
 Geisterwaffen ab dem Ghost Realm. Hell zahlt vorerst nur Barren, weil es noch

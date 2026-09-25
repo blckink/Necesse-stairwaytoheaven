@@ -484,3 +484,81 @@ statline of their own at all** — they are vanilla reskins that inherit
 predates this pass and is not fixed by it: three of the five Crooked Beyond
 enemies are therefore still standing at the Skyreach floor. It is the largest
 single hole left in the ladder.
+
+## 11. What the Warden's chain asks for (2026-09-25, 11n)
+
+### Why
+
+The player, 2026-09-24: the ingredients for the first Warden quests were all
+together "nach paar min". Read off the code, that is exactly right — **not one
+material any Warden `DeliverItemsQuest` asked for needed a place to be found.**
+Every one of them has an open-world source (census of every source, file:line,
+taken for this pass):
+
+| item | cheapest source | explore? |
+|---|---|---|
+| skystone | `skystonerock` outcrops, 0.46 of 16-tile cells (`SkyObjects`, `SkyTerrainPainter`) | no |
+| aetheriumbar | 3 `aetheriumore` (surface rock) at a vanilla forge (`SkyItems:523`) | no |
+| stormsteelbar | Aether Forge: 4 ore + 1 storm shard (`SkyProfessions:176`); Halda sells 1 for 420–800 | no |
+| stormshard | `stormcrystal` on 3.5 % of Stormveil tiles; every Storm Wisp 1–2 | no |
+| fulgurite | `fulguriterock` in Stormveil/Skyway outcrops; Rime Sentry 70 % | no |
+| edensap / goldenpollen | Jealous Vine 85 %, Bloom Maw 80 % / Golden Hornet 70 % — common table mobs | no |
+| echoshard / palestone | stray gravestones, Hollow Angel always 2–5 / `palestonerock`, Ives sells it | no |
+| bonewood / spectralore | every Ghost tree / `spectralorerock` 1.2 % of the Bone Orchard | no |
+| oddwood / realityshard | `spiraltree` 3 % of Spiral Fields / `teethrock` 2.2 % of the Striped Waste | no |
+
+So a rung was a shopping list, and §B1's rule ("only obtainable IN that region")
+only ever made it a shopping list *in the right place*.
+
+### The rule now
+
+**Every rung = its surface materials, unchanged, plus one proof of having
+explored its band.** The proof is the band's trophy (`SkyItems`, 8n): one per
+band of §10's uplift table, dropped by one mob that only that band spawns, plus
+a chance in that band's chapter-02 hoard chest (`RealmPoiHoards.prize`). The
+trophies craft into nothing, so the ask does not compete with a recipe; the
+player's only other use for them is selling to Magpie.
+
+| band | trophy | where it drops (VERIFIED [jar], read off source) | chance |
+|---|---|---|---|
+| Skyreach | `skystoneheart` | Skystone Golem — the elite of three Skyreach tables and the anchor of every guard pack; Counterfeit Treasury / Fallen Observatory prize | 12 % / 15 % |
+| Eden | `bloomfang` | Bloom Maw; Hedge Labyrinth prize | 12 % / 15 % |
+| Steinfeld | `mourningband` | Stone Mourner; Ossuary prize | 12 % / 20 % |
+| Ghost Realm | `soulcollar` | Mourning Bride (elite); Wedding Feast prize | 12 % / 20 % |
+| Crooked Beyond | `stripedhorn` | Door Mimic; Hall of Doors prize | 20 % / 20 % |
+
+Two trophies at 12 % is ≈17 elite kills in expectation — a tour of the band's
+guarded sites, not a detour past a rock. The surface amounts were **left as they
+were** on purpose: they already track §5 (the anchor's are the §1 tier-10 ×4),
+and raising them would only lengthen the farming the player complained about
+instead of replacing it with a reason to go somewhere.
+
+### Old and new
+
+| quest | old ask | new ask |
+|---|---|---|
+| `swh_anchor` | 20 Aetherium Bar, 80 Skystone, 8 Stormsteel Bar | 20 Aetherium Bar, 80 Skystone, 8 Stormsteel Bar, **2 Skystone Heart** |
+| `swh_keyskyreach` | 10 Storm Shard, 5 Fulgurite | 10 Storm Shard, 5 Fulgurite, **2 Skystone Heart** |
+| `swh_keyeden` | 8 Eden Sap, 6 Golden Pollen | 8 Eden Sap, 6 Golden Pollen, **2 Bloom Fang** |
+| `swh_keysteinfeld` | 8 Echo Shard, 20 Pale Stone | 8 Echo Shard, 20 Pale Stone, **2 Mourning Band** |
+| `swh_keyghostrealm` | 12 Bonewood, 8 Spectral Ore | 12 Bonewood, 8 Spectral Ore, **2 Soul Collar** |
+| `swh_keycrookedbeyond` | 16 Oddwood, 8 Reality Shard | 16 Oddwood, 8 Reality Shard, **2 Striped Horn** |
+| `swh_keyhell` | 16 Reality Shard, 24 Oddwood | 16 Reality Shard, 24 Oddwood, **4 Striped Horn** |
+
+Hell has no band and no trophy of its own; its ask was always "the Crooked
+Beyond, twice over" (`wardenkeyaskhell`), so it takes twice the Crooked horn.
+
+**Not changed, and why.** `swh_recruitwarden` asks for coins (30 000,
+`SkyWardenMob.RECRUIT_COST`), not items — the price is a recorded decision
+(the Warden is the *entry* to the layer, not an endgame purchase) and the
+integration test reads it. `swh_cats` is not a `DeliverItemsQuest` at all.
+
+**Old saves.** A quest that is already in a player's journal keeps the ask it
+was handed out with: `DeliverItemsQuest.addSaveData` writes each objective's
+`itemStringID` and `itemsAmount` into the save and `applyLoadData` rebuilds the
+objectives from exactly those (decompiled 1.3.2 `DeliverItemsQuest.java`
+lines 75–98, VERIFIED [jar]). The new asks reach a world the next time the
+Warden hands a rung out.
+
+**Status: IMPLEMENTED — awaiting player confirmation.** Whether ≈17 elite kills
+per rung is the right length is a playtest question.

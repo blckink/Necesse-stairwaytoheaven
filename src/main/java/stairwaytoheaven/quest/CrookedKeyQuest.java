@@ -38,7 +38,11 @@ import necesse.gfx.gameFont.FontOptions;
 public class CrookedKeyQuest extends DeliverItemsQuest {
 
     public CrookedKeyQuest() {
-        super(new ItemObjective("oddwood", 16), new ItemObjective("realityshard", 8));
+        // 11n: plus the band trophy (docs/BALANCE.md §11) -- the surface
+        // materials alone were farmable in minutes; the trophy needs the band's
+        // own elite or its hoard chest.
+        super(new ItemObjective("oddwood", 16), new ItemObjective("realityshard", 8),
+                new ItemObjective("stripedhorn", 2));
     }
 
     @Override

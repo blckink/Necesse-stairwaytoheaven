@@ -35,7 +35,11 @@ import necesse.gfx.gameFont.FontOptions;
 public class SteinfeldKeyQuest extends DeliverItemsQuest {
 
     public SteinfeldKeyQuest() {
-        super(new ItemObjective("echoshard", 8), new ItemObjective("palestone", 20));
+        // 11n: plus the band trophy (docs/BALANCE.md §11) -- the surface
+        // materials alone were farmable in minutes; the trophy needs the band's
+        // own elite or its hoard chest.
+        super(new ItemObjective("echoshard", 8), new ItemObjective("palestone", 20),
+                new ItemObjective("mourningband", 2));
     }
 
     @Override

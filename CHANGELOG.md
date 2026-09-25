@@ -23,6 +23,13 @@ All notable changes to this project are documented here. Format loosely follows
   `tools/recolour_preview.py` previews the ramp.
 
 ### Changed
+- **Warden quests need an expedition per rung (11n).** The anchor and all six
+  region keys keep their materials and now also ask for their band's trophy:
+  2 Skystone Heart (anchor, Skyreach key), 2 Bloom Fang, 2 Mourning Band,
+  2 Soul Collar, 2 Striped Horn, and 4 Striped Horn for Hell. Every earlier
+  ingredient had a surface source; the trophies drop only from the band's
+  elite (12–20 %) or its hoard chest. Quests already in a journal keep their
+  old ask. Table and reasons: `docs/BALANCE.md` §11.
 - **The Warden's quests are readable** (task 10n, playtest 2026-09-24: "Durch
   die Textblasen ist null lesbar was man machen soll"). His dialogue window
   now opens on the task he just gave you — his words, the goal with your own

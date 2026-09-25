@@ -34,7 +34,11 @@ import necesse.gfx.gameFont.FontOptions;
 public class EdenKeyQuest extends DeliverItemsQuest {
 
     public EdenKeyQuest() {
-        super(new ItemObjective("edensap", 8), new ItemObjective("goldenpollen", 6));
+        // 11n: plus the band trophy (docs/BALANCE.md §11) -- the surface
+        // materials alone were farmable in minutes; the trophy needs the band's
+        // own elite or its hoard chest.
+        super(new ItemObjective("edensap", 8), new ItemObjective("goldenpollen", 6),
+                new ItemObjective("bloomfang", 2));
     }
 
     @Override

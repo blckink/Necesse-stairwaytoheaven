@@ -13,21 +13,21 @@ next to it; the reasons are in "The 2026-09-24 tuning pass" at the end.
 | 1 | `swh_findspire` | first climb of the Skyward Stairway | find the Old Warden Spire | map pin (signpost) | Skyreach |
 | 2 | `swh_recruitwarden` | Sky Warden | recruit him, 30 000 coins | he moves in + **Silver Bell** (the Veil's key) + the beacon lights | Skyreach |
 | 3 | `swh_cats` | Sky Warden | coax Siggi and Peanut home with Cloudpuff Treats | Cat Basket, 2x Flickerlight Garland, 10x Stormsteel Bar | Skyreach |
-| 4 | `swh_anchor` | Sky Warden | 20x Aetherium Bar, 80x Skystone, 8x Stormsteel Bar | **Wolkengleve** ~~Stormsteel Vambrace~~, Skywatch Banner, 5x Aurora Petal | Skyreach (finale) |
-| 5 | `swh_keyskyreach` | Sky Warden | 10x Storm Shard, 5x Fulgurite | Skyreach Watchfire, 4x Stormsteel Bar, **4x** ~~1x~~ Stormdisc, Skywatch Hood | Skyreach → Cryo Queen |
+| 4 | `swh_anchor` | Sky Warden | 20x Aetherium Bar, 80x Skystone, 8x Stormsteel Bar, **2x Skystone Heart** | **Wolkengleve** ~~Stormsteel Vambrace~~, Skywatch Banner, 5x Aurora Petal | Skyreach (finale) |
+| 5 | `swh_keyskyreach` | Sky Warden | 10x Storm Shard, 5x Fulgurite, **2x Skystone Heart** | Skyreach Watchfire, 4x Stormsteel Bar, **4x** ~~1x~~ Stormdisc, Skywatch Hood | Skyreach → Cryo Queen |
 | 6 | `swh_edenreach` | Eden Gate, first use | find Eveleen | signpost | Eden |
 | 7 | `swh_edenplants` | Eveleen | 1x Eden Berry, 1x Moon Melon, 1x Sun Grape | 3x Knowledge Cutting, 10x Stormsteel Bar, her 7 000 fee waived | Eden |
-| 8 | `swh_keyeden` | Sky Warden | 8x Eden Sap, 6x Golden Pollen | Eden Garden Stair, 5x Stormsteel Bar, Galehowl, Warden's Mantle | Eden → Moonlight Dancer |
+| 8 | `swh_keyeden` | Sky Warden | 8x Eden Sap, 6x Golden Pollen, **2x Bloom Fang** | Eden Garden Stair, 5x Stormsteel Bar, Galehowl, Warden's Mantle | Eden → Moonlight Dancer |
 | 9 | `swh_steinfeldvigil` | Ives | 14x Grave Salt, 10x Spirit Moss | his 11 000 fee waived, **12x** ~~10x~~ Stormsteel Bar | Steinfeld |
-| 10 | `swh_keysteinfeld` | Sky Warden | 8x Echo Shard, 20x Pale Stone | Mourning Angel, 6x Stormsteel Bar, Tempest Edge, Warden's Boots | Steinfeld → Ascended Wizard |
+| 10 | `swh_keysteinfeld` | Sky Warden | 8x Echo Shard, 20x Pale Stone, **2x Mourning Band** | Mourning Angel, 6x Stormsteel Bar, Tempest Edge, Warden's Boots | Steinfeld → Ascended Wizard |
 | 11 | `swh_eleanor` | Eleanor | PASS ON: hold 12x Veil Essence · STAY: recruit her (5 000) | PASS ON: Will-o'-Wisp Lantern + **10x** ~~14x~~ Spiritsteel Bar · STAY: she moves in + **10x** ~~14x~~ | Ghost Realm |
 | 12 | `swh_mortimerrites` | Mortimer | 12x Soul Thread, 10x Bonewood | his 8 000 fee waived, 6x Spiritsteel Bar | Ghost Realm |
 | 13 | `swh_caspernforge` | Caspern | 12x Spectral Ore, 8x Veil Essence | his 14 000 fee waived, 6x Spiritsteel Bar | Ghost Realm |
-| 14 | `swh_keyghostrealm` | Sky Warden | 12x Bonewood, 8x Spectral Ore | Raven Perch, 6x Spiritsteel Bar, **Spiritsteel Reaver** ~~Skyreave~~, Stormsteel Vambrace | Ghost → Pest Warden |
+| 14 | `swh_keyghostrealm` | Sky Warden | 12x Bonewood, 8x Spectral Ore, **2x Soul Collar** | Raven Perch, 6x Spiritsteel Bar, **Spiritsteel Reaver** ~~Skyreave~~, Stormsteel Vambrace | Ghost → Pest Warden |
 | 15 | `swh_crookedarrival` | Crooked Door, first use | find Mr. Knott | signpost | Crooked Beyond |
 | 16 | `swh_crookeddoor` | Mr. Knott | 5x Reality Shard, 8x Warp Resin, 8x Strange Fabric | Zephyr Harness, 12x Spiritsteel Bar, 6x Reality Shard | Crooked Beyond |
-| 17 | `swh_keycrookedbeyond` | Sky Warden | 16x Oddwood, 8x Reality Shard | Knott's Crooked Door, 8x Spiritsteel Bar, **Gravewind Bow** ~~Prismcaller~~, Aurora Locket | Crooked → Crystal Dragon |
-| 18 | `swh_keyhell` | Sky Warden | 16x Reality Shard, 24x Oddwood | Infernal Seal, **16x** ~~10x~~ Spiritsteel Bar ~~+ Thunderhead + Zephyr Harness~~ | Hell → Mutant Hydra |
+| 17 | `swh_keycrookedbeyond` | Sky Warden | 16x Oddwood, 8x Reality Shard, **2x Striped Horn** | Knott's Crooked Door, 8x Spiritsteel Bar, **Gravewind Bow** ~~Prismcaller~~, Aurora Locket | Crooked → Crystal Dragon |
+| 18 | `swh_keyhell` | Sky Warden | 16x Reality Shard, 24x Oddwood, **4x Striped Horn** | Infernal Seal, **16x** ~~10x~~ Spiritsteel Bar ~~+ Thunderhead + Zephyr Harness~~ | Hell → Mutant Hydra |
 | — | `swh_beacon` | *nobody* | — | dead: registered so old saves load, never handed out | — |
 
 **How the chains hand each other on.** The Warden's chain is strictly linear
@@ -36,7 +36,9 @@ the six region keys start only at DONE and are offered one at a time in boss
 order. The realm chains (Eveleen, Ives, Mortimer, Caspern, Eleanor, Knott) are
 side lines layered on top: each is handed out by its own person the first time
 they are met, and two of them (Eden, Crooked) open with a signpost handed out
-by the gate object you walk through. Nothing in the table can be handed out and
+by the gate object you walk through. Since 2026-09-25 (11n) every Warden rung also asks for its band's trophy —
+the one ingredient that needs a guarded site or the band's elite rather than a
+rock; the table and the reasons are `docs/BALANCE.md` §11. Nothing in the table can be handed out and
 then never turned in — see "A dead end this pass found and fixed" and the
 region-key co-op sweep below.
 
