@@ -445,7 +445,7 @@ in keiner Liste. Rezept-Station ist die Tech-ID (`workstation` = Werkbank,
 | `stormsedge` | Objekt | GrassObject |  | objects.landscaping.plants | objects.landscaping.plants | nein / nein | 0.0 | NORMAL |  |
 | `tallcloudgrass` | Objekt | GrassObject |  | objects.landscaping.plants | objects.landscaping.plants | nein / nein | 0.0 | NORMAL |  |
 | `thunderbloom` | Objekt | GrassObject |  | objects.landscaping.plants | objects.landscaping.plants | ja / ja | 1.0 | NORMAL |  |
-| `treeofplenty` | Objekt | FruitTreeObject |  | objects.landscaping.plants | objects | ja / ja | 100.0 | NORMAL |  |
+| `treeofplenty` | Objekt | TreeOfPlentyObject |  | objects.landscaping.plants | objects | ja / ja | 100.0 | NORMAL |  |
 | `whisperreeds` | Objekt | NaturalGrassObject |  | objects.landscaping.plants | objects.landscaping.plants | ja / ja | 1.0 | NORMAL |  |
 | `widowflower` | Objekt | SteinfeldPlantObject |  | objects.landscaping.plants | objects.landscaping.plants | nein / nein | 0.0 | NORMAL |  |
 | `widowvine` | Objekt | GhostPlantObject |  | objects.landscaping.plants | objects.landscaping.plants | nein / nein | 0.0 | NORMAL |  |

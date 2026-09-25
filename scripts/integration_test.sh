@@ -620,6 +620,10 @@ for expected in \
     grep -qF "swhcat loot $expected" "$LOG1" \
         || { echo "FAIL: loot probe expected: $expected"; grep -aE "swhcat loot" "$LOG1" | head -3; STATUS=1; }
 done
+# The Tree of Plenty's sprite hangs four fruits; until 2026-09-25 every
+# harvest was Paradise Apples only (vanilla FruitTreeObject, one fruit ID).
+grep -qF "swhcat harvest treeofplenty fruits=[edenberry, moonmelon, paradiseapple, sungrape]" "$LOG1" \
+    || { echo "FAIL: the Tree of Plenty does not harvest its fruit mix"; grep -aE "swhcat harvest" "$LOG1" | head -3; STATUS=1; }
 
 echo "--- verifying the arsenal stream's enemies can actually be placed ---"
 # Two failure modes this catches, and they look identical from a log:

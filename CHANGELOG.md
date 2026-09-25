@@ -21,6 +21,14 @@ All notable changes to this project are documented here. Format loosely follows
   was neither registered nor sold.
 
 ### Changed
+- **Tree of Plenty harvests a fruit mix / Baum der Fülle trägt gemischte
+  Früchte**: its sheet hangs apples, grapes and other fruit, but as a plain
+  vanilla `FruitTreeObject` it only knew one fruit ID, so every harvest was
+  Paradise Apples. Each harvested fruit is now rolled separately: Paradise
+  Apple 45 %, Sun Grape 20 %, Eden Berry 20 %, Moon Melon 15 % — for the
+  player's harvest and the settler's harvest job alike. Amount and growth are
+  unchanged; trees already standing in a save switch over on load.
+
 - **Dorian's hunt loot goes to storage / Dorians Jagdbeute kommt ins Lager**:
   the Blood Vial (and the occasional raw mutton) from a night drain is put
   straight into the settlement's storage — highest priority first, chest

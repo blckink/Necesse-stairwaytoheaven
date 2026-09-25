@@ -168,12 +168,8 @@ public final class EdenRealm {
                 new necesse.level.gameObject.TreeObject("paradisepalm", "palmlog", "palmsapling",
                         new Color(133, 79, 18), 40, 80, 120, "palmleaves"),
                 0.0F, false, false, true);
-        treeOfPlentyID = ObjectRegistry.registerObject("treeofplenty",
-                new necesse.level.gameObject.FruitTreeObject(
-                        "treeofplenty", "sprucelog", "applesapling",
-                        900.0F, 1800.0F, "paradiseapple", 1.5F, 4,
-                        new Color(74, 168, 75), 30, 60, 100, "appleleaves"),
-                100.0F, true);
+        // Harvest is a weighted mix of Eden fruit, matching the sprite.
+        treeOfPlentyID = ObjectRegistry.registerObject("treeofplenty", new TreeOfPlentyObject(), 100.0F, true);
         edenBerryBushID = object("blackberrybush");
         sunGrapeBushID = object("blueberrybush");
         moonMelonBushID = object("blueberrybush");

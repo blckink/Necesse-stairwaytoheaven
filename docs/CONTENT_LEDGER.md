@@ -163,7 +163,7 @@ chapter; the ground is real now.
 | `knowledgecutting` | item | Rare living cutting recovered near Knowledge Trees. |
 | `paradisecoconut` | item | Lagoon-shore fruit and cache reward. |
 | `paradisepalm` | object | Eden's oversized lagoon palm, using vanilla palm tree behaviour on its own sprite and object ID. |
-| `treeofplenty` | object | Multi-fruit Eden tree with its own growing and snow-covered variants. |
+| `treeofplenty` | object | Multi-fruit Eden tree with its own growing and snow-covered variants; harvest is a weighted mix of Paradise Apple, Sun Grape, Eden Berry and Moon Melon (`TreeOfPlentyObject`). |
 | `giantfigtree` | object | Twisted tropical Eden tree bearing purple fruit clusters. |
 | `knowledgetree` | object | Rare golden landmark tree surrounded by Eden's danger gradient. |
 | `paradisefern` | object | Eight-variant walk-through fern ground cover for Eden. |

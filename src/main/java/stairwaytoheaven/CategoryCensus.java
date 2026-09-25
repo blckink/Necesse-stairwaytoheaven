@@ -73,6 +73,11 @@ public final class CategoryCensus {
                 } catch (Throwable t) {
                     System.out.println("swhcat loot: FAILED " + t);
                 }
+                try {
+                    probeHarvest(event);
+                } catch (Throwable t) {
+                    System.out.println("swhcat harvest: FAILED " + t);
+                }
             }
         });
     }
@@ -154,6 +159,45 @@ public final class CategoryCensus {
                 sb.append(byPlayer ? " placed=" : " natural=").append(ids);
             }
             System.out.println(sb);
+        }
+    }
+
+    /**
+     * What a fruit tree hands out, asked of its real object entity on a
+     * throwaway level: both the player's harvest (split items) and the
+     * settler job's harvest, over enough stages to see every fruit. Prints
+     * {@code swhcat harvest <id> fruits=[..]}.
+     */
+    static final String[] HARVEST_PROBES = {"treeofplenty"};
+
+    private static void probeHarvest(ServerStartEvent event) {
+        necesse.level.maps.Level level = new necesse.level.maps.Level(
+                new necesse.engine.util.LevelIdentifier("swhharvestprobe"), 8, 8, event.server.world.worldEntity);
+        for (String id : HARVEST_PROBES) {
+            int objectID = necesse.engine.registries.ObjectRegistry.getObjectID(id);
+            if (objectID < 0) {
+                System.out.println("swhcat harvest " + id + " MISSING");
+                continue;
+            }
+            GameObject object = necesse.engine.registries.ObjectRegistry.getObject(objectID);
+            necesse.entity.objectEntity.ObjectEntity entity = object.getNewObjectEntity(level, 3, 3);
+            if (!(entity instanceof necesse.entity.objectEntity.FruitGrowerObjectEntity)) {
+                System.out.println("swhcat harvest " + id + " NOFRUIT");
+                continue;
+            }
+            necesse.entity.objectEntity.FruitGrowerObjectEntity grower =
+                    (necesse.entity.objectEntity.FruitGrowerObjectEntity) entity;
+            java.util.TreeSet<String> ids = new java.util.TreeSet<>();
+            for (int i = 0; i < 200; i++) {
+                grower.setRandomStage(new necesse.engine.util.GameRandom(i));
+                for (necesse.inventory.InventoryItem item : grower.getHarvestSplitItems()) {
+                    ids.add(item.item.getStringID());
+                }
+                for (necesse.inventory.InventoryItem item : grower.getHarvestItems()) {
+                    ids.add(item.item.getStringID());
+                }
+            }
+            System.out.println("swhcat harvest " + id + " fruits=" + ids);
         }
     }
 
