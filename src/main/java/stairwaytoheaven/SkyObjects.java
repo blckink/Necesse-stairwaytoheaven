@@ -241,9 +241,13 @@ final class SkyObjects {
 
         // --- Dense meadow tall grasses: walk-through carpets (drop nothing,
         // clear on a swing like vanilla tall grass) ---
-        SkyRegistry.tallcloudgrassID = registerMeadowGrass("tallcloudgrass", new Color(186, 202, 186));
-        SkyRegistry.stormsedgeID = registerMeadowGrass("stormsedge", new Color(96, 110, 128));
-        SkyRegistry.prismgrassID = registerMeadowGrass("prismgrass", new Color(206, 190, 214));
+        // The colour is also the debris the engine throws when the grass is
+        // walked through or cut (GameObject.getDebrisColor falls back to
+        // mapColor), so it is taken from the sprite's own mean: the old
+        // grey-green values made every stir of a carpet puff grey dust.
+        SkyRegistry.tallcloudgrassID = registerMeadowGrass("tallcloudgrass", new Color(122, 197, 228));
+        SkyRegistry.stormsedgeID = registerMeadowGrass("stormsedge", new Color(73, 76, 122));
+        SkyRegistry.prismgrassID = registerMeadowGrass("prismgrass", new Color(227, 164, 236));
 
         // --- Ores (same RockOreObject mask idiom as aetherium) ---
         SkyRegistry.fulguriteRockID = ObjectRegistry.registerObject("fulguriterock",

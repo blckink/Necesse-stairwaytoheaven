@@ -238,6 +238,19 @@ public final class SkyTerrainPainter {
     public static final float SPIRE_GROUNDS_RADIUS = 18.0F;
 
     /**
+     * Town grounds: the ring from the plaza out to this radius is where the
+     * player settles, and it was the easiest mine in the world -- every rock,
+     * ore, crate and bush of the open sky, a few steps from the spire
+     * (reported 2026-09-25). Inside it resources survive only with a chance
+     * that ramps from {@link #TOWN_KEEP_MIN} at the plaza rim to 1 here; the
+     * meadow carpets are scenery, drop nothing, and stay, so the town still
+     * looks alive.
+     */
+    public static final float TOWN_GROUNDS_RADIUS = 46.0F;
+    public static final float TOWN_KEEP_MIN = 0.15F;
+    public static final int SALT_TOWN_THIN = 157;
+
+    /**
      * v0.7 built landscape: the Skywatch roads, the designed places they
      * connect and the gates between them all come from
      * {@link SkyLandscape}, which decides them as registry-free SURFACE/PROP
@@ -1237,6 +1250,23 @@ public final class SkyTerrainPainter {
         }
 
         int band = SkyOrigin.bandFor(hubDist);
+
+        // Town grounds: a thinned tile gets no resource, only the meadow
+        // carpet it would have had anyway.
+        if (hubDist < TOWN_GROUNDS_RADIUS) {
+            float t = (hubDist - SPIRE_GROUNDS_RADIUS) / (TOWN_GROUNDS_RADIUS - SPIRE_GROUNDS_RADIUS);
+            float keep = TOWN_KEEP_MIN + (1.0F - TOWN_KEEP_MIN) * Math.max(0.0F, t);
+            if (SkyNoise.tileRoll(seed, tileX, tileY, SALT_TOWN_THIN) >= keep) {
+                int carpet = 0;
+                if (!isRockPatch
+                        && SkyNoise.fbm(seed + SALT_MEADOW, tileX, tileY, MEADOW_SCALE, 2) > MEADOW_THRESHOLD
+                        && SkyNoise.tileRoll(seed, tileX, tileY, SALT_MEADOW_ROLL) < MEADOW_DENSITY) {
+                    carpet = isStormveil ? SkyRegistry.stormsedgeID
+                            : (isAurora ? SkyRegistry.prismgrassID : SkyRegistry.tallcloudgrassID);
+                }
+                return pack(groundID, carpet, biomeID, false);
+            }
+        }
 
         // Everything below this point — outcrops, aurora colonies, wreck
         // sites, workshops, meadow carpets, the scree beds — is the BRIGHT
