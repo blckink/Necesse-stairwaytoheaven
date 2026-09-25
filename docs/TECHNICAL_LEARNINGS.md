@@ -4689,10 +4689,25 @@ those regions saved empty, and the presets over them are gone for good; the
 fix stops new ones but does not repair those. Repairing them would mean
 deleting the regions' save data so they regenerate — not done here.
 
-**Same class, from saved evidence [run] (geometry of a kept failing run, not
-re-run before the fix):** the `dewkeepershut ... objects=0/169 placed=0/64` run
+**Same class [run]:** the `dewkeepershut ... objects=0/169 placed=0/64` run
 with every tile `@t0` had world seed `aKiVp`, `tabbyLair=142,-175`; the cat
 ring round it is tiles 110..174 x -207..-143, and the hut's box
 (122..134 x -156..-144) lies wholly inside it — every region under it was
-loaded empty, so no ground and no preset. The `rpeak=5200:0/3204` Outland FAIL
+loaded empty, so no ground and no preset. Re-run on the fix with
+`INTEGRATION_SEED=aKiVp`: `realmpoi stamp: kind=dewkeepershut at=122,-156
+objects=84/169 fill=49.7% placed=64/64 missing=0` and `PASS`. Likewise
+`INTEGRATION_SEED=VLk1r`: `kind=aethermanufactory at=-257,-153 objects=147/567
+fill=25.9% placed=127/127 missing=0`, `PASS`. The `rpeak=5200:0/3204` Outland FAIL
 (seed `yZeXb`) is 5000 tiles from any cat and is NOT this class.
+
+**Still open after the fix, and not this class [run]:** `INTEGRATION_SEED=yZeXb`
+still fails `no Outland ground at Crooked Beyond's peak`
+(`rpeak=5200:0/3204`, identical before and after); random seed `F6mfM`
+(census 1561972458) fails the same Outland probe (`rpeak=5200:0/3353`) and
+`fallinginstitute stands nowhere in the world` with
+`realmpoi kind fallinginstitute: ... accepted=0 queued=0` while
+`realmpoi funnel skyreach: candidates=32 accepted=31 ... nearlandmark=1` — the
+placement decision itself (a pure function of the seed, no tile generated)
+starving one of the Skyreach kinds, i.e. the bounded-band arithmetic of
+2026-09-10, not region loading. Neither log has a `swh region skipped
+generation` line. Both reproducible now with `INTEGRATION_SEED`.
