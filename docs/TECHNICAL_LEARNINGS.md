@@ -4908,3 +4908,20 @@ ist ... Sichtfeld wenn ich stehen bleibe ... wie auf Oberwelt von Vanilla"*.
   bed would leave `objectUser` held by the discarded sleep node and block
   `findJob` for good; `SkySettlerMob.setNightbound` therefore calls
   `objectUser.stopUsing()` before `installBrain()`. Not observed either way.
+
+## A multi-tile's collision can differ per rotation; only `isSolid` and the region cannot (2026-09-25, cannon c28012)
+
+Read in the decompiled 1.3.3 `Necesse.jar` (not yet observed in game):
+`GameObject.getCollision(Level, x, y, rotation)` is `protected` and receives
+the rotation stored on that very tile, and `GameObject.placeObject` hands the
+master's rotation to every other piece of the `MultiTile`
+(`streamOtherObjects(...).placeObject(..., rotation, ...)`). So a square
+footprint whose drawing changes shape per rotation can return a different box
+per rotation. `CollisionFilter.mobCollision()` asks `getCollisions(lo.rotation)`
+with no `isSolid` pre-filter (the default predicate is `null`), so a piece
+built with a degenerate constructor rectangle still blocks where the override
+says. What does stay fixed: `isSolid` and `regionType` are set once in the
+constructor, and `getRegionType()` takes no position, so a piece that blocks
+only in some rotations keeps whatever region type its constructor rectangle
+gave it. `VeteranCatapultObject` uses this: north/south block from footprint
+y=16 (the wheels), east/west from y=32.
