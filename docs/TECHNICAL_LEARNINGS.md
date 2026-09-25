@@ -4925,3 +4925,17 @@ constructor, and `getRegionType()` takes no position, so a piece that blocks
 only in some rotations keeps whatever region type its constructor rectangle
 gave it. `VeteranCatapultObject` uses this: north/south block from footprint
 y=16 (the wheels), east/west from y=32.
+
+## `/skyreachstatus` can still deadlock on the integration test's second boot (2026-09-25, task Die-2c97e6)
+
+VERIFIED [run], 1 of 2 runs on the 1.3.3 dedicated server: `FAIL: timeout
+waiting for: SKYREACH_STATUS_DONE`, and `latest-crash.log` in the work dir
+reads `Deadlock detected between threads: Command scanner waiting on
+java.lang.Object held by Server Thread; Server Thread waiting on SkyLevel held
+by Command scanner`. The scanner is in `SkyreachStatusCommand.runLocked ->
+Level.getTileID -> RegionStructureDataMap.getRegion`, inside the
+`synchronized (level)` that the first lock-order fix added. So a second path
+exists where the server thread takes the region structure lock first and then
+wants the Level monitor. Not fixed. When this line appears, read
+`latest-crash.log` (`INTEGRATION_KEEP=1` keeps it) and rerun before blaming
+your own change; the rerun passed.
