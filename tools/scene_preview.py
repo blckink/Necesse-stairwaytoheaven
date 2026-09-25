@@ -228,7 +228,7 @@ def twilight():
     st = Stage("Twilight Merchant: Beetlefreak-Wand, Duesterholz-Boden, Moebel, Wandstuecke, Haendler + Outfits",
                ground, {"m": "murkmoss", "g": "gloomwoodfloor"}, walls, "objects/beetlewall.png")
     # Wandstücke auf die Fläche der oberen Wand
-    for piece, tx in (("walleye", 3), ("magicmirror", 9)):
+    for piece, tx in (("walleye", 3), ("magicmirror", 9), ("shrunkenheads", 11)):
         p = os.path.join(RES, "objects", "paintings", piece + ".png")
         if os.path.exists(p):
             front = Image.open(p).convert("RGBA").crop((0, 0, 64, 64))

@@ -48,6 +48,12 @@ dark, gothic, Beetlejuice/Addams — but still readable on a dark floor.
 
 ## Lessons (newest first — append, do not rewrite)
 
+- 2026-09-25 · **Large wall pieces: give the box, not only the mass.** The
+  2026-09-17 shrunken heads were drawn 60 px tall from one nail; on the 28 px
+  wall face that left 10 px blobs, so the piece never shipped. Stating
+  "front x10..54, y34..62, heads side by side" plus the shipped pieces as
+  layout refs came back right on the first pass in three minutes.
+
 - 2026-09-19 · **`convert_reference.py --bg` keys by colour, not by
   connectivity.** Codex draws the specular glint of a metal ball near-white, so
   keying the white background out took the glint with it — 131 instead of 156

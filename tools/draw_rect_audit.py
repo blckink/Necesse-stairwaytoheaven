@@ -53,6 +53,7 @@ Checks, per sheet:
             (a full-width bookcase back beside its side view) are not a cut.
   side      wall pieces: the wall-left view must sit left of the wall-right
             view (centroid), or the piece hangs off the wrong edge.
+  face      large wall pieces: nothing in row 0 above band-y 32 (wall top face).
 
 Usage:  python3 tools/draw_rect_audit.py [-v]
 Exit 1 on any FIX.
@@ -117,7 +118,7 @@ def spec():
                 "paintings/eyepainting.png", "paintings/shrunkenheadtrophy.png"):
         s[rel] = ("PaintingObject", (32, 128), painting(), ())
     for rel in ("paintings/walleye.png", "paintings/hauntedwallclock.png",
-                "paintings/magicmirror.png"):
+                "paintings/magicmirror.png", "paintings/shrunkenheads.png"):
         s[rel] = ("LargePaintingObject", (64, 256), large_painting(), ())
     for rel in ("mistglasslantern.png", "flickerlightgarland.png", "salonsign.png"):
         s[rel] = ("WallTorchObject", (64, 128), wall_torch(), ())
@@ -257,6 +258,15 @@ def check(rel, cls, size, views, extras, verbose):
             notes.append("%s back row 2 uses its bottom 8 rows (%d px) -- the "
                          "engine draws it at +8, so those sit on the wall below"
                          % (rel, len(low)))
+    # LargePaintingObject draws row 0 at drawY-64, so the wall face is band-y
+    # 32..64 (tools/align_wall_piece.py). Art above y32 lies on the wall's top
+    # face: "half on the wall, half on the ceiling".
+    if cls == "LargePaintingObject":
+        high = sum(A[y][x] for y in range(0, 32) for x in range(64))
+        if high:
+            fixes.append("%s: row 0 has %d opaque px above band-y 32 -- that is the "
+                         "wall's top face, not its front; run tools/align_wall_piece.py"
+                         % (rel, high))
     # wall side: centroid of the left-wall view must be left of the right-wall one
     if cls in ("PaintingObject", "WallTorchObject", "LargePaintingObject"):
         cen = {}

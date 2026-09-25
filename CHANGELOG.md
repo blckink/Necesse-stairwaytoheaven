@@ -14,6 +14,12 @@ All notable changes to this project are documented here. Format loosely follows
   Vials (sleeps by day, works by night, never bitten) and give the daylight
   back for free. Save-compatible: a saved flag, no mob swap.
 
+- **Hanging Shrunken Heads / Hängende Schrumpfköpfe** get their sheet and
+  icon, so the Twilight Merchant sells them: three heads with sewn-shut lips
+  side by side on a crooked twig, on vanilla's two-tile large painting frame.
+  The ID had been in his list since the first batch but never had art, so it
+  was neither registered nor sold.
+
 ### Changed
 - **NPC prices cut / NPC-Preise gesenkt**: the Therapist's trait swap costs
   5 000 coins instead of 50 000. Recruit fees: Warden 30 000 → 8 000, Knott

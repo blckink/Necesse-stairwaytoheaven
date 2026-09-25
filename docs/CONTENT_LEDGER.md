@@ -450,7 +450,7 @@ so an undrawn entry is neither registered nor sold. Outfits are cosmetic: armour
 | `walleye` | object | Eye in the Wall — wall piece on vanilla's two-tile large painting frame (`<id>` and `<id>2`). |
 | `hauntedwallclock` | object | Twisted Wall Clock — wall piece on the large painting frame. |
 | `magicmirror` | object | Haunted Mirror — wall piece on the large painting frame. |
-| `shrunkenheads` | object | Hanging Shrunken Heads — wall piece on the large painting frame; in `DECOR` but not drawn yet, so not registered or sold. |
+| `shrunkenheads` | object | Hanging Shrunken Heads — wall piece on the large painting frame: three heads side by side on a crooked twig. Its sheet ships since 2026-09-25, so it is registered and sold. |
 | `eyepainting` | object | Watching Eye — framed one-tile painting of the first batch. No longer sold; stays registered while its sheet ships so pieces already hanging keep loading. |
 | `shrunkenheadtrophy` | object | Shrunken Head Trophy — the other retired first-batch painting, kept for the same reason. |
 

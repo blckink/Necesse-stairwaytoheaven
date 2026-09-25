@@ -30,7 +30,7 @@ immer gleichmaessig, das Blatt wird also nicht verzerrt.
 
 Aufruf:
     PYTHONPATH=/home/blackoffset/dev/pylib python3 tools/align_wall_piece.py \
-        walleye hauntedwallclock magicmirror
+        walleye hauntedwallclock magicmirror shrunkenheads
 """
 import argparse
 import os

@@ -299,6 +299,7 @@ def main():
             ("walleye", large_painting_strip("objects/paintings/walleye.png")),
             ("hauntedwallclock", large_painting_strip("objects/paintings/hauntedwallclock.png")),
             ("magicmirror", large_painting_strip("objects/paintings/magicmirror.png")),
+            ("shrunkenheads", large_painting_strip("objects/paintings/shrunkenheads.png")),
             ("skywatchcandelabra", lamp_strip("objects/skywatchcandelabra.png")),
             ("skullcandelabra", lamp_strip("objects/skullcandelabra.png"))]
     for rel, anchor in sorted(ROTATION_ANCHORS.items()):
