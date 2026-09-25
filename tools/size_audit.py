@@ -388,6 +388,25 @@ PAIRS = [
      "objects/decorativepot1.png", None, "pet bed / small furniture"),
 ]
 
+# The Twilight Merchant's eleven outfits: 33 item icons that had no row until
+# 2026-09-25. Vanilla draws a cosmetic's icon as its own flat-lay, much larger
+# than the worn frame (shirt: icon 28x28/560 px, worn 20x10/176), so each icon
+# answers to a vanilla icon, never to our sheet. Heads are full-face masks ->
+# pumpkinmask; chests -> shirt (the band's median); a pair of low shoes ->
+# witchshoes, a pair of trouser legs -> arachnidlegs.
+_OUTFIT_BOOTS_ARE_LEGS = {"grinclown", "hockeyslasher", "dreamstalker",
+                          "pincushion", "widowgown", "stitchedmonster"}
+for _outfit in ("twilightsuit", "skeleton", "grinclown", "hockeyslasher",
+                "dreamstalker", "screamrobe", "pincushion", "widowgown",
+                "stitchedmonster", "pumpkinscarecrow", "hauntedpuppet"):
+    PAIRS += [
+        (f"items/{_outfit}head.png", None, "items/pumpkinmask.png", None, "outfit head icon"),
+        (f"items/{_outfit}chest.png", None, "items/shirt.png", None, "outfit chest icon"),
+        (f"items/{_outfit}boots.png", None,
+         "items/arachnidlegs.png" if _outfit in _OUTFIT_BOOTS_ARE_LEGS else "items/witchshoes.png",
+         None, "outfit legs icon" if _outfit in _OUTFIT_BOOTS_ARE_LEGS else "outfit shoes icon"),
+    ]
+
 THRESHOLD = 0.75
 
 # Per-sprite accepted minimums: our silhouette is legitimately lighter than
@@ -400,6 +419,10 @@ ACCEPTED = {
     "objects/stormcrystal.png": 0.70,
     # a bare weeping willow is airier than a solid vanilla dead tree
     "objects/gloomwillow.png": 0.45,
+    # 418 / 419 px sit inside the vanilla chest-icon band (400-680 px); shirt
+    # is its median, so the plain 0.75 would flap on a single pixel.
+    "items/grinclownchest.png": 0.70,
+    "items/pumpkinscarecrowchest.png": 0.70,
 }
 
 

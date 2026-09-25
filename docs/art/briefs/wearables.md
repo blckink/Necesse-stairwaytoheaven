@@ -22,3 +22,10 @@
   stitchedmonster = too-short black jacket, grey-green skin, bolts;
   pumpkinscarecrow = patched burlap, straw tufts; hauntedpuppet = striped
   shirt under blue denim overalls, red sneakers.
+- Item ICON (`items/<outfit>head|chest|boots.png`, 32×32) is its own flat-lay,
+  NOT a crop of the worn frame: vanilla `shirt` is 28×28/560 px as icon but
+  20×10/176 worn. Vanilla band (measured 2026-09-25): chest 28×28, 400–680 px,
+  bottom edge y 28–30; boots/shoes a side-by-side PAIR ~30×16, 296–584 px,
+  bottom edge y 24–26; trousers like `arachnidlegs` 30×26; heads 28 wide,
+  ≤ 760 px. Keep 1–2 px margin, centre ± 1 px. `tools/size_audit.py` has a
+  row per outfit icon and must not flag the new one.

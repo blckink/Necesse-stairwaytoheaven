@@ -21,6 +21,15 @@ All notable changes to this project are documented here. Format loosely follows
   was neither registered nor sold.
 
 ### Changed
+- **Twilight outfit icons measured / Outfit-Icons vermessen**: all 33 item
+  icons of the Twilight Merchant's outfits now have a row in
+  `tools/size_audit.py` against a vanilla icon (pumpkinmask, shirt,
+  witchshoes, arachnidlegs). Nine icons that sat above vanilla's ground line
+  were moved down, pixel for pixel, so chests end at y 28 and shoes at y 24
+  like vanilla's: skeleton, screamrobe and widowgown chest; twilightsuit,
+  skeleton, dreamstalker, screamrobe, pumpkinscarecrow and hauntedpuppet boots.
+  Nine icons stay too small for the vanilla band and need a redraw; they are
+  flagged by the audit (see `docs/art/briefs/wearables.md`).
 - **NPC prices cut / NPC-Preise gesenkt**: the Therapist's trait swap costs
   5 000 coins instead of 50 000. Recruit fees: Warden 30 000 → 8 000, Knott
   22 000 → 5 000, Caspern 14 000 → 4 000, Ives and Dorian 11 000 → 3 000,
