@@ -23,9 +23,13 @@ Es gab zwei parallele Arbeitsstränge:
    - `plan/WEITERMACHEN-2026-09-25-selbstheilung.md` (bzw. `…-selfheilung.md`)
    - `plan/WEITERMACHEN-2026-09-25.md`
 
-   Diese Dateien und die Arbeit darin liegen **lokal auf dem PC**. Die Cloud konnte sie
-   nicht sehen. Möglicherweise gibt es dort nicht gepushte Commits oder Änderungen im
-   Arbeitsbaum.
+   **Berichtigt 2026-09-25 (Auftrag In-1369d8):** Diese Annahme stimmt nicht. Beide
+   Dateien liegen unter `~/aethergate/plan/` und sind Übergaben der Äthergate-Arbeit
+   selbst (PWA, Modellwahl, Dateiablage, WSL-Hänger, VPS), keine Mod-Arbeit; das Wort
+   „Necesse“ kommt darin nicht vor. Im Mod-Repo gibt es kein `plan/`, keinen Zweig
+   `local/stand-2026-09-24` und keinen Stash. Es gab also **keine** ungepushte
+   Mod-Arbeit vom 24.09. zusammenzuführen; §1 Schritte 1, 2 und 4 entfallen.
+   `claude/integrate-2026-09-25` ist inzwischen in `master` gemergt (`a80d895`).
 
 **Deine Aufgabe:** beides **sinnvoll zusammenführen** und dabei nichts überschreiben,
 danach die To-dos in §4 abarbeiten, in der Reihenfolge ihrer Priorität. Sinnvoll heißt:
