@@ -445,7 +445,7 @@ so an undrawn entry is neither registered nor sold. Outfits are cosmetic: armour
 | `twilightsarcophagus` | object | Grinning Sarcophagus — the merchant's own sarcophagus on vanilla's `SarcophagusObject`, one column per rotation. |
 | `hangingtree` | object | Hanging Tree — a tall bare tree prop (`SkyDecoObject`, 128 px), no collision. |
 | `twilightcauldron` | object | Twilight Cauldron — a bubbling green cauldron prop (`SkyDecoObject`). Not `witchcauldron`: vanilla owns that ID. |
-| `hauntedscarecrow` | object | Grinning Scarecrow — a one-tile field prop whose eyes glow pumpkin-orange (light 100). Registered only once `objects/hauntedscarecrow.png` ships; until then it is neither registered nor sold. |
+| `hauntedscarecrow` | object | Grinning Scarecrow — a one-tile field prop whose eyes glow pumpkin-orange (light 100) (`SkyDecoObject`, 32x64, no collision). Its sheet ships since 2026-09-25, so it is registered and sold. |
 | `sandwormtombstone` | object | Sandworm Tombstone — a one-tile grave prop (`SkyDecoObject`). |
 | `walleye` | object | Eye in the Wall — wall piece on vanilla's two-tile large painting frame (`<id>` and `<id>2`). |
 | `hauntedwallclock` | object | Twisted Wall Clock — wall piece on the large painting frame. |

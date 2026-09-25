@@ -249,6 +249,7 @@ def twilight():
     st.put(cell("objects/hangingtree.png", 0, 0, 128, 128), 21, 10, "hangingtree")
     st.put(img("objects/twilightcauldron.png").crop((0, 0, 64, 64)), 3, 10, "twilightcauldron")
     st.put(cell("objects/sandwormtombstone.png", 0, 0, 32, 64), 9, 10, "sandwormtombstone")
+    st.put(cell("objects/hauntedscarecrow.png", 0, 0, 32, 64), 11, 10, "hauntedscarecrow")
     return st.render()
 
 
