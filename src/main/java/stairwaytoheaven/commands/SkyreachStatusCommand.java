@@ -42,13 +42,22 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                 // "pois" runs the realm-POI census: how many of the thirteen
                 // inhabited places the world really stands up, and how far the
                 // nearest one is from the tile the stairway puts you on.
+                // "doctor" downs the settled settler nearest to a settled
+                // Doctor on the surface; "doctorcheck" reports on it later,
+                // which is how a headless run sees the Doctor revive someone.
                 new necesse.engine.commands.CmdParameter("mode",
-                        new necesse.engine.commands.parameterHandlers.StringParameterHandler("", "cats", "dump", "pois"), true));
+                        new necesse.engine.commands.parameterHandlers.StringParameterHandler("", "cats", "dump", "pois",
+                                "doctor", "doctorcheck"), true));
     }
 
     @Override
     public void runModular(Client client, Server server, ServerClient serverClient, Object[] args, String[] errors, CommandLog logs) {
         String mode = args.length > 0 && args[0] != null ? String.valueOf(args[0]) : "";
+        if (mode.startsWith("doctor")) {
+            diagnoseDoctor(server, mode, logs);
+            logs.add("SKYREACH_STATUS_DONE");
+            return;
+        }
         Level level = server.world.getLevel(SkyRegistry.SKYREACH_IDENTIFIER);
         if (!(level instanceof SkyLevel)) {
             logs.add("FAIL: level for identifier \"" + SkyRegistry.SKYREACH_IDENTIFIER + "\" is " + level.getClass().getSimpleName()
@@ -262,6 +271,70 @@ public class SkyreachStatusCommand extends ModularChatCommand {
      * mod could actually produce, and the three marked (old build) are the ones
      * that used to hand out nothing at all.
      */
+    /** The settler "doctor" downed, for "doctorcheck" to look up. */
+    private static int doctorTestVictim;
+
+    /**
+     * The Doctor's revive, observed headless on a world that has a settled
+     * Doctor on the surface (the integration world has none, so this runs on
+     * a copy of a real save). "doctor" knocks the nearest fellow settler to 0
+     * health — with settler death off that downs them — and "doctorcheck",
+     * sent a while later, reports whether they are back in the settlement.
+     */
+    private void diagnoseDoctor(Server server, String mode, CommandLog logs) {
+        Level surface = server.world.getLevel(new necesse.engine.util.LevelIdentifier("surface"));
+        synchronized (surface) {
+            stairwaytoheaven.mobs.DoctorHumanMob doctor = surface.entityManager.mobs.stream()
+                    .filter(m -> m instanceof stairwaytoheaven.mobs.DoctorHumanMob
+                            && ((stairwaytoheaven.mobs.DoctorHumanMob) m).isSettler())
+                    .map(m -> (stairwaytoheaven.mobs.DoctorHumanMob) m)
+                    .findFirst().orElse(null);
+            if (doctor == null) {
+                logs.add("doctor test: no settled doctor on surface");
+                return;
+            }
+            if (mode.equals("doctor")) {
+                surface.regionManager.ensureTilesAreLoaded(doctor.getTileX() - 40, doctor.getTileY() - 40,
+                        doctor.getTileX() + 40, doctor.getTileY() + 40);
+                int ours = doctor.getSettlementUniqueID();
+                necesse.entity.mobs.friendly.human.HumanMob victim = surface.entityManager.mobs.stream()
+                        .filter(m -> m instanceof necesse.entity.mobs.friendly.human.HumanMob && m != doctor)
+                        .map(m -> (necesse.entity.mobs.friendly.human.HumanMob) m)
+                        .filter(h -> h.getSettlementUniqueID() == ours && !h.isDowned())
+                        .min(java.util.Comparator.comparingDouble(h -> doctor.getDistance(h)))
+                        .orElse(null);
+                if (victim == null) {
+                    logs.add("doctor test: doctor has no fellow settler on surface");
+                    return;
+                }
+                victim.setHealth(0);
+                doctorTestVictim = victim.getUniqueID();
+                logs.add("doctor test: downed " + victim.getStringID() + " id=" + doctorTestVictim
+                        + " downed=" + victim.isDowned() + " settler=" + victim.isSettler()
+                        + " tiles=" + (int) (doctor.getDistance(victim) / 32));
+                // The node's own search and the revive it calls on arrival.
+                // Without a player the server unloads the surface within
+                // seconds, so the walk in between is not observable here.
+                necesse.entity.mobs.friendly.human.HumanMob patient =
+                        stairwaytoheaven.mobs.DoctorReviveAINode.findPatient(doctor);
+                boolean revived = patient != null && stairwaytoheaven.settlement.SkyDoctor.revive(doctor, patient);
+                logs.add("doctor test: found=" + (patient == null ? "none" : String.valueOf(patient.getUniqueID()))
+                        + " revived=" + revived + " downed=" + victim.isDowned() + " settler=" + victim.isSettler()
+                        + " health=" + victim.getHealth() + "/" + victim.getMaxHealth());
+            } else {
+                necesse.entity.mobs.Mob m = surface.entityManager.mobs.get(doctorTestVictim, false);
+                if (!(m instanceof necesse.entity.mobs.friendly.human.HumanMob)) {
+                    logs.add("doctor check: victim " + doctorTestVictim + " not found");
+                    return;
+                }
+                necesse.entity.mobs.friendly.human.HumanMob victim = (necesse.entity.mobs.friendly.human.HumanMob) m;
+                logs.add("doctor check: " + victim.getStringID() + " downed=" + victim.isDowned()
+                        + " settler=" + victim.isSettler() + " health=" + victim.getHealth() + "/" + victim.getMaxHealth()
+                        + " doctorTiles=" + (int) (doctor.getDistance(victim) / 32));
+            }
+        }
+    }
+
     /**
      * Which residents keep their shop closed for a player who has done no
      * ladder step yet ({@code SkySettlerMob.chapterLocksTrade}). An auth no

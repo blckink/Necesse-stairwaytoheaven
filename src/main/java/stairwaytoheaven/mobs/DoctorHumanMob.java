@@ -2,11 +2,18 @@ package stairwaytoheaven.mobs;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import necesse.engine.localization.message.GameMessage;
 import necesse.engine.network.server.ServerClient;
 import necesse.engine.util.GameRandom;
+import necesse.entity.levelEvent.mobAbilityLevelEvent.MobHealthChangeEvent;
+import necesse.entity.mobs.Mob;
+import necesse.entity.mobs.ai.behaviourTree.BehaviourTreeAI;
+import necesse.entity.mobs.ai.behaviourTree.util.AIMover;
+import necesse.entity.mobs.friendly.human.HumanMob;
 import necesse.entity.mobs.friendly.human.humanShop.BuyingShopItem;
 import necesse.entity.mobs.friendly.human.humanShop.HumanShop;
 import necesse.entity.mobs.friendly.human.humanShop.SellingShopItem;
@@ -61,6 +68,12 @@ import stairwaytoheaven.settlement.SkyDoctor;
  * dishes spoil (vanilla gives every gourmet meal {@code spoilDuration(120)}),
  * which is the other half of that: they are for the trip you are leaving on,
  * not for a chest.
+ *
+ * <h2>In the field</h2>
+ *
+ * A settled Doctor runs to any downed settler of his settlement and revives
+ * them for free ({@link DoctorReviveAINode}), and while a fight is on he heals
+ * the most hurt ally near him every three seconds ({@link #serverTick}).
  */
 public class DoctorHumanMob extends HumanShop {
 
@@ -113,6 +126,83 @@ public class DoctorHumanMob extends HumanShop {
         // is not the only reason to want one ready.
         this.shop.addSellingItem("bloodfevertincture", new SellingShopItem(5, 1))
                 .setStaticPrice(250, 250);
+    }
+
+    // --- the field medic: revive the fallen, heal the fighting ---------------
+
+    /** Ticks between two heals (20 ticks = one second). */
+    public static final int HEAL_INTERVAL = 60;
+
+    /** How far the heal reaches, in pixels (32 = one tile). */
+    private static final int HEAL_RANGE = 10 * 32;
+
+    /**
+     * One heal: a tenth of the patient's max health, at least 20. Every three
+     * seconds that is a little under a Health Potion (+50 at vanilla value 5)
+     * per ten seconds on a 500-health settler — a medic, not a second potion
+     * belt, and only while the fight lasts.
+     */
+    private static final float HEAL_FRACTION = 0.1F;
+    private static final int HEAL_MIN = 20;
+
+    private int healCooldown;
+
+    /**
+     * Vanilla's settler brain plus the revive node ({@link DoctorAI}).
+     * {@code HumanMob.init} installs the plain {@code HumanAI}; this swaps it
+     * right after, the same way {@code SkySettlerMob.installBrain} does.
+     */
+    @Override
+    public void init() {
+        super.init();
+        this.ai = new BehaviourTreeAI<>(this, new DoctorAI<>(320, true, false, 25000),
+                new AIMover(HumanMob.humanPathIterations));
+    }
+
+    @Override
+    public void serverTick() {
+        super.serverTick();
+        if (--this.healCooldown > 0) {
+            return;
+        }
+        this.healCooldown = HEAL_INTERVAL;
+        if (!this.isSettler() || this.isDowned()) {
+            return;
+        }
+        Mob patient = this.findHurtAlly();
+        if (patient != null) {
+            int amount = Math.max(HEAL_MIN, (int) (patient.getMaxHealth() * HEAL_FRACTION));
+            amount = Math.min(amount, patient.getMaxHealth() - patient.getHealth());
+            // Vanilla's own Health Potion heals through this event, which is
+            // what puts the green number over the patient on every client.
+            this.getLevel().entityManager.events.add(new MobHealthChangeEvent(patient, amount));
+        }
+    }
+
+    /**
+     * The most hurt ally within {@link #HEAL_RANGE} who is in a fight — this
+     * settlement's settlers and its players. Not "same team": a settlement
+     * without a player team puts its settlers on vanilla's shared team -10,
+     * which every other teamless settler and villager is on as well.
+     */
+    private Mob findHurtAlly() {
+        ServerSettlementData data = this.getSettlerSettlementServerData();
+        if (data == null || this.getLevel() == null) {
+            return null;
+        }
+        int ours = this.getSettlementUniqueID();
+        Stream<Mob> settlers = this.getLevel().entityManager.mobs
+                .streamInRegionsInRange(this.x, this.y, HEAL_RANGE)
+                .filter(m -> m instanceof HumanMob && ((HumanMob) m).getSettlementUniqueID() == ours);
+        Stream<Mob> players = data.networkData.streamTeamMembers()
+                .map(c -> (Mob) c.playerMob)
+                .filter(p -> p != null && p.isSamePlace(this));
+        return Stream.concat(settlers, players)
+                .filter(m -> !m.removed() && m.getHealth() > 0 && m.getHealth() < m.getMaxHealth())
+                .filter(m -> m.isInCombat() || this.isInCombat())
+                .filter(m -> this.getDistance(m) <= HEAL_RANGE)
+                .min(Comparator.comparingDouble(m -> m.getHealth() / (double) m.getMaxHealth()))
+                .orElse(null);
     }
 
     /**

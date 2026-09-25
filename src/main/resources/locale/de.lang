@@ -1717,3 +1717,6 @@ wardendialogtask=Deine Aufgabe: <title>
 wardendialogjournal=Das alles steht auch in deinem Abenteuerbuch.
 wardendialogcats=Mit diesem Turm kamen zwei Katzen, und zwei Katzen sind draußen im Wetter. Für mich kommen sie nicht mehr. Für dich vielleicht, mit etwas zu fressen.
 wardendialoganchor=Die Katzen sind daheim, die Insel nicht. Sie treibt. Bring mir Metall und Stein, dann setze ich sie fest, wo sie hingehört.
+
+[misc]
+swhdoctorrevived=<doctor> hat <settler> wieder auf die Beine gebracht

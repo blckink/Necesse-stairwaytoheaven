@@ -1,8 +1,16 @@
 package stairwaytoheaven.settlement;
 
+import necesse.engine.localization.message.LocalMessage;
 import necesse.engine.registries.MobRegistry;
 import necesse.engine.registries.SettlerDialogueRegistry;
 import necesse.engine.registries.SettlerRegistry;
+import necesse.entity.mobs.friendly.human.HumanMob;
+import necesse.inventory.container.settlement.events.SettlementSettlersChangedEvent;
+import necesse.level.maps.levelData.settlementData.LevelSettler;
+import necesse.level.maps.levelData.settlementData.NetworkSettlementData;
+import necesse.level.maps.levelData.settlementData.SavedSettlerSettings;
+import necesse.level.maps.levelData.settlementData.ServerSettlementData;
+import necesse.level.maps.levelData.settlementData.settler.Settler;
 
 /**
  * The Doctor — the mod's second settler profession, and the proof that a third
@@ -30,11 +38,17 @@ import necesse.engine.registries.SettlerRegistry;
  * because a trait swap's outcome is invisible until something says it out loud.
  * Being healed is a health bar filling up.
  *
- * <h2>The two things a Doctor does</h2>
+ * <h2>What a Doctor does</h2>
  *
  * <ul>
  * <li><b>Patches you up on the spot</b> for {@link #HEAL_PRICE} coins — see
  *     {@link DoctorHealDialogue}.</li>
+ * <li><b>Gets fallen settlers back up.</b> With settler death off, a settler
+ *     at 0 health is downed and drops out of the settlement; the Doctor runs
+ *     over and revives them for free ({@code mobs.DoctorReviveAINode},
+ *     {@link #revive}).</li>
+ * <li><b>Heals in a fight</b> — every {@code DoctorHumanMob.HEAL_INTERVAL}
+ *     ticks, the most hurt ally within range who is in combat.</li>
  * <li><b>Sells the good consumables</b> — six Greater-tier potions and five
  *     gourmet dishes, all vanilla, all craftable by the player anyway, priced
  *     off each item's own registered broker value by vanilla's own Alchemist
@@ -61,6 +75,70 @@ public final class SkyDoctor {
      * to get it, which is the whole trade.
      */
     public static final int HEAL_PRICE = 100;
+
+    /**
+     * Whether a downed settler was one of the Doctor's own people.
+     *
+     * <p>Keyed on {@code savedSettlerSettings.settlementUniqueID}, which
+     * vanilla writes from the settler's {@code LevelSettler} just before it
+     * removes the fallen one from the settlement. If that record is missing
+     * (vanilla only writes it when a {@code LevelSettler} existed), a downed
+     * settler lying inside the Doctor's own settlement counts too — only
+     * settlers are ever downed, so that is somebody's resident, and here it
+     * can only be ours.
+     */
+    public static boolean belongsTo(HumanMob downed, HumanMob doctor) {
+        int ours = doctor.getSettlementUniqueID();
+        if (ours == 0) {
+            return false;
+        }
+        SavedSettlerSettings saved = downed.savedSettlerSettings;
+        if (saved != null) {
+            return saved.settlementUniqueID == ours;
+        }
+        NetworkSettlementData network = doctor.getSettlerSettlementNetworkData();
+        return network != null && network.isTileWithinBounds(downed.getTileX(), downed.getTileY());
+    }
+
+    /**
+     * Puts a downed settler back into the Doctor's settlement — vanilla's own
+     * recruit path ({@code PacketShopContainerUpdate.recruitSettler}, 1.3.3)
+     * with the Revival Potion taken out, in the same order and with the same
+     * checks: settler cap, {@code canMoveIn}, {@code moveIn} (which clears the
+     * downed state through {@code HumanSettlerMob.makeSettler}),
+     * {@code onRecruited} (restores the saved settings, a quarter of max
+     * health and five seconds of spawn invincibility), then the
+     * settlers-changed event and a chat line to the settlement's team.
+     *
+     * @return false if the settlement is gone, full or refuses the settler
+     */
+    public static boolean revive(HumanMob doctor, HumanMob downed) {
+        if (!doctor.isServer() || !downed.isDowned()) {
+            return false;
+        }
+        ServerSettlementData data = doctor.getSettlerSettlementServerData();
+        Settler settler = downed.getSettler();
+        if (data == null || settler == null || doctor.getLevel() == null) {
+            return false;
+        }
+        int max = doctor.getLevel().getServer().world.settings.maxSettlersPerSettlement;
+        if (max >= 0 && data.countTotalSettlers() >= max) {
+            return false;
+        }
+        LevelSettler levelSettler = new LevelSettler(data, settler, downed.getUniqueID(), downed.getSettlerSeed());
+        if (!data.canMoveIn(levelSettler, -1)) {
+            return false;
+        }
+        data.moveIn(levelSettler);
+        downed.onRecruited(null, data, levelSettler);
+        data.sendEvent(SettlementSettlersChangedEvent.class);
+        LocalMessage message = new LocalMessage("misc", "swhdoctorrevived",
+                "doctor", doctor.getLocalization(), "settler", downed.getLocalization());
+        data.networkData.streamTeamMembers().forEach(c -> c.sendChatMessage(message));
+        System.out.println("doctor revive: " + downed.getStringID() + " " + downed.getUniqueID()
+                + " back in settlement " + data.uniqueID);
+        return true;
+    }
 
     /**
      * Three registries, one call, from {@code StairwayToHeavenMod.init} —

@@ -6,6 +6,17 @@ All notable changes to this project are documented here. Format loosely follows
 ## [Unreleased]
 
 ### Added
+- **The Doctor is a field medic / Der Arzt ist Sanitäter**: with settler death
+  off, a settler at 0 health is *downed* and drops out of the settlement until
+  a player brings a Revival Potion. A settled Doctor now runs to any downed
+  settler of his settlement (up to 64 tiles) and revives them for free —
+  vanilla's recruit path minus the potion, so saved settings, a quarter of max
+  health and spawn invincibility come back as with the potion. While a fight
+  is on he heals the most hurt ally within 10 tiles (settlers of his
+  settlement and its players) every 3 s for 10 % of their max health (min 20).
+  Applies to Doctors already living in a settlement. Headless:
+  `skyreachstatus doctor` / `doctorcheck`.
+
 - **Dorian's Daywalk quest / Dorians Tagesgang-Quest** on his dialogue page:
   step 1 *Daywalker* (5 Blood Vials + 1 Veil Essence) — the sun no longer
   slows him; step 2 *Restless* (8 Blood Vials) — up by day and by night, he

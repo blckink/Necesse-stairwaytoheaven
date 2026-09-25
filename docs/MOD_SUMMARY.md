@@ -98,7 +98,7 @@ und Texte aller Figuren: `docs/KOMPLETTUEBERSICHT.md` §3.
 | **Siggi + Peanut** | Skyreach | Lairs im Sturmschleier / in den Aurorabänken | nicht anwerbbar | — | Ziel von `swh_cats` | ziehen in den Katzenkorb |
 | **Dorian, der Nachtgebundene** | — | nirgends in der Welt | 11 000 | **Jagd** (nachts; nach Stufe 2 der Quest auch am Tag) | ⭐ Tagesgang in seinem Dialog: Tageswandler (5 Blutfläschchen + 1 Schleier-Essenz → kein Sonnen-Malus), Rastlos (8 Blutfläschchen → wach bei Tag und Nacht, schläft nur müde); danach macht er für 3 Blutfläschchen den nächsten Bewohner zum Nachtsiedler (umkehrbar, kostenlos) | ja, wenn ein Sarg in der Siedlung steht |
 | **Therapeut** | — | — | 900–1 400 | Therapieplätze, Wesenszug tauschen | — | ja, wie ein Schmied |
-| **Arzt** | — | — | 900–1 400 | Heilung, Blutfieber heilen | — | ja, wie ein Schmied |
+| **Arzt** | — | — | 900–1 400 | Heilung, Blutfieber heilen; **Sanitäter**: läuft zu gestürzten Siedlern der eigenen Siedlung und belebt sie kostenlos wieder (ohne Wiederbelebungstrank), heilt im Kampf alle 3 s den am schwersten verletzten Verbündeten in 10 Kacheln | — | ja, wie ein Schmied |
 | **Kriegsveteran** | — | — | 900 | Verteidigungsausbau (5 Stufen) | — | ja, wie ein Schmied |
 | **Zwielichtiger Händler** | — | — | nicht anwerbbar (Besucher) | wechselnde Kostüme + Deko | — | kommt als Besucher |
 
