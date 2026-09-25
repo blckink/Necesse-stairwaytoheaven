@@ -383,6 +383,7 @@ public class RealmPoiWorldPreset extends WorldPreset {
                     int y = clamp(spotY - height / 2, regionY, regionY + PRESET_REGION_TILES - height - 1);
                     if (!inRegion(x + width / 2, y + height / 2, regionX, regionY)) continue;
                     if (intersectsLandmark(landmarks, x, y, width, height)) continue;
+                    if (intersectsSpireKeep(x, y, width, height, originX, originY)) continue;
                     java.awt.Rectangle grown = new java.awt.Rectangle(x - RESCUE_MARGIN, y - RESCUE_MARGIN,
                             width + 2 * RESCUE_MARGIN, height + 2 * RESCUE_MARGIN);
                     boolean clear = true;
@@ -503,6 +504,9 @@ public class RealmPoiWorldPreset extends WorldPreset {
                         lastY = y;
                         // ...and a nudged footprint must not land on one either.
                         if (intersectsLandmark(landmarks, x, y, width, height)) continue;
+                        // The ring above tests a CENTRE; this tests the whole
+                        // footprint after the region clamp, which can move it.
+                        if (intersectsSpireKeep(x, y, width, height, originX, originY)) continue;
                         if (validSite(kind, realm, seed, x, y, width, height)) {
                             visitor.site(kind, realm, x, y, width, height, STAGE_ACCEPTED);
                             lastStage = STAGE_ACCEPTED;
@@ -613,6 +617,29 @@ public class RealmPoiWorldPreset extends WorldPreset {
         float roll = SkyNoise.hash(seed + SALT + 4 + axis * 64L + attempt * 8L + kind,
                 cellX, cellY);
         return Math.round((roll * 2.0F - 1.0F) * SITE_JITTER);
+    }
+
+    /**
+     * Half-width of the square around the spire no lattice FOOTPRINT may touch:
+     * the spire plot, the Spire Village ({@code SpireVillage.RADIUS} 38), and
+     * the hub island the painter guarantees ({@code SkyOrigin.HUB_RADIUS} 56)
+     * with a margin. {@code SkyreachStatusCommand}'s painter oracle scans
+     * exactly this square, so the two cannot drift.
+     *
+     * <p>{@link #SPIRE_CLEARANCE} alone did not keep it: it tests the site's
+     * CENTRE, and a 49x55 Sky Tower centred 105 tiles out reaches 39 tiles
+     * from the spire -- the village's own edge. Seed 6xK4d did exactly that
+     * ({@code skytower@+39,+57}) and the oracle counted the tower's floor as
+     * 30 painter mismatches. The region clamp can also pull a centre inside
+     * the ring (offline: a Fallen Observatory centred 60 tiles out). Measured
+     * over 501 seeds before this test: 5 put a footprint in this square.
+     */
+    public static final int SPIRE_KEEP_CLEAR = 64;
+
+    private static boolean intersectsSpireKeep(int x, int y, int width, int height,
+            int originX, int originY) {
+        return x <= originX + SPIRE_KEEP_CLEAR && x + width - 1 >= originX - SPIRE_KEEP_CLEAR
+                && y <= originY + SPIRE_KEEP_CLEAR && y + height - 1 >= originY - SPIRE_KEEP_CLEAR;
     }
 
     /** The clear ring around the spire, as one named test both callers share. */

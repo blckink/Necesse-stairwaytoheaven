@@ -4787,3 +4787,38 @@ institute now runs `dryRing(p, cloudturf)` like the tower, town and toll
 bridge. The other chapter-01 plan presets without `dryRing` (shrine, dew
 keeper's hut, fold, wayhouse, redoubt, manufactory, anvil, gate, prism choir;
 the reef wants water) carry the same latent risk — HYPOTHESIS, not seen failing.
+
+### Seed 6xK4d: a town tree killed by a willow, and a tower at the village's edge (2026-09-25)
+
+Reproduced with `INTEGRATION_SEED=6xK4d` (census seed 1574826039) before the
+fix [run]: `realmpoi stamp: kind=skytown at=-362,121 ... placed=556/557
+missing=1 53,9=0!=1639@t105` and `painter oracle: tileMismatches=30 (scan
+radius 64, ...)`.
+
+**The tree [jar] + offline dump.** `TreeObject.isValid` (jar 1.3.2
+TreeObject.java:356-364) returns false if ANY of the eight adjacent objects
+`isTree`, and the engine runs validity over a preset's footprint after placing
+(see the `dryRing` entry). The town's cloudtree at plan (53,9) = world
+-309,130 stands among `.` tiles, which keep the painter's objects, and the
+painter grew two `nimbuswillow` (a vanilla `TreeObject`) at -309,129 and
+-308,129. Fix: `RealmPoiPresets.clearTreeRing`, installed by `plan()` for every
+plan-built preset — a pre-apply that removes world trees from the eight
+neighbours of every tree the preset plants, wherever the preset leaves the
+object unset.
+
+**The oracle [run offline].** The spire, the village and `SPIRE_CLEARANCE`
+all use `SkyOrigin.compute` (the arrival is only origin+15, it is not a
+second centre). But `SPIRE_CLEARANCE` (100) tests a site's CENTRE: the 49x55
+Sky Tower centred 105 tiles out stood at `+39,+57` relative to the origin, one
+tile off the village's `RADIUS` 38, and the region clamp can pull a centre
+inside the ring (offline: a Fallen Observatory centred 60 out). Over 501 seeds
+5 put a footprint in the oracle's +-64 square, none into the village square.
+Decision: a lattice POI may not crowd the spire. `RealmPoiWorldPreset.
+SPIRE_KEEP_CLEAR` = 64 is tested on the final, clamped footprint (lattice and
+rescue), and the oracle's `SCAN_RADIUS_TILES` is now that constant. After:
+`seeds=501 intoOracleBox=0 intoVillage=0 centreInside100=0`; against the 300-seed
+placement list, 1 seed's one place moved within its own cell
+(`nightfellredoubt@126,-204` -> `@196,-155`), nothing else changed, and still
+`seeds=300 withMissing=0`, `seeds=500 withMissing=0`. Save impact: only
+footprints within 64 tiles of the spire are refused, ground every save has
+generated already, where the engine drops a queued preset anyway.

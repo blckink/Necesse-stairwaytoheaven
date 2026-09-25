@@ -25,7 +25,9 @@ import stairwaytoheaven.worldgen.pois.RealmPoiCensus;
  */
 public class SkyreachStatusCommand extends ModularChatCommand {
 
-    private static final int SCAN_RADIUS_TILES = 64;
+    /** The painter oracle's square: exactly the ground no lattice POI may touch. */
+    private static final int SCAN_RADIUS_TILES =
+            stairwaytoheaven.worldgen.pois.RealmPoiWorldPreset.SPIRE_KEEP_CLEAR;
 
     public SkyreachStatusCommand() {
         super("skyreachstatus", "Generates and inspects the Skyreach around the origin (debug)", PermissionLevel.ADMIN, false,

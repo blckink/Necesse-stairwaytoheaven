@@ -450,6 +450,49 @@ public final class RealmPoiPresets {
         });
     }
 
+    /**
+     * Clears the world's own trees off the eight neighbours of every tree the
+     * preset plants, where the preset itself leaves the object unset.
+     *
+     * <p>{@code TreeObject.isValid} (jar 1.3.2 TreeObject.java:356-364) is
+     * false whenever ANY adjacent object {@code isTree}, and the engine runs
+     * it over the preset's footprint after placing ({@code
+     * Region.checkTilesGenerationValid}, see {@link #dryRing}). A plan's
+     * {@code '.'} keeps the painter's objects, so a painter tree beside a
+     * planted one deletes the planted one. Seed 6xK4d: the Sky Town's
+     * cloudtree at (53,9) = world -309,130 had two {@code nimbuswillow}s
+     * diagonally above it (offline dump, -309,129 and -308,129), and the
+     * stamp read {@code placed=556/557 missing=1 53,9=0!=1639}.
+     */
+    public static void clearTreeRing(Preset p) {
+        p.addCustomPreApply(0, 0, 0, (level, originX, originY, dir, blackboard) -> {
+            for (int x = 0; x < p.width; x++) {
+                for (int y = 0; y < p.height; y++) {
+                    int id = p.getObject(0, x, y);
+                    if (id <= 0 || !ObjectRegistry.getObject(id).isTree) continue;
+                    for (int dx = -1; dx <= 1; dx++) {
+                        for (int dy = -1; dy <= 1; dy++) {
+                            if (dx == 0 && dy == 0) continue;
+                            int tx = x + dx;
+                            int ty = y + dy;
+                            if (tx >= 0 && tx < p.width && ty >= 0 && ty < p.height
+                                    && p.getObject(0, tx, ty) != -1) {
+                                continue;
+                            }
+                            int levelX = originX + tx;
+                            int levelY = originY + ty;
+                            if (!level.isTileWithinBounds(levelX, levelY)) continue;
+                            if (level.getObject(levelX, levelY).isTree) {
+                                level.setObject(levelX, levelY, 0);
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+        });
+    }
+
     /** Whether any object layer holds something on this preset tile. */
     private static boolean carriesObject(Preset p, int x, int y) {
         for (int layerID : ObjectLayerRegistry.getLayerIDs()) {
@@ -2480,6 +2523,8 @@ public final class RealmPoiPresets {
      *         §0.2-§0.4 -- see this section's header for the list
      */
     public static void plan(Preset p, String[] rows, Legend legend) {
+        // Runs at apply time, so it sees every tree the plan below writes.
+        clearTreeRing(p);
         // Every named tile has to be a tile the plan really draws on. An
         // override on empty margin would move a piece nobody can see it move.
         for (java.util.Map.Entry<Integer, Character> entry : legend.override.entrySet()) {
