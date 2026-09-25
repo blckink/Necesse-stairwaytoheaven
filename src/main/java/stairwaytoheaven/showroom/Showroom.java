@@ -57,6 +57,7 @@ import stairwaytoheaven.worldgen.RealmDepth;
 import stairwaytoheaven.worldgen.RealmLanding;
 import stairwaytoheaven.worldgen.SkyOrigin;
 import stairwaytoheaven.worldgen.SkyTerrainPainter;
+import stairwaytoheaven.village.SpireVillage;
 import stairwaytoheaven.worldgen.WardenSpirePreset;
 import stairwaytoheaven.worldgen.pois.RealmPoiPresets;
 
@@ -281,6 +282,22 @@ public final class Showroom {
                             // Its stamp-time hook writes the quest anchor and
                             // spawns the Warden. Not in an exhibition.
                             p.customApplies.clear();
+                            return p;
+                        }));
+                // The whole Spire Village as the world stamps it: the ring's
+                // ground, the spire in the forecourt, the twelve houses at their
+                // offsets. No residents -- SpireVillage.seatResidents seats them.
+                int villageSize = SpireVillage.RADIUS * 2 + 1;
+                out.add(new Exhibit("spirevillage", group, "preset", villageSize, villageSize,
+                        seed -> {
+                            int r = SpireVillage.RADIUS;
+                            Preset p = SpireVillage.base();
+                            Preset spire = new WardenSpirePreset();
+                            spire.customApplies.clear();
+                            p.applyPreset(r - WardenSpirePreset.SIZE / 2, r - WardenSpirePreset.SIZE / 2, spire);
+                            for (SpireVillage.House house : SpireVillage.House.values()) {
+                                p.applyPreset(r + house.offsetX, r + house.offsetY, house.preset());
+                            }
                             return p;
                         }));
                 break;

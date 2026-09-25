@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format loosely follows
 ## [Unreleased]
 
 ### Added
+- **Showroom exhibit `spirevillage`** — the whole Spire Village as the world
+  stamps it (ring ground, spire, the twelve houses at their offsets, no
+  residents), so `scripts/preset_render.sh spirevillage` and `/swhshots
+  spirevillage` show the town at once. Dedicated server:
+  `SHOWROOM_CHECK exhibits=70 expected=10423 missing=0 signs=70/70 mobs=0`.
 - **Wolkengleve / Cloud Glaive** (`cloudglaive`) — the Cryo Glaive re-made in
   white and gold, gold-and-white light motes on the swing instead of frost.
   165 → 208.54, range 160, enchant 2000, EPIC: above the craftable Skyreave
