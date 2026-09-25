@@ -926,10 +926,14 @@ done
 # "the loot is a person" is the entire reason these three exist, and a building
 # with an empty chair passes every count the census makes.
 #
-# present=1 EXACTLY is also the "never stamped twice" assertion. ensureWardenSpire
-# runs on every skyreachstatus, so by the time this log is read SkyLandmarkPois
-# has run five times over the same world; a stamp record that did not hold, or a
-# settler seated without claiming the name, would read 2 or more here.
+# Since 2026-09-24 (473190d) the three settlers live in the Spire Village, not
+# here: SkyLandmarkPois no longer seats them, so the census line's `present=`
+# (a count of that mob inside the footprint) reads 0 on a green run and is NOT
+# asserted. What guards the person now is `settler=... home=village` below plus
+# the `village residents:` gate further up. Until then present=1 was asserted
+# here and flickered to 0 now and then -- HYPOTHESIS, never proven: the seated
+# settler wandered out of the footprint before the census counted.
+# The "never stamped twice" half lives on in `landmark stamps: 3/3` (phase 2).
 #
 # Since 2026-09-10 each line also carries the place's GUARD and the unique
 # rewards §3 puts in its containers, and both are asserted here. They are the
