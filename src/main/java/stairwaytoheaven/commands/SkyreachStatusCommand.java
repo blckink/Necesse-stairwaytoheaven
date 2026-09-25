@@ -1670,8 +1670,6 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                     paved++;
                 } else if (wantTile == SkyRegistry.skyplinthTileID) {
                     chequer++;
-                } else if (wantTile == SkyCloudmarbleSet.skywayTileID) {
-                    skywayGround++;
                 }
                 // The spire preset is stamped on top of the painter's work,
                 // so everything it writes is expected to differ. The box comes
@@ -1694,6 +1692,12 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                         && Math.hypot(x - origin.x, y - origin.y)
                                 > stairwaytoheaven.village.SpireVillage.FORECOURT) {
                     continue;
+                }
+                // Skyway ground is counted only where its trees are: the
+                // village ring above is skipped for both, since the village
+                // paves over whatever the painter grew there.
+                if (wantTile == SkyCloudmarbleSet.skywayTileID) {
+                    skywayGround++;
                 }
                 if (level.getTileID(x, y) != wantTile) {
                     tileMismatches++;
