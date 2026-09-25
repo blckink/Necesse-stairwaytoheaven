@@ -440,8 +440,12 @@ public class SkyreachStatusCommand extends ModularChatCommand {
                 // at the old lair is the way "brought home" would silently stop
                 // meaning anything.
                 // SPIRE_RADIUS is the tower's own interior, so AT_BASKET reads
-                // as "a player who walks in finds this cat".
-                final int spireRadius = 8;
+                // as "a player who walks in finds this cat". 12, not 8: a run on
+                // 2026-09-25 caught the tabby 9 tiles out with its tether exactly
+                // on the basket -- walking back, as the note above predicts. The
+                // tether test is the strict one; this only has to tell "near its
+                // home" from "somewhere else in the world".
+                final int spireRadius = 12;
                 boolean tetherOk = tether != null && tether.x == homeX && tether.y == homeY;
                 String state;
                 if (!cat.isCoaxedHome()) {
