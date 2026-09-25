@@ -116,6 +116,12 @@ public abstract class SkySettlerMob extends HumanShop {
         }
         this.nightbound = value;
         if (this.getLevel() != null) {
+            // Out of bed first: the old tree's sleep node holds the bed, and
+            // the new tree would never let go of it (findJob refuses anyone
+            // with an objectUser).
+            if (this.objectUser != null) {
+                this.objectUser.stopUsing();
+            }
             this.installBrain();
         }
     }
