@@ -4939,3 +4939,17 @@ exists where the server thread takes the region structure lock first and then
 wants the Level monitor. Not fixed. When this line appears, read
 `latest-crash.log` (`INTEGRATION_KEEP=1` keeps it) and rerun before blaming
 your own change; the rerun passed.
+
+## Putting an item straight into settlement storage (2026-09-25, task Beute-865391)
+
+VERIFIED [jar], 1.3.2 source + 1.3.3 `javap`: vanilla has no one-call "add
+this to the settlement's storage". Haulers do it in `StorageDropOff.addItem`,
+and that body is reusable as public API: `data.storageManager.getStorage()`
+(sort by `SettlementInventory.priority` descending, as `TempStorage` does) →
+`inv.getInventoryRange()` (null when the chest's object entity is gone — skip)
+→ `inv.getFilter().getAddAmount(level, item, range, true)` →
+`range.inventory.addItem(level, null, item.copy(n), range.startSlot,
+range.endSlot, "hauljob", null)`; what is left in the copy did not fit. A
+settler reaches its `ServerSettlementData` through `levelSettler.data`.
+`VampireSettlerMob.dropAt` uses this for Dorian's hunt loot, and drops the
+remainder at `networkData.getTileX()/getTileY()` when `hasFlag()`.
