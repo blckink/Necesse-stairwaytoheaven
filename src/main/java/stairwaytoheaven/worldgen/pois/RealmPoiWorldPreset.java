@@ -226,6 +226,186 @@ public class RealmPoiWorldPreset extends WorldPreset {
         java.awt.Rectangle[] landmarks = landmarkRects(seed);
         surveyLattice(seed, false, startX, startY, endX, endY, originX, originY, landmarks, visitor);
         surveyLattice(seed, true, startX, startY, endX, endY, originX, originY, landmarks, visitor);
+        // Last, so on the occupancy board they come after everything the two
+        // lattices queued in the same region -- and they were chosen clear of
+        // all of it, so the board has nothing to reject them for.
+        for (int[] rescue : skyreachRescues(seed)) {
+            int centreX = rescue[1] + RealmPoiPresets.width(rescue[0]) / 2;
+            int centreY = rescue[2] + RealmPoiPresets.height(rescue[0]) / 2;
+            if (centreX < startX || centreX >= endX || centreY < startY || centreY >= endY) continue;
+            visitor.site(rescue[0], RealmDepth.REALM_SKYREACH, rescue[1], rescue[2],
+                    RealmPoiPresets.width(rescue[0]), RealmPoiPresets.height(rescue[0]), STAGE_ACCEPTED);
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // The Skyreach rescue: every Skyreach kind stands at least once per world.
+    // -----------------------------------------------------------------------
+
+    /** Preset regions are 64 level regions of 16 tiles (WorldPresetsRegion, jar 1.3.2). */
+    private static final int PRESET_REGION_TILES = 64 * 16;
+    /** Clear ground a rescued place keeps from every place the lattices accepted. */
+    private static final int RESCUE_MARGIN = 16;
+    /** Salt for the site an EMPTY cell offers the rescue; never used by lattice 0. */
+    private static final int RESCUE_SALT = 0x7E5C;
+    /** Last few seeds' rescues; a region generation asks once per preset region. */
+    private static final java.util.Map<Integer, int[][]> RESCUE_CACHE =
+            new java.util.LinkedHashMap<Integer, int[][]>(16, 0.75F, true) {
+                @Override
+                protected boolean removeEldestEntry(java.util.Map.Entry<Integer, int[][]> eldest) {
+                    return size() > 8;
+                }
+            };
+
+    /**
+     * The places this seed's Skyreach would otherwise not have: one
+     * {@code {kind, x, y}} per Skyreach kind that the two lattices leave with no
+     * standing site anywhere in the band.
+     *
+     * <p><b>Why this exists.</b> {@link #skyreachRotate} deals the band's ~32-45
+     * sites to its kinds by rank, which gives every kind about two cells. Two is
+     * not many: when both of a kind's cells fail — one lands on a landmark's
+     * clearance, the other fails the kind's own ground test and the next kind
+     * in the rotation takes it — the kind stands nowhere in the world. Measured
+     * offline over 300 seeds on 2026-09-25: <b>15 seeds (5%)</b> lost one kind,
+     * spread over ten different kinds, the reef most often (it wants open cloud,
+     * the rarest ground on a lattice centred on islands). Seed {@code F6mfM}
+     * lost the Falling Institute exactly so: {@code nearlandmark=1}, and its
+     * other cell taken by a neighbour.
+     *
+     * <p><b>What it does.</b> A pure function of the seed, computed over the
+     * whole band (it is bounded, so this is ~25 preset regions of survey): run
+     * both lattices, simulate the occupancy board per preset region, and for
+     * every Skyreach kind with no surviving site, try it on the band's cells
+     * nearest the spire first — each cell's own site, or for a cell the lattice
+     * left empty a site hashed with {@link #RESCUE_SALT} — with the same
+     * {@link #SITE_ATTEMPTS} jittered attempts, the same ground test, and a
+     * {@link #RESCUE_MARGIN} of clearance from every accepted rectangle, the
+     * landmarks, the spire ring and the other rescues. First fit wins.
+     *
+     * <p><b>Additive only.</b> Nothing the lattices place moves or changes kind;
+     * on a seed where every kind already stands this returns nothing and the
+     * world is byte-for-byte the one it was. On an existing save, the engine
+     * recomputes presets per preset region at load and drops any whose regions
+     * are already generated ({@code LevelPresetsRegion.startGenerateRegion}), so
+     * a rescue appears only if it lands wholly on ground the save has not yet
+     * generated, and never overwrites anything.
+     */
+    static int[][] skyreachRescues(int seed) {
+        synchronized (RESCUE_CACHE) {
+            int[][] cached = RESCUE_CACHE.get(seed);
+            if (cached != null) return cached;
+        }
+        int[][] rescues = computeSkyreachRescues(seed);
+        synchronized (RESCUE_CACHE) {
+            RESCUE_CACHE.put(seed, rescues);
+        }
+        return rescues;
+    }
+
+    private static int[][] computeSkyreachRescues(final int seed) {
+        final int originX = SkyOrigin.originX(seed);
+        final int originY = SkyOrigin.originY(seed);
+        java.awt.Rectangle[] landmarks = landmarkRects(seed);
+        int reach = (int) (RealmDepth.bandEnd(RealmDepth.REALM_SKYREACH)
+                * RealmDepth.DEPTH_SCALE) + 2 * CELL;
+
+        // 1. What the two lattices place in the band, through a simulated board.
+        final boolean[] standing = new boolean[RealmPoiPresets.COUNT];
+        final java.util.List<java.awt.Rectangle> taken = new java.util.ArrayList<>();
+        for (int prx = Math.floorDiv(originX - reach, PRESET_REGION_TILES);
+                prx <= Math.floorDiv(originX + reach, PRESET_REGION_TILES); prx++) {
+            for (int pry = Math.floorDiv(originY - reach, PRESET_REGION_TILES);
+                    pry <= Math.floorDiv(originY + reach, PRESET_REGION_TILES); pry++) {
+                final java.util.List<java.awt.Rectangle> board = new java.util.ArrayList<>();
+                int sx = prx * PRESET_REGION_TILES;
+                int sy = pry * PRESET_REGION_TILES;
+                SiteVisitor boardVisitor = (kind, realm, x, y, width, height, stage) -> {
+                    if (stage != STAGE_ACCEPTED) return;
+                    java.awt.Rectangle rect = new java.awt.Rectangle(x, y, width, height);
+                    for (java.awt.Rectangle other : board) {
+                        if (other.intersects(rect)) return;
+                    }
+                    board.add(rect);
+                    taken.add(rect);
+                    if (realm == RealmDepth.REALM_SKYREACH) standing[kind] = true;
+                };
+                surveyLattice(seed, false, sx, sy, sx + PRESET_REGION_TILES, sy + PRESET_REGION_TILES,
+                        originX, originY, landmarks, boardVisitor);
+                surveyLattice(seed, true, sx, sy, sx + PRESET_REGION_TILES, sy + PRESET_REGION_TILES,
+                        originX, originY, landmarks, boardVisitor);
+            }
+        }
+        java.util.List<Integer> missing = new java.util.ArrayList<>();
+        for (int kind : REALM_KINDS[RealmDepth.REALM_SKYREACH]) {
+            if (!standing[kind]) missing.add(kind);
+        }
+        for (int kind : SKY_HOARD_KINDS) {
+            if (!standing[kind]) missing.add(kind);
+        }
+        if (missing.isEmpty()) return new int[0][];
+
+        // 2. The band's cells, nearest the spire first.
+        java.util.List<int[]> cells = new java.util.ArrayList<>();
+        for (int cx = Math.floorDiv(originX - reach, CELL); cx <= Math.floorDiv(originX + reach, CELL); cx++) {
+            for (int cy = Math.floorDiv(originY - reach, CELL); cy <= Math.floorDiv(originY + reach, CELL); cy++) {
+                boolean own = hasSite(seed, cx, cy);
+                int gridSeed = own ? seed : seed + RESCUE_SALT;
+                int sx = siteX(gridSeed, cx, cy);
+                int sy = siteY(gridSeed, cx, cy);
+                if (nearSpire(sx - originX, sy - originY)) continue;
+                if (RealmDepth.realmAt(seed, sx, sy, originX, originY) != RealmDepth.REALM_SKYREACH) continue;
+                long dx = sx - originX;
+                long dy = sy - originY;
+                cells.add(new int[]{cx, cy, sx, sy, (int) Math.min(Integer.MAX_VALUE, dx * dx + dy * dy)});
+            }
+        }
+        cells.sort((a, b) -> a[4] != b[4] ? Integer.compare(a[4], b[4])
+                : (a[0] != b[0] ? Integer.compare(a[0], b[0]) : Integer.compare(a[1], b[1])));
+
+        // 3. Each missing kind takes the first cell it fits in.
+        java.util.List<int[]> rescues = new java.util.ArrayList<>();
+        for (int kind : missing) {
+            int width = RealmPoiPresets.width(kind);
+            int height = RealmPoiPresets.height(kind);
+            placed:
+            for (int[] cell : cells) {
+                for (int attempt = 0; attempt < SITE_ATTEMPTS; attempt++) {
+                    int spotX = cell[2] + jitter(seed + RESCUE_SALT, cell[0], cell[1], kind, attempt, 0);
+                    int spotY = cell[3] + jitter(seed + RESCUE_SALT, cell[0], cell[1], kind, attempt, 1);
+                    if (nearSpire(spotX - originX, spotY - originY)) continue;
+                    if (RealmDepth.realmAt(seed, spotX, spotY, originX, originY) != RealmDepth.REALM_SKYREACH) continue;
+                    // Whole inside the preset region that owns its centre, the
+                    // rule every lattice footprint keeps.
+                    int regionX = Math.floorDiv(spotX, PRESET_REGION_TILES) * PRESET_REGION_TILES;
+                    int regionY = Math.floorDiv(spotY, PRESET_REGION_TILES) * PRESET_REGION_TILES;
+                    int x = clamp(spotX - width / 2, regionX, regionX + PRESET_REGION_TILES - width - 1);
+                    int y = clamp(spotY - height / 2, regionY, regionY + PRESET_REGION_TILES - height - 1);
+                    if (!inRegion(x + width / 2, y + height / 2, regionX, regionY)) continue;
+                    if (intersectsLandmark(landmarks, x, y, width, height)) continue;
+                    java.awt.Rectangle grown = new java.awt.Rectangle(x - RESCUE_MARGIN, y - RESCUE_MARGIN,
+                            width + 2 * RESCUE_MARGIN, height + 2 * RESCUE_MARGIN);
+                    boolean clear = true;
+                    for (java.awt.Rectangle other : taken) {
+                        if (other.intersects(grown)) {
+                            clear = false;
+                            break;
+                        }
+                    }
+                    if (!clear) continue;
+                    if (!validSite(kind, RealmDepth.REALM_SKYREACH, seed, x, y, width, height)) continue;
+                    rescues.add(new int[]{kind, x, y});
+                    taken.add(new java.awt.Rectangle(x, y, width, height));
+                    break placed;
+                }
+            }
+        }
+        return rescues.toArray(new int[0][]);
+    }
+
+    private static boolean inRegion(int x, int y, int regionX, int regionY) {
+        return x >= regionX && x < regionX + PRESET_REGION_TILES
+                && y >= regionY && y < regionY + PRESET_REGION_TILES;
     }
 
     /**

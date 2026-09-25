@@ -2908,6 +2908,12 @@ public final class RealmPoiPresets {
                 .pending('s', false)
                 .pending('Y', true);
         plan(p, INSTITUTE_PLAN, legend);
+        // The rim's '.' tiles keep the world's ground, and validSite samples
+        // nine points, not the three candelabras on row 2. Seed F6mfM put one
+        // ON a two-tile Mistsea inlet (-120,-598): `placed=39/40 missing=1
+        // 10,2=0!=1687`. dryRing turns liquid under and beside every object to
+        // cloudturf, as it does for the tower, town and toll bridge.
+        dryRing(p, SkyRegistry.cloudturfID);
         return p;
     }
 

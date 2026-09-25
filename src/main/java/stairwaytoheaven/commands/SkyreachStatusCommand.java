@@ -1117,58 +1117,60 @@ public class SkyreachStatusCommand extends ModularChatCommand {
             // rather than as a fixed name, and reads 0 with radius `none` if
             // the band has no Crooked radius at all, which is itself a defect
             // worth failing on.
-            int peak = 0;
-            for (int r = 5280; r >= 4400; r -= 40) {
-                if (stairwaytoheaven.worldgen.RealmDepth.realmForDepth(outSeed,
-                        outOrigin.x + r, outOrigin.y,
-                        stairwaytoheaven.worldgen.RealmDepth.depthFor(r))
-                        == stairwaytoheaven.worldgen.RealmDepth.REALM_CROOKED) {
-                    peak = r;
-                    break;
-                }
-            }
-            int[] rampRadii = {4400, 5000, peak};
+            // ...and since 2026-09-25 it is not ONE window either. A 121x121
+            // window at one radius is a coin flip against the Outland patches
+            // themselves: they are fbm blobs at PATCH_SCALE 52 above a ~0.64
+            // threshold, about a fifth of the band's land, and a window can
+            // fall wholly between two. Seeds yZeXb and F6mfM did exactly that
+            // (rpeak=5200:0/3204 and 0/3353) while, measured offline round the
+            // same circle, 52 of 55 and 47 of 49 Crooked windows held Outland
+            // ground -- ~20% of the land. The world was right; the probe
+            // sampled one spot of it. So the peak is found per BEARING, 24
+            // bearings 15 degrees apart, and rpeak sums the windows there.
+            // Still a real gate: if the painter stopped producing Outland
+            // ground, every window reads 0 and rpeak=<r>:0/<land> fails.
+            int peak = crookedPeak(outSeed, outOrigin, 1.0, 0.0);
+            int[] rampRadii = {4400, 5000};
             for (int probe = 0; probe < rampRadii.length; probe++) {
                 int radius = rampRadii[probe];
+                int[] counts = outlandWindow(outSeed, outOrigin, outOrigin.x + radius, outOrigin.y,
+                        crookedPortalID);
+                wallSeen += counts[2];
+                portalSeen += counts[3];
+                ramp.append(String.format(" r%d=%d/%d", radius, counts[0], counts[1]));
+            }
+            int peakLand = 0;
+            int peakWrong = 0;
+            int peakWindows = 0;
+            int peakWindowsWrong = 0;
+            for (int bearing = 0; bearing < 360; bearing += 15) {
+                double cos = Math.cos(Math.toRadians(bearing));
+                double sin = Math.sin(Math.toRadians(bearing));
+                int radius = crookedPeak(outSeed, outOrigin, cos, sin);
                 if (radius == 0) {
-                    ramp.append(" rpeak=none:0/0");
                     continue;
                 }
-                int land = 0;
-                int wrong = 0;
-                for (int dx = -60; dx <= 60; dx += 2) {
-                    for (int dy = -60; dy <= 60; dy += 2) {
-                        int tx = outOrigin.x + radius + dx;
-                        int ty = outOrigin.y + dy;
-                        long desc = stairwaytoheaven.worldgen.SkyTerrainPainter.describeTile(
-                                outSeed, tx, ty, outOrigin.x, outOrigin.y);
-                        if (necesse.engine.registries.TileRegistry.getTile(
-                                stairwaytoheaven.worldgen.SkyTerrainPainter.descTile(desc)).isLiquid) {
-                            continue;
-                        }
-                        land++;
-                        if (stairwaytoheaven.worldgen.SkyTerrainPainter.descBiome(desc)
-                                == stairwaytoheaven.worldgen.SkyTerrainPainter.BIOME_OUTLANDS) {
-                            wrong++;
-                            int obj = stairwaytoheaven.worldgen.SkyTerrainPainter.descObject(desc);
-                            if (obj == SkyRegistry.evilwallID) {
-                                wallSeen++;
-                            }
-                            // Counts the CROOKED BOSS PORTAL, not the Seance
-                            // Circle. The Outlands portal sites used to carry a
-                            // circle; they carry the boss portal since the chalk
-                            // made the circle settlement-only. Left pointing at
-                            // seanceCircleID this check would read 0 forever and
-                            // never catch the sites going empty again.
-                            if (crookedPortalID != 0 && obj == crookedPortalID) {
-                                portalSeen++;
-                            }
-                        }
-                    }
+                int[] counts = outlandWindow(outSeed, outOrigin,
+                        outOrigin.x + (int) Math.round(radius * cos),
+                        outOrigin.y + (int) Math.round(radius * sin), crookedPortalID);
+                peakWrong += counts[0];
+                peakLand += counts[1];
+                wallSeen += counts[2];
+                portalSeen += counts[3];
+                peakWindows++;
+                if (counts[0] > 0) {
+                    peakWindowsWrong++;
                 }
-                ramp.append(probe == rampRadii.length - 1
-                        ? String.format(" rpeak=%d:%d/%d", radius, wrong, land)
-                        : String.format(" r%d=%d/%d", radius, wrong, land));
+            }
+            if (peakWindows == 0) {
+                ramp.append(" rpeak=none:0/0");
+            } else {
+                // The radius printed is the east bearing's, as before, so old
+                // logs still compare ("arc" if east has none); the counts are
+                // every bearing's.
+                ramp.append(String.format(" rpeak=%s:%d/%d rpeakwindows=%d/%d",
+                        peak == 0 ? "arc" : Integer.toString(peak), peakWrong, peakLand,
+                        peakWindowsWrong, peakWindows));
             }
             // The realm field from WORLD_DESIGN §3, reported so the concept and
             // the code can be compared without reading either.
@@ -1785,5 +1787,58 @@ public class SkyreachStatusCommand extends ModularChatCommand {
         logs.add("placement check on " + checked + " free land tiles:");
         crystalErrors.forEach((k, v) -> logs.add("  stormcrystal: " + k + " x" + v));
         reedErrors.forEach((k, v) -> logs.add("  skyreeds: " + k + " x" + v));
+    }
+
+    /**
+     * Crooked Beyond's peak along one bearing from the origin: walk inward from
+     * the outer edge of its nominal peak (5280) until the seed-noised realm
+     * field really answers Crooked. 0 if it never does on this bearing.
+     */
+    private static int crookedPeak(int seed, java.awt.Point origin, double cos, double sin) {
+        for (int r = 5280; r >= 4400; r -= 40) {
+            int tx = origin.x + (int) Math.round(r * cos);
+            int ty = origin.y + (int) Math.round(r * sin);
+            if (stairwaytoheaven.worldgen.RealmDepth.realmAt(seed, tx, ty, origin.x, origin.y)
+                    == stairwaytoheaven.worldgen.RealmDepth.REALM_CROOKED) {
+                return r;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * One 121x121 window (every second tile) of the painter's own decision:
+     * {Outland land tiles, land tiles, evilwalls, Crooked boss portals}.
+     */
+    private static int[] outlandWindow(int seed, java.awt.Point origin, int centreX, int centreY,
+            int crookedPortalID) {
+        int[] counts = new int[4];
+        for (int dx = -60; dx <= 60; dx += 2) {
+            for (int dy = -60; dy <= 60; dy += 2) {
+                long desc = stairwaytoheaven.worldgen.SkyTerrainPainter.describeTile(
+                        seed, centreX + dx, centreY + dy, origin.x, origin.y);
+                if (necesse.engine.registries.TileRegistry.getTile(
+                        stairwaytoheaven.worldgen.SkyTerrainPainter.descTile(desc)).isLiquid) {
+                    continue;
+                }
+                counts[1]++;
+                if (stairwaytoheaven.worldgen.SkyTerrainPainter.descBiome(desc)
+                        != stairwaytoheaven.worldgen.SkyTerrainPainter.BIOME_OUTLANDS) {
+                    continue;
+                }
+                counts[0]++;
+                int obj = stairwaytoheaven.worldgen.SkyTerrainPainter.descObject(desc);
+                if (obj == SkyRegistry.evilwallID) {
+                    counts[2]++;
+                }
+                // Counts the CROOKED BOSS PORTAL, not the Seance Circle: the
+                // Outlands portal sites carry the boss portal since the chalk
+                // made the circle settlement-only.
+                if (crookedPortalID != 0 && obj == crookedPortalID) {
+                    counts[3]++;
+                }
+            }
+        }
+        return counts;
     }
 }

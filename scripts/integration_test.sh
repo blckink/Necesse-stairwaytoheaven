@@ -666,7 +666,12 @@ grep -qE "outlands check: .* inside=0/[1-9][0-9]*" "$LOG1" \
 # while r5000 read 356/2342. SkyreachStatusCommand now walks inward from 5280
 # until the realm field really says Crooked and probes there, reporting the
 # radius it chose.
-grep -qE "outlands check: .* rpeak=[0-9]+:[1-9][0-9]*/" "$LOG1" \
+# ...and since 2026-09-25 it sums 24 windows, one per 15-degree bearing, each
+# at that bearing's own Crooked peak (`rpeak=<east radius|arc>:wrong/land
+# rpeakwindows=<with Outland>/<probed>`). One 121x121 window missed the Outland
+# patches outright on 18 of 152 seeds offline (yZeXb 0/3204, F6mfM 0/3353)
+# while every one of those seeds had Outland ground in 18+ of its 24 windows.
+grep -qE "outlands check: .* rpeak=([0-9]+|arc):[1-9][0-9]*/" "$LOG1" \
     || { echo "FAIL: no Outland ground at Crooked Beyond's peak -- the ramp never rises"; \
          grep -aE "outlands check:|realm check:" "$LOG1" | tail -2; STATUS=1; }
 grep -qE "outlands check: .* biome=NOT REGISTERED" "$LOG1" \

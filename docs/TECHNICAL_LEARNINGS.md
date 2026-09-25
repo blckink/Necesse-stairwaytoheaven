@@ -4711,3 +4711,79 @@ placement decision itself (a pure function of the seed, no tile generated)
 starving one of the Skyreach kinds, i.e. the bounded-band arithmetic of
 2026-09-10, not region loading. Neither log has a `swh region skipped
 generation` line. Both reproducible now with `INTEGRATION_SEED`.
+
+## The last two seed flakes: a one-window Outland probe, and a Skyreach kind with no cell left (2026-09-25)
+
+Both FAIL lines left open above were reproduced offline first, with a small
+harness compiled against `Server.jar` + the built mod jar that fills the ID
+fields the way `scripts/SkyMapDump.java` does and calls the real
+`RealmPoiWorldPreset.survey` / `SkyTerrainPainter.describeTile` (VERIFIED
+[run]; it reproduced the server's numbers exactly: F6mfM
+`funnel [31 accepted, 1 nearlandmark]`, `fallinginstitute=0`; yZeXb
+`rpeak=5200:0/3204`; F6mfM `rpeak=5200:0/3353`).
+
+### 1. `no Outland ground at Crooked Beyond's peak` — the probe, not the world
+
+The probe looked at ONE 121x121 window (every 2nd tile) at the east-bearing
+Crooked peak. Outland ground is fbm patches (`SkyOutlands.PATCH_SCALE` 52,
+threshold ~0.64 at the peak), about a fifth of the band's land, so one window
+can sit wholly between patches. Measured offline on 152 seeds: the old window
+read **0 on 18 seeds (12%)**, while at each bearing's own Crooked peak, 24
+bearings 15 degrees apart, **every** seed had Outland ground in at least 18 of
+24 windows (yZeXb 20/24 windows, 9295/62085 land tiles; F6mfM 22/24,
+9474/59652). No content gap: Crooked Beyond has its Outlands on these seeds.
+
+Fix: `SkyreachStatusCommand` sums those 24 windows and prints
+`rpeak=<east radius|arc>:<wrong>/<land> rpeakwindows=<with Outland>/<probed>`;
+the gate regex is the same test (`[1-9]` wrong tiles), so a painter that stops
+producing Outland ground still reads `:0/` and fails. `r4400`/`r5000` keep
+their single windows (not asserted). The bearing peak uses
+`RealmDepth.realmAt` (the painter's own depth), not `realmForDepth(depthFor(r))`.
+
+### 2. `fallinginstitute stands nowhere` — a kind whose ~2 cells both failed
+
+`skyreachRotate` deals the bounded band's 32-46 sites to its 15 kinds by rank,
+so each kind has about two cells, and when a kind's test fails on a cell the
+NEXT kind in the rotation takes it. Lose both cells (F6mfM: one on a
+landmark's clearance, `nearlandmark=1`; the other taken by a neighbour) and the
+kind stands nowhere. Offline over 300 random seeds: **15 seeds (5%)** missed a
+kind, ten different kinds, `serpentsreef` most often (it wants open cloud).
+
+Fix, additive only: `RealmPoiWorldPreset.skyreachRescues(seed)`. A pure
+function of the seed, cached for the last 8 seeds: survey both lattices over
+the whole band's preset regions, simulate the `villages` occupancy board per
+preset region, and for each Skyreach lattice kind (the 15 + the 2 chapter-02
+hoards) with no surviving site, try it on the band's cells nearest the spire
+first — the cell's own site, or a `RESCUE_SALT` site for an empty cell — with
+the same 48 jittered attempts and the same `validSite`, requiring the realm to
+be Skyreach, clear of the spire ring, the landmarks, and 16 tiles from every
+accepted rectangle and earlier rescue, whole inside the owning 1024-tile
+preset region. `survey` emits the rescues last, as ACCEPTED, in the region
+owning their centre.
+
+Offline, same 300 seeds, placement lists before/after the change
+(VERIFIED [run]): `seeds=300 seedsWithRemovals=0 seedsWithAdditions=15
+totalAdded=15` — the 15 failing seeds gained exactly the missing kind and
+nothing on any seed moved or changed kind; `seeds=300 withMissing=0` after.
+
+**Save impact (source-read [jar], not tested on a save):** presets are
+recomputed from `addToRegion` whenever a preset region loads
+(`WorldPresetsRegion.getLevelRegionsFuture` → `WorldPresetRegistry.initRegion`;
+only placed presets are saved), and `LevelPresetsRegion.startGenerateRegion`
+drops a queued preset any of whose regions is already generated. So on an
+existing save nothing already standing moves or is overwritten; on the ~5% of
+seeds with a missing kind, the rescued place appears only if its whole
+rectangle lies on ground that save has not generated yet — otherwise the kind
+stays missing in that save (a `/swhreset regenerate` world gets it).
+
+**What the rescue then exposed [run].** The first `INTEGRATION_SEED=F6mfM` run
+on the rescue queued the institute (the rescued one, `at=-130,-600`, is the
+nearest and gets force-stamped) and failed on
+`realmpoi stamp: kind=fallinginstitute at=-130,-600 ... placed=39/40 missing=1 10,2=0!=1687@t111`:
+the candelabra at plan (10,2) is a `loose` object on a `.` tile that keeps the
+world's ground, and there the world is a two-tile Mistsea inlet (offline dump:
+`mistsea` at -120,-598). `validSite`'s nine samples do not include row 2. The
+institute now runs `dryRing(p, cloudturf)` like the tower, town and toll
+bridge. The other chapter-01 plan presets without `dryRing` (shrine, dew
+keeper's hut, fold, wayhouse, redoubt, manufactory, anvil, gate, prism choir;
+the reef wants water) carry the same latent risk — HYPOTHESIS, not seen failing.
