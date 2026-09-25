@@ -27,6 +27,11 @@ import necesse.gfx.gameFont.FontOptions;
  * supply, and nothing in Eden, Steinfeld, the Aftergarden or the Crooked Beyond
  * drops either.
  *
+ * <p>Region-only turned out not to be enough: both lie on the surface, and a
+ * player had the ask together in minutes (11n, 2026-09-25). Two Skystone
+ * Hearts — the band's trophy, off its golems and hoard chests — are the part
+ * that needs the Skyreach explored rather than mined. docs/BALANCE.md §11.
+ *
  * <h2>Reward, and why it looks like this</h2>
  * The key piece, 4 Stormsteel Bar, a full set of four Stormdiscs and the
  * Skywatch Hood. The table lives in ONE place, {@code SkyWardenMob.RegionKey};
