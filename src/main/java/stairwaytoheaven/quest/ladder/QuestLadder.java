@@ -462,6 +462,36 @@ public final class QuestLadder {
         }
         Server server = client.getServer();
         long auth = client.authentication;
+        // Catch up a co-op partner: a per-player step another player online
+        // has already turned in counts as done for this one too. Saves from
+        // before the party rule had player 1 far ahead and player 2 locked
+        // out of every later chapter by isOffered's per-player gate.
+        LadderWorldData ledger = LadderWorldData.get(server);
+        if (ledger != null) {
+            for (ServerClient member : SkyQuests.party(server, client)) {
+                if (member == client) {
+                    continue;
+                }
+                for (Step step : STEPS) {
+                    if (!step.custom && step.worldDone == null
+                            && !ledger.isDone(auth, step.id)
+                            && ledger.isDone(member.authentication, step.id)) {
+                        ledger.markDone(auth, step.id);
+                    }
+                }
+            }
+        }
+        // A copy this player holds for a step they already finished (shared in
+        // by a co-op partner before the party moved together) can never be
+        // turned in -- rule 3 skips done steps. Drop it from their journal.
+        for (Step step : stepsOf(giver)) {
+            if (!step.custom && step.isDone(server, auth)) {
+                Quest stale = SkyQuests.findHeld(client, step.questClass);
+                if (stale != null) {
+                    server.world.getQuests().removeQuest(stale);
+                }
+            }
+        }
         // Rule 3 first: anything held and complete is turned in, whatever order.
         for (Step step : stepsOf(giver)) {
             if (step.custom || step.isDone(server, auth)) {
@@ -470,21 +500,28 @@ public final class QuestLadder {
             Quest held = SkyQuests.findHeld(client, step.questClass);
             if (held != null && held.canComplete(client)) {
                 held.complete(client);
-                // A world-scoped step is finished for everybody: clear every
-                // copy. A per-player step only clears this player's.
+                // Co-op is one party (the player, 2026-09-26): a turn-in
+                // finishes the step for everyone online, clears every copy,
+                // and pays everyone -- "beide Spieler sollen Belohnung immer
+                // kriegen". An offline partner is caught up on their next
+                // conversation (the ledger sync at the top), without the reward.
+                java.util.List<ServerClient> party = SkyQuests.party(server, client);
+                SkyQuests.removeAllOfType(server, step.questClass);
                 if (step.worldMark != null) {
-                    SkyQuests.removeAllOfType(server, step.questClass);
                     step.worldMark.accept(server);
                     SkywatchWorldData.recordDoneBy(server, step.id, client.getName());
                 } else {
-                    server.world.getQuests().removeQuest(held);
                     LadderWorldData data = LadderWorldData.get(server);
                     if (data != null) {
-                        data.markDone(auth, step.id);
+                        for (ServerClient member : party) {
+                            data.markDone(member.authentication, step.id);
+                        }
                     }
                 }
                 if (step.reward != null) {
-                    step.reward.accept(server, client);
+                    for (ServerClient member : party) {
+                        step.reward.accept(server, member);
+                    }
                 }
                 return new Reply(new LocalMessage("misc", step.doneKey()), step, true);
             }

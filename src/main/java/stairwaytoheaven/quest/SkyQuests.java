@@ -27,8 +27,33 @@ public final class SkyQuests {
         return null;
     }
 
-    /** Gives a fresh quest of the type unless the client already holds one. */
+    /**
+     * Gives a fresh quest of the type unless the client already holds one --
+     * and the same to every other player online. Co-op is one party: the
+     * player, 2026-09-26, "Spieler 1 kriegt alle Aufgaben, Spieler 2 nicht".
+     * Each player gets their OWN instance (a DeliverItemsQuest counts the
+     * holder's inventory), which is why this makes a new one per player.
+     */
     public static <T extends Quest> T giveOnce(Server server, ServerClient client, T quest) {
+        T mine = giveOnceTo(server, client, quest);
+        for (ServerClient other : party(server, client)) {
+            if (other == client) {
+                continue;
+            }
+            try {
+                @SuppressWarnings("unchecked")
+                java.lang.reflect.Constructor<? extends Quest> ctor = quest.getClass().getDeclaredConstructor();
+                ctor.setAccessible(true);
+                T copy = (T) ctor.newInstance();
+                giveOnceTo(server, other, copy);
+            } catch (ReflectiveOperationException e) {
+                System.err.println("[swh] cannot share quest " + quest.getClass().getSimpleName() + ": " + e);
+            }
+        }
+        return mine;
+    }
+
+    private static <T extends Quest> T giveOnceTo(Server server, ServerClient client, T quest) {
         @SuppressWarnings("unchecked")
         T held = (T) findHeld(client, quest.getClass());
         if (held != null) {
@@ -37,6 +62,26 @@ public final class SkyQuests {
         server.world.getQuests().addQuest(quest, true);
         quest.makeActiveFor(server, client);
         return quest;
+    }
+
+    /**
+     * Every player online with a body in the world, {@code self} always
+     * included. A quest reward goes to all of them: the player, 2026-09-26,
+     * "beide Spieler sollen Belohnung immer kriegen bei quests".
+     */
+    public static java.util.List<ServerClient> party(Server server, ServerClient self) {
+        java.util.List<ServerClient> out = new ArrayList<>();
+        if (self != null) {
+            out.add(self);
+        }
+        if (server != null) {
+            for (ServerClient c : server.getClients()) {
+                if (c != null && c != self && c.playerMob != null) {
+                    out.add(c);
+                }
+            }
+        }
+        return out;
     }
 
     /**

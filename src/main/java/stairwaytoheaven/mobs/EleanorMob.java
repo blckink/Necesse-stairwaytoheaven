@@ -209,12 +209,14 @@ public class EleanorMob extends SkySettlerMob {
         // still there to say it.
         stairwaytoheaven.util.TileText.at(client, this.getTileX(), this.getTileY(),
                 new LocalMessage("misc", "eleanorpassedon"));
-        give(client, PASS_ON_REWARD, 1);
+        for (ServerClient member : SkyQuests.party(server, client)) {
+            give(member, PASS_ON_REWARD, 1);
+            give(member, "spiritsteelbar", PASS_ON_BAR_BONUS);
+        }
         // The endgame payout on top of the trinket §11 names: benchmarked the
         // same way every other chain this pass adds is, against the Skyreach
         // finale's own 10 Stormsteel bars (docs/BALANCE.md) — Ghost Realm's own
         // bar, and more of it, since she is made of what it is smelted from.
-        give(client, "spiritsteelbar", PASS_ON_BAR_BONUS);
         if (server != null) {
             SkywatchWorldData.markEleanorPassedOn(server);
             SkyQuests.removeAllOfType(server, EleanorQuest.class);
@@ -239,7 +241,9 @@ public class EleanorMob extends SkySettlerMob {
         if (server != null) {
             SkyQuests.removeAllOfType(server, EleanorQuest.class);
         }
-        give(client, "spiritsteelbar", PASS_ON_BAR_BONUS);
+        for (ServerClient member : SkyQuests.party(server, client)) {
+            give(member, "spiritsteelbar", PASS_ON_BAR_BONUS);
+        }
         // No line of our own for the STAY ending. It used to post
         // "misc.eleanorstaydone" into chat; vanilla's own recruit packet
         // already announces that she joined the settlement, the bars land in

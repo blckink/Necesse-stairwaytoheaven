@@ -708,16 +708,19 @@ public class SkyWardenMob extends HumanShop {
             stairwaytoheaven.quest.SkyQuests.removeAllOfType(server, step.questClass);
             SkywatchWorldData.markRegionKeyEarned(server, step.realm);
             SkywatchWorldData.recordDoneBy(server, "key" + RealmDepth.keyOf(step.realm), client.getName());
-            give(client, step.keyItemID, 1);
-            give(client, step.barItemID, step.bars);
-            for (String special : step.specialItemIDs) {
-                int colon = special.indexOf(':');
-                String id = colon < 0 ? special : special.substring(0, colon);
-                int amount = colon < 0 ? 1 : Integer.parseInt(special.substring(colon + 1));
-                // The Skywatch set only registers when its armor sheets ship
-                // (WardenIdentity.armorSheetsExist); skip a piece that did not.
-                if (necesse.engine.registries.ItemRegistry.getItemID(id) >= 0) {
-                    give(client, id, amount);
+            // Every player online is paid (co-op party, the player 2026-09-26).
+            for (ServerClient member : stairwaytoheaven.quest.SkyQuests.party(server, client)) {
+                give(member, step.keyItemID, 1);
+                give(member, step.barItemID, step.bars);
+                for (String special : step.specialItemIDs) {
+                    int colon = special.indexOf(':');
+                    String id = colon < 0 ? special : special.substring(0, colon);
+                    int amount = colon < 0 ? 1 : Integer.parseInt(special.substring(colon + 1));
+                    // The Skywatch set only registers when its armor sheets ship
+                    // (WardenIdentity.armorSheetsExist); skip a piece that did not.
+                    if (necesse.engine.registries.ItemRegistry.getItemID(id) >= 0) {
+                        give(member, id, amount);
+                    }
                 }
             }
             // His doneKey line already tells the player where the piece goes
@@ -821,15 +824,17 @@ public class SkyWardenMob extends HumanShop {
             // the endgame rescale it is no longer the payout by itself.
             // Flickerlight Garland is the same story (no second source
             // either) and stays an extra at its original count.
-            give(client, "catbasket", 1);
-            give(client, "flickerlightgarland", 2);
+            for (ServerClient member : stairwaytoheaven.quest.SkyQuests.party(server, client)) {
+                give(member, "catbasket", 1);
+                give(member, "flickerlightgarland", 2);
+                give(member, "stormsteelbar", 10);
+            }
             // The real payout: a serious stack of the mod's own endgame bar.
             // Benchmarked against StormsteelArmor.Helmet's own recipe cost
             // (SkyItems.registerGearRecipes: stormsteelbar 8) plus a 2-bar
             // margin -- enough on its own to clear the bar cost of any single
             // Stormsteel recipe (helmet 8, boots 6, vambrace 6) once the
             // player has that recipe's other ingredients in hand.
-            give(client, "stormsteelbar", 10);
             say(client, "wardencatsdone");
             chapter = chapterFor(quest, this.isSettler());
         }
@@ -849,8 +854,10 @@ public class SkyWardenMob extends HumanShop {
                 // now, not the payout. The player's own verdict on these two
                 // being the WHOLE finale reward was "das sind keine endgame
                 // belohnungen tbh", and this is the fix.
-                give(client, "skywatchbanner", 1);
-                give(client, "aurorapetal", 5);
+                for (ServerClient member : stairwaytoheaven.quest.SkyQuests.party(server, client)) {
+                    give(member, "skywatchbanner", 1);
+                    give(member, "aurorapetal", 5);
+                }
                 // The actual payout for finishing the whole chain: the
                 // Wolkengleve, the Skywatch's own glaive (arsenal/
                 // CloudGlaiveToolItem). It replaced the Stormsteel Vambrace
@@ -883,7 +890,9 @@ public class SkyWardenMob extends HumanShop {
      * quests} clears it together with the anchor it belongs to.
      */
     private void giveCloudGlaive(Server server, ServerClient client) {
-        give(client, "cloudglaive", 1);
+        for (ServerClient member : stairwaytoheaven.quest.SkyQuests.party(server, client)) {
+            give(member, "cloudglaive", 1);
+        }
         SkywatchWorldData.markResidentChainDone(server, SkywatchWorldData.REWARD_CLOUD_GLAIVE);
     }
 
