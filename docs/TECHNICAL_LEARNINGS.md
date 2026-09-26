@@ -5003,3 +5003,27 @@ Read in 1.3.3 (CFR), VERIFIED [run] headless where marked:
   other settlements' settlers and village residents
   (`HumanMob.updateTeam`), so `isSameTeam` does not mean "ours". Compare
   `getSettlementUniqueID()` instead.
+
+## Vanilla's Adventure Journal and fixed settler names (2026-09-26)
+
+- `JournalRegistry.registerJournalEntry` and
+  `JournalChallengeRegistry.registerChallenge` are public and work from a
+  mod's `init()`: `GlobalData` runs every core `registerCore()` first, then the
+  mods' `init()`, then closes the registries (VERIFIED [jar] 1.3.3; both exist
+  in 1.3.2 too). `onRegistryClose` builds the biome→entry map, so entries must
+  be registered in `init()`, not `postInit()`.
+- Discovery: `ServerClient.tickDiscoveredBiomes` reads the tile's biome from
+  `region.biomeLayer` and discovers every entry for that biome whose level
+  identifier matches — use `new JournalEntry(biome, SKYREACH_IDENTIFIER)`; the
+  one-argument constructor means the surface. Entry title =
+  `journal.<entryID>`, challenge text = `journal.<challengeID>` (vanilla's own
+  `[journal]` section). Challenges only count once the entry is discovered.
+  VERIFIED [run]: `swhjournal vanilla: entries=22 challenges=66 missing=0` on
+  the dedicated server; the client window itself is HYPOTHESIS.
+- A settler's name is `HumanMob.settlerName`, rolled by the overridable
+  `getRandomName(GameRandom)` and saved raw; `getLocalization()` wraps it in
+  `mob.<id>name`. A fixed name = override `getRandomName` and set
+  `settlerName` in `applyLoadData` for old saves (`mobs/SkySettlerMob`).
+- `tools/locale_audit.py`: a mod `[controls]` section makes vanilla's
+  `controls.usetip` look missing; and `new LocalMessage(cat, "prefix" + x)`
+  is read as the literal key `prefix` — build the key in a local variable.
