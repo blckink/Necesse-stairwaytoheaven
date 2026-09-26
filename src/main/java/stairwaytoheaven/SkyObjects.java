@@ -400,7 +400,7 @@ final class SkyObjects {
 
         // crooked bare tree: woody trunk, so axe like every TreeObject.
         stairwaytoheaven.objects.SkyDecoObject deadtree = new stairwaytoheaven.objects.SkyDecoObject(
-                "deadtree", 48, new Color(60, 52, 58), null, "objects", "landscaping", "plants")
+                "deadtree", 64, new Color(60, 52, 58), null, "objects", "landscaping", "plants")
                 .setTool(ToolType.AXE)
                 // Scattered all over the Veil and the Outlands: chopping one
                 // the world grew gives logs like vanilla's dead trees, not a

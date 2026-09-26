@@ -127,13 +127,13 @@ public final class GhostRealm {
     }
 
     private static void registerObjects() {
-        crookedDeadTreeID = natural("crookeddeadtree", new GhostDecoObject("deadtree", "deadwoodtree", 32,
+        crookedDeadTreeID = natural("crookeddeadtree", new GhostDecoObject("deadtree", "deadwoodtree", 64,
                 new Color(45, 37, 55), new Rectangle(8, 20, 16, 12)).setDrops(new LootTable(LootItem.between("bonewood", 2, 5))));
-        bonewoodTreeID = natural("bonewoodtree", new GhostDecoObject("deadwood", "deadwoodtree", 32,
-                new Color(59, 55, 69), new Rectangle(8, 20, 16, 12)).setDrops(new LootTable(LootItem.between("bonewood", 3, 7))));
-        spiritWillowID = natural("spiritwillow", new GhostDecoObject("willowtree", "willowtree", 32,
-                new Color(45, 110, 102), new Rectangle(8, 20, 16, 12)).setDrops(new LootTable(LootItem.between("bonewood", 2, 5))));
-        lanternTreeID = natural("lanterntree", new GhostDecoObject("gloomwillow", "willowtree", 32,
+        bonewoodTreeID = natural("bonewoodtree", new GhostDecoObject("deadwood", "deadwoodtree", 128,
+                new Color(59, 55, 69), new Rectangle(8, 20, 16, 12)).setCells(128, 0, 0, 0, 1, 0, 2, 0, 3).setDrops(new LootTable(LootItem.between("bonewood", 3, 7))));
+        spiritWillowID = natural("spiritwillow", new GhostDecoObject("willowtree", "willowtree", 128,
+                new Color(45, 110, 102), new Rectangle(8, 20, 16, 12)).setCells(128, 0, 0, 0, 3).setDrops(new LootTable(LootItem.between("bonewood", 2, 5))));
+        lanternTreeID = natural("lanterntree", new GhostDecoObject("gloomwillow", "willowtree", 64,
                 new Color(95, 167, 132), new Rectangle(8, 20, 16, 12)).setDrops(new LootTable(
                         LootItem.between("bonewood", 2, 4), ChanceLootItem.between(0.35F, "ectoplasm", 1, 2))));
 

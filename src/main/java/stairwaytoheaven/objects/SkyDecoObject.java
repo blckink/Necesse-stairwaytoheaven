@@ -34,6 +34,8 @@ public class SkyDecoObject extends GameObject {
      * See {@link #setNaturalLoot}.
      */
     private LootTable naturalLoot;
+    private int cellHeight;
+    private int[] cells;
 
     public SkyDecoObject(String textureName, int variantWidth, Color mapColor, Rectangle collision, String... category) {
         // The box goes through super(): GameObject(Rectangle) derives isSolid
@@ -92,6 +94,19 @@ public class SkyDecoObject extends GameObject {
      * can be set down and broken into its material, instead of sitting in the
      * bag for good (player: "liegen nur im Inventar rum").
      */
+    /**
+     * For sheets that stack several whole pictures in rows, like vanilla's
+     * {@code deadwood} and {@code willowtree} (128 px cells, one tree per
+     * row): draw only a {@code cellHeight}-tall cell, picked per tile from
+     * the given (column, row) pairs. Without this every variant is a
+     * full-height column strip of the whole sheet.
+     */
+    public SkyDecoObject setCells(int cellHeight, int... colRowPairs) {
+        this.cellHeight = cellHeight;
+        this.cells = colRowPairs;
+        return this;
+    }
+
     public SkyDecoObject setNaturalLoot(LootTable naturalLoot) {
         this.naturalLoot = naturalLoot;
         return this;
@@ -118,16 +133,21 @@ public class SkyDecoObject extends GameObject {
             return;
         }
         GameLight light = level.getLightLevel(tileX, tileY);
-        int variants = Math.max(1, this.texture.getWidth() / this.variantWidth);
+        int height = this.cellHeight > 0 ? this.cellHeight : this.texture.getHeight();
+        int variants = this.cells != null
+                ? this.cells.length / 2
+                : Math.max(1, this.texture.getWidth() / this.variantWidth);
         int variant;
         synchronized (this.drawRandom) {
             variant = this.drawRandom.seeded(getTileSeed(tileX, tileY)).nextInt(variants);
         }
+        int col = this.cells != null ? this.cells[variant * 2] : variant;
+        int row = this.cells != null ? this.cells[variant * 2 + 1] : 0;
         int drawX = camera.getTileDrawX(tileX) - this.variantWidth / 2 + 16;
-        int drawY = camera.getTileDrawY(tileY) - this.texture.getHeight() + 32;
+        int drawY = camera.getTileDrawY(tileY) - height + 32;
         final TextureDrawOptionsEnd options = this.texture
                 .initDraw()
-                .section(variant * this.variantWidth, (variant + 1) * this.variantWidth, 0, this.texture.getHeight())
+                .section(col * this.variantWidth, (col + 1) * this.variantWidth, row * height, (row + 1) * height)
                 .light(light)
                 .pos(drawX, drawY);
         list.add(new LevelSortedDrawable(this, tileX, tileY) {
@@ -149,9 +169,12 @@ public class SkyDecoObject extends GameObject {
             return;
         }
         int drawX = camera.getTileDrawX(tileX) - this.variantWidth / 2 + 16;
-        int drawY = camera.getTileDrawY(tileY) - this.texture.getHeight() + 32;
+        int height = this.cellHeight > 0 ? this.cellHeight : this.texture.getHeight();
+        int col = this.cells != null ? this.cells[0] : 0;
+        int row = this.cells != null ? this.cells[1] : 0;
+        int drawY = camera.getTileDrawY(tileY) - height + 32;
         this.texture.initDraw()
-                .section(0, this.variantWidth, 0, this.texture.getHeight())
+                .section(col * this.variantWidth, (col + 1) * this.variantWidth, row * height, (row + 1) * height)
                 .alpha(alpha)
                 .draw(drawX, drawY);
     }

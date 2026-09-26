@@ -62,6 +62,12 @@ public class GhostDecoObject extends SkyDecoObject {
         this.iconName = iconName;
     }
 
+    @Override
+    public GhostDecoObject setCells(int cellHeight, int... colRowPairs) {
+        super.setCells(cellHeight, colRowPairs);
+        return this;
+    }
+
     /** What breaking this yields, instead of the object's own item. */
     public GhostDecoObject setDrops(LootTable lootTable) {
         this.lootTable = lootTable;
