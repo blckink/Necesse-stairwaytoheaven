@@ -36,12 +36,15 @@ public class SkyDecoObject extends GameObject {
     private LootTable naturalLoot;
 
     public SkyDecoObject(String textureName, int variantWidth, Color mapColor, Rectangle collision, String... category) {
+        // The box goes through super(): GameObject(Rectangle) derives isSolid
+        // and regionType from it (VERIFIED [jar] 1.3.3). Setting this.collision
+        // afterwards left the tile OPEN for pathfinding while the box still
+        // blocked bodies - settlers walked into standing region keys and
+        // hung there, starving, until the piece was mined (2026-09-26).
+        super(collision != null ? collision : new Rectangle());
         this.textureName = textureName;
         this.variantWidth = variantWidth;
         this.mapColor = mapColor;
-        if (collision != null) {
-            this.collision = collision;
-        }
         this.isLightTransparent = true;
         if (category.length > 0) {
             this.setItemCategory(category);
