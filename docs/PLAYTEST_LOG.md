@@ -945,3 +945,18 @@ headless on a copy. It has not been applied yet: it needs the game closed.
 
 The Doctor part landed in 7466873. The revive was VERIFIED [run] headless;
 the walk and the heal pulse are HYPOTHESIS until the next raid is played.
+
+## 2026-09-26 — "halbes Dorf hat gestreikt … hingen an unseren Portalen fest"
+
+Player: half the village went on strike from hunger; the settlers were stuck
+at our portals on the surface and walked on once the portals were mined.
+
+Finding (VERIFIED [jar] 1.3.3): the standing region key pieces
+(`RegionKeyObject`, via `SkyDecoObject`) set their statue box after an
+implicit `super()`. `GameObject(Rectangle)` derives `isSolid`/`regionType`
+from the constructor argument only, so the tile stayed OPEN for pathfinding
+while the box still blocked bodies: settlers routed through the arch and
+hung there. The stairway (`LadderDownObject`) and the boss portals have no
+collision box and cannot cause this. Fixed in 301c55b for every
+`SkyDecoObject` with a box. Settlers walking around the pieces now is
+HYPOTHESIS until played.
