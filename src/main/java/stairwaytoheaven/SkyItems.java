@@ -565,6 +565,20 @@ public final class SkyItems {
                 "windsilk", 1, RecipeTechRegistry.NONE,
                 Recipes.ingredientsFromScript("{{windwheat, 3}}")));
 
+        // Two sky scenery pieces were dead ends (checked 2026-09-25): picked
+        // scree gave only itself and no recipe took it; cut reeds from before
+        // 5f45645 (world reeds now drop vanilla's wormbait) sat in bags with
+        // nothing to do. Both are hand-crafted into the material they already
+        // stand for -- broken paving back into stone, reeds into bait -- at
+        // the windsilk ratio, so a stack is worth something but never beats
+        // mining or the Magpie's wormbait.
+        Recipes.registerModRecipe(new Recipe(
+                "skystone", 1, RecipeTechRegistry.NONE,
+                Recipes.ingredientsFromScript("{{skyscree, 2}}")));
+        Recipes.registerModRecipe(new Recipe(
+                "wormbait", 1, RecipeTechRegistry.NONE,
+                Recipes.ingredientsFromScript("{{skyreeds, 2}}")));
+
         // NO seancecircle recipe any more, and no ghostchalk recipe either.
         //
         // The circle used to be craftable at the Tungsten Workstation out of

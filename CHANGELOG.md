@@ -24,6 +24,11 @@ All notable changes to this project are documented here. Format loosely follows
   Stairway's sheet).
 
 ### Changed
+- **Sky Scree and Sky Reeds are useful / Himmelsschutt und Himmelsried
+  haben einen Zweck**: 2 Sky Scree craft by hand into 1 Skystone, 2 Sky
+  Reeds into 1 Worm Bait. Both used to be dead ends — scree gave only
+  itself, and reeds cut before the natural-drop change sat in bags. Nothing
+  was removed, so placed pieces and old stacks in saves stay valid.
 - **Stronger defences / Stärkere Verteidigung**: the War Veteran's
   Auto Turret hits for 25 instead of 6, the Cannon for 120 instead of 35 and
   the Barbed Wire Fence for 25 instead of 8; all three ignore 20 armour.
