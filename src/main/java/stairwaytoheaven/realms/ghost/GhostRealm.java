@@ -22,6 +22,8 @@ import necesse.inventory.lootTable.lootItem.LootItem;
 import necesse.inventory.recipe.Recipe;
 import necesse.inventory.recipe.Recipes;
 import necesse.inventory.recipe.Tech;
+import necesse.level.gameObject.RockObject;
+import necesse.level.maps.Level;
 
 /** Registers the complete playable core of the Aftergarden in one place. */
 public final class GhostRealm {
@@ -143,13 +145,26 @@ public final class GhostRealm {
         widowVineID = plant("widowvine", "withershrub", 2, new Color(76, 126, 87), "soulthread");
         spiritMushroomID = plant("spiritmushroom", "gloomshroom", 2, new Color(72, 191, 168), "ectoplasm");
 
-        ghostRockID = natural("ghostrock", new GhostDecoObject("veilrock", "veilrock", 32,
-                new Color(49, 73, 78), new Rectangle(4, 12, 24, 20)).setDrops(new LootTable(LootItem.between("bonewood", 1, 2))));
+        // veilrock.png is a vanilla RockObject sheet (192x208, the same one
+        // the Veil's veilrock and Steinfeld's gravesaltrock draw). Sliced as
+        // a deco object it became 32-px strips of the WHOLE sheet: 6.5-tile
+        // blue pillars all over the ghost realm (2026-09-27). Vanilla's rock
+        // drawing picks the right cell and joins neighbours; the old drop
+        // stays.
+        ghostRockID = ObjectRegistry.registerObject("ghostrock",
+                new RockObject("veilrock", new Color(49, 73, 78), "stone") {
+                    @Override
+                    public LootTable getLootTable(Level level, int layerID, int tileX, int tileY) {
+                        return new LootTable(LootItem.between("bonewood", 1, 2));
+                    }
+                }, 0.0F, false);
         spectralOreRockID = natural("spectralorerock", new GhostDecoObject("cryptorerock_nightsteelore",
                 "nightsteelore", 32, new Color(77, 133, 126), new Rectangle(4, 12, 24, 20))
                 .setDrops(new LootTable(LootItem.between("spectralore", 1, 2))));
+        // Vanilla cryptgravestone1 is 128x96: four 32x64 stones in row 0
+        // (front, side, front, side), their shadows below. Only the fronts.
         gravestoneID = natural("ghostgravestone", new GhostDecoObject("cryptgravestone1", "cryptgravestone1", 32,
-                new Color(72, 70, 85), new Rectangle(5, 15, 22, 17)));
+                new Color(72, 70, 85), new Rectangle(5, 15, 22, 17)).setCells(64, 0, 0, 2, 0));
 
         soulBasinID = ObjectRegistry.registerObject("soulbasin", new SoulBasinObject(), 25.0F, true);
         SOUL_LOOM = RecipeTechRegistry.registerTech("soulloom", "soulloom");
