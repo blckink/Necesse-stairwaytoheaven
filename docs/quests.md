@@ -1,5 +1,62 @@
 # Quests — every chain, in the order a player meets it
 
+## Read this first (2026-09-26)
+
+**Stale below this section:** the table and chain notes further down are the
+2026-09-24 state (30 000-coin Warden, residents handing out on first
+meeting). Since then the Spire Village's **quest ladder** hands out every
+resident step in six chapters (`quest/ladder/QuestLadder.build` is the table;
+`docs/DESIGN_DECISIONS.md` has the rules) and `SkyWardenMob.RegionKey` is the
+table of the Warden's keys. Read those two in the code; the prose below is
+history. `SkyQuests.advanceResidentChain` has no callers any more.
+
+### Where a player sees a quest — one role per place
+
+The player, 2026-09-26: *"Es ist eh total nervig jetzt bei warden, im Buch und
+als Aufgabe quests zu haben. Eine saubere übersichtliche Lösung bitte!"* The
+three places stay — each is the one a player expects for its job — but each
+now has exactly one job and the same wording:
+
+| place | job | what it shows |
+|---|---|---|
+| **Quest giver's dialogue window** (Sky Warden, and since this pass every Spire Village resident) | get and hand in | the giver's own line, *Your task: …*, the objectives with the reader's counts, *Details are in your Sky Chronicle.* Built by `journal/WardenBrief.task` for all of them. A resident whose next step waits for a chapter says so here. No why/where/opens/reward. |
+| **Sky Chronicle** (`adventurersjournal`, the mod's book — renamed from Adventurer's Journal so it cannot be confused with vanilla's Adventure Journal) | the complete log | every step per realm: status, giver and place, description, why, objectives, what it opens, reward. **[Ready to hand in]** when everything is in the bag (`JournalStatus.READY`). |
+| **Vanilla quest tracker / Aufgaben** | progress on screen | the vanilla `Quest` objects as before (title, objectives). |
+| speech bubble | reactions only | thanks at a turn-in; never a new task or a "not yet" (decision 10n). |
+
+Turn-in is unchanged: talk to the giver with the items in your bag.
+
+### Multiplayer rules (2026-09-26)
+
+- **Quests are not shareable** (`canShare() == false` on every mod quest):
+  progress lives in the giver's records, and a shared instance was removed
+  from both players at the first turn-in.
+- **Per-player steps** (most ladder steps, arrival signposts) are done by each
+  player; the Eden Gate and the Crooked Door now hand their signpost by the
+  ladder's per-player record, not a world flag.
+- **World steps** (Warden chain, region keys, the six resident chains with a
+  waived fee) are done once for the world and pay whoever turns them in —
+  the player's standing rule "man soll nicht alles doppelt machen zwingend".
+  The Chronicle tells everyone else **"Done by <name>"**
+  (`SkywatchWorldData.doneBy`, written at the turn-in) instead of "reward
+  received". Every one-off Warden reward can be bought from him afterwards
+  (glaive, banner, basket, garland, and now the Skywatch hood/mantle/boots
+  and a second copy of each earned key piece); every key weapon and trinket
+  also has a recipe.
+- Contraband pays each player 2 500 coins; the route bonus stays the world's.
+
+### The region key pieces are gates
+
+A key piece stood up in a settlement wakes its realm's Summoning Stones for
+the world (unchanged) and, used, takes the player to the nearest stone of
+that realm (`BossPortalSites` walks `SkyLevel.placePortalsOf`'s lattice from
+the seed) — only once the realm is awake and only for a player who has been
+in that realm (`JournalWorldData.hasVisited`). The tooltip says all of that.
+The Eden piece is the Eden Moon Arch (was "Garden Stair"). HYPOTHESIS until
+walked in game: that the lattice site always has its stone (a site whose
+open ground is all scenery could be empty).
+
+
 ## The whole table (read off the code, 2026-09-24)
 
 Twenty quests are registered; nineteen are handed out, and `swh_beacon` is the

@@ -132,10 +132,15 @@ public final class QuestLadderSource implements JournalStepSource {
         switch (status) {
             case DONE:
                 js.status = JournalStatus.DONE;
+                if (js.worldScoped) {
+                    js.doneBy = ctx.doneByOther(step.id);
+                }
                 return js;
             case ACTIVE:
-            case READY:
                 js.status = JournalStatus.ACTIVE;
+                break;
+            case READY:
+                js.status = JournalStatus.READY;
                 break;
             case AVAILABLE:
                 js.status = JournalStatus.AVAILABLE;

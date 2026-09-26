@@ -36,6 +36,12 @@ public final class LadderQuests {
     /** Shared texts: title, description, reward line, "speak with". */
     public abstract static class Step extends DeliverItemsQuest {
 
+        /** Not shareable: see {@code quest.RealmVisitQuest#canShare}. */
+        @Override
+        public boolean canShare() {
+            return false;
+        }
+
         protected Step() {
         }
 

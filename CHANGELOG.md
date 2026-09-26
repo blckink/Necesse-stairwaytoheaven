@@ -6,6 +6,50 @@ All notable changes to this project are documented here. Format loosely follows
 ## [Unreleased]
 
 ### Added
+- **Sky regions in the Adventure Journal / Himmelsgebiete im
+  Abenteuertagebuch**: all 22 sky biomes have a vanilla Adventure Journal
+  entry — what grows and can be mined there, who lives there with their
+  drops (each realm's boss in its first biome), the treasure of its hoards
+  and sites, and three challenges with a claimable reward (harvest, gather,
+  craft, defeat the local guardian or elite). Found, worked and claimed per
+  player, like vanilla's own. No fish are listed: the sky has no fishing
+  water.
+- **Key pieces are gates / Schlüsselstücke sind Tore**: a region key piece
+  standing in a settlement now takes you, on use, to the nearest Summoning
+  Stone of its realm — once that realm is awake and only if you have been
+  there yourself. Its tooltip says what it wakes (realm and boss), that the
+  stones stay awake if you take it down, and how to travel with it. Each
+  piece wears its realm's stone arch; the Eden piece is the **Eden Moon
+  Arch / Mondbogen von Eden** (was the Garden Stair, which wore the Skyward
+  Stairway's sheet).
+
+### Changed
+- **One name per character / Ein Name pro Figur**: Halda, Magpie, Ossian,
+  Eveleen, Ives, Mortimer, Caspern, Eleanor, Mr. Knott and Dorian keep their
+  story name in the settlement list, the dialogue header ("Halda,
+  Kellermeisterin") and every quest text instead of a random first name;
+  saves switch on load. Magpie is Magpie in German too. Profession NPCs keep
+  random names in vanilla's pattern ("Greta, Arzt"). The Warden is the
+  Himmelswächter throughout, his tower the Alte Wächterspitze.
+- **The mod's book is the Sky Chronicle / Himmelschronik** so it no longer
+  collides with vanilla's Adventure Journal (Abenteuertagebuch); quests are
+  "Aufgaben" in German like in vanilla.
+- **Quests: one role per place / Aufgaben: ein Ort, eine Rolle**: the
+  Chronicle is the full log (why, where, what it opens, reward); the vanilla
+  quest tracker shows progress; every quest giver — the Sky Warden and now
+  the village residents too — writes their task into the dialogue window in
+  the same short form (their words, the task, what is missing, a pointer to
+  the Chronicle). Bubbles are only reactions. A step with everything in the
+  bag shows **[Ready to hand in / Bereit zur Abgabe]**; a world step another
+  player finished says **"Done by <name>"** instead of "reward received".
+- **Co-op / Mehrspieler**: mod quests can no longer be shared (a shared copy
+  vanished at the first turn-in); the Eden Gate and Crooked Door hand their
+  signpost per player; Contraband pays each player 2 500 coins on top of the
+  world's route bonus; the Sky Warden sells the Skywatch hood, mantle and
+  boots and a second copy of each earned key piece once its key is earned in
+  the world.
+
+### Added
 - **The Doctor is a field medic / Der Arzt ist Sanitäter**: with settler death
   off, a settler at 0 health is *downed* and drops out of the settlement until
   a player brings a Revival Potion. A settled Doctor now runs to any downed

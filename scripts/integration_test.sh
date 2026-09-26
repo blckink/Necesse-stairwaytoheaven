@@ -500,6 +500,12 @@ grep -qE "story  stage=0 recruited=false cats=00" "$LOG3" \
     || { echo "FAIL: the quest reset did not survive the save/load round trip"; STATUS=1; }
 grep -qE "keys   earned=\[\] portalsUnlocked=\[\]" "$LOG3" \
     || { echo "FAIL: the region-key/portal unlock records survived a reset they should not have"; STATUS=1; }
+# The sky biomes in vanilla's Adventure Journal (journal.RealmJournalEntries):
+# every entry, challenge, loot, mob and reward ID resolved at start-up.
+# 2026-09-26.
+grep -qE "swhjournal vanilla: entries=22 challenges=66 missing=0$" "$LOG1" \
+    || { echo "FAIL: a sky biome's Adventure Journal entry names something unregistered"; \
+         grep -E "swhjournal vanilla:" "$LOG1"; STATUS=1; }
 # The Adventurer's Journal (stairwaytoheaven.journal, /swhjournal).
 grep -qE "journal check: item=adventurersjournal id=[0-9]+ class=AdventurersJournalItem packets=OK asks=12/12 " "$LOG1" \
     || { echo "FAIL: the journal item/packets are not registered, or a delivery quest's asks cannot be read"; STATUS=1; }

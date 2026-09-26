@@ -108,7 +108,8 @@ public class JournalForm extends Form {
     private static int firstOpenChapter(JournalBook book) {
         for (JournalChapter chapter : book.chapters) {
             for (JournalStep step : chapter.steps) {
-                if (step.status == JournalStatus.ACTIVE || step.status == JournalStatus.AVAILABLE) {
+                if (step.status == JournalStatus.READY || step.status == JournalStatus.ACTIVE
+                        || step.status == JournalStatus.AVAILABLE) {
                     return chapter.realm;
                 }
             }
@@ -207,7 +208,12 @@ public class JournalForm extends Form {
         }
         switch (step.status) {
             case DONE:
-                if (step.reward != null) {
+                if (step.doneBy != null) {
+                    // Somebody else finished this for the whole world; the
+                    // reward went to them, not to the reader.
+                    y = this.line(text(new LocalMessage("journal", "doneby", "name", step.doneBy)),
+                            12, style.successTextColor, x, y, w);
+                } else if (step.reward != null) {
                     y = this.line(text(new LocalMessage("journal", "rewardreceived")) + " " + text(step.reward),
                             12, style.successTextColor, x, y, w);
                 }
@@ -215,6 +221,10 @@ public class JournalForm extends Form {
             case LOCKED:
                 break;
             default:
+                if (step.status == JournalStatus.READY && step.giver != null) {
+                    y = this.line(text(new LocalMessage("journal", "readyturnin", "name", step.giver)),
+                            12, style.successTextColor, x, y, w);
+                }
                 if (step.description != null) {
                     y = this.line(text(step.description), 12, null, x, y, w);
                 }
@@ -280,6 +290,7 @@ public class JournalForm extends Form {
     private static String statusWord(JournalStatus status) {
         switch (status) {
             case DONE: return Localization.translate("journal", "statusdone");
+            case READY: return Localization.translate("journal", "statusready");
             case ACTIVE: return Localization.translate("journal", "statusactive");
             case AVAILABLE: return Localization.translate("journal", "statusavailable");
             default: return Localization.translate("journal", "statuslocked");
@@ -290,6 +301,7 @@ public class JournalForm extends Form {
     private static String statusMark(JournalStatus status) {
         switch (status) {
             case DONE: return "[+]";
+            case READY: return "[!]";
             case ACTIVE: return "[~]";
             case AVAILABLE: return "[o]";
             default: return "[-]";
@@ -299,6 +311,7 @@ public class JournalForm extends Form {
     private static Color colourOf(JournalStatus status, GameInterfaceStyle style) {
         switch (status) {
             case DONE: return style.successTextColor;
+            case READY: return style.successTextColor;
             case ACTIVE: return style.highlightTextColor;
             case AVAILABLE: return style.activeTextColor;
             default: return style.inactiveTextColor;

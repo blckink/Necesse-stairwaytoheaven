@@ -545,7 +545,9 @@ public abstract class SkySettlerMob extends HumanShop {
     /** Open on the recruit page until they have actually moved in. */
     @Override
     public boolean startInRecruitForm(ServerClient client) {
-        return !this.isSettler();
+        // A resident with a task for this player opens on the dialogue page,
+        // where the task is written; Recruit is a button there.
+        return !this.isSettler() && this.questBrief(client) == null;
     }
 
     /** True only while {@link #getShopContainerData} builds a locked window. */
@@ -611,8 +613,61 @@ public abstract class SkySettlerMob extends HumanShop {
 
     @Override
     public GameMessage getDialogueIntroMessage(ServerClient client) {
+        GameMessage brief = this.questBrief(client);
+        if (brief != null) {
+            return brief;
+        }
         return this.isSettler() ? super.getDialogueIntroMessage(client)
                 : new LocalMessage("misc", this.talkKey() + "pitch");
+    }
+
+    /**
+     * This resident's task for this player, in the same shape the Sky Warden
+     * uses ({@code journal.WardenBrief#task}): their ask, the task with what
+     * is still missing, and the Chronicle pointer - or, when their next step
+     * waits for a chapter, their "not yet" line. Null when they have nothing
+     * to say about a task. Until 2026-09-26 the residents only spoke in
+     * fading bubbles and said nothing at all to a player who was short of
+     * items, while the Warden wrote the whole task into his window.
+     */
+    protected GameMessage questBrief(ServerClient client) {
+        if (client == null || client.getServer() == null) {
+            return null;
+        }
+        List<stairwaytoheaven.quest.ladder.QuestLadder.Step> mine =
+                stairwaytoheaven.quest.ladder.QuestLadder.stepsOf(this.getStringID());
+        if (mine.isEmpty()) {
+            return null;
+        }
+        List<stairwaytoheaven.journal.JournalStep> steps = stairwaytoheaven.journal.AdventurerJournal.stepSource()
+                .buildSteps(new stairwaytoheaven.journal.JournalContext(client.getServer(), client));
+        for (stairwaytoheaven.quest.ladder.QuestLadder.Step step : mine) {
+            if (step.custom) {
+                continue;
+            }
+            stairwaytoheaven.journal.JournalStep shown = null;
+            for (stairwaytoheaven.journal.JournalStep js : steps) {
+                if (js.id.equals(step.id)) {
+                    shown = js;
+                    break;
+                }
+            }
+            if (shown == null || shown.status == stairwaytoheaven.journal.JournalStatus.DONE) {
+                continue;
+            }
+            if (shown.status == stairwaytoheaven.journal.JournalStatus.ACTIVE
+                    || shown.status == stairwaytoheaven.journal.JournalStatus.READY) {
+                return stairwaytoheaven.journal.WardenBrief.task(new LocalMessage("misc", step.askKey()), shown);
+            }
+            if (!stairwaytoheaven.quest.ladder.QuestLadder.chapterOpen(client.getServer(),
+                    client.authentication, step.chapter)) {
+                return new LocalMessage("misc", stairwaytoheaven.quest.ladder.QuestLadder.waitKey(this.getStringID()),
+                        "chapter", new LocalMessage("misc",
+                                stairwaytoheaven.quest.ladder.QuestLadder.chapterKey(step.chapter)));
+            }
+            return null;
+        }
+        return null;
     }
 
     /**
@@ -637,7 +692,12 @@ public abstract class SkySettlerMob extends HumanShop {
         if (reply == null || reply.bubble == null) {
             return false;
         }
-        this.bubble(reply.bubble);
+        // Bubbles are for reactions only (decision 10n): the thanks when a
+        // step is paid. A new task or a "not yet" is written into the
+        // dialogue window (questBrief), which stays open to be read.
+        if (reply.paid) {
+            this.bubble(reply.bubble);
+        }
         return true;
     }
 

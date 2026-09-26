@@ -372,6 +372,14 @@ here for the same reason everything else is: the swap pass has to be able to
 find every place a sprite is standing in for something, and "it is our own file"
 does not make it any less a stand-in.
 
+**Superseded 2026-09-26 — history below.** The stones have worn their own
+64x96 arches (`objects/bossportals/<realm>.png`, mod art) since 2026-09-15, and
+since 2026-09-26 the key pieces wear the same arches again
+(`RegionKeyObject.SHEET_*` = `bossportals/<realm>`), with inventory icons
+`items/regionkey<realm>.png` that are those arches box-downscaled to 32x32 once
+(no new drawing, no vanilla art). Nothing in the two tables below is worn by a
+key piece or a stone any more; they record what was borrowed before.
+
 **The boss portals** (`docs/FOGKEY_AND_BOSSPORTALS.md` §B3) are supposed to look
 like their realm's **key piece** — the buildable object §B1 makes a quest reward
 — so that a player who meets one recognises what they need. The key pieces

@@ -693,6 +693,7 @@ public class SkyWardenMob extends HumanShop {
             held.complete(client);
             stairwaytoheaven.quest.SkyQuests.removeAllOfType(server, step.questClass);
             SkywatchWorldData.markRegionKeyEarned(server, step.realm);
+            SkywatchWorldData.recordDoneBy(server, "key" + RealmDepth.keyOf(step.realm), client.getName());
             give(client, step.keyItemID, 1);
             give(client, step.barItemID, step.bars);
             for (String special : step.specialItemIDs) {
@@ -800,6 +801,7 @@ public class SkyWardenMob extends HumanShop {
             stairwaytoheaven.quest.SkyQuests.removeAllOfType(
                     server, stairwaytoheaven.quest.SpireCatsQuest.class);
             quest.catsRewardGiven = true;
+            SkywatchWorldData.recordDoneBy(server, "cats", client.getName());
             // Cat Basket is the ONLY source of the object in the whole mod
             // (docs/OVERVIEW.md §9) -- it stays, and stays mandatory, but per
             // the endgame rescale it is no longer the payout by itself.
@@ -827,6 +829,7 @@ public class SkyWardenMob extends HumanShop {
                 stairwaytoheaven.quest.SkyQuests.removeAllOfType(
                         server, stairwaytoheaven.quest.AnchorDeliveryQuest.class);
                 quest.anchorDone = true;
+                SkywatchWorldData.recordDoneBy(server, "anchor", client.getName());
                 // Skywatch Banner and Aurora Petal are the old reward kept
                 // whole, as decoration and a small material top-up -- extras
                 // now, not the payout. The player's own verdict on these two

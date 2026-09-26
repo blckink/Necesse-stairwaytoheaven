@@ -43,36 +43,64 @@ public final class WardenBrief {
         if (client == null || client.getServer() == null) {
             return null;
         }
-        List<JournalStep> steps = new LegacyQuestSource().buildSteps(new JournalContext(client.getServer(), client));
-        JournalStep step = pick(steps, JournalStatus.ACTIVE);
+        List<JournalStep> steps = AdventurerJournal.stepSource().buildSteps(
+                new JournalContext(client.getServer(), client));
+        JournalStep step = pick(steps, JournalStatus.READY);
+        if (step == null) {
+            step = pick(steps, JournalStatus.ACTIVE);
+        }
         if (step == null) {
             step = pick(steps, JournalStatus.AVAILABLE);
         }
         if (step == null) {
             return null;
         }
-        GameMessageBuilder out = new GameMessageBuilder();
+        GameMessage line;
         if (step.id.equals("recruitwarden")) {
-            out.append(new LocalMessage("misc", "wardenintro2")).append(" ")
+            line = new GameMessageBuilder().append(new LocalMessage("misc", "wardenintro2")).append(" ")
                     .append(new LocalMessage("misc", "wardenrecruit1"));
         } else if (step.id.startsWith("key")) {
             // SkyWardenMob.RegionKey's askKey: "wardenkeyask" + RealmDepth.keyOf.
             String askKey = "wardenkeyask" + step.id.substring(3);
-            out.append(new LocalMessage("misc", askKey));
+            line = new LocalMessage("misc", askKey);
         } else {
             String dialogKey = "wardendialog" + step.id; // wardendialogcats, wardendialoganchor
-            out.append(new LocalMessage("misc", dialogKey));
+            line = new LocalMessage("misc", dialogKey);
         }
-        out.append("\n\n").append(new LocalMessage("misc", "wardendialogtask", "title", step.title));
+        return task(line, step);
+    }
+
+    /**
+     * The one shape every quest giver's dialogue has (2026-09-26, the player:
+     * "total nervig ... bei warden, im Buch und als Aufgabe quests zu haben"):
+     * the giver's own words, the task and what is still missing, and a pointer
+     * to the Sky Chronicle. Why, where, what it opens and the reward live in
+     * the Chronicle only; the vanilla quest tracker keeps the progress on
+     * screen. The same builder serves the Warden and the Spire Village.
+     */
+    public static GameMessage task(GameMessage line, JournalStep step) {
+        GameMessageBuilder out = new GameMessageBuilder();
+        if (line != null) {
+            out.append(line).append("\n\n");
+        }
+        out.append(new LocalMessage("misc", "wardendialogtask", "title", step.title));
         for (GameMessage objective : step.objectives) {
+            if (isTurnInLine(objective)) {
+                continue; // "bring it to <this person>" - the reader is talking to them
+            }
             out.append("\n").append(objective);
         }
-        line(out, "whylabel", step.why);
-        line(out, "wherelabel", step.where);
-        line(out, "openslabel", step.opens);
-        line(out, "rewardlabel", step.reward);
+        if (step.status == JournalStatus.READY) {
+            out.append("\n\n").append(new LocalMessage("misc", "questbriefready"));
+        }
         out.append("\n\n").append(new LocalMessage("misc", "wardendialogjournal"));
         return out;
+    }
+
+    private static boolean isTurnInLine(GameMessage objective) {
+        return objective instanceof LocalMessage
+                && ("swhladderturnin".equals(((LocalMessage) objective).key)
+                        || "swhreturnwarden".equals(((LocalMessage) objective).key));
     }
 
     private static JournalStep pick(List<JournalStep> steps, JournalStatus status) {
@@ -84,11 +112,5 @@ public final class WardenBrief {
             }
         }
         return null;
-    }
-
-    private static void line(GameMessageBuilder out, String labelKey, GameMessage text) {
-        if (text != null) {
-            out.append("\n").append(new LocalMessage("journal", labelKey)).append(" ").append(text);
-        }
     }
 }

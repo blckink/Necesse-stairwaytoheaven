@@ -81,6 +81,26 @@ public final class JournalContext {
         return this.client != null && SkyQuests.findHeld(this.client, type) != null;
     }
 
+    /** Held, and it could be handed in right now. */
+    public boolean ready(Class<? extends Quest> type) {
+        Quest held = this.client == null ? null : SkyQuests.findHeld(this.client, type);
+        return held != null && held.canComplete(this.client);
+    }
+
+    /**
+     * Who finished a world-scoped step, when it was somebody other than the
+     * reader; null otherwise (or when nobody was recorded - saves from before
+     * 2026-09-26).
+     */
+    public necesse.engine.localization.message.GameMessage doneByOther(String stepID) {
+        stairwaytoheaven.quest.SkywatchWorldData world = stairwaytoheaven.quest.SkywatchWorldData.get(this.server);
+        String name = world == null ? null : world.doneBy.get(stepID);
+        if (name == null || (this.client != null && name.equals(this.client.getName()))) {
+            return null;
+        }
+        return new necesse.engine.localization.message.StaticMessage(name);
+    }
+
     /** How many of an item the reader carries in the main inventory; -1 when unknown. */
     public int have(Item item) {
         PlayerMob player = this.client == null ? null : this.client.playerMob;

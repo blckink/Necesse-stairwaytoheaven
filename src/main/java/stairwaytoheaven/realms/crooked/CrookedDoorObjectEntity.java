@@ -91,7 +91,9 @@ public class CrookedDoorObjectEntity extends PortalObjectEntity {
             // on the world record, not on "does the client hold one": a player
             // who already paid Mr. Knott his three materials must not be handed
             // the signpost again on their next walk through a door.
-            if (!stairwaytoheaven.quest.SkywatchWorldData.crookedDoorwayOpened(server)) {
+            // Per player since 2026-09-26, like the ladder step it opens
+            // (QuestLadder "swh_crookedarrival").
+            if (!stairwaytoheaven.quest.ladder.QuestLadder.isDone(client, "swh_crookedarrival")) {
                 stairwaytoheaven.quest.SkyQuests.giveOnce(server, client,
                         new stairwaytoheaven.quest.CrookedArrivalQuest());
             }

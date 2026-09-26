@@ -98,7 +98,10 @@ public class EdenGateObjectEntity extends PortalObjectEntity {
             // three plants and steps back through the gate must not be handed
             // the signpost again — the chain is shared world progression, the
             // same trade-off SkywardStairwayObjectEntity makes for FindSpireQuest.
-            if (!SkywatchWorldData.edenPlantsGiven(server)) {
+            // Per player since 2026-09-26, like the ladder that records this
+            // step (QuestLadder "swh_edenreach"): a second player walking in
+            // after the first finished Eden still gets the signpost.
+            if (!stairwaytoheaven.quest.ladder.QuestLadder.isDone(client, "swh_edenreach")) {
                 SkyQuests.giveOnce(server, client, new stairwaytoheaven.quest.EdenArrivalQuest());
             }
             return true;

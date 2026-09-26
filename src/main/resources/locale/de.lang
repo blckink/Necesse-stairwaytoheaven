@@ -1314,6 +1314,9 @@ rewardreceived=Belohnung erhalten:
 rewardlabel=Belohnung:
 statusdone=[Erledigt]
 statusactive=[Aktiv]
+statusready=[Bereit zur Abgabe]
+readyturnin=Du hast alles dabei - gib es bei <name> ab.
+doneby=Von <name> für die ganze Welt erledigt - die Belohnung hat <name> bekommen.
 statusavailable=[Verfügbar]
 statuslocked=[Gesperrt]
 realm0=Himmelsweite
@@ -1484,7 +1487,7 @@ swhladderciderdesc=Halda hat vom Garten gehört und will einen Most ansetzen, de
 swhladderciderreward=3x Paradiesmost, danach in Haldas Laden
 swhladdercontrabandtitle=Schmuggelware aus dem Garten
 swhladdercontrabanddesc=Magpie hat Käufer für Schlangenschuppen und Giftzähne - und braucht den Himmelsweg-Freibrief aus dem Zollhaus, damit die Ladung über jede Straße kommt.
-swhladdercontrabandreward=Magpies Himmelsfahrten: jede offene Route +15 % Erfolg
+swhladdercontrabandreward=2 500 Münzen; Magpies Himmelsfahrten: jede offene Route +15 % Erfolg (für die ganze Welt)
 swhladderechotitle=Das Echo im Archiv
 swhladderechodesc=In Steinfeld sind Stimmen zu Stein geworden. Ossian will sie archivieren: zehn Echosplitter und einen Trauerflor von einem Steinernen Trauernden.
 swhladderechoreward=Echomuschel (Accessoire: +25 % Kritschaden, +3 % Krit)
@@ -1823,3 +1826,6 @@ swhinfernalseal=[item=regionkeyhell] Erhalte das Höllensiegel vom Himmelswächt
 swhboilerhounds=[mob=boilerhound] Besiege 10 Kesselhunde
 swhashspirits=[mob=ashspirit] Besiege 10 Aschegeister
 swhhellpearls=[item=cinderpearl] Sammle in der Hölle 10 Glutperlen
+
+[misc]
+questbriefready=Alles da. Sprich mich noch einmal an, um es abzugeben.

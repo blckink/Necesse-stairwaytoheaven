@@ -226,6 +226,10 @@ public final class QuestLadder {
                     if (data != null) {
                         data.flags.add(LadderWorldData.FLAG_WRIT_HONOURED);
                     }
+                    // The route bonus is the world's; this is the player's own
+                    // cut, so a second player who runs the same cargo is paid
+                    // too (2026-09-26 co-op pass).
+                    give(client, "coin", 2500);
                 }, -1));
         // ------------------------------------------------ III. Steinfeld
         s.add(new Step("swh_steinfeldvigil", CHAPTER_STEINFELD, SkySettlers.IVES, true, false,
@@ -471,6 +475,7 @@ public final class QuestLadder {
                 if (step.worldMark != null) {
                     SkyQuests.removeAllOfType(server, step.questClass);
                     step.worldMark.accept(server);
+                    SkywatchWorldData.recordDoneBy(server, step.id, client.getName());
                 } else {
                     server.world.getQuests().removeQuest(held);
                     LadderWorldData data = LadderWorldData.get(server);

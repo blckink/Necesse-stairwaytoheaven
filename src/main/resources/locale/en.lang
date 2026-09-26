@@ -1313,6 +1313,9 @@ rewardreceived=Reward received:
 rewardlabel=Reward:
 statusdone=[Done]
 statusactive=[Active]
+statusready=[Ready to hand in]
+readyturnin=Everything is in your bag - hand it in to <name>.
+doneby=Done by <name> for the whole world - <name> received the reward.
 statusavailable=[Available]
 statuslocked=[Locked]
 realm0=Skyreach
@@ -1483,7 +1486,7 @@ swhladderciderdesc=Halda has heard about the Garden and wants to start a cider n
 swhladderciderreward=3x Paradise Cider, then on sale in her shop
 swhladdercontrabandtitle=Contraband from the Garden
 swhladdercontrabanddesc=Magpie has buyers for serpent scales and venom fangs - and needs the Skyway Writ from the Toll-House so the cargo gets through on every road.
-swhladdercontrabandreward=Magpie's sky voyages: every open route +15% success
+swhladdercontrabandreward=2,500 coins; Magpie's sky voyages: every open route +15% success (for the whole world)
 swhladderechotitle=The Echo in the Archive
 swhladderechodesc=In Steinfeld voices have turned to stone. Ossian wants to archive them: ten echo shards, and a mourning band from a Stone Mourner.
 swhladderechoreward=Echo Conch (accessory: +25% crit damage, +3% crit)
@@ -1823,3 +1826,6 @@ swhinfernalseal=[item=regionkeyhell] Receive the Infernal Seal from the Sky Ward
 swhboilerhounds=[mob=boilerhound] Defeat 10 Boiler Hounds
 swhashspirits=[mob=ashspirit] Defeat 10 Ash Spirits
 swhhellpearls=[item=cinderpearl] Collect 10 Cinder Pearls in Hell
+
+[misc]
+questbriefready=Everything is here. Talk to me again to hand it in.

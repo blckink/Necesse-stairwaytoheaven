@@ -245,6 +245,22 @@ public class SkywatchWorldData extends WorldData {
      */
     public static final String REWARD_CLOUD_GLAIVE = "anchorcloudglaive";
 
+    /**
+     * Who finished each world-scoped step ({@code JournalStep} ID → player
+     * name), so the Chronicle can tell a second player "done by Kevin" instead
+     * of "reward received" (2026-09-26). Written at the turn-in; saves from
+     * before then simply have no entry and read as before.
+     */
+    public final java.util.HashMap<String, String> doneBy = new java.util.HashMap<>();
+
+    /** Records who finished a world-scoped step; the first name stays. */
+    public static void recordDoneBy(Server server, String stepID, String playerName) {
+        SkywatchWorldData data = get(server);
+        if (data != null && stepID != null && playerName != null && !data.doneBy.containsKey(stepID)) {
+            data.doneBy.put(stepID, playerName);
+        }
+    }
+
     public boolean catHomeSet = false;
     public int catHomeX = 0;
     public int catHomeY = 0;
@@ -270,6 +286,12 @@ public class SkywatchWorldData extends WorldData {
                 this.regionKeysEarned.toArray(new String[0]));
         save.addStringArray("residentChainsDone",
                 this.residentChainsDone.toArray(new String[0]));
+        String[] doneByEntries = new String[this.doneBy.size()];
+        int doneIndex = 0;
+        for (java.util.Map.Entry<String, String> entry : this.doneBy.entrySet()) {
+            doneByEntries[doneIndex++] = entry.getKey() + "=" + entry.getValue();
+        }
+        save.addStringArray("doneBy", doneByEntries);
         save.addBoolean("catHomeSet", this.catHomeSet);
         save.addInt("catHomeX", this.catHomeX);
         save.addInt("catHomeY", this.catHomeY);
@@ -314,6 +336,13 @@ public class SkywatchWorldData extends WorldData {
         for (String done : save.getStringArray("residentChainsDone", new String[0], false)) {
             if (done != null && !done.isEmpty()) {
                 this.residentChainsDone.add(done);
+            }
+        }
+        this.doneBy.clear();
+        for (String entry : save.getStringArray("doneBy", new String[0], false)) {
+            int eq = entry == null ? -1 : entry.indexOf('=');
+            if (eq > 0 && eq < entry.length() - 1) {
+                this.doneBy.put(entry.substring(0, eq), entry.substring(eq + 1));
             }
         }
         this.catHomeSet = save.getBoolean("catHomeSet", this.catHomeSet, false);
@@ -655,6 +684,7 @@ public class SkywatchWorldData extends WorldData {
         this.bossPortalsUnlocked.clear();
         this.regionKeysEarned.clear();
         this.residentChainsDone.clear();
+        this.doneBy.clear();
         this.catHomeSet = false;
         this.catHomeX = 0;
         this.catHomeY = 0;

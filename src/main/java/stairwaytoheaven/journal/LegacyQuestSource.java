@@ -67,6 +67,13 @@ public final class LegacyQuestSource implements JournalStepSource {
         ghost(ctx, out);
         crooked(ctx, out);
         hell(ctx, out);
+        // A world-scoped step somebody else finished: say who, instead of
+        // "reward received" to a reader who received nothing.
+        for (JournalStep step : out) {
+            if (step.worldScoped && step.status == JournalStatus.DONE) {
+                step.doneBy = ctx.doneByOther(step.id);
+            }
+        }
         return out;
     }
 
@@ -123,6 +130,7 @@ public final class LegacyQuestSource implements JournalStepSource {
         boolean black = ctx.catHome(true);
         boolean tabby = ctx.catHome(false);
         cats.status = catsDone ? JournalStatus.DONE
+                : ctx.wardenRecruited() && black && tabby ? JournalStatus.READY
                 : ctx.holds(SpireCatsQuest.class) || (ctx.wardenRecruited() && (black || tabby)) ? JournalStatus.ACTIVE
                 : ctx.wardenRecruited() ? JournalStatus.AVAILABLE : JournalStatus.LOCKED;
         if (cats.status == JournalStatus.LOCKED) {
@@ -149,6 +157,7 @@ public final class LegacyQuestSource implements JournalStepSource {
         anchor.where = new LocalMessage("journal", "wherewarden");
         anchor.worldScoped = true;
         anchor.status = ctx.anchorDone() ? JournalStatus.DONE
+                : ctx.ready(AnchorDeliveryQuest.class) ? JournalStatus.READY
                 : ctx.holds(AnchorDeliveryQuest.class) ? JournalStatus.ACTIVE
                 : catsDone ? JournalStatus.AVAILABLE : JournalStatus.LOCKED;
         if (anchor.status == JournalStatus.LOCKED) {
@@ -194,6 +203,7 @@ public final class LegacyQuestSource implements JournalStepSource {
         plants.where = new LocalMessage("journal", "whereeveleen");
         plants.worldScoped = true;
         plants.status = ctx.edenPlantsGiven() ? JournalStatus.DONE
+                : ctx.ready(EdenPlantsQuest.class) ? JournalStatus.READY
                 : ctx.holds(EdenPlantsQuest.class) ? JournalStatus.ACTIVE : JournalStatus.AVAILABLE;
         if (plants.status != JournalStatus.DONE) {
             deliver(ctx, plants, EdenPlantsQuest.class, new LocalMessage("quests", "swhspeaktoeveleen"));
@@ -323,6 +333,7 @@ public final class LegacyQuestSource implements JournalStepSource {
         door.worldScoped = true;
         boolean reachable = ctx.hasMark() || ctx.met("knottsettler");
         door.status = ctx.crookedDoorwayOpened() ? JournalStatus.DONE
+                : ctx.ready(CrookedDoorQuest.class) ? JournalStatus.READY
                 : ctx.holds(CrookedDoorQuest.class) ? JournalStatus.ACTIVE
                 : reachable ? JournalStatus.AVAILABLE : JournalStatus.LOCKED;
         if (door.status == JournalStatus.LOCKED) {
@@ -372,6 +383,7 @@ public final class LegacyQuestSource implements JournalStepSource {
         }
         boolean offered = ctx.wardenChainDone() && previousEarned;
         step.status = ctx.keyEarned(realm) ? JournalStatus.DONE
+                : ctx.ready(type) ? JournalStatus.READY
                 : ctx.holds(type) ? JournalStatus.ACTIVE
                 : offered ? JournalStatus.AVAILABLE : JournalStatus.LOCKED;
         if (step.status == JournalStatus.LOCKED) {
@@ -398,6 +410,7 @@ public final class LegacyQuestSource implements JournalStepSource {
         step.where = where;
         step.worldScoped = worldScoped;
         step.status = ctx.chainDone(chainKey) ? JournalStatus.DONE
+                : ctx.ready(type) ? JournalStatus.READY
                 : ctx.holds(type) ? JournalStatus.ACTIVE : JournalStatus.AVAILABLE;
         if (step.status != JournalStatus.DONE) {
             deliver(ctx, step, type, turnIn);

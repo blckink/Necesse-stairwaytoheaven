@@ -51,6 +51,8 @@ public final class JournalStep {
     public GameMessage why;
     /** What finishing it opens up, beyond the items in {@link #reward}. May be null. */
     public GameMessage opens;
+    /** For a world-scoped DONE step: the other player who finished it. */
+    public GameMessage doneBy;
 
     public JournalStep(String id, int realm) {
         this.id = id;
@@ -79,6 +81,7 @@ public final class JournalStep {
         JournalBook.writeMessage(writer, this.reward);
         JournalBook.writeMessage(writer, this.why);
         JournalBook.writeMessage(writer, this.opens);
+        JournalBook.writeMessage(writer, this.doneBy);
     }
 
     static JournalStep read(PacketReader reader) {
@@ -102,6 +105,7 @@ public final class JournalStep {
         step.reward = JournalBook.readMessage(reader);
         step.why = JournalBook.readMessage(reader);
         step.opens = JournalBook.readMessage(reader);
+        step.doneBy = JournalBook.readMessage(reader);
         return step;
     }
 }

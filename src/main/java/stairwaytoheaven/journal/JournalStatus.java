@@ -16,7 +16,13 @@ public enum JournalStatus {
     /** The player holds it (or the world is in the middle of it). */
     ACTIVE('T'),
     /** Finished, reward paid. */
-    DONE('D');
+    DONE('D'),
+    /**
+     * Held, and everything it asks is in the bag: go and hand it in. Added
+     * 2026-09-26 (the book used to fold this into ACTIVE, so it never said
+     * "go back now"); last, so the ordinals above keep their meaning.
+     */
+    READY('R');
 
     public final char code;
 

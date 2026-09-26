@@ -74,4 +74,14 @@ public class SkyreachKeyQuest extends DeliverItemsQuest {
         return new FairType().append(new FontOptions(12).outline(outlined),
                 Localization.translate("quests", "swhreturnwarden"));
     }
+
+    /**
+     * Not shareable. Progress in this mod is recorded per player or per world
+     * by the giver, never on the quest instance, so a shared instance is one
+     * the first turn-in removes from both players (2026-09-26 co-op pass).
+     */
+    @Override
+    public boolean canShare() {
+        return false;
+    }
 }
