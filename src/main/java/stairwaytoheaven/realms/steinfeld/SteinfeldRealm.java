@@ -256,7 +256,9 @@ public final class SteinfeldRealm {
         SkyRegistry.chapelcolumnID = ObjectRegistry.registerObject("chapelcolumn",
                 new ColumnObject("cryptcolumn", new Color(150, 156, 164), ToolType.PICKAXE), 0.0F, false);
         SkyRegistry.heavenslabID = ObjectRegistry.registerObject("heavenslab",
-                new SkyDecoObject("skywatchrubble", 32, new Color(160, 166, 176),
+                // 48, not 32: the sheet became a 48x80 winged statue in
+                // 14a1460; a 32 strip showed its left two thirds, one wing.
+                new SkyDecoObject("skywatchrubble", 48, new Color(160, 166, 176),
                         new Rectangle(8, 12, 16, 20), "objects", "decorations"),
                 0.0F, false);
 
