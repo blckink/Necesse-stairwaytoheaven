@@ -258,6 +258,7 @@ public class SkyWardenMob extends HumanShop {
     @Override
     public void serverTick() {
         super.serverTick();
+        this.questMarkers.serverTick(stairwaytoheaven.journal.WardenBrief::markerCode, null);
         if (this.stampedWorldRecord || !this.isSettler()) {
             return;
         }
@@ -268,6 +269,19 @@ public class SkyWardenMob extends HumanShop {
             world.markRecruited(0L);
             this.stampedWorldRecord = true;
         }
+    }
+
+    /**
+     * The Elder's "!" / "?" over his head for whatever {@code WardenBrief}
+     * would talk about (Kevin, 2026-09-26) — see {@code QuestMarkerSync}.
+     */
+    private final stairwaytoheaven.quest.ladder.QuestMarkerSync questMarkers =
+            new stairwaytoheaven.quest.ladder.QuestMarkerSync(this);
+
+    @Override
+    public necesse.entity.mobs.QuestMarkerOptions getMarkerOptions(PlayerMob perspective) {
+        return necesse.entity.mobs.QuestMarkerOptions.combine(super.getMarkerOptions(perspective),
+                this.questMarkers.options(perspective));
     }
 
     /** Whether this world already recruited a Sky Warden. Null-safe. */

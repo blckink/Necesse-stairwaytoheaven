@@ -720,6 +720,31 @@ public abstract class SkySettlerMob extends HumanShop {
                 stairwaytoheaven.village.SpireVillage.bringHome(this);
             }
         }
+        this.questMarkers.serverTick(this::markerCode, this::markerCodeForEveryone);
+    }
+
+    /**
+     * The Elder's "!" / "?" over this resident's head (Kevin, 2026-09-26):
+     * something new, something to turn in, something running, or something
+     * wrong — see {@code quest.ladder.QuestMarkerSync}.
+     */
+    protected final stairwaytoheaven.quest.ladder.QuestMarkerSync questMarkers =
+            new stairwaytoheaven.quest.ladder.QuestMarkerSync(this);
+
+    /** This resident's marker for one player; by default their ladder steps. */
+    protected int markerCode(ServerClient client) {
+        return stairwaytoheaven.quest.ladder.QuestMarkerSync.ladderCode(this.getStringID(), client);
+    }
+
+    /** A marker every player sees (a resident in trouble); none by default. */
+    protected int markerCodeForEveryone() {
+        return stairwaytoheaven.quest.ladder.QuestMarkerSync.NONE;
+    }
+
+    @Override
+    public necesse.entity.mobs.QuestMarkerOptions getMarkerOptions(necesse.entity.mobs.PlayerMob perspective) {
+        return necesse.entity.mobs.QuestMarkerOptions.combine(super.getMarkerOptions(perspective),
+                this.questMarkers.options(perspective));
     }
 
     /** Unique story residents: no stray mob may kill one. */

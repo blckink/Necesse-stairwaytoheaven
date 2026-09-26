@@ -5027,3 +5027,11 @@ Read in 1.3.3 (CFR), VERIFIED [run] headless where marked:
 - `tools/locale_audit.py`: a mod `[controls]` section makes vanilla's
   `controls.usetip` look missing; and `new LocalMessage(cat, "prefix" + x)`
   is read as the literal key `prefix` — build the key in a local variable.
+- Quest marker over a head (VERIFIED [jar], 1.3.3): `HumanMob.getMarkerOptions(PlayerMob)`
+  is overridable and drawn client-side from the mob's draw with the local
+  player as perspective (`getMarkerDrawOptions(..., 0, -45, perspective)`);
+  vanilla builds it from `QuestMarkerOptions(char, Color)` and merges with
+  `QuestMarkerOptions.combine`. Server-only state (ladder, journal) has to be
+  sent over — `quest/ladder/QuestMarkerSync` does it per player (keyed by
+  `NetworkClient.authentication`) through a `CustomMobAbility` registered in a
+  field initializer, so the ability ID is the same on both sides.

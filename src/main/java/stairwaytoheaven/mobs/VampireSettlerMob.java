@@ -152,6 +152,19 @@ public class VampireSettlerMob extends SkySettlerMob {
         return this.isRestless() ? !this.napping : this.isNightTime();
     }
 
+    /**
+     * A red "!" over his head while he is thirsty enough to go for a neighbour
+     * (below the bowl threshold, so a blood bowl within reach would already
+     * have fed him): the player sees trouble coming instead of only the
+     * "vampirebite" bubble after the fact. Kevin, 2026-09-26.
+     */
+    @Override
+    protected int markerCodeForEveryone() {
+        return this.isSettler() && this.bloodThirst < BOWL_THRESHOLD
+                ? stairwaytoheaven.quest.ladder.QuestMarkerSync.WARNING
+                : stairwaytoheaven.quest.ladder.QuestMarkerSync.NONE;
+    }
+
     /** Whether an idle hour sends him hunting: the night, or any waking hour once Restless. */
     public boolean huntsNow() {
         return this.isRestless() ? !this.napping : this.isNightTime();

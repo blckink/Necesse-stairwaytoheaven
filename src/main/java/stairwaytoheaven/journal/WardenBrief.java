@@ -78,6 +78,33 @@ public final class WardenBrief {
      * the Chronicle only; the vanilla quest tracker keeps the progress on
      * screen. The same builder serves the Warden and the Spire Village.
      */
+    /**
+     * The marker over the Warden's head for {@link #dialogue}'s pick, in the
+     * same order: READY -> yellow "?", the recruitment offer -> yellow "!",
+     * ACTIVE -> grey "?".
+     */
+    public static int markerCode(ServerClient client) {
+        if (client == null || client.getServer() == null) {
+            return stairwaytoheaven.quest.ladder.QuestMarkerSync.NONE;
+        }
+        List<JournalStep> steps = AdventurerJournal.stepSource().buildSteps(
+                new JournalContext(client.getServer(), client));
+        if (pick(steps, JournalStatus.READY) != null) {
+            return stairwaytoheaven.quest.ladder.QuestMarkerSync.READY;
+        }
+        // "!" only for the recruitment: the other asks (cats, anchor, keys)
+        // stay AVAILABLE until the player acts out in the world, not by
+        // talking, so a "!" for them would never go away.
+        JournalStep offered = pick(steps, JournalStatus.AVAILABLE);
+        if (offered != null && offered.id.equals("recruitwarden")) {
+            return stairwaytoheaven.quest.ladder.QuestMarkerSync.NEW;
+        }
+        if (pick(steps, JournalStatus.ACTIVE) != null) {
+            return stairwaytoheaven.quest.ladder.QuestMarkerSync.ACTIVE;
+        }
+        return stairwaytoheaven.quest.ladder.QuestMarkerSync.NONE;
+    }
+
     public static GameMessage task(GameMessage line, JournalStep step) {
         GameMessageBuilder out = new GameMessageBuilder();
         if (line != null) {

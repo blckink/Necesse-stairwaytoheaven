@@ -960,3 +960,15 @@ hung there. The stairway (`LadderDownObject`) and the boss portals have no
 collision box and cannot cause this. Fixed in 301c55b for every
 `SkyDecoObject` with a box. Settlers walking around the pieces now is
 HYPOTHESIS until played.
+
+### 2026-09-26 — Quest markers over our NPCs
+
+Kevin (screenshot of the Settlement Elder handing out a story reward): vanilla
+wears a "?" over the Elder's head while he has something for you; our people
+only had a bubble or nothing. Now every Spire Village resident (`SkySettlerMob`)
+wears the Elder's marker for their ladder steps — yellow "!" new task, yellow
+"?" complete and ready to turn in, grey "?" still running — the Sky Warden the
+same for his asks ("!" only for the recruitment), and the vampire a red "!"
+while his thirst is below the bowl threshold (he is about to bite someone).
+`quest/ladder/QuestMarkerSync`. Build + syntax gate + integration test green;
+the drawn marker itself is HYPOTHESIS until seen in game.
