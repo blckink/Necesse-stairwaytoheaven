@@ -29,8 +29,14 @@ public class VeteranTurretObjectEntity extends ObjectEntity {
 
     public static final int RANGE_PX = 14 * 32;
     private static final long FIRE_INTERVAL_MS = 200L;
-    /** Damage per shot at defense level 0; VeteranDefense scales this up. */
-    private static final float BASE_DAMAGE = 6.0F;
+    /**
+     * Damage per shot at defense level 0; VeteranDefense scales this up.
+     * Vanilla takes armour * 0.5 off every hit flat, so the old 6 did next to
+     * nothing against the sky's armour-40 floor (docs/BALANCE.md).
+     */
+    private static final float BASE_DAMAGE = 25.0F;
+    /** Armour ignored per hit, shared by the catapult and the barbed wire. */
+    static final float ARMOR_PEN = 20.0F;
 
     private long nextFireTime;
     /**
@@ -122,7 +128,7 @@ public class VeteranTurretObjectEntity extends ObjectEntity {
         this.aimAt(target, this.tileX * 32 + 16, this.tileY * 32 + 16);
         this.markShot(now);
         float damage = BASE_DAMAGE * stairwaytoheaven.settlement.VeteranDefense.turretMultiplier(level);
-        target.isServerHit(new GameDamage(damage), target.x, target.y, 0.0F, null);
+        target.isServerHit(new GameDamage(damage, ARMOR_PEN), target.x, target.y, 0.0F, null);
 
         float originX = this.tileX * 32 + 16;
         float originY = this.tileY * 32 + 16;

@@ -24,6 +24,12 @@ All notable changes to this project are documented here. Format loosely follows
   Stairway's sheet).
 
 ### Changed
+- **Stronger defences / Stärkere Verteidigung**: the War Veteran's
+  Auto Turret hits for 25 instead of 6, the Cannon for 120 instead of 35 and
+  the Barbed Wire Fence for 25 instead of 8; all three ignore 20 armour.
+  Vanilla takes half the target's armour off every hit, so against sky
+  enemies (armour 40) the old values did almost nothing. The ammo levels
+  still add +25 % (turret) / +40 % (cannon) per level on top.
 - **One name per character / Ein Name pro Figur**: Halda, Magpie, Ossian,
   Eveleen, Ives, Mortimer, Caspern, Eleanor, Mr. Knott and Dorian keep their
   story name in the settlement list, the dialogue header ("Halda,

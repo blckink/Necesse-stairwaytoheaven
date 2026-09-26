@@ -14,7 +14,7 @@ import necesse.level.maps.Level;
 public class BarbedWireObjectEntity extends ObjectEntity {
 
     private static final long INTERVAL_MS = 500L;
-    private static final float DAMAGE = 8.0F;
+    private static final float DAMAGE = 25.0F;
     /** How far outside the tile a mob's centre may be and still touch the wire. */
     private static final int REACH_PX = 14;
 
@@ -49,7 +49,7 @@ public class BarbedWireObjectEntity extends ObjectEntity {
                 continue;
             }
             if (mob.x >= minX && mob.x <= maxX && mob.y >= minY && mob.y <= maxY) {
-                mob.isServerHit(new GameDamage(DAMAGE), mob.x, mob.y, 0.0F, null);
+                mob.isServerHit(new GameDamage(DAMAGE, VeteranTurretObjectEntity.ARMOR_PEN), mob.x, mob.y, 0.0F, null);
             }
         }
     }

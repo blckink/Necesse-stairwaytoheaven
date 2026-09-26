@@ -18,7 +18,7 @@ public class VeteranCatapultObjectEntity extends stairwaytoheaven.objects.Vetera
 
     public static final int CATAPULT_RANGE_PX = 25 * 32;
     private static final long CATAPULT_INTERVAL_MS = 3000L;
-    private static final float CATAPULT_BASE_DAMAGE = 35.0F;
+    private static final float CATAPULT_BASE_DAMAGE = 120.0F;
     private static final float SPLASH_RADIUS_PX = 64.0F;
 
     private long nextCatapultFire;
@@ -66,7 +66,7 @@ public class VeteranCatapultObjectEntity extends stairwaytoheaven.objects.Vetera
             float dx = mob.x - tx;
             float dy = mob.y - ty;
             if (dx * dx + dy * dy <= SPLASH_RADIUS_PX * SPLASH_RADIUS_PX) {
-                mob.isServerHit(new GameDamage(damage), mob.x, mob.y, 0.0F, null);
+                mob.isServerHit(new GameDamage(damage, ARMOR_PEN), mob.x, mob.y, 0.0F, null);
             }
         }
 
