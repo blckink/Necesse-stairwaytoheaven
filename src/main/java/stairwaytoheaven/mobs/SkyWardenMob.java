@@ -23,6 +23,7 @@ import necesse.level.maps.levelData.settlementData.ServerSettlementData;
 import stairwaytoheaven.SkyRegistry;
 import stairwaytoheaven.quest.SkywatchQuestData;
 import stairwaytoheaven.quest.SkywatchWorldData;
+import stairwaytoheaven.worldgen.RealmDepth;
 
 /**
  * The Sky Warden — the last keeper of the Skywatch, resident of the Old
@@ -136,8 +137,43 @@ public class SkyWardenMob extends HumanShop {
         this.shop.addSellingItem("flickerlightgarland", new SellingShopItem(2, 1))
                 .setStaticPrice(500, 500)
                 .addRequirement((random, client, shop, blackboard) -> catsHome(shop));
-        // A replacement Adventurer's Journal, for a player who lost theirs.
+        // The region keys' one-off rewards, the same rule (2026-09-26 rewards
+        // check): every weapon and trinket a key pays can also be crafted, but
+        // the Skywatch hood, mantle and boots could not, so in co-op only the
+        // player who turned the key in could ever wear the set. Each piece is
+        // on his shelf once its key is earned anywhere in the world. Broker
+        // value 0 (SkyItems), so priced like the banner tier, not 10x of it.
+        if (WardenIdentity.armorSheetsExist()) {
+            this.shop.addSellingItem("skywatchhood", new SellingShopItem(1, 1))
+                    .setStaticPrice(2500, 2500)
+                    .addRequirement((random, client, shop, blackboard) -> keyEarned(shop, RealmDepth.REALM_SKYREACH));
+            this.shop.addSellingItem("wardenmantle", new SellingShopItem(1, 1))
+                    .setStaticPrice(2500, 2500)
+                    .addRequirement((random, client, shop, blackboard) -> keyEarned(shop, RealmDepth.REALM_EDEN));
+            this.shop.addSellingItem("wardenboots", new SellingShopItem(1, 1))
+                    .setStaticPrice(2500, 2500)
+                    .addRequirement((random, client, shop, blackboard) -> keyEarned(shop, RealmDepth.REALM_STEINFELD));
+        }
+        // A second copy of an earned key piece. The realm is already awake -
+        // this one is for its other use, the arch that takes you to the
+        // realm's nearest Summoning Stone (RegionKeyObject.interact), so a
+        // co-op partner with their own settlement can stand one up too.
+        for (int realm = 0; realm < RealmDepth.REALM_COUNT; realm++) {
+            final int keyRealm = realm;
+            this.shop.addSellingItem(stairwaytoheaven.objects.RegionKeyObject.idFor(realm), new SellingShopItem(1, 1))
+                    .setStaticPrice(1500, 1500)
+                    .addRequirement((random, client, shop, blackboard) -> keyEarned(shop, keyRealm));
+        }
+        // A replacement Sky Chronicle, for a player who lost theirs.
         stairwaytoheaven.journal.AdventurerJournal.stockShop(this.shop);
+    }
+
+    /** This realm's key quest has been turned in on this world. */
+    private static boolean keyEarned(necesse.entity.mobs.friendly.human.humanShop.HumanShop shop, int realm) {
+        Level level = shop == null ? null : shop.getLevel();
+        Server server = level == null ? null : level.getServer();
+        SkywatchWorldData world = server == null ? null : SkywatchWorldData.get(server);
+        return world != null && world.regionKeysEarned.contains(RealmDepth.keyOf(realm));
     }
 
     /** The anchor quest has been turned in on this world (its glaive is paid). */

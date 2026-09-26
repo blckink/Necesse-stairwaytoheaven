@@ -1,18 +1,31 @@
 package stairwaytoheaven.objects;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.awt.Rectangle;
 
 import necesse.engine.localization.Localization;
 import necesse.engine.localization.message.LocalMessage;
+import necesse.engine.network.server.Server;
+import necesse.engine.network.server.ServerClient;
+import necesse.engine.util.GameRandom;
+import necesse.engine.util.GameUtils;
+import necesse.engine.util.TeleportResult;
 import necesse.engine.registries.ObjectRegistry;
 import necesse.engine.world.worldData.SettlementsWorldData;
 import necesse.entity.mobs.PlayerMob;
 import necesse.gfx.gameTexture.GameTexture;
+import necesse.gfx.gameTooltips.ListGameTooltips;
+import necesse.gfx.gameTooltips.StringTooltips;
+import necesse.inventory.InventoryItem;
 import necesse.inventory.item.toolItem.ToolType;
 import necesse.level.maps.Level;
 import necesse.level.maps.hudManager.floatText.ChatBubbleText;
+import stairwaytoheaven.SkyRegistry;
+import stairwaytoheaven.bosses.BossPortalSites;
+import stairwaytoheaven.journal.JournalWorldData;
 import stairwaytoheaven.quest.SkywatchWorldData;
+import stairwaytoheaven.worldgen.SkyOrigin;
 import stairwaytoheaven.worldgen.RealmDepth;
 import stairwaytoheaven.util.TileText;
 
@@ -61,54 +74,36 @@ import stairwaytoheaven.util.TileText;
 public class RegionKeyObject extends SkyDecoObject {
 
     // ------------------------------------------------------------------
-    // the sheets, one per realm — each one its boss portal's own
+    // the sheets, one per realm — each one its summoning stone's own arch
     // ------------------------------------------------------------------
 
-    /** Skyreach: the Warden's beacon, lit. 32x96, mod art. */
-    public static final String SHEET_SKYREACH = "wardenbeaconon";
-    /** Eden: the stairway sheet the Eden Gate itself wears. 32x96, mod art. */
-    public static final String SHEET_EDEN = "skystairwaydown";
-    /** Steinfeld: the seraph statue. 96x192, mod art, under {@code objects/}. */
-    public static final String SHEET_STEINFELD = "statues/seraph";
-    /** Ghost Realm: the Gloom Raven statue. 64x96, mod art. */
-    public static final String SHEET_GHOST = "statues/gloomraven";
-    /** Crooked Beyond: Mr. Knott's door. 32x96, mod art. */
-    public static final String SHEET_CROOKED = "veilriftdown";
-    /** Hell's key: the Aether Forge, the same sheet its boss portal wears. */
-    public static final String SHEET_HELL = "aetherforge";
+    /*
+     * 2026-09-26: every key piece wears its realm's summoning-stone arch
+     * (objects/bossportals/<realm>.png, 64x96, drawn centred on its tile).
+     * The stones moved to those arches on 2026-09-15 and the keys were left on
+     * the old borrowed sheets, so the Eden key still wore the Skyward Stairway
+     * - the player: "was soll Gartenstiege von Eden machen? ... Ich hab keine
+     * Ahnung". §B3's "a stone looks like its key piece" holds again, and a
+     * placed key IS a small gate to its stone (see interact).
+     */
+    public static final String SHEET_SKYREACH = "bossportals/skyreach";
+    public static final String SHEET_EDEN = "bossportals/eden";
+    public static final String SHEET_STEINFELD = "bossportals/steinfeld";
+    public static final String SHEET_GHOST = "bossportals/ghost";
+    public static final String SHEET_CROOKED = "bossportals/crooked";
+    public static final String SHEET_HELL = "bossportals/hell";
 
     /**
-     * Inventory icons: the 32x32 cell at grid (0,0) of the named file.
-     *
-     * <p>Three of the five already own a hand-drawn 32x32 item icon, because
-     * the mod already registers an obtainable object on the same sheet —
-     * {@code skystairwaydown} (the Skyward Stairway), {@code seraphstatue}
-     * (`SkyCloudmarbleSet`) and {@code gloomravenstatue}
-     * (`SkyBuildingSet`). For those three the file IS 32x32, so cell (0,0) is
-     * the whole icon and nothing is cropped at all.
-     *
-     * <p>The other two — the beacon and the door — are 32x96 world sheets whose
-     * objects are registered unobtainable, so no icon was ever drawn for them.
-     * Cell (0,0) of each is the part a player would point at: the beacon's lit
-     * orb, and the oval of the rift. Cropping a sheet to build an item texture
-     * is the engine's own idiom, not an invention —
-     * {@code TerrainSplatterTile.generateItemTexture} (TerrainSplatterTile
-     * .java:68) and {@code RockOreObject.generateItemTexture}
-     * (RockOreObject.java:184) both do it, through this same
-     * {@code GameTexture(copy, spriteX, spriteY, spriteRes)} constructor
-     * (GameTexture.java:248, VERIFIED [jar]). Nothing is recoloured.
+     * Inventory icons: the arch itself, box-downscaled to 32x32 once from the
+     * sheet above (items/regionkey<realm>.png, 2026-09-26) - a reduction of
+     * the existing art, nothing redrawn.
      */
-    public static final String ICON_SKYREACH = "objects/wardenbeaconon";
-    public static final String ICON_EDEN = "items/skystairwaydown";
-    public static final String ICON_STEINFELD = "items/seraphstatue";
-    public static final String ICON_GHOST = "items/gloomravenstatue";
-    public static final String ICON_CROOKED = "objects/veilriftdown";
-    /**
-     * Hell's icon. The Aether Forge is one of the three that already owns a
-     * hand-drawn 32x32 item icon, because the mod registers an obtainable
-     * object on the same sheet, so nothing is cropped here either.
-     */
-    public static final String ICON_HELL = "items/aetherforge";
+    public static final String ICON_SKYREACH = "items/regionkeyskyreach";
+    public static final String ICON_EDEN = "items/regionkeyeden";
+    public static final String ICON_STEINFELD = "items/regionkeysteinfeld";
+    public static final String ICON_GHOST = "items/regionkeyghostrealm";
+    public static final String ICON_CROOKED = "items/regionkeycrookedbeyond";
+    public static final String ICON_HELL = "items/regionkeyhell";
 
     // ------------------------------------------------------------------
     // registration
@@ -135,17 +130,17 @@ public class RegionKeyObject extends SkyDecoObject {
      */
     public static void register() {
         registerKey("regionkeyskyreach", RealmDepth.REALM_SKYREACH,
-                SHEET_SKYREACH, 32, ICON_SKYREACH, new Color(196, 206, 219));
+                SHEET_SKYREACH, 64, ICON_SKYREACH, new Color(196, 206, 219));
         registerKey("regionkeyeden", RealmDepth.REALM_EDEN,
-                SHEET_EDEN, 32, ICON_EDEN, new Color(120, 198, 132));
+                SHEET_EDEN, 64, ICON_EDEN, new Color(120, 198, 132));
         registerKey("regionkeysteinfeld", RealmDepth.REALM_STEINFELD,
-                SHEET_STEINFELD, 96, ICON_STEINFELD, new Color(172, 178, 188));
+                SHEET_STEINFELD, 64, ICON_STEINFELD, new Color(172, 178, 188));
         registerKey("regionkeyghostrealm", RealmDepth.REALM_GHOST,
                 SHEET_GHOST, 64, ICON_GHOST, new Color(120, 150, 132));
         registerKey("regionkeycrookedbeyond", RealmDepth.REALM_CROOKED,
-                SHEET_CROOKED, 32, ICON_CROOKED, new Color(168, 96, 150));
+                SHEET_CROOKED, 64, ICON_CROOKED, new Color(168, 96, 150));
         registerKey("regionkeyhell", RealmDepth.REALM_HELL,
-                SHEET_HELL, 128, ICON_HELL, new Color(186, 84, 52));
+                SHEET_HELL, 64, ICON_HELL, new Color(186, 84, 52));
     }
 
     private static void registerKey(String stringID, int realm, String worldSheet,
@@ -179,23 +174,23 @@ public class RegionKeyObject extends SkyDecoObject {
      * mistyped path would ship as the engine's red ERR tile — standing in the
      * world, or sitting in the player's bag — and nothing would have caught it.
      *
-     * <p>Eight and not ten: the beacon and the door are their own icons, cropped
-     * from the world sheet, so their paths appear once.
+     * <p>Twelve paths: six arches, six icons.
      */
     public static void loadBorrowedArt() {
-        // world sheets -- each one its realm's boss portal's own
-        GameTexture.fromFile("objects/wardenbeaconon");
-        GameTexture.fromFile("objects/skystairwaydown");
-        GameTexture.fromFile("objects/statues/seraph");
-        GameTexture.fromFile("objects/statues/gloomraven");
-        GameTexture.fromFile("objects/veilriftdown");
-        GameTexture.fromFile("objects/aetherforge");
-        // inventory icons (the two missing from this list are the two world
-        // sheets above that double as their own icon)
-        GameTexture.fromFile("items/skystairwaydown");
-        GameTexture.fromFile("items/seraphstatue");
-        GameTexture.fromFile("items/gloomravenstatue");
-        GameTexture.fromFile("items/aetherforge");
+        // world sheets -- each one its realm's summoning stone's own arch
+        GameTexture.fromFile("objects/bossportals/skyreach");
+        GameTexture.fromFile("objects/bossportals/eden");
+        GameTexture.fromFile("objects/bossportals/steinfeld");
+        GameTexture.fromFile("objects/bossportals/ghost");
+        GameTexture.fromFile("objects/bossportals/crooked");
+        GameTexture.fromFile("objects/bossportals/hell");
+        // inventory icons
+        GameTexture.fromFile("items/regionkeyskyreach");
+        GameTexture.fromFile("items/regionkeyeden");
+        GameTexture.fromFile("items/regionkeysteinfeld");
+        GameTexture.fromFile("items/regionkeyghostrealm");
+        GameTexture.fromFile("items/regionkeycrookedbeyond");
+        GameTexture.fromFile("items/regionkeyhell");
     }
 
     /** The registered string ID of a realm's key piece, built the one way. */
@@ -243,6 +238,93 @@ public class RegionKeyObject extends SkyDecoObject {
         // 50 it gives chairs and flower pots.
         this.setTool(ToolType.PICKAXE);
         this.setObjectHealth(100);
+        // The arch is 64x96 on one tile, drawn centred and standing on the
+        // tile's bottom edge - BossPortalObject's own hover box.
+        this.hoverHitbox = new Rectangle(-16, -64, 64, 96);
+    }
+
+    /** {@code journal.realm<N>}, in {@code RealmDepth.REALM_*} order: the realm's name as the Chronicle writes it. */
+    private static final String[] REALM_NAME_KEYS = {"realm0", "realm1", "realm2", "realm3", "realm4", "realm5"};
+
+    private LocalMessage realmName() {
+        return new LocalMessage("journal", REALM_NAME_KEYS[this.realm]);
+    }
+
+    /** {@code mob.<boss>}: the boss its stones call. */
+    private LocalMessage bossName() {
+        return new LocalMessage("mob", stairwaytoheaven.journal.JournalBuilder.bossOf(this.realm));
+    }
+
+    /**
+     * What the piece is for, in the bag. Until 2026-09-26 the tooltip said
+     * nothing but vanilla's "can be placed", and the player asked what the Eden
+     * one was supposed to do.
+     */
+    @Override
+    public ListGameTooltips getItemTooltips(InventoryItem item, PlayerMob perspective) {
+        ListGameTooltips tooltips = super.getItemTooltips(item, perspective);
+        tooltips.add(new StringTooltips(new LocalMessage("itemtooltip", "regionkeytip",
+                "realm", this.realmName(), "boss", this.bossName()).translate(), 400));
+        tooltips.add(new StringTooltips(new LocalMessage("itemtooltip", "regionkeytraveltip",
+                "realm", this.realmName()).translate(), 400));
+        return tooltips;
+    }
+
+    @Override
+    public boolean canInteract(Level level, int x, int y, PlayerMob player) {
+        return true;
+    }
+
+    @Override
+    public String getInteractTip(Level level, int x, int y, PlayerMob perspective, boolean debug) {
+        return Localization.translate("misc", "regionkeyusetip");
+    }
+
+    /**
+     * A standing key piece is a gate to its realm's nearest summoning stone.
+     *
+     * <p>Only once the realm's stones are awake (a piece set down outside a
+     * settlement wakes nothing and leads nowhere), and only for a player who
+     * has been in that realm themself ({@code JournalWorldData.hasVisited}) -
+     * in co-op the piece somebody else earned does not carry a newcomer past
+     * the Veil. Per player: everyone who uses it travels alone. The way back is
+     * vanilla's: walk, or a Recall Scroll.
+     */
+    @Override
+    public void interact(Level level, int x, int y, PlayerMob player) {
+        if (level.isServer() && player != null && player.isServerClient()) {
+            this.travel(level, x, y, player.getServerClient());
+        }
+        super.interact(level, x, y, player);
+    }
+
+    private void travel(Level level, int x, int y, ServerClient client) {
+        Server server = level.getServer();
+        if (!SkywatchWorldData.bossPortalsUnlocked(server, this.realm)) {
+            TileText.at(client, x, y, new LocalMessage("misc", "regionkeyasleep", "realm", this.realmName()));
+            return;
+        }
+        JournalWorldData seen = JournalWorldData.get(server);
+        if (seen != null && !seen.hasVisited(client.authentication, this.realm)) {
+            TileText.at(client, x, y, new LocalMessage("misc", "regionkeynotvisited", "realm", this.realmName()));
+            return;
+        }
+        int seed = SkyOrigin.worldGenSeed(level.getWorldEntity());
+        Point from = level.getIdentifier().equals(SkyRegistry.SKYREACH_IDENTIFIER) ? new Point(x, y) : null;
+        final Point landing = BossPortalSites.landingNearestTo(seed, this.realm, from);
+        if (landing == null) {
+            TileText.at(client, x, y, new LocalMessage("misc", "regionkeynostone", "realm", this.realmName()));
+            return;
+        }
+        client.changeLevelCheck(SkyRegistry.SKYREACH_IDENTIFIER, dest -> {
+            dest.regionManager.ensureTileIsLoaded(landing.x, landing.y);
+            Point pos = GameUtils.getValidMobLocationAroundObject(GameRandom.globalRandom, dest,
+                    client.playerMob, landing.x, landing.y, true);
+            if (pos == null) {
+                pos = new Point(landing.x * 32 + 16, landing.y * 32 + 16);
+            }
+            return new TeleportResult(true, pos);
+        }, true);
     }
 
     /**

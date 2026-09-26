@@ -29,6 +29,11 @@ public final class JournalBuilder {
     static final String[] BOSSES = {"cryoqueen", "moonlightdancer", "ascendedwizard",
             "pestwarden", "crystaldragon", "mutanthydra"};
 
+    /** The boss mob ID a realm's summoning stones call. */
+    public static String bossOf(int realm) {
+        return BOSSES[realm];
+    }
+
     private JournalBuilder() {
     }
 

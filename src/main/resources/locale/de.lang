@@ -955,7 +955,7 @@ seancenobodyanswers=Die Kreide hier ist alt und kalt.\nNichts antwortet darauf.
 // ============================================================
 [object]
 regionkeyskyreach=Wachfeuer der Himmelsweite
-regionkeyeden=Gartenstiege von Eden
+regionkeyeden=Mondbogen von Eden
 regionkeysteinfeld=Trauerengel von Steinfeld
 regionkeyghostrealm=Rabenkanzel des Nachgartens
 regionkeycrookedbeyond=Knotts Krumme Tür
@@ -964,9 +964,9 @@ regionkeyhell=Höllensiegel
 swhkeyskyreachtitle=Das Wachfeuer
 swhkeyskyreachdesc=Der Himmelswächter kann ein Wachfeuer bauen, auf das die Rufsteine der Himmelsweite antworten - wenn du ihm den Sturm bringst, mit dem es brennt.
 swhkeyskyreachreward=Wachfeuer der Himmelsweite + 4x Sturmscheibe + Himmelswacht-Kapuze + 4x Sturmstahlbarren
-swhkeyedentitle=Die Gartenstiege
-swhkeyedendesc=Eden bewacht seinen Saft und seinen Pollen mit Zähnen und Stacheln. Hol beides aus dem Garten, dazu zwei Zähne der Blütenmäuler, die beißen, dann schlägt dir der Himmelswächter eine Stiege, die seine Steine wiedererkennen.
-swhkeyedenreward=Gartenstiege von Eden + Windheuler + Mantel des Himmelswächters + 5x Sturmstahlbarren
+swhkeyedentitle=Der Mondbogen
+swhkeyedendesc=Eden bewacht seinen Saft und seinen Pollen mit Zähnen und Stacheln. Hol beides aus dem Garten, dazu zwei Zähne der Blütenmäuler, die beißen, dann setzt dir der Himmelswächter einen Bogen, den seine Steine wiedererkennen.
+swhkeyedenreward=Mondbogen von Eden + Windheuler + Mantel des Himmelswächters + 5x Sturmstahlbarren
 swhkeysteinfeldtitle=Der Trauerengel
 swhkeysteinfelddesc=Steinfeld ist nichts als bleicher Stein und das Echo, das darin gefangen ist. Bring genug von beidem zurück, dann stellt dir der Himmelswächter einen seiner Engel in die eigene Siedlung.
 swhkeysteinfeldreward=Trauerengel von Steinfeld + Sturmklinge + Stiefel des Himmelswächters + 6x Sturmstahlbarren
@@ -985,7 +985,7 @@ regionkeyunlocked=Das Schlüsselstück setzt sich in den Boden: <key>.\nWeit dra
 wardenkeyaskskyreach=Es gibt einen Weg, das zu rufen, was da draußen schläft - aber es antwortet nur seinesgleichen. Bring mir den Sturm und noch zwei Golemherzen, dann baue ich dir ein Wachfeuer.
 wardenkeydoneskyreach=Das brennt. Stell es daheim ab, wo die Mauern dir gehören.
 wardenkeyaskeden=Dann also Eden. Saft und Pollen und zwei Zähne der Blumen, die beißen - nichts davon wird dir jemand reichen.
-wardenkeydoneeden=Grünes Zeug, und noch warm. Nimm die Stiege - sie weiß, wie ihre eigenen Steine geschnitten sind.
+wardenkeydoneeden=Grünes Zeug, und noch warm. Nimm den Bogen - er weiß, wie seine eigenen Steine geschnitten sind.
 wardenkeyasksteinfeld=Steinfeld lässt seine Toten stehen. Bring mir bleichen Stein und das Echo darin und zwei Trauerflore von den weinenden Statuen, dann stelle ich dir einen seiner Engel auf.
 wardenkeydonesteinfeld=Sie ist schwerer, als sie aussieht. Gib ihr Boden, auf dem man sie in Ruhe lässt.
 wardenkeyaskghostrealm=Jetzt der Nachgarten, und nimm deine Kreide mit. Knochenholz und Spektralerz - und zwei Halsbänder der Bräute, die dort umgehen.
@@ -1674,8 +1674,8 @@ opensanchor=Das erste Regionsschlüssel-Stück (Das Wachfeuer); ab dann verkauft
 whyghostchalk=Der Nebel hinter Steinfeld tötet Lebende (Seelenblöße). Mit der Kreide zeichnest du den Séance-Kreis, dessen Geisterführer dich durch den Nebel lässt.
 opensghostchalk=Das Nebelmal
 whykeyskyreach=Ein Schlüsselstück, in deiner Siedlung aufgestellt, weckt die Rufsteine seines Reichs. Ohne es bleiben sie stumm und der Boss des Reichs lässt sich nicht rufen.
-openskeyskyreach=Die Rufsteine der Himmelsweite (ihr Boss) und der nächste Schlüssel: Die Gartenstiege
-whykeyeden=Die Rufsteine Edens antworten nur auf eine Stiege aus Edens eigenem Saft und Pollen. Stell sie zu Hause auf, um sie zu wecken.
+openskeyskyreach=Die Rufsteine der Himmelsweite (ihr Boss) und der nächste Schlüssel: Der Mondbogen
+whykeyeden=Die Rufsteine Edens antworten nur auf einen Bogen aus Edens eigenem Saft und Pollen. Stell ihn zu Hause auf, um sie zu wecken.
 openskeyeden=Die Rufsteine Edens (sein Boss) und der nächste Schlüssel: Der Trauerengel
 whykeysteinfeld=Die Rufsteine Steinfelds schlafen, bis einer seiner Engel in deiner Siedlung steht.
 openskeysteinfeld=Die Rufsteine Steinfelds (sein Boss) und der nächste Schlüssel: Die Rabenkanzel
@@ -1720,3 +1720,14 @@ wardendialoganchor=Die Katzen sind daheim, die Insel nicht. Sie treibt. Bring mi
 
 [misc]
 swhdoctorrevived=<doctor> hat <settler> wieder auf die Beine gebracht
+
+// Region-Schlüsselstücke: wozu sie da sind (2026-09-26, RegionKeyObject).
+[itemtooltip]
+regionkeytip=Schlüsselstück von <realm>. In deiner Siedlung aufgestellt, weckt es die Rufsteine von <realm> für die ganze Welt (Boss: <boss>). Sie bleiben wach, auch wenn du das Stück wieder abbaust.
+regionkeytraveltip=Aufgestellt bringt es dich per Benutzen zum nächsten Rufstein von <realm> - wenn du selbst schon in <realm> warst. Zurück geht es zu Fuß oder mit einer Rückrufrolle.
+
+[misc]
+regionkeyusetip=Zum Rufstein reisen
+regionkeyasleep=Hier draußen weckt dieses Stück nichts. Stell es in einer Siedlung auf, um die Steine von <realm> zu wecken.
+regionkeynotvisited=Der Bogen führt nur dorthin, wo du schon warst. Erreiche <realm> erst selbst.
+regionkeynostone=In dieser Welt steht nirgends ein Rufstein von <realm>.

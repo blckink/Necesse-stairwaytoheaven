@@ -954,7 +954,7 @@ seancenobodyanswers=The chalk here is old and cold.\nNothing answers it.
 // ============================================================
 [object]
 regionkeyskyreach=Skyreach Watchfire
-regionkeyeden=Eden Garden Stair
+regionkeyeden=Eden Moon Arch
 regionkeysteinfeld=Steinfeld Mourning Angel
 regionkeyghostrealm=Aftergarden Raven Perch
 regionkeycrookedbeyond=Knott's Crooked Door
@@ -963,9 +963,9 @@ regionkeyhell=Infernal Seal
 swhkeyskyreachtitle=The Watchfire
 swhkeyskyreachdesc=The Warden can build a watchfire that the Skyreach's own summoning stones will answer to - if you bring him the storm to light it with.
 swhkeyskyreachreward=Skyreach Watchfire + 4x Stormdisc + Skywatch Hood + 4x Stormsteel Bar
-swhkeyedentitle=The Garden Stair
-swhkeyedendesc=Eden guards its sap and its pollen with teeth and stings. Take both from the garden, and two fangs off the Bloom Maws that bite, and the Warden will cut you a stair that its stones recognise.
-swhkeyedenreward=Eden Garden Stair + Galehowl + Warden's Mantle + 5x Stormsteel Bar
+swhkeyedentitle=The Moon Arch
+swhkeyedendesc=Eden guards its sap and its pollen with teeth and stings. Take both from the garden, and two fangs off the Bloom Maws that bite, and the Sky Warden will raise you an arch that its stones recognise.
+swhkeyedenreward=Eden Moon Arch + Galehowl + Warden's Mantle + 5x Stormsteel Bar
 swhkeysteinfeldtitle=The Mourning Angel
 swhkeysteinfelddesc=Steinfeld is nothing but pale stone and the echoes trapped in it. Bring back enough of each and the Warden will raise one of its angels in your own settlement.
 swhkeysteinfeldreward=Steinfeld Mourning Angel + Tempest Edge + Warden's Boots + 6x Stormsteel Bar
@@ -984,7 +984,7 @@ regionkeyunlocked=The key piece settles into the ground: <key>.\nSomewhere far o
 wardenkeyaskskyreach=There is a way to call the things that sleep out there - but they only answer their own kind. Bring me the storm, and two more golem hearts, and I will build you a watchfire.
 wardenkeydoneskyreach=That will burn. Set it down at home, where the walls are yours.
 wardenkeyaskeden=Eden next, then. Sap and pollen, and two fangs off the flowers that bite - none of it will be handed to you.
-wardenkeydoneeden=Green things, and still warm. Take the stair - it knows the way its own stones are cut.
+wardenkeydoneeden=Green things, and still warm. Take the arch - it knows the way its own stones are cut.
 wardenkeyasksteinfeld=Steinfeld keeps its dead standing. Bring me pale stone and the echoes in it, and two mourning bands off the statues that weep, and I will raise you one of its angels.
 wardenkeydonesteinfeld=She is heavier than she looks. Give her ground she will be left alone on.
 wardenkeyaskghostrealm=The Aftergarden, now, and you will want your chalk before you go. Bonewood and spectral ore - and two collars off the brides who wander there.
@@ -1673,8 +1673,8 @@ opensanchor=The first region key (The Watchfire); the Warden sells the Cloud Gla
 whyghostchalk=The fog past Steinfeld kills the living (Soul Exposure). The chalk draws the séance circle whose Ghost Guide makes the fog let you through.
 opensghostchalk=The Veil Mark
 whykeyskyreach=A key piece stood up in your settlement wakes that realm's Summoning Stones. Without it they stay inert and the realm's boss cannot be called.
-openskeyskyreach=The Skyreach's Summoning Stones (its boss), and the next key: The Garden Stair
-whykeyeden=Eden's Summoning Stones only answer a stair cut from Eden's own sap and pollen. Stand it up at home to wake them.
+openskeyskyreach=The Skyreach's Summoning Stones (its boss), and the next key: The Moon Arch
+whykeyeden=Eden's Summoning Stones only answer an arch grown from Eden's own sap and pollen. Stand it up at home to wake them.
 openskeyeden=Eden's Summoning Stones (its boss), and the next key: The Mourning Angel
 whykeysteinfeld=Steinfeld's Summoning Stones sleep until one of its angels stands in your settlement.
 openskeysteinfeld=Steinfeld's Summoning Stones (its boss), and the next key: The Raven Perch
@@ -1719,3 +1719,14 @@ wardendialoganchor=The cats are home; the island is not. It drifts. Bring me met
 
 [misc]
 swhdoctorrevived=<doctor> got <settler> back on their feet
+
+// Region key pieces: what they do (2026-09-26, RegionKeyObject).
+[itemtooltip]
+regionkeytip=Key piece of <realm>. Stand it up inside your settlement and the Summoning Stones of <realm> wake for the whole world (boss: <boss>). They stay awake even if you take the piece down again.
+regionkeytraveltip=Once standing: use it to travel to the nearest Summoning Stone of <realm> - if you have been to <realm> yourself. The way back is on foot or by Recall Scroll.
+
+[misc]
+regionkeyusetip=Travel to the Summoning Stone
+regionkeyasleep=This piece wakes nothing out here. Stand it up inside a settlement to wake the stones of <realm>.
+regionkeynotvisited=The arch only leads where you have been. Reach <realm> on your own first.
+regionkeynostone=No Summoning Stone of <realm> stands anywhere in this world.
