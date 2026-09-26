@@ -5035,3 +5035,9 @@ Read in 1.3.3 (CFR), VERIFIED [run] headless where marked:
   sent over — `quest/ladder/QuestMarkerSync` does it per player (keyed by
   `NetworkClient.authentication`) through a `CustomMobAbility` registered in a
   field initializer, so the ability ID is the same on both sides.
+- Settler mood without food (VERIFIED [jar], 1.3.3): `HumanMob.getStaticThoughts`
+  skips the last-meal and diet-variety thoughts when any personality returns
+  true from `preventsLastFoodEatenThought` / `preventsDietVarietyThought`.
+  Fixed traits the vanilla way: override `setupPersonalities`; because the
+  saved list is read back after it, old saves need the list re-set after
+  `applyLoadData` (`settlement/SkyPersonalities`).

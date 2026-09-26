@@ -321,6 +321,9 @@ public final class SkyTherapy {
      */
     public static boolean swapPersonality(HumanMob mob, SettlerPersonality replace,
                                           SettlerPersonality replacement) {
+        if (SkyPersonalities.isFixed(mob.getStringID())) {
+            return false; // story people keep their traits; a load would undo the swap anyway
+        }
         ArrayList<SettlerPersonality> personalities = mob.getPersonalities();
         for (int i = 0; i < personalities.size(); i++) {
             if (personalities.get(i).getID() != replace.getID()) {

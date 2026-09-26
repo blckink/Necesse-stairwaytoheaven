@@ -284,6 +284,15 @@ public abstract class SkySettlerMob extends HumanShop {
         if (own != null) {
             this.settlerName = own;
         }
+        // The saved trait list wins over setupPersonalities on load; a save
+        // from before 2026-09-26 gets its fixed traits here (SkyPersonalities).
+        if (!stairwaytoheaven.settlement.SkyPersonalities.matches(this.personalities, this.getStringID())) {
+            java.util.ArrayList<necesse.level.maps.levelData.settlementData.settler.personalities.SettlerPersonality> fixed =
+                    stairwaytoheaven.settlement.SkyPersonalities.fixed(this, this.getStringID());
+            if (fixed != null) {
+                this.personalities = fixed;
+            }
+        }
         boolean turned = save.getBoolean("swhnightbound", false, false);
         if (turned != this.nightbound) {
             this.nightbound = turned;
@@ -734,6 +743,21 @@ public abstract class SkySettlerMob extends HumanShop {
     /** This resident's marker for one player; by default their ladder steps. */
     protected int markerCode(ServerClient client) {
         return stairwaytoheaven.quest.ladder.QuestMarkerSync.ladderCode(this.getStringID(), client);
+    }
+
+    /**
+     * Fixed traits that fit the character (a courier jogs, a botanist
+     * gardens) instead of random ones — {@code settlement.SkyPersonalities}.
+     */
+    @Override
+    protected void setupPersonalities() {
+        java.util.ArrayList<necesse.level.maps.levelData.settlementData.settler.personalities.SettlerPersonality> fixed =
+                stairwaytoheaven.settlement.SkyPersonalities.fixed(this, this.getStringID());
+        if (fixed != null) {
+            this.personalities = fixed;
+        } else {
+            super.setupPersonalities();
+        }
     }
 
     /** A marker every player sees (a resident in trouble); none by default. */

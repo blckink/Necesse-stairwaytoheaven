@@ -100,6 +100,7 @@ public final class SkySettlers {
      * failure instead of a resident who silently never appears.
      */
     public static void register() {
+        SkyPersonalities.register();
         MobRegistry.registerMob("magpiesettler", stairwaytoheaven.mobs.MagpieMob.class, false);
         MobRegistry.registerMob("haldasettler", stairwaytoheaven.mobs.HaldaMob.class, false);
         MobRegistry.registerMob("ossiansettler", stairwaytoheaven.mobs.OssianMob.class, false);

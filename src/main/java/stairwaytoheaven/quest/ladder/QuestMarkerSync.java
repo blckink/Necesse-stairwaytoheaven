@@ -38,7 +38,7 @@ public final class QuestMarkerSync {
     public static final int NEW = 1;
     /** Yellow "?": your task for them is complete — turn it in. */
     public static final int READY = 2;
-    /** Grey "?": your task for them is still running. */
+    /** Grey "?": still running. Not used — Kevin wants no mark for that. */
     public static final int ACTIVE = 3;
     /** Red "!": something is wrong with them (the vampire's thirst). */
     public static final int WARNING = 4;
@@ -149,25 +149,24 @@ public final class QuestMarkerSync {
 
     /**
      * The code for one quest-ladder giver and one player, in the Elder's
-     * order: something to turn in beats something new beats something running.
+     * order: something to turn in beats something new.
      */
     public static int ladderCode(String giver, ServerClient client) {
-        boolean active = false;
         boolean offered = false;
         for (QuestLadder.Step step : QuestLadder.stepsOf(giver)) {
             QuestLadder.Status status = QuestLadder.status(client, step);
             if (status == QuestLadder.Status.READY) {
                 return READY;
             }
-            if (status == QuestLadder.Status.ACTIVE) {
-                active = true;
-            } else if (status == QuestLadder.Status.AVAILABLE && !step.custom) {
+            if (status == QuestLadder.Status.AVAILABLE && !step.custom) {
                 // A custom step is handed out by its own trigger, not by
                 // talking, so a "!" for it would send the player to talk
                 // for nothing; held and complete it still shows "?".
                 offered = true;
             }
         }
-        return offered ? NEW : active ? ACTIVE : NONE;
+        // Nothing for a task still running: the Elder shows a mark only
+        // when there is something to take or to hand in (Kevin, 2026-09-26).
+        return offered ? NEW : NONE;
     }
 }

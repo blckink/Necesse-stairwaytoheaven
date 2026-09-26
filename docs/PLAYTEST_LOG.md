@@ -972,3 +972,15 @@ same for his asks ("!" only for the recruitment), and the vampire a red "!"
 while his thirst is below the bowl threshold (he is about to bite someone).
 `quest/ladder/QuestMarkerSync`. Build + syntax gate + integration test green;
 the drawn marker itself is HYPOTHESIS until seen in game.
+
+### 2026-09-26 (2) — Markers only for take/turn-in; fixed traits; Dorian's mood
+
+Kevin: the grey "?" for a running task is wrong — the Elder only marks what
+you can take or hand in. Removed (residents and Warden). He also saw story
+people with random traits ("Bambus-Liebhaber") and Dorian at 0 for meals and
+a monotonous diet in the mood view. Now `settlement/SkyPersonalities` gives
+every Spire Village resident a fixed, fitting trait list (also for existing
+saves, on load; the trait therapy leaves them alone), and Dorian his own trait
+`vampirenature`, which switches the food and diet-variety thoughts off the
+way vanilla personalities do. Dorian's German lines fixed (grammar, ihr/du).
+In game: HYPOTHESIS until seen.

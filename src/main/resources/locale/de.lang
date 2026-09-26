@@ -1194,6 +1194,8 @@ twilightmerchanttalk4=Das Sargbett? Schläft sich wie tot. Garantiert.
 twilightmerchanttalk5=Ich bin nur bis Sonnenuntergang da. Oder -aufgang. Vergess ich immer.
 
 [personalities]
+vampirenature=Vampir
+vampirenature_desc=<name> lebt von Blut, nicht von Essen. Mahlzeiten und Abwechslung bedeuten ihm nichts - eine gefüllte Blutschale schon.
 twilightmerchant=Zwielichtiger Händler
 twilightmerchant_desc=<name> kommt nur auf der Durchreise und verkauft, was sonst niemand hat.
 
@@ -1247,13 +1249,13 @@ bloodfevertip=Von Dorian gebissen. Langsamer, schwächer bei der Arbeit, weniger
 
 [misc]
 vampiresettlertip=Vampir. Kommt in eine Siedlung, in der ein Sarkophag oder ein Sargbett steht. Schläft am Tag, jagt nachts Wildtiere außerhalb der Siedlung. Hat er Durst und ist keine Blutschale gefüllt, beißt er einen Siedler - der Arzt kann das heilen.
-vampiretalkpitch=Ich bin, was eure Großmütter einen Vampir nannten. Ich trinke von Tieren - und von euch, wenn ihr mich hungern lasst. Ihr haltet einen Sarg und niemanden darin; ich hoffe, das ist eine Einladung.
+vampiretalkpitch=Ich bin, was eure Großmütter einen Vampir nannten. Ich trinke von Tieren - und von euch, wenn ihr mich hungern lasst. Ihr habt einen Sarg und niemanden darin; ich nehme das als Einladung.
 vampiretalk1=Eure Leute arbeiten im Licht und schlafen im Dunkeln. Ich habe das nie verstanden, aber ich übernehme die andere Hälfte.
-vampiretalk2=Zwei Felder weiter steht ein Reh, das mich noch nicht bemerkt hat. Gib ihm eine Stunde.
+vampiretalk2=Zwei Felder weiter steht ein Reh, das mich noch nicht bemerkt hat. Gebt ihm eine Stunde.
 vampiretalk3=Ich nehme nichts, was euer Zeichen trägt. Das ist keine Höflichkeit. Das ist die Abmachung.
-vampiretalk4=Füllt eine Blutschale, wenn ihr lieber nicht habt, dass ich losziehe. Oder gebt mir selbst ein Fläschchen. Ich bin nicht stolz.
+vampiretalk4=Füllt eine Blutschale, wenn ihr nicht wollt, dass ich losziehe. Oder gebt mir selbst ein Fläschchen. Ich bin nicht stolz.
 vampiredrained=...
-vampirebite=Verzeih. Die Schale war leer.
+vampirebite=Verzeiht. Die Schale war leer.
 swhdoctorcure=Die Gebissenen behandeln (<price> Münzen)
 swhdoctorcured=Bis morgen früh sind sie wieder sie selbst. Und füttert den da.
 vampireturned=Das da ist noch nicht fertig. Zurück.

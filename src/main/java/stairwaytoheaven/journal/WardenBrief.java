@@ -81,7 +81,7 @@ public final class WardenBrief {
     /**
      * The marker over the Warden's head for {@link #dialogue}'s pick, in the
      * same order: READY -> yellow "?", the recruitment offer -> yellow "!",
-     * ACTIVE -> grey "?".
+     * nothing while a task is only running.
      */
     public static int markerCode(ServerClient client) {
         if (client == null || client.getServer() == null) {
@@ -98,9 +98,6 @@ public final class WardenBrief {
         JournalStep offered = pick(steps, JournalStatus.AVAILABLE);
         if (offered != null && offered.id.equals("recruitwarden")) {
             return stairwaytoheaven.quest.ladder.QuestMarkerSync.NEW;
-        }
-        if (pick(steps, JournalStatus.ACTIVE) != null) {
-            return stairwaytoheaven.quest.ladder.QuestMarkerSync.ACTIVE;
         }
         return stairwaytoheaven.quest.ladder.QuestMarkerSync.NONE;
     }

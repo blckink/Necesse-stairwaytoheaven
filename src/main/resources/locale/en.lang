@@ -1193,6 +1193,8 @@ twilightmerchanttalk4=The coffin bed? Sleeps like the dead. Guaranteed.
 twilightmerchanttalk5=I'm only here till sundown. Or sunup. I forget which.
 
 [personalities]
+vampirenature=Vampire
+vampirenature_desc=<name> lives on blood, not on food. Meals and a varied diet mean nothing to him - a filled blood bowl does.
 twilightmerchant=Twilight Merchant
 twilightmerchant_desc=<name> is only passing through and sells what nobody else has.
 
