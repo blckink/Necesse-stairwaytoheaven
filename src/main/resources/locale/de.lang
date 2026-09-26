@@ -108,7 +108,7 @@ skycrate=Bergungskiste
 skycache=Aeronauten-Depot
 aeronautwreck=Luftschiffer-Wrack
 skyparcel=Himmelspost-Paket
-wardencandelabra=Kandelaber des Hüters
+wardencandelabra=Kandelaber des Himmelswächters
 skystonebrickwall=Himmelsstein-Ziegelwand
 skystonebrickdoor=Himmelsstein-Ziegeltür
 skystonebrickdoorlocked=Verschlossene Himmelsstein-Ziegeltür
@@ -193,8 +193,8 @@ cloudpufftreat=Wolkenzupf-Leckerli
 silverbell=Silberglöckchen
 
 skywatchhood=Himmelswacht-Kapuze
-wardenmantle=Mantel des Hüters
-wardenboots=Stiefel des Hüters
+wardenmantle=Mantel des Himmelswächters
+wardenboots=Stiefel des Himmelswächters
 dewsnail=Tauschnecke
 [itemtooltip]
 skystairwaydowntip=Ermöglicht den Aufstieg in die Himmelsweite
@@ -202,26 +202,26 @@ tempestedgetip=Aus Himmelsmetall geschmiedet, leicht wie der Wind
 galehowltip=Mit Windseide bespannt – ihre Pfeile überholen den Sturm
 
 [mob]
-magpiesettler=Elster
+magpiesettler=Magpie
 haldasettler=Halda
-ossiansettler=Ossian Vane
-magpiesettlername=<name>, genannt Elster
-haldasettlername=<name> die Kellermeisterin
-ossiansettlername=Ossian <name>, der letzte Leser
+ossiansettler=Ossian
+magpiesettlername=<name>, Kurierin
+haldasettlername=<name>, Kellermeisterin
+ossiansettlername=<name>, Letzter Leser
 galehound=Sturmwindhund
 dawnpiercer=Morgenstecher
 zephyrfinch=Zephyrfink
 dewsnail=Tauschnecke
 wardensettler=Himmelswächter
-wardensettlername=<name>, der Himmelswächter
+wardensettlername=<name>, Himmelswächter
 gloomshade=Düsterschemen
 glowmoth=Glühfalter
 sparkbeetle=Funkenkäfer
 zephyrray=Zephyrrochen
 stormwisp=Sturmirrlicht
 skystonegolem=Himmelsstein-Golem
-skywarden=Der Himmelswächter
-skywardenname=<name>, der Himmelswächter
+skywarden=Himmelswächter
+skywardenname=<name>, Himmelswächter
 spirecatblack=Siggi
 spirecattabby=Peanut
 
@@ -270,7 +270,7 @@ ossiantalk1=Ich habe jede Liste gelesen, die die Himmelswacht führte. Deiner is
 ossiantalk2=Was ich verkaufe, stammt nicht von hier. Frag nicht, woher.
 ossiantalk3=Der Turm ist keine Ruine. Eine Ruine hat aufgehört, etwas zu bedeuten.
 ossiantalk4=Bring mir Barren, kein Erz. Für Schmelzen fehlt mir die Geduld.
-spiremarker=Turm des Wächters
+spiremarker=Alte Wächterspitze
 stairsmarker=Deine Treppe
 dirnorth=Norden
 dirnortheast=Nordosten
@@ -281,22 +281,22 @@ dirsouthwest=Südwesten
 dirwest=Westen
 dirnorthwest=Nordwesten
 wardenintro1=Hm. Die Treppe. Lange hat niemand mehr die Treppe genommen.
-wardenintro2=Ich bin der Wächter. Der letzte, wenn du mitzählst. Ich hüte das Licht. Hütete, besser gesagt. Es erlosch mit dem Sturm.
+wardenintro2=Ich bin der Himmelswächter. Der letzte, wenn du mitzählst. Ich hüte das Licht. Hütete, besser gesagt. Es erlosch mit dem Sturm.
 wardenintro3=Nimm diese Windseide. Du bist den ganzen Weg geklettert; mit leeren Taschen schicke ich dich nicht fort.
-wardenrecruit1=Hier ist eine seltsame Bitte an einen Fremden: Mein Orden hütete den Himmel vierhundert Jahre, und ich bin der letzte Name auf seiner Liste. Ein Hüter ohne Turm ist nur ein alter Mann im Wind.
+wardenrecruit1=Hier ist eine seltsame Bitte an einen Fremden: Mein Orden hütete den Himmel vierhundert Jahre, und ich bin der letzte Name auf seiner Liste. Ein Wächter ohne Turm ist nur ein alter Mann im Wind.
 wardensettlertip=Über den Wolken angeworben, für ein Vermögen in Münzen.
 gatenobinding=Das Tor summt schlafend.\nEs hat noch nirgendwohin zu führen - steig erst von deiner eigenen Treppe auf.
 swhregenerateevacuated=Der Himmel wird neu erschaffen. Du wurdest zu deiner Treppe zurückgeschickt - steig wieder hinauf, um den neuen Himmel zu sehen.
 wardencatfound1=Mrrp?
-wardencattreat=Die Katze schnappt sich das Leckerli und verschwindet in einem Wölkchen -\ndirekt in den Korb im Turm des Wächters, <dist> Felder <dir> von hier.
+wardencattreat=Die Katze schnappt sich das Leckerli und verschwindet in einem Wölkchen -\ndirekt in den Korb in der Alten Wächterspitze, <dist> Felder <dir> von hier.
 wardencatpurr=Prrrrt.
-wardencatathome=Diese Katze ist endgültig eingezogen.\nSie schläft jetzt im Korb im Turm des Wächters.
+wardencatathome=Diese Katze ist endgültig eingezogen.\nSie schläft jetzt im Korb in der Alten Wächterspitze.
 wardencatathomebasket=Diese Katze ist endgültig eingezogen.\nIhr Korb steht bei <x>, <y> - das ist jetzt ihr Zuhause.
 wardencattreatbasket=Die Katze schnappt sich das Leckerli und verschwindet in einem Wölkchen -\ndirekt in den Korb, den du bei <x>, <y> aufgestellt hast (<level>).
 catbasketready=Der Korb steht bereit, und leer.\nSiggi und Peanut sind noch oben in der Himmelsweite - finde sie und gib ihnen ein Wolkenzupf-Leckerli,\ndann ziehen sie hier ein.
 catbasketmovedin=Katzen erkennen einen guten Korb:\n<count> Katze(n) sind gerade bei <x>, <y> eingezogen.
 catbasketmoved=Der neueste Korb gewinnt:\n<count> Katze(n) haben den alten verlassen und sind bei <x>, <y> eingezogen.
-catbasketremoved=Der Korb ist weg, also sind die Katzen zurück in den Korb im Turm des Wächters gegangen.\nStell einen neuen auf, dann kommen sie dorthin.
+catbasketremoved=Der Korb ist weg, also sind die Katzen zurück in den Korb in der Alten Wächterspitze gegangen.\nStell einen neuen auf, dann kommen sie dorthin.
 siggipetted=Siggi drückt sich in deine Hand und brummt wie ein kleines Gewitter.\nSiggis Schnurren: einen ganzen Tag schärfer und zäher.
 peanutpetted=Peanut wirft sich auf den Rücken, alle vier Pfoten in der Luft.\nPeanuts Schnurren: einen ganzen Tag flinker auf den Beinen.
 siggigiftfish=*legt dir einen gebratenen Fisch vor die Füße* Mrrrp.
@@ -321,12 +321,12 @@ catmarkerblack=Siggis Lager
 catmarkertabby=Peanuts Lager
 
 [quests]
-swhfindspiretitle=Der Ruf des Wächters
+swhfindspiretitle=Der Ruf des Himmelswächters
 swhfindspiredesc=Etwas hält über den Wolken noch ein Licht am Brennen.
-swhfindspireobj=Finde den Turm des Wächters - folge dem Flackern über dem Nebel.
+swhfindspireobj=Finde die Alte Wächterspitze - folge dem Flackern über dem Nebel.
 swhreturnwarden=Sprich mit dem Himmelswächter.
 swhbeacontitle=Entzünde das Leuchtfeuer
-swhbeacondesc=Das Leuchtfeuer der Himmelswacht ist zu lange dunkel gewesen. Bring dem Wächter, was es zum Brennen braucht.
+swhbeacondesc=Das Leuchtfeuer der Himmelswacht ist zu lange dunkel gewesen. Bring dem Himmelswächter, was es zum Brennen braucht.
 swhbeaconreward=2x Flackerlicht-Girlande
 swhcatstitle=Die Turmkatzen
 swhcatsdesc=Zwei Katzen streunen noch durch Sturm und Bänke. Ein Wolkenzupf-Leckerli überzeugt sie vom Heimweg.
@@ -336,9 +336,9 @@ swhcatblackhome=Siggi ist daheim - schläft im Katzenkorb
 swhcattabbyhome=Peanut ist daheim - schläft im Katzenkorb
 swhcatsreward=10x Sturmstahlbarren + Katzenkorb + 2x Flackerlicht-Girlande
 swhanchortitle=Verankere die Insel
-swhanchordesc=Die Turminsel driftet. Der Wächter kann sie verankern - mit deinem Metall und Stein und zwei Herzen aus den Himmelsstein-Golems, die die Wracks bewachen.
+swhanchordesc=Die Turminsel driftet. Der Himmelswächter kann sie verankern - mit deinem Metall und Stein und zwei Herzen aus den Himmelsstein-Golems, die die Wracks bewachen.
 swhanchorreward=Wolkengleve + Himmelswacht-Banner + 5x Aurorablatt
-swhrecruitwardentitle=Der letzte Hüter
+swhrecruitwardentitle=Der letzte Himmelswächter
 swhrecruitwardendesc=Der Himmelswächter würde die Himmelswacht hinter sich lassen - für einen Preis, den keine kleine Siedlung zahlen kann.
 swhrecruitwardenobj=Heuere den Himmelswächter für deine Siedlung an (<cost> Münzen)
 
@@ -430,7 +430,7 @@ skyfallshard=Gefallene Himmelsscherbe
 
 [misc]
 // Das Schild an der verfallenen Schwelle. Die Hälfte ist verwittert.
-swhshrinesign=...und die Treppe steht, wo der Himmel am dünnsten ist,\nund der Hüter zählt, was herunterkommt.\n\n- der Rest ist verwittert -
+swhshrinesign=...und die Treppe steht, wo der Himmel am dünnsten ist,\nund der Wächter zählt, was herunterkommt.\n\n- der Rest ist verwittert -
 // Die Notiz im Lager des gestrandeten Luftschiffers.
 swhaeronautsign=Ballon runter. Fracht größtenteils heil.\nGehe nach Osten. Wer das hier findet: Die Kisten gehören dir.\nVorsicht bei denen, die noch warm sind.
 // Ansagen zum Sternenfall. Sie schweben ueber den Fuessen jedes Spielers
@@ -489,7 +489,7 @@ cloudcustardtip=Nahrung - Nimbusmilch und Wolkenbeeren im Kochtopf. Macht danach
 nimbusdraughttip=Trank - Nimbusmilch mit einem Aurorablatt gebraut. Macht die Haut fest gegen einen tiefen Sturz.
 // -- Verschiedenes --
 cloudpufftreattip=Tierleckerli - aus Windseide und Blütenblättern gerollt. Siggi und Peanut folgen dir dafür überallhin.
-silverbelltip=Ein Andenken aus dem Turm des Hüters. Es öffnet nichts mehr.
+silverbelltip=Ein Andenken aus der Alten Wächterspitze. Es öffnet nichts mehr.
 // -- Das Sturmstahl-Set und die drei Accessoires --
 stormsteelhelmettip=Kopfrüstung - Sturmstahlplatte mit Sturmglas-Visier. Am Wolframamboss geschmiedet.
 stormsteelchestplatetip=Brustrüstung - ein Sturmstahl-Harnisch mit Sturmlinse auf der Brust. Am Wolframamboss geschmiedet.
@@ -539,14 +539,14 @@ eveleensettler=Eveleen
 mortimersettler=Mortimer
 caspernsettler=Caspern
 eleanorsettler=Eleanor
-eveleensettlername=Eveleen <name>, Botanikerin von Eden
-mortimersettlername=Mortimer <name>, Bestatter
-caspernsettlername=Caspern <name>, Geisterschmied
-eleanorsettlername=Eleanor <name>, die noch immer hier ist
+eveleensettlername=<name>, Botanikerin von Eden
+mortimersettlername=<name>, Bestatter
+caspernsettlername=<name>, Geisterschmied
+eleanorsettlername=<name>, die noch immer hier ist
 knottsettler=Mr. Knott
-knottsettlername=Mr. Knott <name>, der Türsteher
+knottsettlername=<name>, Türsteher
 ivessettler=Ives
-ivessettlername=Ives <name>, Küster der Stillen Weite
+ivessettlername=<name>, Küster der Stillen Weite
 
 [misc]
 // --- Herkunft jedes Siedlers (Hinweis im Siedlungsfenster) ---
@@ -567,7 +567,7 @@ ivestalk2=Einer von ihnen geht jeden Abend dieselben elf Schritte. Ich habe mitg
 ivestalk3=Das Gold wird dunkel hier draußen. Alles, worauf der Himmel stolz war, wird hier draußen dunkel.
 ivestalk4=Ich führe eine Liste. Eine Seite davon habe ich noch nie zu Ende gebracht.
 ivesasksvigil=Bring mir Grabsalz und Geistermoos, dann lege ich sie ordentlich nieder. Vierzehn und zehn. Sie haben lange genug gewartet.
-ivesvigildone=So. Jetzt können sie aufhören zu laufen. Nimm die Barren - der Wärter schuldete sie mir, und ich wollte sie nie.
+ivesvigildone=So. Jetzt können sie aufhören zu laufen. Nimm die Barren - der Himmelswächter schuldete sie mir, und ich wollte sie nie.
 
 // --- Mortimers letzte Ehre ---
 mortimerasksrites=Zwölf da draußen habe ich nicht erreichen können. Bring mir Seelenfaden für die Leichentücher und Knochenholz für die Kisten, dann hole ich sie.
@@ -935,7 +935,7 @@ spiritsteelreavertip=Eine zweihändige Klinge aus Geisterstahl. Sie schwingt, al
 gravewindbowtip=Ein Geisterstahl-Bogen, bespannt mit Seelenfaden. Das Spannen ist völlig lautlos.
 [mob]
 ghostguide=Geisterführer
-ghostguidename=<name>, der Geisterführer
+ghostguidename=<name>, Geisterführer
 [misc]
 seanceneedsettlement=Kreide hält nur dort, wo Menschen wohnen. Zeichne sie in deiner Siedlung.
 seanceguidehere=Dein Führer ist bereits hier.
@@ -962,22 +962,22 @@ regionkeycrookedbeyond=Knotts Krumme Tür
 regionkeyhell=Höllensiegel
 [quests]
 swhkeyskyreachtitle=Das Wachfeuer
-swhkeyskyreachdesc=Der Wächter kann ein Wachfeuer bauen, auf das die Rufsteine der Himmelsweite antworten - wenn du ihm den Sturm bringst, mit dem es brennt.
+swhkeyskyreachdesc=Der Himmelswächter kann ein Wachfeuer bauen, auf das die Rufsteine der Himmelsweite antworten - wenn du ihm den Sturm bringst, mit dem es brennt.
 swhkeyskyreachreward=Wachfeuer der Himmelsweite + 4x Sturmscheibe + Himmelswacht-Kapuze + 4x Sturmstahlbarren
 swhkeyedentitle=Die Gartenstiege
-swhkeyedendesc=Eden bewacht seinen Saft und seinen Pollen mit Zähnen und Stacheln. Hol beides aus dem Garten, dazu zwei Zähne der Blütenmäuler, die beißen, dann schlägt dir der Wächter eine Stiege, die seine Steine wiedererkennen.
-swhkeyedenreward=Gartenstiege von Eden + Windheuler + Mantel des Hüters + 5x Sturmstahlbarren
+swhkeyedendesc=Eden bewacht seinen Saft und seinen Pollen mit Zähnen und Stacheln. Hol beides aus dem Garten, dazu zwei Zähne der Blütenmäuler, die beißen, dann schlägt dir der Himmelswächter eine Stiege, die seine Steine wiedererkennen.
+swhkeyedenreward=Gartenstiege von Eden + Windheuler + Mantel des Himmelswächters + 5x Sturmstahlbarren
 swhkeysteinfeldtitle=Der Trauerengel
-swhkeysteinfelddesc=Steinfeld ist nichts als bleicher Stein und das Echo, das darin gefangen ist. Bring genug von beidem zurück, dann stellt dir der Wächter einen seiner Engel in die eigene Siedlung.
-swhkeysteinfeldreward=Trauerengel von Steinfeld + Sturmklinge + Stiefel des Hüters + 6x Sturmstahlbarren
+swhkeysteinfelddesc=Steinfeld ist nichts als bleicher Stein und das Echo, das darin gefangen ist. Bring genug von beidem zurück, dann stellt dir der Himmelswächter einen seiner Engel in die eigene Siedlung.
+swhkeysteinfeldreward=Trauerengel von Steinfeld + Sturmklinge + Stiefel des Himmelswächters + 6x Sturmstahlbarren
 swhkeyghostrealmtitle=Die Rabenkanzel
-swhkeyghostrealmdesc=Aus dem Nachgarten kommt nichts, was der Nebel nicht schon berührt hat. Trag sein Knochenholz und sein Spektralerz heraus, dann setzt dir der Wächter einen Raben über das Tor.
+swhkeyghostrealmdesc=Aus dem Nachgarten kommt nichts, was der Nebel nicht schon berührt hat. Trag sein Knochenholz und sein Spektralerz heraus, dann setzt dir der Himmelswächter einen Raben über das Tor.
 swhkeyghostrealmreward=Rabenkanzel des Nachgartens + Geisterstahl-Schnitter + Sturmstahl-Armschiene + 6x Geisterstahlbarren
 swhkeycrookedbeyondtitle=Eine eigene Tür
-swhkeycrookedbeyonddesc=Jede Tür in der Krümmung führt irgendwohin, wo sie nicht hinführen sollte. Bring dem Wächter ihr Holz und ihre Splitter, dann hängt er dir eine ein, die es mit Absicht tut.
+swhkeycrookedbeyonddesc=Jede Tür in der Krümmung führt irgendwohin, wo sie nicht hinführen sollte. Bring dem Himmelswächter ihr Holz und ihre Splitter, dann hängt er dir eine ein, die es mit Absicht tut.
 swhkeycrookedbeyondreward=Knotts Krumme Tür + Grabwind-Bogen + Auroramedaillon + 8x Geisterstahlbarren
 swhkeyhelltitle=Alles scheint in Ordnung zu sein
-swhkeyhelldesc=Die Hölle macht niemandem ohne Papiere auf. Ein Formular kann der Wächter dir nicht besorgen, also nimmt er den Beweis, dass du so weit draußen warst: die Krümmung, doppelt.
+swhkeyhelldesc=Die Hölle macht niemandem ohne Papiere auf. Ein Formular kann der Himmelswächter dir nicht besorgen, also nimmt er den Beweis, dass du so weit draußen warst: die Krümmung, doppelt.
 swhkeyhellreward=Höllensiegel + 16x Geisterstahlbarren
 [misc]
 regionkeyneedsettlement=Ein Schlüsselstück hält nur dort, wo Menschen wohnen. Stell es in deiner Siedlung auf.
@@ -1035,7 +1035,7 @@ bondedlockbox=Verzollte Kassette
 skywaywrit=Himmelsweg-Freibrief
 postledger=Buch der unzustellbaren Post
 themother=Die Mutter
-wardensround=Die Runde des Wächters
+wardensround=Die Runde des Himmelswächters
 stormlenscore=Sturmlinsenkern
 aetherwrightcasing=Ätherwerker-Gehäuse
 skywatchsignet=Siegelring der Himmelswacht
@@ -1069,12 +1069,12 @@ soulcollartip=Trophäe - was die Trauernde Braut immer noch am Hals trägt. Kalt
 stripedhorntip=Trophäe - aus einem Tür-Mimik geschnitten. Was immer es zuletzt gefressen hat, hatte so eines. Magpie zahlt über Wert.
 magpiecaptip=Magpies eigene Schirmkappe. Keine Rüstung, und sie verkauft dir ihre zweite.
 haldakerchieftip=Haldas weiche Kellerhaube, von vierzig Jahren Bottichen rosa geworden.
-vanecowltip=Ossian Vanes Arbeitsreif, mit der Lupe, die er nie abnimmt.
+vanecowltip=Ossians Arbeitsreif, mit der Lupe, die er nie abnimmt.
 
 # Therapeut – ein neuer Siedlerberuf (docs/settlers.md)
 [mob]
 therapisthuman=Therapeut
-therapisthumanname=<name>, der Therapeut
+therapisthumanname=<name>, Therapeut
 [settlement]
 therapisttip=Zieht von selbst in deine Siedlung, so bereitwillig wie ein Schmied
 [mobmsg]
@@ -1103,7 +1103,7 @@ swhtraitnotrait=In ihm ist nichts mehr, woraus ich das machen könnte. Behalt de
 # Arzt – der zweite Siedlerberuf (docs/settlers.md)
 [mob]
 doctorhuman=Arzt
-doctorhumanname=<name>, der Arzt
+doctorhumanname=<name>, Arzt
 [settlement]
 doctortip=Zieht von selbst in deine Siedlung, so bereitwillig wie ein Schmied
 [mobmsg]
@@ -1183,7 +1183,7 @@ twilight=Zwielicht
 
 [mob]
 twilightmerchant=Zwielichtiger Händler
-twilightmerchanthumanname=<name>, der Zwielichtige Händler
+twilightmerchanthumanname=<name>, Zwielichtiger Händler
 twilightmerchanthuman=Zwielichtiger Händler
 
 [misc]
@@ -1199,7 +1199,7 @@ twilightmerchant_desc=<name> kommt nur auf der Durchreise und verkauft, was sons
 
 [mob]
 warveteranhuman=Kriegsveteran
-warveteranhumanname=<name>, der Kriegsveteran
+warveteranhumanname=<name>, Kriegsveteran
 
 [settlement]
 warveterantip=Zieht von selbst in deine Siedlung ein, genau wie ein Schmied
@@ -1231,7 +1231,7 @@ swhveteranmax=Die Verteidigung ist bereits auf der höchsten Stufe. Da ist nicht
 
 [mob]
 vampiresettler=Dorian
-vampiresettlername=Dorian <name>, der Nachtgebundene
+vampiresettlername=<name>, Nachtgebundener
 
 [item]
 bloodvial=Blutfläschchen
@@ -1295,15 +1295,15 @@ swhshowroom=Ausstellung
 // The Adventurer's Journal (stairwaytoheaven.journal) - item, window, chapters.
 // ===========================================================================
 [item]
-adventurersjournal=Abenteurer-Tagebuch
+adventurersjournal=Himmelschronik
 [itemtooltip]
-adventurersjournaltip=Hält deine Reise durch die Reiche fest: Aufträge, Schlüssel, Bosse, wen du getroffen und was du erfahren hast. Verloren? Der Himmelswächter verkauft ein neues.
+adventurersjournaltip=Deine Aufgaben in den Himmelsreichen: was offen ist, wer es will und was es bringt - dazu Bewohner, Orte und Geschichten. Gebiete, Beute und Herausforderungen stehen im Abenteuertagebuch. Verloren? Der Himmelswächter verkauft eine neue.
 [journal]
-title=Abenteurer-Tagebuch
+title=Himmelschronik
 refresh=Aktualisieren
 close=Schließen
 nosteps=Hier gibt es noch keine Geschichte.
-secsteps=Geschichte & Aufträge
+secsteps=Geschichte & Aufgaben
 secfacts=Schlüssel, Rufsteine & Boss
 secresidents=Bewohner
 seclandmarks=Orte
@@ -1330,13 +1330,13 @@ intro4=Etwa 4 200 bis 5 600 Kacheln hinaus. Nach dem Tod zerfällt nicht nur die
 intro5=Ab etwa 4 800 Kacheln bis an den Rand von allem. Keine Feuerlandschaft, sondern eine funktionierende Verwaltung.
 giverstairway=Stairway to Heaven
 wherestairway=Hergestellt an der Wolfram-Werkbank (8 Wolframbarren, 15 Quarz), an der Oberfläche platziert
-rewardfindspire=Karten-Pins für den Turm des Wächters und deine Treppe
+rewardfindspire=Karten-Pins für die Alte Wächterspitze und deine Treppe
 wherespire=Die Alte Wächterspitze, in der Mitte der Himmelsweite
 objneedsettlement=Du brauchst eine eigene Siedlung, in die er einziehen kann.
-rewardrecruitwarden=Der Wächter zieht in deine Siedlung und das Leuchtfeuer an der Spitze brennt
+rewardrecruitwarden=Der Himmelswächter zieht in deine Siedlung und das Leuchtfeuer an der Spitze brennt
 wherecats=Siggis Lager liegt im Sturmschleier, Peanuts in den Aurorabänken (beide auf deiner Karte markiert)
 objcattreat=Sprich jede Katze mit einem Wolkenzupf-Leckerli im Inventar an (von Hand hergestellt oder bei Halda gekauft).
-wherewarden=Wo auch immer der Wächter steht: an seiner Spitze oder, einmal angeworben, in deiner Siedlung
+wherewarden=Wo auch immer der Himmelswächter steht: an seiner Spitze oder, einmal angeworben, in deiner Siedlung
 whereeden=Der Garten Eden, das grüne Band etwa 600 bis 2 900 Kacheln von der Spitze
 hintedengate=Lauf hin, oder bau eine Edenschwelle und benutze sie mit 6 Eden-Grassamen, damit sie zum Edentor wird.
 whereeveleen=In Eden, neben einem Baum der Erkenntnis
@@ -1345,8 +1345,8 @@ stepfogtitle=Die Nebelwand
 stepfogdesc=Irgendwo hinter Steinfeld verdichtet sich die Luft zu einem Nebel, der keine Lebenden will. Geh einmal bis zu ihm und komm lebend zurück.
 wherefog=etwa 3 500 Kacheln von der Spitze, wo Steinfeld in den Nachgarten übergeht
 stepchalktitle=Geisterkreide
-stepchalkdesc=Der Wächter weiß, was der Nebel ist und was dich hindurchbringt. Hast du ihn einmal selbst gespürt, gibt er dir ein Stück Geisterkreide.
-rewardchalk=1 Geisterkreide (der Wächter verkauft weitere)
+stepchalkdesc=Der Himmelswächter weiß, was der Nebel ist und was dich hindurchbringt. Hast du ihn einmal selbst gespürt, gibt er dir ein Stück Geisterkreide.
+rewardchalk=1 Geisterkreide (der Himmelswächter verkauft weitere)
 stepmarktitle=Das Nebelmal
 stepmarkdesc=Zieh mit der Kreide einen Séance-Zirkel und ruf jemanden von der anderen Seite. Als Erstes sorgt der Geisterführer dafür, dass der Nebel dich kennt.
 whereseance=ein Séance-Zirkel, gezogen in deiner eigenen Siedlung
@@ -1366,8 +1366,8 @@ factvisited=Du warst schon hier.
 factnotvisited=Noch nicht besucht.
 unknown=(unbekannt)
 factkey=Region-Schlüssel: <key>
-factkeyearned=Vom Wächter erhalten (für die ganze Welt).
-factkeynot=Noch nicht erhalten - der Wächter fertigt es an.
+factkeyearned=Vom Himmelswächter erhalten (für die ganze Welt).
+factkeynot=Noch nicht erhalten - der Himmelswächter fertigt es an.
 factstones=Rufsteine
 factstonesawake=Wach: das Schlüsselstück steht in einer Siedlung.
 factstonesasleep=Schlafen, bis das Schlüsselstück dieses Reichs in einer Siedlung steht.
@@ -1375,7 +1375,7 @@ factboss=Boss: <boss>
 factbosskills=<count>x besiegt (zählt jeden Kampf gegen diesen Boss, nicht nur am Rufstein).
 factbossready=Noch nicht besiegt - benutze einen Rufstein in diesem Reich.
 factbossasleep=Noch nicht besiegt - seine Rufsteine schlafen noch.
-rolewarden=Letzter Hüter der Himmelswacht; vergibt die Aufträge des Wächters und alle Region-Schlüssel; verkauft Geisterkreide
+rolewarden=Letzter Himmelswächter der Himmelswacht; vergibt seine Aufgaben und alle Regionsschlüssel; verkauft Geisterkreide
 rolemagpie=Schmugglerin der Himmelswacht-Fracht; kauft Bergungsgut und fliegt als Siedlerin Himmelsfahrten
 rolehalda=Kellermeisterin; verkauft Sturmstahlbarren, Himmelsgewebe und Wolkenzupf-Leckerli
 roleossian=Der letzte Leser des Archivs; verkauft Dinge von weiter draußen als diesem Himmel
@@ -1389,17 +1389,17 @@ rolemortimer=Bestatter; verkauft Grabsteine und Knochenmöbel
 rolecaspern=Geisterschmied; bearbeitet Metall, das sich erinnert
 roleeleanor=Sie weiß nicht, warum sie noch hier ist - du entscheidest, ob sie bleibt
 roleghostguide=Wird am Séance-Zirkel gerufen; verleiht das Nebelmal und handelt mit Geisterstahl
-roleknott=Hüter des Türhofs; glaubt, dass sich eine der Türen überzeugen lässt
+roleknott=Türsteher des Türhofs; glaubt, dass sich eine der Türen überzeugen lässt
 noresidents=Hier hat dir noch niemand eine Tür geöffnet - noch nicht.
 unknownresident=??? (noch nicht getroffen)
 residenthint=Such hier: <where>
 residentsettled=<role>. Lebt in einer Siedlung.
 residentat=<role>. Getroffen: <where>
 lmspire=Die Alte Wächterspitze
-lmspiredesc=Der letzte Turm der Himmelswacht. Sein Leuchtfeuer brennt, sobald der Wächter angeworben ist.
+lmspiredesc=Der letzte Turm der Himmelswacht. Sein Leuchtfeuer brennt, sobald der Himmelswächter angeworben ist.
 lmspirehint=in der Mitte der Himmelsweite, wo dich die Treppe absetzt
 lmtollhouse=Das Skyway-Zollhaus
-lmtollhousedesc=Vom Zollwerk bewacht. Die Verzollte Kassette in der Tresor-Vitrine ist es, was Elster haben will.
+lmtollhousedesc=Vom Zollwerk bewacht. Die Verzollte Kassette in der Tresor-Vitrine ist es, was Magpie haben will.
 lmtollhousehint=auf den Himmelspfaden, etwa 180 bis 700 Kacheln von der Spitze
 lmgrange=Der Grange-Keller
 lmgrangedesc=Zwischen den Bottichen wächst eine Sauerbottich-Blüte. Sie lässt Die Mutter fallen, nach der Halda fragt.
@@ -1427,13 +1427,13 @@ lmhellrimhint=etwa 4 800 Kacheln von der Spitze, hinter dem Krummen Jenseits
 notfoundyet=Noch nicht gefunden - <where>
 lorelocked=??? (noch nicht geschrieben)
 lore0atitle=Die Himmelswacht
-lore0a=Einst hielt ein Orden von der Spitze und ihrem Leuchtfeuer aus Wache über den Wolken. Der Orden hörte auf zu antworten, seine Fracht landete nicht mehr, und ein Hüter blieb, um das Licht am Brennen zu halten, weil es irgendwer musste.
-lore0ahint=Freigeschaltet durch: den Wächter treffen.
+lore0a=Einst hielt ein Orden von der Spitze und ihrem Leuchtfeuer aus Wache über den Wolken. Der Orden hörte auf zu antworten, seine Fracht landete nicht mehr, und ein Wächter blieb, um das Licht am Brennen zu halten, weil es irgendwer musste.
+lore0ahint=Freigeschaltet durch: den Himmelswächter treffen.
 lore0btitle=Siggi und Peanut
 lore0b=Die Turmkatzen saßen immer auf dem warmen Bottich in Haldas Keller. Als der Turm sich leerte, verwilderten sie in Sturm und Bänken - aber eine Katze vergisst nie ganz, wo der Korb stand.
 lore0bhint=Freigeschaltet durch: eine Turmkatze heimbringen.
 lore0ctitle=Eine Insel vor Anker
-lore0c=Die Turminsel trieb, solange sich jemand erinnert. Mit deinem Metall und Stein verankert, ist sie der eine feste Punkt am Himmel - und von hier aus kann der Wächter beginnen, Schlüssel zu fertigen.
+lore0c=Die Turminsel trieb, solange sich jemand erinnert. Mit deinem Metall und Stein verankert, ist sie der eine feste Punkt am Himmel - und von hier aus kann der Himmelswächter beginnen, Schlüssel zu fertigen.
 lore0chint=Freigeschaltet durch: die Insel verankern.
 lore1atitle=Unangenehm perfekt
 lore1a=In Eden wächst alles zu gut. Die Früchte sind zu groß, das Wasser zu blau, das Gras zu hoch, um zu sehen, was sich darin bewegt. Schönheit ist hier kein Versprechen, sondern ein Köder.
@@ -1466,13 +1466,13 @@ lore5atitle=Alles scheint in Ordnung zu sein
 lore5a=Die Hölle ist keine Feuerlandschaft. Sie ist eine funktionierende Gesellschaft mit Schaltern, Formularen und einem Wartezimmer - und neben einem Schalter ein Skelett, das offenbar seit vierhundert Jahren wartet.
 lore5ahint=Freigeschaltet durch: die Hölle erreichen.
 lore5btitle=Das Höllensiegel
-lore5b=Ein Formular war nicht aufzutreiben, also nahm der Wächter stattdessen einen Beweis: das Krumme Jenseits, doppelt. Himmel, Tod und Hölle führen ihre Bücher im selben Hauptbuch - das Siegel ist nur der Stempel, der es bestätigt.
+lore5b=Ein Formular war nicht aufzutreiben, also nahm der Himmelswächter stattdessen einen Beweis: das Krumme Jenseits, doppelt. Himmel, Tod und Hölle führen ihre Bücher im selben Hauptbuch - das Siegel ist nur der Stempel, der es bestätigt.
 lore5bhint=Freigeschaltet durch: das Höllensiegel verdienen.
 // ---- Spire Village and quest ladder (chapter-03-spire-village.md) ----
 [quests]
 swhladderposttitle=Unzustellbare Post
 swhladderpostdesc=Magpie flog Fracht für die Himmelswacht, bis die Straße verstummte. Ihr Buch der unzustellbaren Post liegt noch im Kontor des Skyway-Zollhauses - hinter dem Zollwerk, das die Kasse bewacht.
-swhladderpostreward=Elsterbeutel (Accessoire: größerer Aufsammelradius, mehr Ausdauer)
+swhladderpostreward=Magpies Kurierbeutel (Accessoire: größerer Aufsammelradius, mehr Ausdauer)
 swhladderroundtitle=Die Kellerhefe
 swhladderrounddesc=Halda will ihren Keller wieder ansetzen. Die Mutter lebt noch im Grange-Keller, aber ohne Futter ist sie nichts: Wolkenbeeren und Windweizen aus den Driftlanden, Aurorablätter aus den Aurorabänken.
 swhladderroundreward=3x Sturmbräu, danach in Haldas Laden
@@ -1509,7 +1509,7 @@ swhladderformreward=Siegel des Prüfers (Accessoire: +10 % Schaden, +5 % Krit)
 swhladderreached=(erledigt)
 swhspeaktomagpie=Sprich mit Magpie.
 swhspeaktohalda=Sprich mit Halda.
-swhspeaktoossian=Sprich mit Ossian Vane.
+swhspeaktoossian=Sprich mit Ossian.
 swhedenreachreward=6x Eden-Grassamen
 swhcrookedarrivalreward=4x Realitätssplitter
 
@@ -1583,7 +1583,7 @@ Fang bei Magpie, Halda und Ossian an.
 Wer weiter hinauswill, fragt wieder, wenn er zurück ist.
 
 [item]
-magpiesatchel=Elsterbeutel
+magpiesatchel=Magpies Kurierbeutel
 stormbrew=Sturmbräu
 readerslens=Leserlupe
 paradisecider=Paradiesmost
@@ -1663,14 +1663,14 @@ bloodbowltip=Blutfläschchen hineinlegen. Dorian trinkt nachts daraus, statt ein
 whylabel=Warum:
 wherelabel=Wo:
 openslabel=Schaltet frei:
-whyfindspire=Der Wächter kennt diesen Himmel. Jede spätere Quest hier oben - die Katzen, der Anker, die Schlüssel zu den Bossen - kommt von ihm.
-opensfindspire=Der letzte Hüter: den Wächter anheuern
-whyrecruitwarden=Nur ein Wächter, der in deiner Siedlung wohnt, gibt dir überall, wo du ihn triffst, weitere Quests - und sein Anheuern entzündet das Leuchtfeuer der Spitze wieder.
+whyfindspire=Der Himmelswächter kennt diesen Himmel. Jede spätere Aufgabe hier oben - die Katzen, der Anker, die Schlüssel zu den Bossen - kommt von ihm.
+opensfindspire=Der letzte Himmelswächter: ihn anwerben
+whyrecruitwarden=Nur ein Himmelswächter, der in deiner Siedlung wohnt, gibt dir überall, wo du ihn triffst, weitere Aufgaben - und sein Anheuern entzündet das Leuchtfeuer der Spitze wieder.
 opensrecruitwarden=Die Turmkatzen, beide Katzenlager auf deiner Karte markiert
-whycats=Die Katzen gehören zum Turm. Schlafen beide im Korb, vertraut dir der Wächter die Insel selbst an - und den Katzenkorb gibt es nirgends sonst.
-openscats=Verankere die Insel; ab dann verkauft der Wächter Katzenkorb und Girlanden
-whyanchor=Die Turminsel driftet. Verankert bleibt sie, wo du sie gelassen hast, und die eigene Kette des Wächters ist abgeschlossen - erst dann fängt er mit den Schlüsseln zu den Bossen der Reiche an.
-opensanchor=Das erste Regionsschlüssel-Stück (Das Wachfeuer); ab dann verkauft der Wächter Wolkengleve und Banner
+whycats=Die Katzen gehören zum Turm. Schlafen beide im Korb, vertraut dir der Himmelswächter die Insel selbst an - und den Katzenkorb gibt es nirgends sonst.
+openscats=Verankere die Insel; ab dann verkauft der Himmelswächter Katzenkorb und Girlanden
+whyanchor=Die Turminsel driftet. Verankert bleibt sie, wo du sie gelassen hast, und die eigene Kette des Himmelswächters ist abgeschlossen - erst dann fängt er mit den Schlüsseln zu den Bossen der Reiche an.
+opensanchor=Das erste Regionsschlüssel-Stück (Das Wachfeuer); ab dann verkauft der Himmelswächter Wolkengleve und Banner
 whyghostchalk=Der Nebel hinter Steinfeld tötet Lebende (Seelenblöße). Mit der Kreide zeichnest du den Séance-Kreis, dessen Geisterführer dich durch den Nebel lässt.
 opensghostchalk=Das Nebelmal
 whykeyskyreach=Ein Schlüsselstück, in deiner Siedlung aufgestellt, weckt die Rufsteine seines Reichs. Ohne es bleiben sie stumm und der Boss des Reichs lässt sich nicht rufen.
@@ -1708,13 +1708,13 @@ opensswheleanor=Entweder geht sie weiter und lässt dir ihre Laterne, oder sie z
 whyswhcrookedarrival=Mr. Knott schwört, hinter der Biegung liege ein Hof voller Türen, und will einen Zeugen. Die Realitätssplitter stammen von dort.
 opensswhcrookedarrival=Seine nächste Aufgabe: Überzeug die Tür. Außerdem einer der Schritte, auf die Kapitel VI - Hölle wartet.
 whyswhcrookeddoor=Mr. Knott glaubt, dass sich eine der Türen im Türhof überzeugen lässt, irgendwohin zu führen. Bring, was so eine Tür bräuchte.
-opensswhcrookeddoor=Seine nächste Aufgabe: Eine Tür mit Manieren, und die Buchseite Eine Tür, die es ernst meint. Außerdem einer der Schritte, auf die Kapitel VI - Hölle wartet.
+opensswhcrookeddoor=Seine nächste Aufgabe: Eine Tür mit Manieren, und der Chronik-Eintrag Eine Tür, die es ernst meint. Außerdem einer der Schritte, auf die Kapitel VI - Hölle wartet.
 whyswhladdershells=Mr. Knott bringt einer Tür Manieren bei - Gestreifte Panzer für den Rahmen und ein Horn von einer Tür, die dich fressen wollte.
 opensswhladdershells=Mr. Knotts letzte Aufgabe. Einer der Schritte, auf die Kapitel VI - Hölle wartet.
 
 [misc]
 wardendialogtask=Deine Aufgabe: <title>
-wardendialogjournal=Das alles steht auch in deinem Abenteuerbuch.
+wardendialogjournal=Einzelheiten stehen in deiner Himmelschronik.
 wardendialogcats=Mit diesem Turm kamen zwei Katzen, und zwei Katzen sind draußen im Wetter. Für mich kommen sie nicht mehr. Für dich vielleicht, mit etwas zu fressen.
 wardendialoganchor=Die Katzen sind daheim, die Insel nicht. Sie treibt. Bring mir Metall und Stein, dann setze ich sie fest, wo sie hingehört.
 

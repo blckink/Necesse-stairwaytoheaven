@@ -233,9 +233,57 @@ public abstract class SkySettlerMob extends HumanShop {
         }
     }
 
+    /**
+     * The one name each story resident goes by.
+     *
+     * <p>Vanilla gives every settler a random first name
+     * ({@code HumanMob.setSettlerSeed} → {@code getRandomName}) and then shows
+     * it three ways: alone in the settlement list, as {@code <id>name} with the
+     * title in the dialogue header, and not at all in the quest texts, which
+     * say "Halda". So one woman was "Bertha", "Bertha die Kellermeisterin" and
+     * "Halda" at once. The player: <i>"du hast irgendwie drei namen für manche
+     * npcs dass muss einheitlich sein"</i>. A story resident now IS her name:
+     * the raw {@code settlerName} is this string, and {@code <id>name} is
+     * vanilla's {@code "<name>, Beruf"} around it.
+     *
+     * <p>{@code settlerName} is a saved raw string, not a locale key, so every
+     * name here is spelled the same in English and German — which is why
+     * Magpie is "Magpie" in the German text too.
+     */
+    private static final java.util.Map<String, String> OWN_NAMES = new java.util.HashMap<>();
+    static {
+        OWN_NAMES.put("magpiesettler", "Magpie");
+        OWN_NAMES.put("haldasettler", "Halda");
+        OWN_NAMES.put("ossiansettler", "Ossian");
+        OWN_NAMES.put("eveleensettler", "Eveleen");
+        OWN_NAMES.put("ivessettler", "Ives");
+        OWN_NAMES.put("mortimersettler", "Mortimer");
+        OWN_NAMES.put("caspernsettler", "Caspern");
+        OWN_NAMES.put("eleanorsettler", "Eleanor");
+        OWN_NAMES.put("knottsettler", "Mr. Knott");
+        OWN_NAMES.put("vampiresettler", "Dorian");
+    }
+
+    /** This resident's own name, or null for one that takes a random vanilla name. */
+    public static String ownName(String mobStringID) {
+        return OWN_NAMES.get(mobStringID);
+    }
+
+    @Override
+    protected String getRandomName(GameRandom random) {
+        String own = OWN_NAMES.get(this.getStringID());
+        return own != null ? own : super.getRandomName(random);
+    }
+
     @Override
     public void applyLoadData(LoadData save) {
         super.applyLoadData(save);
+        // Saves from before 2026-09-26 carry the random name; the story name
+        // replaces it on load.
+        String own = OWN_NAMES.get(this.getStringID());
+        if (own != null) {
+            this.settlerName = own;
+        }
         boolean turned = save.getBoolean("swhnightbound", false, false);
         if (turned != this.nightbound) {
             this.nightbound = turned;

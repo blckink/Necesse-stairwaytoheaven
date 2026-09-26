@@ -204,15 +204,15 @@ galehowltip=Strung with windsilk, its arrows outrun the storm
 [mob]
 magpiesettler=Magpie
 haldasettler=Halda
-ossiansettler=Ossian Vane
-magpiesettlername=<name>, called Magpie
+ossiansettler=Ossian
+magpiesettlername=<name> the Courier
 haldasettlername=<name> the Cellarer
-ossiansettlername=Ossian <name>, the last reader
+ossiansettlername=<name> the Last Reader
 galehound=Galehound
 dawnpiercer=Dawnpiercer
 zephyrfinch=Zephyr Finch
 dewsnail=Dew Snail
-wardensettler=Warden
+wardensettler=Sky Warden
 wardensettlername=<name> the Sky Warden
 gloomshade=Gloom Shade
 glowmoth=Glowmoth
@@ -220,7 +220,7 @@ sparkbeetle=Sparkbeetle
 zephyrray=Zephyr Ray
 stormwisp=Storm Wisp
 skystonegolem=Skystone Golem
-skywarden=The Sky Warden
+skywarden=Sky Warden
 skywardenname=<name> the Sky Warden
 spirecatblack=Siggi
 spirecattabby=Peanut
@@ -269,7 +269,7 @@ ossiantalk1=I have read every roster the Skywatch kept. Yours is the first new n
 ossiantalk2=What I sell did not come from here. Do not ask where it did.
 ossiantalk3=The tower is not a ruin. A ruin has stopped meaning something.
 ossiantalk4=Bring me bars, not ore. I have no patience left for smelting.
-spiremarker=Warden's Spire
+spiremarker=Old Warden Spire
 stairsmarker=Your stairway
 dirnorth=north
 dirnortheast=north-east
@@ -287,16 +287,16 @@ wardensettlertip=Recruited above the clouds, for a fortune in coin.
 gatenobinding=The gate hums, dormant.\nIt has nowhere to take you yet - ascend from your own stairway first.
 swhregenerateevacuated=The sky is being generated anew. You were sent back down to your stairway - climb up again to see the new sky.
 wardencatfound1=Mrrp?
-wardencattreat=The cat snatches the treat and vanishes in a puff of cloud -\nstraight to the basket in the Warden's Spire, <dist> tiles <dir> of here.
+wardencattreat=The cat snatches the treat and vanishes in a puff of cloud -\nstraight to the basket in the Old Warden Spire, <dist> tiles <dir> of here.
 wardencatnotreat=The cat eyes you warily.\nIt clearly expects a snack.
 wardencatpurr=Prrrrt.
-wardencatathome=This one has moved in for good.\nIt sleeps in the basket in the Warden's Spire now.
+wardencatathome=This one has moved in for good.\nIt sleeps in the basket in the Old Warden Spire now.
 wardencatathomebasket=This one has moved in for good.\nIts basket is at <x>, <y> - that is home now.
 wardencattreatbasket=The cat snatches the treat and vanishes in a puff of cloud -\nstraight to the basket you set out at <x>, <y> in the <level>.
 catbasketready=The basket is ready, and empty.\nSiggi and Peanut are still up in the Skyreach - find them and offer a Cloudpuff Treat,\nand they will move in here.
 catbasketmovedin=The cats know a good basket when they see one:\n<count> cat(s) just moved in at <x>, <y>.
 catbasketmoved=The newest basket wins:\n<count> cat(s) left the old one and moved into this one at <x>, <y>.
-catbasketremoved=The basket is gone, so the cats went back to the basket in the Warden's Spire.\nPut another one down and they will come to it.
+catbasketremoved=The basket is gone, so the cats went back to the basket in the Old Warden Spire.\nPut another one down and they will come to it.
 siggipetted=Siggi leans into your hand and rumbles like a small thunderstorm.\nSiggi's Purr: sharper and tougher for a whole day.
 peanutpetted=Peanut flops over, all four paws in the air.\nPeanut's Purr: quicker on your feet for a whole day.
 siggigiftfish=*drops a roasted fish at your feet* Mrrrp.
@@ -322,7 +322,7 @@ catmarkertabby=Peanut's lair
 [quests]
 swhfindspiretitle=The Warden's Call
 swhfindspiredesc=Something still keeps a light burning above the clouds.
-swhfindspireobj=Find the Warden's Spire - follow the flicker over the mist.
+swhfindspireobj=Find the Old Warden Spire - follow the flicker over the mist.
 swhreturnwarden=Speak with the Sky Warden.
 swhbeacontitle=Light the Beacon
 swhbeacondesc=The Skywatch beacon has been dark for too long. Bring the Warden what it needs to burn again.
@@ -337,7 +337,7 @@ swhcatsreward=10x Stormsteel Bar + Cat Basket + 2x Flickerlight Garland
 swhanchortitle=Anchor the Island
 swhanchordesc=The spire island drifts. The Warden can anchor it - with your metal and stone, and two hearts cut out of the Skystone Golems that guard the wrecks.
 swhanchorreward=Cloud Glaive + Skywatch Banner + 5x Aurora Petal
-swhrecruitwardentitle=The Last Keeper
+swhrecruitwardentitle=The Last Sky Warden
 swhrecruitwardendesc=The Sky Warden would leave the Skywatch behind, for a price no small settlement could pay.
 swhrecruitwardenobj=Hire the Sky Warden into your settlement (<cost> coins)
 
@@ -488,7 +488,7 @@ cloudcustardtip=Food - Nimbus Milk and cloudberries cooked in a pot. Quick on th
 nimbusdraughttip=Potion - Nimbus Milk brewed with an Aurora Petal. Thickens the skin against a long fall.
 // -- odds and ends --
 cloudpufftreattip=Pet treat - rolled from windsilk and petals. Siggi and Peanut will follow you for one.
-silverbelltip=A keepsake from the Warden's spire. It opens nothing any more.
+silverbelltip=A keepsake from the Old Warden Spire. It opens nothing any more.
 // -- the Stormsteel set and the three accessories --
 stormsteelhelmettip=Head armour - Stormsteel plate with a stormglass visor. Beaten out at a Tungsten Anvil.
 stormsteelchestplatetip=Chest armour - a Stormsteel cuirass with a storm-lens boss. Beaten out at a Tungsten Anvil.
@@ -538,14 +538,14 @@ eveleensettler=Eveleen
 mortimersettler=Mortimer
 caspernsettler=Caspern
 eleanorsettler=Eleanor
-eveleensettlername=Eveleen <name>, Eden Botanist
-mortimersettlername=Mortimer <name>, Undertaker
-caspernsettlername=Caspern <name>, Spirit Smith
-eleanorsettlername=Eleanor <name>, who is still here
+eveleensettlername=<name> the Eden Botanist
+mortimersettlername=<name> the Undertaker
+caspernsettlername=<name> the Spirit Smith
+eleanorsettlername=<name>, Who Is Still Here
 knottsettler=Mr. Knott
-knottsettlername=Mr. Knott <name>, the Doorman
+knottsettlername=<name> the Doorman
 ivessettler=Ives
-ivessettlername=Ives <name>, Verger of the Quiet Reach
+ivessettlername=<name> the Verger
 
 [misc]
 // --- where each settler comes from (settlement screen "acquire" tip) ---
@@ -934,7 +934,7 @@ spiritsteelreavertip=A two-handed blade of Spiritsteel. It swings as though some
 gravewindbowtip=A Spiritsteel stave strung with soul thread. The draw makes no sound at all.
 [mob]
 ghostguide=Ghost Guide
-ghostguidename=<name>, the Ghost Guide
+ghostguidename=<name> the Ghost Guide
 [misc]
 seanceneedsettlement=Chalk only holds where people live. Draw it inside your settlement.
 seanceguidehere=Your guide is already here.
@@ -1068,7 +1068,7 @@ soulcollartip=Trophy - what the Mourning Bride still wears at the throat. Cold t
 stripedhorntip=Trophy - taken out of a Door Mimic. Whatever it last ate had one of these. Magpie pays a premium.
 magpiecaptip=Magpie's own peaked cap. No armour, and she will sell you her spare.
 haldakerchieftip=Halda's soft cellar cap, gone pink from forty years of vats.
-vanecowltip=Ossian Vane's working circlet, with the loupe he never takes off.
+vanecowltip=Ossian's working circlet, with the loupe he never takes off.
 
 # Therapist - a new settler profession (docs/settlers.md)
 [mob]
@@ -1182,7 +1182,7 @@ twilight=Twilight
 
 [mob]
 twilightmerchant=Twilight Merchant
-twilightmerchanthumanname=<name>, the Twilight Merchant
+twilightmerchanthumanname=<name> the Twilight Merchant
 twilightmerchanthuman=Twilight Merchant
 
 [misc]
@@ -1230,7 +1230,7 @@ swhveteranmax=The defenses are already at their maximum level. Nothing more to h
 
 [mob]
 vampiresettler=Dorian
-vampiresettlername=Dorian <name>, the Nightbound
+vampiresettlername=<name> the Nightbound
 
 [item]
 bloodvial=Blood Vial
@@ -1294,11 +1294,11 @@ swhshowroom=Showroom
 // The Adventurer's Journal (stairwaytoheaven.journal) - item, window, chapters.
 // ===========================================================================
 [item]
-adventurersjournal=Adventurer's Journal
+adventurersjournal=Sky Chronicle
 [itemtooltip]
-adventurersjournaltip=Keeps your journey through the realms: quests, keys, bosses, the people you met and what you learned. Lost it? The Sky Warden sells another.
+adventurersjournaltip=Your quests in the sky realms: what is open, who asks for it, what it pays - plus residents, landmarks and lore. Regions, loot and challenges are in the Adventure Journal. Lost it? The Sky Warden sells another.
 [journal]
-title=Adventurer's Journal
+title=Sky Chronicle
 refresh=Refresh
 close=Close
 nosteps=No story here yet.
@@ -1321,7 +1321,7 @@ realm2=Steinfeld
 realm3=Ghost Realm
 realm4=Crooked Beyond
 realm5=Hell
-intro0=The sky around the Old Warden's Spire, up to about 1,800 tiles out. Cloud paths, storm and aurora - and a light somebody still keeps burning.
+intro0=The sky around the Old Warden Spire, up to about 1,800 tiles out. Cloud paths, storm and aurora - and a light somebody still keeps burning.
 intro1=About 600 to 2,900 tiles from the spire. Uncomfortably perfect: fruit too large, water too blue, and snakes in the tall grass.
 intro2=About 1,900 to 4,200 tiles out: the Quiet Reach, where the sky stops working properly and the gold turns dark.
 intro3=Beyond the fog wall at about 3,500 tiles: the Aftergarden. Violet shadows, glowing ectoplasm - and the dead, who have problems too.
@@ -1329,8 +1329,8 @@ intro4=About 4,200 to 5,600 tiles out. After death it is not only the landscape 
 intro5=From about 4,800 tiles out to the edge of everything. Not a fire landscape: a functioning administration.
 giverstairway=The Stairway to Heaven
 wherestairway=Crafted at a tungsten workstation (8 Tungsten Bar, 15 Quartz) and placed on the surface
-rewardfindspire=Map pins for the Warden's Spire and your stairway
-wherespire=The Old Warden's Spire, at the centre of the Skyreach
+rewardfindspire=Map pins for the Old Warden Spire and your stairway
+wherespire=The Old Warden Spire, at the centre of the Skyreach
 objneedsettlement=You need a settlement of your own for him to move into.
 rewardrecruitwarden=The Warden moves into your settlement and the spire's beacon is lit
 wherecats=Siggi's lair is in the Stormveil, Peanut's in the Aurora Shoals (both marked on your map)
@@ -1388,13 +1388,13 @@ rolemortimer=Undertaker; sells gravestones and bone furniture
 rolecaspern=Spirit smith; works metal that remembers
 roleeleanor=She does not know why she is still here - you decide whether she stays
 roleghostguide=Called at the séance circle; grants the Veil Mark and trades in spiritsteel
-roleknott=Keeper of the Door Yard; believes one of the doors can be convinced
+roleknott=Doorman of the Door Yard; believes one of the doors can be convinced
 noresidents=Nobody here has opened a door for you - yet.
 unknownresident=??? (not met yet)
 residenthint=Look: <where>
 residentsettled=<role>. Lives in a settlement.
 residentat=<role>. Met at: <where>
-lmspire=The Old Warden's Spire
+lmspire=The Old Warden Spire
 lmspiredesc=The Skywatch's last tower. Its beacon burns once the Warden is hired.
 lmspirehint=at the centre of the Skyreach, where the stairway sets you down
 lmtollhouse=The Skyway Toll House
@@ -1508,7 +1508,7 @@ swhladderformreward=The Auditor's Seal (accessory: +10% damage, +5% crit)
 swhladderreached=(done)
 swhspeaktomagpie=Speak with Magpie.
 swhspeaktohalda=Speak with Halda.
-swhspeaktoossian=Speak with Ossian Vane.
+swhspeaktoossian=Speak with Ossian.
 swhedenreachreward=6x Eden Grass Seed
 swhcrookedarrivalreward=4x Reality Shard
 
@@ -1663,7 +1663,7 @@ whylabel=Why:
 wherelabel=Where:
 openslabel=Opens:
 whyfindspire=The Warden is the one who knows this sky. Every later quest up here - the cats, the anchor, the keys to the bosses - comes from him.
-opensfindspire=The Last Keeper: hiring the Warden
+opensfindspire=The Last Sky Warden: recruiting him
 whyrecruitwarden=Only a Warden who lives in your settlement keeps handing you quests wherever you meet him, and his hire lights the spire's beacon again.
 opensrecruitwarden=The Spire Cats, with both cat lairs marked on your map
 whycats=The cats belong to the tower. Once both sleep in the basket, the Warden trusts you with the island itself - and the Cat Basket exists nowhere else.
@@ -1707,13 +1707,13 @@ opensswheleanor=Either she passes on and leaves you her lantern, or she moves in
 whyswhcrookedarrival=Mr. Knott swears a yard full of doors lies past the bend and wants a witness. The Reality Shards come from there.
 opensswhcrookedarrival=His next task: Convince the Door. Also one of the steps Chapter VI - Hell waits for.
 whyswhcrookeddoor=Mr. Knott believes one of the Door Yard's doors can be convinced to lead somewhere. Bring what such a door would need.
-opensswhcrookeddoor=His next task: A Door with Manners, and the journal page A door that means it. Also one of the steps Chapter VI - Hell waits for.
+opensswhcrookeddoor=His next task: A Door with Manners, and the Chronicle entry A door that means it. Also one of the steps Chapter VI - Hell waits for.
 whyswhladdershells=Mr. Knott is teaching a door manners - striped shells for the frame, and a horn from a door that tried to eat you.
 opensswhladdershells=Mr. Knott's last task. It is one of the steps Chapter VI - Hell waits for.
 
 [misc]
 wardendialogtask=Your task: <title>
-wardendialogjournal=All of this is also in your Adventurer's Journal.
+wardendialogjournal=Details are in your Sky Chronicle.
 wardendialogcats=Two cats came with this tower, and two cats are out in the weather. They will not come for me any more. They might come for you, with something to eat.
 wardendialoganchor=The cats are home; the island is not. It drifts. Bring me metal and stone and I will set it where it belongs.
 
