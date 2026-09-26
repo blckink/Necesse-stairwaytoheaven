@@ -1730,3 +1730,96 @@ regionkeyusetip=Travel to the Summoning Stone
 regionkeyasleep=This piece wakes nothing out here. Stand it up inside a settlement to wake the stones of <realm>.
 regionkeynotvisited=The arch only leads where you have been. Reach <realm> on your own first.
 regionkeynostone=No Summoning Stone of <realm> stands anywhere in this world.
+
+// Vanilla's Adventure Journal: one entry per sky biome and its three challenges
+// (stairwaytoheaven.journal.RealmJournalEntries, 2026-09-26). Section [journal]
+// is vanilla's own; entry and challenge IDs are chosen not to collide with it.
+[journal]
+driftlands=Driftlands (Skyreach)
+stormveil=Stormveil (Skyreach)
+aurorashoals=Aurora Shoals (Skyreach)
+skyway=Skyway Passages (Skyreach)
+edengarden=Eden Garden (Eden)
+edencanopy=Eden Canopy (Eden)
+edenshallows=Eden Shallows (Eden)
+quietmeadow=Quiet Meadow (Steinfeld)
+slabfields=Slab Fields (Steinfeld)
+graveheath=Grave Heath (Steinfeld)
+aftergarden=Aftergarden (Ghost Realm)
+boneorchard=Bone Orchard (Ghost Realm)
+ectomarsh=Ectomarsh (Ghost Realm)
+gloomfen=Gloomfen (Ghost Realm)
+ashenreach=Ashen Reach (Ghost Realm)
+stripedwaste=Striped Waste (Crooked Beyond)
+spiralfields=Spiral Fields (Crooked Beyond)
+checkerworks=Checkerworks (Crooked Beyond)
+outlands=Beetle Outlands (Crooked Beyond)
+beetlefreakhollow=Beetlefreak Hollows (Crooked Beyond)
+infernalfringe=Infernal Fringe (Hell)
+furnacereach=Furnace Reach (Hell)
+swhwindwheat=[item=windwheat] Harvest 20 Windwheat
+swhcloudpufftreat=[item=cloudpufftreat] Make a Cloudpuff Treat
+swhsourvatbloom=[mob=sourvatbloom] Defeat the Sourvat Bloom in the Grange Cellar
+swhstormwisps=[mob=stormwisp] Defeat 15 Storm Wisps
+swhstormshards=[item=stormshard] Break Storm Crystals for 12 Storm Shards
+swhprototypenine=[mob=prototypenine] Shut down Prototype Nine on the Stormveil proving ground
+swhaurorapetals=[item=aurorapetal] Gather 15 Aurora Petals
+swhdawnpiercer=[mob=dawnpiercer] Defeat a Dawnpiercer
+swhprismcaller=[item=prismcaller] Craft the Prismcaller
+swhtollwright=[mob=tollwright] Defeat the Tollwright of the Skyway Toll-House
+swhgalehounds=[mob=galehound] Defeat 10 Galehounds
+swhskywatchfurniture=[item=skywatchchair] Build a piece of Skywatch furniture at the Carpenter's Bench
+swhparadiseapple=[item=paradiseapple] Pick a Paradise Apple
+swhbloommaws=[mob=bloommaw] Defeat 10 Bloom Maws
+swhedenseedbasin=[item=edenseedbasin] Build an Eden Threshold
+swhjealousvines=[mob=jealousvine] Defeat 8 Jealous Vines
+swhforbiddenserpent=[mob=forbiddenserpent] Defeat the Forbidden Serpent
+swhknowledgecutting=[item=knowledgecutting] Obtain a Knowledge Cutting
+swhgoldenhornets=[mob=goldenhornet] Defeat 12 Golden Hornets
+swhgoldenpollen=[item=goldenpollen] Collect 10 Golden Pollen
+swhedenbronze=[item=edenbronzebar] Smelt an Eden Bronze Bar
+swhlostpilgrims=[mob=lostpilgrim] Lay 10 Lost Pilgrims to rest
+swhspiritmoss=[item=spiritmoss] Gather 12 Spirit Moss
+swhgravecrows=[mob=gravecrow] Defeat 10 Grave Crows
+swhstonemourner=[mob=stonemourner] Defeat a Stone Mourner
+swhpalestone=[item=palestone] Break loose 40 Pale Stone
+swhmourningband=[item=mourningband] Take a Mourning Band
+swhhollowangel=[mob=hollowangel] Defeat a Hollow Angel
+swhgravesalt=[item=gravesalt] Collect 15 Grave Salt
+swhechoshards=[item=echoshard] Collect 8 Echo Shards
+swhdrifters=[mob=drifter] Defeat 12 Drifters
+swhlanternwidow=[mob=lanternwidow] Defeat a Lantern Widow
+swhsoulbasin=[item=soulbasin] Build a Soul Basin
+swhbonewood=[item=bonewood] Gather 30 Bonewood
+swhheadlessbutler=[mob=headlessbutler] Defeat a Headless Butler
+swhmourningbride=[mob=mourningbride] Defeat a Mourning Bride
+swhsoulhounds=[mob=soulhound] Defeat 10 Soul Hounds
+swhsoulthread=[item=soulthread] Gather 15 Soul Thread
+swhcoffincrawler=[mob=coffincrawler] Defeat a Coffin Crawler
+swhgloomshades=[mob=gloomshade] Defeat 12 Gloom Shades
+swhfenwraith=[mob=fenwraith] Defeat a Fen Wraith
+swhveilessence=[item=veilessence] Collect 8 Veil Essence
+swhcindercantor=[mob=cindercantor] Defeat a Cinder Cantor
+swhcinderpearls=[item=cinderpearl] Collect 6 Cinder Pearls
+swhspiritsteelarmor=[item=spiritsteelchestplate] Obtain a piece of Spiritsteel armour
+swhcrookedgolems=[mob=crookedgolem] Defeat 10 Crooked Golems
+swhstripedshells=[item=stripedshell] Collect 6 Striped Shells
+swhdoormimic=[mob=doormimic] Defeat a Door Mimic
+swhtongueplants=[mob=tongueplant] Defeat 8 Tongue Plants
+swhoddwood=[item=oddwood] Gather 30 Oddwood
+swhwarpresin=[item=warpresin] Collect 10 Warp Resin
+swhrarecrookedgolem=[mob=rarecrookedgolem] Defeat a Rare Crooked Golem
+swhrealityshards=[item=realityshard] Collect 8 Reality Shards
+swhstrangefabric=[item=strangefabric] Collect 10 Strange Fabric
+swhcrookedarmadillos=[mob=crookedarmadillo] Defeat 10 Crooked Armadillos
+swheyeseeds=[item=eyeseed] Collect 5 Eye Seeds
+swhfenwraiths=[mob=fenwraith] Defeat 8 Fen Wraiths in the Outlands
+swhbeetlewalls=[item=beetlewall] Build 20 Beetlefreak Walls
+swhbeetledoor=[item=beetledoor] Craft a Beetlefreak Door
+swhcindercantors=[mob=cindercantor] Defeat 5 Cinder Cantors
+swhinfernalclerks=[mob=infernalclerk] Defeat 10 Infernal Clerks
+swhticketimps=[mob=ticketimp] Defeat 10 Ticket Imps
+swhinfernalseal=[item=regionkeyhell] Receive the Infernal Seal from the Sky Warden
+swhboilerhounds=[mob=boilerhound] Defeat 10 Boiler Hounds
+swhashspirits=[mob=ashspirit] Defeat 10 Ash Spirits
+swhhellpearls=[item=cinderpearl] Collect 10 Cinder Pearls in Hell

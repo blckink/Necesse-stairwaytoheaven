@@ -262,6 +262,10 @@ public class StairwayToHeavenMod {
         stairwaytoheaven.showroom.ShowroomBiome.instance = BiomeRegistry.registerBiome("swhshowroom",
                 new stairwaytoheaven.showroom.ShowroomBiome(), false);
         stairwaytoheaven.showroom.ShowroomRegistry.end();
+        // The 22 sky biomes in vanilla's Adventure Journal (loot, residents,
+        // treasure, three challenges and a reward each). Last, because it
+        // reads items, objects, mobs, biomes and the hoard tables.
+        stairwaytoheaven.journal.RealmJournalEntries.register();
     }
 
     /**

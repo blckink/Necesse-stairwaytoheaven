@@ -1731,3 +1731,95 @@ regionkeyusetip=Zum Rufstein reisen
 regionkeyasleep=Hier draußen weckt dieses Stück nichts. Stell es in einer Siedlung auf, um die Steine von <realm> zu wecken.
 regionkeynotvisited=Der Bogen führt nur dorthin, wo du schon warst. Erreiche <realm> erst selbst.
 regionkeynostone=In dieser Welt steht nirgends ein Rufstein von <realm>.
+
+// Vanillas Abenteuertagebuch: ein Eintrag je Himmels-Biom und seine drei
+// Herausforderungen (stairwaytoheaven.journal.RealmJournalEntries, 2026-09-26).
+[journal]
+driftlands=Driftlande (Himmelsweite)
+stormveil=Sturmschleier (Himmelsweite)
+aurorashoals=Aurorabänke (Himmelsweite)
+skyway=Himmelspfade (Himmelsweite)
+edengarden=Garten Eden (Eden)
+edencanopy=Eden-Baumkronen (Eden)
+edenshallows=Eden-Ufer (Eden)
+quietmeadow=Stille Wiese (Steinfeld)
+slabfields=Plattenfelder (Steinfeld)
+graveheath=Grabheide (Steinfeld)
+aftergarden=Nachgarten (Geisterreich)
+boneorchard=Knochenhain (Geisterreich)
+ectomarsh=Ektoplasmasumpf (Geisterreich)
+gloomfen=Düsterfenn (Geisterreich)
+ashenreach=Aschenöde (Geisterreich)
+stripedwaste=Gestreifte Öde (Krummes Jenseits)
+spiralfields=Spiralfelder (Krummes Jenseits)
+checkerworks=Schachbrettwerke (Krummes Jenseits)
+outlands=Käferlande (Krummes Jenseits)
+beetlefreakhollow=Käfergrund (Krummes Jenseits)
+infernalfringe=Höllensaum (Hölle)
+furnacereach=Ofenweite (Hölle)
+swhwindwheat=[item=windwheat] Ernte 20 Windweizen
+swhcloudpufftreat=[item=cloudpufftreat] Stelle ein Wolkenzupf-Leckerli her
+swhsourvatbloom=[mob=sourvatbloom] Besiege die Sauerbottich-Blüte im Grange-Keller
+swhstormwisps=[mob=stormwisp] Besiege 15 Sturmirrlichter
+swhstormshards=[item=stormshard] Zerschlage Sturmkristalle und sammle 12 Sturmsplitter
+swhprototypenine=[mob=prototypenine] Lege Prototyp Neun auf dem Sturmschleier-Testgelände still
+swhaurorapetals=[item=aurorapetal] Sammle 15 Aurorablätter
+swhdawnpiercer=[mob=dawnpiercer] Besiege einen Morgenstecher
+swhprismcaller=[item=prismcaller] Stelle den Prismenrufer her
+swhtollwright=[mob=tollwright] Besiege das Zollwerk im Skyway-Zollhaus
+swhgalehounds=[mob=galehound] Besiege 10 Sturmwindhunde
+swhskywatchfurniture=[item=skywatchchair] Baue ein Himmelswacht-Möbelstück am Schreinertisch
+swhparadiseapple=[item=paradiseapple] Pflücke einen Paradiesapfel
+swhbloommaws=[mob=bloommaw] Besiege 10 Blütenrachen
+swhedenseedbasin=[item=edenseedbasin] Baue eine Edenschwelle
+swhjealousvines=[mob=jealousvine] Besiege 8 Eifersüchtige Ranken
+swhforbiddenserpent=[mob=forbiddenserpent] Besiege die Verbotene Schlange
+swhknowledgecutting=[item=knowledgecutting] Erhalte einen Wissenssteckling
+swhgoldenhornets=[mob=goldenhornet] Besiege 12 Goldhornissen
+swhgoldenpollen=[item=goldenpollen] Sammle 10 Goldenen Pollen
+swhedenbronze=[item=edenbronzebar] Schmelze einen Edenbronzebarren
+swhlostpilgrims=[mob=lostpilgrim] Bringe 10 Verlorene Pilger zur Ruhe
+swhspiritmoss=[item=spiritmoss] Sammle 12 Geistermoos
+swhgravecrows=[mob=gravecrow] Besiege 10 Grabkrähen
+swhstonemourner=[mob=stonemourner] Besiege einen Steinernen Trauernden
+swhpalestone=[item=palestone] Brich 40 Blassen Stein los
+swhmourningband=[item=mourningband] Erbeute einen Trauerflor
+swhhollowangel=[mob=hollowangel] Besiege einen Hohlen Engel
+swhgravesalt=[item=gravesalt] Sammle 15 Grabsalz
+swhechoshards=[item=echoshard] Sammle 8 Echosplitter
+swhdrifters=[mob=drifter] Besiege 12 Treiber
+swhlanternwidow=[mob=lanternwidow] Besiege eine Laternenwitwe
+swhsoulbasin=[item=soulbasin] Baue ein Seelenbecken
+swhbonewood=[item=bonewood] Sammle 30 Knochenholz
+swhheadlessbutler=[mob=headlessbutler] Besiege einen Kopflosen Butler
+swhmourningbride=[mob=mourningbride] Besiege eine Trauerbraut
+swhsoulhounds=[mob=soulhound] Besiege 10 Seelenhunde
+swhsoulthread=[item=soulthread] Sammle 15 Seelenfaden
+swhcoffincrawler=[mob=coffincrawler] Besiege einen Sargkriecher
+swhgloomshades=[mob=gloomshade] Besiege 12 Düsterschemen
+swhfenwraith=[mob=fenwraith] Besiege einen Moorgeist
+swhveilessence=[item=veilessence] Sammle 8 Schleier-Essenz
+swhcindercantor=[mob=cindercantor] Besiege einen Aschekantor
+swhcinderpearls=[item=cinderpearl] Sammle 6 Glutperlen
+swhspiritsteelarmor=[item=spiritsteelchestplate] Erhalte ein Teil der Geisterstahl-Rüstung
+swhcrookedgolems=[mob=crookedgolem] Besiege 10 Krumme Golems
+swhstripedshells=[item=stripedshell] Sammle 6 Gestreifte Panzer
+swhdoormimic=[mob=doormimic] Besiege eine Türmimik
+swhtongueplants=[mob=tongueplant] Besiege 8 Zungenpflanzen
+swhoddwood=[item=oddwood] Sammle 30 Seltsamholz
+swhwarpresin=[item=warpresin] Sammle 10 Krümmungsharz
+swhrarecrookedgolem=[mob=rarecrookedgolem] Besiege einen Seltenen krummen Golem
+swhrealityshards=[item=realityshard] Sammle 8 Realitätssplitter
+swhstrangefabric=[item=strangefabric] Sammle 10 Seltsamen Stoff
+swhcrookedarmadillos=[mob=crookedarmadillo] Besiege 10 Krumme Gürteltiere
+swheyeseeds=[item=eyeseed] Sammle 5 Augensamen
+swhfenwraiths=[mob=fenwraith] Besiege 8 Moorgeister in den Käferlanden
+swhbeetlewalls=[item=beetlewall] Baue 20 Käferwahn-Wände
+swhbeetledoor=[item=beetledoor] Stelle eine Käferwahn-Tür her
+swhcindercantors=[mob=cindercantor] Besiege 5 Aschekantoren
+swhinfernalclerks=[mob=infernalclerk] Besiege 10 Höllische Sachbearbeiter
+swhticketimps=[mob=ticketimp] Besiege 10 Nummernkobolde
+swhinfernalseal=[item=regionkeyhell] Erhalte das Höllensiegel vom Himmelswächter
+swhboilerhounds=[mob=boilerhound] Besiege 10 Kesselhunde
+swhashspirits=[mob=ashspirit] Besiege 10 Aschegeister
+swhhellpearls=[item=cinderpearl] Sammle in der Hölle 10 Glutperlen
