@@ -259,7 +259,9 @@ public final class SteinfeldTerrainPainter {
             if (vein > 0.68F) {
                 return S_DEAD_SOIL;
             }
-            return patch > 0.55F ? S_CRACKED_MARBLE : S_PALE_GRASS;
+            // Marble was 0.55 and took almost half the band: the player's
+            // screenshot of 2026-09-26 was one unbroken sheet of it.
+            return patch > 0.66F ? S_CRACKED_MARBLE : S_PALE_GRASS;
         }
         // Grave Heath: grass is grey, stone is cold, and the ground itself is
         // turned earth over half of it.
@@ -279,10 +281,12 @@ public final class SteinfeldTerrainPainter {
      * the state this mod shipped in: <i>"nichts so im Überfluss dass man nach
      * einem Run schon so viel gesammelt hat dass man Kisten füllen kann"</i>,
      * measured at roughly one object per three walkable tiles in the Skyreach.
-     * The thresholds below top out at <b>0.082</b> — about one object per
-     * twelve tiles — and the two mineable nodes together take <b>0.011</b> of
-     * that, one per ninety tiles. A run through the Reach fills a stack, not a
-     * chest.
+     * The scatter in {@link #scatterAt} tops out at <b>0.082</b> — about one
+     * object per twelve tiles — and the two mineable nodes together take
+     * <b>0.011</b> of that, one per ninety tiles. A run through the Reach fills
+     * a stack, not a chest. On top of it {@link #coverAt} lays lootless grass,
+     * reeds, flowers and dead-tree groves, so the ground is covered without
+     * anything more to harvest.
      *
      * <p>The mix is also a third statement of the gradient: flowers and bright
      * stone near Eden, reeds and dead wood in the middle, mushrooms, moss,
@@ -291,6 +295,65 @@ public final class SteinfeldTerrainPainter {
     public static int propAt(int seed, int tileX, int tileY) {
         int band = bandAt(seed, tileX, tileY);
         int surface = surfaceAt(seed, tileX, tileY);
+        int prop = scatterAt(seed, tileX, tileY, band, surface);
+        return prop != P_NONE ? prop : coverAt(seed, tileX, tileY, band, surface);
+    }
+
+    public static final int SALT_COVER = 457;
+    public static final int SALT_GROVE = 461;
+    public static final float GROVE_SCALE = 42.0F;
+
+    /**
+     * The ground cover under the scatter: grass, reeds, flowers, and dead
+     * trees standing together in groves instead of one per hundred tiles.
+     *
+     * <p>The player, 2026-09-26: <i>"Das Steinfeld ist total schäbig und
+     * leer"</i> — with Eden and the Skyreach as the ones that were right. Eden
+     * covers about 43% of its ground; this band covered about 7%. Everything
+     * added here has an EMPTY loot table (the {@code SteinfeldPlantObject}s
+     * built with {@code new LootTable()}) or is a dead tree, so A4.2's "a run
+     * fills a stack, not a chest" still holds: the mineable nodes and the
+     * spirit moss in {@link #scatterAt} are untouched.
+     */
+    static int coverAt(int seed, int tileX, int tileY, int band, int surface) {
+        float roll = SkyNoise.tileRoll(seed, tileX, tileY, SALT_COVER);
+        boolean soil = organic(surface);
+        if (band != BAND_QUIET) {
+            float grove = SkyNoise.fbm(seed + SALT_GROVE, tileX, tileY, GROVE_SCALE, 2);
+            if (grove > 0.64F && soil && roll < (band == BAND_HEATH ? 0.09F : 0.06F)) {
+                return P_DEAD_TREE;
+            }
+        }
+        if (!soil) {
+            // Grass forcing its way up through the cracks in the slabs.
+            return roll < 0.07F ? P_WITHERED_TUFT : P_NONE;
+        }
+        if (band == BAND_QUIET) {
+            if (roll < 0.18F) {
+                return P_WITHERED_TUFT;
+            }
+            if (roll < 0.27F) {
+                return P_WIDOW_FLOWER;
+            }
+            return roll < 0.31F ? P_PALE_REED : P_NONE;
+        }
+        if (band == BAND_SLAB) {
+            if (roll < 0.15F) {
+                return P_WITHERED_TUFT;
+            }
+            if (roll < 0.25F) {
+                return P_PALE_REED;
+            }
+            return roll < 0.28F ? P_DEAD_HEAVEN_BLOOM : P_NONE;
+        }
+        if (roll < 0.16F) {
+            return P_WITHERED_TUFT;
+        }
+        return roll < 0.22F ? P_GHOST_MUSHROOM : P_NONE;
+    }
+
+    /** The original sparse scatter: rocks, statues, slabs, loot. */
+    static int scatterAt(int seed, int tileX, int tileY, int band, int surface) {
         float roll = SkyNoise.tileRoll(seed, tileX, tileY, SALT_PROP);
         if (band == BAND_QUIET) {
             if (roll < 0.030F) {
