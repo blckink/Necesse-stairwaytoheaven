@@ -45,7 +45,10 @@ public class SpillTile extends LiquidTile {
 
     @Override
     public TextureIndexes getTextureIndexes(Level level, int tileX, int tileY, Biome biome) {
-        return new TextureIndexes(0, 1, 0, 1);
+        // One sheet ("ooze"), so every depth reads index 0. Index 1 threw
+        // ArrayIndexOutOfBounds in LiquidTile.getNewSplattingSection the moment
+        // a Spill tile was drawn -- a crash on joining the world.
+        return new TextureIndexes(0, 0, 0, 0);
     }
 
     @Override
