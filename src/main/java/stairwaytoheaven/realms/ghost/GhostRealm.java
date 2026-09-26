@@ -18,6 +18,7 @@ import necesse.entity.mobs.buffs.BuffModifiers;
 import necesse.entity.mobs.buffs.staticBuffs.armorBuffs.setBonusBuffs.SimpleSetBonusBuff;
 import necesse.gfx.gameTexture.GameTexture;
 import necesse.inventory.item.Item;
+import necesse.inventory.item.toolItem.ToolType;
 import necesse.inventory.lootTable.LootTable;
 import necesse.inventory.lootTable.lootItem.ChanceLootItem;
 import necesse.inventory.lootTable.lootItem.LootItem;
@@ -132,14 +133,18 @@ public final class GhostRealm {
     }
 
     private static void registerObjects() {
+        // Trees are felled with an AXE, not mined: a deco object defaults to
+        // the pickaxe, so the Aftergarden's woods only fell to one (player,
+        // 2026-09-27). setVariety shrinks and mirrors the 128 px vanilla
+        // sheets per tile - four identical full-size trees made every grove.
         crookedDeadTreeID = natural("crookeddeadtree", new GhostDecoObject("deadtree", "deadwoodtree", 64,
-                new Color(45, 37, 55), new Rectangle(8, 20, 16, 12)).setDrops(new LootTable(LootItem.between("bonewood", 2, 5))));
+                new Color(45, 37, 55), new Rectangle(8, 20, 16, 12)).setTool(ToolType.AXE).setVariety(true, 75, 100).setDrops(new LootTable(LootItem.between("bonewood", 2, 5))));
         bonewoodTreeID = natural("bonewoodtree", new GhostDecoObject("deadwood", "deadwoodtree", 128,
-                new Color(59, 55, 69), new Rectangle(8, 20, 16, 12)).setCells(128, 0, 0, 0, 1, 0, 2, 0, 3).setDrops(new LootTable(LootItem.between("bonewood", 3, 7))));
+                new Color(59, 55, 69), new Rectangle(8, 20, 16, 12)).setCells(128, 0, 0, 0, 1, 0, 2, 0, 3).setTool(ToolType.AXE).setVariety(true, 50, 62, 75).setDrops(new LootTable(LootItem.between("bonewood", 3, 7))));
         spiritWillowID = natural("spiritwillow", new GhostDecoObject("willowtree", "willowtree", 128,
-                new Color(45, 110, 102), new Rectangle(8, 20, 16, 12)).setCells(128, 0, 0, 0, 3).setDrops(new LootTable(LootItem.between("bonewood", 2, 5))));
+                new Color(45, 110, 102), new Rectangle(8, 20, 16, 12)).setCells(128, 0, 0, 0, 3).setTool(ToolType.AXE).setVariety(true, 50, 62, 75).setDrops(new LootTable(LootItem.between("bonewood", 2, 5))));
         lanternTreeID = natural("lanterntree", new GhostDecoObject("gloomwillow", "willowtree", 64,
-                new Color(95, 167, 132), new Rectangle(8, 20, 16, 12)).setDrops(new LootTable(
+                new Color(95, 167, 132), new Rectangle(8, 20, 16, 12)).setTool(ToolType.AXE).setVariety(true, 75, 100).setDrops(new LootTable(
                         LootItem.between("bonewood", 2, 4), ChanceLootItem.between(0.35F, "ectoplasm", 1, 2))));
 
         ghostLilyID = plant("ghostlily", "aurorabloom", 2, new Color(175, 224, 222), "soulthread");

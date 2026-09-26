@@ -40,7 +40,7 @@ public class SpiritsteelChestplate extends ChestArmorItem {
     public static final String ICON = "soulseedchestplate";
 
     public SpiritsteelChestplate() {
-        super(34, 2400, Item.Rarity.EPIC,   // BALANCE §7: Spiritsteel chest 34 / enchant 2400
+        super(42, 2400, Item.Rarity.EPIC,   // 34 x 1.24 (BALANCE §7a gear uplift) / enchant 2400
                 BODY_TEXTURE, ARMS_TEXTURE, (OneOfLootItems) null);
     }
 

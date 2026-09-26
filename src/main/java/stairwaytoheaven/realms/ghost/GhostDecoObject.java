@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Rectangle;
 
 import necesse.gfx.gameTexture.GameTexture;
+import necesse.inventory.item.toolItem.ToolType;
 import necesse.inventory.lootTable.LootTable;
 import necesse.level.maps.Level;
 import stairwaytoheaven.objects.SkyDecoObject;
@@ -65,6 +66,18 @@ public class GhostDecoObject extends SkyDecoObject {
     @Override
     public GhostDecoObject setCells(int cellHeight, int... colRowPairs) {
         super.setCells(cellHeight, colRowPairs);
+        return this;
+    }
+
+    @Override
+    public GhostDecoObject setVariety(boolean randomMirror, int... scalePercents) {
+        super.setVariety(randomMirror, scalePercents);
+        return this;
+    }
+
+    @Override
+    public GhostDecoObject setTool(ToolType toolType) {
+        super.setTool(toolType);
         return this;
     }
 

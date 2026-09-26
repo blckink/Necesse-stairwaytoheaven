@@ -240,7 +240,7 @@ Chest armour is the anchor; enchant cost and rarity move with it.
 | set | realm | chest | enchant | rarity |
 |---|---|---|---|---|
 | Stormsteel | Skyreach | 29 | 1900 | EPIC |
-| Spiritsteel | Ghost Realm | 34 | 2400 | EPIC |
+| Spiritsteel | Ghost Realm | 34 (42 since §7a) | 2400 | EPIC |
 | (Crooked set) | Crooked Beyond | 38 | 3000 | EPIC |
 | Hellsteel | Hell | 42 | 3600 | LEGENDARY |
 
@@ -252,6 +252,24 @@ piece a player skips.
 Stormsteel starting *at* Arcanic rather than above it is the point: the mod's
 entry set equals the game's incursion set, and the whole climb happens inside the
 mod.
+
+### 7a. Gear follows the mob uplift (2026-09-27)
+
+The §6 uplift raised every Ghost Realm mob (HP ×1.45, damage ×1.24) and left
+Spiritsteel where §7 put it. Result in play: a common ghost (4060 HP) took ~23
+Reaver swings, and 285-damage hits went through the set in seconds (player:
+"nichts, das stark genug wäre, keine Rüstung, die länger als 5 Sekunden
+hält"). The realm's own gear now carries the same factors, so hits-to-kill and
+hits-to-die are back where §7 measured them:
+
+| item | old | new | factor |
+|---|---|---|---|
+| Spiritsteel helmet / chest / boots | 31 / 34 / 24 | **38 / 42 / 29** | ×1.24 (mob damage) |
+| Spiritsteel Reaver | 176 → 219 | **255 → 317** | ×1.45 (mob HP) |
+| Gravewind Bow | 105 → 130 | **152 → 188** | ×1.45 (mob HP) |
+
+Broker values stay pinned to the Ghost Guide's material price. The other
+realms' sets have not been re-measured against their uplift yet.
 
 ## 8. How to re-derive this
 

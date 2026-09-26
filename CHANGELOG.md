@@ -24,6 +24,13 @@ All notable changes to this project are documented here. Format loosely follows
   Stairway's sheet).
 
 ### Changed
+- **Aftergarden trees and gear / Bäume und Ausrüstung im Geisterreich**:
+  bonewood trees, spirit willows, crooked dead trees and lantern trees are
+  felled with an axe instead of a pickaxe, and are drawn at mixed sizes
+  (half to three quarters for the big ones) and randomly mirrored instead of
+  four identical full-size trees. Spiritsteel armour and the realm's two
+  weapons now follow the realm's mob uplift (armour ×1.24: 38/42/29; Reaver
+  255→317, Gravewind Bow 152→188) — see docs/BALANCE.md §7a.
 - **Sky Scree and Sky Reeds are useful / Himmelsschutt und Himmelsried
   haben einen Zweck**: 2 Sky Scree craft by hand into 1 Skystone, 2 Sky
   Reeds into 1 Worm Bait. Both used to be dead ends — scree gave only

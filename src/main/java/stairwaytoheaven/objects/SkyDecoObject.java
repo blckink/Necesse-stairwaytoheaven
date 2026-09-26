@@ -36,6 +36,8 @@ public class SkyDecoObject extends GameObject {
     private LootTable naturalLoot;
     private int cellHeight;
     private int[] cells;
+    private int[] scalePercents;
+    private boolean randomMirror;
 
     public SkyDecoObject(String textureName, int variantWidth, Color mapColor, Rectangle collision, String... category) {
         // The box goes through super(): GameObject(Rectangle) derives isSolid
@@ -107,6 +109,20 @@ public class SkyDecoObject extends GameObject {
         return this;
     }
 
+    /**
+     * Draw each placed piece at one of these sizes (percent of the sheet),
+     * picked per tile, and mirror half of them. For big borrowed sheets with
+     * few variants, like vanilla's 128 px {@code deadwood}: at full size and
+     * unmirrored a grove was four trees repeated, each four tiles wide
+     * (player, 2026-09-27: "viel zu fett und identisch alle"). The foot stays
+     * on the tile; only the picture shrinks.
+     */
+    public SkyDecoObject setVariety(boolean randomMirror, int... scalePercents) {
+        this.randomMirror = randomMirror;
+        this.scalePercents = scalePercents.length > 0 ? scalePercents : null;
+        return this;
+    }
+
     public SkyDecoObject setNaturalLoot(LootTable naturalLoot) {
         this.naturalLoot = naturalLoot;
         return this;
@@ -138,17 +154,28 @@ public class SkyDecoObject extends GameObject {
                 ? this.cells.length / 2
                 : Math.max(1, this.texture.getWidth() / this.variantWidth);
         int variant;
+        boolean mirror;
+        int percent;
         synchronized (this.drawRandom) {
-            variant = this.drawRandom.seeded(getTileSeed(tileX, tileY)).nextInt(variants);
+            GameRandom random = this.drawRandom.seeded(getTileSeed(tileX, tileY));
+            variant = random.nextInt(variants);
+            mirror = this.randomMirror && random.nextBoolean();
+            percent = this.scalePercents != null
+                    ? this.scalePercents[random.nextInt(this.scalePercents.length)]
+                    : 100;
         }
         int col = this.cells != null ? this.cells[variant * 2] : variant;
         int row = this.cells != null ? this.cells[variant * 2 + 1] : 0;
-        int drawX = camera.getTileDrawX(tileX) - this.variantWidth / 2 + 16;
-        int drawY = camera.getTileDrawY(tileY) - height + 32;
+        int width = this.variantWidth * percent / 100;
+        int drawHeight = height * percent / 100;
+        int drawX = camera.getTileDrawX(tileX) - width / 2 + 16;
+        int drawY = camera.getTileDrawY(tileY) - drawHeight + 32;
         final TextureDrawOptionsEnd options = this.texture
                 .initDraw()
                 .section(col * this.variantWidth, (col + 1) * this.variantWidth, row * height, (row + 1) * height)
                 .light(light)
+                .mirror(mirror, false)
+                .size(width, drawHeight)
                 .pos(drawX, drawY);
         list.add(new LevelSortedDrawable(this, tileX, tileY) {
             @Override

@@ -82,8 +82,10 @@ public class SpiritsteelReaver extends GreatswordToolItem {
         // BALANCE §7 puts Spiritsteel one rung up at 2400.
         super(2400, (OneOfLootItems) null, getThreeChargeLevels(150, 300, 450));
         this.rarity = Item.Rarity.EPIC;                 // ravenwinggreatsword: EPIC
-        // ravenwinggreatsword 150 -> 186.67, x 34/29 (BALANCE §7's chest step)
-        this.attackDamage.setBaseValue(176.0F).setUpgradedValue(1.0F, 219.0F);
+        // ravenwinggreatsword 150 -> 186.67, x 34/29 (BALANCE §7's chest step),
+        // then x 1.45: the realm's mobs carry the §6 HP uplift, and without it
+        // a common ghost took 23 swings (BALANCE §7a, 2026-09-27)
+        this.attackDamage.setBaseValue(255.0F).setUpgradedValue(1.0F, 317.0F);
         this.attackRange.setBaseValue(100);             // ravenwinggreatsword: 100
         this.knockback.setBaseValue(150);               // ravenwinggreatsword: 150
         this.canBeUsedForRaids = true;                  // ravenwinggreatsword: true

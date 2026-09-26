@@ -67,8 +67,9 @@ public class GravewindBow extends BowProjectileToolItem {
         super(2400, (OneOfLootItems) null);
         this.rarity = Item.Rarity.EPIC;                  // thecrimsonsky: EPIC
         this.attackAnimTime.setBaseValue(500);           // thecrimsonsky: 500
-        // thecrimsonsky 90 -> 110.83, x 34/29 (BALANCE §7's chest step)
-        this.attackDamage.setBaseValue(105.0F).setUpgradedValue(1.0F, 130.0F);
+        // thecrimsonsky 90 -> 110.83, x 34/29 (BALANCE §7's chest step),
+        // then x 1.45 for the realm's mob HP uplift (BALANCE §7a, 2026-09-27)
+        this.attackDamage.setBaseValue(152.0F).setUpgradedValue(1.0F, 188.0F);
         this.velocity.setBaseValue(350);                 // thecrimsonsky: 350
         this.attackRange.setBaseValue(1600);             // thecrimsonsky: 1600
         // antiquebow's own offsets: where the stave is drawn against the hand.

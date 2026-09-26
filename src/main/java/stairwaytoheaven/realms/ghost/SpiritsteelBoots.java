@@ -33,7 +33,7 @@ public class SpiritsteelBoots extends BootsArmorItem {
     public static final String ICON = "soulseedboots";
 
     public SpiritsteelBoots() {
-        super(24, 2400, Item.Rarity.EPIC,   // BALANCE §7: chest 34 - 10, enchant 2400
+        super(29, 2400, Item.Rarity.EPIC,   // 24 x 1.24 (BALANCE §7a gear uplift), enchant 2400
                 ARMOR_TEXTURE, (OneOfLootItems) null);
     }
 

@@ -55,7 +55,7 @@ public class SpiritsteelHelmet extends SetHelmetArmorItem {
     public static final String ICON = "soulseedcrown";
 
     public SpiritsteelHelmet() {
-        super(31, DamageTypeRegistry.MELEE, 2400,   // BALANCE §7: chest 34 - 3, enchant 2400
+        super(38, DamageTypeRegistry.MELEE, 2400,   // 31 x 1.24 (BALANCE §7a gear uplift), enchant 2400
                 (OneOfLootItems) null, (OneOfLootItems) null,
                 Item.Rarity.EPIC,                    // the tier's own rarity
                 ARMOR_TEXTURE,
