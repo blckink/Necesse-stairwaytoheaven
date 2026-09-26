@@ -3,6 +3,8 @@ package stairwaytoheaven.realms.ghost;
 import java.awt.Color;
 import java.awt.Rectangle;
 
+import necesse.engine.localization.message.GameMessage;
+import necesse.engine.localization.message.LocalMessage;
 import necesse.engine.modifiers.ModifierValue;
 import necesse.engine.registries.BiomeRegistry;
 import necesse.engine.registries.BuffRegistry;
@@ -23,6 +25,7 @@ import necesse.inventory.recipe.Recipe;
 import necesse.inventory.recipe.Recipes;
 import necesse.inventory.recipe.Tech;
 import necesse.level.gameObject.RockObject;
+import necesse.level.gameObject.SingleOreRockSmall;
 import necesse.level.maps.Level;
 
 /** Registers the complete playable core of the Aftergarden in one place. */
@@ -158,9 +161,23 @@ public final class GhostRealm {
                         return new LootTable(LootItem.between("bonewood", 1, 2));
                     }
                 }, 0.0F, false);
-        spectralOreRockID = natural("spectralorerock", new GhostDecoObject("cryptorerock_nightsteelore",
-                "nightsteelore", 32, new Color(77, 133, 126), new Rectangle(4, 12, 24, 20))
-                .setDrops(new LootTable(LootItem.between("spectralore", 1, 2))));
+        // cryptorerock_nightsteelore is only vanilla's ORE OVERLAY for a
+        // small crypt rock; drawn alone the ore specks floated with no stone
+        // under them. Same class and textures as vanilla's
+        // cryptnightsteelorerocksmall, our name and our drop.
+        spectralOreRockID = ObjectRegistry.registerObject("spectralorerock",
+                new SingleOreRockSmall("cryptstone", 4.0F, "cryptrock", "nightsteelore", "cryptorerock",
+                        "cryptorerock_nightsteelore", new Color(77, 133, 126), "spectralore", 1, 2, 1) {
+                    @Override
+                    public GameMessage getNewLocalization() {
+                        return new LocalMessage("object", "spectralorerock");
+                    }
+
+                    @Override
+                    public LootTable getLootTable(Level level, int layerID, int tileX, int tileY) {
+                        return new LootTable(LootItem.between("spectralore", 1, 2));
+                    }
+                }, 0.0F, false);
         // Vanilla cryptgravestone1 is 128x96: four 32x64 stones in row 0
         // (front, side, front, side), their shadows below. Only the fronts.
         gravestoneID = natural("ghostgravestone", new GhostDecoObject("cryptgravestone1", "cryptgravestone1", 32,
